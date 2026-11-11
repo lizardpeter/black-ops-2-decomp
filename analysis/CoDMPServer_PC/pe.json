@@ -1,0 +1,40 @@
+{
+  "build": "CoDMPServer_PC",
+  "sha256": "f67eb68a494b93b5b229985205bdc94e26fdfe677663410e2207c25f6f27a55d",
+  "size": 13711872,
+  "image_base": "00400000",
+  "entry_point": "00AB7178",
+  "linker_version": "10.00",
+  "pdb": {
+    "guid": "3C12954B-A78E-4C6E-B4E8-5A8FD595F0DB",
+    "age": 51
+  },
+  "sections": [
+    ".text",
+    ".rdata",
+    ".data",
+    ".tls",
+    ".rsrc"
+  ],
+  "imports": [
+    "steam_api.dll",
+    "WINMM.dll",
+    "WSOCK32.dll",
+    "dxgi.dll",
+    "KERNEL32.dll",
+    "ADVAPI32.dll",
+    "DSOUND.dll",
+    "USER32.dll",
+    "GDI32.dll",
+    "SHELL32.dll",
+    "ole32.dll",
+    "d3d9.dll",
+    "XINPUT1_3.dll",
+    "WININET.dll",
+    "PSAPI.DLL",
+    "WS2_32.dll",
+    "binkw32.dll",
+    "D3DCOMPILER_43.dll"
+  ],
+  "delay_imports": []
+}

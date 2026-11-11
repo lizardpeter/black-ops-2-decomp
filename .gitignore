@@ -1,0 +1,10 @@
+/originals/
+/build/
+/build-*/
+/analysis/graph/
+__pycache__/
+*.exe
+*.dll
+*.pdb
+*.map
+*.so

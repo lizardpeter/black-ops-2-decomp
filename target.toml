@@ -1,0 +1,28 @@
+project = "t6"
+title = "Call of Duty: Black Ops II (PC, x86)"
+graph = "re_t6"
+r2_public = "https://r2.houseofkublai.com/"
+ghidra = "12.1.4"
+source_roots = ['c:\t6\code\src', 'e:\t6\pc\dev\code\src_noserver']
+
+[[build]]
+id = "t6mp"
+kind = "retail"
+architecture = "x86"
+image_base = 0x00400000
+timestamp = "2015-01-30T01:23:23Z"
+pdb_guid = "DE575CD6-25F4-4C45-81EB-60450E0D2A61"
+pdb_age = 1
+exe = { key = "bo2/exes/t6mp.exe", sha256 = "7c6aa5e703ea096a981e6fb8962d2d13a1e80f80d3498e4836e8c8466322810d" }
+
+[[build]]
+id = "CoDMPServer_PC"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+timestamp = "2013-03-11T19:15:45Z"
+pdb_guid = "3C12954B-A78E-4C6E-B4E8-5A8FD595F0DB"
+pdb_age = 51
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_PC.exe", sha256 = "f67eb68a494b93b5b229985205bdc94e26fdfe677663410e2207c25f6f27a55d" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_PC.pdb", sha256 = "7874efc2c9992467a72dbf48cc6f66d8cfa3c9a701275e41df1f8483a3d971fc" }
+map = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_PC.map", sha256 = "34e16e517072031629307ffa0520d59f3c586539b943d081f60c59ee9ce1c3bf" }

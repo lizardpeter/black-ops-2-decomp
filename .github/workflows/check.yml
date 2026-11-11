@@ -1,0 +1,22 @@
+name: Reconstruction checks
+
+on: [push, pull_request, workflow_dispatch]
+
+permissions:
+  contents: read
+
+jobs:
+  differential:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -r tests/differential/requirements.txt
+      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
+      - run: python tools/fetch_originals.py CoDMPServer_PC originals --only exe
+      - run: |
+          python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_faithful.so
+          python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_enhanced.so
+      - run: python tools/status.py && git diff --exit-code -- STATUS.md
