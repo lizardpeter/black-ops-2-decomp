@@ -1,6 +1,8 @@
 name: Ghidra analysis
 
 on:
+  push:
+    branches: [analysis/t6mp-pseudocode]
   workflow_dispatch:
     inputs:
       build:
@@ -12,14 +14,14 @@ on:
           - t6mp
 
 permissions:
-  contents: read
+  contents: write
 
 jobs:
   analyze:
     runs-on: ubuntu-latest
     timeout-minutes: 300
     env:
-      BUILD_ID: ${{ inputs.build }}
+      BUILD_ID: ${{ inputs.build || 't6mp' }}
       GH_TOKEN: ${{ github.token }}
     steps:
       - uses: actions/checkout@v4
@@ -62,9 +64,9 @@ jobs:
           python3 tools/ghidra/publish.py "$BUILD_ID" "$RUNNER_TEMP/raw" --inventory-only
       - uses: actions/upload-artifact@v4
         with:
-          name: ghidra-inventory-${{ inputs.build }}
+          name: ghidra-inventory-${{ inputs.build || 't6mp' }}
           path: |
-            analysis/${{ inputs.build }}/inventory.tsv
+            analysis/${{ inputs.build || 't6mp' }}/inventory.tsv
             ${{ runner.temp }}/raw/functions.tsv
             ${{ runner.temp }}/raw/analyze.log
           if-no-files-found: error
@@ -72,15 +74,53 @@ jobs:
         env:
           GHIDRA_HEADLESS_MAXMEM: 3500M
         run: |
-          /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
-            -process "$BUILD_ID.exe" -noanalysis -scriptPath tools/ghidra \
-            -postScript Decompile.java "$RUNNER_TEMP/raw/decomp-0.jsonl" 0 1 30 -max-cpu 2
-          test -s "$RUNNER_TEMP/raw/decomp-0.jsonl"
+          export GHIDRA_HEADLESS_MAXMEM=1000M
+          pids=()
+          for shard in 0 1 2 3; do
+            project="$RUNNER_TEMP/project-$shard"
+            mkdir -p "$project"
+            cp -a "$RUNNER_TEMP/project/t6.gpr" "$RUNNER_TEMP/project/t6.rep" "$project/"
+            /tmp/ghidra/ghidra_*/support/analyzeHeadless "$project" t6 \
+              -process "$BUILD_ID.exe" -noanalysis -readOnly -scriptPath tools/ghidra \
+              -postScript Decompile.java "$RUNNER_TEMP/raw/decomp-$shard.jsonl" "$shard" 4 30 \
+              -max-cpu 1 -log "$RUNNER_TEMP/raw/decompile-$shard.log" \
+              > "$RUNNER_TEMP/raw/decompile-$shard.console.log" 2>&1 &
+            pids+=("$!")
+          done
+          failed=0
+          for pid in "${pids[@]}"; do wait "$pid" || failed=1; done
+          if [ "$failed" != 0 ]; then tail -50 "$RUNNER_TEMP"/raw/decompile-*.console.log; exit 1; fi
+          python3 - "$RUNNER_TEMP/raw" <<'PYTHON'
+          import csv, json, sys
+          from pathlib import Path
+          raw = Path(sys.argv[1])
+          with (raw / "functions.tsv").open() as stream:
+              expected = {r["va"] for r in csv.DictReader(stream, delimiter="\t") if not r["thunk"]}
+          seen = set()
+          for path in sorted(raw.glob("decomp-*.jsonl")):
+              for line in path.open():
+                  row = json.loads(line)
+                  assert row["va"] not in seen, row["va"]
+                  assert ("c" in row) != ("error" in row), row["va"]
+                  seen.add(row["va"])
+          assert seen == expected, (len(seen - expected), len(expected - seen))
+          print(f"Verified decompiler records for {len(seen):,} non-thunk functions.")
+          PYTHON
           python3 tools/ghidra/publish.py "$BUILD_ID" "$RUNNER_TEMP/raw"
           python3 tools/status.py
       - uses: actions/upload-artifact@v4
         with:
-          name: ghidra-${{ inputs.build }}
+          name: ghidra-${{ inputs.build || 't6mp' }}
           path: |
-            analysis/${{ inputs.build }}/
+            analysis/${{ inputs.build || 't6mp' }}/
             STATUS.md
+      - name: Commit the pseudocode and function tables
+        if: github.ref == 'refs/heads/analysis/t6mp-pseudocode'
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add "analysis/$BUILD_ID/pseudocode" "analysis/$BUILD_ID/functions.tsv" \
+            "analysis/$BUILD_ID/ghidra/functions.tsv" "analysis/$BUILD_ID/inventory.tsv" STATUS.md
+          git commit -m "Export all retail T6 Ghidra pseudocode"
+          git push origin HEAD:refs/heads/analysis/t6mp-pseudocode
+
