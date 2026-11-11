@@ -19,3 +19,14 @@ The server linker MAP supplies symbol names and object files. The retail PE inve
 | `I_isdigit` | `0078DF40` | `006580F0` |
 
 The retail routines use stack-pointer-relative arguments in place of the server's frame-pointer-relative arguments. The matching evidence is the control flow and constants in each body, followed by differential execution of the pinned retail bytes. Both library variants run the same checks against both original builds.
+
+## Retail function entry inventory
+
+`analysis/t6mp/direct-entries.tsv` inventories decoded direct calls within the retail `.text` section to 16-byte-aligned instruction boundaries immediately after `INT3` padding. Each row includes the number of decoded call sites. The scan can miss indirectly reached functions and entries with other alignment or padding. It supplies candidate starts and leaves function extents and the full Ghidra inventory open.
+
+Regenerate the table with GNU `objdump` and the installed differential test requirements.
+
+```sh
+python tools/inventory/retail_calls.py originals/t6mp.exe
+python tools/status.py
+```

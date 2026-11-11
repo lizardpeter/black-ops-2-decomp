@@ -23,4 +23,7 @@ jobs:
           python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_enhanced.so
           python tests/differential/reference.py originals/t6mp.exe build/libt6_faithful.so --build t6mp
           python tests/differential/reference.py originals/t6mp.exe build/libt6_enhanced.so --build t6mp
-      - run: python tools/status.py && git diff --exit-code -- STATUS.md
+      - run: |
+          python tools/inventory/retail_calls.py originals/t6mp.exe
+          python tools/status.py
+          git diff --exit-code -- analysis/t6mp/direct-entries.tsv STATUS.md

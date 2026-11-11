@@ -78,8 +78,12 @@ def load(build: str) -> dict[str, Fn]:
         f.type = r["type"]
         f.status = "typed" if r["type"] else "named"
     joined = a / "functions.tsv"
+    compact = a / "inventory.tsv"
+    if not joined.is_file() and not compact.is_file():
+        for r in read_tsv(a / "direct-entries.tsv"):
+            get(r["va"]).extra["direct_calls"] = int(r["direct_calls"])
     if not joined.is_file():
-        for r in read_tsv(a / "inventory.tsv"):
+        for r in read_tsv(compact):
             f = get(r["va"])
             f.size = f.size or int(r["size"])
     for r in read_tsv(joined):  # joined Ghidra table, once the pipeline has run
