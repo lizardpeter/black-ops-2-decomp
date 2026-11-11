@@ -32,20 +32,49 @@ jobs:
           version=$(python3 -c 'import tomllib; print(tomllib.load(open("target.toml", "rb"))["ghidra"])')
           gh release download "Ghidra_${version}_build" --repo NationalSecurityAgency/ghidra --pattern 'ghidra_*_PUBLIC_*.zip' --dir /tmp
           unzip -q /tmp/ghidra_*.zip -d /tmp/ghidra
-      - name: Import original and export analysis
+      - name: Import and analyze original
+        env:
+          GHIDRA_HEADLESS_MAXMEM: 6200M
         run: |
           python3 tools/fetch_originals.py "$BUILD_ID" originals
           mkdir -p "$RUNNER_TEMP/project" "$RUNNER_TEMP/raw"
-          pdb=()
-          if [ -f "originals/$BUILD_ID.pdb" ]; then
-            pdb=(-preScript PrepPdb.java "$PWD/originals/$BUILD_ID.pdb")
+          prepare=()
+          if [ "$BUILD_ID" = t6mp ]; then
+            prepare=(-preScript InventoryOptions.java)
+          elif [ -f "originals/$BUILD_ID.pdb" ]; then
+            prepare=(-preScript PrepPdb.java "$PWD/originals/$BUILD_ID.pdb")
           fi
           /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
-            -import "$PWD/originals/$BUILD_ID.exe" -scriptPath tools/ghidra "${pdb[@]}" \
-            -postScript ExportAll.java "$RUNNER_TEMP/raw" \
-            -postScript Decompile.java "$RUNNER_TEMP/raw/decomp-0.jsonl" 0 1 30 \
-            -analysisTimeoutPerFile 7200 -log "$RUNNER_TEMP/raw/analyze.log"
-          test -s "$RUNNER_TEMP/raw/functions.tsv"
+            -import "$PWD/originals/$BUILD_ID.exe" -scriptPath tools/ghidra "${prepare[@]}" \
+            -analysisTimeoutPerFile 7200 -max-cpu 2 -log "$RUNNER_TEMP/raw/analyze.log"
+          grep -F 'Analysis succeeded for file:' "$RUNNER_TEMP/raw/analyze.log"
+          if [ "$BUILD_ID" = t6mp ]; then
+            grep -F 'Disabled x86 Constant Reference Analyzer' "$RUNNER_TEMP/raw/analyze.log"
+          fi
+      - name: Export function inventory and disassembly
+        env:
+          GHIDRA_HEADLESS_MAXMEM: 3500M
+        run: |
+          /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
+            -process "$BUILD_ID.exe" -noanalysis -scriptPath tools/ghidra \
+            -postScript ExportAll.java "$RUNNER_TEMP/raw" -max-cpu 2
+          test -s "$RUNNER_TEMP/raw/export.complete"
+          python3 tools/ghidra/publish.py "$BUILD_ID" "$RUNNER_TEMP/raw" --inventory-only
+      - uses: actions/upload-artifact@v4
+        with:
+          name: ghidra-inventory-${{ inputs.build }}
+          path: |
+            analysis/${{ inputs.build }}/inventory.tsv
+            ${{ runner.temp }}/raw/functions.tsv
+            ${{ runner.temp }}/raw/analyze.log
+          if-no-files-found: error
+      - name: Decompile saved project and publish analysis
+        env:
+          GHIDRA_HEADLESS_MAXMEM: 3500M
+        run: |
+          /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
+            -process "$BUILD_ID.exe" -noanalysis -scriptPath tools/ghidra \
+            -postScript Decompile.java "$RUNNER_TEMP/raw/decomp-0.jsonl" 0 1 30 -max-cpu 2
           test -s "$RUNNER_TEMP/raw/decomp-0.jsonl"
           python3 tools/ghidra/publish.py "$BUILD_ID" "$RUNNER_TEMP/raw"
           python3 tools/status.py

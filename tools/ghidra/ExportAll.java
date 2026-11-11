@@ -6,6 +6,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.Writer;
+import java.nio.file.Files;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -168,5 +169,6 @@ public class ExportAll extends GhidraScript {
 		try (Writer hw = new BufferedWriter(new FileWriter(new File(out, "types.h")))) {
 			new DataTypeWriter(dtm, hw).write(dtm, monitor);
 		}
+		Files.writeString(new File(out, "export.complete").toPath(), "complete\n");
 	}
 }
