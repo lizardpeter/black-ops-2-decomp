@@ -34,3 +34,15 @@ python tools/status.py
 `analysis/t6mp/inventory.tsv` records the Ghidra 12.1.4 function entry addresses and body sizes for the pinned retail executable. The analysis used two CPUs, a 6,200 MiB Java heap, and disabled the x86 Constant Reference Analyzer. The saved project supports independent export and decompilation passes.
 
 Ghidra recovered 24,565 functions. Of those, 18,593 overlap the direct-call scan and 5,972 are additional entries. The 735 direct-call candidates outside the Ghidra inventory remain available for review. All six differentially verified retail routines appear in both tables.
+
+## Retail pseudocode
+
+The Ghidra export in [`analysis/t6mp/pseudocode/`](../analysis/t6mp/pseudocode/) uses the same layout as Ghosts and BO3. Functions without a source-file assignment are grouped by 64 KiB address block under `_unattributed/`. The [function table](../analysis/t6mp/functions.tsv) records the decompiler outcome for every inventory entry.
+
+| Outcome | Functions |
+|---|---:|
+| Generated C pseudocode | 24,392 |
+| Thunks recorded with their targets | 168 |
+| Decompiler errors | 5 |
+
+The five failures are marked at their addresses in the generated files. Export validation found exactly one decompiler result for every non-thunk function. These files contain generated analysis. Verified reconstructions are tracked independently in [STATUS.md](../STATUS.md).
