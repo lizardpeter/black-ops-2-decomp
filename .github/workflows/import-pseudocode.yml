@@ -1,0 +1,28 @@
+name: Import verified retail pseudocode
+on:
+  push:
+    branches: [analysis/t6mp-pseudocode]
+    paths: [analysis-transfer/**]
+
+permissions:
+  contents: write
+
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify and unpack generated files
+        run: |
+          cat analysis-transfer/pseudocode.part-* > "$RUNNER_TEMP/pseudocode.tar.xz"
+          (cd "$RUNNER_TEMP" && sha256sum -c "$GITHUB_WORKSPACE/analysis-transfer/pseudocode.sha256")
+          tar -xJf "$RUNNER_TEMP/pseudocode.tar.xz"
+          python tools/status.py
+      - name: Commit generated analysis
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add analysis/t6mp/pseudocode analysis/t6mp/functions.tsv analysis/t6mp/ghidra/functions.tsv STATUS.md
+          git rm -r analysis-transfer
+          git commit -m "Import verified retail T6 Ghidra pseudocode"
+          git push origin HEAD:refs/heads/analysis/t6mp-pseudocode
