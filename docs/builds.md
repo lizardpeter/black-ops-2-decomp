@@ -7,4 +7,4 @@
 
 Both files were downloaded from R2, hashed, and inspected as PE32 with a preferred image base of `00400000` and linker version 10.00. The downloaded server PDB's GUID and age agree with the executable. The retail executable is the 2015 object in R2. Its hash and CodeView identity identify this specific build.
 
-The first server pass uses linker MAP publics. Three leaf functions were reconstructed from the pinned server's x86 instructions and compared with original execution. Their byte sequences do not match verbatim in the retail executable, so their retail identities remain open. The retail inventory records PE imports and sections. Retail Ghidra output requires review before claiming function boundaries or names for that build.
+The first server pass uses linker MAP publics. Reconstructed server routines are compared with the pinned x86 instructions through the differential harness. The three bootstrap routines have no verbatim byte match in the retail executable. Retail identities remain open. The retail inventory records PE imports and sections. Retail Ghidra output requires review before claiming function boundaries or names for that build.

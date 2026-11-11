@@ -10,7 +10,7 @@ from pathlib import Path
 
 import pefile
 from unicorn import UC_ARCH_X86, UC_MODE_32, Uc
-from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_EIP, UC_X86_REG_ESP
+from unicorn.x86_const import UC_X86_REG_EAX, UC_X86_REG_EDX, UC_X86_REG_EIP, UC_X86_REG_ESP
 
 ROOT = Path(__file__).resolve().parents[2]
 CODE = 0x1000
@@ -22,6 +22,11 @@ FUNCTIONS = {
     "ClampChar": (0x00761340, 24, ctypes.c_int8, [ctypes.c_int32]),
     "ClampShort": (0x00761360, 34, ctypes.c_int16, [ctypes.c_int32]),
     "Com_HashKey": (0x0076B690, 73, ctypes.c_int32, [ctypes.c_char_p, ctypes.c_int32]),
+    "ShortSwap": (0x0078DCC0, 24, ctypes.c_int16, [ctypes.c_int16]),
+    "ShortNoSwap": (0x0078DCE0, 9, ctypes.c_int16, [ctypes.c_int16]),
+    "LongSwap": (0x0078DCF0, 48, ctypes.c_int32, [ctypes.c_int32]),
+    "Long64Swap": (0x0078DD20, 173, ctypes.c_uint64, [ctypes.c_uint64]),
+    "Long64NoSwap": (0x0078DDD0, 11, ctypes.c_uint64, [ctypes.c_uint64]),
 }
 
 
@@ -45,7 +50,7 @@ def original_function(image, address, size):
         vm.emu_start(CODE, RETURN, count=2_000_000)
         if vm.reg_read(UC_X86_REG_EIP) != RETURN:
             raise RuntimeError(f"Original function at {address:08X} did not return")
-        return vm.reg_read(UC_X86_REG_EAX)
+        return (vm.reg_read(UC_X86_REG_EDX) << 32) | vm.reg_read(UC_X86_REG_EAX)
 
     return invoke
 
@@ -61,6 +66,18 @@ def cases(name):
         for _ in range(250):
             data = rng.randbytes(rng.randrange(512))
             yield (data, rng.randrange(-10, len(data) + 10))
+    elif name in {"ShortSwap", "ShortNoSwap"}:
+        for value in range(-2**15, 2**15):
+            yield (value,)
+    elif name in {"LongSwap", "Long64Swap", "Long64NoSwap"}:
+        width = 32 if name == "LongSwap" else 64
+        value_type = ctypes.c_int32 if width == 32 else ctypes.c_uint64
+        for value in (0, 1, (1 << width) - 1, 0x0123456789abcdef):
+            yield (value_type(value).value,)
+        for bit in range(width):
+            yield (value_type(1 << bit).value,)
+        for _ in range(250):
+            yield (value_type(rng.getrandbits(width)).value,)
     else:
         for value in (-2**31, -32769, -32768, -32767, -129, -128, -127, 0, 126, 127, 128, 32766, 32767, 32768, 2**31 - 1):
             yield (value,)
@@ -99,6 +116,9 @@ def main():
             if name == "Com_HashKey":
                 data, limit = arguments
                 result = original((DATA if data is not None else 0, limit), data)
+            elif arg_types == [ctypes.c_uint64]:
+                (value,) = arguments
+                result = original((value, value >> 32))
             else:
                 result = original(arguments)
             expected = result_type(result).value

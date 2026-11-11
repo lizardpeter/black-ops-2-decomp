@@ -4,6 +4,7 @@ project(t6_reconstruction LANGUAGES C)
 set(T6_FAITHFUL_SOURCES
     src/universal/com_math.c
     src/universal/com_shared.c
+    src/universal/q_shared.c
 )
 
 add_library(t6_faithful SHARED ${T6_FAITHFUL_SOURCES})

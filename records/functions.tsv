@@ -2,3 +2,8 @@ build	va	status	src	note
 CoDMPServer_PC	00761340	matches	src/universal/com_math.c	ClampChar; tests/differential/reference.py
 CoDMPServer_PC	00761360	matches	src/universal/com_math.c	ClampShort; tests/differential/reference.py
 CoDMPServer_PC	0076B690	matches	src/universal/com_shared.c	Com_HashKey; tests/differential/reference.py
+CoDMPServer_PC	0078DCC0	matches	src/universal/q_shared.c	ShortSwap; tests/differential/reference.py
+CoDMPServer_PC	0078DCE0	matches	src/universal/q_shared.c	ShortNoSwap; tests/differential/reference.py
+CoDMPServer_PC	0078DCF0	matches	src/universal/q_shared.c	LongSwap; tests/differential/reference.py
+CoDMPServer_PC	0078DD20	matches	src/universal/q_shared.c	Long64Swap; tests/differential/reference.py
+CoDMPServer_PC	0078DDD0	matches	src/universal/q_shared.c	Long64NoSwap; tests/differential/reference.py

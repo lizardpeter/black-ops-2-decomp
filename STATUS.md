@@ -11,11 +11,11 @@ Function inventory pending.
 | status | functions | reached |
 |---|---:|---|
 | located | 0 | ████████████████████ 100.00% |
-| named | 28,421 | ████████████████████ 100.00% |
-| typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.01% |
-| decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.01% |
-| compiles | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.01% |
-| matches | 3 | ░░░░░░░░░░░░░░░░░░░░ 0.01% |
+| named | 28,416 | ████████████████████ 100.00% |
+| typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
+| decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
+| compiles | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
+| matches | 8 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
 | integrated | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 
-28,424 functions known. Reconstructed (decompiled or better): 3.
+28,424 functions known. Reconstructed (decompiled or better): 8.
