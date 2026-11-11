@@ -1,4 +1,4 @@
-"""Compare reconstructed leaf functions with the pinned PC server's x86 instructions."""
+"""Compare reconstructed leaf functions with pinned PC builds' x86 instructions."""
 import argparse
 import ctypes
 import csv
@@ -27,6 +27,11 @@ FUNCTIONS = {
     "LongSwap": (0x0078DCF0, 48, ctypes.c_int32, [ctypes.c_int32]),
     "Long64Swap": (0x0078DD20, 173, ctypes.c_uint64, [ctypes.c_uint64]),
     "Long64NoSwap": (0x0078DDD0, 11, ctypes.c_uint64, [ctypes.c_uint64]),
+}
+RETAIL_LOCATIONS = {
+    "ClampChar": (0x007043C0, 20),
+    "ClampShort": (0x00645340, 30),
+    "Com_HashKey": (0x006F5A40, 73),
 }
 
 
@@ -89,24 +94,28 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("original", type=Path)
     parser.add_argument("library", type=Path)
+    parser.add_argument("--build", choices=("CoDMPServer_PC", "t6mp"), default="CoDMPServer_PC")
     args = parser.parse_args()
     config = tomllib.loads((ROOT / "target.toml").read_text())
-    server = next(build for build in config["build"] if build["id"] == "CoDMPServer_PC")
+    build = next(build for build in config["build"] if build["id"] == args.build)
     binary = args.original.read_bytes()
-    if hashlib.sha256(binary).hexdigest() != server["exe"]["sha256"]:
-        raise ValueError("Original PC server SHA-256 mismatch")
+    if hashlib.sha256(binary).hexdigest() != build["exe"]["sha256"]:
+        raise ValueError(f"Original {args.build} SHA-256 mismatch")
     with (ROOT / "records" / "functions.tsv").open(newline="") as records:
         verified = {
             (row["build"], int(row["va"], 16))
             for row in csv.DictReader(records, delimiter="\t")
-            if row["status"] in {"matches", "integrated"}
+            if row["build"] == args.build and row["status"] in {"matches", "integrated"}
         }
-    covered = {(server["id"], address) for address, *_ in FUNCTIONS.values()}
+    functions = FUNCTIONS
+    if args.build == "t6mp":
+        functions = {name: (*location, *FUNCTIONS[name][2:]) for name, location in RETAIL_LOCATIONS.items()}
+    covered = {(args.build, address) for address, *_ in functions.values()}
     if verified != covered:
         raise ValueError(f"Function records and differential tests disagree: {verified ^ covered}")
     image = pefile.PE(data=binary, fast_load=True)
     library = ctypes.CDLL(str(args.library.resolve()))
-    for name, (address, size, result_type, arg_types) in FUNCTIONS.items():
+    for name, (address, size, result_type, arg_types) in functions.items():
         original = original_function(image, address, size)
         reconstructed = getattr(library, name)
         reconstructed.restype = result_type

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Turn raw Ghidra exports into the committed analysis/<build>/ layout.
 
-    python3 tools/ghidra/publish.py <build-id> <raw-dir>
+    python3 tools/ghidra/publish.py <build-id> <raw-dir> [--inventory-only]
 
 <raw-dir> holds what ExportAll.java and Decompile.java wrote:
   functions.tsv callgraph.tsv symbols.tsv strings.tsv types.h disasm.jsonl decomp-*.jsonl
@@ -16,11 +16,11 @@ holding Arxan's own code. The saved Ghidra project still contains it.
 
 Generated output only: never hand-edit what this writes.
 """
+import argparse
 import csv
 import json
 import re
 import shutil
-import sys
 import tomllib
 from collections import defaultdict
 from pathlib import Path
@@ -62,7 +62,13 @@ def excluded_ranges(build):
 
 
 def main():
-    build, raw = sys.argv[1], Path(sys.argv[2])
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("build")
+    parser.add_argument("raw", type=Path)
+    parser.add_argument("--inventory-only", action="store_true",
+                        help="write only the compact function address and size table")
+    args = parser.parse_args()
+    build, raw = args.build, args.raw
     out = ROOT / "analysis" / build
     ranges = excluded_ranges(build)
     dropped = defaultdict(int)
@@ -85,6 +91,21 @@ def main():
                 parts = line.rstrip("\n").split("\t")
                 if all(not any(lo <= int(parts[i], 16) < hi for _, lo, hi in ranges) for i in idx if parts[i]):
                     o.write(line)
+    if not (raw / "functions.tsv").is_file():
+        parser.error(f"missing function export: {raw / 'functions.tsv'}")
+    ghidra = [g for g in read_tsv(raw / "functions.tsv") if keep(g["va"])]
+    if not ghidra:
+        parser.error(f"no functions to publish for {build}")
+
+    if args.inventory_only:
+        out.mkdir(parents=True, exist_ok=True)
+        with (out / "inventory.tsv").open("w", newline="\n") as f:
+            f.write("va\tsize\n")
+            for g in sorted(ghidra, key=lambda row: row["va"]):
+                f.write(f"{g['va']}\t{g['size']}\n")
+        print(f"{build}: {len(ghidra):,} functions inventoried")
+        return
+
     pdb = {r["va"]: r for r in read_tsv(out / "pdb" / "functions.tsv")}
     mapobj = {r["va"]: r for r in read_tsv(out / "map" / "publics.tsv") if "f" in r["flags"]}
 
@@ -103,7 +124,6 @@ def main():
         (out / "logs").mkdir(parents=True, exist_ok=True)
         shutil.copyfile(log, out / "logs" / log.name)
 
-    ghidra = [g for g in read_tsv(raw / "functions.tsv") if keep(g["va"])]
     decomp = {}
     for shard in sorted(raw.glob("decomp-*.jsonl")):
         for line in open(shard):

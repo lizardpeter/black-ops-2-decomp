@@ -23,7 +23,12 @@ def main():
             continue
         c = Counter(f.status for f in fns.values())
         total = len(fns)
-        out += [f"## {b['id']}", "", "| status | functions | reached |", "|---|---:|---|"]
+        out += [f"## {b['id']}", ""]
+        if b["kind"] == "retail":
+            analysis = ROOT / "analysis" / b["id"]
+            if not any((analysis / name).is_file() for name in ("functions.tsv", "inventory.tsv")):
+                out += ["Function inventory pending. Counts reflect reviewed records.", ""]
+        out += ["| status | functions | reached |", "|---|---:|---|"]
         for i, s in enumerate(LADDER):
             reached = sum(c[t] for t in LADDER[i:])
             out.append(f"| {s} | {c[s]:,} | {bar(reached, total)} {reached / total:.2%} |")

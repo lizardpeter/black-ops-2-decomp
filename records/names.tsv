@@ -1,1 +1,4 @@
 build	va	kind	name	symbol	source	method	evidence	confidence
+t6mp	00645340	function	ClampShort	?ClampShort@@YAFH@Z	universal/com_math.cpp	semantic+differential	CoDMPServer_PC 00761360: same two signed saturation bounds and 16-bit result	high
+t6mp	006F5A40	function	Com_HashKey	?Com_HashKey@@YAHPBDH@Z	universal/com_shared.cpp	semantic+differential	CoDMPServer_PC 0076B690: same null and length guards, signed byte weighting by index + 119, and two arithmetic shifts	high
+t6mp	007043C0	function	ClampChar	?ClampChar@@YACH@Z	universal/com_math.cpp	semantic+differential	CoDMPServer_PC 00761340: same two signed saturation bounds and 8-bit result	high

@@ -7,4 +7,12 @@
 
 Both files were downloaded from R2, hashed, and inspected as PE32 with a preferred image base of `00400000` and linker version 10.00. The downloaded server PDB's GUID and age agree with the executable. The retail executable is the 2015 object in R2. Its hash and CodeView identity identify this specific build.
 
-The first server pass uses linker MAP publics. Reconstructed server routines are compared with the pinned x86 instructions through the differential harness. The three bootstrap routines have no verbatim byte match in the retail executable. Retail identities remain open. The retail inventory records PE imports and sections. Retail Ghidra output requires review before claiming function boundaries or names for that build.
+The server linker MAP supplies symbol names and object files. The retail PE inventory records imports and sections.
+
+| Routine | Server VA | Retail VA |
+|---|---|---|
+| `ClampChar` | `00761340` | `007043C0` |
+| `ClampShort` | `00761360` | `00645340` |
+| `Com_HashKey` | `0076B690` | `006F5A40` |
+
+The retail routines use stack-pointer-relative arguments in place of the server's frame-pointer-relative arguments. The matching evidence is the control flow and constants in each body, followed by differential execution of the pinned retail bytes. Both library variants run the same checks against both original builds.

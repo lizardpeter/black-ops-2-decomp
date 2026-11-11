@@ -77,16 +77,21 @@ def load(build: str) -> dict[str, Fn]:
         f.line = int(r["line"] or 0)
         f.type = r["type"]
         f.status = "typed" if r["type"] else "named"
-    for r in read_tsv(a / "functions.tsv"):  # joined Ghidra table, once the pipeline has run
+    joined = a / "functions.tsv"
+    if not joined.is_file():
+        for r in read_tsv(a / "inventory.tsv"):
+            f = get(r["va"])
+            f.size = f.size or int(r["size"])
+    for r in read_tsv(joined):  # joined Ghidra table, once the pipeline has run
         f = get(r["va"])
         f.size = f.size or int(r["size"] or 0)
         f.name = f.name or r["pdb_name"] or r["ghidra_name"]
         f.extra["bytes_sha256"] = r["bytes_sha256"]
         f.extra["decompile"] = r["decompile"]
     for r in read_tsv(ROOT / "records" / "names.tsv"):
-        if r["build"] != build or r["kind"] != "function" or r["va"] not in fns:
+        if r["build"] != build or r["kind"] != "function":
             continue
-        f = fns[r["va"]]
+        f = get(r["va"])
         if not r["name"].startswith("sub_"):  # sub_<va>: identified as a function, name unknown
             f.name = r["name"]
             f.symbol = f.symbol or (r["symbol"] if r["symbol"].startswith("?") else "")

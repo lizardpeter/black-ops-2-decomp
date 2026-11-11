@@ -7,3 +7,6 @@ CoDMPServer_PC	0078DCE0	matches	src/universal/q_shared.c	ShortNoSwap; tests/diff
 CoDMPServer_PC	0078DCF0	matches	src/universal/q_shared.c	LongSwap; tests/differential/reference.py
 CoDMPServer_PC	0078DD20	matches	src/universal/q_shared.c	Long64Swap; tests/differential/reference.py
 CoDMPServer_PC	0078DDD0	matches	src/universal/q_shared.c	Long64NoSwap; tests/differential/reference.py
+t6mp	00645340	matches	src/universal/com_math.c	ClampShort; tests/differential/reference.py --build t6mp
+t6mp	006F5A40	matches	src/universal/com_shared.c	Com_HashKey; tests/differential/reference.py --build t6mp
+t6mp	007043C0	matches	src/universal/com_math.c	ClampChar; tests/differential/reference.py --build t6mp

@@ -11,10 +11,13 @@ Call of Duty: Black Ops II (T6), PC x86. The retail multiplayer target is `t6mp`
 ```sh
 python -m pip install -r tests/differential/requirements.txt
 python tools/fetch_originals.py CoDMPServer_PC originals --only exe
+python tools/fetch_originals.py t6mp originals --only exe
 cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build
 python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_faithful.so
 python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_enhanced.so
+python tests/differential/reference.py originals/t6mp.exe build/libt6_faithful.so --build t6mp
+python tests/differential/reference.py originals/t6mp.exe build/libt6_enhanced.so --build t6mp
 ```
 
 These commands build reconstruction libraries and compare their functions with original x86 routines under Unicorn.
