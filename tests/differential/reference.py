@@ -27,11 +27,17 @@ FUNCTIONS = {
     "LongSwap": (0x0078DCF0, 48, ctypes.c_int32, [ctypes.c_int32]),
     "Long64Swap": (0x0078DD20, 173, ctypes.c_uint64, [ctypes.c_uint64]),
     "Long64NoSwap": (0x0078DDD0, 11, ctypes.c_uint64, [ctypes.c_uint64]),
+    "ColorIndex": (0x0078DB60, 22, ctypes.c_uint8, [ctypes.c_uint8]),
+    "I_islower": (0x0078DF00, 21, ctypes.c_uint8, [ctypes.c_int32]),
+    "I_isdigit": (0x0078DF40, 21, ctypes.c_uint8, [ctypes.c_int32]),
 }
 RETAIL_LOCATIONS = {
     "ClampChar": (0x007043C0, 20),
     "ClampShort": (0x00645340, 30),
     "Com_HashKey": (0x006F5A40, 73),
+    "ColorIndex": (0x004017C0, 19),
+    "I_islower": (0x00444010, 18),
+    "I_isdigit": (0x006580F0, 18),
 }
 
 
@@ -71,6 +77,16 @@ def cases(name):
         for _ in range(250):
             data = rng.randbytes(rng.randrange(512))
             yield (data, rng.randrange(-10, len(data) + 10))
+    elif name == "ColorIndex":
+        for value in range(256):
+            yield (value,)
+    elif name in {"I_islower", "I_isdigit"}:
+        for value in range(-256, 257):
+            yield (value,)
+        for value in (-2**31, 2**31 - 1):
+            yield (value,)
+        for _ in range(250):
+            yield (rng.randrange(-2**31, 2**31),)
     elif name in {"ShortSwap", "ShortNoSwap"}:
         for value in range(-2**15, 2**15):
             yield (value,)

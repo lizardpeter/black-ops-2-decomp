@@ -13,27 +13,27 @@ Function inventory pending. Counts reflect reviewed records.
 | typed | 0 | ████████████████████ 100.00% |
 | decompiled | 0 | ████████████████████ 100.00% |
 | compiles | 0 | ████████████████████ 100.00% |
-| matches | 3 | ████████████████████ 100.00% |
+| matches | 6 | ████████████████████ 100.00% |
 | integrated | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 
-3 functions known. Reconstructed (decompiled or better): 3.
+6 functions known. Reconstructed (decompiled or better): 6.
 
 ### By subsystem (top 25 by size)
 
 | subsystem | functions | decompiled+ | matches+ |
 |---|---:|---:|---:|
-| `universal` | 3 | 3 | 3 |
+| `universal` | 6 | 6 | 6 |
 
 ## CoDMPServer_PC
 
 | status | functions | reached |
 |---|---:|---|
 | located | 0 | ████████████████████ 100.00% |
-| named | 28,416 | ████████████████████ 100.00% |
-| typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
-| decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
-| compiles | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
-| matches | 8 | ░░░░░░░░░░░░░░░░░░░░ 0.03% |
+| named | 28,413 | ████████████████████ 100.00% |
+| typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
+| decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
+| compiles | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
+| matches | 11 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
 | integrated | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 
-28,424 functions known. Reconstructed (decompiled or better): 8.
+28,424 functions known. Reconstructed (decompiled or better): 11.

@@ -38,3 +38,19 @@ uint64_t Long64NoSwap(uint64_t value)
 {
     return value;
 }
+
+uint8_t ColorIndex(uint8_t value)
+{
+    uint8_t index = (uint8_t)(value - 0x30);
+    return index < 10 ? index : 7;
+}
+
+bool I_islower(int32_t value)
+{
+    return value >= 0x61 && value <= 0x7a;
+}
+
+bool I_isdigit(int32_t value)
+{
+    return value >= 0x30 && value <= 0x39;
+}

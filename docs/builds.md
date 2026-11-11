@@ -14,5 +14,8 @@ The server linker MAP supplies symbol names and object files. The retail PE inve
 | `ClampChar` | `00761340` | `007043C0` |
 | `ClampShort` | `00761360` | `00645340` |
 | `Com_HashKey` | `0076B690` | `006F5A40` |
+| `ColorIndex` | `0078DB60` | `004017C0` |
+| `I_islower` | `0078DF00` | `00444010` |
+| `I_isdigit` | `0078DF40` | `006580F0` |
 
 The retail routines use stack-pointer-relative arguments in place of the server's frame-pointer-relative arguments. The matching evidence is the control flow and constants in each body, followed by differential execution of the pinned retail bytes. Both library variants run the same checks against both original builds.
