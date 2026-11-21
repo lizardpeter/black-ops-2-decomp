@@ -41,11 +41,9 @@ undefined4 * FUN_009e0070(undefined4 param_1,uint *param_2)
 }
 
 
-// 009E00F0  lh_strhash  (line unknown)
+// 009E00F0  FUN_009e00f0  (line unknown)
 
-/* lh_strhash */
-
-uint __cdecl lh_strhash(byte *param_1)
+uint FUN_009e00f0(byte *param_1)
 
 {
   byte bVar1;
@@ -71,11 +69,9 @@ uint __cdecl lh_strhash(byte *param_1)
 }
 
 
-// 009E0140  lh_num_items  (line unknown)
+// 009E0140  FUN_009e0140  (line unknown)
 
-/* lh_num_items */
-
-undefined4 __cdecl lh_num_items(int param_1)
+undefined4 FUN_009e0140(int param_1)
 
 {
   if (param_1 != 0) {
@@ -85,19 +81,17 @@ undefined4 __cdecl lh_num_items(int param_1)
 }
 
 
-// 009E0150  lh_new  (line unknown)
+// 009E0150  FUN_009e0150  (line unknown)
 
-/* lh_new */
-
-int * __cdecl lh_new(code *param_1,code *param_2)
+int * FUN_009e0150(code *param_1,code *param_2)
 
 {
   int *piVar1;
   int iVar2;
   
-  piVar1 = (int *)_CRYPTO_malloc(0x60,".\\crypto\\lhash\\lhash.c",0x77);
+  piVar1 = (int *)FUN_009d96f0(0x60,".\\crypto\\lhash\\lhash.c",0x77);
   if (piVar1 != (int *)0x0) {
-    iVar2 = _CRYPTO_malloc(0x40,".\\crypto\\lhash\\lhash.c",0x79);
+    iVar2 = FUN_009d96f0(0x40,".\\crypto\\lhash\\lhash.c",0x79);
     *piVar1 = iVar2;
     if (iVar2 != 0) {
       iVar2 = 0;
@@ -106,11 +100,11 @@ int * __cdecl lh_new(code *param_1,code *param_2)
         iVar2 = iVar2 + 4;
       } while (iVar2 < 0x40);
       if (param_2 == (code *)0x0) {
-        param_2 = strcmp;
+        param_2 = _strcmp;
       }
       piVar1[1] = (int)param_2;
       if (param_1 == (code *)0x0) {
-        param_1 = lh_strhash;
+        param_1 = FUN_009e00f0;
       }
       piVar1[2] = (int)param_1;
       piVar1[5] = 0;
@@ -136,17 +130,15 @@ int * __cdecl lh_new(code *param_1,code *param_2)
       piVar1[8] = 0x100;
       return piVar1;
     }
-    _CRYPTO_free(piVar1);
+    FUN_009d98a0(piVar1);
   }
   return (int *)0x0;
 }
 
 
-// 009E0220  lh_insert  (line unknown)
+// 009E0220  FUN_009e0220  (line unknown)
 
-/* lh_insert */
-
-undefined4 __cdecl lh_insert(int param_1,undefined4 param_2)
+undefined4 FUN_009e0220(int param_1,undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -165,7 +157,7 @@ undefined4 __cdecl lh_insert(int param_1,undefined4 param_2)
   piVar4 = (int *)FUN_009e0070(param_2,&param_1);
   puVar5 = (undefined4 *)*piVar4;
   if (puVar5 == (undefined4 *)0x0) {
-    puVar5 = (undefined4 *)_CRYPTO_malloc(0xc,".\\crypto\\lhash\\lhash.c",0xc1);
+    puVar5 = (undefined4 *)FUN_009d96f0(0xc,".\\crypto\\lhash\\lhash.c",0xc1);
     if (puVar5 == (undefined4 *)0x0) {
       *(int *)(iVar2 + 0x5c) = *(int *)(iVar2 + 0x5c) + 1;
       return 0;
@@ -185,11 +177,9 @@ undefined4 __cdecl lh_insert(int param_1,undefined4 param_2)
 }
 
 
-// 009E02B0  lh_delete  (line unknown)
+// 009E02B0  FUN_009e02b0  (line unknown)
 
-/* lh_delete */
-
-undefined4 __cdecl lh_delete(int param_1,undefined4 param_2)
+undefined4 FUN_009e02b0(int param_1,undefined4 param_2)
 
 {
   undefined4 *puVar1;
@@ -207,7 +197,7 @@ undefined4 __cdecl lh_delete(int param_1,undefined4 param_2)
   }
   *piVar4 = puVar1[1];
   uVar2 = *puVar1;
-  _CRYPTO_free(puVar1);
+  FUN_009d98a0(puVar1);
   *(int *)(iVar3 + 0x24) = *(int *)(iVar3 + 0x24) + -1;
   *(int *)(iVar3 + 0x48) = *(int *)(iVar3 + 0x48) + 1;
   if ((0x10 < *(uint *)(iVar3 + 0xc)) &&
@@ -218,11 +208,9 @@ undefined4 __cdecl lh_delete(int param_1,undefined4 param_2)
 }
 
 
-// 009E0320  lh_retrieve  (line unknown)
+// 009E0320  FUN_009e0320  (line unknown)
 
-/* lh_retrieve */
-
-undefined4 __cdecl lh_retrieve(int param_1,undefined4 param_2)
+undefined4 FUN_009e0320(int param_1,undefined4 param_2)
 
 {
   undefined4 uVar1;
@@ -244,14 +232,14 @@ undefined4 __cdecl lh_retrieve(int param_1,undefined4 param_2)
 }
 
 
-// 009E0360  _X509_VERIFY_PARAM_new  (line unknown)
+// 009E0360  FUN_009e0360  (line unknown)
 
-undefined4 * _X509_VERIFY_PARAM_new(void)
+undefined4 * FUN_009e0360(void)
 
 {
   undefined4 *puVar1;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x28,".\\crypto\\x509\\x509_vpm.c",0x5a);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x28,".\\crypto\\x509\\x509_vpm.c",0x5a);
   *puVar1 = 0;
   puVar1[1] = 0;
   puVar1[2] = 0;
@@ -270,7 +258,7 @@ undefined4 * _X509_VERIFY_PARAM_new(void)
     puVar1[5] = 0;
     puVar1[8] = 0xffffffff;
     if (puVar1[9] != 0) {
-      sk_pop_free(puVar1[9],_ASN1_OBJECT_free);
+      FUN_009daa70(puVar1[9],FUN_009dbfb0);
       puVar1[9] = 0;
     }
   }
@@ -278,9 +266,9 @@ undefined4 * _X509_VERIFY_PARAM_new(void)
 }
 
 
-// 009E03D0  _X509_VERIFY_PARAM_free  (line unknown)
+// 009E03D0  FUN_009e03d0  (line unknown)
 
-void _X509_VERIFY_PARAM_free(undefined4 *param_1)
+void FUN_009e03d0(undefined4 *param_1)
 
 {
   if (param_1 != (undefined4 *)0x0) {
@@ -291,18 +279,18 @@ void _X509_VERIFY_PARAM_free(undefined4 *param_1)
     param_1[5] = 0;
     param_1[8] = 0xffffffff;
     if (param_1[9] != 0) {
-      sk_pop_free(param_1[9],_ASN1_OBJECT_free);
+      FUN_009daa70(param_1[9],FUN_009dbfb0);
       param_1[9] = 0;
     }
   }
-  _CRYPTO_free(param_1);
+  FUN_009d98a0(param_1);
   return;
 }
 
 
-// 009E0420  _X509_VERIFY_PARAM_set_flags  (line unknown)
+// 009E0420  FUN_009e0420  (line unknown)
 
-undefined4 _X509_VERIFY_PARAM_set_flags(int param_1,uint param_2)
+undefined4 FUN_009e0420(int param_1,uint param_2)
 
 {
   *(uint *)(param_1 + 0x14) = *(uint *)(param_1 + 0x14) | param_2;
@@ -313,9 +301,9 @@ undefined4 _X509_VERIFY_PARAM_set_flags(int param_1,uint param_2)
 }
 
 
-// 009E0450  _X509_VERIFY_PARAM_set1_policies  (line unknown)
+// 009E0450  FUN_009e0450  (line unknown)
 
-undefined4 _X509_VERIFY_PARAM_set1_policies(int param_1,int param_2)
+undefined4 FUN_009e0450(int param_1,int param_2)
 
 {
   int iVar1;
@@ -328,32 +316,32 @@ undefined4 _X509_VERIFY_PARAM_set1_policies(int param_1,int param_2)
     return 0;
   }
   if (*(int *)(param_1 + 0x24) != 0) {
-    sk_pop_free(*(int *)(param_1 + 0x24),_ASN1_OBJECT_free);
+    FUN_009daa70(*(int *)(param_1 + 0x24),FUN_009dbfb0);
   }
   if (param_2 == 0) {
     *(undefined4 *)(param_1 + 0x24) = 0;
     return 1;
   }
-  iVar1 = sk_new_null();
+  iVar1 = FUN_009da960();
   *(int *)(param_1 + 0x24) = iVar1;
   if (iVar1 == 0) {
     return 0;
   }
-  iVar1 = sk_num(param_2);
+  iVar1 = FUN_009da820(param_2);
   if (0 < iVar1) {
     do {
-      uVar2 = sk_value(param_2,iVar4);
-      iVar1 = _OBJ_dup(uVar2);
+      uVar2 = FUN_009da830(param_2,iVar4);
+      iVar1 = FUN_009ebc80(uVar2);
       if (iVar1 == 0) {
         return 0;
       }
-      iVar3 = sk_push(*(undefined4 *)(param_1 + 0x24),iVar1);
+      iVar3 = FUN_009da780(*(undefined4 *)(param_1 + 0x24),iVar1);
       if (iVar3 == 0) {
-        _ASN1_OBJECT_free(iVar1);
+        FUN_009dbfb0(iVar1);
         return 0;
       }
       iVar4 = iVar4 + 1;
-      iVar1 = sk_num(param_2);
+      iVar1 = FUN_009da820(param_2);
     } while (iVar4 < iVar1);
   }
   *(uint *)(param_1 + 0x14) = *(uint *)(param_1 + 0x14) | 0x80;
@@ -361,11 +349,11 @@ undefined4 _X509_VERIFY_PARAM_set1_policies(int param_1,int param_2)
 }
 
 
-// 009E0550  _X509_VERIFY_PARAM_lookup  (line unknown)
+// 009E0550  FUN_009e0550  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-void _X509_VERIFY_PARAM_lookup(undefined4 param_1)
+void FUN_009e0550(undefined4 param_1)
 
 {
   int iVar1;
@@ -375,20 +363,20 @@ void _X509_VERIFY_PARAM_lookup(undefined4 param_1)
   uStack_4 = 0x9e055a;
   local_28[0] = param_1;
   if (DAT_00eabd6c != 0) {
-    iVar1 = sk_find(DAT_00eabd6c,local_28);
+    iVar1 = FUN_009daa50(DAT_00eabd6c,local_28);
     if (iVar1 != -1) {
-      sk_value(DAT_00eabd6c,iVar1);
+      FUN_009da830(DAT_00eabd6c,iVar1);
       return;
     }
   }
-  _OBJ_bsearch(local_28,&PTR_s_default_00a75540,5,0x28,&LAB_009e0510);
+  FUN_009e13a0(local_28,&PTR_s_default_00a75540,5,0x28,&LAB_009e0510);
   return;
 }
 
 
-// 009E05B0  _X509_VERIFY_PARAM_inherit  (line unknown)
+// 009E05B0  FUN_009e05b0  (line unknown)
 
-undefined4 _X509_VERIFY_PARAM_inherit(int param_1,int param_2)
+undefined4 FUN_009e05b0(int param_1,int param_2)
 
 {
   undefined4 uVar1;
@@ -444,32 +432,31 @@ LAB_009e0652:
   *(uint *)(param_1 + 0x14) = *(uint *)(param_1 + 0x14) | *(uint *)(param_2 + 0x14);
   if (((bVar2) ||
       ((*(int *)(param_2 + 0x24) != 0 && ((uVar5 != 0 || (*(int *)(param_1 + 0x24) == 0)))))) &&
-     (iVar3 = _X509_VERIFY_PARAM_set1_policies(param_1,*(undefined4 *)(param_2 + 0x24)), iVar3 == 0)
-     ) {
+     (iVar3 = FUN_009e0450(param_1,*(undefined4 *)(param_2 + 0x24)), iVar3 == 0)) {
     return 0;
   }
   return 1;
 }
 
 
-// 009E06A0  _X509_VERIFY_PARAM_set1  (line unknown)
+// 009E06A0  FUN_009e06a0  (line unknown)
 
-void _X509_VERIFY_PARAM_set1(int param_1,undefined4 param_2)
+void FUN_009e06a0(int param_1,undefined4 param_2)
 
 {
   uint uVar1;
   
   uVar1 = *(uint *)(param_1 + 0x10);
   *(uint *)(param_1 + 0x10) = uVar1 | 1;
-  _X509_VERIFY_PARAM_inherit(param_1,param_2);
+  FUN_009e05b0(param_1,param_2);
   *(uint *)(param_1 + 0x10) = uVar1;
   return;
 }
 
 
-// 009E06D0  _BIO_s_socket  (line unknown)
+// 009E06D0  FUN_009e06d0  (line unknown)
 
-undefined * _BIO_s_socket(void)
+undefined * FUN_009e06d0(void)
 
 {
   return &DAT_00b89ef0;
@@ -486,8 +473,8 @@ undefined4 FUN_009e06e0(int param_1)
   }
   if (*(int *)(param_1 + 0x10) != 0) {
     if (*(int *)(param_1 + 0xc) != 0) {
-      shutdown(*(undefined4 *)(param_1 + 0x1c),2);
-      closesocket(*(undefined4 *)(param_1 + 0x1c));
+      Ordinal_22(*(undefined4 *)(param_1 + 0x1c),2);
+      Ordinal_3(*(undefined4 *)(param_1 + 0x1c));
     }
     *(undefined4 *)(param_1 + 0xc) = 0;
     *(undefined4 *)(param_1 + 0x14) = 0;
@@ -496,11 +483,9 @@ undefined4 FUN_009e06e0(int param_1)
 }
 
 
-// 009E0930  engine_unlocked_init  (line unknown)
+// 009E0930  FUN_009e0930  (line unknown)
 
-/* engine_unlocked_init */
-
-int __cdecl engine_unlocked_init(int param_1)
+int FUN_009e0930(int param_1)
 
 {
   int iVar1;
@@ -516,11 +501,9 @@ int __cdecl engine_unlocked_init(int param_1)
 }
 
 
-// 009E0960  engine_unlocked_finish  (line unknown)
+// 009E0960  FUN_009e0960  (line unknown)
 
-/* engine_unlocked_finish */
-
-int __cdecl engine_unlocked_finish(int param_1,int param_2)
+int FUN_009e0960(int param_1,int param_2)
 
 {
   int *piVar1;
@@ -532,37 +515,37 @@ int __cdecl engine_unlocked_finish(int param_1,int param_2)
   iVar3 = 1;
   if ((*piVar1 == 0) && (*(int *)(param_1 + 0x34) != 0)) {
     if (param_2 != 0) {
-      _CRYPTO_lock(10,0x1e,".\\crypto\\engine\\eng_init.c",0x61);
+      FUN_009dfaa0(10,0x1e,".\\crypto\\engine\\eng_init.c",0x61);
     }
     iVar3 = (**(code **)(param_1 + 0x34))(param_1);
     if (param_2 != 0) {
-      _CRYPTO_lock(9,0x1e,".\\crypto\\engine\\eng_init.c",100);
+      FUN_009dfaa0(9,0x1e,".\\crypto\\engine\\eng_init.c",100);
     }
     if (iVar3 == 0) {
       return 0;
     }
   }
-  iVar2 = engine_free_util(param_1,0);
+  iVar2 = FUN_009f5330(param_1,0);
   if (iVar2 == 0) {
-    _ERR_put_error(0x26,0xbf,0x6a,".\\crypto\\engine\\eng_init.c",0x72);
+    FUN_009d90b0(0x26,0xbf,0x6a,".\\crypto\\engine\\eng_init.c",0x72);
     return 0;
   }
   return iVar3;
 }
 
 
-// 009E09F0  _ENGINE_init  (line unknown)
+// 009E09F0  FUN_009e09f0  (line unknown)
 
-int _ENGINE_init(int param_1)
+int FUN_009e09f0(int param_1)
 
 {
   int iVar1;
   
   if (param_1 == 0) {
-    _ERR_put_error(0x26,0x77,0x43,".\\crypto\\engine\\eng_init.c",0x7e);
+    FUN_009d90b0(0x26,0x77,0x43,".\\crypto\\engine\\eng_init.c",0x7e);
     return 0;
   }
-  _CRYPTO_lock(9,0x1e,".\\crypto\\engine\\eng_init.c",0x81);
+  FUN_009dfaa0(9,0x1e,".\\crypto\\engine\\eng_init.c",0x81);
   iVar1 = 1;
   if ((*(int *)(param_1 + 0x54) == 0) && (*(code **)(param_1 + 0x30) != (code *)0x0)) {
     iVar1 = (**(code **)(param_1 + 0x30))(param_1);
@@ -571,14 +554,14 @@ int _ENGINE_init(int param_1)
   *(int *)(param_1 + 0x50) = *(int *)(param_1 + 0x50) + 1;
   *(int *)(param_1 + 0x54) = *(int *)(param_1 + 0x54) + 1;
 LAB_009e0a4f:
-  _CRYPTO_lock(10,0x1e,".\\crypto\\engine\\eng_init.c",0x83);
+  FUN_009dfaa0(10,0x1e,".\\crypto\\engine\\eng_init.c",0x83);
   return iVar1;
 }
 
 
-// 009E0A70  _ENGINE_finish  (line unknown)
+// 009E0A70  FUN_009e0a70  (line unknown)
 
-int _ENGINE_finish(int param_1)
+int FUN_009e0a70(int param_1)
 
 {
   int *piVar1;
@@ -586,116 +569,112 @@ int _ENGINE_finish(int param_1)
   int iVar3;
   
   if (param_1 == 0) {
-    _ERR_put_error(0x26,0x6b,0x43,".\\crypto\\engine\\eng_init.c",0x8e);
+    FUN_009d90b0(0x26,0x6b,0x43,".\\crypto\\engine\\eng_init.c",0x8e);
     return 0;
   }
-  _CRYPTO_lock(9,0x1e,".\\crypto\\engine\\eng_init.c",0x91);
+  FUN_009dfaa0(9,0x1e,".\\crypto\\engine\\eng_init.c",0x91);
   piVar1 = (int *)(param_1 + 0x54);
   *piVar1 = *piVar1 + -1;
   iVar3 = 1;
   if ((*piVar1 == 0) && (*(int *)(param_1 + 0x34) != 0)) {
-    _CRYPTO_lock(10,0x1e,".\\crypto\\engine\\eng_init.c",0x61);
+    FUN_009dfaa0(10,0x1e,".\\crypto\\engine\\eng_init.c",0x61);
     iVar3 = (**(code **)(param_1 + 0x34))(param_1);
-    _CRYPTO_lock(9,0x1e,".\\crypto\\engine\\eng_init.c",100);
+    FUN_009dfaa0(9,0x1e,".\\crypto\\engine\\eng_init.c",100);
     if (iVar3 != 0) goto LAB_009e0aec;
   }
   else {
 LAB_009e0aec:
-    iVar2 = engine_free_util(param_1,0);
+    iVar2 = FUN_009f5330(param_1,0);
     if (iVar2 != 0) goto LAB_009e0b15;
-    _ERR_put_error(0x26,0xbf,0x6a,".\\crypto\\engine\\eng_init.c",0x72);
+    FUN_009d90b0(0x26,0xbf,0x6a,".\\crypto\\engine\\eng_init.c",0x72);
   }
   iVar3 = 0;
 LAB_009e0b15:
-  _CRYPTO_lock(10,0x1e,".\\crypto\\engine\\eng_init.c",0x93);
+  FUN_009dfaa0(10,0x1e,".\\crypto\\engine\\eng_init.c",0x93);
   if (iVar3 == 0) {
-    _ERR_put_error(0x26,0x6b,0x6a,".\\crypto\\engine\\eng_init.c",0x96);
+    FUN_009d90b0(0x26,0x6b,0x6a,".\\crypto\\engine\\eng_init.c",0x96);
     return 0;
   }
   return iVar3;
 }
 
 
-// 009E0B70  _X509_NAME_ENTRY_new  (line unknown)
+// 009E0B70  FUN_009e0b70  (line unknown)
 
-void _X509_NAME_ENTRY_new(void)
+void FUN_009e0b70(void)
 
 {
-  _ASN1_item_new(&DAT_00a756b4);
+  FUN_009f13a0(&DAT_00a756b4);
   return;
 }
 
 
-// 009E0B80  _X509_NAME_ENTRY_free  (line unknown)
+// 009E0B80  FUN_009e0b80  (line unknown)
 
-void _X509_NAME_ENTRY_free(undefined4 param_1)
+void FUN_009e0b80(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a756b4);
+  FUN_009f1750(param_1,&DAT_00a756b4);
   return;
 }
 
 
-// 009E0BA0  _X509_NAME_ENTRY_dup  (line unknown)
+// 009E0BA0  FUN_009e0ba0  (line unknown)
 
-void _X509_NAME_ENTRY_dup(undefined4 param_1)
+void FUN_009e0ba0(undefined4 param_1)
 
 {
-  _ASN1_item_dup(&DAT_00a756b4,param_1);
+  FUN_009e7ed0(&DAT_00a756b4,param_1);
   return;
 }
 
 
-// 009E0BE0  d2i_X509_NAME  (line unknown)
+// 009E0BE0  FUN_009e0be0  (line unknown)
 
-/* d2i_X509_NAME */
-
-void __cdecl d2i_X509_NAME(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009e0be0(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a75748);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a75748);
   return;
 }
 
 
-// 009E0C00  i2d_X509_NAME  (line unknown)
+// 009E0C00  FUN_009e0c00  (line unknown)
 
-/* i2d_X509_NAME */
-
-void __cdecl i2d_X509_NAME(undefined4 param_1,undefined4 param_2)
+void FUN_009e0c00(undefined4 param_1,undefined4 param_2)
 
 {
-  _ASN1_item_i2d(param_1,param_2,&DAT_00a75748);
+  FUN_009f0ed0(param_1,param_2,&DAT_00a75748);
   return;
 }
 
 
-// 009E0C20  _X509_NAME_new  (line unknown)
+// 009E0C20  FUN_009e0c20  (line unknown)
 
-void _X509_NAME_new(void)
+void FUN_009e0c20(void)
 
 {
-  _ASN1_item_new(&DAT_00a75748);
+  FUN_009f13a0(&DAT_00a75748);
   return;
 }
 
 
-// 009E0C30  _X509_NAME_free  (line unknown)
+// 009E0C30  FUN_009e0c30  (line unknown)
 
-void _X509_NAME_free(undefined4 param_1)
+void FUN_009e0c30(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a75748);
+  FUN_009f1750(param_1,&DAT_00a75748);
   return;
 }
 
 
-// 009E0C50  _X509_NAME_dup  (line unknown)
+// 009E0C50  FUN_009e0c50  (line unknown)
 
-void _X509_NAME_dup(undefined4 param_1)
+void FUN_009e0c50(undefined4 param_1)
 
 {
-  _ASN1_item_dup(&DAT_00a75748,param_1);
+  FUN_009e7ed0(&DAT_00a75748,param_1);
   return;
 }
 
@@ -708,12 +687,12 @@ undefined4 FUN_009e0c70(undefined4 *param_1)
   int *piVar1;
   int iVar2;
   
-  piVar1 = (int *)_CRYPTO_malloc(0x10,".\\crypto\\asn1\\x_name.c",0x74);
+  piVar1 = (int *)FUN_009d96f0(0x10,".\\crypto\\asn1\\x_name.c",0x74);
   if (piVar1 != (int *)0x0) {
-    iVar2 = sk_new_null();
+    iVar2 = FUN_009da960();
     *piVar1 = iVar2;
     if (iVar2 != 0) {
-      iVar2 = _BUF_MEM_new();
+      iVar2 = FUN_009e2e20();
       piVar1[2] = iVar2;
       if (iVar2 != 0) {
         piVar1[1] = 1;
@@ -722,12 +701,12 @@ undefined4 FUN_009e0c70(undefined4 *param_1)
       }
     }
   }
-  _ERR_put_error(0xd,0xab,0x41,".\\crypto\\asn1\\x_name.c",0x7e);
+  FUN_009d90b0(0xd,0xab,0x41,".\\crypto\\asn1\\x_name.c",0x7e);
   if (piVar1 != (int *)0x0) {
     if (*piVar1 != 0) {
-      sk_free(*piVar1);
+      FUN_009da7f0(*piVar1);
     }
-    _CRYPTO_free(piVar1);
+    FUN_009d98a0(piVar1);
   }
   return 0;
 }
@@ -735,83 +714,81 @@ undefined4 FUN_009e0c70(undefined4 *param_1)
 
 // 009E0D40  FUN_009e0d40  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 int FUN_009e0d40(int *param_1,undefined4 *param_2,undefined4 param_3,undefined4 param_4,
                 undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
 {
-  uchar *puVar1;
-  undefined4 *puVar2;
+  void *_Src;
+  undefined4 *puVar1;
+  int iVar2;
   int iVar3;
-  int iVar4;
-  undefined4 uVar5;
-  int iVar6;
+  undefined4 uVar4;
+  int iVar5;
   undefined4 local_10;
-  uchar *local_c;
+  void *local_c;
   undefined4 *local_8;
   int local_4;
   
   local_4 = 0x9e0d4a;
-  puVar1 = (uchar *)*param_2;
+  _Src = (void *)*param_2;
   local_10 = 0;
   local_8 = (undefined4 *)0x0;
-  local_c = puVar1;
-  iVar3 = _ASN1_item_ex_d2i(&local_10,&local_c,param_3,&DAT_00a75714,param_5,param_6,param_7,param_8
-                           );
-  if (0 < iVar3) {
-    puVar2 = (undefined4 *)*param_1;
-    local_4 = iVar3;
-    if (puVar2 != (undefined4 *)0x0) {
-      _BUF_MEM_free(puVar2[2]);
-      sk_pop_free(*puVar2,_X509_NAME_ENTRY_free);
-      _CRYPTO_free(puVar2);
+  local_c = _Src;
+  iVar2 = FUN_009ecba0(&local_10,&local_c,param_3,&DAT_00a75714,param_5,param_6,param_7,param_8);
+  if (0 < iVar2) {
+    puVar1 = (undefined4 *)*param_1;
+    local_4 = iVar2;
+    if (puVar1 != (undefined4 *)0x0) {
+      FUN_009e2e60(puVar1[2]);
+      FUN_009daa70(*puVar1,FUN_009e0b80);
+      FUN_009d98a0(puVar1);
       *param_1 = 0;
     }
-    iVar4 = FUN_009e0c70(&local_8,0);
-    puVar2 = local_8;
-    if ((iVar4 == 0) || (iVar4 = _BUF_MEM_grow(local_8[2],(int)local_c - (int)puVar1), iVar4 == 0))
-    {
+    iVar3 = FUN_009e0c70(&local_8,0);
+    puVar1 = local_8;
+    if ((iVar3 == 0) || (iVar3 = FUN_009e2ea0(local_8[2],(int)local_c - (int)_Src), iVar3 == 0)) {
 LAB_009e0ec7:
-      _ERR_put_error(0xd,0x9e,0x3a,".\\crypto\\asn1\\x_name.c",200);
+      FUN_009d90b0(0xd,0x9e,0x3a,".\\crypto\\asn1\\x_name.c",200);
       return 0;
     }
-    memcpy(*(uchar **)(puVar2[2] + 4),puVar1,(int)local_c - (int)puVar1);
-    iVar6 = 0;
-    iVar4 = sk_num(local_10);
-    if (0 < iVar4) {
+    FID_conflict__memcpy(*(void **)(puVar1[2] + 4),_Src,(int)local_c - (int)_Src);
+    iVar5 = 0;
+    iVar3 = FUN_009da820(local_10);
+    if (0 < iVar3) {
       do {
-        uVar5 = sk_value(local_10,iVar6);
-        iVar4 = 0;
-        iVar3 = sk_num(uVar5);
-        if (0 < iVar3) {
+        uVar4 = FUN_009da830(local_10,iVar5);
+        iVar3 = 0;
+        iVar2 = FUN_009da820(uVar4);
+        if (0 < iVar2) {
           do {
-            iVar3 = sk_value(uVar5,iVar4);
-            *(int *)(iVar3 + 8) = iVar6;
-            iVar3 = sk_push(*puVar2,iVar3);
-            if (iVar3 == 0) goto LAB_009e0ec7;
-            iVar4 = iVar4 + 1;
-            iVar3 = sk_num(uVar5);
-          } while (iVar4 < iVar3);
+            iVar2 = FUN_009da830(uVar4,iVar3);
+            *(int *)(iVar2 + 8) = iVar5;
+            iVar2 = FUN_009da780(*puVar1,iVar2);
+            if (iVar2 == 0) goto LAB_009e0ec7;
+            iVar3 = iVar3 + 1;
+            iVar2 = FUN_009da820(uVar4);
+          } while (iVar3 < iVar2);
         }
-        sk_free(uVar5);
-        iVar6 = iVar6 + 1;
-        iVar4 = sk_num(local_10);
-        iVar3 = local_4;
-      } while (iVar6 < iVar4);
+        FUN_009da7f0(uVar4);
+        iVar5 = iVar5 + 1;
+        iVar3 = FUN_009da820(local_10);
+        iVar2 = local_4;
+      } while (iVar5 < iVar3);
     }
-    sk_free(local_10);
-    puVar2[1] = 0;
-    *param_1 = (int)puVar2;
+    FUN_009da7f0(local_10);
+    puVar1[1] = 0;
+    *param_1 = (int)puVar1;
     *param_2 = local_c;
   }
-  return iVar3;
+  return iVar2;
 }
 
 
 // 009E0EF0  FUN_009e0ef0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009e0ef0(void)
 
@@ -829,46 +806,47 @@ undefined4 FUN_009e0ef0(void)
   local_c = 0;
   local_8 = 0;
   iVar4 = -1;
-  local_c = sk_new_null();
+  local_c = FUN_009da960();
   if (local_c != 0) {
-    iVar1 = sk_num(*unaff_ESI);
+    iVar1 = FUN_009da820(*unaff_ESI);
     if (0 < iVar1) {
       iVar1 = 0;
       do {
-        iVar2 = sk_value(*unaff_ESI,iVar1);
+        iVar2 = FUN_009da830(*unaff_ESI,iVar1);
         if (*(int *)(iVar2 + 8) != iVar4) {
-          local_8 = sk_new_null();
-          if ((local_8 == 0) || (iVar4 = sk_push(local_c,local_8), iVar4 == 0)) goto LAB_009e0fb5;
+          local_8 = FUN_009da960();
+          if ((local_8 == 0) || (iVar4 = FUN_009da780(local_c,local_8), iVar4 == 0))
+          goto LAB_009e0fb5;
           iVar4 = *(int *)(iVar2 + 8);
         }
-        iVar2 = sk_push(local_8,iVar2);
+        iVar2 = FUN_009da780(local_8,iVar2);
         if (iVar2 == 0) goto LAB_009e0fb5;
         iVar1 = iVar1 + 1;
-        iVar2 = sk_num(*unaff_ESI);
+        iVar2 = FUN_009da820(*unaff_ESI);
       } while (iVar1 < iVar2);
     }
-    uVar3 = _ASN1_item_ex_i2d(&local_c,0,&DAT_00a75714,0xffffffff,0xffffffff);
-    iVar4 = _BUF_MEM_grow(unaff_ESI[2],uVar3);
+    uVar3 = FUN_009f08f0(&local_c,0,&DAT_00a75714,0xffffffff,0xffffffff);
+    iVar4 = FUN_009e2ea0(unaff_ESI[2],uVar3);
     if (iVar4 != 0) {
       local_4 = *(undefined4 *)(unaff_ESI[2] + 4);
-      _ASN1_item_ex_i2d(&local_c,&local_4,&DAT_00a75714,0xffffffff,0xffffffff);
-      sk_pop_free(local_c,&LAB_009e0d30);
+      FUN_009f08f0(&local_c,&local_4,&DAT_00a75714,0xffffffff,0xffffffff);
+      FUN_009daa70(local_c,&LAB_009e0d30);
       unaff_ESI[1] = 0;
       return uVar3;
     }
   }
 LAB_009e0fb5:
-  sk_pop_free(local_c,&LAB_009e0d30);
-  _ERR_put_error(0xd,0xcb,0x41,".\\crypto\\asn1\\x_name.c",0xfb);
+  FUN_009daa70(local_c,&LAB_009e0d30);
+  FUN_009d90b0(0xd,0xcb,0x41,".\\crypto\\asn1\\x_name.c",0xfb);
   return 0xffffffff;
 }
 
 
-// 009E1070  _OBJ_nid2obj  (line unknown)
+// 009E1070  FUN_009e1070  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined ** _OBJ_nid2obj(uint param_1)
+undefined ** FUN_009e1070(uint param_1)
 
 {
   int iVar1;
@@ -893,22 +871,22 @@ undefined ** _OBJ_nid2obj(uint param_1)
     local_10 = param_1;
     local_1c = local_18;
     local_20 = 3;
-    iVar1 = lh_retrieve(DAT_00eabd70,&local_20);
+    iVar1 = FUN_009e0320(DAT_00eabd70,&local_20);
     if (iVar1 != 0) {
       return *(undefined ***)(iVar1 + 4);
     }
     uVar2 = 300;
   }
-  _ERR_put_error(8,0x67,0x65,".\\crypto\\objects\\obj_dat.c",uVar2);
+  FUN_009d90b0(8,0x67,0x65,".\\crypto\\objects\\obj_dat.c",uVar2);
   return (undefined **)0x0;
 }
 
 
-// 009E1100  _OBJ_nid2sn  (line unknown)
+// 009E1100  FUN_009e1100  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined * _OBJ_nid2sn(uint param_1)
+undefined * FUN_009e1100(uint param_1)
 
 {
   int iVar1;
@@ -933,22 +911,22 @@ undefined * _OBJ_nid2sn(uint param_1)
     local_10 = param_1;
     local_1c = local_18;
     local_20 = 3;
-    iVar1 = lh_retrieve(DAT_00eabd70,&local_20);
+    iVar1 = FUN_009e0320(DAT_00eabd70,&local_20);
     if (iVar1 != 0) {
       return (undefined *)**(undefined4 **)(iVar1 + 4);
     }
     uVar2 = 0x14c;
   }
-  _ERR_put_error(8,0x68,0x65,".\\crypto\\objects\\obj_dat.c",uVar2);
+  FUN_009d90b0(8,0x68,0x65,".\\crypto\\objects\\obj_dat.c",uVar2);
   return (undefined *)0x0;
 }
 
 
-// 009E11A0  _OBJ_nid2ln  (line unknown)
+// 009E11A0  FUN_009e11a0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined * _OBJ_nid2ln(uint param_1)
+undefined * FUN_009e11a0(uint param_1)
 
 {
   int iVar1;
@@ -973,13 +951,13 @@ undefined * _OBJ_nid2ln(uint param_1)
     local_10 = param_1;
     local_1c = local_18;
     local_20 = 3;
-    iVar1 = lh_retrieve(DAT_00eabd70,&local_20);
+    iVar1 = FUN_009e0320(DAT_00eabd70,&local_20);
     if (iVar1 != 0) {
       return *(undefined **)(*(int *)(iVar1 + 4) + 4);
     }
     uVar2 = 0x16c;
   }
-  _ERR_put_error(8,0x66,0x65,".\\crypto\\objects\\obj_dat.c",uVar2);
+  FUN_009d90b0(8,0x66,0x65,".\\crypto\\objects\\obj_dat.c",uVar2);
   return (undefined *)0x0;
 }
 
@@ -1035,10 +1013,9 @@ LAB_009e127f:
 }
 
 
-// 009E12F0  _OBJ_bsearch_ex  (line unknown)
+// 009E12F0  FUN_009e12f0  (line unknown)
 
-int _OBJ_bsearch_ex(undefined4 param_1,int param_2,int param_3,int param_4,code *param_5,
-                   byte param_6)
+int FUN_009e12f0(undefined4 param_1,int param_2,int param_3,int param_4,code *param_5,byte param_6)
 
 {
   int iVar1;
@@ -1089,22 +1066,22 @@ int _OBJ_bsearch_ex(undefined4 param_1,int param_2,int param_3,int param_4,code 
 }
 
 
-// 009E13A0  _OBJ_bsearch  (line unknown)
+// 009E13A0  FUN_009e13a0  (line unknown)
 
-void _OBJ_bsearch(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+void FUN_009e13a0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
                  undefined4 param_5)
 
 {
-  _OBJ_bsearch_ex(param_1,param_2,param_3,param_4,param_5,0);
+  FUN_009e12f0(param_1,param_2,param_3,param_4,param_5,0);
   return;
 }
 
 
-// 009E13D0  _OBJ_obj2nid  (line unknown)
+// 009E13D0  FUN_009e13d0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-int _OBJ_obj2nid(int param_1)
+int FUN_009e13d0(int param_1)
 
 {
   undefined **ppuVar1;
@@ -1125,7 +1102,7 @@ int _OBJ_obj2nid(int param_1)
     if (DAT_00eabd70 != 0) {
       local_4 = param_1;
       local_8 = 0;
-      iVar2 = lh_retrieve(DAT_00eabd70,&local_8);
+      iVar2 = FUN_009e0320(DAT_00eabd70,&local_8);
       if (iVar2 != 0) {
         return *(int *)(*(int *)(iVar2 + 4) + 8);
       }
@@ -1151,12 +1128,41 @@ int _OBJ_obj2nid(int param_1)
 }
 
 
-// 009E1480  _OBJ_obj2txt  (line unknown)
+// 009E1425  FUN_009e1425  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+undefined4 FUN_009e1425(void)
 
-int _OBJ_obj2txt(char *param_1,int param_2,int param_3,int param_4)
+{
+  undefined **ppuVar1;
+  int iVar2;
+  int iVar3;
+  int iVar4;
+  int unaff_EDI;
+  
+  iVar3 = 0x348;
+  do {
+    iVar4 = (iVar3 + unaff_EDI) / 2;
+    ppuVar1 = &PTR_PTR_00b92540 + iVar4;
+    iVar2 = FUN_009e1240(&stack0x00000010,ppuVar1);
+    if (-1 < iVar2) {
+      if (iVar2 < 1) break;
+      unaff_EDI = iVar4 + 1;
+      iVar4 = iVar3;
+    }
+    iVar3 = iVar4;
+  } while (unaff_EDI < iVar4);
+  if ((iVar2 == 0) && (ppuVar1 != (undefined **)0x0)) {
+    return *(undefined4 *)(*ppuVar1 + 8);
+  }
+  return 0;
+}
+
+
+// 009E1480  FUN_009e1480  (line unknown)
+
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
+
+void FUN_009e1480(char *param_1,int param_2,int param_3,int param_4)
 
 {
   byte bVar1;
@@ -1176,171 +1182,172 @@ int _OBJ_obj2txt(char *param_1,int param_2,int param_3,int param_4)
   char local_20 [28];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_38;
+  local_4 = DAT_00b86490 ^ (uint)&local_38;
   local_34 = param_2;
   local_30 = 0;
   if ((param_3 == 0) || (*(int *)(param_3 + 0x10) == 0)) {
     *param_1 = '\0';
-    return 0;
+    __security_check_cookie(local_4 ^ (uint)&local_38);
+    return;
   }
-  if (((param_4 == 0) && (iVar3 = _OBJ_obj2nid(param_3), iVar3 != 0)) &&
-     ((pcVar4 = (char *)_OBJ_nid2ln(iVar3), pcVar4 != (char *)0x0 ||
-      (pcVar4 = (char *)_OBJ_nid2sn(iVar3), pcVar4 != (char *)0x0)))) {
+  if (((param_4 == 0) && (iVar3 = FUN_009e13d0(param_3), iVar3 != 0)) &&
+     ((pcVar4 = (char *)FUN_009e11a0(iVar3), pcVar4 != (char *)0x0 ||
+      (pcVar4 = (char *)FUN_009e1100(iVar3), pcVar4 != (char *)0x0)))) {
     if (param_1 != (char *)0x0) {
-      _BUF_strlcpy(param_1,pcVar4,local_34);
+      FUN_009e5590(param_1,pcVar4,local_34);
     }
     pcVar6 = pcVar4 + 1;
     do {
       cVar7 = *pcVar4;
       pcVar4 = pcVar4 + 1;
     } while (cVar7 != '\0');
-    return (int)pcVar4 - (int)pcVar6;
+    __security_check_cookie(local_4 ^ (uint)&local_38,pcVar6);
+    return;
   }
   local_2c = *(int *)(param_3 + 0xc);
   local_24 = *(byte **)(param_3 + 0x10);
   local_28 = 1;
   local_38 = 0;
-  if (local_2c < 1) {
-    return local_30;
-  }
-  do {
+  if (0 < local_2c) {
+LAB_009e1558:
     uVar8 = 0;
     bVar2 = false;
     iVar3 = local_38;
-    while( true ) {
+LAB_009e1560:
+    do {
       bVar1 = *local_24;
       local_24 = local_24 + 1;
       local_2c = local_2c + -1;
       if ((local_2c == 0) && ((char)bVar1 < '\0')) goto LAB_009e178b;
       if (bVar2) {
-        iVar5 = _BN_add_word(iVar3,bVar1 & 0x7f);
+        iVar5 = FUN_009f2070(iVar3,bVar1 & 0x7f);
         iVar3 = local_38;
         if (iVar5 == 0) goto LAB_009e178b;
       }
       else {
         uVar8 = uVar8 | bVar1 & 0x7f;
       }
-      if (-1 < (char)bVar1) break;
+      if (-1 < (char)bVar1) goto LAB_009e160d;
+      if (!bVar2) {
+        if (uVar8 < 0x2000000) {
+          uVar8 = uVar8 << 7;
+          goto LAB_009e1560;
+        }
+        if ((iVar3 == 0) && (iVar3 = FUN_009dcbf0(), local_38 = iVar3, iVar3 == 0))
+        goto LAB_009e1798;
+        iVar5 = FUN_009dce60(iVar3,uVar8);
+        iVar3 = local_38;
+        if (iVar5 == 0) goto LAB_009e178b;
+        bVar2 = true;
+      }
+      iVar5 = FUN_009f59e0(iVar3,iVar3,7);
+      iVar3 = local_38;
+      if (iVar5 == 0) goto LAB_009e178b;
+    } while( true );
+  }
+LAB_009e1770:
+  __security_check_cookie(local_4 ^ (uint)&local_38);
+  return;
+LAB_009e160d:
+  if (local_28 != 0) {
+    local_28 = 0;
+    if (uVar8 < 0x50) {
+      cVar7 = (char)(uVar8 / 0x28);
+      uVar8 = uVar8 % 0x28;
+    }
+    else {
+      cVar7 = '\x02';
       if (bVar2) {
-LAB_009e15e8:
-        iVar5 = _BN_lshift(iVar3,iVar3,7);
+        iVar5 = FUN_009f2130(iVar3,0x50);
         iVar3 = local_38;
         if (iVar5 == 0) goto LAB_009e178b;
       }
       else {
-        if (0x1ffffff < uVar8) {
-          if ((iVar3 == 0) && (iVar3 = _BN_new(), local_38 = iVar3, iVar3 == 0)) {
-            return -1;
-          }
-          iVar5 = _BN_set_word(iVar3,uVar8);
-          iVar3 = local_38;
-          if (iVar5 != 0) {
-            bVar2 = true;
-            goto LAB_009e15e8;
-          }
-          goto LAB_009e178b;
-        }
-        uVar8 = uVar8 << 7;
+        uVar8 = uVar8 - 0x50;
       }
     }
-    if (local_28 != 0) {
-      local_28 = 0;
-      if (uVar8 < 0x50) {
-        cVar7 = (char)(uVar8 / 0x28);
-        uVar8 = uVar8 % 0x28;
+    if ((param_1 != (char *)0x0) && (0 < local_34)) {
+      *param_1 = cVar7 + '0';
+      param_1 = param_1 + 1;
+      local_34 = local_34 + -1;
+    }
+    local_30 = local_30 + 1;
+  }
+  if (bVar2) {
+    pcVar4 = (char *)FUN_009f53b0(iVar3);
+    iVar3 = local_38;
+    if (pcVar4 == (char *)0x0) {
+LAB_009e178b:
+      if (iVar3 != 0) {
+        FUN_009dcb90(iVar3);
+      }
+LAB_009e1798:
+      __security_check_cookie(local_4 ^ (uint)&local_38);
+      return;
+    }
+    pcVar6 = pcVar4;
+    do {
+      cVar7 = *pcVar6;
+      pcVar6 = pcVar6 + 1;
+    } while (cVar7 != '\0');
+    iVar3 = (int)pcVar6 - (int)(pcVar4 + 1);
+    if (param_1 != (char *)0x0) {
+      iVar5 = local_34;
+      if (0 < local_34) {
+        *param_1 = '.';
+        param_1 = param_1 + 1;
+        iVar5 = local_34 + -1;
+      }
+      FUN_009e5590(param_1,pcVar4,iVar5);
+      if (iVar5 < iVar3) {
+        param_1 = param_1 + iVar5;
+        local_34 = 0;
       }
       else {
-        cVar7 = '\x02';
-        if (bVar2) {
-          iVar5 = _BN_sub_word(iVar3,0x50);
-          iVar3 = local_38;
-          if (iVar5 == 0) goto LAB_009e178b;
-        }
-        else {
-          uVar8 = uVar8 - 0x50;
-        }
+        param_1 = param_1 + iVar3;
+        local_34 = iVar5 - iVar3;
       }
-      if ((param_1 != (char *)0x0) && (0 < local_34)) {
-        *param_1 = cVar7 + '0';
-        param_1 = param_1 + 1;
-        local_34 = local_34 + -1;
-      }
-      local_30 = local_30 + 1;
     }
-    if (bVar2) {
-      pcVar4 = (char *)_BN_bn2dec(iVar3);
-      iVar3 = local_38;
-      if (pcVar4 == (char *)0x0) {
-LAB_009e178b:
-        if (iVar3 != 0) {
-          _BN_free(iVar3);
-        }
-        return -1;
+    local_30 = local_30 + 1 + iVar3;
+    FUN_009d98a0(pcVar4);
+  }
+  else {
+    FUN_009e9f60(local_20,0x1a,&DAT_00a7a84c,uVar8);
+    iVar3 = local_34;
+    pcVar4 = local_20;
+    do {
+      cVar7 = *pcVar4;
+      pcVar4 = pcVar4 + 1;
+    } while (cVar7 != '\0');
+    iVar5 = (int)pcVar4 - (int)(local_20 + 1);
+    if ((param_1 != (char *)0x0) && (0 < local_34)) {
+      FUN_009e5590(param_1,local_20,local_34);
+      if (iVar3 < iVar5) {
+        param_1 = param_1 + iVar3;
+        local_34 = 0;
       }
-      pcVar6 = pcVar4;
-      do {
-        cVar7 = *pcVar6;
-        pcVar6 = pcVar6 + 1;
-      } while (cVar7 != '\0');
-      iVar3 = (int)pcVar6 - (int)(pcVar4 + 1);
-      if (param_1 != (char *)0x0) {
-        iVar5 = local_34;
-        if (0 < local_34) {
-          *param_1 = '.';
-          param_1 = param_1 + 1;
-          iVar5 = local_34 + -1;
-        }
-        _BUF_strlcpy(param_1,pcVar4,iVar5);
-        if (iVar5 < iVar3) {
-          param_1 = param_1 + iVar5;
-          local_34 = 0;
-        }
-        else {
-          param_1 = param_1 + iVar3;
-          local_34 = iVar5 - iVar3;
-        }
+      else {
+        param_1 = param_1 + iVar5;
+        local_34 = iVar3 - iVar5;
       }
-      local_30 = local_30 + 1 + iVar3;
-      _CRYPTO_free(pcVar4);
     }
-    else {
-      _BIO_snprintf(local_20,0x1a,".%lu",uVar8);
-      iVar3 = local_34;
-      pcVar4 = local_20;
-      do {
-        cVar7 = *pcVar4;
-        pcVar4 = pcVar4 + 1;
-      } while (cVar7 != '\0');
-      iVar5 = (int)pcVar4 - (int)(local_20 + 1);
-      if ((param_1 != (char *)0x0) && (0 < local_34)) {
-        _BUF_strlcpy(param_1,local_20,local_34);
-        if (iVar3 < iVar5) {
-          param_1 = param_1 + iVar3;
-          local_34 = 0;
-        }
-        else {
-          param_1 = param_1 + iVar5;
-          local_34 = iVar3 - iVar5;
-        }
-      }
-      local_30 = local_30 + iVar5;
-    }
-    if (local_2c < 1) {
-      if (local_38 == 0) {
-        return local_30;
-      }
-      _BN_free(local_38);
-      return local_30;
-    }
-  } while( true );
+    local_30 = local_30 + iVar5;
+  }
+  if (local_2c < 1) goto code_r0x009e175f;
+  goto LAB_009e1558;
+code_r0x009e175f:
+  if (local_38 != 0) {
+    FUN_009dcb90(local_38);
+  }
+  goto LAB_009e1770;
 }
 
 
-// 009E17D0  _OBJ_ln2nid  (line unknown)
+// 009E17D0  FUN_009e17d0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _OBJ_ln2nid(byte *param_1)
+undefined4 FUN_009e17d0(byte *param_1)
 
 {
   undefined **ppuVar1;
@@ -1363,7 +1370,7 @@ undefined4 _OBJ_ln2nid(byte *param_1)
   if (DAT_00eabd70 != 0) {
     local_1c = local_18;
     local_20 = 2;
-    iVar3 = lh_retrieve(DAT_00eabd70,&local_20);
+    iVar3 = FUN_009e0320(DAT_00eabd70,&local_20);
     if (iVar3 != 0) {
       return *(undefined4 *)(*(int *)(iVar3 + 4) + 8);
     }
@@ -1459,11 +1466,11 @@ LAB_009e1865:
 }
 
 
-// 009E18A0  _OBJ_sn2nid  (line unknown)
+// 009E18A0  FUN_009e18a0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _OBJ_sn2nid(byte *param_1)
+undefined4 FUN_009e18a0(byte *param_1)
 
 {
   undefined **ppuVar1;
@@ -1485,7 +1492,7 @@ undefined4 _OBJ_sn2nid(byte *param_1)
   if (DAT_00eabd70 != 0) {
     local_1c = local_18;
     local_20 = 1;
-    iVar3 = lh_retrieve(DAT_00eabd70,&local_20);
+    iVar3 = FUN_009e0320(DAT_00eabd70,&local_20);
     if (iVar3 != 0) {
       return *(undefined4 *)(*(int *)(iVar3 + 4) + 8);
     }
@@ -1581,11 +1588,11 @@ LAB_009e1935:
 }
 
 
-// 009E1970  _OBJ_txt2obj  (line unknown)
+// 009E1970  FUN_009e1970  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _OBJ_txt2obj(undefined4 param_1,int param_2)
+undefined4 FUN_009e1970(undefined4 param_1,int param_2)
 
 {
   int iVar1;
@@ -1595,72 +1602,72 @@ undefined4 _OBJ_txt2obj(undefined4 param_1,int param_2)
   
   local_4 = 0x9e197a;
   if (param_2 == 0) {
-    iVar1 = _OBJ_sn2nid(param_1);
+    iVar1 = FUN_009e18a0(param_1);
     if (iVar1 == 0) {
-      iVar1 = _OBJ_ln2nid(param_1);
+      iVar1 = FUN_009e17d0(param_1);
       if (iVar1 == 0) goto LAB_009e19ac;
     }
-    uVar2 = _OBJ_nid2obj(iVar1);
+    uVar2 = FUN_009e1070(iVar1);
     return uVar2;
   }
 LAB_009e19ac:
-  iVar1 = a2d_ASN1_OBJECT(0,0,param_1,0xffffffff);
+  iVar1 = FUN_009dba40(0,0,param_1,0xffffffff);
   if (iVar1 < 1) {
     return 0;
   }
-  uVar2 = _ASN1_object_size(0,iVar1,6);
-  iVar3 = _CRYPTO_malloc(uVar2,".\\crypto\\objects\\obj_dat.c",0x1a9);
+  uVar2 = FUN_009d9a10(0,iVar1,6);
+  iVar3 = FUN_009d96f0(uVar2,".\\crypto\\objects\\obj_dat.c",0x1a9);
   if (iVar3 == 0) {
     return 0;
   }
   param_2 = iVar3;
-  _ASN1_put_object(&param_2,0,iVar1,6,0);
-  a2d_ASN1_OBJECT(param_2,iVar1,param_1,0xffffffff);
+  FUN_009d9df0(&param_2,0,iVar1,6,0);
+  FUN_009dba40(param_2,iVar1,param_1,0xffffffff);
   local_4 = iVar3;
-  uVar2 = d2i_ASN1_OBJECT(0,&local_4,uVar2);
-  _CRYPTO_free(iVar3);
+  uVar2 = FUN_009dc1a0(0,&local_4,uVar2);
+  FUN_009d98a0(iVar3);
   return uVar2;
 }
 
 
-// 009E1A40  _DH_new_method  (line unknown)
+// 009E1A40  FUN_009e1a40  (line unknown)
 
-undefined4 * _DH_new_method(int param_1)
+undefined4 * FUN_009e1a40(int param_1)
 
 {
   undefined4 *puVar1;
   int iVar2;
   undefined4 uVar3;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x4c,".\\crypto\\dh\\dh_lib.c",0x6f);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x4c,".\\crypto\\dh\\dh_lib.c",0x6f);
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(5,0x69,0x41,".\\crypto\\dh\\dh_lib.c",0x72);
+    FUN_009d90b0(5,0x69,0x41,".\\crypto\\dh\\dh_lib.c",0x72);
     return (undefined4 *)0x0;
   }
   if (DAT_00eabd74 == 0) {
-    DAT_00eabd74 = _DH_OpenSSL();
+    DAT_00eabd74 = FUN_009e7ac0();
   }
   puVar1[0x11] = DAT_00eabd74;
   if (param_1 == 0) {
-    uVar3 = _ENGINE_get_default_DH();
+    uVar3 = FUN_009f5c60();
     puVar1[0x12] = uVar3;
   }
   else {
-    iVar2 = _ENGINE_init(param_1);
+    iVar2 = FUN_009e09f0(param_1);
     if (iVar2 == 0) {
-      _ERR_put_error(5,0x69,0x26,".\\crypto\\dh\\dh_lib.c",0x7c);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(5,0x69,0x26,".\\crypto\\dh\\dh_lib.c",0x7c);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
     puVar1[0x12] = param_1;
   }
   if (puVar1[0x12] != 0) {
-    iVar2 = _BN_BLINDING_get_thread_id(puVar1[0x12]);
+    iVar2 = FUN_009f5c70(puVar1[0x12]);
     puVar1[0x11] = iVar2;
     if (iVar2 == 0) {
-      _ERR_put_error(5,0x69,0x26,".\\crypto\\dh\\dh_lib.c",0x89);
-      _ENGINE_finish(puVar1[0x12]);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(5,0x69,0x26,".\\crypto\\dh\\dh_lib.c",0x89);
+      FUN_009e0a70(puVar1[0x12]);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
   }
@@ -1679,15 +1686,15 @@ undefined4 * _DH_new_method(int param_1)
   puVar1[8] = 0;
   puVar1[0xe] = 1;
   puVar1[7] = *(undefined4 *)(puVar1[0x11] + 0x18);
-  _CRYPTO_new_ex_data(8,puVar1,puVar1 + 0xf);
+  FUN_009d7f10(8,puVar1,puVar1 + 0xf);
   if (*(code **)(puVar1[0x11] + 0x10) != (code *)0x0) {
     iVar2 = (**(code **)(puVar1[0x11] + 0x10))(puVar1);
     if (iVar2 == 0) {
       if (puVar1[0x12] != 0) {
-        _ENGINE_finish(puVar1[0x12]);
+        FUN_009e0a70(puVar1[0x12]);
       }
-      _CRYPTO_free_ex_data(8,puVar1,puVar1 + 0xf);
-      _CRYPTO_free(puVar1);
+      FUN_009d7f70(8,puVar1,puVar1 + 0xf);
+      FUN_009d98a0(puVar1);
       puVar1 = (undefined4 *)0x0;
     }
   }
@@ -1695,81 +1702,81 @@ undefined4 * _DH_new_method(int param_1)
 }
 
 
-// 009E1BA0  _DH_free  (line unknown)
+// 009E1BA0  FUN_009e1ba0  (line unknown)
 
-void _DH_free(int param_1)
+void FUN_009e1ba0(int param_1)
 
 {
   code *pcVar1;
   int iVar2;
   
   if (param_1 != 0) {
-    iVar2 = _CRYPTO_add_lock(param_1 + 0x38,0xffffffff,0x1a,".\\crypto\\dh\\dh_lib.c",0xb2);
+    iVar2 = FUN_009dfad0(param_1 + 0x38,0xffffffff,0x1a,".\\crypto\\dh\\dh_lib.c",0xb2);
     if (iVar2 < 1) {
       pcVar1 = *(code **)(*(int *)(param_1 + 0x44) + 0x14);
       if (pcVar1 != (code *)0x0) {
         (*pcVar1)(param_1);
       }
       if (*(int *)(param_1 + 0x48) != 0) {
-        _ENGINE_finish(*(int *)(param_1 + 0x48));
+        FUN_009e0a70(*(int *)(param_1 + 0x48));
       }
-      _CRYPTO_free_ex_data(8,param_1,param_1 + 0x3c);
+      FUN_009d7f70(8,param_1,param_1 + 0x3c);
       if (*(int *)(param_1 + 8) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 8));
+        FUN_009dcb30(*(int *)(param_1 + 8));
       }
       if (*(int *)(param_1 + 0xc) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0xc));
+        FUN_009dcb30(*(int *)(param_1 + 0xc));
       }
       if (*(int *)(param_1 + 0x24) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x24));
+        FUN_009dcb30(*(int *)(param_1 + 0x24));
       }
       if (*(int *)(param_1 + 0x28) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x28));
+        FUN_009dcb30(*(int *)(param_1 + 0x28));
       }
       if (*(int *)(param_1 + 0x2c) != 0) {
-        _CRYPTO_free(*(int *)(param_1 + 0x2c));
+        FUN_009d98a0(*(int *)(param_1 + 0x2c));
       }
       if (*(int *)(param_1 + 0x34) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x34));
+        FUN_009dcb30(*(int *)(param_1 + 0x34));
       }
       if (*(int *)(param_1 + 0x14) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x14));
+        FUN_009dcb30(*(int *)(param_1 + 0x14));
       }
       if (*(int *)(param_1 + 0x18) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x18));
+        FUN_009dcb30(*(int *)(param_1 + 0x18));
       }
-      _CRYPTO_free(param_1);
+      FUN_009d98a0(param_1);
     }
   }
   return;
 }
 
 
-// 009E1C90  _DH_size  (line unknown)
+// 009E1C90  FUN_009e1c90  (line unknown)
 
-int _DH_size(int param_1)
+int FUN_009e1c90(int param_1)
 
 {
   int iVar1;
   
-  iVar1 = _BN_num_bits(*(undefined4 *)(param_1 + 8));
+  iVar1 = FUN_009dcb00(*(undefined4 *)(param_1 + 8));
   return (int)(iVar1 + 7 + (iVar1 + 7 >> 0x1f & 7U)) >> 3;
 }
 
 
-// 009E1CB0  _DH_new  (line unknown)
+// 009E1CB0  FUN_009e1cb0  (line unknown)
 
-void _DH_new(void)
+void FUN_009e1cb0(void)
 
 {
-  _DH_new_method(0);
+  FUN_009e1a40(0);
   return;
 }
 
 
-// 009E1CC0  _RSA_public_encrypt  (line unknown)
+// 009E1CC0  FUN_009e1cc0  (line unknown)
 
-void _RSA_public_encrypt(void)
+void FUN_009e1cc0(void)
 
 {
   int in_stack_00000010;
@@ -1781,9 +1788,9 @@ void _RSA_public_encrypt(void)
 }
 
 
-// 009E1CD0  _RSA_private_encrypt  (line unknown)
+// 009E1CD0  FUN_009e1cd0  (line unknown)
 
-void _RSA_private_encrypt(void)
+void FUN_009e1cd0(void)
 
 {
   int in_stack_00000010;
@@ -1795,9 +1802,9 @@ void _RSA_private_encrypt(void)
 }
 
 
-// 009E1CE0  _RSA_public_decrypt  (line unknown)
+// 009E1CE0  FUN_009e1ce0  (line unknown)
 
-void _RSA_public_decrypt(void)
+void FUN_009e1ce0(void)
 
 {
   int in_stack_00000010;
@@ -1809,21 +1816,21 @@ void _RSA_public_decrypt(void)
 }
 
 
-// 009E1CF0  _RSA_size  (line unknown)
+// 009E1CF0  FUN_009e1cf0  (line unknown)
 
-int _RSA_size(int param_1)
+int FUN_009e1cf0(int param_1)
 
 {
   int iVar1;
   
-  iVar1 = _BN_num_bits(*(undefined4 *)(param_1 + 0x10));
+  iVar1 = FUN_009dcb00(*(undefined4 *)(param_1 + 0x10));
   return (int)(iVar1 + 7 + (iVar1 + 7 >> 0x1f & 7U)) >> 3;
 }
 
 
 // 009E1D10  FUN_009e1d10  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009e1d10(int param_1,int param_2,int param_3)
 
@@ -1835,38 +1842,38 @@ undefined4 FUN_009e1d10(int param_1,int param_2,int param_3)
   int iVar5;
   
   if (((param_1 != 0) && (param_2 != 0)) && (param_3 != 0)) {
-    _BN_CTX_start();
-    uVar1 = _BN_CTX_get();
-    uVar2 = _BN_CTX_get();
-    iVar3 = _BN_CTX_get();
+    FUN_009e64c0();
+    uVar1 = FUN_009e6550();
+    uVar2 = FUN_009e6550();
+    iVar3 = FUN_009e6550();
     if (iVar3 != 0) {
-      uVar4 = _BN_value_one();
-      iVar5 = _BN_sub(uVar2,param_2,uVar4);
+      uVar4 = FUN_009dcaa0();
+      iVar5 = FUN_009f7800(uVar2,param_2,uVar4);
       if (iVar5 != 0) {
-        uVar4 = _BN_value_one();
-        iVar5 = _BN_sub(iVar3,param_3,uVar4);
+        uVar4 = FUN_009dcaa0();
+        iVar5 = FUN_009f7800(iVar3,param_3,uVar4);
         if (iVar5 != 0) {
-          iVar3 = _BN_mul(uVar1,uVar2,iVar3);
+          iVar3 = FUN_009f72e0(uVar1,uVar2,iVar3);
           if (iVar3 != 0) {
-            uVar1 = _BN_mod_inverse(0,param_1,uVar1);
-            _BN_CTX_end();
+            uVar1 = FUN_009f6340(0,param_1,uVar1);
+            FUN_009e6510();
             return uVar1;
           }
         }
       }
     }
-    _BN_CTX_end();
+    FUN_009e6510();
     return 0;
   }
   return 0;
 }
 
 
-// 009E1DF0  _RSA_setup_blinding  (line unknown)
+// 009E1DF0  FUN_009e1df0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-int _RSA_setup_blinding(int param_1,int param_2)
+int FUN_009e1df0(int param_1,int param_2)
 
 {
   int *piVar1;
@@ -1885,15 +1892,15 @@ int _RSA_setup_blinding(int param_1,int param_2)
   iVar6 = 0;
   iVar2 = param_2;
   if (param_2 == 0) {
-    iVar2 = _BN_CTX_new();
+    iVar2 = FUN_009e6430();
     if (iVar2 == 0) {
       return 0;
     }
   }
-  _BN_CTX_start();
-  iVar3 = _BN_CTX_get(iVar2);
+  FUN_009e64c0();
+  iVar3 = FUN_009e6550(iVar2);
   if (iVar3 == 0) {
-    _ERR_put_error(4,0x88,0x41,".\\crypto\\rsa\\rsa_lib.c",0xb9);
+    FUN_009d90b0(4,0x88,0x41,".\\crypto\\rsa\\rsa_lib.c",0xb9);
   }
   else {
     iVar3 = *(int *)(param_1 + 0x14);
@@ -1901,14 +1908,14 @@ int _RSA_setup_blinding(int param_1,int param_2)
       iVar3 = FUN_009e1d10(*(undefined4 *)(param_1 + 0x18),*(undefined4 *)(param_1 + 0x1c),
                            *(undefined4 *)(param_1 + 0x20));
       if (iVar3 == 0) {
-        _ERR_put_error(4,0x88,0x8c,".\\crypto\\rsa\\rsa_lib.c",0xc2);
+        FUN_009d90b0(4,0x88,0x8c,".\\crypto\\rsa\\rsa_lib.c",0xc2);
         goto LAB_009e1f5e;
       }
     }
-    iVar6 = _RAND_status();
+    iVar6 = FUN_009d3140();
     if (((iVar6 == 0) && (piVar1 = *(int **)(param_1 + 0x18), piVar1 != (int *)0x0)) &&
        (*piVar1 != 0)) {
-      _RAND_add(*piVar1,piVar1[2] * 4,0);
+      FUN_009d3010(*piVar1,piVar1[2] * 4,0);
     }
     if ((*(uint *)(param_1 + 0x3c) & 0x100) == 0) {
       puVar5 = *(undefined4 **)(param_1 + 0x10);
@@ -1922,39 +1929,38 @@ int _RSA_setup_blinding(int param_1,int param_2)
     else {
       puVar5 = *(undefined4 **)(param_1 + 0x10);
     }
-    iVar6 = _BN_BLINDING_create_param
-                      (0,iVar3,puVar5,iVar2,*(undefined4 *)(*(int *)(param_1 + 8) + 0x18),
-                       *(undefined4 *)(param_1 + 0x40));
+    iVar6 = FUN_009f5d70(0,iVar3,puVar5,iVar2,*(undefined4 *)(*(int *)(param_1 + 8) + 0x18),
+                         *(undefined4 *)(param_1 + 0x40));
     if (iVar6 == 0) {
-      _ERR_put_error(4,0x88,3,".\\crypto\\rsa\\rsa_lib.c",0xde);
+      FUN_009d90b0(4,0x88,3,".\\crypto\\rsa\\rsa_lib.c",0xde);
     }
     else {
-      uVar4 = _CRYPTO_thread_id();
-      _BN_BLINDING_set_thread_id(iVar6,uVar4);
+      uVar4 = FUN_009dfa80();
+      FUN_009f5d60(iVar6,uVar4);
     }
   }
 LAB_009e1f5e:
-  _BN_CTX_end();
+  FUN_009e6510();
   if (param_2 == 0) {
-    _BN_CTX_free();
+    FUN_009e6490();
   }
   if (*(int *)(param_1 + 0x14) == 0) {
-    _BN_free();
+    FUN_009dcb90();
   }
   return iVar6;
 }
 
 
-// 009E1F90  _COMP_CTX_new  (line unknown)
+// 009E1F90  FUN_009e1f90  (line unknown)
 
-int * _COMP_CTX_new(int param_1)
+int * FUN_009e1f90(int param_1)
 
 {
   int *piVar1;
   int iVar2;
   int *piVar3;
   
-  piVar1 = (int *)_CRYPTO_malloc(0x1c,".\\crypto\\comp\\comp_lib.c",0xb);
+  piVar1 = (int *)FUN_009d96f0(0x1c,".\\crypto\\comp\\comp_lib.c",0xb);
   piVar3 = (int *)0x0;
   if (piVar1 != (int *)0x0) {
     piVar1[1] = 0;
@@ -1967,7 +1973,7 @@ int * _COMP_CTX_new(int param_1)
     piVar3 = piVar1;
     if ((*(code **)(param_1 + 8) != (code *)0x0) &&
        (iVar2 = (**(code **)(param_1 + 8))(piVar1), iVar2 == 0)) {
-      _CRYPTO_free(piVar1);
+      FUN_009d98a0(piVar1);
       piVar3 = (int *)0x0;
     }
   }
@@ -1975,25 +1981,24 @@ int * _COMP_CTX_new(int param_1)
 }
 
 
-// 009E1FF0  _COMP_CTX_free  (line unknown)
+// 009E1FF0  FUN_009e1ff0  (line unknown)
 
-void _COMP_CTX_free(int *param_1)
+void FUN_009e1ff0(int *param_1)
 
 {
   if (param_1 != (int *)0x0) {
     if (*(code **)(*param_1 + 0xc) != (code *)0x0) {
       (**(code **)(*param_1 + 0xc))(param_1);
     }
-    _CRYPTO_free(param_1);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E2020  _COMP_compress_block  (line unknown)
+// 009E2020  FUN_009e2020  (line unknown)
 
-int _COMP_compress_block
-              (int *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,int param_5)
+int FUN_009e2020(int *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,int param_5)
 
 {
   int iVar1;
@@ -2010,10 +2015,9 @@ int _COMP_compress_block
 }
 
 
-// 009E2060  _COMP_expand_block  (line unknown)
+// 009E2060  FUN_009e2060  (line unknown)
 
-int _COMP_expand_block(int *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-                      int param_5)
+int FUN_009e2060(int *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,int param_5)
 
 {
   int iVar1;
@@ -2030,12 +2034,12 @@ int _COMP_expand_block(int *param_1,undefined4 param_2,undefined4 param_3,undefi
 }
 
 
-// 009E20A0  _EVP_CIPHER_CTX_init  (line unknown)
+// 009E20A0  FUN_009e20a0  (line unknown)
 
-void _EVP_CIPHER_CTX_init(uchar *param_1)
+void FUN_009e20a0(void *param_1)
 
 {
-  memset(param_1,'\0',0x8c);
+  _memset(param_1,0,0x8c);
   return;
 }
 
@@ -2052,10 +2056,10 @@ undefined4 FUN_009e20c0(void)
   undefined4 uVar2;
   
   if (in_ECX == 0) {
-    in_ECX = _ENGINE_get_cipher_engine(*(undefined4 *)*unaff_EDI);
+    in_ECX = FUN_009f7960(*(undefined4 *)*unaff_EDI);
   }
   else {
-    iVar1 = _ENGINE_init();
+    iVar1 = FUN_009e09f0();
     if (iVar1 == 0) {
       uVar2 = 0x9b;
       goto LAB_009e20d9;
@@ -2065,7 +2069,7 @@ undefined4 FUN_009e20c0(void)
     *(undefined4 *)(unaff_EBX + 4) = 0;
     return 1;
   }
-  iVar1 = _ENGINE_get_cipher(in_ECX,*(undefined4 *)*unaff_EDI);
+  iVar1 = FUN_009f7980(in_ECX,*(undefined4 *)*unaff_EDI);
   if (iVar1 != 0) {
     *unaff_EDI = iVar1;
     *(int *)(unaff_EBX + 4) = in_ECX;
@@ -2073,14 +2077,14 @@ undefined4 FUN_009e20c0(void)
   }
   uVar2 = 0xac;
 LAB_009e20d9:
-  _ERR_put_error(6,0x8c,0x86,".\\crypto\\evp\\enc_min.c",uVar2);
+  FUN_009d90b0(6,0x8c,0x86,".\\crypto\\evp\\enc_min.c",uVar2);
   return 0;
 }
 
 
-// 009E2140  _EVP_CIPHER_CTX_cleanup  (line unknown)
+// 009E2140  FUN_009e2140  (line unknown)
 
-undefined4 _EVP_CIPHER_CTX_cleanup(int *param_1)
+undefined4 FUN_009e2140(int *param_1)
 
 {
   code *pcVar1;
@@ -2095,23 +2099,23 @@ undefined4 _EVP_CIPHER_CTX_cleanup(int *param_1)
       }
     }
     if (param_1[0x18] != 0) {
-      _OPENSSL_cleanse(param_1[0x18],*(undefined4 *)(*param_1 + 0x20));
+      FUN_009e5400(param_1[0x18],*(undefined4 *)(*param_1 + 0x20));
     }
   }
   if (param_1[0x18] != 0) {
-    _CRYPTO_free(param_1[0x18]);
+    FUN_009d98a0(param_1[0x18]);
   }
   if (param_1[1] != 0) {
-    _ENGINE_finish(param_1[1]);
+    FUN_009e0a70(param_1[1]);
   }
-  memset((uchar *)param_1,'\0',0x8c);
+  _memset(param_1,0,0x8c);
   return 1;
 }
 
 
-// 009E21B0  _EVP_Cipher  (line unknown)
+// 009E21B0  FUN_009e21b0  (line unknown)
 
-void _EVP_Cipher(int *param_1)
+void FUN_009e21b0(int *param_1)
 
 {
                     /* WARNING: Could not recover jumptable at 0x009e21bd. Too many branches */
@@ -2121,46 +2125,45 @@ void _EVP_Cipher(int *param_1)
 }
 
 
-// 009E21C0  _EVP_CIPHER_CTX_ctrl  (line unknown)
+// 009E21C0  FUN_009e21c0  (line unknown)
 
-int _EVP_CIPHER_CTX_ctrl(int *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+int FUN_009e21c0(int *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
 
 {
   code *pcVar1;
   int iVar2;
   
   if (*param_1 == 0) {
-    _ERR_put_error(6,0x7c,0x83,".\\crypto\\evp\\enc_min.c",0x169);
+    FUN_009d90b0(6,0x7c,0x83,".\\crypto\\evp\\enc_min.c",0x169);
     return 0;
   }
   pcVar1 = *(code **)(*param_1 + 0x2c);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(6,0x7c,0x84,".\\crypto\\evp\\enc_min.c",0x16e);
+    FUN_009d90b0(6,0x7c,0x84,".\\crypto\\evp\\enc_min.c",0x16e);
     return 0;
   }
   iVar2 = (*pcVar1)(param_1,param_2,param_3,param_4);
   if (iVar2 == -1) {
-    _ERR_put_error(6,0x7c,0x85,".\\crypto\\evp\\enc_min.c",0x174);
+    FUN_009d90b0(6,0x7c,0x85,".\\crypto\\evp\\enc_min.c",0x174);
     iVar2 = 0;
   }
   return iVar2;
 }
 
 
-// 009E2250  _EVP_CIPHER_CTX_flags  (line unknown)
+// 009E2250  FUN_009e2250  (line unknown)
 
-undefined4 _EVP_CIPHER_CTX_flags(int *param_1)
+undefined4 FUN_009e2250(int *param_1)
 
 {
   return *(undefined4 *)(*param_1 + 0x10);
 }
 
 
-// 009E2260  _EVP_CipherInit_ex  (line unknown)
+// 009E2260  FUN_009e2260  (line unknown)
 
 undefined4
-_EVP_CipherInit_ex(int *param_1,int *param_2,undefined4 param_3,int param_4,uchar *param_5,
-                  int param_6)
+FUN_009e2260(int *param_1,int *param_2,undefined4 param_3,int param_4,void *param_5,int param_6)
 
 {
   uint uVar1;
@@ -2179,12 +2182,12 @@ _EVP_CipherInit_ex(int *param_1,int *param_2,undefined4 param_3,int param_4,ucha
      ((param_2 != (int *)0x0 && (*param_2 != *(int *)*param_1)))) {
     if (param_2 == (int *)0x0) {
       if (*param_1 == 0) {
-        _ERR_put_error(6,0x7b,0x83,".\\crypto\\evp\\enc_min.c",0x104);
+        FUN_009d90b0(6,0x7b,0x83,".\\crypto\\evp\\enc_min.c",0x104);
         return 0;
       }
     }
     else {
-      _EVP_CIPHER_CTX_cleanup(param_1);
+      FUN_009e2140(param_1);
       param_1[2] = param_6;
       iVar2 = FUN_009e20c0();
       if (iVar2 == 0) {
@@ -2195,27 +2198,27 @@ _EVP_CipherInit_ex(int *param_1,int *param_2,undefined4 param_3,int param_4,ucha
         param_1[0x18] = 0;
       }
       else {
-        iVar2 = _CRYPTO_malloc(param_2[8],".\\crypto\\evp\\enc_min.c",0xec);
+        iVar2 = FUN_009d96f0(param_2[8],".\\crypto\\evp\\enc_min.c",0xec);
         param_1[0x18] = iVar2;
         if (iVar2 == 0) {
-          _ERR_put_error(6,0x7b,0x41,".\\crypto\\evp\\enc_min.c",0xef);
+          FUN_009d90b0(6,0x7b,0x41,".\\crypto\\evp\\enc_min.c",0xef);
           return 0;
         }
       }
       param_1[0x16] = param_2[2];
       param_1[0x17] = 0;
       if (((*(byte *)(*param_1 + 0x10) & 0x40) != 0) &&
-         (iVar2 = _EVP_CIPHER_CTX_ctrl(param_1,0,0,0), iVar2 == 0)) {
-        _ERR_put_error(6,0x7b,0x86,".\\crypto\\evp\\enc_min.c",0xfd);
+         (iVar2 = FUN_009e21c0(param_1,0,0,0), iVar2 == 0)) {
+        FUN_009d90b0(6,0x7b,0x86,".\\crypto\\evp\\enc_min.c",0xfd);
         return 0;
       }
     }
   }
   iVar2 = *(int *)(*param_1 + 4);
   if (((iVar2 != 1) && (iVar2 != 8)) && (iVar2 != 0x10)) {
-    _OpenSSLDie(".\\crypto\\evp\\enc_min.c",0x10d,
-                "ctx->cipher->block_size == 1 || ctx->cipher->block_size == 8 || ctx->cipher->block_size == 16"
-               );
+    FUN_009dfd90(".\\crypto\\evp\\enc_min.c",0x10d,
+                 "ctx->cipher->block_size == 1 || ctx->cipher->block_size == 8 || ctx->cipher->block_size == 16"
+                );
   }
   uVar1 = *(uint *)(*param_1 + 0x10);
   if ((uVar1 & 0x10) == 0) {
@@ -2228,13 +2231,13 @@ _EVP_CipherInit_ex(int *param_1,int *param_2,undefined4 param_3,int param_4,ucha
       param_1[0x14] = 0;
     case 2:
       if (0x10 < *(int *)(*param_1 + 0xc)) {
-        _OpenSSLDie(".\\crypto\\evp\\enc_min.c",0x11f,
-                    "EVP_CIPHER_CTX_iv_length(ctx) <= (int)sizeof(ctx->iv)");
+        FUN_009dfd90(".\\crypto\\evp\\enc_min.c",0x11f,
+                     "EVP_CIPHER_CTX_iv_length(ctx) <= (int)sizeof(ctx->iv)");
       }
-      if (param_5 != (uchar *)0x0) {
-        memcpy((uchar *)(param_1 + 4),param_5,*(ulong *)(*param_1 + 0xc));
+      if (param_5 != (void *)0x0) {
+        FID_conflict__memcpy(param_1 + 4,param_5,*(size_t *)(*param_1 + 0xc));
       }
-      memcpy((uchar *)(param_1 + 8),(uchar *)(param_1 + 4),*(ulong *)(*param_1 + 0xc));
+      FID_conflict__memcpy(param_1 + 8,param_1 + 4,*(size_t *)(*param_1 + 0xc));
       break;
     default:
       goto switchD_009e23cf_default;
@@ -2252,9 +2255,9 @@ switchD_009e23cf_default:
 }
 
 
-// 009E2480  _BIO_f_buffer  (line unknown)
+// 009E2480  FUN_009e2480  (line unknown)
 
-undefined * _BIO_f_buffer(void)
+undefined * FUN_009e2480(void)
 
 {
   return &DAT_00b93264;
@@ -2275,13 +2278,13 @@ undefined4 FUN_009e2540(int param_1)
   iVar1 = *(int *)(param_1 + 0x20);
   iVar2 = *(int *)(iVar1 + 8);
   if (iVar2 != 0) {
-    _CRYPTO_free(iVar2);
+    FUN_009d98a0(iVar2);
   }
   iVar1 = *(int *)(iVar1 + 0x14);
   if (iVar1 != 0) {
-    _CRYPTO_free(iVar1);
+    FUN_009d98a0(iVar1);
   }
-  _CRYPTO_free(*(undefined4 *)(param_1 + 0x20));
+  FUN_009d98a0(*(undefined4 *)(param_1 + 0x20));
   *(undefined4 *)(param_1 + 0x20) = 0;
   *(undefined4 *)(param_1 + 0xc) = 0;
   *(undefined4 *)(param_1 + 0x14) = 0;
@@ -2291,16 +2294,16 @@ undefined4 FUN_009e2540(int param_1)
 
 // 009E25A0  FUN_009e25a0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-ulong FUN_009e25a0(int param_1,uchar *param_2,ulong param_3)
+size_t FUN_009e25a0(int param_1,void *param_2,size_t param_3)
 
 {
   int *piVar1;
-  ulong uVar2;
-  ulong local_4;
+  size_t sVar2;
+  size_t local_4;
   
-  if (param_2 == (uchar *)0x0) {
+  if (param_2 == (void *)0x0) {
     return 0;
   }
   piVar1 = *(int **)(param_1 + 0x20);
@@ -2308,103 +2311,104 @@ ulong FUN_009e25a0(int param_1,uchar *param_2,ulong param_3)
     return 0;
   }
   local_4 = 0;
-  _BIO_clear_flags(param_1,0xf);
+  FUN_009d4c00(param_1,0xf);
   while( true ) {
-    uVar2 = piVar1[3];
-    if (uVar2 != 0) {
-      if ((int)param_3 < (int)uVar2) {
-        uVar2 = param_3;
+    sVar2 = piVar1[3];
+    if (sVar2 != 0) {
+      if ((int)param_3 < (int)sVar2) {
+        sVar2 = param_3;
       }
-      memcpy(param_2,(uchar *)(piVar1[2] + piVar1[4]),uVar2);
-      piVar1[4] = piVar1[4] + uVar2;
-      piVar1[3] = piVar1[3] - uVar2;
-      local_4 = local_4 + uVar2;
-      if (param_3 == uVar2) {
+      FID_conflict__memcpy(param_2,(void *)(piVar1[2] + piVar1[4]),sVar2);
+      piVar1[4] = piVar1[4] + sVar2;
+      piVar1[3] = piVar1[3] - sVar2;
+      local_4 = local_4 + sVar2;
+      if (param_3 == sVar2) {
         return local_4;
       }
-      param_3 = param_3 - uVar2;
-      param_2 = param_2 + uVar2;
+      param_3 = param_3 - sVar2;
+      param_2 = (void *)((int)param_2 + sVar2);
     }
     if (*piVar1 < (int)param_3) break;
-    uVar2 = _BIO_read(*(undefined4 *)(param_1 + 0x24),piVar1[2],*piVar1);
-    if ((int)uVar2 < 1) {
-      _BIO_copy_next_retry(param_1);
-      if ((int)uVar2 < 0) {
+    sVar2 = FUN_009d4c30(*(undefined4 *)(param_1 + 0x24),piVar1[2],*piVar1);
+    if ((int)sVar2 < 1) {
+      FUN_009d5160(param_1);
+      if ((int)sVar2 < 0) {
         if (0 < (int)local_4) {
           return local_4;
         }
-        return uVar2;
+        return sVar2;
       }
-      if (uVar2 == 0) {
+      if (sVar2 == 0) {
         return local_4;
       }
     }
     piVar1[4] = 0;
-    piVar1[3] = uVar2;
+    piVar1[3] = sVar2;
   }
   do {
-    uVar2 = _BIO_read(*(undefined4 *)(param_1 + 0x24),param_2,param_3);
-    if ((int)uVar2 < 1) {
-      _BIO_copy_next_retry(param_1);
-      if ((int)uVar2 < 0) {
+    sVar2 = FUN_009d4c30(*(undefined4 *)(param_1 + 0x24),param_2,param_3);
+    if ((int)sVar2 < 1) {
+      FUN_009d5160(param_1);
+      if ((int)sVar2 < 0) {
         if ((int)local_4 < 1) {
-          local_4 = uVar2;
+          local_4 = sVar2;
         }
         return local_4;
       }
-      if (uVar2 == 0) {
+      if (sVar2 == 0) {
         return local_4;
       }
     }
-    local_4 = local_4 + uVar2;
-    if (param_3 == uVar2) {
+    local_4 = local_4 + sVar2;
+    if (param_3 == sVar2) {
       return local_4;
     }
-    param_2 = param_2 + uVar2;
-    param_3 = param_3 - uVar2;
+    param_2 = (void *)((int)param_2 + sVar2);
+    param_3 = param_3 - sVar2;
   } while( true );
 }
 
 
 // 009E26D0  FUN_009e26d0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-int FUN_009e26d0(int param_1,uchar *param_2,ulong param_3)
+int FUN_009e26d0(int param_1,void *param_2,size_t param_3)
 
 {
   int *piVar1;
   int iVar2;
   int iVar3;
-  ulong uVar4;
+  size_t _Size;
   int local_4;
   
   local_4 = 0;
-  if ((param_2 == (uchar *)0x0) || ((int)param_3 < 1)) {
+  if ((param_2 == (void *)0x0) || ((int)param_3 < 1)) {
     return 0;
   }
   iVar2 = *(int *)(param_1 + 0x20);
   if ((iVar2 == 0) || (*(int *)(param_1 + 0x24) == 0)) {
     return 0;
   }
-  _BIO_clear_flags(param_1,0xf);
-  uVar4 = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
-  if ((int)uVar4 < (int)param_3) {
+  FUN_009d4c00(param_1,0xf);
+  _Size = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
+  if ((int)_Size < (int)param_3) {
     do {
       if (*(int *)(iVar2 + 0x18) != 0) {
-        if (0 < (int)uVar4) {
-          memcpy((uchar *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,uVar4);
-          param_2 = param_2 + uVar4;
-          local_4 = local_4 + uVar4;
-          param_3 = param_3 - uVar4;
-          *(int *)(iVar2 + 0x18) = *(int *)(iVar2 + 0x18) + uVar4;
+        if (0 < (int)_Size) {
+          FID_conflict__memcpy
+                    ((void *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,_Size);
+          param_2 = (void *)((int)param_2 + _Size);
+          local_4 = local_4 + _Size;
+          param_3 = param_3 - _Size;
+          *(int *)(iVar2 + 0x18) = *(int *)(iVar2 + 0x18) + _Size;
         }
         do {
-          iVar3 = _BIO_write(*(undefined4 *)(param_1 + 0x24),
-                             *(int *)(iVar2 + 0x1c) + *(int *)(iVar2 + 0x14),
-                             *(undefined4 *)(iVar2 + 0x18));
+          iVar3 = FUN_009d4cf0(*(undefined4 *)(param_1 + 0x24),
+                               *(int *)(iVar2 + 0x1c) + *(int *)(iVar2 + 0x14),
+                               *(undefined4 *)(iVar2 + 0x18));
           if (iVar3 < 1) {
-            _BIO_copy_next_retry(param_1);
+            FUN_009d5160(param_1);
             if (iVar3 < 0) goto LAB_009e2816;
             if (iVar3 == 0) {
               return local_4;
@@ -2418,9 +2422,9 @@ int FUN_009e26d0(int param_1,uchar *param_2,ulong param_3)
       *(undefined4 *)(iVar2 + 0x1c) = 0;
       if (*(int *)(iVar2 + 4) <= (int)param_3) {
         do {
-          iVar3 = _BIO_write(*(undefined4 *)(param_1 + 0x24),param_2,param_3);
+          iVar3 = FUN_009d4cf0(*(undefined4 *)(param_1 + 0x24),param_2,param_3);
           if (iVar3 < 1) {
-            _BIO_copy_next_retry(param_1);
+            FUN_009d5160(param_1);
             if (iVar3 < 0) {
 LAB_009e2816:
               if (0 < local_4) {
@@ -2433,17 +2437,17 @@ LAB_009e2816:
             }
           }
           local_4 = local_4 + iVar3;
-          param_2 = param_2 + iVar3;
+          param_2 = (void *)((int)param_2 + iVar3);
           param_3 = param_3 - iVar3;
           if (param_3 == 0) {
             return local_4;
           }
         } while (*(int *)(iVar2 + 4) <= (int)param_3);
       }
-      uVar4 = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
-    } while ((int)uVar4 < (int)param_3);
+      _Size = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
+    } while ((int)_Size < (int)param_3);
   }
-  memcpy((uchar *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,param_3);
+  FID_conflict__memcpy((void *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,param_3);
   *(int *)(iVar2 + 0x18) = *(int *)(iVar2 + 0x18) + param_3;
   return local_4 + param_3;
 }
@@ -2451,7 +2455,7 @@ LAB_009e2816:
 
 // 009E2C90  FUN_009e2c90  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 int FUN_009e2c90(int param_1,undefined1 *param_2,int param_3)
 
@@ -2465,13 +2469,13 @@ int FUN_009e2c90(int param_1,undefined1 *param_2,int param_3)
   puVar1 = *(undefined4 **)(param_1 + 0x20);
   local_4 = 0;
   param_3 = param_3 + -1;
-  _BIO_clear_flags(param_1,0xf);
+  FUN_009d4c00(param_1,0xf);
   do {
     while( true ) {
       if (0 < (int)puVar1[3]) break;
-      iVar3 = _BIO_read(*(undefined4 *)(param_1 + 0x24),puVar1[2],*puVar1);
+      iVar3 = FUN_009d4c30(*(undefined4 *)(param_1 + 0x24),puVar1[2],*puVar1);
       if (iVar3 < 1) {
-        _BIO_copy_next_retry(param_1);
+        FUN_009d5160(param_1);
         *param_2 = 0;
         if (iVar3 < 0) {
           if (0 < local_4) {
@@ -2514,21 +2518,21 @@ int FUN_009e2c90(int param_1,undefined1 *param_2,int param_3)
 }
 
 
-// 009E2DA0  _X509_STORE_load_locations  (line unknown)
+// 009E2DA0  FUN_009e2da0  (line unknown)
 
-undefined4 _X509_STORE_load_locations(undefined4 param_1,int param_2,int param_3)
+undefined4 FUN_009e2da0(undefined4 param_1,int param_2,int param_3)
 
 {
   undefined4 uVar1;
   int iVar2;
   
   if (param_2 != 0) {
-    uVar1 = _X509_LOOKUP_file();
-    iVar2 = _X509_STORE_add_lookup(param_1,uVar1);
+    uVar1 = FUN_009db530();
+    iVar2 = FUN_009dad50(param_1,uVar1);
     if (iVar2 == 0) {
       return 0;
     }
-    iVar2 = _X509_LOOKUP_ctrl(iVar2,1,param_2,1,0);
+    iVar2 = FUN_009dab40(iVar2,1,param_2,1,0);
     if (iVar2 != 1) {
       return 0;
     }
@@ -2539,9 +2543,9 @@ undefined4 _X509_STORE_load_locations(undefined4 param_1,int param_2,int param_3
     }
   }
   else {
-    uVar1 = _X509_LOOKUP_hash_dir();
-    iVar2 = _X509_STORE_add_lookup(param_1,uVar1);
-    if ((iVar2 != 0) && (iVar2 = _X509_LOOKUP_ctrl(iVar2,2,param_3,1,0), iVar2 == 1)) {
+    uVar1 = FUN_009f79d0();
+    iVar2 = FUN_009dad50(param_1,uVar1);
+    if ((iVar2 != 0) && (iVar2 = FUN_009dab40(iVar2,2,param_3,1,0), iVar2 == 1)) {
       return 1;
     }
   }
@@ -2549,16 +2553,16 @@ undefined4 _X509_STORE_load_locations(undefined4 param_1,int param_2,int param_3
 }
 
 
-// 009E2E20  _BUF_MEM_new  (line unknown)
+// 009E2E20  FUN_009e2e20  (line unknown)
 
-undefined4 * _BUF_MEM_new(void)
+undefined4 * FUN_009e2e20(void)
 
 {
   undefined4 *puVar1;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0xc,".\\crypto\\buffer\\buffer.c",0x43);
+  puVar1 = (undefined4 *)FUN_009d96f0(0xc,".\\crypto\\buffer\\buffer.c",0x43);
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(7,0x65,0x41,".\\crypto\\buffer\\buffer.c",0x46);
+    FUN_009d90b0(7,0x65,0x41,".\\crypto\\buffer\\buffer.c",0x46);
     return (undefined4 *)0x0;
   }
   *puVar1 = 0;
@@ -2568,25 +2572,25 @@ undefined4 * _BUF_MEM_new(void)
 }
 
 
-// 009E2E60  _BUF_MEM_free  (line unknown)
+// 009E2E60  FUN_009e2e60  (line unknown)
 
-void _BUF_MEM_free(int param_1)
+void FUN_009e2e60(int param_1)
 
 {
   if (param_1 != 0) {
-    if (*(uchar **)(param_1 + 4) != (uchar *)0x0) {
-      memset(*(uchar **)(param_1 + 4),'\0',*(ulong *)(param_1 + 8));
-      _CRYPTO_free(*(undefined4 *)(param_1 + 4));
+    if (*(void **)(param_1 + 4) != (void *)0x0) {
+      _memset(*(void **)(param_1 + 4),0,*(size_t *)(param_1 + 8));
+      FUN_009d98a0(*(undefined4 *)(param_1 + 4));
     }
-    _CRYPTO_free(param_1);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E2EA0  _BUF_MEM_grow  (line unknown)
+// 009E2EA0  FUN_009e2ea0  (line unknown)
 
-int _BUF_MEM_grow(int *param_1,int param_2)
+int FUN_009e2ea0(int *param_1,int param_2)
 
 {
   int iVar1;
@@ -2597,31 +2601,31 @@ int _BUF_MEM_grow(int *param_1,int param_2)
     if (param_1[2] < param_2) {
       iVar1 = ((param_2 + 3) / 3) * 4;
       if (param_1[1] == 0) {
-        iVar2 = _CRYPTO_malloc(iVar1,".\\crypto\\buffer\\buffer.c",0x6e);
+        iVar2 = FUN_009d96f0(iVar1,".\\crypto\\buffer\\buffer.c",0x6e);
       }
       else {
-        iVar2 = _CRYPTO_realloc(param_1[1],iVar1,".\\crypto\\buffer\\buffer.c",0x70);
+        iVar2 = FUN_009d9770(param_1[1],iVar1,".\\crypto\\buffer\\buffer.c",0x70);
       }
       if (iVar2 == 0) {
-        _ERR_put_error(7,100,0x41,".\\crypto\\buffer\\buffer.c",0x73);
+        FUN_009d90b0(7,100,0x41,".\\crypto\\buffer\\buffer.c",0x73);
         return 0;
       }
       param_1[1] = iVar2;
       param_1[2] = iVar1;
-      memset((uchar *)(*param_1 + iVar2),'\0',param_2 - *param_1);
+      _memset((void *)(*param_1 + iVar2),0,param_2 - *param_1);
       *param_1 = param_2;
       return param_2;
     }
-    memset((uchar *)(param_1[1] + iVar1),'\0',param_2 - iVar1);
+    _memset((void *)(param_1[1] + iVar1),0,param_2 - iVar1);
   }
   *param_1 = param_2;
   return param_2;
 }
 
 
-// 009E2F60  _BUF_MEM_grow_clean  (line unknown)
+// 009E2F60  FUN_009e2f60  (line unknown)
 
-int _BUF_MEM_grow_clean(int *param_1,int param_2)
+int FUN_009e2f60(int *param_1,int param_2)
 
 {
   int iVar1;
@@ -2629,96 +2633,92 @@ int _BUF_MEM_grow_clean(int *param_1,int param_2)
   
   iVar1 = *param_1;
   if (param_2 <= iVar1) {
-    memset((uchar *)(param_1[1] + param_2),'\0',iVar1 - param_2);
+    _memset((void *)(param_1[1] + param_2),0,iVar1 - param_2);
     *param_1 = param_2;
     return param_2;
   }
   if (param_2 <= param_1[2]) {
-    memset((uchar *)(param_1[1] + iVar1),'\0',param_2 - iVar1);
+    _memset((void *)(param_1[1] + iVar1),0,param_2 - iVar1);
     *param_1 = param_2;
     return param_2;
   }
   iVar1 = ((param_2 + 3) / 3) * 4;
   if (param_1[1] == 0) {
-    iVar2 = _CRYPTO_malloc(iVar1,".\\crypto\\buffer\\buffer.c",0x93);
+    iVar2 = FUN_009d96f0(iVar1,".\\crypto\\buffer\\buffer.c",0x93);
   }
   else {
-    iVar2 = _CRYPTO_realloc_clean(param_1[1],param_1[2],iVar1,".\\crypto\\buffer\\buffer.c",0x95);
+    iVar2 = FUN_009d97f0(param_1[1],param_1[2],iVar1,".\\crypto\\buffer\\buffer.c",0x95);
   }
   if (iVar2 == 0) {
-    _ERR_put_error(7,0x69,0x41,".\\crypto\\buffer\\buffer.c",0x98);
+    FUN_009d90b0(7,0x69,0x41,".\\crypto\\buffer\\buffer.c",0x98);
     return 0;
   }
   param_1[1] = iVar2;
   param_1[2] = iVar1;
-  memset((uchar *)(*param_1 + iVar2),'\0',param_2 - *param_1);
+  _memset((void *)(*param_1 + iVar2),0,param_2 - *param_1);
   *param_1 = param_2;
   return param_2;
 }
 
 
-// 009E30A0  i2d_OCSP_RESPID  (line unknown)
+// 009E30A0  FUN_009e30a0  (line unknown)
 
-/* i2d_OCSP_RESPID */
-
-void __cdecl i2d_OCSP_RESPID(undefined4 param_1,undefined4 param_2)
+void FUN_009e30a0(undefined4 param_1,undefined4 param_2)
 
 {
-  _ASN1_item_i2d(param_1,param_2,&DAT_00a7af20);
+  FUN_009f0ed0(param_1,param_2,&DAT_00a7af20);
   return;
 }
 
 
-// 009E3170  i2d_X509_EXTENSIONS  (line unknown)
+// 009E3170  FUN_009e3170  (line unknown)
 
-/* i2d_X509_EXTENSIONS */
-
-void __cdecl i2d_X509_EXTENSIONS(undefined4 param_1,undefined4 param_2)
+void FUN_009e3170(undefined4 param_1,undefined4 param_2)
 
 {
-  _ASN1_item_i2d(param_1,param_2,&DAT_00a7b278);
+  FUN_009f0ed0(param_1,param_2,&DAT_00a7b278);
   return;
 }
 
 
-// 009E3190  _RSA_new_method  (line unknown)
+// 009E3190  FUN_009e3190  (line unknown)
 
-undefined4 * _RSA_new_method(int param_1)
+undefined4 * FUN_009e3190(int param_1)
 
 {
   undefined4 *puVar1;
   int iVar2;
   undefined4 uVar3;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x58,".\\crypto\\rsa\\rsa_eng.c",0x92);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x58,".\\crypto\\rsa\\rsa_eng.c",0x92);
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(4,0x6a,0x41,".\\crypto\\rsa\\rsa_eng.c",0x95);
+    FUN_009d90b0(4,0x6a,0x41,".\\crypto\\rsa\\rsa_eng.c",0x95);
     return (undefined4 *)0x0;
   }
   if (DAT_00eabd78 == 0) {
-    DAT_00eabd78 = _RSA_PKCS1_SSLeay();
+    DAT_00eabd78 = FUN_009f8370();
   }
   puVar1[2] = DAT_00eabd78;
   if (param_1 == 0) {
-    uVar3 = _ENGINE_get_default_RSA();
+    uVar3 = FUN_009f97b0();
     puVar1[3] = uVar3;
   }
   else {
-    iVar2 = _ENGINE_init(param_1);
+    iVar2 = FUN_009e09f0(param_1);
     if (iVar2 == 0) {
-      _ERR_put_error(4,0x6a,0x26,".\\crypto\\rsa\\rsa_eng.c",0x9f);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(4,0x6a,0x26,".\\crypto\\rsa\\rsa_eng.c",0x9f);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
     puVar1[3] = param_1;
   }
   if (puVar1[3] != 0) {
-    iVar2 = _EVP_CIPHER_key_length(puVar1[3]);
+    iVar2 = FUN_009d9cc0(puVar1[3]);
     puVar1[2] = iVar2;
     if (iVar2 == 0) {
-      _ERR_put_error(4,0x6a,0x26,".\\crypto\\rsa\\rsa_eng.c",0xad);
-      _ENGINE_finish(puVar1[3]);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(4,0x6a,0x26,".\\crypto\\rsa\\rsa_eng.c",0xad);
+      FUN_009e0a70(puVar1[3]);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
   }
@@ -2740,22 +2740,22 @@ undefined4 * _RSA_new_method(int param_1)
   puVar1[0x15] = 0;
   puVar1[0x13] = 0;
   puVar1[0xf] = *(uint *)(puVar1[2] + 0x24) & 0xfffffbff;
-  iVar2 = _CRYPTO_new_ex_data(6,puVar1,puVar1 + 0xc);
+  iVar2 = FUN_009d7f10(6,puVar1,puVar1 + 0xc);
   if (iVar2 == 0) {
     if (puVar1[3] != 0) {
-      _ENGINE_finish(puVar1[3]);
+      FUN_009e0a70(puVar1[3]);
     }
-    _CRYPTO_free(puVar1);
+    FUN_009d98a0(puVar1);
     return (undefined4 *)0x0;
   }
   if (*(code **)(puVar1[2] + 0x1c) != (code *)0x0) {
     iVar2 = (**(code **)(puVar1[2] + 0x1c))(puVar1);
     if (iVar2 == 0) {
       if (puVar1[3] != 0) {
-        _ENGINE_finish(puVar1[3]);
+        FUN_009e0a70(puVar1[3]);
       }
-      _CRYPTO_free_ex_data(6,puVar1,puVar1 + 0xc);
-      _CRYPTO_free(puVar1);
+      FUN_009d7f70(6,puVar1,puVar1 + 0xc);
+      FUN_009d98a0(puVar1);
       puVar1 = (undefined4 *)0x0;
     }
   }
@@ -2763,80 +2763,80 @@ undefined4 * _RSA_new_method(int param_1)
 }
 
 
-// 009E3330  _RSA_free  (line unknown)
+// 009E3330  FUN_009e3330  (line unknown)
 
-void _RSA_free(int param_1)
+void FUN_009e3330(int param_1)
 
 {
   code *pcVar1;
   int iVar2;
   
   if (param_1 != 0) {
-    iVar2 = _CRYPTO_add_lock(param_1 + 0x38,0xffffffff,9,".\\crypto\\rsa\\rsa_eng.c",0xf0);
+    iVar2 = FUN_009dfad0(param_1 + 0x38,0xffffffff,9,".\\crypto\\rsa\\rsa_eng.c",0xf0);
     if (iVar2 < 1) {
       pcVar1 = *(code **)(*(int *)(param_1 + 8) + 0x20);
       if (pcVar1 != (code *)0x0) {
         (*pcVar1)(param_1);
       }
       if (*(int *)(param_1 + 0xc) != 0) {
-        _ENGINE_finish(*(int *)(param_1 + 0xc));
+        FUN_009e0a70(*(int *)(param_1 + 0xc));
       }
-      _CRYPTO_free_ex_data(6,param_1,param_1 + 0x30);
+      FUN_009d7f70(6,param_1,param_1 + 0x30);
       if (*(int *)(param_1 + 0x10) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x10));
+        FUN_009dcb30(*(int *)(param_1 + 0x10));
       }
       if (*(int *)(param_1 + 0x14) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x14));
+        FUN_009dcb30(*(int *)(param_1 + 0x14));
       }
       if (*(int *)(param_1 + 0x18) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x18));
+        FUN_009dcb30(*(int *)(param_1 + 0x18));
       }
       if (*(int *)(param_1 + 0x1c) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x1c));
+        FUN_009dcb30(*(int *)(param_1 + 0x1c));
       }
       if (*(int *)(param_1 + 0x20) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x20));
+        FUN_009dcb30(*(int *)(param_1 + 0x20));
       }
       if (*(int *)(param_1 + 0x24) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x24));
+        FUN_009dcb30(*(int *)(param_1 + 0x24));
       }
       if (*(int *)(param_1 + 0x28) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x28));
+        FUN_009dcb30(*(int *)(param_1 + 0x28));
       }
       if (*(int *)(param_1 + 0x2c) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x2c));
+        FUN_009dcb30(*(int *)(param_1 + 0x2c));
       }
       if (*(int *)(param_1 + 0x50) != 0) {
-        _BN_BLINDING_free(*(int *)(param_1 + 0x50));
+        FUN_009f5c80(*(int *)(param_1 + 0x50));
       }
       if (*(int *)(param_1 + 0x54) != 0) {
-        _BN_BLINDING_free(*(int *)(param_1 + 0x54));
+        FUN_009f5c80(*(int *)(param_1 + 0x54));
       }
       if (*(int *)(param_1 + 0x4c) != 0) {
-        _CRYPTO_free_locked(*(int *)(param_1 + 0x4c));
+        FUN_009d96b0(*(int *)(param_1 + 0x4c));
       }
-      _CRYPTO_free(param_1);
+      FUN_009d98a0(param_1);
     }
   }
   return;
 }
 
 
-// 009E3450  _RSA_up_ref  (line unknown)
+// 009E3450  FUN_009e3450  (line unknown)
 
-bool _RSA_up_ref(int param_1)
+bool FUN_009e3450(int param_1)
 
 {
   int iVar1;
   
-  iVar1 = _CRYPTO_add_lock(param_1 + 0x38,1,9,".\\crypto\\rsa\\rsa_eng.c",0x116);
+  iVar1 = FUN_009dfad0(param_1 + 0x38,1,9,".\\crypto\\rsa\\rsa_eng.c",0x116);
   return 1 < iVar1;
 }
 
 
-// 009E3480  _RSA_flags  (line unknown)
+// 009E3480  FUN_009e3480  (line unknown)
 
-undefined4 _RSA_flags(int param_1)
+undefined4 FUN_009e3480(int param_1)
 
 {
   if (param_1 == 0) {
@@ -2846,103 +2846,96 @@ undefined4 _RSA_flags(int param_1)
 }
 
 
-// 009E3490  _RSA_new  (line unknown)
+// 009E3490  FUN_009e3490  (line unknown)
 
-void _RSA_new(void)
+void FUN_009e3490(void)
 
 {
-  _RSA_new_method(0);
+  FUN_009e3190(0);
   return;
 }
 
 
-// 009E34A0  _X509_verify  (line unknown)
+// 009E34A0  FUN_009e34a0  (line unknown)
 
-void _X509_verify(undefined4 *param_1,undefined4 param_2)
-
-{
-  undefined4 uVar1;
-  
-  uVar1 = _X509_CINF_it(param_1[1],param_1[2],*param_1,param_2);
-  _ASN1_item_verify(uVar1);
-  return;
-}
-
-
-// 009E34D0  _X509_CRL_verify  (line unknown)
-
-void _X509_CRL_verify(undefined4 *param_1,undefined4 param_2)
+void FUN_009e34a0(undefined4 *param_1,undefined4 param_2)
 
 {
   undefined4 uVar1;
   
-  uVar1 = _X509_CRL_INFO_it(param_1[1],param_1[2],*param_1,param_2);
-  _ASN1_item_verify(uVar1);
+  uVar1 = FUN_009de440(param_1[1],param_1[2],*param_1,param_2);
+  FUN_009f97c0(uVar1);
   return;
 }
 
 
-// 009E3500  d2i_X509_bio  (line unknown)
+// 009E34D0  FUN_009e34d0  (line unknown)
 
-/* d2i_X509_bio */
-
-void __cdecl d2i_X509_bio(undefined4 param_1,undefined4 param_2)
+void FUN_009e34d0(undefined4 *param_1,undefined4 param_2)
 
 {
   undefined4 uVar1;
   
-  uVar1 = _X509_it(param_1,param_2);
-  _ASN1_item_d2i_bio(uVar1);
+  uVar1 = FUN_009eefd0(param_1[1],param_1[2],*param_1,param_2);
+  FUN_009f97c0(uVar1);
   return;
 }
 
 
-// 009E3520  d2i_X509_CRL_bio  (line unknown)
+// 009E3500  FUN_009e3500  (line unknown)
 
-/* d2i_X509_CRL_bio */
-
-void __cdecl d2i_X509_CRL_bio(undefined4 param_1,undefined4 param_2)
+void FUN_009e3500(undefined4 param_1,undefined4 param_2)
 
 {
   undefined4 uVar1;
   
-  uVar1 = _X509_CRL_it(param_1,param_2);
-  _ASN1_item_d2i_bio(uVar1);
+  uVar1 = FUN_009de520(param_1,param_2);
+  FUN_009f9bf0(uVar1);
   return;
 }
 
 
-// 009E3540  _X509_digest  (line unknown)
+// 009E3520  FUN_009e3520  (line unknown)
 
-void _X509_digest(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+void FUN_009e3520(undefined4 param_1,undefined4 param_2)
 
 {
   undefined4 uVar1;
   
-  uVar1 = _X509_it(param_2,param_1,param_3,param_4);
-  _ASN1_item_digest(uVar1);
+  uVar1 = FUN_009eefe0(param_1,param_2);
+  FUN_009f9bf0(uVar1);
   return;
 }
 
 
-// 009E3570  d2i_PrivateKey_bio  (line unknown)
+// 009E3540  FUN_009e3540  (line unknown)
 
-/* d2i_PrivateKey_bio */
-
-void __cdecl d2i_PrivateKey_bio(undefined4 param_1,undefined4 param_2)
+void FUN_009e3540(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
 
 {
-  _ASN1_d2i_bio(_EVP_PKEY_new,_d2i_AutoPrivateKey,param_1,param_2);
+  undefined4 uVar1;
+  
+  uVar1 = FUN_009de520(param_2,param_1,param_3,param_4);
+  FUN_009fa990(uVar1);
   return;
 }
 
 
-// 009E3590  _PEM_read_bio_PrivateKey  (line unknown)
+// 009E3570  FUN_009e3570  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+void FUN_009e3570(undefined4 param_1,undefined4 param_2)
 
-int _PEM_read_bio_PrivateKey(undefined4 param_1,int *param_2,code *param_3,undefined4 param_4)
+{
+  FUN_009f9b90(FUN_009d40a0,FUN_009e3ec0,param_1,param_2);
+  return;
+}
+
+
+// 009E3590  FUN_009e3590  (line unknown)
+
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
+
+void FUN_009e3590(undefined4 param_1,int *param_2,code *param_3,undefined4 param_4)
 
 {
   int iVar1;
@@ -2959,16 +2952,16 @@ int _PEM_read_bio_PrivateKey(undefined4 param_1,int *param_2,code *param_3,undef
   undefined1 local_404 [1024];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_41c;
+  local_4 = DAT_00b86490 ^ (uint)&local_41c;
   local_408 = param_4;
   local_40c = (char *)0x0;
   local_418 = 0;
   local_410 = 0;
   local_41c = 0;
-  iVar1 = _PEM_bytes_read_bio(&local_410,&local_414,&local_40c,"ANY PRIVATE KEY",param_1,param_3,
-                              param_4);
+  iVar1 = FUN_009f4ad0(&local_410,&local_414,&local_40c,"ANY PRIVATE KEY",param_1,param_3,param_4);
   if (iVar1 == 0) {
-    return 0;
+    __security_check_cookie(local_4 ^ (uint)&local_41c);
+    return;
   }
   local_418 = local_410;
   iVar1 = 0x10;
@@ -2983,7 +2976,7 @@ int _PEM_read_bio_PrivateKey(undefined4 param_1,int *param_2,code *param_3,undef
     pcVar4 = pcVar4 + 1;
   } while (bVar5);
   if (bVar5) {
-    local_41c = d2i_PrivateKey(6,param_2,&local_418,local_414);
+    local_41c = FUN_009e3dc0(6,param_2,&local_418,local_414);
 LAB_009e37b1:
     if (local_41c != 0) goto LAB_009e37cd;
   }
@@ -3000,7 +2993,7 @@ LAB_009e37b1:
       pcVar4 = pcVar4 + 1;
     } while (bVar5);
     if (bVar5) {
-      local_41c = d2i_PrivateKey(0x74,param_2,&local_418,local_414);
+      local_41c = FUN_009e3dc0(0x74,param_2,&local_418,local_414);
       goto LAB_009e37b1;
     }
     iVar1 = 0xf;
@@ -3015,7 +3008,7 @@ LAB_009e37b1:
       pcVar4 = pcVar4 + 1;
     } while (bVar5);
     if (bVar5) {
-      local_41c = d2i_PrivateKey(0x198,param_2,&local_418,local_414);
+      local_41c = FUN_009e3dc0(0x198,param_2,&local_418,local_414);
       goto LAB_009e37b1;
     }
     iVar1 = 0xc;
@@ -3030,18 +3023,18 @@ LAB_009e37b1:
       pcVar4 = pcVar4 + 1;
     } while (bVar5);
     if (bVar5) {
-      iVar2 = d2i_PKCS8_PRIV_KEY_INFO(0,&local_418,local_414);
+      iVar2 = FUN_009faaa0(0,&local_418,local_414);
 LAB_009e3780:
       if (iVar2 != 0) {
-        iVar1 = _EVP_PKCS82PKEY(iVar2);
+        iVar1 = FUN_009faae0(iVar2);
         local_41c = iVar1;
         if (param_2 != (int *)0x0) {
           if (*param_2 != 0) {
-            _EVP_PKEY_free(*param_2);
+            FUN_009d43f0(*param_2);
           }
           *param_2 = iVar1;
         }
-        _PKCS8_PRIV_KEY_INFO_free(iVar2);
+        FUN_009faac0(iVar2);
         goto LAB_009e37b1;
       }
     }
@@ -3058,38 +3051,39 @@ LAB_009e3780:
         pcVar4 = pcVar4 + 1;
       } while (bVar5);
       if (bVar5) {
-        iVar1 = d2i_X509_SIG(0,&local_418,local_414);
+        iVar1 = FUN_009faa00(0,&local_418,local_414);
         if (iVar1 != 0) {
           if (param_3 == (code *)0x0) {
-            iVar2 = _PEM_def_callback(local_404,0x400,0,local_408);
+            iVar2 = FUN_009f3650(local_404,0x400,0,local_408);
           }
           else {
             iVar2 = (*param_3)(local_404,0x400,0,local_408);
           }
           if (iVar2 < 1) {
-            _ERR_put_error(9,0x7b,0x68,".\\crypto\\pem\\pem_pkey.c",0x6d);
-            _X509_SIG_free(iVar1);
+            FUN_009d90b0(9,0x7b,0x68,".\\crypto\\pem\\pem_pkey.c",0x6d);
+            FUN_009faa40(iVar1);
             goto LAB_009e37cd;
           }
-          iVar2 = _PKCS8_decrypt(iVar1,local_404,iVar2);
-          _X509_SIG_free(iVar1);
+          iVar2 = FUN_009fb0e0(iVar1,local_404,iVar2);
+          FUN_009faa40(iVar1);
           goto LAB_009e3780;
         }
       }
     }
   }
-  _ERR_put_error(9,0x7b,0xd,".\\crypto\\pem\\pem_pkey.c",0x7d);
+  FUN_009d90b0(9,0x7b,0xd,".\\crypto\\pem\\pem_pkey.c",0x7d);
 LAB_009e37cd:
-  _CRYPTO_free(local_40c);
-  _OPENSSL_cleanse(local_410,local_414);
-  _CRYPTO_free(local_410);
-  return local_41c;
+  FUN_009d98a0(local_40c);
+  FUN_009e5400(local_410,local_414);
+  FUN_009d98a0(local_410);
+  __security_check_cookie(local_4 ^ (uint)&local_41c);
+  return;
 }
 
 
-// 009E3810  _BIO_s_file  (line unknown)
+// 009E3810  FUN_009e3810  (line unknown)
 
-undefined * _BIO_s_file(void)
+undefined * FUN_009e3810(void)
 
 {
   return &DAT_00b9328c;
@@ -3105,8 +3099,8 @@ undefined4 FUN_009e3840(int param_1)
     return 0;
   }
   if (*(int *)(param_1 + 0x10) != 0) {
-    if ((*(int *)(param_1 + 0xc) != 0) && (*(_iobuf **)(param_1 + 0x20) != (_iobuf *)0x0)) {
-      fclose(*(_iobuf **)(param_1 + 0x20));
+    if ((*(int *)(param_1 + 0xc) != 0) && (*(FILE **)(param_1 + 0x20) != (FILE *)0x0)) {
+      _fclose(*(FILE **)(param_1 + 0x20));
       *(undefined4 *)(param_1 + 0x20) = 0;
       *(undefined4 *)(param_1 + 0x14) = 0;
     }
@@ -3118,75 +3112,73 @@ undefined4 FUN_009e3840(int param_1)
 
 // 009E3890  FUN_009e3890  (line unknown)
 
-uint FUN_009e3890(int param_1,void *param_2,uint param_3)
+size_t FUN_009e3890(int param_1,void *param_2,size_t param_3)
 
 {
-  uint uVar1;
+  size_t sVar1;
   int iVar2;
   DWORD DVar3;
   char *pcVar4;
   undefined4 uVar5;
   
-  uVar1 = 0;
+  sVar1 = 0;
   if ((*(int *)(param_1 + 0xc) != 0) && (param_2 != (void *)0x0)) {
-    uVar1 = fread(param_2,1,param_3,*(_iobuf **)(param_1 + 0x20));
-    iVar2 = ferror(*(_iobuf **)(param_1 + 0x20));
+    sVar1 = _fread(param_2,1,param_3,*(FILE **)(param_1 + 0x20));
+    iVar2 = _ferror(*(FILE **)(param_1 + 0x20));
     if (iVar2 != 0) {
       uVar5 = 0xca;
       pcVar4 = ".\\crypto\\bio\\bss_file.c";
       DVar3 = GetLastError();
-      _ERR_put_error(2,0xb,DVar3,pcVar4,uVar5);
-      _ERR_put_error(0x20,0x82,2,".\\crypto\\bio\\bss_file.c",0xcb);
+      FUN_009d90b0(2,0xb,DVar3,pcVar4,uVar5);
+      FUN_009d90b0(0x20,0x82,2,".\\crypto\\bio\\bss_file.c",0xcb);
       return 0xffffffff;
     }
   }
-  return uVar1;
+  return sVar1;
 }
 
 
-// 009E3CE0  _BIO_new_file  (line unknown)
+// 009E3CE0  FUN_009e3ce0  (line unknown)
 
-int _BIO_new_file(char *param_1,char *param_2)
+int FUN_009e3ce0(char *param_1,char *param_2)
 
 {
-  _iobuf *p_Var1;
-  DWORD DVar2;
-  int *piVar3;
-  int iVar4;
-  char *pcVar5;
-  undefined4 uVar6;
+  FILE *_File;
+  DWORD DVar1;
+  int *piVar2;
+  int iVar3;
+  char *pcVar4;
+  undefined4 uVar5;
   
-  p_Var1 = fopen(param_1,param_2);
-  if (p_Var1 != (_iobuf *)0x0) {
-    iVar4 = _BIO_new(&DAT_00b9328c);
-    if (iVar4 == 0) {
-      fclose(p_Var1);
+  _File = _fopen(param_1,param_2);
+  if (_File != (FILE *)0x0) {
+    iVar3 = FUN_009d5180(&DAT_00b9328c);
+    if (iVar3 == 0) {
+      _fclose(_File);
       return 0;
     }
-    _BIO_clear_flags(iVar4,0);
-    _BIO_ctrl(iVar4,0x6a,1,p_Var1);
-    return iVar4;
+    FUN_009d4c00(iVar3,0);
+    FUN_009d4f60(iVar3,0x6a,1,_File);
+    return iVar3;
   }
-  uVar6 = 0x7e;
-  pcVar5 = ".\\crypto\\bio\\bss_file.c";
-  DVar2 = GetLastError();
-  _ERR_put_error(2,1,DVar2,pcVar5,uVar6);
-  _ERR_add_error_data(5,"fopen(\'",param_1,"\',\'",param_2,"\')");
-  piVar3 = _errno();
-  if (*piVar3 == 2) {
-    _ERR_put_error(0x20,0x6d,0x80,".\\crypto\\bio\\bss_file.c",0x81);
+  uVar5 = 0x7e;
+  pcVar4 = ".\\crypto\\bio\\bss_file.c";
+  DVar1 = GetLastError();
+  FUN_009d90b0(2,1,DVar1,pcVar4,uVar5);
+  FUN_009d92c0(5,"fopen(\'",param_1,&DAT_00a7b380,param_2,&DAT_00a6fcbc);
+  piVar2 = __errno();
+  if (*piVar2 == 2) {
+    FUN_009d90b0(0x20,0x6d,0x80,".\\crypto\\bio\\bss_file.c",0x81);
     return 0;
   }
-  _ERR_put_error(0x20,0x6d,2,".\\crypto\\bio\\bss_file.c",0x83);
+  FUN_009d90b0(0x20,0x6d,2,".\\crypto\\bio\\bss_file.c",0x83);
   return 0;
 }
 
 
-// 009E3DC0  d2i_PrivateKey  (line unknown)
+// 009E3DC0  FUN_009e3dc0  (line unknown)
 
-/* d2i_PrivateKey */
-
-int * __cdecl d2i_PrivateKey(int param_1,int *param_2,undefined4 param_3,undefined4 param_4)
+int * FUN_009e3dc0(int param_1,int *param_2,undefined4 param_3,undefined4 param_4)
 
 {
   int *piVar1;
@@ -3195,17 +3187,17 @@ int * __cdecl d2i_PrivateKey(int param_1,int *param_2,undefined4 param_3,undefin
   undefined4 uVar4;
   
   if ((param_2 == (int *)0x0) || (piVar1 = (int *)*param_2, piVar1 == (int *)0x0)) {
-    piVar1 = (int *)_EVP_PKEY_new();
+    piVar1 = (int *)FUN_009d40a0();
     if (piVar1 == (int *)0x0) {
-      _ERR_put_error(0xd,0x9a,6,".\\crypto\\asn1\\d2i_pr.c",0x54);
+      FUN_009d90b0(0xd,0x9a,6,".\\crypto\\asn1\\d2i_pr.c",0x54);
       return (int *)0x0;
     }
   }
   piVar1[1] = param_1;
-  iVar2 = _EVP_PKEY_type(param_1);
+  iVar2 = FUN_009d40f0(param_1);
   *piVar1 = iVar2;
   if (iVar2 == 6) {
-    iVar2 = d2i_RSAPrivateKey(0,param_3,param_4);
+    iVar2 = FUN_009e3fc0(0,param_3,param_4);
     piVar1[3] = iVar2;
     if (iVar2 != 0) {
 LAB_009e3eb0:
@@ -3217,7 +3209,7 @@ LAB_009e3eb0:
     uVar4 = 99;
   }
   else if (iVar2 == 0x74) {
-    iVar2 = d2i_DSAPrivateKey(0,param_3,param_4);
+    iVar2 = FUN_009e8160(0,param_3,param_4);
     piVar1[3] = iVar2;
     if (iVar2 != 0) goto LAB_009e3eb0;
     uVar4 = 0x6d;
@@ -3228,24 +3220,24 @@ LAB_009e3eb0:
       uVar3 = 0xa3;
       goto LAB_009e3e8b;
     }
-    iVar2 = d2i_ECPrivateKey(0,param_3,param_4);
+    iVar2 = FUN_009fa600(0,param_3,param_4);
     piVar1[3] = iVar2;
     if (iVar2 != 0) goto LAB_009e3eb0;
     uVar4 = 0x77;
   }
   uVar3 = 0xd;
 LAB_009e3e8b:
-  _ERR_put_error(0xd,0x9a,uVar3,".\\crypto\\asn1\\d2i_pr.c",uVar4);
+  FUN_009d90b0(0xd,0x9a,uVar3,".\\crypto\\asn1\\d2i_pr.c",uVar4);
   if ((param_2 == (int *)0x0) || ((int *)*param_2 != piVar1)) {
-    _EVP_PKEY_free(piVar1);
+    FUN_009d43f0(piVar1);
   }
   return (int *)0x0;
 }
 
 
-// 009E3EC0  _d2i_AutoPrivateKey  (line unknown)
+// 009E3EC0  FUN_009e3ec0  (line unknown)
 
-void _d2i_AutoPrivateKey(undefined4 param_1,undefined4 *param_2,undefined4 param_3)
+void FUN_009e3ec0(undefined4 param_1,undefined4 *param_2,undefined4 param_3)
 
 {
   undefined4 *puVar1;
@@ -3256,134 +3248,128 @@ void _d2i_AutoPrivateKey(undefined4 param_1,undefined4 *param_2,undefined4 param
   uVar2 = param_3;
   puVar1 = param_2;
   param_2 = (undefined4 *)*param_2;
-  uVar3 = d2i_ASN1_SET(0,&param_2,param_3,d2i_ASN1_TYPE,_ASN1_TYPE_free,0x10,0);
-  iVar4 = sk_num(uVar3);
+  uVar3 = FUN_009fb410(0,&param_2,param_3,FUN_009ea9d0,FUN_009eaa20,0x10,0);
+  iVar4 = FUN_009da820(uVar3);
   if (iVar4 == 6) {
     iVar4 = 0x74;
   }
   else {
-    iVar4 = sk_num(uVar3);
+    iVar4 = FUN_009da820(uVar3);
     iVar4 = (-(uint)(iVar4 != 4) & 0xfffffe6e) + 0x198;
   }
-  sk_pop_free(uVar3,_ASN1_TYPE_free);
-  d2i_PrivateKey(iVar4,param_1,puVar1,uVar2);
+  FUN_009daa70(uVar3,FUN_009eaa20);
+  FUN_009e3dc0(iVar4,param_1,puVar1,uVar2);
   return;
 }
 
 
-// 009E3F40  _PEM_read_bio_X509_CRL  (line unknown)
+// 009E3F40  FUN_009e3f40  (line unknown)
 
-void _PEM_read_bio_X509_CRL
-               (undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+void FUN_009e3f40(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
 
 {
-  _PEM_ASN1_read_bio(&_d2i_X509_CRL,&s_X509_CRL,param_1,param_2,param_3,param_4);
+  FUN_009f35b0(&LAB_009eeff0,&DAT_00a7b3d4,param_1,param_2,param_3,param_4);
   return;
 }
 
 
-// 009E3FC0  d2i_RSAPrivateKey  (line unknown)
+// 009E3FC0  FUN_009e3fc0  (line unknown)
 
-/* d2i_RSAPrivateKey */
-
-void __cdecl d2i_RSAPrivateKey(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009e3fc0(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a7b4b4);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a7b4b4);
   return;
 }
 
 
-// 009E4000  d2i_RSAPublicKey  (line unknown)
+// 009E4000  FUN_009e4000  (line unknown)
 
-/* d2i_RSAPublicKey */
-
-void __cdecl d2i_RSAPublicKey(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009e4000(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a7b510);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a7b510);
   return;
 }
 
 
-// 009E4020  _RSAPrivateKey_dup  (line unknown)
+// 009E4020  FUN_009e4020  (line unknown)
 
-void _RSAPrivateKey_dup(undefined4 param_1)
+void FUN_009e4020(undefined4 param_1)
 
 {
-  _ASN1_item_dup(&DAT_00a7b4b4,param_1);
+  FUN_009e7ed0(&DAT_00a7b4b4,param_1);
   return;
 }
 
 
-// 009E4040  _PEM_read_bio_X509_AUX  (line unknown)
+// 009E4040  FUN_009e4040  (line unknown)
 
-void _PEM_read_bio_X509_AUX
-               (undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+void FUN_009e4040(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
 
 {
-  _PEM_ASN1_read_bio(&_d2i_X509_AUX,"TRUSTED CERTIFICATE",param_1,param_2,param_3,param_4);
+  FUN_009f35b0(&LAB_009de5a0,"TRUSTED CERTIFICATE",param_1,param_2,param_3,param_4);
   return;
 }
 
 
-// 009E4070  _EVP_ecdsa  (line unknown)
+// 009E4070  FUN_009e4070  (line unknown)
 
-undefined * _EVP_ecdsa(void)
+undefined * FUN_009e4070(void)
 
 {
   return &DAT_00a7b540;
 }
 
 
-// 009E40B0  _EVP_dss1  (line unknown)
+// 009E40B0  FUN_009e40b0  (line unknown)
 
-undefined * _EVP_dss1(void)
+undefined * FUN_009e40b0(void)
 
 {
   return &DAT_00a7b588;
 }
 
 
-// 009E40D0  _EVP_sha1  (line unknown)
+// 009E40D0  FUN_009e40d0  (line unknown)
 
-undefined * _EVP_sha1(void)
+undefined * FUN_009e40d0(void)
 
 {
   return &DAT_00a7b5d0;
 }
 
 
-// 009E4130  _EVP_sha224  (line unknown)
+// 009E4130  FUN_009e4130  (line unknown)
 
-undefined * _EVP_sha224(void)
+undefined * FUN_009e4130(void)
 
 {
   return &DAT_00a7b618;
 }
 
 
-// 009E4140  _EVP_sha256  (line unknown)
+// 009E4140  FUN_009e4140  (line unknown)
 
-undefined * _EVP_sha256(void)
+undefined * FUN_009e4140(void)
 
 {
   return &DAT_00a7b660;
 }
 
 
-// 009E41A0  _EVP_sha384  (line unknown)
+// 009E41A0  FUN_009e41a0  (line unknown)
 
-undefined * _EVP_sha384(void)
+undefined * FUN_009e41a0(void)
 
 {
   return &DAT_00a7b6a8;
 }
 
 
-// 009E41B0  _EVP_sha512  (line unknown)
+// 009E41B0  FUN_009e41b0  (line unknown)
 
-undefined * _EVP_sha512(void)
+undefined * FUN_009e41b0(void)
 
 {
   return &DAT_00a7b6f0;
@@ -3407,9 +3393,9 @@ int FUN_009e41c0(int *param_1,int *param_2)
   }
   if (DAT_00eabd7c != 0) {
     iVar3 = *param_1;
-    iVar2 = sk_num(DAT_00eabd7c);
+    iVar2 = FUN_009da820(DAT_00eabd7c);
     if (iVar3 < iVar2) {
-      iVar3 = sk_value(DAT_00eabd7c,iVar3);
+      iVar3 = FUN_009da830(DAT_00eabd7c,iVar3);
       iVar3 = (**(code **)(iVar3 + 4))(param_1[2],param_2[2]);
       return iVar3;
     }
@@ -3436,11 +3422,11 @@ int FUN_009e41c0(int *param_1,int *param_2)
 }
 
 
-// 009E42A0  _OBJ_NAME_remove  (line unknown)
+// 009E42A0  FUN_009e42a0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _OBJ_NAME_remove(undefined4 param_1,uint param_2)
+undefined4 FUN_009e42a0(undefined4 param_1,uint param_2)
 
 {
   int *piVar1;
@@ -3456,26 +3442,26 @@ undefined4 _OBJ_NAME_remove(undefined4 param_1,uint param_2)
   }
   local_8 = param_1;
   local_10[0] = param_2 & 0xffff7fff;
-  piVar1 = (int *)lh_delete(DAT_00eabd84,local_10);
+  piVar1 = (int *)FUN_009e02b0(DAT_00eabd84,local_10);
   if (piVar1 == (int *)0x0) {
     return 0;
   }
   if (DAT_00eabd7c != 0) {
     iVar3 = *piVar1;
-    iVar2 = sk_num(DAT_00eabd7c);
+    iVar2 = FUN_009da820(DAT_00eabd7c);
     if (iVar3 < iVar2) {
-      iVar3 = sk_value(DAT_00eabd7c,iVar3);
+      iVar3 = FUN_009da830(DAT_00eabd7c,iVar3);
       (**(code **)(iVar3 + 8))(piVar1[2],*piVar1,piVar1[3]);
     }
   }
-  _CRYPTO_free(piVar1);
+  FUN_009d98a0(piVar1);
   return 1;
 }
 
 
-// 009E4370  _OBJ_NAME_cleanup  (line unknown)
+// 009E4370  FUN_009e4370  (line unknown)
 
-void _OBJ_NAME_cleanup(int param_1)
+void FUN_009e4370(int param_1)
 
 {
   undefined4 uVar1;
@@ -3486,10 +3472,10 @@ void _OBJ_NAME_cleanup(int param_1)
     uVar1 = *(undefined4 *)(DAT_00eabd84 + 0x20);
     DAT_00eabd80 = param_1;
     *(undefined4 *)(DAT_00eabd84 + 0x20) = 0;
-    lh_doall(iVar2,&LAB_009e4340);
+    FUN_009dfe70(iVar2,&LAB_009e4340);
     if (param_1 < 0) {
-      lh_free(DAT_00eabd84);
-      sk_pop_free(DAT_00eabd7c,policy_node_free);
+      FUN_009dfdc0(DAT_00eabd84);
+      FUN_009daa70(DAT_00eabd7c,thunk_FUN_009d98a0);
       DAT_00eabd84 = 0;
       DAT_00eabd7c = 0;
       return;
@@ -3500,26 +3486,26 @@ void _OBJ_NAME_cleanup(int param_1)
 }
 
 
-// 009E43F0  _OBJ_NAME_init  (line unknown)
+// 009E43F0  FUN_009e43f0  (line unknown)
 
-bool _OBJ_NAME_init(void)
+bool FUN_009e43f0(void)
 
 {
   if (DAT_00eabd84 != 0) {
     return true;
   }
-  _CRYPTO_mem_ctrl(3);
-  DAT_00eabd84 = lh_new(&LAB_009e4240,FUN_009e41c0);
-  _CRYPTO_mem_ctrl(2);
+  FUN_009e8e30(3);
+  DAT_00eabd84 = FUN_009e0150(&LAB_009e4240,FUN_009e41c0);
+  FUN_009e8e30(2);
   return DAT_00eabd84 != 0;
 }
 
 
-// 009E4430  _OBJ_NAME_get  (line unknown)
+// 009E4430  FUN_009e4430  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _OBJ_NAME_get(int param_1,uint param_2)
+undefined4 FUN_009e4430(int param_1,uint param_2)
 
 {
   int iVar1;
@@ -3530,10 +3516,10 @@ undefined4 _OBJ_NAME_get(int param_1,uint param_2)
   
   uStack_4 = 0x9e443a;
   iVar2 = 0;
-  if ((param_1 != 0) && ((DAT_00eabd84 != 0 || (iVar1 = _OBJ_NAME_init(), iVar1 != 0)))) {
+  if ((param_1 != 0) && ((DAT_00eabd84 != 0 || (iVar1 = FUN_009e43f0(), iVar1 != 0)))) {
     local_10[0] = param_2 & 0xffff7fff;
     local_8 = param_1;
-    iVar1 = lh_retrieve(DAT_00eabd84,local_10);
+    iVar1 = FUN_009e0320(DAT_00eabd84,local_10);
     while( true ) {
       if (iVar1 == 0) {
         return 0;
@@ -3544,7 +3530,7 @@ undefined4 _OBJ_NAME_get(int param_1,uint param_2)
         return 0;
       }
       local_8 = *(undefined4 *)(iVar1 + 0xc);
-      iVar1 = lh_retrieve(DAT_00eabd84,local_10);
+      iVar1 = FUN_009e0320(DAT_00eabd84,local_10);
     }
     return *(undefined4 *)(iVar1 + 0xc);
   }
@@ -3552,9 +3538,9 @@ undefined4 _OBJ_NAME_get(int param_1,uint param_2)
 }
 
 
-// 009E44E0  _OBJ_NAME_add  (line unknown)
+// 009E44E0  FUN_009e44e0  (line unknown)
 
-undefined4 _OBJ_NAME_add(uint param_1,uint param_2,uint param_3)
+undefined4 FUN_009e44e0(uint param_1,uint param_2,uint param_3)
 
 {
   uint *puVar1;
@@ -3563,14 +3549,14 @@ undefined4 _OBJ_NAME_add(uint param_1,uint param_2,uint param_3)
   int iVar4;
   
   if (DAT_00eabd84 == 0) {
-    _CRYPTO_mem_ctrl(3);
-    DAT_00eabd84 = lh_new(&LAB_009e4240,FUN_009e41c0);
-    _CRYPTO_mem_ctrl(2);
+    FUN_009e8e30(3);
+    DAT_00eabd84 = FUN_009e0150(&LAB_009e4240,FUN_009e41c0);
+    FUN_009e8e30(2);
     if (DAT_00eabd84 == 0) {
       return 0;
     }
   }
-  puVar1 = (uint *)_CRYPTO_malloc(0x10,".\\crypto\\objects\\o_names.c",0xbf);
+  puVar1 = (uint *)FUN_009d96f0(0x10,".\\crypto\\objects\\o_names.c",0xbf);
   if (puVar1 == (uint *)0x0) {
     return 0;
   }
@@ -3579,7 +3565,7 @@ undefined4 _OBJ_NAME_add(uint param_1,uint param_2,uint param_3)
   iVar4 = DAT_00eabd84;
   *puVar1 = param_2 & 0xffff7fff;
   puVar1[3] = param_3;
-  piVar2 = (int *)lh_insert(iVar4,puVar1);
+  piVar2 = (int *)FUN_009e0220(iVar4,puVar1);
   if (piVar2 == (int *)0x0) {
     if (*(int *)(DAT_00eabd84 + 0x5c) != 0) {
       return 0;
@@ -3588,57 +3574,57 @@ undefined4 _OBJ_NAME_add(uint param_1,uint param_2,uint param_3)
   else {
     if (DAT_00eabd7c != 0) {
       iVar4 = *piVar2;
-      iVar3 = sk_num(DAT_00eabd7c);
+      iVar3 = FUN_009da820(DAT_00eabd7c);
       if (iVar4 < iVar3) {
-        iVar4 = sk_value(DAT_00eabd7c,iVar4);
+        iVar4 = FUN_009da830(DAT_00eabd7c,iVar4);
         (**(code **)(iVar4 + 8))(piVar2[2],*piVar2,piVar2[3]);
       }
     }
-    _CRYPTO_free(piVar2);
+    FUN_009d98a0(piVar2);
   }
   return 1;
 }
 
 
-// 009E4610  _EVP_md5  (line unknown)
+// 009E4610  FUN_009e4610  (line unknown)
 
-undefined * _EVP_md5(void)
+undefined * FUN_009e4610(void)
 
 {
   return &DAT_00a7b758;
 }
 
 
-// 009E4620  _EVP_aes_128_cbc  (line unknown)
+// 009E4620  FUN_009e4620  (line unknown)
 
-undefined * _EVP_aes_128_cbc(void)
+undefined * FUN_009e4620(void)
 
 {
   return &DAT_00a7b7a0;
 }
 
 
-// 009E4660  _EVP_aes_192_cbc  (line unknown)
+// 009E4660  FUN_009e4660  (line unknown)
 
-undefined * _EVP_aes_192_cbc(void)
+undefined * FUN_009e4660(void)
 
 {
   return &DAT_00a7b870;
 }
 
 
-// 009E4740  _EVP_aes_256_cbc  (line unknown)
+// 009E4740  FUN_009e4740  (line unknown)
 
-undefined * _EVP_aes_256_cbc(void)
+undefined * FUN_009e4740(void)
 
 {
   return &DAT_00a7b940;
 }
 
 
-// 009E4950  _EVP_rc2_cbc  (line unknown)
+// 009E4950  FUN_009e4950  (line unknown)
 
-undefined * _EVP_rc2_cbc(void)
+undefined * FUN_009e4950(void)
 
 {
   return &DAT_00a7bb60;
@@ -3659,17 +3645,16 @@ undefined4 FUN_009e49e0(int param_1)
   if (param_1 == 0xa0) {
     return 0x28;
   }
-  _ERR_put_error(6,0x6d,0x6c,".\\crypto\\evp\\e_rc2.c",0xa3);
+  FUN_009d90b0(6,0x6d,0x6c,".\\crypto\\evp\\e_rc2.c",0xa3);
   return 0;
 }
 
 
 // 009E4A30  FUN_009e4a30  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-uint FUN_009e4a30(undefined4 param_1,int param_2)
+void FUN_009e4a30(undefined4 param_1,int param_2)
 
 {
   uint uVar1;
@@ -3679,40 +3664,46 @@ uint FUN_009e4a30(undefined4 param_1,int param_2)
   undefined1 local_14 [16];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_18;
+  local_4 = DAT_00b86490 ^ (uint)&local_18;
   local_18 = 0;
   if (param_2 == 0) {
-    return 0;
+LAB_009e4b03:
+    __security_check_cookie(local_4 ^ (uint)&local_18);
+    return;
   }
-  uVar1 = _EVP_CIPHER_CTX_iv_length(param_1);
+  uVar1 = FUN_009d4440(param_1);
   if (0x10 < uVar1) {
-    _OpenSSLDie(".\\crypto\\evp\\e_rc2.c",0xb3,"l <= sizeof(iv)");
+    FUN_009dfd90(".\\crypto\\evp\\e_rc2.c",0xb3,"l <= sizeof(iv)");
   }
-  uVar2 = _ASN1_TYPE_get_int_octetstring(param_2,&local_18,local_14,uVar1);
-  if ((uVar2 == uVar1) && (iVar3 = FUN_009e49e0(local_18), iVar3 != 0)) {
-    if (0 < (int)uVar2) {
-      _EVP_CipherInit_ex(param_1,0,0,0,local_14,0xffffffff);
+  uVar2 = FUN_00a01420(param_2,&local_18,local_14,uVar1);
+  if (uVar2 == uVar1) {
+    iVar3 = FUN_009e49e0(local_18);
+    if (iVar3 != 0) {
+      if (0 < (int)uVar2) {
+        FUN_009e2260(param_1,0,0,0,local_14,0xffffffff);
+      }
+      FUN_009e21c0(param_1,3,iVar3,0);
+      FUN_009ea470(param_1,(int)(iVar3 + (iVar3 >> 0x1f & 7U)) >> 3);
+      goto LAB_009e4b03;
     }
-    _EVP_CIPHER_CTX_ctrl(param_1,3,iVar3,0);
-    _EVP_CIPHER_CTX_set_key_length(param_1,(int)(iVar3 + (iVar3 >> 0x1f & 7U)) >> 3);
-    return uVar2;
   }
-  return 0xffffffff;
+  __security_check_cookie(local_4 ^ (uint)&local_18);
+  return;
 }
 
 
-// 009E4BD0  _EVP_rc4  (line unknown)
+// 009E4BD0  FUN_009e4bd0  (line unknown)
 
-undefined * _EVP_rc4(void)
+undefined * FUN_009e4bd0(void)
 
 {
   return &DAT_00a7bcc0;
 }
 
 
-// 009E4D30  _EVP_idea_cbc  (line unknown)
+// 009E4D30  FUN_009e4d30  (line unknown)
 
-undefined * _EVP_idea_cbc(void)
+undefined * FUN_009e4d30(void)
 
 {
   return &DAT_00a7bd28;
@@ -3721,7 +3712,7 @@ undefined * _EVP_idea_cbc(void)
 
 // 009E4D40  FUN_009e4d40  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009e4d40(int param_1,undefined4 param_2,undefined4 param_3,int param_4)
 
@@ -3732,25 +3723,25 @@ undefined4 FUN_009e4d40(int param_1,undefined4 param_2,undefined4 param_3,int pa
   
   uStack_4 = 0x9e4d4a;
   if (param_4 == 0) {
-    bVar1 = _EVP_CIPHER_CTX_flags(param_1);
+    bVar1 = FUN_009e2250(param_1);
     if ((bVar1 & 7) != 4) {
-      bVar1 = _EVP_CIPHER_CTX_flags(param_1);
+      bVar1 = FUN_009e2250(param_1);
       if ((bVar1 & 7) != 3) {
-        idea_set_encrypt_key(param_2,local_d8);
-        idea_set_decrypt_key(local_d8,*(undefined4 *)(param_1 + 0x60));
-        _OPENSSL_cleanse(local_d8,0xd8);
+        FUN_00a029c0(param_2,local_d8);
+        FUN_00a02bb0(local_d8,*(undefined4 *)(param_1 + 0x60));
+        FUN_009e5400(local_d8,0xd8);
         return 1;
       }
     }
   }
-  idea_set_encrypt_key(param_2,*(undefined4 *)(param_1 + 0x60));
+  FUN_00a029c0(param_2,*(undefined4 *)(param_1 + 0x60));
   return 1;
 }
 
 
-// 009E5010  _EVP_des_ede3_cbc  (line unknown)
+// 009E5010  FUN_009e5010  (line unknown)
 
-undefined * _EVP_des_ede3_cbc(void)
+undefined * FUN_009e5010(void)
 
 {
   return &DAT_00a7bec8;
@@ -3759,7 +3750,7 @@ undefined * _EVP_des_ede3_cbc(void)
 
 // 009E5220  FUN_009e5220  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009e5220(int param_1,int param_2,int param_3,uint param_4)
 
@@ -3778,8 +3769,8 @@ undefined4 FUN_009e5220(int param_1,int param_2,int param_3,uint param_4)
       uStack_4 = CONCAT13(uStack_4._3_1_,
                           CONCAT12(-(((byte)(1 << (7 - bVar1 & 0x1f)) & *(byte *)(uVar2 + param_3))
                                     != 0),(undefined2)uStack_4)) & 0xff80ffff;
-      _DES_cfb_encrypt((int)&uStack_4 + 2,(int)&uStack_4 + 3,1,1,*(undefined4 *)(param_1 + 0x60),
-                       param_1 + 0x20,*(undefined4 *)(param_1 + 8));
+      FUN_00a03d70((int)&uStack_4 + 2,(int)&uStack_4 + 3,1,1,*(undefined4 *)(param_1 + 0x60),
+                   param_1 + 0x20,*(undefined4 *)(param_1 + 8));
       uVar3 = uVar3 + 1;
       *(byte *)(uVar2 + param_2) =
            ~(byte)(0x80 >> bVar1) & *(byte *)(uVar2 + param_2) | (uStack_4._3_1_ & 0x80) >> bVar1;
@@ -3789,103 +3780,100 @@ undefined4 FUN_009e5220(int param_1,int param_2,int param_3,uint param_4)
 }
 
 
-// 009E5300  _EVP_des_cbc  (line unknown)
+// 009E5300  FUN_009e5300  (line unknown)
 
-undefined * _EVP_des_cbc(void)
+undefined * FUN_009e5300(void)
 
 {
   return &DAT_00a7c000;
 }
 
 
-// 009E5370  _ERR_load_crypto_strings  (line unknown)
+// 009E5370  FUN_009e5370  (line unknown)
 
-void _ERR_load_crypto_strings(void)
+void FUN_009e5370(void)
 
 {
-  _ERR_load_ERR_strings();
-  _ERR_load_BN_strings();
-  _ERR_load_RSA_strings();
-  _ERR_load_DH_strings();
-  _ERR_load_EVP_strings();
-  _ERR_load_BUF_strings();
-  _ERR_load_OBJ_strings();
-  _ERR_load_PEM_strings();
-  _ERR_load_DSA_strings();
-  _ERR_load_X509_strings();
-  _ERR_load_ASN1_strings();
-  _ERR_load_CONF_strings();
-  _ERR_load_CRYPTO_strings();
-  _ERR_load_EC_strings();
-  _ERR_load_ECDSA_strings();
-  _ERR_load_ECDH_strings();
-  _ERR_load_BIO_strings();
-  _ERR_load_PKCS7_strings();
-  _ERR_load_X509V3_strings();
-  _ERR_load_PKCS12_strings();
-  _ERR_load_RAND_strings();
-  _ERR_load_DSO_strings();
-  _ERR_load_ENGINE_strings();
-  _ERR_load_OCSP_strings();
-  _ERR_load_UI_strings();
-  _ERR_load_COMP_strings();
+  FUN_00a049a0();
+  FUN_00a04870();
+  FUN_00a04840();
+  FUN_00a04810();
+  FUN_00a047e0();
+  FUN_00a047b0();
+  FUN_00a04780();
+  FUN_00a04750();
+  FUN_00a04720();
+  FUN_00a046f0();
+  FUN_00a046c0();
+  FUN_00a04690();
+  FUN_00a04660();
+  FUN_00a04630();
+  FUN_00a04600();
+  FUN_00a045d0();
+  FUN_00a045a0();
+  FUN_00a04570();
+  FUN_00a04540();
+  FUN_00a04510();
+  FUN_00a044e0();
+  FUN_00a044b0();
+  FUN_00a04480();
+  FUN_00a04450();
+  FUN_00a04420();
+  FUN_00a043f0();
   return;
 }
 
 
-// 009E5400  _OPENSSL_cleanse  (line unknown)
+// 009E5400  FUN_009e5400  (line unknown)
 
-void _OPENSSL_cleanse(uchar *param_1,ulong param_2)
+void FUN_009e5400(char *param_1,size_t param_2)
 
 {
-  byte bVar1;
-  uchar *puVar2;
-  int extraout_EAX;
-  ulong uVar3;
-  uint uVar4;
+  char *pcVar1;
+  void *pvVar2;
+  size_t sVar3;
+  char cVar4;
+  uint uVar5;
   
-  uVar4 = (uint)_cleanse_ctr;
-  bVar1 = _cleanse_ctr;
-  puVar2 = param_1;
-  for (uVar3 = param_2; uVar3 != 0; uVar3 = uVar3 - 1) {
-    *puVar2 = (uchar)uVar4;
-    puVar2 = puVar2 + 1;
-    uVar4 = uVar4 + 0x11 + ((uint)puVar2 & 0xf);
-    bVar1 = (byte)uVar4;
+  uVar5 = (uint)DAT_00eabd88;
+  pcVar1 = param_1;
+  for (sVar3 = param_2; cVar4 = (char)uVar5, sVar3 != 0; sVar3 = sVar3 - 1) {
+    *pcVar1 = cVar4;
+    pcVar1 = pcVar1 + 1;
+    uVar5 = uVar5 + 0x11 + ((uint)pcVar1 & 0xf);
   }
-  memchr(param_1,bVar1,param_2);
-  if (extraout_EAX != 0) {
-    _cleanse_ctr = bVar1 + 0x3f + (char)extraout_EAX;
+  pvVar2 = _memchr(param_1,uVar5 & 0xff,param_2);
+  if (pvVar2 != (void *)0x0) {
+    DAT_00eabd88 = cVar4 + '?' + (char)pvVar2;
     return;
   }
-  _cleanse_ctr = bVar1;
+  DAT_00eabd88 = cVar4;
   return;
 }
 
 
-// 009E5460  _ENGINE_load_ssl_client_cert  (line unknown)
+// 009E5460  FUN_009e5460  (line unknown)
 
 undefined4
-_ENGINE_load_ssl_client_cert
-          (int param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5,
-          undefined4 param_6,undefined4 param_7,undefined4 param_8)
+FUN_009e5460(int param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5
+            ,undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
 {
   undefined4 uVar1;
   
   if (param_1 == 0) {
-    _ERR_put_error(0x26,0xc0,0x43,".\\crypto\\engine\\eng_pkey.c",0xb0);
+    FUN_009d90b0(0x26,0xc0,0x43,".\\crypto\\engine\\eng_pkey.c",0xb0);
     return 0;
   }
-  _CRYPTO_lock(9,0x1e,".\\crypto\\engine\\eng_pkey.c",0xb3);
+  FUN_009dfaa0(9,0x1e,".\\crypto\\engine\\eng_pkey.c",0xb3);
   if (*(int *)(param_1 + 0x54) == 0) {
-    _CRYPTO_lock(10,0x1e,".\\crypto\\engine\\eng_pkey.c",0xb6);
-    _ERR_put_error(0x26,0xc0,0x75,".\\crypto\\engine\\eng_pkey.c",0xb8);
+    FUN_009dfaa0(10,0x1e,".\\crypto\\engine\\eng_pkey.c",0xb6);
+    FUN_009d90b0(0x26,0xc0,0x75,".\\crypto\\engine\\eng_pkey.c",0xb8);
     return 0;
   }
-  _CRYPTO_lock(10,0x1e,".\\crypto\\engine\\eng_pkey.c",0xbb);
+  FUN_009dfaa0(10,0x1e,".\\crypto\\engine\\eng_pkey.c",0xbb);
   if (*(code **)(param_1 + 0x44) == (code *)0x0) {
-    _ERR_put_error(0x26,0xc0,0x7d,".\\crypto\\engine\\eng_pkey.c",0xbf);
+    FUN_009d90b0(0x26,0xc0,0x7d,".\\crypto\\engine\\eng_pkey.c",0xbf);
     return 0;
   }
   uVar1 = (**(code **)(param_1 + 0x44))
@@ -3894,30 +3882,29 @@ _ENGINE_load_ssl_client_cert
 }
 
 
-// 009E5540  _BUF_memdup  (line unknown)
+// 009E5540  FUN_009e5540  (line unknown)
 
-undefined4 _BUF_memdup(uchar *param_1,ulong param_2)
+void * FUN_009e5540(void *param_1,size_t param_2)
 
 {
-  uchar *puVar1;
-  undefined4 extraout_EAX;
+  void *pvVar1;
   
-  if (param_1 == (uchar *)0x0) {
-    return 0;
+  if (param_1 == (void *)0x0) {
+    return (void *)0x0;
   }
-  puVar1 = (uchar *)_CRYPTO_malloc(param_2,".\\crypto\\buffer\\buf_str.c",0x58);
-  if (puVar1 == (uchar *)0x0) {
-    _ERR_put_error(7,0x67,0x41,".\\crypto\\buffer\\buf_str.c",0x5b);
-    return 0;
+  pvVar1 = (void *)FUN_009d96f0(param_2,".\\crypto\\buffer\\buf_str.c",0x58);
+  if (pvVar1 == (void *)0x0) {
+    FUN_009d90b0(7,0x67,0x41,".\\crypto\\buffer\\buf_str.c",0x5b);
+    return (void *)0x0;
   }
-  memcpy(puVar1,param_1,param_2);
-  return extraout_EAX;
+  pvVar1 = FID_conflict__memcpy(pvVar1,param_1,param_2);
+  return pvVar1;
 }
 
 
-// 009E5590  _BUF_strlcpy  (line unknown)
+// 009E5590  FUN_009e5590  (line unknown)
 
-char * _BUF_strlcpy(char *param_1,char *param_2,uint param_3)
+char * FUN_009e5590(char *param_1,char *param_2,uint param_3)
 
 {
   char *pcVar1;
@@ -3943,9 +3930,9 @@ char * _BUF_strlcpy(char *param_1,char *param_2,uint param_3)
 }
 
 
-// 009E55E0  _BUF_strlcat  (line unknown)
+// 009E55E0  FUN_009e55e0  (line unknown)
 
-char * _BUF_strlcat(char *param_1,char *param_2,uint param_3)
+char * FUN_009e55e0(char *param_1,char *param_2,uint param_3)
 
 {
   char *pcVar1;
@@ -3982,9 +3969,9 @@ char * _BUF_strlcat(char *param_1,char *param_2,uint param_3)
 }
 
 
-// 009E5650  _BUF_strndup  (line unknown)
+// 009E5650  FUN_009e5650  (line unknown)
 
-int _BUF_strndup(int param_1,int param_2)
+int FUN_009e5650(int param_1,int param_2)
 
 {
   int iVar1;
@@ -3992,19 +3979,19 @@ int _BUF_strndup(int param_1,int param_2)
   if (param_1 == 0) {
     return 0;
   }
-  iVar1 = _CRYPTO_malloc(param_2 + 1,".\\crypto\\buffer\\buf_str.c",0x48);
+  iVar1 = FUN_009d96f0(param_2 + 1,".\\crypto\\buffer\\buf_str.c",0x48);
   if (iVar1 == 0) {
-    _ERR_put_error(7,0x68,0x41,".\\crypto\\buffer\\buf_str.c",0x4b);
+    FUN_009d90b0(7,0x68,0x41,".\\crypto\\buffer\\buf_str.c",0x4b);
     return 0;
   }
-  _BUF_strlcpy(iVar1,param_1,param_2 + 1);
+  FUN_009e5590(iVar1,param_1,param_2 + 1);
   return iVar1;
 }
 
 
-// 009E56B0  _BUF_strdup  (line unknown)
+// 009E56B0  FUN_009e56b0  (line unknown)
 
-undefined4 _BUF_strdup(char *param_1)
+undefined4 FUN_009e56b0(char *param_1)
 
 {
   char cVar1;
@@ -4019,14 +4006,14 @@ undefined4 _BUF_strdup(char *param_1)
     cVar1 = *pcVar2;
     pcVar2 = pcVar2 + 1;
   } while (cVar1 != '\0');
-  uVar3 = _BUF_strndup(param_1,(int)pcVar2 - (int)(param_1 + 1));
+  uVar3 = FUN_009e5650(param_1,(int)pcVar2 - (int)(param_1 + 1));
   return uVar3;
 }
 
 
-// 009E56E0  _EVP_MD_CTX_init  (line unknown)
+// 009E56E0  FUN_009e56e0  (line unknown)
 
-void _EVP_MD_CTX_init(undefined4 *param_1)
+void FUN_009e56e0(undefined4 *param_1)
 
 {
   *param_1 = 0;
@@ -4049,21 +4036,21 @@ undefined4 FUN_009e5700(void)
   
   if (*unaff_EDI == 0) {
     if (*unaff_EBX == 0) {
-      _ERR_put_error(6,0x8b,0x8b,".\\crypto\\evp\\digest.c",0xfe);
+      FUN_009d90b0(6,0x8b,0x8b,".\\crypto\\evp\\digest.c",0xfe);
       return 0;
     }
   }
   else {
     if (unaff_EBX[1] != 0) {
-      _ENGINE_finish(unaff_EBX[1]);
+      FUN_009e0a70(unaff_EBX[1]);
     }
     if (in_ECX == 0) {
-      in_ECX = _ENGINE_get_digest_engine(*(undefined4 *)*unaff_EDI);
+      in_ECX = FUN_00a049f0(*(undefined4 *)*unaff_EDI);
     }
     else {
-      iVar1 = _ENGINE_init();
+      iVar1 = FUN_009e09f0();
       if (iVar1 == 0) {
-        _ERR_put_error(6,0x8b,0x86,".\\crypto\\evp\\digest.c",0xdf);
+        FUN_009d90b0(6,0x8b,0x86,".\\crypto\\evp\\digest.c",0xdf);
         return 0;
       }
     }
@@ -4071,10 +4058,10 @@ undefined4 FUN_009e5700(void)
       unaff_EBX[1] = 0;
       return 1;
     }
-    iVar1 = _ENGINE_get_digest(in_ECX,*(undefined4 *)*unaff_EDI);
+    iVar1 = FUN_00a04a10(in_ECX,*(undefined4 *)*unaff_EDI);
     if (iVar1 == 0) {
-      _ERR_put_error(6,0x8b,0x86,".\\crypto\\evp\\digest.c",0xed);
-      _ENGINE_finish(in_ECX);
+      FUN_009d90b0(6,0x8b,0x86,".\\crypto\\evp\\digest.c",0xed);
+      FUN_009e0a70(in_ECX);
       return 0;
     }
     *unaff_EDI = iVar1;
@@ -4084,9 +4071,9 @@ undefined4 FUN_009e5700(void)
 }
 
 
-// 009E57E0  _EVP_DigestInit_ex  (line unknown)
+// 009E57E0  FUN_009e57e0  (line unknown)
 
-undefined4 _EVP_DigestInit_ex(int *param_1,int *param_2)
+undefined4 FUN_009e57e0(int *param_1,int *param_2)
 
 {
   int *piVar1;
@@ -4103,14 +4090,14 @@ undefined4 _EVP_DigestInit_ex(int *param_1,int *param_2)
     piVar1 = (int *)*param_1;
     if (piVar1 != param_2) {
       if ((piVar1 != (int *)0x0) && (piVar1[0x11] != 0)) {
-        _CRYPTO_free(param_1[3]);
+        FUN_009d98a0(param_1[3]);
       }
       *param_1 = (int)param_2;
       if (param_2[0x11] != 0) {
-        iVar2 = _CRYPTO_malloc(param_2[0x11],".\\crypto\\evp\\digest.c",0x131);
+        iVar2 = FUN_009d96f0(param_2[0x11],".\\crypto\\evp\\digest.c",0x131);
         param_1[3] = iVar2;
         if (iVar2 == 0) {
-          _ERR_put_error(6,0x80,0x41,".\\crypto\\evp\\digest.c",0x134);
+          FUN_009d90b0(6,0x80,0x41,".\\crypto\\evp\\digest.c",0x134);
           return 0;
         }
       }
@@ -4121,9 +4108,9 @@ undefined4 _EVP_DigestInit_ex(int *param_1,int *param_2)
 }
 
 
-// 009E5890  _EVP_DigestUpdate  (line unknown)
+// 009E5890  FUN_009e5890  (line unknown)
 
-void _EVP_DigestUpdate(int *param_1)
+void FUN_009e5890(int *param_1)
 
 {
                     /* WARNING: Could not recover jumptable at 0x009e589d. Too many branches */
@@ -4133,15 +4120,15 @@ void _EVP_DigestUpdate(int *param_1)
 }
 
 
-// 009E58A0  _EVP_DigestFinal_ex  (line unknown)
+// 009E58A0  FUN_009e58a0  (line unknown)
 
-undefined4 _EVP_DigestFinal_ex(int *param_1,undefined4 param_2,undefined4 *param_3)
+undefined4 FUN_009e58a0(int *param_1,undefined4 param_2,undefined4 *param_3)
 
 {
   undefined4 uVar1;
   
   if (0x40 < *(int *)(*param_1 + 8)) {
-    _OpenSSLDie(".\\crypto\\evp\\digest.c",0x159,"ctx->digest->md_size <= EVP_MAX_MD_SIZE");
+    FUN_009dfd90(".\\crypto\\evp\\digest.c",0x159,"ctx->digest->md_size <= EVP_MAX_MD_SIZE");
   }
   uVar1 = (**(code **)(*param_1 + 0x18))(param_1,param_2);
   if (param_3 != (undefined4 *)0x0) {
@@ -4151,14 +4138,14 @@ undefined4 _EVP_DigestFinal_ex(int *param_1,undefined4 param_2,undefined4 *param
     (**(code **)(*param_1 + 0x20))(param_1);
     param_1[2] = param_1[2] | 2;
   }
-  memset((uchar *)param_1[3],'\0',*(ulong *)(*param_1 + 0x44));
+  _memset((void *)param_1[3],0,*(size_t *)(*param_1 + 0x44));
   return uVar1;
 }
 
 
-// 009E5920  _EVP_MD_CTX_cleanup  (line unknown)
+// 009E5920  FUN_009e5920  (line unknown)
 
-undefined4 _EVP_MD_CTX_cleanup(int *param_1)
+undefined4 FUN_009e5920(int *param_1)
 
 {
   code *pcVar1;
@@ -4171,12 +4158,12 @@ undefined4 _EVP_MD_CTX_cleanup(int *param_1)
     }
     if ((((*param_1 != 0) && (iVar2 = *(int *)(*param_1 + 0x44), iVar2 != 0)) && (param_1[3] != 0))
        && ((*(byte *)(param_1 + 2) & 4) == 0)) {
-      _OPENSSL_cleanse(param_1[3],iVar2);
-      _CRYPTO_free(param_1[3]);
+      FUN_009e5400(param_1[3],iVar2);
+      FUN_009d98a0(param_1[3]);
     }
   }
   if (param_1[1] != 0) {
-    _ENGINE_finish(param_1[1]);
+    FUN_009e0a70(param_1[1]);
   }
   *param_1 = 0;
   param_1[1] = 0;
@@ -4186,22 +4173,22 @@ undefined4 _EVP_MD_CTX_cleanup(int *param_1)
 }
 
 
-// 009E5990  _EVP_MD_CTX_copy_ex  (line unknown)
+// 009E5990  FUN_009e5990  (line unknown)
 
-undefined4 _EVP_MD_CTX_copy_ex(int *param_1,int *param_2)
+undefined4 FUN_009e5990(int *param_1,int *param_2)
 
 {
   int iVar1;
   undefined4 uVar2;
   
   if ((param_2 == (int *)0x0) || (*param_2 == 0)) {
-    _ERR_put_error(6,0x6e,0x6f,".\\crypto\\evp\\digest.c",0x171);
+    FUN_009d90b0(6,0x6e,0x6f,".\\crypto\\evp\\digest.c",0x171);
     return 0;
   }
   if (param_2[1] != 0) {
-    iVar1 = _ENGINE_init(param_2[1]);
+    iVar1 = FUN_009e09f0(param_2[1]);
     if (iVar1 == 0) {
-      _ERR_put_error(6,0x6e,0x26,".\\crypto\\evp\\digest.c",0x178);
+      FUN_009d90b0(6,0x6e,0x26,".\\crypto\\evp\\digest.c",0x178);
       return 0;
     }
   }
@@ -4212,24 +4199,24 @@ undefined4 _EVP_MD_CTX_copy_ex(int *param_1,int *param_2)
   else {
     iVar1 = 0;
   }
-  _EVP_MD_CTX_cleanup(param_1);
+  FUN_009e5920(param_1);
   *param_1 = *param_2;
   param_1[1] = param_2[1];
   param_1[2] = param_2[2];
   param_1[3] = param_2[3];
   if (*(int *)(*param_1 + 0x44) != 0) {
     if (iVar1 == 0) {
-      iVar1 = _CRYPTO_malloc(*(int *)(*param_1 + 0x44),".\\crypto\\evp\\digest.c",0x18c);
+      iVar1 = FUN_009d96f0(*(int *)(*param_1 + 0x44),".\\crypto\\evp\\digest.c",0x18c);
       param_1[3] = iVar1;
       if (iVar1 == 0) {
-        _ERR_put_error(6,0x6e,0x41,".\\crypto\\evp\\digest.c",399);
+        FUN_009d90b0(6,0x6e,0x41,".\\crypto\\evp\\digest.c",399);
         return 0;
       }
     }
     else {
       param_1[3] = iVar1;
     }
-    memcpy((uchar *)param_1[3],(uchar *)param_2[3],*(ulong *)(*param_1 + 0x44));
+    FID_conflict__memcpy((void *)param_1[3],(void *)param_2[3],*(size_t *)(*param_1 + 0x44));
   }
   if (*(code **)(*param_1 + 0x1c) != (code *)0x0) {
     uVar2 = (**(code **)(*param_1 + 0x1c))(param_1,param_2);
@@ -4239,13 +4226,13 @@ undefined4 _EVP_MD_CTX_copy_ex(int *param_1,int *param_2)
 }
 
 
-// 009E5AB0  _EVP_Digest  (line unknown)
+// 009E5AB0  FUN_009e5ab0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
-_EVP_Digest(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-           undefined4 param_5,undefined4 param_6)
+FUN_009e5ab0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+            undefined4 param_5,undefined4 param_6)
 
 {
   int iVar1;
@@ -4255,34 +4242,32 @@ _EVP_Digest(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 
   local_10[1] = 0;
   local_10[3] = 0;
   local_10[2] = 1;
-  iVar1 = _EVP_DigestInit_ex(local_10,param_5,param_6);
+  iVar1 = FUN_009e57e0(local_10,param_5,param_6);
   if (iVar1 != 0) {
     iVar1 = (**(code **)(local_10[0] + 0x14))(local_10,param_1,param_2);
     if (iVar1 != 0) {
-      iVar1 = _EVP_DigestFinal_ex(local_10,param_3,param_4);
+      iVar1 = FUN_009e58a0(local_10,param_3,param_4);
       if (iVar1 != 0) {
-        _EVP_MD_CTX_cleanup(local_10);
+        FUN_009e5920(local_10);
         return 1;
       }
     }
   }
-  _EVP_MD_CTX_cleanup(local_10);
+  FUN_009e5920(local_10);
   return 0;
 }
 
 
-// 009E5B60  _EVP_SignFinal  (line unknown)
+// 009E5B60  FUN_009e5b60  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _EVP_SignFinal(int *param_1,undefined4 param_2,undefined4 *param_3,int *param_4)
+void FUN_009e5b60(int *param_1,undefined4 param_2,undefined4 *param_3,int *param_4)
 
 {
   undefined4 *puVar1;
   int *piVar2;
-  undefined4 uVar3;
-  int iVar4;
+  int iVar3;
   undefined4 local_60;
   undefined1 *local_5c;
   int local_58;
@@ -4290,88 +4275,91 @@ undefined4 _EVP_SignFinal(int *param_1,undefined4 param_2,undefined4 *param_3,in
   undefined1 local_44 [64];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_60;
+  local_4 = DAT_00b86490 ^ (uint)&local_60;
   *param_3 = 0;
-  iVar4 = 0;
+  iVar3 = 0;
   piVar2 = (int *)(*param_1 + 0x2c);
   do {
     if (*piVar2 == 0) break;
     if (*param_4 == *piVar2) {
       if (*(int *)(*param_1 + 0x24) == 0) {
-        _ERR_put_error(6,0x6b,0x68,".\\crypto\\evp\\p_sign.c",0x68);
-        return 0;
+        FUN_009d90b0(6,0x6b,0x68,".\\crypto\\evp\\p_sign.c",0x68);
+        __security_check_cookie(local_4 ^ (uint)&local_60);
+        return;
       }
-      _EVP_MD_CTX_init(local_54);
-      _EVP_MD_CTX_copy_ex(local_54,param_1);
+      FUN_009e56e0(local_54);
+      FUN_009e5990(local_54,param_1);
       puVar1 = (undefined4 *)*param_1;
       if ((puVar1[3] & 0x800) == 0) {
-        _EVP_DigestFinal_ex(local_54,local_44,&local_60);
-        uVar3 = (*(code *)((undefined4 *)*param_1)[9])
-                          (*(undefined4 *)*param_1,local_44,local_60,param_2,param_3,param_4[3]);
+        FUN_009e58a0(local_54,local_44,&local_60);
+        (*(code *)((undefined4 *)*param_1)[9])
+                  (*(undefined4 *)*param_1,local_44,local_60,param_2,param_3,param_4[3]);
       }
       else {
         local_58 = param_4[3];
         local_5c = local_54;
-        uVar3 = (*(code *)puVar1[9])(*puVar1,0,0xffffffff,param_2,param_3,&local_5c);
+        (*(code *)puVar1[9])(*puVar1,0,0xffffffff,param_2,param_3,&local_5c);
       }
-      _EVP_MD_CTX_cleanup(local_54);
-      return uVar3;
+      FUN_009e5920(local_54);
+      __security_check_cookie(local_4 ^ (uint)&local_60);
+      return;
     }
-    iVar4 = iVar4 + 1;
+    iVar3 = iVar3 + 1;
     piVar2 = piVar2 + 1;
-  } while (iVar4 < 4);
-  _ERR_put_error(6,0x6b,0x6e,".\\crypto\\evp\\p_sign.c",99);
-  return 0;
+  } while (iVar3 < 4);
+  FUN_009d90b0(6,0x6b,0x6e,".\\crypto\\evp\\p_sign.c",99);
+  __security_check_cookie(local_4 ^ (uint)&local_60);
+  return;
 }
 
 
-// 009E5CB0  _EVP_CIPHER_get_asn1_iv  (line unknown)
+// 009E5CB0  FUN_009e5cb0  (line unknown)
 
-uint _EVP_CIPHER_get_asn1_iv(int param_1,int param_2)
+uint FUN_009e5cb0(int param_1,int param_2)
 
 {
+  uint _Size;
   uint uVar1;
-  uint uVar2;
   
-  uVar2 = 0;
+  uVar1 = 0;
   if (param_2 != 0) {
-    uVar1 = _EVP_CIPHER_CTX_iv_length(param_1);
-    if (0x10 < uVar1) {
-      _OpenSSLDie(".\\crypto\\evp\\evp_lib.c",0x62,"l <= sizeof(c->iv)");
+    _Size = FUN_009d4440(param_1);
+    if (0x10 < _Size) {
+      FUN_009dfd90(".\\crypto\\evp\\evp_lib.c",0x62,"l <= sizeof(c->iv)");
     }
-    uVar2 = _ASN1_TYPE_get_octetstring(param_2,(uchar *)(param_1 + 0x10),uVar1);
-    if (uVar2 != uVar1) {
+    uVar1 = FUN_00a012a0(param_2,(void *)(param_1 + 0x10),_Size);
+    if (uVar1 != _Size) {
       return 0xffffffff;
     }
-    if (0 < (int)uVar2) {
-      memcpy((uchar *)(param_1 + 0x20),(uchar *)(param_1 + 0x10),uVar1);
+    if (0 < (int)uVar1) {
+      FID_conflict__memcpy((void *)(param_1 + 0x20),(void *)(param_1 + 0x10),_Size);
     }
   }
-  return uVar2;
+  return uVar1;
 }
 
 
-// 009E5D70  _EVP_CIPHER_CTX_key_length  (line unknown)
+// 009E5D70  FUN_009e5d70  (line unknown)
 
-undefined4 _EVP_CIPHER_CTX_key_length(int param_1)
+undefined4 FUN_009e5d70(int param_1)
 
 {
   return *(undefined4 *)(param_1 + 0x58);
 }
 
 
-// 009E5D80  _EVP_MD_block_size  (line unknown)
+// 009E5D80  FUN_009e5d80  (line unknown)
 
-undefined4 _EVP_MD_block_size(int param_1)
+undefined4 FUN_009e5d80(int param_1)
 
 {
   return *(undefined4 *)(param_1 + 0x40);
 }
 
 
-// 009E5D90  _EVP_MD_CTX_set_flags  (line unknown)
+// 009E5D90  FUN_009e5d90  (line unknown)
 
-void _EVP_MD_CTX_set_flags(int param_1,uint param_2)
+void FUN_009e5d90(int param_1,uint param_2)
 
 {
   *(uint *)(param_1 + 8) = *(uint *)(param_1 + 8) | param_2;
@@ -4379,16 +4367,16 @@ void _EVP_MD_CTX_set_flags(int param_1,uint param_2)
 }
 
 
-// 009E5DA0  _EC_KEY_new  (line unknown)
+// 009E5DA0  FUN_009e5da0  (line unknown)
 
-undefined4 * _EC_KEY_new(void)
+undefined4 * FUN_009e5da0(void)
 
 {
   undefined4 *puVar1;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x20,".\\crypto\\ec\\ec_key.c",0x49);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x20,".\\crypto\\ec\\ec_key.c",0x49);
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(0x10,0xb6,0x41,".\\crypto\\ec\\ec_key.c",0x4c);
+    FUN_009d90b0(0x10,0xb6,0x41,".\\crypto\\ec\\ec_key.c",0x4c);
     return (undefined4 *)0x0;
   }
   *puVar1 = 1;
@@ -4403,37 +4391,37 @@ undefined4 * _EC_KEY_new(void)
 }
 
 
-// 009E5E00  _EC_KEY_free  (line unknown)
+// 009E5E00  FUN_009e5e00  (line unknown)
 
-void _EC_KEY_free(int param_1)
+void FUN_009e5e00(int param_1)
 
 {
   int iVar1;
   
   if (param_1 != 0) {
-    iVar1 = _CRYPTO_add_lock(param_1 + 0x18,0xffffffff,0x21,".\\crypto\\ec\\ec_key.c",0x6f);
+    iVar1 = FUN_009dfad0(param_1 + 0x18,0xffffffff,0x21,".\\crypto\\ec\\ec_key.c",0x6f);
     if (iVar1 < 1) {
       if (*(int *)(param_1 + 4) != 0) {
-        _EC_GROUP_free(*(int *)(param_1 + 4));
+        FUN_009e7480(*(int *)(param_1 + 4));
       }
       if (*(int *)(param_1 + 8) != 0) {
-        _EC_POINT_free(*(int *)(param_1 + 8));
+        FUN_009e6ac0(*(int *)(param_1 + 8));
       }
       if (*(int *)(param_1 + 0xc) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0xc));
+        FUN_009dcb30(*(int *)(param_1 + 0xc));
       }
-      _EC_EX_DATA_free_all_data(param_1 + 0x1c);
-      _OPENSSL_cleanse(param_1,0x20);
-      _CRYPTO_free(param_1);
+      FUN_009e6990(param_1 + 0x1c);
+      FUN_009e5400(param_1,0x20);
+      FUN_009d98a0(param_1);
     }
   }
   return;
 }
 
 
-// 009E5E70  _EC_KEY_copy  (line unknown)
+// 009E5E70  FUN_009e5e70  (line unknown)
 
-undefined4 * _EC_KEY_copy(undefined4 *param_1,undefined4 *param_2)
+undefined4 * FUN_009e5e70(undefined4 *param_1,undefined4 *param_2)
 
 {
   undefined4 *puVar1;
@@ -4441,52 +4429,52 @@ undefined4 * _EC_KEY_copy(undefined4 *param_1,undefined4 *param_2)
   int iVar3;
   
   if ((param_1 == (undefined4 *)0x0) || (param_2 == (undefined4 *)0x0)) {
-    _ERR_put_error(0x10,0xb2,0x43,".\\crypto\\ec\\ec_key.c",0x90);
+    FUN_009d90b0(0x10,0xb2,0x43,".\\crypto\\ec\\ec_key.c",0x90);
     return (undefined4 *)0x0;
   }
   if (param_2[1] != 0) {
-    uVar2 = _SSL_version(param_2[1]);
+    uVar2 = FUN_009e6680(param_2[1]);
     if (param_1[1] != 0) {
-      _EC_GROUP_free(param_1[1]);
+      FUN_009e7480(param_1[1]);
     }
-    iVar3 = _EC_GROUP_new(uVar2);
+    iVar3 = FUN_009e65b0(uVar2);
     param_1[1] = iVar3;
     if (iVar3 == 0) {
       return (undefined4 *)0x0;
     }
-    iVar3 = _EC_GROUP_copy(iVar3,param_2[1]);
+    iVar3 = FUN_009e7590(iVar3,param_2[1]);
     if (iVar3 == 0) {
       return (undefined4 *)0x0;
     }
   }
   if ((param_2[2] != 0) && (param_2[1] != 0)) {
     if (param_1[2] != 0) {
-      _EC_POINT_free(param_1[2]);
+      FUN_009e6ac0(param_1[2]);
     }
-    iVar3 = _EC_POINT_new(param_2[1]);
+    iVar3 = FUN_009e6a10(param_2[1]);
     param_1[2] = iVar3;
     if (iVar3 == 0) {
       return (undefined4 *)0x0;
     }
-    iVar3 = _EC_POINT_copy(iVar3,param_2[2]);
+    iVar3 = FUN_009e6b30(iVar3,param_2[2]);
     if (iVar3 == 0) {
       return (undefined4 *)0x0;
     }
   }
   if (param_2[3] != 0) {
     if (param_1[3] == 0) {
-      iVar3 = _BN_new();
+      iVar3 = FUN_009dcbf0();
       param_1[3] = iVar3;
       if (iVar3 == 0) {
         return (undefined4 *)0x0;
       }
     }
-    iVar3 = _BN_copy(param_1[3],param_2[3]);
+    iVar3 = FUN_009dcd80(param_1[3],param_2[3]);
     if (iVar3 == 0) {
       return (undefined4 *)0x0;
     }
   }
-  _EC_EX_DATA_free_all_data(param_1 + 7);
+  FUN_009e6990(param_1 + 7);
   puVar1 = (undefined4 *)param_2[7];
   while( true ) {
     if (puVar1 == (undefined4 *)0x0) {
@@ -4497,51 +4485,50 @@ undefined4 * _EC_KEY_copy(undefined4 *param_1,undefined4 *param_2)
     }
     iVar3 = (*(code *)puVar1[2])(puVar1[1]);
     if ((iVar3 == 0) ||
-       (iVar3 = _EC_EX_DATA_set_data(param_1 + 7,iVar3,puVar1[2],puVar1[3],puVar1[4]), iVar3 == 0))
-    break;
+       (iVar3 = FUN_009e6850(param_1 + 7,iVar3,puVar1[2],puVar1[3],puVar1[4]), iVar3 == 0)) break;
     puVar1 = (undefined4 *)*puVar1;
   }
   return (undefined4 *)0x0;
 }
 
 
-// 009E5FD0  _EC_KEY_dup  (line unknown)
+// 009E5FD0  FUN_009e5fd0  (line unknown)
 
-int _EC_KEY_dup(undefined4 param_1)
+int FUN_009e5fd0(undefined4 param_1)
 
 {
   int iVar1;
   int iVar2;
   
-  iVar1 = _EC_KEY_new();
+  iVar1 = FUN_009e5da0();
   if (iVar1 != 0) {
-    iVar2 = _EC_KEY_copy(iVar1,param_1);
+    iVar2 = FUN_009e5e70(iVar1,param_1);
     if (iVar2 != 0) {
       return iVar1;
     }
-    _EC_KEY_free(iVar1);
+    FUN_009e5e00(iVar1);
   }
   return 0;
 }
 
 
-// 009E6000  _EC_KEY_up_ref  (line unknown)
+// 009E6000  FUN_009e6000  (line unknown)
 
-bool _EC_KEY_up_ref(int param_1)
+bool FUN_009e6000(int param_1)
 
 {
   int iVar1;
   
-  iVar1 = _CRYPTO_add_lock(param_1 + 0x18,1,0x21,".\\crypto\\ec\\ec_key.c",0xdb);
+  iVar1 = FUN_009dfad0(param_1 + 0x18,1,0x21,".\\crypto\\ec\\ec_key.c",0xdb);
   return 1 < iVar1;
 }
 
 
-// 009E6030  _EC_KEY_generate_key  (line unknown)
+// 009E6030  FUN_009e6030  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _EC_KEY_generate_key(int param_1)
+undefined4 FUN_009e6030(int param_1)
 
 {
   int iVar1;
@@ -4555,100 +4542,99 @@ undefined4 _EC_KEY_generate_key(int param_1)
   iVar5 = 0;
   local_4 = 0;
   if ((param_1 == 0) || (*(int *)(param_1 + 4) == 0)) {
-    _ERR_put_error(0x10,0xb3,0x43,".\\crypto\\ec\\ec_key.c",0xf2);
+    FUN_009d90b0(0x10,0xb3,0x43,".\\crypto\\ec\\ec_key.c",0xf2);
     return 0;
   }
-  iVar1 = _BN_new();
+  iVar1 = FUN_009dcbf0();
   if (iVar1 != 0) {
-    iVar2 = _BN_CTX_new();
+    iVar2 = FUN_009e6430();
     if ((iVar2 != 0) &&
-       (((iVar5 = *(int *)(param_1 + 0xc), iVar5 != 0 || (iVar5 = _BN_new(), iVar5 != 0)) &&
-        (iVar3 = _EC_GROUP_get_order(*(undefined4 *)(param_1 + 4),iVar1,iVar2), iVar3 != 0)))) {
+       (((iVar5 = *(int *)(param_1 + 0xc), iVar5 != 0 || (iVar5 = FUN_009dcbf0(), iVar5 != 0)) &&
+        (iVar3 = FUN_009e66a0(*(undefined4 *)(param_1 + 4),iVar1,iVar2), iVar3 != 0)))) {
       do {
-        iVar3 = _BN_rand_range(iVar5,iVar1);
+        iVar3 = FUN_00a04dd0(iVar5,iVar1);
         if (iVar3 == 0) goto LAB_009e60f5;
       } while (*(int *)(iVar5 + 4) == 0);
       iVar4 = *(int *)(param_1 + 8);
-      if (((iVar4 != 0) || (iVar4 = _EC_POINT_new(*(undefined4 *)(param_1 + 4)), iVar4 != 0)) &&
-         (iVar3 = _EC_POINT_mul(*(undefined4 *)(param_1 + 4),iVar4,iVar5,0,0,iVar2), iVar3 != 0)) {
+      if (((iVar4 != 0) || (iVar4 = FUN_009e6a10(*(undefined4 *)(param_1 + 4)), iVar4 != 0)) &&
+         (iVar3 = FUN_009e73d0(*(undefined4 *)(param_1 + 4),iVar4,iVar5,0,0,iVar2), iVar3 != 0)) {
         *(int *)(param_1 + 0xc) = iVar5;
         *(int *)(param_1 + 8) = iVar4;
         local_4 = 1;
       }
     }
 LAB_009e60f5:
-    _BN_free(iVar1);
+    FUN_009dcb90(iVar1);
     if ((iVar4 != 0) && (*(int *)(param_1 + 8) == 0)) {
-      _EC_POINT_free(iVar4);
+      FUN_009e6ac0(iVar4);
     }
     if ((iVar5 != 0) && (*(int *)(param_1 + 0xc) == 0)) {
-      _BN_free(iVar5);
+      FUN_009dcb90(iVar5);
     }
     if (iVar2 != 0) {
-      _BN_CTX_free(iVar2);
+      FUN_009e6490(iVar2);
     }
   }
   return local_4;
 }
 
 
-// 009E6170  _EC_KEY_set_group  (line unknown)
+// 009E6170  FUN_009e6170  (line unknown)
 
-bool _EC_KEY_set_group(int param_1,undefined4 param_2)
+bool FUN_009e6170(int param_1,undefined4 param_2)
 
 {
   int iVar1;
   
   if (*(int *)(param_1 + 4) != 0) {
-    _EC_GROUP_free(*(int *)(param_1 + 4));
+    FUN_009e7480(*(int *)(param_1 + 4));
   }
-  iVar1 = _EC_GROUP_dup(param_2);
+  iVar1 = FUN_009e7750(param_2);
   *(int *)(param_1 + 4) = iVar1;
   return iVar1 != 0;
 }
 
 
-// 009E61A0  _EC_KEY_set_public_key  (line unknown)
+// 009E61A0  FUN_009e61a0  (line unknown)
 
-bool _EC_KEY_set_public_key(int param_1,undefined4 param_2)
+bool FUN_009e61a0(int param_1,undefined4 param_2)
 
 {
   int iVar1;
   
   if (*(int *)(param_1 + 8) != 0) {
-    _EC_POINT_free(*(int *)(param_1 + 8));
+    FUN_009e6ac0(*(int *)(param_1 + 8));
   }
-  iVar1 = _EC_POINT_dup(param_2,*(undefined4 *)(param_1 + 4));
+  iVar1 = FUN_009e6ba0(param_2,*(undefined4 *)(param_1 + 4));
   *(int *)(param_1 + 8) = iVar1;
   return iVar1 != 0;
 }
 
 
-// 009E61E0  _EC_KEY_get_key_method_data  (line unknown)
+// 009E61E0  FUN_009e61e0  (line unknown)
 
-void _EC_KEY_get_key_method_data(void)
+void FUN_009e61e0(void)
 
 {
-  _EC_EX_DATA_get_data();
+  FUN_009e68f0();
   return;
 }
 
 
-// 009E61F0  _EC_KEY_insert_key_method_data  (line unknown)
+// 009E61F0  FUN_009e61f0  (line unknown)
 
-void _EC_KEY_insert_key_method_data
-               (int param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-               undefined4 param_5)
+void FUN_009e61f0(int param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5)
 
 {
   int iVar1;
   
-  _CRYPTO_lock(9,0x21,".\\crypto\\ec\\ec_key.c",0x1b7);
-  iVar1 = _EC_EX_DATA_get_data(*(undefined4 *)(param_1 + 0x1c),param_3,param_4,param_5);
+  FUN_009dfaa0(9,0x21,".\\crypto\\ec\\ec_key.c",0x1b7);
+  iVar1 = FUN_009e68f0(*(undefined4 *)(param_1 + 0x1c),param_3,param_4,param_5);
   if (iVar1 == 0) {
-    _EC_EX_DATA_set_data(param_1 + 0x1c,param_2,param_3,param_4,param_5);
+    FUN_009e6850(param_1 + 0x1c,param_2,param_3,param_4,param_5);
   }
-  _CRYPTO_lock(10,0x21,".\\crypto\\ec\\ec_key.c",0x1bb);
+  FUN_009dfaa0(10,0x21,".\\crypto\\ec\\ec_key.c",0x1bb);
   return;
 }
 
@@ -4659,30 +4645,30 @@ void FUN_009e6260(undefined4 param_1)
 
 {
   int iVar1;
-  uchar *puVar2;
-  uint uVar3;
+  void *_Dst;
+  uint uVar2;
   int *unaff_ESI;
   
   iVar1 = unaff_ESI[2];
   if (unaff_ESI[1] == iVar1) {
     if (iVar1 == 0) {
-      uVar3 = 0x20;
+      uVar2 = 0x20;
     }
     else {
-      uVar3 = (uint)(iVar1 * 3) >> 1;
+      uVar2 = (uint)(iVar1 * 3) >> 1;
     }
-    puVar2 = (uchar *)_CRYPTO_malloc(uVar3 * 4,".\\crypto\\bn\\bn_ctx.c",0x152);
-    if (puVar2 == (uchar *)0x0) {
+    _Dst = (void *)FUN_009d96f0(uVar2 * 4,".\\crypto\\bn\\bn_ctx.c",0x152);
+    if (_Dst == (void *)0x0) {
       return;
     }
     if (unaff_ESI[1] != 0) {
-      memcpy(puVar2,(uchar *)*unaff_ESI,unaff_ESI[1] * 4);
+      FID_conflict__memcpy(_Dst,(void *)*unaff_ESI,unaff_ESI[1] * 4);
     }
     if (unaff_ESI[2] != 0) {
-      _CRYPTO_free(*unaff_ESI);
+      FUN_009d98a0(*unaff_ESI);
     }
-    *unaff_ESI = (int)puVar2;
-    unaff_ESI[2] = uVar3;
+    *unaff_ESI = (int)_Dst;
+    unaff_ESI[2] = uVar2;
   }
   *(undefined4 *)(*unaff_ESI + unaff_ESI[1] * 4) = param_1;
   unaff_ESI[1] = unaff_ESI[1] + 1;
@@ -4705,13 +4691,13 @@ void FUN_009e62f0(void)
     iVar1 = 0x10;
     do {
       if (*piVar2 != 0) {
-        _BN_clear_free(piVar2);
+        FUN_009dcb30(piVar2);
       }
       piVar2 = piVar2 + 5;
       iVar1 = iVar1 + -1;
     } while (iVar1 != 0);
     unaff_EDI[1] = *(int *)(*unaff_EDI + 0x144);
-    _CRYPTO_free(*unaff_EDI);
+    FUN_009d98a0(*unaff_EDI);
     iVar1 = unaff_EDI[1];
     *unaff_EDI = iVar1;
   }
@@ -4732,14 +4718,14 @@ int FUN_009e6340(void)
   
   uVar1 = unaff_ESI[3];
   if (uVar1 == unaff_ESI[4]) {
-    iVar2 = _CRYPTO_malloc(0x148,".\\crypto\\bn\\bn_ctx.c",0x199);
+    iVar2 = FUN_009d96f0(0x148,".\\crypto\\bn\\bn_ctx.c",0x199);
     if (iVar2 == 0) {
       return 0;
     }
     iVar4 = 0x10;
     iVar3 = iVar2;
     do {
-      _BN_init(iVar3);
+      FUN_009dcbd0(iVar3);
       iVar3 = iVar3 + 0x14;
       iVar4 = iVar4 + -1;
     } while (iVar4 != 0);
@@ -4797,16 +4783,16 @@ void FUN_009e63f0(void)
 }
 
 
-// 009E6430  _BN_CTX_new  (line unknown)
+// 009E6430  FUN_009e6430  (line unknown)
 
-undefined4 * _BN_CTX_new(void)
+undefined4 * FUN_009e6430(void)
 
 {
   undefined4 *puVar1;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x2c,".\\crypto\\bn\\bn_ctx.c",0xd8);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x2c,".\\crypto\\bn\\bn_ctx.c",0xd8);
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(3,0x6a,0x41,".\\crypto\\bn\\bn_ctx.c",0xdb);
+    FUN_009d90b0(3,0x6a,0x41,".\\crypto\\bn\\bn_ctx.c",0xdb);
     return (undefined4 *)0x0;
   }
   puVar1[2] = 0;
@@ -4824,25 +4810,25 @@ undefined4 * _BN_CTX_new(void)
 }
 
 
-// 009E6490  _BN_CTX_free  (line unknown)
+// 009E6490  FUN_009e6490  (line unknown)
 
-void _BN_CTX_free(int param_1)
+void FUN_009e6490(int param_1)
 
 {
   if (param_1 != 0) {
     if (*(int *)(param_1 + 0x1c) != 0) {
-      _CRYPTO_free(*(undefined4 *)(param_1 + 0x14));
+      FUN_009d98a0(*(undefined4 *)(param_1 + 0x14));
     }
     FUN_009e62f0();
-    _CRYPTO_free(param_1);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E64C0  _BN_CTX_start  (line unknown)
+// 009E64C0  FUN_009e64c0  (line unknown)
 
-void _BN_CTX_start(int param_1)
+void FUN_009e64c0(int param_1)
 
 {
   int iVar1;
@@ -4850,7 +4836,7 @@ void _BN_CTX_start(int param_1)
   if ((*(int *)(param_1 + 0x24) == 0) && (*(int *)(param_1 + 0x28) == 0)) {
     iVar1 = FUN_009e6260(*(undefined4 *)(param_1 + 0x20));
     if (iVar1 == 0) {
-      _ERR_put_error(3,0x81,0x6d,".\\crypto\\bn\\bn_ctx.c",0x108);
+      FUN_009d90b0(3,0x81,0x6d,".\\crypto\\bn\\bn_ctx.c",0x108);
       *(int *)(param_1 + 0x24) = *(int *)(param_1 + 0x24) + 1;
       return;
     }
@@ -4862,9 +4848,9 @@ void _BN_CTX_start(int param_1)
 }
 
 
-// 009E6510  _BN_CTX_end  (line unknown)
+// 009E6510  FUN_009e6510  (line unknown)
 
-void _BN_CTX_end(int param_1)
+void FUN_009e6510(int param_1)
 
 {
   uint uVar1;
@@ -4884,9 +4870,9 @@ void _BN_CTX_end(int param_1)
 }
 
 
-// 009E6550  _BN_CTX_get  (line unknown)
+// 009E6550  FUN_009e6550  (line unknown)
 
-int _BN_CTX_get(int param_1)
+int FUN_009e6550(int param_1)
 
 {
   int iVar1;
@@ -4895,10 +4881,10 @@ int _BN_CTX_get(int param_1)
     iVar1 = FUN_009e6340();
     if (iVar1 == 0) {
       *(undefined4 *)(param_1 + 0x28) = 1;
-      _ERR_put_error(3,0x74,0x6d,".\\crypto\\bn\\bn_ctx.c",0x12a);
+      FUN_009d90b0(3,0x74,0x6d,".\\crypto\\bn\\bn_ctx.c",0x12a);
       return 0;
     }
-    _BN_set_word(iVar1,0);
+    FUN_009dce60(iVar1,0);
     *(int *)(param_1 + 0x20) = *(int *)(param_1 + 0x20) + 1;
     return iVar1;
   }
@@ -4906,32 +4892,32 @@ int _BN_CTX_get(int param_1)
 }
 
 
-// 009E65B0  _EC_GROUP_new  (line unknown)
+// 009E65B0  FUN_009e65b0  (line unknown)
 
-int * _EC_GROUP_new(int param_1)
+int * FUN_009e65b0(int param_1)
 
 {
   int *piVar1;
   int iVar2;
   
   if (param_1 == 0) {
-    _ERR_put_error(0x10,0x6c,0x43,".\\crypto\\ec\\ec_lib.c",0x52);
+    FUN_009d90b0(0x10,0x6c,0x43,".\\crypto\\ec\\ec_lib.c",0x52);
     return (int *)0x0;
   }
   if (*(int *)(param_1 + 4) == 0) {
-    _ERR_put_error(0x10,0x6c,0x42,".\\crypto\\ec\\ec_lib.c",0x57);
+    FUN_009d90b0(0x10,0x6c,0x42,".\\crypto\\ec\\ec_lib.c",0x57);
     return (int *)0x0;
   }
-  piVar1 = (int *)_CRYPTO_malloc(0xa8,".\\crypto\\ec\\ec_lib.c",0x5b);
+  piVar1 = (int *)FUN_009d96f0(0xa8,".\\crypto\\ec\\ec_lib.c",0x5b);
   if (piVar1 == (int *)0x0) {
-    _ERR_put_error(0x10,0x6c,0x41,".\\crypto\\ec\\ec_lib.c",0x5e);
+    FUN_009d90b0(0x10,0x6c,0x41,".\\crypto\\ec\\ec_lib.c",0x5e);
     return (int *)0x0;
   }
   *piVar1 = param_1;
   piVar1[0x11] = 0;
   piVar1[1] = 0;
-  _BN_init(piVar1 + 2);
-  _BN_init(piVar1 + 7);
+  FUN_009dcbd0(piVar1 + 2);
+  FUN_009dcbd0(piVar1 + 7);
   piVar1[0xc] = 0;
   piVar1[0xd] = 0;
   piVar1[0xe] = 4;
@@ -4939,39 +4925,39 @@ int * _EC_GROUP_new(int param_1)
   piVar1[0x10] = 0;
   iVar2 = (**(code **)(param_1 + 4))(piVar1);
   if (iVar2 == 0) {
-    _CRYPTO_free(piVar1);
+    FUN_009d98a0(piVar1);
     return (int *)0x0;
   }
   return piVar1;
 }
 
 
-// 009E6680  _SSL_version  (line unknown)
+// 009E6680  FUN_009e6680  (line unknown)
 
-undefined4 _SSL_version(undefined4 *param_1)
+undefined4 FUN_009e6680(undefined4 *param_1)
 
 {
   return *param_1;
 }
 
 
-// 009E6690  _EC_KEY_get0_group  (line unknown)
+// 009E6690  FUN_009e6690  (line unknown)
 
-undefined4 _EC_KEY_get0_group(int param_1)
+undefined4 FUN_009e6690(int param_1)
 
 {
   return *(undefined4 *)(param_1 + 4);
 }
 
 
-// 009E66A0  _EC_GROUP_get_order  (line unknown)
+// 009E66A0  FUN_009e66a0  (line unknown)
 
-bool _EC_GROUP_get_order(int param_1,int param_2)
+bool FUN_009e66a0(int param_1,int param_2)
 
 {
   int iVar1;
   
-  iVar1 = _BN_copy(param_2,param_1 + 8);
+  iVar1 = FUN_009dcd80(param_2,param_1 + 8);
   if (iVar1 == 0) {
     return false;
   }
@@ -4979,14 +4965,14 @@ bool _EC_GROUP_get_order(int param_1,int param_2)
 }
 
 
-// 009E66D0  _EC_GROUP_get_cofactor  (line unknown)
+// 009E66D0  FUN_009e66d0  (line unknown)
 
-bool _EC_GROUP_get_cofactor(int param_1,undefined4 param_2)
+bool FUN_009e66d0(int param_1,undefined4 param_2)
 
 {
   int iVar1;
   
-  iVar1 = _BN_copy(param_2,param_1 + 0x1c);
+  iVar1 = FUN_009dcd80(param_2,param_1 + 0x1c);
   if (iVar1 == 0) {
     return false;
   }
@@ -4994,9 +4980,9 @@ bool _EC_GROUP_get_cofactor(int param_1,undefined4 param_2)
 }
 
 
-// 009E6700  _EC_GROUP_set_curve_name  (line unknown)
+// 009E6700  FUN_009e6700  (line unknown)
 
-void _EC_GROUP_set_curve_name(int param_1,undefined4 param_2)
+void FUN_009e6700(int param_1,undefined4 param_2)
 
 {
   *(undefined4 *)(param_1 + 0x30) = param_2;
@@ -5004,9 +4990,9 @@ void _EC_GROUP_set_curve_name(int param_1,undefined4 param_2)
 }
 
 
-// 009E6710  _EC_GROUP_set_asn1_flag  (line unknown)
+// 009E6710  FUN_009e6710  (line unknown)
 
-void _EC_GROUP_set_asn1_flag(int param_1,undefined4 param_2)
+void FUN_009e6710(int param_1,undefined4 param_2)
 
 {
   *(undefined4 *)(param_1 + 0x34) = param_2;
@@ -5014,9 +5000,9 @@ void _EC_GROUP_set_asn1_flag(int param_1,undefined4 param_2)
 }
 
 
-// 009E6720  _EC_GROUP_set_point_conversion_form  (line unknown)
+// 009E6720  FUN_009e6720  (line unknown)
 
-void _EC_GROUP_set_point_conversion_form(int param_1,undefined4 param_2)
+void FUN_009e6720(int param_1,undefined4 param_2)
 
 {
   *(undefined4 *)(param_1 + 0x38) = param_2;
@@ -5024,41 +5010,41 @@ void _EC_GROUP_set_point_conversion_form(int param_1,undefined4 param_2)
 }
 
 
-// 009E6730  _EC_GROUP_set_seed  (line unknown)
+// 009E6730  FUN_009e6730  (line unknown)
 
-ulong _EC_GROUP_set_seed(int param_1,uchar *param_2,ulong param_3)
+size_t FUN_009e6730(int param_1,void *param_2,size_t param_3)
 
 {
-  uchar *puVar1;
+  void *_Dst;
   
   if (*(int *)(param_1 + 0x3c) != 0) {
-    _CRYPTO_free(*(int *)(param_1 + 0x3c));
+    FUN_009d98a0(*(int *)(param_1 + 0x3c));
     *(undefined4 *)(param_1 + 0x3c) = 0;
     *(undefined4 *)(param_1 + 0x40) = 0;
   }
-  if ((param_3 != 0) && (param_2 != (uchar *)0x0)) {
-    puVar1 = (uchar *)_CRYPTO_malloc(param_3,".\\crypto\\ec\\ec_lib.c",0x182);
-    *(uchar **)(param_1 + 0x3c) = puVar1;
-    if (puVar1 == (uchar *)0x0) {
+  if ((param_3 != 0) && (param_2 != (void *)0x0)) {
+    _Dst = (void *)FUN_009d96f0(param_3,".\\crypto\\ec\\ec_lib.c",0x182);
+    *(void **)(param_1 + 0x3c) = _Dst;
+    if (_Dst == (void *)0x0) {
       return 0;
     }
-    memcpy(puVar1,param_2,param_3);
-    *(ulong *)(param_1 + 0x40) = param_3;
+    FID_conflict__memcpy(_Dst,param_2,param_3);
+    *(size_t *)(param_1 + 0x40) = param_3;
     return param_3;
   }
   return 1;
 }
 
 
-// 009E67A0  _EC_GROUP_set_curve_GFp  (line unknown)
+// 009E67A0  FUN_009e67a0  (line unknown)
 
-undefined4 _EC_GROUP_set_curve_GFp(int *param_1)
+undefined4 FUN_009e67a0(int *param_1)
 
 {
   undefined4 uVar1;
   
   if (*(code **)(*param_1 + 0x14) == (code *)0x0) {
-    _ERR_put_error(0x10,0x6d,0x42,".\\crypto\\ec\\ec_lib.c",0x19b);
+    FUN_009d90b0(0x10,0x6d,0x42,".\\crypto\\ec\\ec_lib.c",0x19b);
     return 0;
   }
                     /* WARNING: Could not recover jumptable at 0x009e67cc. Too many branches */
@@ -5068,15 +5054,15 @@ undefined4 _EC_GROUP_set_curve_GFp(int *param_1)
 }
 
 
-// 009E67D0  _EC_GROUP_set_curve_GF2m  (line unknown)
+// 009E67D0  FUN_009e67d0  (line unknown)
 
-undefined4 _EC_GROUP_set_curve_GF2m(int *param_1)
+undefined4 FUN_009e67d0(int *param_1)
 
 {
   undefined4 uVar1;
   
   if (*(code **)(*param_1 + 0x14) == (code *)0x0) {
-    _ERR_put_error(0x10,0xb0,0x42,".\\crypto\\ec\\ec_lib.c",0x1b1);
+    FUN_009d90b0(0x10,0xb0,0x42,".\\crypto\\ec\\ec_lib.c",0x1b1);
     return 0;
   }
                     /* WARNING: Could not recover jumptable at 0x009e67ff. Too many branches */
@@ -5086,15 +5072,15 @@ undefined4 _EC_GROUP_set_curve_GF2m(int *param_1)
 }
 
 
-// 009E6810  _EC_GROUP_get_degree  (line unknown)
+// 009E6810  FUN_009e6810  (line unknown)
 
-undefined4 _EC_GROUP_get_degree(int *param_1)
+undefined4 FUN_009e6810(int *param_1)
 
 {
   undefined4 uVar1;
   
   if (*(code **)(*param_1 + 0x1c) == (code *)0x0) {
-    _ERR_put_error(0x10,0xad,0x42,".\\crypto\\ec\\ec_lib.c",0x1c7);
+    FUN_009d90b0(0x10,0xad,0x42,".\\crypto\\ec\\ec_lib.c",0x1c7);
     return 0;
   }
                     /* WARNING: Could not recover jumptable at 0x009e683f. Too many branches */
@@ -5104,9 +5090,9 @@ undefined4 _EC_GROUP_get_degree(int *param_1)
 }
 
 
-// 009E6850  _EC_EX_DATA_set_data  (line unknown)
+// 009E6850  FUN_009e6850  (line unknown)
 
-undefined4 _EC_EX_DATA_set_data(undefined4 *param_1,int param_2,int param_3,int param_4,int param_5)
+undefined4 FUN_009e6850(undefined4 *param_1,int param_2,int param_3,int param_4,int param_5)
 
 {
   undefined4 *puVar1;
@@ -5118,7 +5104,7 @@ undefined4 _EC_EX_DATA_set_data(undefined4 *param_1,int param_2,int param_3,int 
   while( true ) {
     if (puVar1 == (undefined4 *)0x0) {
       if (param_2 != 0) {
-        puVar1 = (undefined4 *)_CRYPTO_malloc(0x14,".\\crypto\\ec\\ec_lib.c",0x23a);
+        puVar1 = (undefined4 *)FUN_009d96f0(0x14,".\\crypto\\ec\\ec_lib.c",0x23a);
         if (puVar1 == (undefined4 *)0x0) {
           return 0;
         }
@@ -5134,14 +5120,14 @@ undefined4 _EC_EX_DATA_set_data(undefined4 *param_1,int param_2,int param_3,int 
     if (((puVar1[2] == param_3) && (puVar1[3] == param_4)) && (puVar1[4] == param_5)) break;
     puVar1 = (undefined4 *)*puVar1;
   }
-  _ERR_put_error(0x10,0xd3,0x6c,".\\crypto\\ec\\ec_lib.c",0x231);
+  FUN_009d90b0(0x10,0xd3,0x6c,".\\crypto\\ec\\ec_lib.c",0x231);
   return 0;
 }
 
 
-// 009E68F0  _EC_EX_DATA_get_data  (line unknown)
+// 009E68F0  FUN_009e68f0  (line unknown)
 
-undefined4 _EC_EX_DATA_get_data(undefined4 *param_1,int param_2,int param_3,int param_4)
+undefined4 FUN_009e68f0(undefined4 *param_1,int param_2,int param_3,int param_4)
 
 {
   while( true ) {
@@ -5155,9 +5141,9 @@ undefined4 _EC_EX_DATA_get_data(undefined4 *param_1,int param_2,int param_3,int 
 }
 
 
-// 009E6930  _EC_EX_DATA_free_data  (line unknown)
+// 009E6930  FUN_009e6930  (line unknown)
 
-void _EC_EX_DATA_free_data(int *param_1,int param_2,int param_3,int param_4)
+void FUN_009e6930(int *param_1,int param_2,int param_3,int param_4)
 
 {
   int *piVar1;
@@ -5173,16 +5159,16 @@ void _EC_EX_DATA_free_data(int *param_1,int param_2,int param_3,int param_4)
     }
     iVar2 = *piVar1;
     (*(code *)piVar1[3])(piVar1[1]);
-    _CRYPTO_free(*param_1);
+    FUN_009d98a0(*param_1);
     *param_1 = iVar2;
   }
   return;
 }
 
 
-// 009E6990  _EC_EX_DATA_free_all_data  (line unknown)
+// 009E6990  FUN_009e6990  (line unknown)
 
-void _EC_EX_DATA_free_all_data(undefined4 *param_1)
+void FUN_009e6990(undefined4 *param_1)
 
 {
   undefined4 *puVar1;
@@ -5193,7 +5179,7 @@ void _EC_EX_DATA_free_all_data(undefined4 *param_1)
     while (puVar2 != (undefined4 *)0x0) {
       puVar1 = (undefined4 *)*puVar2;
       (*(code *)puVar2[3])(puVar2[1]);
-      _CRYPTO_free(puVar2);
+      FUN_009d98a0(puVar2);
       puVar2 = puVar1;
     }
     *param_1 = 0;
@@ -5202,9 +5188,9 @@ void _EC_EX_DATA_free_all_data(undefined4 *param_1)
 }
 
 
-// 009E69D0  _EC_EX_DATA_clear_free_all_data  (line unknown)
+// 009E69D0  FUN_009e69d0  (line unknown)
 
-void _EC_EX_DATA_clear_free_all_data(undefined4 *param_1)
+void FUN_009e69d0(undefined4 *param_1)
 
 {
   undefined4 *puVar1;
@@ -5215,7 +5201,7 @@ void _EC_EX_DATA_clear_free_all_data(undefined4 *param_1)
     while (puVar2 != (undefined4 *)0x0) {
       puVar1 = (undefined4 *)*puVar2;
       (*(code *)puVar2[4])(puVar2[1]);
-      _CRYPTO_free(puVar2);
+      FUN_009d98a0(puVar2);
       puVar2 = puVar1;
     }
     *param_1 = 0;
@@ -5224,56 +5210,56 @@ void _EC_EX_DATA_clear_free_all_data(undefined4 *param_1)
 }
 
 
-// 009E6A10  _EC_POINT_new  (line unknown)
+// 009E6A10  FUN_009e6a10  (line unknown)
 
-int * _EC_POINT_new(int *param_1)
+int * FUN_009e6a10(int *param_1)
 
 {
   int *piVar1;
   int iVar2;
   
   if (param_1 == (int *)0x0) {
-    _ERR_put_error(0x10,0x79,0x43,".\\crypto\\ec\\ec_lib.c",699);
+    FUN_009d90b0(0x10,0x79,0x43,".\\crypto\\ec\\ec_lib.c",699);
     return (int *)0x0;
   }
   if (*(int *)(*param_1 + 0x24) == 0) {
-    _ERR_put_error(0x10,0x79,0x42,".\\crypto\\ec\\ec_lib.c",0x2c0);
+    FUN_009d90b0(0x10,0x79,0x42,".\\crypto\\ec\\ec_lib.c",0x2c0);
     return (int *)0x0;
   }
-  piVar1 = (int *)_CRYPTO_malloc(0x44,".\\crypto\\ec\\ec_lib.c",0x2c4);
+  piVar1 = (int *)FUN_009d96f0(0x44,".\\crypto\\ec\\ec_lib.c",0x2c4);
   if (piVar1 == (int *)0x0) {
-    _ERR_put_error(0x10,0x79,0x41,".\\crypto\\ec\\ec_lib.c",0x2c7);
+    FUN_009d90b0(0x10,0x79,0x41,".\\crypto\\ec\\ec_lib.c",0x2c7);
     return (int *)0x0;
   }
   iVar2 = *param_1;
   *piVar1 = iVar2;
   iVar2 = (**(code **)(iVar2 + 0x24))(piVar1);
   if (iVar2 == 0) {
-    _CRYPTO_free(piVar1);
+    FUN_009d98a0(piVar1);
     return (int *)0x0;
   }
   return piVar1;
 }
 
 
-// 009E6AC0  _EC_POINT_free  (line unknown)
+// 009E6AC0  FUN_009e6ac0  (line unknown)
 
-void _EC_POINT_free(int *param_1)
+void FUN_009e6ac0(int *param_1)
 
 {
   if (param_1 != (int *)0x0) {
     if (*(code **)(*param_1 + 0x28) != (code *)0x0) {
       (**(code **)(*param_1 + 0x28))(param_1);
     }
-    _CRYPTO_free(param_1);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E6AF0  _EC_POINT_clear_free  (line unknown)
+// 009E6AF0  FUN_009e6af0  (line unknown)
 
-void _EC_POINT_clear_free(int *param_1)
+void FUN_009e6af0(int *param_1)
 
 {
   int iVar1;
@@ -5288,16 +5274,16 @@ void _EC_POINT_clear_free(int *param_1)
     else {
       (**(code **)(iVar1 + 0x2c))(param_1);
     }
-    _OPENSSL_cleanse(param_1,0x44);
-    _CRYPTO_free(param_1);
+    FUN_009e5400(param_1,0x44);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E6B30  _EC_POINT_copy  (line unknown)
+// 009E6B30  FUN_009e6b30  (line unknown)
 
-undefined4 _EC_POINT_copy(int *param_1,int *param_2)
+undefined4 FUN_009e6b30(int *param_1,int *param_2)
 
 {
   code *pcVar1;
@@ -5305,11 +5291,11 @@ undefined4 _EC_POINT_copy(int *param_1,int *param_2)
   
   pcVar1 = *(code **)(*param_1 + 0x30);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x72,0x42,".\\crypto\\ec\\ec_lib.c",0x2f2);
+    FUN_009d90b0(0x10,0x72,0x42,".\\crypto\\ec\\ec_lib.c",0x2f2);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x72,0x65,".\\crypto\\ec\\ec_lib.c",0x2f7);
+    FUN_009d90b0(0x10,0x72,0x65,".\\crypto\\ec\\ec_lib.c",0x2f7);
     return 0;
   }
   if (param_1 == param_2) {
@@ -5320,9 +5306,9 @@ undefined4 _EC_POINT_copy(int *param_1,int *param_2)
 }
 
 
-// 009E6BA0  _EC_POINT_dup  (line unknown)
+// 009E6BA0  FUN_009e6ba0  (line unknown)
 
-int * _EC_POINT_dup(int param_1,undefined4 param_2)
+int * FUN_009e6ba0(int param_1,undefined4 param_2)
 
 {
   int *piVar1;
@@ -5331,24 +5317,24 @@ int * _EC_POINT_dup(int param_1,undefined4 param_2)
   if (param_1 == 0) {
     return (int *)0x0;
   }
-  piVar1 = (int *)_EC_POINT_new(param_2);
+  piVar1 = (int *)FUN_009e6a10(param_2);
   if (piVar1 != (int *)0x0) {
-    iVar2 = _EC_POINT_copy(piVar1,param_1);
+    iVar2 = FUN_009e6b30(piVar1,param_1);
     if (iVar2 != 0) {
       return piVar1;
     }
     if (*(code **)(*piVar1 + 0x28) != (code *)0x0) {
       (**(code **)(*piVar1 + 0x28))(piVar1);
     }
-    _CRYPTO_free(piVar1);
+    FUN_009d98a0(piVar1);
   }
   return (int *)0x0;
 }
 
 
-// 009E6C00  _EC_POINT_set_to_infinity  (line unknown)
+// 009E6C00  FUN_009e6c00  (line unknown)
 
-undefined4 _EC_POINT_set_to_infinity(int *param_1,int *param_2)
+undefined4 FUN_009e6c00(int *param_1,int *param_2)
 
 {
   code *pcVar1;
@@ -5356,11 +5342,11 @@ undefined4 _EC_POINT_set_to_infinity(int *param_1,int *param_2)
   
   pcVar1 = *(code **)(*param_1 + 0x34);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x7f,0x42,".\\crypto\\ec\\ec_lib.c",0x31d);
+    FUN_009d90b0(0x10,0x7f,0x42,".\\crypto\\ec\\ec_lib.c",0x31d);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x7f,0x65,".\\crypto\\ec\\ec_lib.c",0x322);
+    FUN_009d90b0(0x10,0x7f,0x65,".\\crypto\\ec\\ec_lib.c",0x322);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2);
@@ -5368,12 +5354,11 @@ undefined4 _EC_POINT_set_to_infinity(int *param_1,int *param_2)
 }
 
 
-// 009E6C60  _EC_POINT_set_Jprojective_coordinates_GFp  (line unknown)
+// 009E6C60  FUN_009e6c60  (line unknown)
 
 undefined4
-_EC_POINT_set_Jprojective_coordinates_GFp
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5,
-          undefined4 param_6)
+FUN_009e6c60(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5,
+            undefined4 param_6)
 
 {
   code *pcVar1;
@@ -5381,11 +5366,11 @@ _EC_POINT_set_Jprojective_coordinates_GFp
   
   pcVar1 = *(code **)(*param_1 + 0x38);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x7e,0x42,".\\crypto\\ec\\ec_lib.c",0x32e);
+    FUN_009d90b0(0x10,0x7e,0x42,".\\crypto\\ec\\ec_lib.c",0x32e);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x7e,0x65,".\\crypto\\ec\\ec_lib.c",0x333);
+    FUN_009d90b0(0x10,0x7e,0x65,".\\crypto\\ec\\ec_lib.c",0x333);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5,param_6);
@@ -5393,11 +5378,10 @@ _EC_POINT_set_Jprojective_coordinates_GFp
 }
 
 
-// 009E6CD0  _EC_POINT_set_affine_coordinates_GFp  (line unknown)
+// 009E6CD0  FUN_009e6cd0  (line unknown)
 
 undefined4
-_EC_POINT_set_affine_coordinates_GFp
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+FUN_009e6cd0(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5405,11 +5389,11 @@ _EC_POINT_set_affine_coordinates_GFp
   
   pcVar1 = *(code **)(*param_1 + 0x40);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x7c,0x42,".\\crypto\\ec\\ec_lib.c",0x350);
+    FUN_009d90b0(0x10,0x7c,0x42,".\\crypto\\ec\\ec_lib.c",0x350);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x7c,0x65,".\\crypto\\ec\\ec_lib.c",0x355);
+    FUN_009d90b0(0x10,0x7c,0x65,".\\crypto\\ec\\ec_lib.c",0x355);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5417,11 +5401,10 @@ _EC_POINT_set_affine_coordinates_GFp
 }
 
 
-// 009E6D40  _EC_POINT_set_affine_coordinates_GF2m  (line unknown)
+// 009E6D40  FUN_009e6d40  (line unknown)
 
 undefined4
-_EC_POINT_set_affine_coordinates_GF2m
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+FUN_009e6d40(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5429,11 +5412,11 @@ _EC_POINT_set_affine_coordinates_GF2m
   
   pcVar1 = *(code **)(*param_1 + 0x40);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0xb9,0x42,".\\crypto\\ec\\ec_lib.c",0x361);
+    FUN_009d90b0(0x10,0xb9,0x42,".\\crypto\\ec\\ec_lib.c",0x361);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0xb9,0x65,".\\crypto\\ec\\ec_lib.c",0x366);
+    FUN_009d90b0(0x10,0xb9,0x65,".\\crypto\\ec\\ec_lib.c",0x366);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5441,11 +5424,10 @@ _EC_POINT_set_affine_coordinates_GF2m
 }
 
 
-// 009E6DB0  _EC_POINT_get_affine_coordinates_GFp  (line unknown)
+// 009E6DB0  FUN_009e6db0  (line unknown)
 
 undefined4
-_EC_POINT_get_affine_coordinates_GFp
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+FUN_009e6db0(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5453,11 +5435,11 @@ _EC_POINT_get_affine_coordinates_GFp
   
   pcVar1 = *(code **)(*param_1 + 0x44);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x74,0x42,".\\crypto\\ec\\ec_lib.c",0x372);
+    FUN_009d90b0(0x10,0x74,0x42,".\\crypto\\ec\\ec_lib.c",0x372);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x74,0x65,".\\crypto\\ec\\ec_lib.c",0x377);
+    FUN_009d90b0(0x10,0x74,0x65,".\\crypto\\ec\\ec_lib.c",0x377);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5465,11 +5447,10 @@ _EC_POINT_get_affine_coordinates_GFp
 }
 
 
-// 009E6E20  _EC_POINT_get_affine_coordinates_GF2m  (line unknown)
+// 009E6E20  FUN_009e6e20  (line unknown)
 
 undefined4
-_EC_POINT_get_affine_coordinates_GF2m
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+FUN_009e6e20(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5477,11 +5458,11 @@ _EC_POINT_get_affine_coordinates_GF2m
   
   pcVar1 = *(code **)(*param_1 + 0x44);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0xb7,0x42,".\\crypto\\ec\\ec_lib.c",899);
+    FUN_009d90b0(0x10,0xb7,0x42,".\\crypto\\ec\\ec_lib.c",899);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0xb7,0x65,".\\crypto\\ec\\ec_lib.c",0x388);
+    FUN_009d90b0(0x10,0xb7,0x65,".\\crypto\\ec\\ec_lib.c",0x388);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5489,11 +5470,10 @@ _EC_POINT_get_affine_coordinates_GF2m
 }
 
 
-// 009E6E90  _EC_POINT_set_compressed_coordinates_GFp  (line unknown)
+// 009E6E90  FUN_009e6e90  (line unknown)
 
 undefined4
-_EC_POINT_set_compressed_coordinates_GFp
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+FUN_009e6e90(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5501,11 +5481,11 @@ _EC_POINT_set_compressed_coordinates_GFp
   
   pcVar1 = *(code **)(*param_1 + 0x48);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x7d,0x42,".\\crypto\\ec\\ec_lib.c",0x394);
+    FUN_009d90b0(0x10,0x7d,0x42,".\\crypto\\ec\\ec_lib.c",0x394);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x7d,0x65,".\\crypto\\ec\\ec_lib.c",0x399);
+    FUN_009d90b0(0x10,0x7d,0x65,".\\crypto\\ec\\ec_lib.c",0x399);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5513,11 +5493,10 @@ _EC_POINT_set_compressed_coordinates_GFp
 }
 
 
-// 009E6F00  _EC_POINT_set_compressed_coordinates_GF2m  (line unknown)
+// 009E6F00  FUN_009e6f00  (line unknown)
 
 undefined4
-_EC_POINT_set_compressed_coordinates_GF2m
-          (int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
+FUN_009e6f00(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5525,11 +5504,11 @@ _EC_POINT_set_compressed_coordinates_GF2m
   
   pcVar1 = *(code **)(*param_1 + 0x48);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0xba,0x42,".\\crypto\\ec\\ec_lib.c",0x3a5);
+    FUN_009d90b0(0x10,0xba,0x42,".\\crypto\\ec\\ec_lib.c",0x3a5);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0xba,0x65,".\\crypto\\ec\\ec_lib.c",0x3aa);
+    FUN_009d90b0(0x10,0xba,0x65,".\\crypto\\ec\\ec_lib.c",0x3aa);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5537,11 +5516,11 @@ _EC_POINT_set_compressed_coordinates_GF2m
 }
 
 
-// 009E6F70  _EC_POINT_point2oct  (line unknown)
+// 009E6F70  FUN_009e6f70  (line unknown)
 
 undefined4
-_EC_POINT_point2oct(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,
-                   undefined4 param_5,undefined4 param_6)
+FUN_009e6f70(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5,
+            undefined4 param_6)
 
 {
   code *pcVar1;
@@ -5549,11 +5528,11 @@ _EC_POINT_point2oct(int *param_1,int *param_2,undefined4 param_3,undefined4 para
   
   pcVar1 = *(code **)(*param_1 + 0x4c);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x7b,0x42,".\\crypto\\ec\\ec_lib.c",0x3b6);
+    FUN_009d90b0(0x10,0x7b,0x42,".\\crypto\\ec\\ec_lib.c",0x3b6);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x7b,0x65,".\\crypto\\ec\\ec_lib.c",0x3bb);
+    FUN_009d90b0(0x10,0x7b,0x65,".\\crypto\\ec\\ec_lib.c",0x3bb);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5,param_6);
@@ -5561,11 +5540,10 @@ _EC_POINT_point2oct(int *param_1,int *param_2,undefined4 param_3,undefined4 para
 }
 
 
-// 009E6FE0  _EC_POINT_oct2point  (line unknown)
+// 009E6FE0  FUN_009e6fe0  (line unknown)
 
 undefined4
-_EC_POINT_oct2point(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,
-                   undefined4 param_5)
+FUN_009e6fe0(int *param_1,int *param_2,undefined4 param_3,undefined4 param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5573,11 +5551,11 @@ _EC_POINT_oct2point(int *param_1,int *param_2,undefined4 param_3,undefined4 para
   
   pcVar1 = *(code **)(*param_1 + 0x50);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x7a,0x42,".\\crypto\\ec\\ec_lib.c",0x3c7);
+    FUN_009d90b0(0x10,0x7a,0x42,".\\crypto\\ec\\ec_lib.c",0x3c7);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x7a,0x65,".\\crypto\\ec\\ec_lib.c",0x3cc);
+    FUN_009d90b0(0x10,0x7a,0x65,".\\crypto\\ec\\ec_lib.c",0x3cc);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5);
@@ -5585,9 +5563,9 @@ _EC_POINT_oct2point(int *param_1,int *param_2,undefined4 param_3,undefined4 para
 }
 
 
-// 009E7050  _EC_POINT_add  (line unknown)
+// 009E7050  FUN_009e7050  (line unknown)
 
-undefined4 _EC_POINT_add(int *param_1,int *param_2,int *param_3,int *param_4,undefined4 param_5)
+undefined4 FUN_009e7050(int *param_1,int *param_2,int *param_3,int *param_4,undefined4 param_5)
 
 {
   code *pcVar1;
@@ -5595,7 +5573,7 @@ undefined4 _EC_POINT_add(int *param_1,int *param_2,int *param_3,int *param_4,und
   
   pcVar1 = *(code **)(*param_1 + 0x54);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x70,0x42,".\\crypto\\ec\\ec_lib.c",0x3d7);
+    FUN_009d90b0(0x10,0x70,0x42,".\\crypto\\ec\\ec_lib.c",0x3d7);
     return 0;
   }
   if (*param_1 == *param_2) {
@@ -5604,14 +5582,14 @@ undefined4 _EC_POINT_add(int *param_1,int *param_2,int *param_3,int *param_4,und
       return uVar2;
     }
   }
-  _ERR_put_error(0x10,0x70,0x65,".\\crypto\\ec\\ec_lib.c",0x3dc);
+  FUN_009d90b0(0x10,0x70,0x65,".\\crypto\\ec\\ec_lib.c",0x3dc);
   return 0;
 }
 
 
-// 009E70D0  _EC_POINT_dbl  (line unknown)
+// 009E70D0  FUN_009e70d0  (line unknown)
 
-undefined4 _EC_POINT_dbl(int *param_1,int *param_2,int *param_3,undefined4 param_4)
+undefined4 FUN_009e70d0(int *param_1,int *param_2,int *param_3,undefined4 param_4)
 
 {
   code *pcVar1;
@@ -5619,21 +5597,21 @@ undefined4 _EC_POINT_dbl(int *param_1,int *param_2,int *param_3,undefined4 param
   
   pcVar1 = *(code **)(*param_1 + 0x58);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x73,0x42,".\\crypto\\ec\\ec_lib.c",999);
+    FUN_009d90b0(0x10,0x73,0x42,".\\crypto\\ec\\ec_lib.c",999);
     return 0;
   }
   if ((*param_1 == *param_2) && (*param_2 == *param_3)) {
     uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4);
     return uVar2;
   }
-  _ERR_put_error(0x10,0x73,0x65,".\\crypto\\ec\\ec_lib.c",0x3ec);
+  FUN_009d90b0(0x10,0x73,0x65,".\\crypto\\ec\\ec_lib.c",0x3ec);
   return 0;
 }
 
 
-// 009E7140  _EC_POINT_invert  (line unknown)
+// 009E7140  FUN_009e7140  (line unknown)
 
-undefined4 _EC_POINT_invert(int *param_1,int *param_2,undefined4 param_3)
+undefined4 FUN_009e7140(int *param_1,int *param_2,undefined4 param_3)
 
 {
   int iVar1;
@@ -5641,11 +5619,11 @@ undefined4 _EC_POINT_invert(int *param_1,int *param_2,undefined4 param_3)
   
   iVar1 = *param_1;
   if (*(int *)(iVar1 + 0x58) == 0) {
-    _ERR_put_error(0x10,0xd2,0x42,".\\crypto\\ec\\ec_lib.c",0x3f7);
+    FUN_009d90b0(0x10,0xd2,0x42,".\\crypto\\ec\\ec_lib.c",0x3f7);
     return 0;
   }
   if (iVar1 != *param_2) {
-    _ERR_put_error(0x10,0xd2,0x65,".\\crypto\\ec\\ec_lib.c",0x3fc);
+    FUN_009d90b0(0x10,0xd2,0x65,".\\crypto\\ec\\ec_lib.c",0x3fc);
     return 0;
   }
   uVar2 = (**(code **)(iVar1 + 0x5c))(param_1,param_2,param_3);
@@ -5653,9 +5631,9 @@ undefined4 _EC_POINT_invert(int *param_1,int *param_2,undefined4 param_3)
 }
 
 
-// 009E71B0  _EC_POINT_is_at_infinity  (line unknown)
+// 009E71B0  FUN_009e71b0  (line unknown)
 
-undefined4 _EC_POINT_is_at_infinity(int *param_1,int *param_2)
+undefined4 FUN_009e71b0(int *param_1,int *param_2)
 
 {
   code *pcVar1;
@@ -5663,11 +5641,11 @@ undefined4 _EC_POINT_is_at_infinity(int *param_1,int *param_2)
   
   pcVar1 = *(code **)(*param_1 + 0x60);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x76,0x42,".\\crypto\\ec\\ec_lib.c",0x407);
+    FUN_009d90b0(0x10,0x76,0x42,".\\crypto\\ec\\ec_lib.c",0x407);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x76,0x65,".\\crypto\\ec\\ec_lib.c",0x40c);
+    FUN_009d90b0(0x10,0x76,0x65,".\\crypto\\ec\\ec_lib.c",0x40c);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2);
@@ -5675,9 +5653,9 @@ undefined4 _EC_POINT_is_at_infinity(int *param_1,int *param_2)
 }
 
 
-// 009E7210  _EC_POINT_is_on_curve  (line unknown)
+// 009E7210  FUN_009e7210  (line unknown)
 
-undefined4 _EC_POINT_is_on_curve(int *param_1,int *param_2,undefined4 param_3)
+undefined4 FUN_009e7210(int *param_1,int *param_2,undefined4 param_3)
 
 {
   code *pcVar1;
@@ -5685,11 +5663,11 @@ undefined4 _EC_POINT_is_on_curve(int *param_1,int *param_2,undefined4 param_3)
   
   pcVar1 = *(code **)(*param_1 + 100);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x77,0x42,".\\crypto\\ec\\ec_lib.c",0x417);
+    FUN_009d90b0(0x10,0x77,0x42,".\\crypto\\ec\\ec_lib.c",0x417);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x77,0x65,".\\crypto\\ec\\ec_lib.c",0x41c);
+    FUN_009d90b0(0x10,0x77,0x65,".\\crypto\\ec\\ec_lib.c",0x41c);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3);
@@ -5697,9 +5675,9 @@ undefined4 _EC_POINT_is_on_curve(int *param_1,int *param_2,undefined4 param_3)
 }
 
 
-// 009E7270  _EC_POINT_cmp  (line unknown)
+// 009E7270  FUN_009e7270  (line unknown)
 
-undefined4 _EC_POINT_cmp(int *param_1,int *param_2,int *param_3,undefined4 param_4)
+undefined4 FUN_009e7270(int *param_1,int *param_2,int *param_3,undefined4 param_4)
 
 {
   code *pcVar1;
@@ -5707,21 +5685,21 @@ undefined4 _EC_POINT_cmp(int *param_1,int *param_2,int *param_3,undefined4 param
   
   pcVar1 = *(code **)(*param_1 + 0x68);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x71,0x42,".\\crypto\\ec\\ec_lib.c",0x427);
+    FUN_009d90b0(0x10,0x71,0x42,".\\crypto\\ec\\ec_lib.c",0x427);
     return 0;
   }
   if ((*param_1 == *param_2) && (*param_2 == *param_3)) {
     uVar2 = (*pcVar1)(param_1,param_2,param_3,param_4);
     return uVar2;
   }
-  _ERR_put_error(0x10,0x71,0x65,".\\crypto\\ec\\ec_lib.c",0x42c);
+  FUN_009d90b0(0x10,0x71,0x65,".\\crypto\\ec\\ec_lib.c",0x42c);
   return 0;
 }
 
 
-// 009E72E0  _EC_POINT_make_affine  (line unknown)
+// 009E72E0  FUN_009e72e0  (line unknown)
 
-undefined4 _EC_POINT_make_affine(int *param_1,int *param_2,undefined4 param_3)
+undefined4 FUN_009e72e0(int *param_1,int *param_2,undefined4 param_3)
 
 {
   code *pcVar1;
@@ -5729,11 +5707,11 @@ undefined4 _EC_POINT_make_affine(int *param_1,int *param_2,undefined4 param_3)
   
   pcVar1 = *(code **)(*param_1 + 0x6c);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x78,0x42,".\\crypto\\ec\\ec_lib.c",0x437);
+    FUN_009d90b0(0x10,0x78,0x42,".\\crypto\\ec\\ec_lib.c",0x437);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x78,0x65,".\\crypto\\ec\\ec_lib.c",0x43c);
+    FUN_009d90b0(0x10,0x78,0x65,".\\crypto\\ec\\ec_lib.c",0x43c);
     return 0;
   }
   uVar2 = (*pcVar1)(param_1,param_2,param_3);
@@ -5741,9 +5719,9 @@ undefined4 _EC_POINT_make_affine(int *param_1,int *param_2,undefined4 param_3)
 }
 
 
-// 009E7340  _EC_POINTs_make_affine  (line unknown)
+// 009E7340  FUN_009e7340  (line unknown)
 
-undefined4 _EC_POINTs_make_affine(int *param_1,uint param_2,int param_3,undefined4 param_4)
+undefined4 FUN_009e7340(int *param_1,uint param_2,int param_3,undefined4 param_4)
 
 {
   code *pcVar1;
@@ -5752,14 +5730,14 @@ undefined4 _EC_POINTs_make_affine(int *param_1,uint param_2,int param_3,undefine
   
   pcVar1 = *(code **)(*param_1 + 0x70);
   if (pcVar1 == (code *)0x0) {
-    _ERR_put_error(0x10,0x88,0x42,".\\crypto\\ec\\ec_lib.c",0x449);
+    FUN_009d90b0(0x10,0x88,0x42,".\\crypto\\ec\\ec_lib.c",0x449);
     return 0;
   }
   uVar2 = 0;
   if (param_2 != 0) {
     do {
       if (*param_1 != **(int **)(param_3 + uVar2 * 4)) {
-        _ERR_put_error(0x10,0x88,0x65,".\\crypto\\ec\\ec_lib.c",0x450);
+        FUN_009d90b0(0x10,0x88,0x65,".\\crypto\\ec\\ec_lib.c",0x450);
         return 0;
       }
       uVar2 = uVar2 + 1;
@@ -5770,12 +5748,12 @@ undefined4 _EC_POINTs_make_affine(int *param_1,uint param_2,int param_3,undefine
 }
 
 
-// 009E73D0  _EC_POINT_mul  (line unknown)
+// 009E73D0  FUN_009e73d0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-void _EC_POINT_mul(int *param_1,undefined4 param_2,undefined4 param_3,int param_4,int param_5,
-                  undefined4 param_6)
+void FUN_009e73d0(int *param_1,undefined4 param_2,undefined4 param_3,int param_4,int param_5,
+                 undefined4 param_6)
 
 {
   undefined4 uVar1;
@@ -5792,7 +5770,7 @@ void _EC_POINT_mul(int *param_1,undefined4 param_2,undefined4 param_3,int param_
     uVar1 = 1;
   }
   if (*(code **)(*param_1 + 0x74) == (code *)0x0) {
-    ec_wNAF_mul(param_1,param_2,param_3,uVar1,&local_4,&param_4,param_6);
+    FUN_00a05140(param_1,param_2,param_3,uVar1,&local_4,&param_4,param_6);
     return;
   }
   (**(code **)(*param_1 + 0x74))(param_1,param_2,param_3,uVar1,&local_4,&param_4,param_6);
@@ -5800,16 +5778,16 @@ void _EC_POINT_mul(int *param_1,undefined4 param_2,undefined4 param_3,int param_
 }
 
 
-// 009E7450  _EC_GROUP_have_precompute_mult  (line unknown)
+// 009E7450  FUN_009e7450  (line unknown)
 
-undefined4 _EC_GROUP_have_precompute_mult(int *param_1)
+undefined4 FUN_009e7450(int *param_1)
 
 {
   code *UNRECOVERED_JUMPTABLE;
   undefined4 uVar1;
   
   if (*(int *)(*param_1 + 0x74) == 0) {
-    uVar1 = ec_wNAF_have_precompute_mult();
+    uVar1 = FUN_00a05f90();
     return uVar1;
   }
   UNRECOVERED_JUMPTABLE = *(code **)(*param_1 + 0x7c);
@@ -5823,9 +5801,9 @@ undefined4 _EC_GROUP_have_precompute_mult(int *param_1)
 }
 
 
-// 009E7480  _EC_GROUP_free  (line unknown)
+// 009E7480  FUN_009e7480  (line unknown)
 
-void _EC_GROUP_free(int *param_1)
+void FUN_009e7480(int *param_1)
 
 {
   int *piVar1;
@@ -5834,28 +5812,28 @@ void _EC_GROUP_free(int *param_1)
     if (*(code **)(*param_1 + 8) != (code *)0x0) {
       (**(code **)(*param_1 + 8))(param_1);
     }
-    _EC_EX_DATA_free_all_data(param_1 + 0x11);
+    FUN_009e6990(param_1 + 0x11);
     piVar1 = (int *)param_1[1];
     if (piVar1 != (int *)0x0) {
       if (*(code **)(*piVar1 + 0x28) != (code *)0x0) {
         (**(code **)(*piVar1 + 0x28))(piVar1);
       }
-      _CRYPTO_free(piVar1);
+      FUN_009d98a0(piVar1);
     }
-    _BN_free(param_1 + 2);
-    _BN_free(param_1 + 7);
+    FUN_009dcb90(param_1 + 2);
+    FUN_009dcb90(param_1 + 7);
     if (param_1[0xf] != 0) {
-      _CRYPTO_free(param_1[0xf]);
+      FUN_009d98a0(param_1[0xf]);
     }
-    _CRYPTO_free(param_1);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E7500  _EC_GROUP_clear_free  (line unknown)
+// 009E7500  FUN_009e7500  (line unknown)
 
-void _EC_GROUP_clear_free(int *param_1)
+void FUN_009e7500(int *param_1)
 
 {
   code *pcVar1;
@@ -5871,85 +5849,84 @@ void _EC_GROUP_clear_free(int *param_1)
     else {
       (*pcVar1)(param_1);
     }
-    _EC_EX_DATA_clear_free_all_data(param_1 + 0x11);
+    FUN_009e69d0(param_1 + 0x11);
     if (param_1[1] != 0) {
-      _EC_POINT_clear_free(param_1[1]);
+      FUN_009e6af0(param_1[1]);
     }
-    _BN_clear_free(param_1 + 2);
-    _BN_clear_free(param_1 + 7);
+    FUN_009dcb30(param_1 + 2);
+    FUN_009dcb30(param_1 + 7);
     if (param_1[0xf] != 0) {
-      _OPENSSL_cleanse(param_1[0xf],param_1[0x10]);
-      _CRYPTO_free(param_1[0xf]);
+      FUN_009e5400(param_1[0xf],param_1[0x10]);
+      FUN_009d98a0(param_1[0xf]);
     }
-    _OPENSSL_cleanse(param_1,0xa8);
-    _CRYPTO_free(param_1);
+    FUN_009e5400(param_1,0xa8);
+    FUN_009d98a0(param_1);
   }
   return;
 }
 
 
-// 009E7590  _EC_GROUP_copy  (line unknown)
+// 009E7590  FUN_009e7590  (line unknown)
 
-undefined4 _EC_GROUP_copy(int *param_1,int *param_2)
+undefined4 FUN_009e7590(int *param_1,int *param_2)
 
 {
   undefined4 *puVar1;
   int iVar2;
-  uchar *puVar3;
-  int extraout_EAX;
+  void *pvVar3;
   undefined4 uVar4;
   
   if (*(int *)(*param_1 + 0x10) == 0) {
-    _ERR_put_error(0x10,0x6a,0x42,".\\crypto\\ec\\ec_lib.c",0xb1);
+    FUN_009d90b0(0x10,0x6a,0x42,".\\crypto\\ec\\ec_lib.c",0xb1);
     return 0;
   }
   if (*param_1 != *param_2) {
-    _ERR_put_error(0x10,0x6a,0x65,".\\crypto\\ec\\ec_lib.c",0xb6);
+    FUN_009d90b0(0x10,0x6a,0x65,".\\crypto\\ec\\ec_lib.c",0xb6);
     return 0;
   }
   if (param_1 == param_2) {
     return 1;
   }
-  _EC_EX_DATA_free_all_data(param_1 + 0x11);
+  FUN_009e6990(param_1 + 0x11);
   for (puVar1 = (undefined4 *)param_2[0x11]; puVar1 != (undefined4 *)0x0;
       puVar1 = (undefined4 *)*puVar1) {
     iVar2 = (*(code *)puVar1[2])(puVar1[1]);
     if (iVar2 == 0) {
       return 0;
     }
-    iVar2 = _EC_EX_DATA_set_data(param_1 + 0x11,iVar2,puVar1[2],puVar1[3],puVar1[4]);
+    iVar2 = FUN_009e6850(param_1 + 0x11,iVar2,puVar1[2],puVar1[3],puVar1[4]);
     if (iVar2 == 0) {
       return 0;
     }
   }
   if (param_2[1] == 0) {
     if (param_1[1] != 0) {
-      _EC_POINT_clear_free(param_1[1]);
+      FUN_009e6af0(param_1[1]);
       param_1[1] = 0;
     }
   }
   else {
     if (param_1[1] == 0) {
-      iVar2 = _EC_POINT_new(param_1);
+      iVar2 = FUN_009e6a10(param_1);
       param_1[1] = iVar2;
       if (iVar2 == 0) {
         return 0;
       }
     }
-    iVar2 = _EC_POINT_copy(param_1[1],param_2[1]);
+    iVar2 = FUN_009e6b30(param_1[1],param_2[1]);
     if (iVar2 == 0) {
       return 0;
     }
   }
-  iVar2 = _BN_copy(param_1 + 2,param_2 + 2);
-  if ((iVar2 != 0) && (iVar2 = _BN_copy(param_1 + 7,param_2 + 7), iVar2 != 0)) {
+  iVar2 = FUN_009dcd80(param_1 + 2,param_2 + 2);
+  if ((iVar2 != 0) && (iVar2 = FUN_009dcd80(param_1 + 7,param_2 + 7), iVar2 != 0)) {
     param_1[0xc] = param_2[0xc];
     iVar2 = param_1[0xf];
     param_1[0xd] = param_2[0xd];
     param_1[0xe] = param_2[0xe];
     if (param_2[0xf] == 0) {
       if (iVar2 != 0) {
-        _CRYPTO_free(iVar2);
+        FUN_009d98a0(iVar2);
       }
       param_1[0xf] = 0;
       param_1[0x10] = 0;
@@ -5957,12 +5934,13 @@ undefined4 _EC_GROUP_copy(int *param_1,int *param_2)
       return uVar4;
     }
     if (iVar2 != 0) {
-      _CRYPTO_free(iVar2);
+      FUN_009d98a0(iVar2);
     }
-    puVar3 = (uchar *)_CRYPTO_malloc(param_2[0x10],".\\crypto\\ec\\ec_lib.c",0xe6);
-    param_1[0xf] = (int)puVar3;
-    if ((puVar3 != (uchar *)0x0) &&
-       (memcpy(puVar3,(uchar *)param_2[0xf],param_2[0x10]), extraout_EAX != 0)) {
+    pvVar3 = (void *)FUN_009d96f0(param_2[0x10],".\\crypto\\ec\\ec_lib.c",0xe6);
+    param_1[0xf] = (int)pvVar3;
+    if ((pvVar3 != (void *)0x0) &&
+       (pvVar3 = FID_conflict__memcpy(pvVar3,(void *)param_2[0xf],param_2[0x10]),
+       pvVar3 != (void *)0x0)) {
       param_1[0x10] = param_2[0x10];
       uVar4 = (**(code **)(*param_1 + 0x10))(param_1,param_2);
       return uVar4;
@@ -5972,9 +5950,9 @@ undefined4 _EC_GROUP_copy(int *param_1,int *param_2)
 }
 
 
-// 009E7750  _EC_GROUP_dup  (line unknown)
+// 009E7750  FUN_009e7750  (line unknown)
 
-int _EC_GROUP_dup(undefined4 *param_1)
+int FUN_009e7750(undefined4 *param_1)
 
 {
   int iVar1;
@@ -5983,54 +5961,54 @@ int _EC_GROUP_dup(undefined4 *param_1)
   if (param_1 == (undefined4 *)0x0) {
     return 0;
   }
-  iVar1 = _EC_GROUP_new(*param_1);
+  iVar1 = FUN_009e65b0(*param_1);
   if (iVar1 != 0) {
-    iVar2 = _EC_GROUP_copy(iVar1,param_1);
+    iVar2 = FUN_009e7590(iVar1,param_1);
     if (iVar2 != 0) {
       return iVar1;
     }
-    _EC_GROUP_free(iVar1);
+    FUN_009e7480(iVar1);
   }
   return 0;
 }
 
 
-// 009E7790  _EC_GROUP_set_generator  (line unknown)
+// 009E7790  FUN_009e7790  (line unknown)
 
-undefined4 _EC_GROUP_set_generator(int param_1,int param_2,int param_3,int param_4)
+undefined4 FUN_009e7790(int param_1,int param_2,int param_3,int param_4)
 
 {
   int iVar1;
   
   if (param_2 == 0) {
-    _ERR_put_error(0x10,0x6f,0x43,".\\crypto\\ec\\ec_lib.c",0x120);
+    FUN_009d90b0(0x10,0x6f,0x43,".\\crypto\\ec\\ec_lib.c",0x120);
     return 0;
   }
   if (*(int *)(param_1 + 4) == 0) {
-    iVar1 = _EC_POINT_new(param_1);
+    iVar1 = FUN_009e6a10(param_1);
     *(int *)(param_1 + 4) = iVar1;
     if (iVar1 == 0) {
       return 0;
     }
   }
-  iVar1 = _EC_POINT_copy(*(undefined4 *)(param_1 + 4),param_2);
+  iVar1 = FUN_009e6b30(*(undefined4 *)(param_1 + 4),param_2);
   if (iVar1 == 0) {
     return 0;
   }
   if (param_3 == 0) {
-    _BN_set_word(param_1 + 8,0);
+    FUN_009dce60(param_1 + 8,0);
   }
   else {
-    iVar1 = _BN_copy(param_1 + 8,param_3);
+    iVar1 = FUN_009dcd80(param_1 + 8,param_3);
     if (iVar1 == 0) {
       return 0;
     }
   }
   if (param_4 == 0) {
-    _BN_set_word(param_1 + 0x1c,0);
+    FUN_009dce60(param_1 + 0x1c,0);
   }
   else {
-    iVar1 = _BN_copy(param_1 + 0x1c,param_4);
+    iVar1 = FUN_009dcd80(param_1 + 0x1c,param_4);
     if (iVar1 == 0) {
       return 0;
     }
@@ -6039,11 +6017,11 @@ undefined4 _EC_GROUP_set_generator(int param_1,int param_2,int param_3,int param
 }
 
 
-// 009E7840  _EC_GROUP_cmp  (line unknown)
+// 009E7840  FUN_009e7840  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _EC_GROUP_cmp(int *param_1,int *param_2,int param_3)
+undefined4 FUN_009e7840(int *param_1,int *param_2,int param_3)
 
 {
   undefined4 uVar1;
@@ -6064,56 +6042,57 @@ undefined4 _EC_GROUP_cmp(int *param_1,int *param_2,int param_3)
   if (((param_1[0xc] != 0) && (param_2[0xc] != 0)) && (param_1[0xc] == param_2[0xc])) {
     return 0;
   }
-  if ((param_3 == 0) && (param_3 = _BN_CTX_new(), local_14 = param_3, param_3 == 0)) {
+  if ((param_3 == 0) && (param_3 = FUN_009e6430(), local_14 = param_3, param_3 == 0)) {
     return 0xffffffff;
   }
-  _BN_CTX_start(param_3);
-  uVar1 = _BN_CTX_get(param_3);
-  uVar2 = _BN_CTX_get(param_3);
-  uVar3 = _BN_CTX_get(param_3);
-  uVar4 = _BN_CTX_get(param_3);
-  uVar5 = _BN_CTX_get(param_3);
-  iVar6 = _BN_CTX_get(param_3);
+  FUN_009e64c0(param_3);
+  uVar1 = FUN_009e6550(param_3);
+  uVar2 = FUN_009e6550(param_3);
+  uVar3 = FUN_009e6550(param_3);
+  uVar4 = FUN_009e6550(param_3);
+  uVar5 = FUN_009e6550(param_3);
+  iVar6 = FUN_009e6550(param_3);
   if (iVar6 == 0) {
 LAB_009e7a3b:
-    _BN_CTX_end(param_3);
+    FUN_009e6510(param_3);
     if (local_14 != 0) {
-      _BN_CTX_free(param_3);
+      FUN_009e6490(param_3);
     }
     return 0xffffffff;
   }
   iVar7 = (**(code **)(*param_1 + 0x18))(param_1,uVar1,uVar2,uVar3,param_3);
   if (((iVar7 != 0) &&
       (iVar7 = (**(code **)(*param_2 + 0x18))(param_2,uVar4,uVar5,iVar6,param_3), iVar7 != 0)) &&
-     ((iVar7 = _BN_cmp(uVar1,uVar4), iVar7 == 0 &&
-      (((iVar7 = _BN_cmp(uVar2,uVar5), iVar7 == 0 && (iVar6 = _BN_cmp(uVar3,iVar6), iVar6 == 0)) &&
-       (iVar6 = _EC_POINT_cmp(param_1,param_1[1],param_2[1],param_3), iVar6 == 0)))))) {
-    iVar6 = _EC_GROUP_get_order(param_1,uVar1,param_3);
-    if (((iVar6 == 0) || (iVar6 = _EC_GROUP_get_order(param_2,uVar4,param_3), iVar6 == 0)) ||
-       ((iVar6 = _EC_GROUP_get_cofactor(param_1,uVar2,param_3), iVar6 == 0 ||
-        (iVar6 = _EC_GROUP_get_cofactor(param_2,uVar5,param_3), iVar6 == 0)))) goto LAB_009e7a3b;
-    iVar6 = _BN_cmp(uVar1,uVar4);
-    if ((iVar6 == 0) && (iVar6 = _BN_cmp(uVar2,uVar5), iVar6 == 0)) goto LAB_009e7a15;
+     ((iVar7 = FUN_009dd090(uVar1,uVar4), iVar7 == 0 &&
+      (((iVar7 = FUN_009dd090(uVar2,uVar5), iVar7 == 0 &&
+        (iVar6 = FUN_009dd090(uVar3,iVar6), iVar6 == 0)) &&
+       (iVar6 = FUN_009e7270(param_1,param_1[1],param_2[1],param_3), iVar6 == 0)))))) {
+    iVar6 = FUN_009e66a0(param_1,uVar1,param_3);
+    if (((iVar6 == 0) || (iVar6 = FUN_009e66a0(param_2,uVar4,param_3), iVar6 == 0)) ||
+       ((iVar6 = FUN_009e66d0(param_1,uVar2,param_3), iVar6 == 0 ||
+        (iVar6 = FUN_009e66d0(param_2,uVar5,param_3), iVar6 == 0)))) goto LAB_009e7a3b;
+    iVar6 = FUN_009dd090(uVar1,uVar4);
+    if ((iVar6 == 0) && (iVar6 = FUN_009dd090(uVar2,uVar5), iVar6 == 0)) goto LAB_009e7a15;
   }
   local_8 = 1;
 LAB_009e7a15:
-  _BN_CTX_end(param_3);
+  FUN_009e6510(param_3);
   if (local_14 != 0) {
-    _BN_CTX_free(param_3);
+    FUN_009e6490(param_3);
   }
   return local_8;
 }
 
 
-// 009E7A60  _ECDH_compute_key  (line unknown)
+// 009E7A60  FUN_009e7a60  (line unknown)
 
-void _ECDH_compute_key(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-                      undefined4 param_5)
+void FUN_009e7a60(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5)
 
 {
   int iVar1;
   
-  iVar1 = ecdh_check(param_4);
+  iVar1 = FUN_00a060e0(param_4);
   if (iVar1 == 0) {
     return;
   }
@@ -6122,9 +6101,9 @@ void _ECDH_compute_key(undefined4 param_1,undefined4 param_2,undefined4 param_3,
 }
 
 
-// 009E7AA0  _DH_generate_key  (line unknown)
+// 009E7AA0  FUN_009e7aa0  (line unknown)
 
-void _DH_generate_key(int param_1)
+void FUN_009e7aa0(int param_1)
 
 {
                     /* WARNING: Could not recover jumptable at 0x009e7aae. Too many branches */
@@ -6134,9 +6113,9 @@ void _DH_generate_key(int param_1)
 }
 
 
-// 009E7AB0  _DH_compute_key  (line unknown)
+// 009E7AB0  FUN_009e7ab0  (line unknown)
 
-void _DH_compute_key(undefined4 param_1,undefined4 param_2,int param_3)
+void FUN_009e7ab0(undefined4 param_1,undefined4 param_2,int param_3)
 
 {
                     /* WARNING: Could not recover jumptable at 0x009e7abe. Too many branches */
@@ -6146,9 +6125,9 @@ void _DH_compute_key(undefined4 param_1,undefined4 param_2,int param_3)
 }
 
 
-// 009E7AC0  _DH_OpenSSL  (line unknown)
+// 009E7AC0  FUN_009e7ac0  (line unknown)
 
-undefined ** _DH_OpenSSL(void)
+undefined ** FUN_009e7ac0(void)
 
 {
   return &PTR_s_OpenSSL_DH_Method_00b932c8;
@@ -6157,7 +6136,7 @@ undefined ** _DH_OpenSSL(void)
 
 // 009E7AD0  FUN_009e7ad0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009e7ad0(int param_1)
 
@@ -6181,31 +6160,31 @@ undefined4 FUN_009e7ad0(int param_1)
   bVar1 = false;
   local_1c = 0;
   iVar5 = 0;
-  iVar2 = _BN_CTX_new();
+  iVar2 = FUN_009e6430();
   if (iVar2 != 0) {
     puVar7 = *(undefined4 **)(param_1 + 0x18);
     if (puVar7 == (undefined4 *)0x0) {
-      puVar7 = (undefined4 *)_BN_new();
+      puVar7 = (undefined4 *)FUN_009dcbf0();
       if (puVar7 == (undefined4 *)0x0) goto LAB_009e7c02;
       bVar1 = true;
     }
     iVar5 = *(int *)(param_1 + 0x14);
-    if (((iVar5 != 0) || (iVar5 = _BN_new(), iVar5 != 0)) &&
+    if (((iVar5 != 0) || (iVar5 = FUN_009dcbf0(), iVar5 != 0)) &&
        (((*(byte *)(param_1 + 0x1c) & 1) == 0 ||
-        (local_1c = _BN_MONT_CTX_set_locked(param_1 + 0x20,0x1a,*(undefined4 *)(param_1 + 8),iVar2),
+        (local_1c = FUN_00a06880(param_1 + 0x20,0x1a,*(undefined4 *)(param_1 + 8),iVar2),
         local_1c != 0)))) {
       if (bVar1) {
         iVar3 = *(int *)(param_1 + 0x10);
         if (iVar3 == 0) {
-          iVar3 = _BN_num_bits(*(undefined4 *)(param_1 + 8));
+          iVar3 = FUN_009dcb00(*(undefined4 *)(param_1 + 8));
           iVar3 = iVar3 + -1;
         }
-        iVar3 = _BN_rand(puVar7,iVar3,0,0);
+        iVar3 = FUN_00a04c20(puVar7,iVar3,0,0);
         if (iVar3 == 0) goto LAB_009e7c02;
       }
       puVar4 = puVar7;
       if ((*(byte *)(param_1 + 0x1c) & 2) == 0) {
-        _BN_init(&local_14);
+        FUN_009dcbd0(&local_14);
         local_14 = *puVar7;
         local_10 = puVar7[1];
         local_c = puVar7[2];
@@ -6225,23 +6204,23 @@ undefined4 FUN_009e7ad0(int param_1)
     }
   }
 LAB_009e7c02:
-  _ERR_put_error(5,0x67,3,".\\crypto\\dh\\dh_key.c",0xa8);
+  FUN_009d90b0(5,0x67,3,".\\crypto\\dh\\dh_key.c",0xa8);
   uVar6 = 0;
 LAB_009e7c1e:
   if ((iVar5 != 0) && (*(int *)(param_1 + 0x14) == 0)) {
-    _BN_free(iVar5);
+    FUN_009dcb90(iVar5);
   }
   if ((puVar7 != (undefined4 *)0x0) && (*(int *)(param_1 + 0x18) == 0)) {
-    _BN_free(puVar7);
+    FUN_009dcb90(puVar7);
   }
-  _BN_CTX_free(iVar2);
+  FUN_009e6490(iVar2);
   return uVar6;
 }
 
 
 // 009E7C60  FUN_009e7c60  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009e7c60(undefined4 param_1,undefined4 param_2,int param_3)
 
@@ -6258,31 +6237,31 @@ undefined4 FUN_009e7c60(undefined4 param_1,undefined4 param_2,int param_3)
   iVar5 = param_3;
   iVar6 = 0;
   local_8 = 0xffffffff;
-  iVar2 = _BN_num_bits(*(undefined4 *)(param_3 + 8));
+  iVar2 = FUN_009dcb00(*(undefined4 *)(param_3 + 8));
   if (10000 < iVar2) {
-    _ERR_put_error(5,0x66,0x67,".\\crypto\\dh\\dh_key.c",0xba);
+    FUN_009d90b0(5,0x66,0x67,".\\crypto\\dh\\dh_key.c",0xba);
     return 0xffffffff;
   }
-  iVar2 = _BN_CTX_new();
+  iVar2 = FUN_009e6430();
   if (iVar2 == 0) {
     return 0xffffffff;
   }
-  _BN_CTX_start(iVar2);
-  uVar3 = _BN_CTX_get(iVar2);
+  FUN_009e64c0(iVar2);
+  uVar3 = FUN_009e6550(iVar2);
   if (*(int *)(iVar5 + 0x18) == 0) {
     uVar7 = 0xc5;
     uVar3 = 100;
   }
   else {
     if ((*(byte *)(iVar5 + 0x1c) & 1) != 0) {
-      iVar6 = _BN_MONT_CTX_set_locked(iVar5 + 0x20,0x1a,*(undefined4 *)(iVar5 + 8),iVar2);
+      iVar6 = FUN_00a06880(iVar5 + 0x20,0x1a,*(undefined4 *)(iVar5 + 8),iVar2);
       if ((*(byte *)(iVar5 + 0x1c) & 2) == 0) {
         puVar1 = (uint *)(*(int *)(iVar5 + 0x18) + 0x10);
         *puVar1 = *puVar1 | 4;
       }
       if (iVar6 == 0) goto LAB_009e7d8b;
     }
-    iVar4 = _DH_check_pub_key(iVar5,param_2,&param_3);
+    iVar4 = FUN_00a06950(iVar5,param_2,&param_3);
     if ((iVar4 == 0) || (param_3 != 0)) {
       uVar7 = 0xd8;
       uVar3 = 0x66;
@@ -6292,26 +6271,26 @@ undefined4 FUN_009e7c60(undefined4 param_1,undefined4 param_2,int param_3)
                         (iVar5,uVar3,param_2,*(undefined4 *)(iVar5 + 0x18),
                          *(undefined4 *)(iVar5 + 8),iVar2,iVar6);
       if (iVar5 != 0) {
-        local_8 = _BN_bn2bin(uVar3,param_1);
+        local_8 = FUN_009dcfc0(uVar3,param_1);
         goto LAB_009e7d8b;
       }
       uVar7 = 0xde;
       uVar3 = 3;
     }
   }
-  _ERR_put_error(5,0x66,uVar3,".\\crypto\\dh\\dh_key.c",uVar7);
+  FUN_009d90b0(5,0x66,uVar3,".\\crypto\\dh\\dh_key.c",uVar7);
 LAB_009e7d8b:
-  _BN_CTX_end(iVar2);
-  _BN_CTX_free(iVar2);
+  FUN_009e6510(iVar2);
+  FUN_009e6490(iVar2);
   return local_8;
 }
 
 
-// 009E7E40  _ASN1_dup  (line unknown)
+// 009E7E40  FUN_009e7e40  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _ASN1_dup(code *param_1,code *param_2,int param_3)
+undefined4 FUN_009e7e40(code *param_1,code *param_2,int param_3)
 
 {
   int iVar1;
@@ -6325,25 +6304,25 @@ undefined4 _ASN1_dup(code *param_1,code *param_2,int param_3)
     return 0;
   }
   iVar2 = (*param_1)(param_3,0);
-  iVar2 = _CRYPTO_malloc(iVar2 + 10,".\\crypto\\asn1\\a_dup.c",0x4b);
+  iVar2 = FUN_009d96f0(iVar2 + 10,".\\crypto\\asn1\\a_dup.c",0x4b);
   if (iVar2 == 0) {
-    _ERR_put_error(0xd,0x6f,0x41,".\\crypto\\asn1\\a_dup.c",0x4d);
+    FUN_009d90b0(0xd,0x6f,0x41,".\\crypto\\asn1\\a_dup.c",0x4d);
     return 0;
   }
   param_3 = iVar2;
   uVar3 = (*param_1)(iVar1,&param_3);
   iStack_4 = iVar2;
   uVar3 = (*param_2)(0,&iStack_4,uVar3);
-  _CRYPTO_free(iVar2);
+  FUN_009d98a0(iVar2);
   return uVar3;
 }
 
 
-// 009E7ED0  _ASN1_item_dup  (line unknown)
+// 009E7ED0  FUN_009e7ed0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _ASN1_item_dup(undefined4 param_1,int param_2)
+undefined4 FUN_009e7ed0(undefined4 param_1,int param_2)
 
 {
   undefined4 uVar1;
@@ -6353,37 +6332,37 @@ undefined4 _ASN1_item_dup(undefined4 param_1,int param_2)
   if (param_2 == 0) {
     return 0;
   }
-  uVar1 = _ASN1_item_i2d(param_2,&local_4,param_1);
+  uVar1 = FUN_009f0ed0(param_2,&local_4,param_1);
   if (local_4 == 0) {
-    _ERR_put_error(0xd,0xbf,0x41,".\\crypto\\asn1\\a_dup.c",0x68);
+    FUN_009d90b0(0xd,0xbf,0x41,".\\crypto\\asn1\\a_dup.c",0x68);
     return 0;
   }
   param_2 = local_4;
-  uVar1 = _ASN1_item_d2i(0,&param_2,uVar1,param_1);
-  _CRYPTO_free(local_4);
+  uVar1 = FUN_009ed5e0(0,&param_2,uVar1,param_1);
+  FUN_009d98a0(local_4);
   return uVar1;
 }
 
 
-// 009E7FE0  _ECDSA_sign_ex  (line unknown)
+// 009E7FE0  FUN_009e7fe0  (line unknown)
 
 undefined4
-_ECDSA_sign_ex(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-              undefined4 *param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8)
+FUN_009e7fe0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+            undefined4 *param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
 {
   int iVar1;
   undefined4 uVar2;
   
-  _RAND_seed(param_2,param_3);
+  FUN_009d2fc0(param_2,param_3);
   uVar2 = param_8;
-  iVar1 = ecdsa_check(param_8);
+  iVar1 = FUN_009eb570(param_8);
   if (iVar1 != 0) {
     iVar1 = (**(code **)(*(int *)(iVar1 + 0xc) + 4))(param_2,param_3,param_6,param_7,uVar2);
     if (iVar1 != 0) {
-      uVar2 = i2d_ECDSA_SIG(iVar1,&param_4);
+      uVar2 = FUN_00a07ad0(iVar1,&param_4);
       *param_5 = uVar2;
-      _ECDSA_SIG_free(iVar1);
+      FUN_00a07b00(iVar1);
       return 1;
     }
   }
@@ -6392,14 +6371,14 @@ _ECDSA_sign_ex(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefine
 }
 
 
-// 009E8060  _ECDSA_sign_setup  (line unknown)
+// 009E8060  FUN_009e8060  (line unknown)
 
-void _ECDSA_sign_setup(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+void FUN_009e8060(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
 
 {
   int iVar1;
   
-  iVar1 = ecdsa_check(param_1);
+  iVar1 = FUN_009eb570(param_1);
   if (iVar1 == 0) {
     return;
   }
@@ -6408,81 +6387,75 @@ void _ECDSA_sign_setup(undefined4 param_1,undefined4 param_2,undefined4 param_3,
 }
 
 
-// 009E80A0  _ECDSA_sign  (line unknown)
+// 009E80A0  FUN_009e80a0  (line unknown)
 
-void _ECDSA_sign(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-                undefined4 param_5,undefined4 param_6)
+void FUN_009e80a0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5,undefined4 param_6)
 
 {
-  _ECDSA_sign_ex(param_1,param_2,param_3,param_4,param_5,0,0,param_6);
+  FUN_009e7fe0(param_1,param_2,param_3,param_4,param_5,0,0,param_6);
   return;
 }
 
 
-// 009E8160  d2i_DSAPrivateKey  (line unknown)
+// 009E8160  FUN_009e8160  (line unknown)
 
-/* d2i_DSAPrivateKey */
-
-void __cdecl d2i_DSAPrivateKey(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009e8160(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a7c3ac);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a7c3ac);
   return;
 }
 
 
-// 009E8180  d2i_DSAparams  (line unknown)
+// 009E8180  FUN_009e8180  (line unknown)
 
-/* d2i_DSAparams */
-
-void __cdecl d2i_DSAparams(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009e8180(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a7c494);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a7c494);
   return;
 }
 
 
-// 009E81B0  d2i_DSAPublicKey  (line unknown)
+// 009E81B0  FUN_009e81b0  (line unknown)
 
-/* d2i_DSAPublicKey */
-
-void __cdecl d2i_DSAPublicKey(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009e81b0(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a7c55c);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a7c55c);
   return;
 }
 
 
-// 009E81D0  _DSA_sign  (line unknown)
+// 009E81D0  FUN_009e81d0  (line unknown)
 
 undefined4
-_DSA_sign(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-         undefined4 *param_5,undefined4 param_6)
+FUN_009e81d0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+            undefined4 *param_5,undefined4 param_6)
 
 {
   int iVar1;
   undefined4 uVar2;
   
-  _RAND_seed(param_2,param_3);
-  iVar1 = _DSA_do_sign(param_2,param_3,param_6);
+  FUN_009d2fc0(param_2,param_3);
+  iVar1 = FUN_00a07b90(param_2,param_3,param_6);
   if (iVar1 == 0) {
     *param_5 = 0;
     return 0;
   }
-  uVar2 = _ASN1_item_i2d(iVar1,&param_4,&DAT_00a7c378);
+  uVar2 = FUN_009f0ed0(iVar1,&param_4,&DAT_00a7c378);
   *param_5 = uVar2;
-  _DSA_SIG_free(iVar1);
+  FUN_00a07b50(iVar1);
   return 1;
 }
 
 
-// 009E8230  _DSA_size  (line unknown)
+// 009E8230  FUN_009e8230  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-void _DSA_size(int param_1)
+void FUN_009e8230(int param_1)
 
 {
   int iVar1;
@@ -6491,24 +6464,24 @@ void _DSA_size(int param_1)
   undefined4 uStack_4;
   
   uStack_4 = 0x9e823a;
-  iVar1 = _BN_num_bits(*(undefined4 *)(param_1 + 0x10));
+  iVar1 = FUN_009dcb00(*(undefined4 *)(param_1 + 0x10));
   local_10[0] = (int)(iVar1 + 7 + (iVar1 + 7 >> 0x1f & 7U)) >> 3;
   local_8 = &param_1;
   local_10[1] = 2;
   param_1 = CONCAT31(param_1._1_3_,0xff);
-  iVar1 = i2d_ASN1_INTEGER(local_10,0);
-  _ASN1_object_size(1,iVar1 * 2,0x10);
+  iVar1 = FUN_009ea830(local_10,0);
+  FUN_009d9a10(1,iVar1 * 2,0x10);
   return;
 }
 
 
-// 009E8290  _DSA_verify  (line unknown)
+// 009E8290  FUN_009e8290  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
-_DSA_verify(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-           undefined4 param_5,undefined4 param_6)
+FUN_009e8290(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+            undefined4 param_5,undefined4 param_6)
 
 {
   int iVar1;
@@ -6517,24 +6490,24 @@ _DSA_verify(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 
   
   local_4 = 0x9e829a;
   uVar2 = 0xffffffff;
-  local_4 = _DSA_SIG_new();
+  local_4 = FUN_00a07b20();
   if (local_4 == 0) {
     return 0xffffffff;
   }
-  iVar1 = _ASN1_item_d2i(&local_4,&param_4,param_5,&DAT_00a7c378);
+  iVar1 = FUN_009ed5e0(&local_4,&param_4,param_5,&DAT_00a7c378);
   if (iVar1 != 0) {
-    uVar2 = _DSA_do_verify(param_2,param_3,local_4,param_6);
+    uVar2 = FUN_00a07bb0(param_2,param_3,local_4,param_6);
   }
-  _DSA_SIG_free(local_4);
+  FUN_00a07b50(local_4);
   return uVar2;
 }
 
 
-// 009E8300  _RSA_sign  (line unknown)
+// 009E8300  FUN_009e8300  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-uint _RSA_sign(int param_1,int param_2,int param_3,undefined4 param_4,int *param_5,int param_6)
+uint FUN_009e8300(int param_1,int param_2,int param_3,undefined4 param_4,int *param_5,int param_6)
 
 {
   code *pcVar1;
@@ -6562,20 +6535,20 @@ uint _RSA_sign(int param_1,int param_2,int param_3,undefined4 param_4,int *param
   if (param_1 == 0x72) {
     iVar6 = 0x24;
     if (param_3 != 0x24) {
-      _ERR_put_error(4,0x75,0x83,".\\crypto\\rsa\\rsa_sign.c",0x57);
+      FUN_009d90b0(4,0x75,0x83,".\\crypto\\rsa\\rsa_sign.c",0x57);
       return 0;
     }
   }
   else {
     local_28 = local_18;
-    iVar6 = _OBJ_nid2obj(param_1);
+    iVar6 = FUN_009e1070(param_1);
     *local_28 = iVar6;
     if (*local_28 == 0) {
-      _ERR_put_error(4,0x75,0x75,".\\crypto\\rsa\\rsa_sign.c",0x69);
+      FUN_009d90b0(4,0x75,0x75,".\\crypto\\rsa\\rsa_sign.c",0x69);
       return 0;
     }
     if (*(int *)(*local_28 + 0xc) == 0) {
-      _ERR_put_error(4,0x75,0x74,".\\crypto\\rsa\\rsa_sign.c",0x6e);
+      FUN_009d90b0(4,0x75,0x74,".\\crypto\\rsa\\rsa_sign.c",0x6e);
       return 0;
     }
     local_20 = 5;
@@ -6584,43 +6557,43 @@ uint _RSA_sign(int param_1,int param_2,int param_3,undefined4 param_4,int *param
     local_24 = local_10;
     local_8 = param_2;
     local_10[0] = param_3;
-    iVar6 = i2d_X509_SIG(&local_28,0);
+    iVar6 = FUN_009faa20(&local_28,0);
     param_2 = 0;
   }
-  iVar3 = _RSA_size(iVar4);
+  iVar3 = FUN_009e1cf0(iVar4);
   if (iVar3 + -0xb < iVar6) {
-    _ERR_put_error(4,0x75,0x70,".\\crypto\\rsa\\rsa_sign.c",0x7e);
+    FUN_009d90b0(4,0x75,0x70,".\\crypto\\rsa\\rsa_sign.c",0x7e);
     return 0;
   }
   iVar5 = 0;
   if (param_1 != 0x72) {
-    param_2 = _CRYPTO_malloc(iVar3 + 1,".\\crypto\\rsa\\rsa_sign.c",0x82);
+    param_2 = FUN_009d96f0(iVar3 + 1,".\\crypto\\rsa\\rsa_sign.c",0x82);
     if (param_2 == 0) {
-      _ERR_put_error(4,0x75,0x41,".\\crypto\\rsa\\rsa_sign.c",0x85);
+      FUN_009d90b0(4,0x75,0x41,".\\crypto\\rsa\\rsa_sign.c",0x85);
       return 0;
     }
     param_6 = param_2;
-    i2d_X509_SIG(&local_28,&param_6);
+    FUN_009faa20(&local_28,&param_6);
     iVar5 = param_2;
   }
-  iVar4 = _RSA_private_encrypt(iVar6,param_2,param_4,iVar4,1);
+  iVar4 = FUN_009e1cd0(iVar6,param_2,param_4,iVar4,1);
   if (0 < iVar4) {
     *param_5 = iVar4;
   }
   if (param_1 != 0x72) {
-    _OPENSSL_cleanse(iVar5,iVar3 + 1);
-    _CRYPTO_free(iVar5);
+    FUN_009e5400(iVar5,iVar3 + 1);
+    FUN_009d98a0(iVar5);
   }
   return (uint)(0 < iVar4);
 }
 
 
-// 009E8510  _RSA_verify  (line unknown)
+// 009E8510  FUN_009e8510  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
-_RSA_verify(int param_1,byte *param_2,uint param_3,undefined4 param_4,int param_5,int param_6)
+FUN_009e8510(int param_1,byte *param_2,uint param_3,undefined4 param_4,int param_5,int param_6)
 
 {
   code *pcVar1;
@@ -6630,18 +6603,17 @@ _RSA_verify(int param_1,byte *param_2,uint param_3,undefined4 param_4,int param_
   uint uVar5;
   int iVar6;
   int *piVar7;
-  _iobuf *p_Var8;
-  byte *pbVar9;
-  undefined4 uVar10;
-  char *pcVar11;
+  byte *pbVar8;
+  undefined4 uVar9;
+  char *_Format;
   undefined4 local_8;
   byte *pbStack_4;
   
   pbStack_4 = (byte *)0x9e851a;
   local_8 = 0;
-  iVar2 = _RSA_size(param_6);
+  iVar2 = FUN_009e1cf0(param_6);
   if (param_5 != iVar2) {
-    _ERR_put_error(4,0x77,0x77,".\\crypto\\rsa\\rsa_sign.c",0xa7);
+    FUN_009d90b0(4,0x77,0x77,".\\crypto\\rsa\\rsa_sign.c",0xa7);
     return 0;
   }
   if (((*(byte *)(param_6 + 0x3c) & 0x40) != 0) &&
@@ -6649,26 +6621,26 @@ _RSA_verify(int param_1,byte *param_2,uint param_3,undefined4 param_4,int param_
     uVar3 = (*pcVar1)(param_1,param_2,param_3,param_4,param_5,param_6);
     return uVar3;
   }
-  pbVar4 = (byte *)_CRYPTO_malloc(param_5,".\\crypto\\rsa\\rsa_sign.c",0xb1);
+  pbVar4 = (byte *)FUN_009d96f0(param_5,".\\crypto\\rsa\\rsa_sign.c",0xb1);
   if (pbVar4 == (byte *)0x0) {
-    _ERR_put_error(4,0x77,0x41,".\\crypto\\rsa\\rsa_sign.c",0xb4);
+    FUN_009d90b0(4,0x77,0x41,".\\crypto\\rsa\\rsa_sign.c",0xb4);
     return 0;
   }
   if ((param_1 == 0x72) && (param_3 != 0x24)) {
-    _ERR_put_error(4,0x77,0x83,".\\crypto\\rsa\\rsa_sign.c",0xbb);
+    FUN_009d90b0(4,0x77,0x83,".\\crypto\\rsa\\rsa_sign.c",0xbb);
     goto LAB_009e883e;
   }
-  iVar2 = _RSA_public_decrypt(param_5,param_4,pbVar4,param_6,1);
+  iVar2 = FUN_009e1ce0(param_5,param_4,pbVar4,param_6,1);
   if (iVar2 < 1) goto LAB_009e883e;
   if (param_1 == 0x72) {
     if (iVar2 == 0x24) {
       uVar5 = 0x24;
-      pbVar9 = pbVar4;
+      pbVar8 = pbVar4;
       do {
-        if (*(int *)pbVar9 != *(int *)param_2) goto LAB_009e864b;
+        if (*(int *)pbVar8 != *(int *)param_2) goto LAB_009e864b;
         uVar5 = uVar5 - 4;
         param_2 = param_2 + 4;
-        pbVar9 = pbVar9 + 4;
+        pbVar8 = pbVar8 + 4;
       } while (3 < uVar5);
       if (uVar5 == 0) {
 LAB_009e86a8:
@@ -6676,15 +6648,15 @@ LAB_009e86a8:
       }
       else {
 LAB_009e864b:
-        iVar2 = (uint)*pbVar9 - (uint)*param_2;
+        iVar2 = (uint)*pbVar8 - (uint)*param_2;
         if (iVar2 == 0) {
           if (uVar5 == 1) goto LAB_009e86a8;
-          iVar2 = (uint)pbVar9[1] - (uint)param_2[1];
+          iVar2 = (uint)pbVar8[1] - (uint)param_2[1];
           if (iVar2 == 0) {
             if (uVar5 == 2) goto LAB_009e86a8;
-            iVar2 = (uint)pbVar9[2] - (uint)param_2[2];
+            iVar2 = (uint)pbVar8[2] - (uint)param_2[2];
             if (iVar2 == 0) {
-              if ((uVar5 == 3) || (iVar2 = (uint)pbVar9[3] - (uint)param_2[3], iVar2 == 0))
+              if ((uVar5 == 3) || (iVar2 = (uint)pbVar8[3] - (uint)param_2[3], iVar2 == 0))
               goto LAB_009e86a8;
             }
           }
@@ -6699,32 +6671,31 @@ LAB_009e864b:
         goto LAB_009e883e;
       }
     }
-    _ERR_put_error(4,0x77,0x68,".\\crypto\\rsa\\rsa_sign.c",0xd1);
+    FUN_009d90b0(4,0x77,0x68,".\\crypto\\rsa\\rsa_sign.c",0xd1);
     goto LAB_009e883e;
   }
   pbStack_4 = pbVar4;
-  piVar7 = (int *)d2i_X509_SIG(0,&pbStack_4,iVar2);
+  piVar7 = (int *)FUN_009faa00(0,&pbStack_4,iVar2);
   if (piVar7 == (int *)0x0) goto LAB_009e883e;
   if (pbStack_4 == pbVar4 + iVar2) {
-    if ((*(int *)(*piVar7 + 4) != 0) && (iVar2 = _ASN1_TYPE_get(*(int *)(*piVar7 + 4)), iVar2 != 5))
-    {
+    if ((*(int *)(*piVar7 + 4) != 0) && (iVar2 = FUN_00a07bc0(*(int *)(*piVar7 + 4)), iVar2 != 5)) {
       uVar3 = 0xe5;
       goto LAB_009e881e;
     }
-    iVar2 = _OBJ_obj2nid(*(undefined4 *)*piVar7);
+    iVar2 = FUN_009e13d0(*(undefined4 *)*piVar7);
     if (iVar2 != param_1) {
       if (param_1 == 4) {
         if (iVar2 == 8) {
 LAB_009e8765:
-          pcVar11 = "signature has problems, re-make with post SSLeay045\n";
-          p_Var8 = __iob_func();
-          fprintf(p_Var8 + 2,pcVar11);
+          _Format = "signature has problems, re-make with post SSLeay045\n";
+          iVar2 = FUN_009581c8();
+          _fprintf((FILE *)(iVar2 + 0x40),_Format);
           goto LAB_009e877b;
         }
       }
       else if ((param_1 == 3) && (iVar2 == 7)) goto LAB_009e8765;
       uVar3 = 0x100;
-      uVar10 = 100;
+      uVar9 = 100;
       goto LAB_009e8825;
     }
 LAB_009e877b:
@@ -6733,10 +6704,10 @@ LAB_009e8819:
       uVar3 = 0x107;
       goto LAB_009e881e;
     }
-    pbVar9 = (byte *)((uint *)piVar7[1])[2];
+    pbVar8 = (byte *)((uint *)piVar7[1])[2];
     for (; 3 < param_3; param_3 = param_3 - 4) {
-      if (*(int *)param_2 != *(int *)pbVar9) goto LAB_009e87ac;
-      pbVar9 = pbVar9 + 4;
+      if (*(int *)param_2 != *(int *)pbVar8) goto LAB_009e87ac;
+      pbVar8 = pbVar8 + 4;
       param_2 = param_2 + 4;
     }
     if (param_3 == 0) {
@@ -6745,15 +6716,15 @@ LAB_009e8809:
     }
     else {
 LAB_009e87ac:
-      iVar2 = (uint)*param_2 - (uint)*pbVar9;
+      iVar2 = (uint)*param_2 - (uint)*pbVar8;
       if (iVar2 == 0) {
         if (param_3 == 1) goto LAB_009e8809;
-        iVar2 = (uint)param_2[1] - (uint)pbVar9[1];
+        iVar2 = (uint)param_2[1] - (uint)pbVar8[1];
         if (iVar2 == 0) {
           if (param_3 == 2) goto LAB_009e8809;
-          iVar2 = (uint)param_2[2] - (uint)pbVar9[2];
+          iVar2 = (uint)param_2[2] - (uint)pbVar8[2];
           if (iVar2 == 0) {
-            if ((param_3 == 3) || (iVar2 = (uint)param_2[3] - (uint)pbVar9[3], iVar2 == 0))
+            if ((param_3 == 3) || (iVar2 = (uint)param_2[3] - (uint)pbVar8[3], iVar2 == 0))
             goto LAB_009e8809;
           }
         }
@@ -6769,21 +6740,21 @@ LAB_009e87ac:
   else {
     uVar3 = 0xdc;
 LAB_009e881e:
-    uVar10 = 0x68;
+    uVar9 = 0x68;
 LAB_009e8825:
-    _ERR_put_error(4,0x77,uVar10,".\\crypto\\rsa\\rsa_sign.c",uVar3);
+    FUN_009d90b0(4,0x77,uVar9,".\\crypto\\rsa\\rsa_sign.c",uVar3);
   }
-  _X509_SIG_free(piVar7);
+  FUN_009faa40(piVar7);
 LAB_009e883e:
-  _OPENSSL_cleanse(pbVar4,param_5);
-  _CRYPTO_free(pbVar4);
+  FUN_009e5400(pbVar4,param_5);
+  FUN_009d98a0(pbVar4);
   return local_8;
 }
 
 
-// 009E8860  _X509_certificate_type  (line unknown)
+// 009E8860  FUN_009e8860  (line unknown)
 
-uint _X509_certificate_type(int param_1,int *param_2)
+uint FUN_009e8860(int param_1,int *param_2)
 
 {
   int *piVar1;
@@ -6797,7 +6768,7 @@ uint _X509_certificate_type(int param_1,int *param_2)
   }
   piVar1 = param_2;
   if (param_2 == (int *)0x0) {
-    piVar1 = (int *)_X509_get_pubkey(param_1);
+    piVar1 = (int *)FUN_009d49c0(param_1);
   }
   if (piVar1 != (int *)0x0) {
     iVar3 = *piVar1;
@@ -6815,8 +6786,8 @@ uint _X509_certificate_type(int param_1,int *param_2)
     else if (iVar3 == 0x198) {
       uVar4 = 0x58;
     }
-    uVar2 = _OBJ_obj2nid(**(undefined4 **)(param_1 + 4));
-    iVar3 = _EVP_PKEY_type(uVar2);
+    uVar2 = FUN_009e13d0(**(undefined4 **)(param_1 + 4));
+    iVar3 = FUN_009d40f0(uVar2);
     if (iVar3 == 6) {
       uVar4 = uVar4 | 0x100;
     }
@@ -6826,12 +6797,12 @@ uint _X509_certificate_type(int param_1,int *param_2)
     else if (iVar3 == 0x198) {
       uVar4 = uVar4 | 0x400;
     }
-    iVar3 = _EVP_PKEY_size(piVar1);
+    iVar3 = FUN_009d3e70(piVar1);
     if (iVar3 < 0x81) {
       uVar4 = uVar4 | 0x1000;
     }
     if (param_2 == (int *)0x0) {
-      _EVP_PKEY_free(piVar1);
+      FUN_009d43f0(piVar1);
     }
     return uVar4;
   }
@@ -6839,18 +6810,16 @@ uint _X509_certificate_type(int param_1,int *param_2)
 }
 
 
-// 009E8930  _EVP_VerifyFinal  (line unknown)
+// 009E8930  FUN_009e8930  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _EVP_VerifyFinal(int *param_1,undefined4 param_2,undefined4 param_3,int *param_4)
+void FUN_009e8930(int *param_1,undefined4 param_2,undefined4 param_3,int *param_4)
 
 {
   undefined4 *puVar1;
   int *piVar2;
-  undefined4 uVar3;
-  int iVar4;
+  int iVar3;
   undefined4 local_60;
   undefined1 *local_5c;
   int local_58;
@@ -6858,43 +6827,46 @@ undefined4 _EVP_VerifyFinal(int *param_1,undefined4 param_2,undefined4 param_3,i
   undefined1 local_44 [64];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_60;
-  iVar4 = 0;
+  local_4 = DAT_00b86490 ^ (uint)&local_60;
+  iVar3 = 0;
   piVar2 = (int *)(*param_1 + 0x2c);
   do {
     if (*piVar2 == 0) break;
     if (*param_4 == *piVar2) {
       if (*(int *)(*param_1 + 0x28) == 0) {
-        _ERR_put_error(6,0x6c,0x69,".\\crypto\\evp\\p_verify.c",0x5a);
-        return 0;
+        FUN_009d90b0(6,0x6c,0x69,".\\crypto\\evp\\p_verify.c",0x5a);
+        __security_check_cookie(local_4 ^ (uint)&local_60);
+        return;
       }
-      _EVP_MD_CTX_init(local_54);
-      _EVP_MD_CTX_copy_ex(local_54,param_1);
+      FUN_009e56e0(local_54);
+      FUN_009e5990(local_54,param_1);
       puVar1 = (undefined4 *)*param_1;
       if ((puVar1[3] & 0x800) == 0) {
-        _EVP_DigestFinal_ex(local_54,local_44,&local_60);
-        uVar3 = (*(code *)((undefined4 *)*param_1)[10])
-                          (*(undefined4 *)*param_1,local_44,local_60,param_2,param_3,param_4[3]);
+        FUN_009e58a0(local_54,local_44,&local_60);
+        (*(code *)((undefined4 *)*param_1)[10])
+                  (*(undefined4 *)*param_1,local_44,local_60,param_2,param_3,param_4[3]);
       }
       else {
         local_58 = param_4[3];
         local_5c = local_54;
-        uVar3 = (*(code *)puVar1[10])(*puVar1,0,0xffffffff,param_2,param_3,&local_5c);
+        (*(code *)puVar1[10])(*puVar1,0,0xffffffff,param_2,param_3,&local_5c);
       }
-      _EVP_MD_CTX_cleanup(local_54);
-      return uVar3;
+      FUN_009e5920(local_54);
+      __security_check_cookie(local_4 ^ (uint)&local_60);
+      return;
     }
-    iVar4 = iVar4 + 1;
+    iVar3 = iVar3 + 1;
     piVar2 = piVar2 + 1;
-  } while (iVar4 < 4);
-  _ERR_put_error(6,0x6c,0x6e,".\\crypto\\evp\\p_verify.c",0x55);
-  return 0xffffffff;
+  } while (iVar3 < 4);
+  FUN_009d90b0(6,0x6c,0x6e,".\\crypto\\evp\\p_verify.c",0x55);
+  __security_check_cookie(local_4 ^ (uint)&local_60);
+  return;
 }
 
 
 // 009E8A80  FUN_009e8a80  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 int FUN_009e8a80(void)
 
@@ -6921,76 +6893,76 @@ int FUN_009e8a80(void)
   local_1c = 0;
   local_4 = 0;
   local_8 = 0;
-  iVar1 = _BN_CTX_new();
+  iVar1 = FUN_009e6430();
   if (iVar1 == 0) {
     uVar5 = 0x46d;
 LAB_009e8cf5:
     uVar4 = 0x41;
   }
   else {
-    local_18 = _BN_new();
+    local_18 = FUN_009dcbf0();
     if (local_18 == 0) {
 LAB_009e8cf0:
       uVar5 = 0x474;
       goto LAB_009e8cf5;
     }
-    local_14 = _BN_new();
+    local_14 = FUN_009dcbf0();
     if (local_14 == 0) goto LAB_009e8cf0;
-    local_10 = _BN_new();
+    local_10 = FUN_009dcbf0();
     if (local_10 == 0) goto LAB_009e8cf0;
-    local_1c = _BN_new();
+    local_1c = FUN_009dcbf0();
     if (local_1c == 0) goto LAB_009e8cf0;
-    local_4 = _BN_new();
+    local_4 = FUN_009dcbf0();
     if (local_4 == 0) goto LAB_009e8cf0;
-    local_8 = _BN_new();
+    local_8 = FUN_009dcbf0();
     if (local_8 == 0) goto LAB_009e8cf0;
-    iVar2 = _BN_hex2bn(&local_18,unaff_EDI[1]);
+    iVar2 = FUN_009f5580(&local_18,unaff_EDI[1]);
     if (iVar2 == 0) {
 LAB_009e8ce2:
       uVar5 = 0x47b;
       uVar4 = 3;
     }
     else {
-      iVar2 = _BN_hex2bn(&local_14,unaff_EDI[2]);
+      iVar2 = FUN_009f5580(&local_14,unaff_EDI[2]);
       if (iVar2 == 0) goto LAB_009e8ce2;
-      iVar2 = _BN_hex2bn(&local_10,unaff_EDI[3]);
+      iVar2 = FUN_009f5580(&local_10,unaff_EDI[3]);
       if (iVar2 == 0) goto LAB_009e8ce2;
       if (*unaff_EDI == 0x196) {
-        iVar3 = _EC_GROUP_new_curve_GFp();
+        iVar3 = FUN_00a07c30();
         if (iVar3 == 0) {
           uVar5 = 0x483;
           uVar4 = 0x10;
         }
         else {
 LAB_009e8bc9:
-          local_c = _EC_POINT_new(iVar3);
+          local_c = FUN_009e6a10(iVar3);
           if (local_c == 0) {
             uVar5 = 0x492;
             uVar4 = 0x10;
           }
           else {
-            iVar2 = _BN_hex2bn(&local_1c,unaff_EDI[4]);
+            iVar2 = FUN_009f5580(&local_1c,unaff_EDI[4]);
             if (iVar2 != 0) {
-              iVar2 = _BN_hex2bn(&local_4,unaff_EDI[5]);
+              iVar2 = FUN_009f5580(&local_4,unaff_EDI[5]);
               if (iVar2 != 0) {
-                iVar2 = _EC_POINT_set_affine_coordinates_GF2m(iVar3,local_c,local_1c,local_4,iVar1);
+                iVar2 = FUN_009e6d40(iVar3,local_c,local_1c,local_4,iVar1);
                 if (iVar2 == 0) {
                   uVar5 = 0x49d;
                   uVar4 = 0x10;
                 }
                 else {
-                  iVar2 = _BN_hex2bn(&local_8,unaff_EDI[6]);
+                  iVar2 = FUN_009f5580(&local_8,unaff_EDI[6]);
                   if (iVar2 != 0) {
-                    iVar2 = _BN_set_word(local_1c,unaff_EDI[7]);
+                    iVar2 = FUN_009dce60(local_1c,unaff_EDI[7]);
                     if (iVar2 != 0) {
-                      iVar2 = _EC_GROUP_set_generator(iVar3,local_c,local_8,local_1c);
+                      iVar2 = FUN_009e7790(iVar3,local_c,local_8,local_1c);
                       if (iVar2 == 0) {
                         uVar5 = 0x4a7;
                         uVar4 = 0x10;
                       }
                       else {
                         if (unaff_EDI[8] == 0) goto LAB_009e8d16;
-                        iVar2 = _EC_GROUP_set_seed(iVar3,unaff_EDI[8],unaff_EDI[9]);
+                        iVar2 = FUN_009e6730(iVar3,unaff_EDI[8],unaff_EDI[9]);
                         if (iVar2 != 0) goto LAB_009e8d16;
                         uVar5 = 0x4ae;
                         uVar4 = 0x10;
@@ -7010,7 +6982,7 @@ LAB_009e8bc9:
         }
       }
       else {
-        iVar3 = _EC_GROUP_new_curve_GF2m(local_18,local_14,local_10,iVar1);
+        iVar3 = FUN_00a07ce0(local_18,local_14,local_10,iVar1);
         if (iVar3 != 0) goto LAB_009e8bc9;
         uVar5 = 0x48b;
         uVar4 = 0x10;
@@ -7018,41 +6990,41 @@ LAB_009e8bc9:
     }
   }
 LAB_009e8cfc:
-  _ERR_put_error(0x10,0xaf,uVar4,".\\crypto\\ec\\ec_curve.c",uVar5);
-  _EC_GROUP_free(iVar3);
+  FUN_009d90b0(0x10,0xaf,uVar4,".\\crypto\\ec\\ec_curve.c",uVar5);
+  FUN_009e7480(iVar3);
   iVar3 = 0;
 LAB_009e8d16:
   if (local_c != 0) {
-    _EC_POINT_free(local_c);
+    FUN_009e6ac0(local_c);
   }
   if (iVar1 != 0) {
-    _BN_CTX_free(iVar1);
+    FUN_009e6490(iVar1);
   }
   if (local_18 != 0) {
-    _BN_free(local_18);
+    FUN_009dcb90(local_18);
   }
   if (local_14 != 0) {
-    _BN_free(local_14);
+    FUN_009dcb90(local_14);
   }
   if (local_10 != 0) {
-    _BN_free(local_10);
+    FUN_009dcb90(local_10);
   }
   if (local_8 != 0) {
-    _BN_free(local_8);
+    FUN_009dcb90(local_8);
   }
   if (local_1c != 0) {
-    _BN_free(local_1c);
+    FUN_009dcb90(local_1c);
   }
   if (local_4 != 0) {
-    _BN_free(local_4);
+    FUN_009dcb90(local_4);
   }
   return iVar3;
 }
 
 
-// 009E8DB0  _EC_GROUP_new_by_curve_name  (line unknown)
+// 009E8DB0  FUN_009e8db0  (line unknown)
 
-int _EC_GROUP_new_by_curve_name(int param_1)
+int FUN_009e8db0(int param_1)
 
 {
   uint uVar1;
@@ -7067,7 +7039,7 @@ int _EC_GROUP_new_by_curve_name(int param_1)
       if ((&DAT_00a81a08)[uVar1 * 2] == param_1) {
         iVar2 = FUN_009e8a80();
         if (iVar2 != 0) {
-          _EC_GROUP_set_curve_name(iVar2,param_1);
+          FUN_009e6700(iVar2,param_1);
           return iVar2;
         }
         break;
@@ -7075,30 +7047,30 @@ int _EC_GROUP_new_by_curve_name(int param_1)
       uVar1 = uVar1 + 1;
     } while (uVar1 < DAT_00b932ec);
   }
-  _ERR_put_error(0x10,0xae,0x81,".\\crypto\\ec\\ec_curve.c",0x4dd);
+  FUN_009d90b0(0x10,0xae,0x81,".\\crypto\\ec\\ec_curve.c",0x4dd);
   return 0;
 }
 
 
-// 009E8E20  _COMP_zlib  (line unknown)
+// 009E8E20  FUN_009e8e20  (line unknown)
 
-undefined * _COMP_zlib(void)
+undefined * FUN_009e8e20(void)
 
 {
   return &DAT_00b932f0;
 }
 
 
-// 009E8E30  _CRYPTO_mem_ctrl  (line unknown)
+// 009E8E30  FUN_009e8e30  (line unknown)
 
-uint _CRYPTO_mem_ctrl(undefined4 param_1)
+uint FUN_009e8e30(undefined4 param_1)
 
 {
   uint uVar1;
   int iVar2;
   
   uVar1 = DAT_00eabd8c;
-  _CRYPTO_lock(9,0x14,".\\crypto\\mem_dbg.c",0xa1);
+  FUN_009dfaa0(9,0x14,".\\crypto\\mem_dbg.c",0xa1);
   switch(param_1) {
   case 0:
     DAT_00eabd8c = 0;
@@ -7112,38 +7084,38 @@ uint _CRYPTO_mem_ctrl(undefined4 param_1)
     if ((((DAT_00eabd8c & 1) != 0) && (DAT_00eabda0 != 0)) &&
        (DAT_00eabda0 = DAT_00eabda0 + -1, DAT_00eabda0 == 0)) {
       DAT_00eabd8c = DAT_00eabd8c | 2;
-      _CRYPTO_lock(10,0x1b,".\\crypto\\mem_dbg.c",0xd4);
+      FUN_009dfaa0(10,0x1b,".\\crypto\\mem_dbg.c",0xd4);
     }
     break;
   case 3:
     if ((DAT_00eabd8c & 1) != 0) {
-      if ((DAT_00eabda0 == 0) || (iVar2 = _CRYPTO_thread_id(), DAT_00eabda4 != iVar2)) {
-        _CRYPTO_lock(10,0x14,".\\crypto\\mem_dbg.c",0xbd);
-        _CRYPTO_lock(9,0x1b,".\\crypto\\mem_dbg.c",0xc3);
-        _CRYPTO_lock(9,0x14,".\\crypto\\mem_dbg.c",0xc4);
+      if ((DAT_00eabda0 == 0) || (iVar2 = FUN_009dfa80(), DAT_00eabda4 != iVar2)) {
+        FUN_009dfaa0(10,0x14,".\\crypto\\mem_dbg.c",0xbd);
+        FUN_009dfaa0(9,0x1b,".\\crypto\\mem_dbg.c",0xc3);
+        FUN_009dfaa0(9,0x14,".\\crypto\\mem_dbg.c",0xc4);
         DAT_00eabd8c = DAT_00eabd8c & 0xfffffffd;
-        DAT_00eabda4 = _CRYPTO_thread_id();
+        DAT_00eabda4 = FUN_009dfa80();
       }
       DAT_00eabda0 = DAT_00eabda0 + 1;
     }
   }
-  _CRYPTO_lock(10,0x14,".\\crypto\\mem_dbg.c",0xdd);
+  FUN_009dfaa0(10,0x14,".\\crypto\\mem_dbg.c",0xdd);
   return uVar1;
 }
 
 
-// 009E8F70  _EVP_enc_null  (line unknown)
+// 009E8F70  FUN_009e8f70  (line unknown)
 
-undefined * _EVP_enc_null(void)
+undefined * FUN_009e8f70(void)
 
 {
   return &DAT_00a81c54;
 }
 
 
-// 009E8F80  get_type  (line unknown)
+// 009E8F80  FUN_009e8f80  (line unknown)
 
-uint __thiscall gjk_aabb_t::get_type(gjk_aabb_t *this)
+undefined4 FUN_009e8f80(void)
 
 {
   return 1;
@@ -7156,8 +7128,8 @@ void FUN_009e8fc0(uint *param_1,undefined1 param_2)
 
 {
   uint uVar1;
-  uchar *puVar2;
-  int iVar3;
+  void *_Dst;
+  int iVar2;
   int *unaff_EBX;
   uint *unaff_ESI;
   int *unaff_EDI;
@@ -7168,17 +7140,17 @@ void FUN_009e8fc0(uint *param_1,undefined1 param_2)
         if (*unaff_ESI == 0) {
           *unaff_ESI = 0x400;
         }
-        puVar2 = (uchar *)_CRYPTO_malloc(*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2e5);
-        *unaff_EDI = (int)puVar2;
+        _Dst = (void *)FUN_009d96f0(*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2e5);
+        *unaff_EDI = (int)_Dst;
         if (*param_1 != 0) {
-          memcpy(puVar2,(uchar *)*unaff_EBX,*param_1);
+          FID_conflict__memcpy(_Dst,(void *)*unaff_EBX,*param_1);
         }
         *unaff_EBX = 0;
       }
       else {
         *unaff_ESI = *unaff_ESI + 0x400;
-        iVar3 = _CRYPTO_realloc(*unaff_EDI,*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2ed);
-        *unaff_EDI = iVar3;
+        iVar2 = FUN_009d9770(*unaff_EDI,*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2ed);
+        *unaff_EDI = iVar2;
       }
     } while (*unaff_ESI <= *param_1);
   }
@@ -7244,37 +7216,39 @@ void FUN_009e9060(undefined4 param_1,undefined4 param_2,char *param_3,byte param
 
 // 009E9140  FUN_009e9140  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-void FUN_009e9140(undefined4 param_1,int param_2,int param_3,uint param_4,int param_5,
-                 undefined4 param_6,undefined4 param_7,byte param_8)
+void FUN_009e9140(undefined4 param_1,undefined4 param_2,int param_3,int param_4,int param_5,
+                 int param_6,int param_7,byte param_8)
 
 {
   char cVar1;
-  int extraout_EAX;
+  undefined4 in_ECX;
   int extraout_ECX;
   int iVar2;
-  int extraout_EDX;
-  undefined4 unaff_EBX;
-  int iVar3;
-  char *pcVar4;
+  char *pcVar3;
+  bool bVar4;
+  longlong lVar5;
   int local_40;
-  char *local_3c;
-  undefined4 local_34;
-  undefined4 local_30;
+  int local_3c;
   char *local_2c;
   undefined4 local_24;
+  char local_20 [28];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_40;
-  iVar3 = 0;
-  local_30 = param_1;
+  local_4 = DAT_00b86490 ^ (uint)&local_40;
+  iVar2 = 0;
   local_24 = 0;
   local_2c = "";
   local_40 = 0;
+  if (param_7 < 0) {
+    param_7 = 0;
+  }
   if ((param_8 & 0x40) == 0) {
-    if (((int)param_4 < 1) && ((int)param_4 < 0)) {
+    if ((param_4 < 1) && (param_4 < 0)) {
+      bVar4 = param_3 != 0;
+      param_3 = -param_3;
+      param_4 = -(param_4 + (uint)bVar4);
       local_24 = 0x2d;
     }
     else if ((param_8 & 2) == 0) {
@@ -7294,89 +7268,88 @@ void FUN_009e9140(undefined4 param_1,int param_2,int param_3,uint param_4,int pa
       local_2c = "0x";
     }
   }
+  lVar5 = CONCAT44(param_4,param_3);
   if ((param_8 & 0x20) != 0) {
     local_40 = 1;
+    lVar5 = CONCAT44(param_4,param_3);
   }
   do {
-    pcVar4 = "0123456789ABCDEF";
+    pcVar3 = "0123456789ABCDEF";
     if (local_40 == 0) {
-      pcVar4 = "0123456789abcdef";
+      pcVar3 = "0123456789abcdef";
     }
-    _aulldvrm();
-    *(char *)((int)&local_30 + iVar3) = pcVar4[extraout_ECX];
-    iVar3 = iVar3 + 1;
-  } while ((extraout_EAX != 0 || extraout_EDX != 0) && (iVar3 < 0x1a));
-  if (iVar3 == 0x1a) {
-    iVar3 = 0x19;
+    lVar5 = __aulldvrm(lVar5,param_5,0);
+    local_20[iVar2] = pcVar3[extraout_ECX];
+    iVar2 = iVar2 + 1;
+  } while ((lVar5 != 0) && (iVar2 < 0x1a));
+  if (iVar2 == 0x1a) {
+    iVar2 = 0x19;
   }
-  iVar2 = param_3 - iVar3;
-  *(undefined1 *)((int)&local_30 + iVar3) = 0;
-  if (param_3 < iVar3) {
-    param_3 = iVar3;
+  local_40 = param_7 - iVar2;
+  local_20[iVar2] = '\0';
+  if (param_7 < iVar2) {
+    param_7 = iVar2;
   }
-  pcVar4 = local_3c;
+  pcVar3 = local_2c;
   do {
-    cVar1 = *pcVar4;
-    pcVar4 = pcVar4 + 1;
+    cVar1 = *pcVar3;
+    pcVar3 = pcVar3 + 1;
   } while (cVar1 != '\0');
-  param_3 = ((param_2 - (uint)(local_34 != 0)) - ((int)pcVar4 - (int)(local_3c + 1))) - param_3;
-  if (iVar2 < 0) {
-    iVar2 = 0;
+  local_3c = ((param_6 - (uint)(local_24 != 0)) - ((int)pcVar3 - (int)(local_2c + 1))) - param_7;
+  if (local_40 < 0) {
+    local_40 = 0;
   }
-  if (param_3 < 0) {
-    param_3 = 0;
+  if (local_3c < 0) {
+    local_3c = 0;
   }
-  if ((param_4 & 0x10) != 0) {
-    if (iVar2 < param_3) {
-      iVar2 = param_3;
+  if ((param_8 & 0x10) != 0) {
+    if (local_40 < local_3c) {
+      local_40 = local_3c;
     }
-    param_3 = 0;
+    local_3c = 0;
   }
-  if ((param_4 & 1) != 0) {
-    param_3 = -param_3;
+  if ((param_8 & 1) != 0) {
+    local_3c = -local_3c;
   }
-  for (; 0 < param_3; param_3 = param_3 + -1) {
-    FUN_009e8fc0(unaff_EBX,0x20);
+  for (; 0 < local_3c; local_3c = local_3c + -1) {
+    FUN_009e8fc0(in_ECX,0x20);
   }
-  if (local_34 != 0) {
-    FUN_009e8fc0(unaff_EBX,local_34);
+  if (local_24 != 0) {
+    FUN_009e8fc0(in_ECX,local_24);
   }
-  cVar1 = *local_3c;
+  cVar1 = *local_2c;
   while (cVar1 != '\0') {
-    FUN_009e8fc0(unaff_EBX,(int)cVar1);
-    local_3c = local_3c + 1;
-    cVar1 = *local_3c;
+    FUN_009e8fc0(in_ECX,(int)cVar1);
+    local_2c = local_2c + 1;
+    cVar1 = *local_2c;
+  }
+  for (; 0 < local_40; local_40 = local_40 + -1) {
+    FUN_009e8fc0(in_ECX,0x30);
   }
   for (; 0 < iVar2; iVar2 = iVar2 + -1) {
-    FUN_009e8fc0(unaff_EBX,0x30);
+    FUN_009e8fc0(in_ECX,(int)local_20[iVar2 + -1]);
   }
-  for (; 0 < iVar3; iVar3 = iVar3 + -1) {
-    FUN_009e8fc0(unaff_EBX,(int)*(char *)((int)&local_34 + iVar3 + 3));
-  }
-  if (param_3 < 0) {
-    param_3 = -param_3;
+  if (local_3c < 0) {
+    iVar2 = -local_3c;
     do {
-      FUN_009e8fc0(unaff_EBX,0x20);
-      param_3 = param_3 + -1;
-    } while (param_3 != 0);
+      FUN_009e8fc0(in_ECX,0x20);
+      iVar2 = iVar2 + -1;
+    } while (iVar2 != 0);
   }
+  __security_check_cookie(local_4 ^ (uint)&local_40);
   return;
 }
 
 
 // 009E9400  FUN_009e9400  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 void FUN_009e9400(undefined4 param_1,undefined4 param_2,double param_3,int param_4,int param_5,
                  byte param_6)
 
 {
   char *pcVar1;
-  int extraout_EAX;
-  int extraout_EAX_00;
-  int extraout_EAX_01;
   int iVar2;
   int iVar3;
   float10 extraout_ST0;
@@ -7387,11 +7360,12 @@ void FUN_009e9400(undefined4 param_1,undefined4 param_2,double param_3,int param
   undefined4 local_3c;
   int local_38;
   int local_34;
-  char acStack_2d [20];
+  undefined4 local_30;
+  char acStack_2c [19];
   char acStack_19 [21];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_44;
+  local_4 = DAT_00b86490 ^ (uint)&local_44;
   local_3c = param_1;
   local_34 = 0;
   local_40 = 0;
@@ -7412,75 +7386,74 @@ void FUN_009e9400(undefined4 param_1,undefined4 param_2,double param_3,int param
   else {
     local_34 = 0x2d;
   }
-  _ftol2_sse();
-  iVar2 = param_5;
+  iVar2 = FUN_0095bef0();
+  iVar3 = param_5;
   if (9 < param_5) {
     param_5 = 9;
-    iVar2 = param_5;
+    iVar3 = param_5;
   }
-  for (; iVar2 != 0; iVar2 = iVar2 + -1) {
+  for (; iVar3 != 0; iVar3 = iVar3 + -1) {
   }
-  _ftol2_sse();
-  iVar2 = param_5;
-  local_38 = extraout_EAX_00;
-  if ((float10)0.5 < extraout_ST1 - (float10)extraout_EAX_00 !=
-      ((float10)0.5 == extraout_ST1 - (float10)extraout_EAX_00)) {
-    local_38 = extraout_EAX_00 + 1;
+  local_30 = iVar2;
+  local_38 = FUN_0095bef0();
+  iVar3 = param_5;
+  if ((float10)0.5 < extraout_ST1 - (float10)local_38 !=
+      ((float10)0.5 == extraout_ST1 - (float10)local_38)) {
+    local_38 = local_38 + 1;
   }
-  for (; iVar2 != 0; iVar2 = iVar2 + -1) {
+  for (; iVar3 != 0; iVar3 = iVar3 + -1) {
   }
-  _ftol2_sse();
-  iVar2 = extraout_EAX_01;
-  if (extraout_ST1_00 <= extraout_ST0 - (float10)extraout_EAX_01) {
-    iVar2 = extraout_EAX_01 + 1;
+  local_30 = FUN_0095bef0();
+  iVar3 = local_30;
+  if (extraout_ST1_00 <= extraout_ST0 - (float10)local_30) {
+    iVar3 = local_30 + 1;
   }
-  iVar3 = extraout_EAX;
-  if (local_38 <= iVar2) {
-    iVar2 = iVar2 - local_38;
-    iVar3 = extraout_EAX + 1;
+  if (local_38 <= iVar3) {
+    iVar3 = iVar3 - local_38;
+    iVar2 = iVar2 + 1;
   }
   do {
-    acStack_2d[local_40 + 1] = "0123456789abcdef"[iVar3 % 10];
+    acStack_2c[local_40] = "0123456789abcdef"[iVar2 % 10];
     local_40 = local_40 + 1;
-    if (iVar3 / 10 == 0) break;
-    iVar3 = iVar3 / 10;
+    if (iVar2 / 10 == 0) break;
+    iVar2 = iVar2 / 10;
   } while (local_40 < 0x14);
   if (local_40 == 0x14) {
     local_40 = 0x13;
   }
-  acStack_2d[local_40 + 1] = '\0';
+  acStack_2c[local_40] = '\0';
   do {
-    acStack_19[local_44 + 1] = "0123456789abcdef"[iVar2 % 10];
+    acStack_19[local_44 + 1] = "0123456789abcdef"[iVar3 % 10];
     local_44 = local_44 + 1;
-    iVar2 = iVar2 / 10;
+    iVar3 = iVar3 / 10;
   } while (local_44 < param_5);
   if (local_44 == 0x14) {
     local_44 = 0x13;
   }
   acStack_19[local_44 + 1] = '\0';
-  iVar2 = (((param_4 - (uint)(local_34 != 0)) - local_40) - param_5) + -1;
+  iVar3 = (((param_4 - (uint)(local_34 != 0)) - local_40) - param_5) + -1;
   local_38 = param_5 - local_44;
   if (local_38 < 0) {
     local_38 = 0;
   }
-  if (iVar2 < 0) {
-    iVar2 = 0;
+  if (iVar3 < 0) {
+    iVar3 = 0;
   }
   if ((param_6 & 1) != 0) {
-    iVar2 = -iVar2;
+    iVar3 = -iVar3;
   }
   if ((param_6 & 0x10) == 0) {
-    for (; 0 < iVar2; iVar2 = iVar2 + -1) {
+    for (; 0 < iVar3; iVar3 = iVar3 + -1) {
       FUN_009e8fc0(local_3c,0x20);
     }
   }
-  else if (0 < iVar2) {
+  else if (0 < iVar3) {
     if (local_34 != 0) {
       FUN_009e8fc0(local_3c,local_34);
-      iVar2 = iVar2 + -1;
+      iVar3 = iVar3 + -1;
       local_34 = 0;
     }
-    for (; 0 < iVar2; iVar2 = iVar2 + -1) {
+    for (; 0 < iVar3; iVar3 = iVar3 + -1) {
       FUN_009e8fc0(local_3c,0x30);
     }
   }
@@ -7488,9 +7461,9 @@ void FUN_009e9400(undefined4 param_1,undefined4 param_2,double param_3,int param
     FUN_009e8fc0(local_3c,local_34);
   }
   while (0 < local_40) {
-    pcVar1 = acStack_2d + local_40;
+    iVar2 = local_40 + -1;
     local_40 = local_40 + -1;
-    FUN_009e8fc0(local_3c,(int)*pcVar1);
+    FUN_009e8fc0(local_3c,(int)acStack_2c[iVar2]);
   }
   if ((0 < param_5) || ((param_6 & 8) != 0)) {
     FUN_009e8fc0(local_3c,0x2e);
@@ -7503,20 +7476,21 @@ void FUN_009e9400(undefined4 param_1,undefined4 param_2,double param_3,int param
   for (; 0 < local_38; local_38 = local_38 + -1) {
     FUN_009e8fc0(local_3c,0x30);
   }
-  if (iVar2 < 0) {
-    iVar2 = -iVar2;
+  if (iVar3 < 0) {
+    iVar3 = -iVar3;
     do {
       FUN_009e8fc0(local_3c,0x20);
-      iVar2 = iVar2 + -1;
-    } while (iVar2 != 0);
+      iVar3 = iVar3 + -1;
+    } while (iVar3 != 0);
   }
+  __security_check_cookie(local_4 ^ (uint)&local_44);
   return;
 }
 
 
 // 009E9760  FUN_009e9760  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 void FUN_009e9760(undefined4 param_1,int param_2,uint *param_3,int *param_4,uint *param_5,
                  byte *param_6)
@@ -7621,7 +7595,7 @@ LAB_009e9815:
     }
     goto LAB_009e97a5;
   case 2:
-    iVar2 = isdigit((uint)bVar5);
+    iVar2 = _isdigit((uint)bVar5);
     if (iVar2 == 0) {
       if (bVar5 == 0x2a) {
         bVar5 = *pbVar8;
@@ -7650,7 +7624,7 @@ LAB_009e9815:
     param_6 = pbVar8;
     goto LAB_009e97a5;
   case 4:
-    iVar2 = isdigit((uint)bVar5);
+    iVar2 = _isdigit((uint)bVar5);
     if (iVar2 == 0) {
       if (bVar5 == 0x2a) {
         bVar5 = *pbVar8;
@@ -7871,16 +7845,14 @@ code_r0x009e99b6:
 }
 
 
-// 009E9E60  _BIO_vprintf  (line unknown)
+// 009E9E60  FUN_009e9e60  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _BIO_vprintf(undefined4 param_1,undefined4 param_2)
+void FUN_009e9e60(undefined4 param_1,undefined4 param_2)
 
 {
   int iVar1;
-  undefined4 uVar2;
   int local_818;
   undefined4 local_814;
   undefined4 local_810;
@@ -7889,40 +7861,41 @@ undefined4 _BIO_vprintf(undefined4 param_1,undefined4 param_2)
   undefined1 local_804 [2048];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_818;
+  local_4 = DAT_00b86490 ^ (uint)&local_818;
   local_80c = local_804;
   local_810 = 0x800;
   local_818 = 0;
-  _CRYPTO_push_info_("doapr()",".\\crypto\\bio\\b_print.c",0x31a);
+  FUN_009d98e0("doapr()",".\\crypto\\bio\\b_print.c",0x31a);
   FUN_009e9760(&local_80c,&local_818,&local_810,&local_814,local_808,param_2);
   iVar1 = local_818;
   if (local_818 == 0) {
-    uVar2 = _BIO_write(param_1,local_804,local_814);
+    FUN_009d4cf0(param_1,local_804,local_814);
   }
   else {
-    uVar2 = _BIO_write(param_1,local_818,local_814);
-    _CRYPTO_free(iVar1);
+    FUN_009d4cf0(param_1,local_818,local_814);
+    FUN_009d98a0(iVar1);
   }
-  _CRYPTO_pop_info();
-  return uVar2;
-}
-
-
-// 009E9F40  _BIO_printf  (line unknown)
-
-void _BIO_printf(undefined4 param_1,undefined4 param_2)
-
-{
-  _BIO_vprintf(param_1,param_2,&stack0x0000000c);
+  FUN_009d9900();
+  __security_check_cookie(local_4 ^ (uint)&local_818);
   return;
 }
 
 
-// 009E9F60  _BIO_snprintf  (line unknown)
+// 009E9F40  FUN_009e9f40  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+void FUN_009e9f40(undefined4 param_1,undefined4 param_2)
 
-uint _BIO_snprintf(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+{
+  FUN_009e9e60(param_1,param_2,&stack0x0000000c);
+  return;
+}
+
+
+// 009E9F60  FUN_009e9f60  (line unknown)
+
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
+
+uint FUN_009e9f60(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
   int local_8;
@@ -7937,37 +7910,37 @@ uint _BIO_snprintf(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 }
 
 
-// 009E9FC0  _EVP_EncryptInit_ex  (line unknown)
+// 009E9FC0  FUN_009e9fc0  (line unknown)
 
-void _EVP_EncryptInit_ex(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4
-                        ,undefined4 param_5)
+void FUN_009e9fc0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5)
 
 {
-  _EVP_CipherInit_ex(param_1,param_2,param_3,param_4,param_5,1);
+  FUN_009e2260(param_1,param_2,param_3,param_4,param_5,1);
   return;
 }
 
 
-// 009E9FF0  _EVP_DecryptInit_ex  (line unknown)
+// 009E9FF0  FUN_009e9ff0  (line unknown)
 
-void _EVP_DecryptInit_ex(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4
-                        ,undefined4 param_5)
+void FUN_009e9ff0(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5)
 
 {
-  _EVP_CipherInit_ex(param_1,param_2,param_3,param_4,param_5,0);
+  FUN_009e2260(param_1,param_2,param_3,param_4,param_5,0);
   return;
 }
 
 
-// 009EA020  _EVP_EncryptUpdate  (line unknown)
+// 009EA020  FUN_009ea020  (line unknown)
 
-bool _EVP_EncryptUpdate(int *param_1,int param_2,uint *param_3,uchar *param_4,uint param_5)
+bool FUN_009ea020(int *param_1,int param_2,uint *param_3,void *param_4,uint param_5)
 
 {
   int iVar1;
   int iVar2;
-  ulong uVar3;
-  uint uVar4;
+  size_t _Size;
+  uint uVar3;
   
   if ((int)param_5 < 1) {
     *param_3 = 0;
@@ -7983,33 +7956,33 @@ bool _EVP_EncryptUpdate(int *param_1,int param_2,uint *param_3,uchar *param_4,ui
     *param_3 = param_5;
     return true;
   }
-  uVar4 = *(uint *)(*param_1 + 4);
-  if (0x20 < (int)uVar4) {
-    _OpenSSLDie(".\\crypto\\evp\\evp_enc.c",0xa7,"bl <= (int)sizeof(ctx->buf)");
+  uVar3 = *(uint *)(*param_1 + 4);
+  if (0x20 < (int)uVar3) {
+    FUN_009dfd90(".\\crypto\\evp\\evp_enc.c",0xa7,"bl <= (int)sizeof(ctx->buf)");
   }
   if (iVar1 == 0) {
     *param_3 = 0;
   }
   else {
-    if ((int)(iVar1 + param_5) < (int)uVar4) {
-      memcpy((uchar *)(iVar1 + 0x30 + (int)param_1),param_4,param_5);
+    if ((int)(iVar1 + param_5) < (int)uVar3) {
+      FID_conflict__memcpy((void *)(iVar1 + 0x30 + (int)param_1),param_4,param_5);
       param_1[3] = param_1[3] + param_5;
       *param_3 = 0;
       return true;
     }
-    uVar3 = uVar4 - iVar1;
-    memcpy((uchar *)(iVar1 + 0x30 + (int)param_1),param_4,uVar3);
-    iVar1 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_1 + 0xc,uVar4);
+    _Size = uVar3 - iVar1;
+    FID_conflict__memcpy((void *)(iVar1 + 0x30 + (int)param_1),param_4,_Size);
+    iVar1 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_1 + 0xc,uVar3);
     if (iVar1 == 0) {
       return false;
     }
-    param_4 = param_4 + uVar3;
-    param_5 = param_5 - uVar3;
-    param_2 = param_2 + uVar4;
-    *param_3 = uVar4;
+    param_4 = (void *)((int)param_4 + _Size);
+    param_5 = param_5 - _Size;
+    param_2 = param_2 + uVar3;
+    *param_3 = uVar3;
   }
-  uVar4 = uVar4 - 1 & param_5;
-  iVar1 = param_5 - uVar4;
+  uVar3 = uVar3 - 1 & param_5;
+  iVar1 = param_5 - uVar3;
   if (0 < iVar1) {
     iVar2 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_4,iVar1);
     if (iVar2 == 0) {
@@ -8017,17 +7990,17 @@ bool _EVP_EncryptUpdate(int *param_1,int param_2,uint *param_3,uchar *param_4,ui
     }
     *param_3 = *param_3 + iVar1;
   }
-  if (uVar4 != 0) {
-    memcpy((uchar *)(param_1 + 0xc),param_4 + iVar1,uVar4);
+  if (uVar3 != 0) {
+    FID_conflict__memcpy(param_1 + 0xc,(void *)((int)param_4 + iVar1),uVar3);
   }
-  param_1[3] = uVar4;
+  param_1[3] = uVar3;
   return true;
 }
 
 
-// 009EA180  _EVP_EncryptFinal_ex  (line unknown)
+// 009EA180  FUN_009ea180  (line unknown)
 
-int _EVP_EncryptFinal_ex(int *param_1,undefined4 param_2,uint *param_3)
+int FUN_009ea180(int *param_1,undefined4 param_2,uint *param_3)
 
 {
   uint uVar1;
@@ -8036,7 +8009,7 @@ int _EVP_EncryptFinal_ex(int *param_1,undefined4 param_2,uint *param_3)
   
   uVar1 = *(uint *)(*param_1 + 4);
   if (0x20 < uVar1) {
-    _OpenSSLDie(".\\crypto\\evp\\evp_enc.c",0xd9,"b <= sizeof ctx->buf");
+    FUN_009dfd90(".\\crypto\\evp\\evp_enc.c",0xd9,"b <= sizeof ctx->buf");
   }
   if (uVar1 == 1) {
     *param_3 = 0;
@@ -8045,7 +8018,7 @@ int _EVP_EncryptFinal_ex(int *param_1,undefined4 param_2,uint *param_3)
   uVar2 = param_1[3];
   if ((param_1[0x17] & 0x100U) == 0) {
     if (uVar2 < uVar1) {
-      memset((uchar *)(uVar2 + 0x30 + (int)param_1),(uchar)(uVar1 - uVar2),uVar1 - uVar2);
+      _memset((void *)(uVar2 + 0x30 + (int)param_1),uVar1 - uVar2,uVar1 - uVar2);
     }
     iVar3 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_1 + 0xc,uVar1);
     if (iVar3 != 0) {
@@ -8054,7 +8027,7 @@ int _EVP_EncryptFinal_ex(int *param_1,undefined4 param_2,uint *param_3)
     return iVar3;
   }
   if (uVar2 != 0) {
-    _ERR_put_error(6,0x7f,0x8a,".\\crypto\\evp\\evp_enc.c",0xe4);
+    FUN_009d90b0(6,0x7f,0x8a,".\\crypto\\evp\\evp_enc.c",0xe4);
     return 0;
   }
   *param_3 = 0;
@@ -8062,9 +8035,9 @@ int _EVP_EncryptFinal_ex(int *param_1,undefined4 param_2,uint *param_3)
 }
 
 
-// 009EA240  _EVP_DecryptUpdate  (line unknown)
+// 009EA240  FUN_009ea240  (line unknown)
 
-uint _EVP_DecryptUpdate(int *param_1,uchar *param_2,int *param_3,undefined4 param_4,int param_5)
+uint FUN_009ea240(int *param_1,void *param_2,int *param_3,undefined4 param_4,int param_5)
 
 {
   int iVar1;
@@ -8078,14 +8051,14 @@ uint _EVP_DecryptUpdate(int *param_1,uchar *param_2,int *param_3,undefined4 para
   if ((param_1[0x17] & 0x100U) == 0) {
     uVar2 = *(uint *)(*param_1 + 4);
     if (0x20 < uVar2) {
-      _OpenSSLDie(".\\crypto\\evp\\evp_enc.c",0x107,"b <= sizeof ctx->final");
+      FUN_009dfd90(".\\crypto\\evp\\evp_enc.c",0x107,"b <= sizeof ctx->final");
     }
     iVar1 = param_1[0x19];
     if (iVar1 != 0) {
-      memcpy(param_2,(uchar *)(param_1 + 0x1b),uVar2);
-      param_2 = param_2 + uVar2;
+      FID_conflict__memcpy(param_2,param_1 + 0x1b,uVar2);
+      param_2 = (void *)((int)param_2 + uVar2);
     }
-    iVar3 = _EVP_EncryptUpdate(param_1,param_2,param_3,param_4,param_5);
+    iVar3 = FUN_009ea020(param_1,param_2,param_3,param_4,param_5);
     if (iVar3 != 0) {
       if ((uVar2 < 2) || (param_1[3] != 0)) {
         param_1[0x19] = 0;
@@ -8093,7 +8066,7 @@ uint _EVP_DecryptUpdate(int *param_1,uchar *param_2,int *param_3,undefined4 para
       else {
         *param_3 = *param_3 - uVar2;
         param_1[0x19] = 1;
-        memcpy((uchar *)(param_1 + 0x1b),param_2 + *param_3,uVar2);
+        FID_conflict__memcpy(param_1 + 0x1b,(void *)(*param_3 + (int)param_2),uVar2);
       }
       if (iVar1 != 0) {
         *param_3 = *param_3 + uVar2;
@@ -8102,14 +8075,14 @@ uint _EVP_DecryptUpdate(int *param_1,uchar *param_2,int *param_3,undefined4 para
     }
     return 0;
   }
-  uVar2 = _EVP_EncryptUpdate(param_1,param_2,param_3,param_4,param_5);
+  uVar2 = FUN_009ea020(param_1,param_2,param_3,param_4,param_5);
   return uVar2;
 }
 
 
-// 009EA340  _EVP_DecryptFinal_ex  (line unknown)
+// 009EA340  FUN_009ea340  (line unknown)
 
-undefined4 _EVP_DecryptFinal_ex(int *param_1,int param_2,int *param_3)
+undefined4 FUN_009ea340(int *param_1,int param_2,int *param_3)
 
 {
   byte *pbVar1;
@@ -8124,11 +8097,11 @@ undefined4 _EVP_DecryptFinal_ex(int *param_1,int param_2,int *param_3)
   if ((param_1[0x17] & 0x100U) == 0) {
     if (1 < uVar2) {
       if ((param_1[3] != 0) || (param_1[0x19] == 0)) {
-        _ERR_put_error(6,0x65,0x6d,".\\crypto\\evp\\evp_enc.c",0x143);
+        FUN_009d90b0(6,0x65,0x6d,".\\crypto\\evp\\evp_enc.c",0x143);
         return 0;
       }
       if (0x20 < uVar2) {
-        _OpenSSLDie(".\\crypto\\evp\\evp_enc.c",0x146,"b <= sizeof ctx->final");
+        FUN_009dfd90(".\\crypto\\evp\\evp_enc.c",0x146,"b <= sizeof ctx->final");
       }
       uVar3 = (uint)*(byte *)(uVar2 + 0x6b + (int)param_1);
       if ((uVar3 != 0) && ((int)uVar3 <= (int)uVar2)) {
@@ -8158,12 +8131,12 @@ undefined4 _EVP_DecryptFinal_ex(int *param_1,int param_2,int *param_3)
       }
       uVar6 = 0x14a;
 LAB_009ea429:
-      _ERR_put_error(6,0x65,100,".\\crypto\\evp\\evp_enc.c",uVar6);
+      FUN_009d90b0(6,0x65,100,".\\crypto\\evp\\evp_enc.c",uVar6);
       return 0;
     }
   }
   else if (param_1[3] != 0) {
-    _ERR_put_error(6,0x65,0x8a,".\\crypto\\evp\\evp_enc.c",0x139);
+    FUN_009d90b0(6,0x65,0x8a,".\\crypto\\evp\\evp_enc.c",0x139);
     return 0;
   }
   *param_3 = 0;
@@ -8171,20 +8144,20 @@ LAB_009ea429:
 }
 
 
-// 009EA470  _EVP_CIPHER_CTX_set_key_length  (line unknown)
+// 009EA470  FUN_009ea470  (line unknown)
 
-undefined4 _EVP_CIPHER_CTX_set_key_length(int *param_1,int param_2)
+undefined4 FUN_009ea470(int *param_1,int param_2)
 
 {
   undefined4 uVar1;
   
   if ((char)*(uint *)(*param_1 + 0x10) < '\0') {
-    uVar1 = _EVP_CIPHER_CTX_ctrl(param_1,1,param_2,0);
+    uVar1 = FUN_009e21c0(param_1,1,param_2,0);
     return uVar1;
   }
   if (param_1[0x16] != param_2) {
     if ((param_2 < 1) || ((*(uint *)(*param_1 + 0x10) & 8) == 0)) {
-      _ERR_put_error(6,0x7a,0x82,".\\crypto\\evp\\evp_enc.c",0x172);
+      FUN_009d90b0(6,0x7a,0x82,".\\crypto\\evp\\evp_enc.c",0x172);
       return 0;
     }
     param_1[0x16] = param_2;
@@ -8193,40 +8166,39 @@ undefined4 _EVP_CIPHER_CTX_set_key_length(int *param_1,int param_2)
 }
 
 
-// 009EA4D0  _EVP_CipherUpdate  (line unknown)
+// 009EA4D0  FUN_009ea4d0  (line unknown)
 
-void _EVP_CipherUpdate(int param_1)
+void FUN_009ea4d0(int param_1)
 
 {
   if (*(int *)(param_1 + 8) != 0) {
-    _EVP_EncryptUpdate();
+    FUN_009ea020();
     return;
   }
-  _EVP_DecryptUpdate();
+  FUN_009ea240();
   return;
 }
 
 
-// 009EA4F0  _EVP_CipherFinal_ex  (line unknown)
+// 009EA4F0  FUN_009ea4f0  (line unknown)
 
-void _EVP_CipherFinal_ex(int param_1)
+void FUN_009ea4f0(int param_1)
 
 {
   if (*(int *)(param_1 + 8) != 0) {
-    _EVP_EncryptFinal_ex();
+    FUN_009ea180();
     return;
   }
-  _EVP_DecryptFinal_ex();
+  FUN_009ea340();
   return;
 }
 
 
-// 009EA510  _HMAC_Init_ex  (line unknown)
+// 009EA510  FUN_009ea510  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-void _HMAC_Init_ex(int *param_1,uchar *param_2,uint param_3,int param_4,undefined4 param_5)
+void FUN_009ea510(int *param_1,void *param_2,uint param_3,int param_4,undefined4 param_5)
 
 {
   int *piVar1;
@@ -8235,11 +8207,11 @@ void _HMAC_Init_ex(int *param_1,uchar *param_2,uint param_3,int param_4,undefine
   undefined4 uVar4;
   bool bVar5;
   undefined4 local_8c;
-  uchar *local_88;
+  void *local_88;
   byte abStack_84 [128];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_8c;
+  local_4 = DAT_00b86490 ^ (uint)&local_8c;
   local_8c = param_5;
   bVar5 = param_4 == 0;
   local_88 = param_2;
@@ -8249,30 +8221,30 @@ void _HMAC_Init_ex(int *param_1,uchar *param_2,uint param_3,int param_4,undefine
   else {
     *param_1 = param_4;
   }
-  if (param_2 == (uchar *)0x0) {
+  if (param_2 == (void *)0x0) {
     if (bVar5) goto LAB_009ea6a5;
   }
   else {
-    iVar2 = _EVP_MD_block_size(param_4);
+    iVar2 = FUN_009e5d80(param_4);
     if (0x80 < iVar2) {
-      _OpenSSLDie(".\\crypto\\hmac\\hmac.c",0x54,"j <= (int)sizeof(ctx->key)");
+      FUN_009dfd90(".\\crypto\\hmac\\hmac.c",0x54,"j <= (int)sizeof(ctx->key)");
     }
     if (iVar2 < (int)param_3) {
       piVar1 = param_1 + 1;
-      _EVP_DigestInit_ex(piVar1,param_4,local_8c);
-      _EVP_DigestUpdate(piVar1,local_88,param_3);
-      _EVP_DigestFinal_ex(piVar1,param_1 + 0xe,param_1 + 0xd);
+      FUN_009e57e0(piVar1,param_4,local_8c);
+      FUN_009e5890(piVar1,local_88,param_3);
+      FUN_009e58a0(piVar1,param_1 + 0xe,param_1 + 0xd);
     }
     else {
       if (0x80 < param_3) {
-        _OpenSSLDie(".\\crypto\\hmac\\hmac.c",0x5e,"len>=0 && len<=(int)sizeof(ctx->key)");
+        FUN_009dfd90(".\\crypto\\hmac\\hmac.c",0x5e,"len>=0 && len<=(int)sizeof(ctx->key)");
       }
-      memcpy((uchar *)(param_1 + 0xe),local_88,param_3);
+      FID_conflict__memcpy(param_1 + 0xe,local_88,param_3);
       param_1[0xd] = param_3;
     }
     iVar2 = param_1[0xd];
     if (iVar2 != 0x80) {
-      memset((uchar *)((int)param_1 + iVar2 + 0x38),'\0',0x80 - iVar2);
+      _memset((void *)((int)param_1 + iVar2 + 0x38),0,0x80 - iVar2);
     }
   }
   uVar4 = local_8c;
@@ -8281,39 +8253,39 @@ void _HMAC_Init_ex(int *param_1,uchar *param_2,uint param_3,int param_4,undefine
     abStack_84[iVar2] = *(byte *)((int)param_1 + iVar2 + 0x38) ^ 0x36;
     iVar2 = iVar2 + 1;
   } while (iVar2 < 0x80);
-  _EVP_DigestInit_ex(param_1 + 5,param_4,local_8c);
-  uVar3 = _EVP_MD_block_size(param_4);
-  _EVP_DigestUpdate(param_1 + 5,abStack_84,uVar3);
+  FUN_009e57e0(param_1 + 5,param_4,local_8c);
+  uVar3 = FUN_009e5d80(param_4);
+  FUN_009e5890(param_1 + 5,abStack_84,uVar3);
   iVar2 = 0;
   do {
     abStack_84[iVar2] = *(byte *)((int)param_1 + iVar2 + 0x38) ^ 0x5c;
     iVar2 = iVar2 + 1;
   } while (iVar2 < 0x80);
-  _EVP_DigestInit_ex(param_1 + 9,param_4,uVar4);
-  uVar4 = _EVP_MD_block_size(param_4);
-  _EVP_DigestUpdate(param_1 + 9,abStack_84,uVar4);
+  FUN_009e57e0(param_1 + 9,param_4,uVar4);
+  uVar4 = FUN_009e5d80(param_4);
+  FUN_009e5890(param_1 + 9,abStack_84,uVar4);
 LAB_009ea6a5:
-  _EVP_MD_CTX_copy_ex(param_1 + 1,param_1 + 5);
+  FUN_009e5990(param_1 + 1,param_1 + 5);
+  __security_check_cookie(local_4 ^ (uint)&local_8c);
   return;
 }
 
 
-// 009EA6D0  _HMAC_Update  (line unknown)
+// 009EA6D0  FUN_009ea6d0  (line unknown)
 
-void _HMAC_Update(void)
+void FUN_009ea6d0(void)
 
 {
-  _EVP_DigestUpdate();
+  FUN_009e5890();
   return;
 }
 
 
-// 009EA6E0  _HMAC_Final  (line unknown)
+// 009EA6E0  FUN_009ea6e0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-void _HMAC_Final(int param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009ea6e0(int param_1,undefined4 param_2,undefined4 param_3)
 
 {
   int iVar1;
@@ -8321,210 +8293,196 @@ void _HMAC_Final(int param_1,undefined4 param_2,undefined4 param_3)
   undefined1 local_44 [64];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_48;
+  local_4 = DAT_00b86490 ^ (uint)&local_48;
   iVar1 = param_1 + 4;
-  _EVP_DigestFinal_ex(iVar1,local_44,&local_48);
-  _EVP_MD_CTX_copy_ex(iVar1,param_1 + 0x24);
-  _EVP_DigestUpdate(iVar1,local_44,local_48);
-  _EVP_DigestFinal_ex(iVar1,param_2,param_3);
+  FUN_009e58a0(iVar1,local_44,&local_48);
+  FUN_009e5990(iVar1,param_1 + 0x24);
+  FUN_009e5890(iVar1,local_44,local_48);
+  FUN_009e58a0(iVar1,param_2,param_3);
+  __security_check_cookie(local_4 ^ (uint)&local_48);
   return;
 }
 
 
-// 009EA760  _HMAC_CTX_init  (line unknown)
+// 009EA760  FUN_009ea760  (line unknown)
 
-void _HMAC_CTX_init(int param_1)
+void FUN_009ea760(int param_1)
 
 {
-  _EVP_MD_CTX_init(param_1 + 0x14);
-  _EVP_MD_CTX_init(param_1 + 0x24);
-  _EVP_MD_CTX_init(param_1 + 4);
+  FUN_009e56e0(param_1 + 0x14);
+  FUN_009e56e0(param_1 + 0x24);
+  FUN_009e56e0(param_1 + 4);
   return;
 }
 
 
-// 009EA790  _HMAC_CTX_cleanup  (line unknown)
+// 009EA790  FUN_009ea790  (line unknown)
 
-void _HMAC_CTX_cleanup(uchar *param_1)
+void FUN_009ea790(void *param_1)
 
 {
-  _EVP_MD_CTX_cleanup(param_1 + 0x14);
-  _EVP_MD_CTX_cleanup(param_1 + 0x24);
-  _EVP_MD_CTX_cleanup(param_1 + 4);
-  memset(param_1,'\0',0xb8);
+  FUN_009e5920((int)param_1 + 0x14);
+  FUN_009e5920((int)param_1 + 0x24);
+  FUN_009e5920((int)param_1 + 4);
+  _memset(param_1,0,0xb8);
   return;
 }
 
 
-// 009EA7D0  _HMAC_CTX_set_flags  (line unknown)
+// 009EA7D0  FUN_009ea7d0  (line unknown)
 
-void _HMAC_CTX_set_flags(int param_1,undefined4 param_2)
+void FUN_009ea7d0(int param_1,undefined4 param_2)
 
 {
-  _EVP_MD_CTX_set_flags(param_1 + 0x14,param_2);
-  _EVP_MD_CTX_set_flags(param_1 + 0x24,param_2);
-  _EVP_MD_CTX_set_flags(param_1 + 4,param_2);
+  FUN_009e5d90(param_1 + 0x14,param_2);
+  FUN_009e5d90(param_1 + 0x24,param_2);
+  FUN_009e5d90(param_1 + 4,param_2);
   return;
 }
 
 
-// 009EA810  d2i_ASN1_INTEGER  (line unknown)
+// 009EA810  FUN_009ea810  (line unknown)
 
-/* d2i_ASN1_INTEGER */
-
-void __cdecl d2i_ASN1_INTEGER(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009ea810(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a81f70);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a81f70);
   return;
 }
 
 
-// 009EA830  i2d_ASN1_INTEGER  (line unknown)
+// 009EA830  FUN_009ea830  (line unknown)
 
-/* i2d_ASN1_INTEGER */
-
-void __cdecl i2d_ASN1_INTEGER(undefined4 param_1,undefined4 param_2)
+void FUN_009ea830(undefined4 param_1,undefined4 param_2)
 
 {
-  _ASN1_item_i2d(param_1,param_2,&DAT_00a81f70);
+  FUN_009f0ed0(param_1,param_2,&DAT_00a81f70);
   return;
 }
 
 
-// 009EA850  _ASN1_INTEGER_free  (line unknown)
+// 009EA850  FUN_009ea850  (line unknown)
 
-void _ASN1_INTEGER_free(undefined4 param_1)
+void FUN_009ea850(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a81f70);
+  FUN_009f1750(param_1,&DAT_00a81f70);
   return;
 }
 
 
-// 009EA880  d2i_ASN1_ENUMERATED  (line unknown)
+// 009EA880  FUN_009ea880  (line unknown)
 
-/* d2i_ASN1_ENUMERATED */
-
-void __cdecl d2i_ASN1_ENUMERATED(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009ea880(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a81f8c);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a81f8c);
   return;
 }
 
 
-// 009EA8B0  i2d_ASN1_BIT_STRING  (line unknown)
+// 009EA8B0  FUN_009ea8b0  (line unknown)
 
-/* i2d_ASN1_BIT_STRING */
-
-void __cdecl i2d_ASN1_BIT_STRING(undefined4 param_1,undefined4 param_2)
+void FUN_009ea8b0(undefined4 param_1,undefined4 param_2)
 
 {
-  _ASN1_item_i2d(param_1,param_2,&DAT_00a81fa8);
+  FUN_009f0ed0(param_1,param_2,&DAT_00a81fa8);
   return;
 }
 
 
-// 009EA8D0  _ASN1_BIT_STRING_free  (line unknown)
+// 009EA8D0  FUN_009ea8d0  (line unknown)
 
-void _ASN1_BIT_STRING_free(undefined4 param_1)
+void FUN_009ea8d0(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a81fa8);
+  FUN_009f1750(param_1,&DAT_00a81fa8);
   return;
 }
 
 
-// 009EA900  d2i_ASN1_OCTET_STRING  (line unknown)
+// 009EA900  FUN_009ea900  (line unknown)
 
-/* d2i_ASN1_OCTET_STRING */
-
-void __cdecl d2i_ASN1_OCTET_STRING(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009ea900(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a81fc4);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a81fc4);
   return;
 }
 
 
-// 009EA920  _ASN1_OCTET_STRING_new  (line unknown)
+// 009EA920  FUN_009ea920  (line unknown)
 
-void _ASN1_OCTET_STRING_new(void)
+void FUN_009ea920(void)
 
 {
-  _ASN1_item_new(&DAT_00a81fc4);
+  FUN_009f13a0(&DAT_00a81fc4);
   return;
 }
 
 
-// 009EA930  _ASN1_OCTET_STRING_free  (line unknown)
+// 009EA930  FUN_009ea930  (line unknown)
 
-void _ASN1_OCTET_STRING_free(undefined4 param_1)
+void FUN_009ea930(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a81fc4);
+  FUN_009f1750(param_1,&DAT_00a81fc4);
   return;
 }
 
 
-// 009EA9D0  d2i_ASN1_TYPE  (line unknown)
+// 009EA9D0  FUN_009ea9d0  (line unknown)
 
-/* d2i_ASN1_TYPE */
-
-void __cdecl d2i_ASN1_TYPE(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+void FUN_009ea9d0(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
-  _ASN1_item_d2i(param_1,param_2,param_3,&DAT_00a82130);
+  FUN_009ed5e0(param_1,param_2,param_3,&DAT_00a82130);
   return;
 }
 
 
-// 009EA9F0  i2d_ASN1_TYPE  (line unknown)
+// 009EA9F0  FUN_009ea9f0  (line unknown)
 
-/* i2d_ASN1_TYPE */
-
-void __cdecl i2d_ASN1_TYPE(undefined4 param_1,undefined4 param_2)
+void FUN_009ea9f0(undefined4 param_1,undefined4 param_2)
 
 {
-  _ASN1_item_i2d(param_1,param_2,&DAT_00a82130);
+  FUN_009f0ed0(param_1,param_2,&DAT_00a82130);
   return;
 }
 
 
-// 009EAA10  _ASN1_TYPE_new  (line unknown)
+// 009EAA10  FUN_009eaa10  (line unknown)
 
-void _ASN1_TYPE_new(void)
+void FUN_009eaa10(void)
 
 {
-  _ASN1_item_new(&DAT_00a82130);
+  FUN_009f13a0(&DAT_00a82130);
   return;
 }
 
 
-// 009EAA20  _ASN1_TYPE_free  (line unknown)
+// 009EAA20  FUN_009eaa20  (line unknown)
 
-void _ASN1_TYPE_free(undefined4 param_1)
+void FUN_009eaa20(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a82130);
+  FUN_009f1750(param_1,&DAT_00a82130);
   return;
 }
 
 
-// 009EAAA0  _RAND_SSLeay  (line unknown)
+// 009EAAA0  FUN_009eaaa0  (line unknown)
 
-undefined ** _RAND_SSLeay(void)
+undefined ** FUN_009eaaa0(void)
 
 {
-  return &_rand_ssleay_meth;
+  return &PTR_LAB_00b93310;
 }
 
 
 // 009EAB00  FUN_009eab00  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 /* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
 
 void FUN_009eab00(int param_1,int param_2,double param_3)
@@ -8550,21 +8508,21 @@ void FUN_009eab00(int param_1,int param_2,double param_3)
   undefined4 uStack_8;
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_3c;
+  local_4 = DAT_00b86490 ^ (uint)&local_3c;
   local_34 = param_1;
   if (DAT_00eac234 == 0) {
     local_3c = 0;
     uVar7 = local_3c;
   }
   else {
-    _CRYPTO_lock(5,0x13,".\\crypto\\rand\\md_rand.c",0xdc);
-    iVar3 = _CRYPTO_thread_id();
+    FUN_009dfaa0(5,0x13,".\\crypto\\rand\\md_rand.c",0xdc);
+    iVar3 = FUN_009dfa80();
     uVar7 = (uint)(DAT_00eac238 == iVar3);
     local_3c = uVar7;
-    _CRYPTO_lock(6,0x13,".\\crypto\\rand\\md_rand.c",0xde);
+    FUN_009dfaa0(6,0x13,".\\crypto\\rand\\md_rand.c",0xde);
     if (uVar7 != 0) goto LAB_009eab82;
   }
-  _CRYPTO_lock(9,0x12,".\\crypto\\rand\\md_rand.c",0xe3);
+  FUN_009dfaa0(9,0x12,".\\crypto\\rand\\md_rand.c",0xe3);
 LAB_009eab82:
   iVar3 = DAT_00eac21c;
   uStack_30 = DAT_00eac220;
@@ -8587,9 +8545,9 @@ LAB_009eab82:
   }
   DAT_00eac224 = DAT_00eac224 + (uint)(0 < param_2 % 0x14) + param_2 / 0x14;
   if (uVar7 == 0) {
-    _CRYPTO_lock(10,0x12,".\\crypto\\rand\\md_rand.c",0x103);
+    FUN_009dfaa0(10,0x12,".\\crypto\\rand\\md_rand.c",0x103);
   }
-  _EVP_MD_CTX_init(auStack_28);
+  FUN_009e56e0(auStack_28);
   if (0 < param_2) {
     iStack_38 = (param_2 - 1U) / 0x14 + 1;
     do {
@@ -8597,21 +8555,21 @@ LAB_009eab82:
       if (0x14 < param_2) {
         iVar6 = 0x14;
       }
-      uVar4 = _EVP_sha1(0);
-      _EVP_DigestInit_ex(auStack_28,uVar4);
-      _EVP_DigestUpdate(auStack_28,&uStack_18,0x14);
+      uVar4 = FUN_009e40d0(0);
+      FUN_009e57e0(auStack_28,uVar4);
+      FUN_009e5890(auStack_28,&uStack_18,0x14);
       iVar5 = iVar6 + -0x3ff + iVar3;
       if (iVar5 < 1) {
-        _EVP_DigestUpdate(auStack_28,&DAT_00eabdf0 + iVar3,iVar6);
+        FUN_009e5890(auStack_28,&DAT_00eabdf0 + iVar3,iVar6);
       }
       else {
-        _EVP_DigestUpdate(auStack_28,&DAT_00eabdf0 + iVar3,iVar6 - iVar5);
-        _EVP_DigestUpdate(auStack_28,&DAT_00eabdf0,iVar5);
+        FUN_009e5890(auStack_28,&DAT_00eabdf0 + iVar3,iVar6 - iVar5);
+        FUN_009e5890(auStack_28,&DAT_00eabdf0,iVar5);
       }
       iVar5 = local_34;
-      _EVP_DigestUpdate(auStack_28,local_34,iVar6);
-      _EVP_DigestUpdate(auStack_28,&uStack_30,8);
-      _EVP_DigestFinal_ex(auStack_28,&uStack_18,0);
+      FUN_009e5890(auStack_28,local_34,iVar6);
+      FUN_009e5890(auStack_28,&uStack_30,8);
+      FUN_009e58a0(auStack_28,&uStack_18,0);
       iStack_2c = iStack_2c + 1;
       local_34 = iVar5 + iVar6;
       iVar5 = 0;
@@ -8631,9 +8589,9 @@ LAB_009eab82:
     iStack_38 = 0;
     uVar7 = local_3c;
   }
-  _EVP_MD_CTX_cleanup(auStack_28);
+  FUN_009e5920(auStack_28);
   if (uVar7 == 0) {
-    _CRYPTO_lock(9,0x12,".\\crypto\\rand\\md_rand.c",0x12e);
+    FUN_009dfaa0(9,0x12,".\\crypto\\rand\\md_rand.c",0x12e);
   }
   iVar3 = 0;
   do {
@@ -8654,19 +8612,19 @@ LAB_009eab82:
     _DAT_00eac228 = _DAT_00eac228 + param_3;
   }
   if (uVar7 == 0) {
-    _CRYPTO_lock(10,0x12,".\\crypto\\rand\\md_rand.c",0x139);
+    FUN_009dfaa0(10,0x12,".\\crypto\\rand\\md_rand.c",0x139);
   }
+  __security_check_cookie(local_4 ^ (uint)&local_3c);
   return;
 }
 
 
 // 009EAE90  FUN_009eae90  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 /* WARNING: Globals starting with '_' overlap smaller symbols at the same address */
 
-undefined4 FUN_009eae90(undefined1 *param_1,int param_2)
+void FUN_009eae90(undefined1 *param_1,int param_2)
 
 {
   undefined4 uVar1;
@@ -8686,17 +8644,17 @@ undefined4 FUN_009eae90(undefined1 *param_1,int param_2)
   undefined4 uStack_8;
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_38;
+  local_4 = DAT_00b86490 ^ (uint)&local_38;
   local_38 = 0;
   if (0 < param_2) {
-    _EVP_MD_CTX_init();
-    _CRYPTO_lock(9,0x12,".\\crypto\\rand\\md_rand.c",0x17f);
-    _CRYPTO_lock(9,0x13,".\\crypto\\rand\\md_rand.c",0x182);
-    DAT_00eac238 = _CRYPTO_thread_id();
-    _CRYPTO_lock(10,0x13,".\\crypto\\rand\\md_rand.c",0x184);
+    FUN_009e56e0();
+    FUN_009dfaa0(9,0x12,".\\crypto\\rand\\md_rand.c",0x17f);
+    FUN_009dfaa0(9,0x13,".\\crypto\\rand\\md_rand.c",0x182);
+    DAT_00eac238 = FUN_009dfa80();
+    FUN_009dfaa0(10,0x13,".\\crypto\\rand\\md_rand.c",0x184);
     DAT_00eac234 = 1;
     if (DAT_00eac230 == 0) {
-      _RAND_poll();
+      FUN_009d35e0();
       DAT_00eac230 = 1;
     }
     iVar3 = 1;
@@ -8738,7 +8696,7 @@ undefined4 FUN_009eae90(undefined1 *param_1,int param_2)
     }
     DAT_00eac220 = DAT_00eac220 + 1;
     DAT_00eac234 = 0;
-    _CRYPTO_lock(10,0x12,".\\crypto\\rand\\md_rand.c",0x1ce);
+    FUN_009dfaa0(10,0x12,".\\crypto\\rand\\md_rand.c",0x1ce);
     do {
       if (param_2 < 10) {
         iStack_34 = param_2;
@@ -8748,20 +8706,20 @@ undefined4 FUN_009eae90(undefined1 *param_1,int param_2)
       }
       iVar5 = iStack_34;
       param_2 = param_2 - iStack_34;
-      uVar1 = _EVP_sha1();
-      _EVP_DigestInit_ex(local_30,uVar1);
-      _EVP_DigestUpdate(local_30,&uStack_18,0x14);
-      _EVP_DigestUpdate(local_30,&iStack_20,8);
-      _EVP_DigestUpdate(local_30,param_1,iVar5);
+      uVar1 = FUN_009e40d0();
+      FUN_009e57e0(local_30,uVar1);
+      FUN_009e5890(local_30,&uStack_18,0x14);
+      FUN_009e5890(local_30,&iStack_20,8);
+      FUN_009e5890(local_30,param_1,iVar5);
       iVar5 = (iVar4 - iVar3) + 10;
       if (iVar5 < 1) {
-        _EVP_DigestUpdate(local_30,&DAT_00eabdf0 + iVar4,10);
+        FUN_009e5890(local_30,&DAT_00eabdf0 + iVar4,10);
       }
       else {
-        _EVP_DigestUpdate(local_30,&DAT_00eabdf0 + iVar4,10 - iVar5);
-        _EVP_DigestUpdate(local_30,&DAT_00eabdf0,iVar5);
+        FUN_009e5890(local_30,&DAT_00eabdf0 + iVar4,10 - iVar5);
+        FUN_009e5890(local_30,&DAT_00eabdf0,iVar5);
       }
-      _EVP_DigestFinal_ex(local_30,&uStack_18);
+      FUN_009e58a0(local_30,&uStack_18);
       iVar2 = 0;
       iVar5 = 2;
       do {
@@ -8814,40 +8772,40 @@ undefined4 FUN_009eae90(undefined1 *param_1,int param_2)
         iVar2 = iVar2 + 5;
       } while (iVar5 < 0xc);
     } while (0 < param_2);
-    uVar1 = _EVP_sha1();
-    _EVP_DigestInit_ex(local_30,uVar1);
-    _EVP_DigestUpdate(local_30,&iStack_20,8);
-    _EVP_DigestUpdate(local_30,&uStack_18,0x14);
-    _CRYPTO_lock(9,0x12,".\\crypto\\rand\\md_rand.c",0x1f9);
-    _EVP_DigestUpdate(local_30,&DAT_00eac204,0x14);
-    _EVP_DigestFinal_ex(local_30,&DAT_00eac204,0);
-    _CRYPTO_lock(10,0x12,".\\crypto\\rand\\md_rand.c",0x1fc);
-    _EVP_MD_CTX_cleanup(local_30);
+    uVar1 = FUN_009e40d0();
+    FUN_009e57e0(local_30,uVar1);
+    FUN_009e5890(local_30,&iStack_20,8);
+    FUN_009e5890(local_30,&uStack_18,0x14);
+    FUN_009dfaa0(9,0x12,".\\crypto\\rand\\md_rand.c",0x1f9);
+    FUN_009e5890(local_30,&DAT_00eac204,0x14);
+    FUN_009e58a0(local_30,&DAT_00eac204,0);
+    FUN_009dfaa0(10,0x12,".\\crypto\\rand\\md_rand.c",0x1fc);
+    FUN_009e5920(local_30);
     if (local_38 == 0) {
-      _ERR_put_error(0x24,100,100,".\\crypto\\rand\\md_rand.c",0x203);
-      _ERR_add_error_data(1,
-                          "You need to read the OpenSSL FAQ, http://www.openssl.org/support/faq.html"
-                         );
-      return 0;
+      FUN_009d90b0(0x24,100,100,".\\crypto\\rand\\md_rand.c",0x203);
+      FUN_009d92c0(1,"You need to read the OpenSSL FAQ, http://www.openssl.org/support/faq.html");
+      __security_check_cookie(local_4 ^ (uint)&local_38);
+      return;
     }
   }
-  return 1;
-}
-
-
-// 009EB430  _ENGINE_get_default_RAND  (line unknown)
-
-void _ENGINE_get_default_RAND(void)
-
-{
-  engine_table_select(&DAT_00eac240,1);
+  __security_check_cookie(local_4 ^ (uint)&local_38);
   return;
 }
 
 
-// 009EB440  _ENGINE_get_RAND  (line unknown)
+// 009EB430  FUN_009eb430  (line unknown)
 
-undefined4 _ENGINE_get_RAND(int param_1)
+void FUN_009eb430(void)
+
+{
+  FUN_00a07d30(&DAT_00eac240,1);
+  return;
+}
+
+
+// 009EB440  FUN_009eb440  (line unknown)
+
+undefined4 FUN_009eb440(int param_1)
 
 {
   return *(undefined4 *)(param_1 + 0x1c);
@@ -8865,36 +8823,36 @@ undefined4 * FUN_009eb450(void)
   int unaff_EDI;
   bool bVar4;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x18,".\\crypto\\ecdsa\\ecs_lib.c",0x6d);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x18,".\\crypto\\ecdsa\\ecs_lib.c",0x6d);
   iVar2 = DAT_00eac244;
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(0x2a,100,0x41,".\\crypto\\ecdsa\\ecs_lib.c",0x70);
+    FUN_009d90b0(0x2a,100,0x41,".\\crypto\\ecdsa\\ecs_lib.c",0x70);
     return (undefined4 *)0x0;
   }
   bVar4 = DAT_00eac244 == 0;
   *puVar1 = 0;
   if (bVar4) {
-    iVar2 = _ECDSA_OpenSSL();
+    iVar2 = FUN_00a07e60();
     DAT_00eac244 = iVar2;
   }
   puVar1[3] = iVar2;
   puVar1[1] = unaff_EDI;
   if (unaff_EDI == 0) {
-    uVar3 = _ENGINE_get_default_ECDSA();
+    uVar3 = FUN_00a08820();
     puVar1[1] = uVar3;
   }
   if (puVar1[1] != 0) {
-    iVar2 = _BIO_get_retry_reason(puVar1[1]);
+    iVar2 = FUN_009d5120(puVar1[1]);
     puVar1[3] = iVar2;
     if (iVar2 == 0) {
-      _ERR_put_error(0x2a,100,0x26,".\\crypto\\ecdsa\\ecs_lib.c",0x80);
-      _ENGINE_finish(puVar1[1]);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(0x2a,100,0x26,".\\crypto\\ecdsa\\ecs_lib.c",0x80);
+      FUN_009e0a70(puVar1[1]);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
   }
   puVar1[2] = *(undefined4 *)(puVar1[3] + 0x10);
-  _CRYPTO_new_ex_data(0xc,puVar1,puVar1 + 4);
+  FUN_009d7f10(0xc,puVar1,puVar1 + 4);
   return puVar1;
 }
 
@@ -8905,25 +8863,23 @@ void FUN_009eb530(int param_1)
 
 {
   if (*(int *)(param_1 + 4) != 0) {
-    _ENGINE_finish(*(int *)(param_1 + 4));
+    FUN_009e0a70(*(int *)(param_1 + 4));
   }
-  _CRYPTO_free_ex_data(0xc,param_1,param_1 + 0x10);
-  _OPENSSL_cleanse(param_1,0x18);
-  _CRYPTO_free(param_1);
+  FUN_009d7f70(0xc,param_1,param_1 + 0x10);
+  FUN_009e5400(param_1,0x18);
+  FUN_009d98a0(param_1);
   return;
 }
 
 
-// 009EB570  ecdsa_check  (line unknown)
+// 009EB570  FUN_009eb570  (line unknown)
 
-/* ecdsa_check */
-
-int __cdecl ecdsa_check(undefined4 param_1)
+int FUN_009eb570(undefined4 param_1)
 
 {
   int iVar1;
   
-  iVar1 = _EC_KEY_get_key_method_data(param_1,&LAB_009eb510,FUN_009eb530,FUN_009eb530);
+  iVar1 = FUN_009e61e0(param_1,&LAB_009eb510,FUN_009eb530,FUN_009eb530);
   if (iVar1 != 0) {
     return iVar1;
   }
@@ -8931,16 +8887,16 @@ int __cdecl ecdsa_check(undefined4 param_1)
   if (iVar1 == 0) {
     return 0;
   }
-  _EC_KEY_insert_key_method_data(param_1,iVar1,&LAB_009eb510,FUN_009eb530,FUN_009eb530);
+  FUN_009e61f0(param_1,iVar1,&LAB_009eb510,FUN_009eb530,FUN_009eb530);
   return iVar1;
 }
 
 
-// 009EB5D0  _ECDSA_size  (line unknown)
+// 009EB5D0  FUN_009eb5d0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _ECDSA_size(int param_1)
+undefined4 FUN_009eb5d0(int param_1)
 
 {
   int iVar1;
@@ -8954,68 +8910,68 @@ undefined4 _ECDSA_size(int param_1)
   if (param_1 == 0) {
     return 0;
   }
-  iVar1 = _EC_KEY_get0_group(param_1);
+  iVar1 = FUN_009e6690(param_1);
   if (iVar1 == 0) {
     return 0;
   }
-  iVar2 = _BN_new();
+  iVar2 = FUN_009dcbf0();
   if (iVar2 != 0) {
-    iVar1 = _EC_GROUP_get_order(iVar1,iVar2,0);
+    iVar1 = FUN_009e66a0(iVar1,iVar2,0);
     if (iVar1 != 0) {
-      iVar1 = _BN_num_bits(iVar2);
+      iVar1 = FUN_009dcb00(iVar2);
       local_10[0] = (int)(iVar1 + 7 + (iVar1 + 7 >> 0x1f & 7U)) >> 3;
       local_8 = &param_1;
       local_10[1] = 2;
       param_1 = CONCAT31(param_1._1_3_,0xff);
-      iVar1 = i2d_ASN1_INTEGER(local_10,0);
-      uVar3 = _ASN1_object_size(1,iVar1 * 2,0x10);
-      _BN_clear_free(iVar2);
+      iVar1 = FUN_009ea830(local_10,0);
+      uVar3 = FUN_009d9a10(1,iVar1 * 2,0x10);
+      FUN_009dcb30(iVar2);
       return uVar3;
     }
-    _BN_clear_free();
+    FUN_009dcb30();
   }
   return 0;
 }
 
 
-// 009EB680  _DSA_new_method  (line unknown)
+// 009EB680  FUN_009eb680  (line unknown)
 
-undefined4 * _DSA_new_method(int param_1)
+undefined4 * FUN_009eb680(int param_1)
 
 {
   undefined4 *puVar1;
   int iVar2;
   undefined4 uVar3;
   
-  puVar1 = (undefined4 *)_CRYPTO_malloc(0x44,".\\crypto\\dsa\\dsa_lib.c",0x84);
+  puVar1 = (undefined4 *)FUN_009d96f0(0x44,".\\crypto\\dsa\\dsa_lib.c",0x84);
   if (puVar1 == (undefined4 *)0x0) {
-    _ERR_put_error(10,0x67,0x41,".\\crypto\\dsa\\dsa_lib.c",0x87);
+    FUN_009d90b0(10,0x67,0x41,".\\crypto\\dsa\\dsa_lib.c",0x87);
     return (undefined4 *)0x0;
   }
   if (DAT_00eac248 == 0) {
-    DAT_00eac248 = _DSA_OpenSSL();
+    DAT_00eac248 = FUN_00a08830();
   }
   puVar1[0xf] = DAT_00eac248;
   if (param_1 == 0) {
-    uVar3 = _ENGINE_get_default_DSA();
+    uVar3 = FUN_00a08fc0();
     puVar1[0x10] = uVar3;
   }
   else {
-    iVar2 = _ENGINE_init(param_1);
+    iVar2 = FUN_009e09f0(param_1);
     if (iVar2 == 0) {
-      _ERR_put_error(10,0x67,0x26,".\\crypto\\dsa\\dsa_lib.c",0x90);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(10,0x67,0x26,".\\crypto\\dsa\\dsa_lib.c",0x90);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
     puVar1[0x10] = param_1;
   }
   if (puVar1[0x10] != 0) {
-    iVar2 = _EVP_CIPHER_iv_length(puVar1[0x10]);
+    iVar2 = FUN_009c1a50(puVar1[0x10]);
     puVar1[0xf] = iVar2;
     if (iVar2 == 0) {
-      _ERR_put_error(10,0x67,0x26,".\\crypto\\dsa\\dsa_lib.c",0x9e);
-      _ENGINE_finish(puVar1[0x10]);
-      _CRYPTO_free(puVar1);
+      FUN_009d90b0(10,0x67,0x26,".\\crypto\\dsa\\dsa_lib.c",0x9e);
+      FUN_009e0a70(puVar1[0x10]);
+      FUN_009d98a0(puVar1);
       return (undefined4 *)0x0;
     }
   }
@@ -9032,15 +8988,15 @@ undefined4 * _DSA_new_method(int param_1)
   puVar1[0xb] = 0;
   puVar1[0xc] = 1;
   puVar1[10] = *(uint *)(puVar1[0xf] + 0x20) & 0xfffffbff;
-  _CRYPTO_new_ex_data(7,puVar1,puVar1 + 0xd);
+  FUN_009d7f10(7,puVar1,puVar1 + 0xd);
   if (*(code **)(puVar1[0xf] + 0x18) != (code *)0x0) {
     iVar2 = (**(code **)(puVar1[0xf] + 0x18))(puVar1);
     if (iVar2 == 0) {
       if (puVar1[0x10] != 0) {
-        _ENGINE_finish(puVar1[0x10]);
+        FUN_009e0a70(puVar1[0x10]);
       }
-      _CRYPTO_free_ex_data(7,puVar1,puVar1 + 0xd);
-      _CRYPTO_free(puVar1);
+      FUN_009d7f70(7,puVar1,puVar1 + 0xd);
+      FUN_009d98a0(puVar1);
       puVar1 = (undefined4 *)0x0;
     }
   }
@@ -9048,171 +9004,170 @@ undefined4 * _DSA_new_method(int param_1)
 }
 
 
-// 009EB7E0  _DSA_free  (line unknown)
+// 009EB7E0  FUN_009eb7e0  (line unknown)
 
-void _DSA_free(int param_1)
+void FUN_009eb7e0(int param_1)
 
 {
   code *pcVar1;
   int iVar2;
   
   if (param_1 != 0) {
-    iVar2 = _CRYPTO_add_lock(param_1 + 0x30,0xffffffff,8,".\\crypto\\dsa\\dsa_lib.c",0xd7);
+    iVar2 = FUN_009dfad0(param_1 + 0x30,0xffffffff,8,".\\crypto\\dsa\\dsa_lib.c",0xd7);
     if (iVar2 < 1) {
       pcVar1 = *(code **)(*(int *)(param_1 + 0x3c) + 0x1c);
       if (pcVar1 != (code *)0x0) {
         (*pcVar1)(param_1);
       }
       if (*(int *)(param_1 + 0x40) != 0) {
-        _ENGINE_finish(*(int *)(param_1 + 0x40));
+        FUN_009e0a70(*(int *)(param_1 + 0x40));
       }
-      _CRYPTO_free_ex_data(7,param_1,param_1 + 0x34);
+      FUN_009d7f70(7,param_1,param_1 + 0x34);
       if (*(int *)(param_1 + 0xc) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0xc));
+        FUN_009dcb30(*(int *)(param_1 + 0xc));
       }
       if (*(int *)(param_1 + 0x10) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x10));
+        FUN_009dcb30(*(int *)(param_1 + 0x10));
       }
       if (*(int *)(param_1 + 0x14) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x14));
+        FUN_009dcb30(*(int *)(param_1 + 0x14));
       }
       if (*(int *)(param_1 + 0x18) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x18));
+        FUN_009dcb30(*(int *)(param_1 + 0x18));
       }
       if (*(int *)(param_1 + 0x1c) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x1c));
+        FUN_009dcb30(*(int *)(param_1 + 0x1c));
       }
       if (*(int *)(param_1 + 0x20) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x20));
+        FUN_009dcb30(*(int *)(param_1 + 0x20));
       }
       if (*(int *)(param_1 + 0x24) != 0) {
-        _BN_clear_free(*(int *)(param_1 + 0x24));
+        FUN_009dcb30(*(int *)(param_1 + 0x24));
       }
-      _CRYPTO_free(param_1);
+      FUN_009d98a0(param_1);
     }
   }
   return;
 }
 
 
-// 009EB8C0  _DSA_new  (line unknown)
+// 009EB8C0  FUN_009eb8c0  (line unknown)
 
-void _DSA_new(void)
+void FUN_009eb8c0(void)
 
 {
-  _DSA_new_method(0);
+  FUN_009eb680(0);
   return;
 }
 
 
-// 009EB910  _X509_NAME_oneline  (line unknown)
+// 009EB910  FUN_009eb910  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-uchar * _X509_NAME_oneline(undefined4 *param_1,uchar *param_2,ulong param_3)
+void FUN_009eb910(undefined4 *param_1,char *param_2,size_t param_3)
 
 {
-  uchar uVar1;
+  char cVar1;
   uint *puVar2;
   uint uVar3;
   byte bVar4;
   int iVar5;
   undefined4 *puVar6;
-  uchar *puVar7;
-  ulong uVar8;
-  uint uVar9;
-  int iVar10;
-  uint uVar11;
-  int iVar12;
-  byte *pbVar13;
+  char *pcVar7;
+  size_t _Size;
+  uint uVar8;
+  int iVar9;
+  uint uVar10;
+  int iVar11;
+  byte *pbVar12;
   int local_80;
   int local_7c [4];
-  uchar *local_6c;
+  char *local_6c;
   int local_68;
-  uchar *local_64;
+  char *local_64;
   int local_60;
   undefined4 *local_5c;
   undefined4 *local_58;
-  uchar local_54 [80];
+  char local_54 [80];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)&local_80;
-  iVar12 = 0;
+  local_4 = DAT_00b86490 ^ (uint)&local_80;
+  iVar11 = 0;
   local_5c = param_1;
   local_6c = param_2;
   local_80 = 0;
-  if (param_2 == (uchar *)0x0) {
-    iVar12 = _BUF_MEM_new();
-    local_80 = iVar12;
-    if ((iVar12 == 0) || (iVar5 = _BUF_MEM_grow(iVar12,200), iVar5 == 0)) {
+  if (param_2 == (char *)0x0) {
+    iVar11 = FUN_009e2e20();
+    local_80 = iVar11;
+    if ((iVar11 == 0) || (iVar5 = FUN_009e2ea0(iVar11,200), iVar5 == 0)) {
 LAB_009ebc2e:
-      _ERR_put_error(0xb,0x74,0x41,".\\crypto\\x509\\x509_obj.c",0xde);
-      if (iVar12 != 0) {
-        _BUF_MEM_free(iVar12);
+      FUN_009d90b0(0xb,0x74,0x41,".\\crypto\\x509\\x509_obj.c",0xde);
+      if (iVar11 != 0) {
+        FUN_009e2e60(iVar11);
       }
-      return (uchar *)0x0;
+      goto LAB_009ebc67;
     }
-    **(undefined1 **)(iVar12 + 4) = 0;
+    **(undefined1 **)(iVar11 + 4) = 0;
     param_3 = 200;
   }
   if (param_1 == (undefined4 *)0x0) {
-    if (iVar12 != 0) {
-      local_6c = *(uchar **)(iVar12 + 4);
-      _CRYPTO_free(iVar12);
+    if (iVar11 != 0) {
+      local_6c = *(char **)(iVar11 + 4);
+      FUN_009d98a0(iVar11);
     }
-    puVar7 = local_6c;
-    strncpy(local_6c,(uchar *)"NO X509_NAME",param_3);
-    puVar7[param_3 - 1] = '\0';
+    pcVar7 = local_6c;
+    _strncpy(local_6c,"NO X509_NAME",param_3);
+    pcVar7[param_3 - 1] = '\0';
   }
   else {
     local_60 = 0;
     local_68 = 0;
-    iVar5 = sk_num(*param_1);
+    iVar5 = FUN_009da820(*param_1);
     if (0 < iVar5) {
       do {
-        puVar6 = (undefined4 *)sk_value(*param_1,local_68);
+        puVar6 = (undefined4 *)FUN_009da830(*param_1,local_68);
         local_58 = puVar6;
-        iVar12 = _OBJ_obj2nid(*puVar6);
-        if (iVar12 == 0) {
+        iVar11 = FUN_009e13d0(*puVar6);
+        if (iVar11 == 0) {
 LAB_009eba3c:
-          i2t_ASN1_OBJECT(local_54,0x50,*puVar6);
+          FUN_009dbe30(local_54,0x50,*puVar6);
           local_64 = local_54;
         }
         else {
-          local_64 = (uchar *)_OBJ_nid2sn(iVar12);
-          if (local_64 == (uchar *)0x0) goto LAB_009eba3c;
+          local_64 = (char *)FUN_009e1100(iVar11);
+          if (local_64 == (char *)0x0) goto LAB_009eba3c;
         }
-        puVar7 = local_64;
+        pcVar7 = local_64;
         do {
-          uVar1 = *puVar7;
-          puVar7 = puVar7 + 1;
-        } while (uVar1 != '\0');
-        uVar8 = (int)puVar7 - (int)(local_64 + 1);
+          cVar1 = *pcVar7;
+          pcVar7 = pcVar7 + 1;
+        } while (cVar1 != '\0');
+        _Size = (int)pcVar7 - (int)(local_64 + 1);
         puVar2 = (uint *)puVar6[1];
         uVar3 = *puVar2;
-        uVar11 = puVar2[2];
+        uVar10 = puVar2[2];
         if (puVar2[1] == 0x1b) {
-          uVar9 = uVar3 & 0x80000003;
-          if ((int)uVar9 < 0) {
-            uVar9 = (uVar9 - 1 | 0xfffffffc) + 1;
+          uVar8 = uVar3 & 0x80000003;
+          if ((int)uVar8 < 0) {
+            uVar8 = (uVar8 - 1 | 0xfffffffc) + 1;
           }
-          if (uVar9 != 0) goto LAB_009ebaf6;
-          uVar9 = 0;
+          if (uVar8 != 0) goto LAB_009ebaf6;
+          uVar8 = 0;
           local_7c[2] = 0;
           local_7c[1] = 0;
           local_7c[0] = 0;
-          iVar12 = 0;
+          iVar11 = 0;
           if (0 < (int)uVar3) {
             do {
-              if (*(char *)(uVar9 + uVar11) != '\0') {
-                local_7c[uVar9 & 3] = 1;
+              if (*(char *)(uVar8 + uVar10) != '\0') {
+                local_7c[uVar8 & 3] = 1;
               }
-              uVar9 = uVar9 + 1;
-              iVar12 = local_7c[0];
-            } while ((int)uVar9 < (int)uVar3);
+              uVar8 = uVar8 + 1;
+              iVar11 = local_7c[0];
+            } while ((int)uVar8 < (int)uVar3);
           }
-          if ((iVar12 == 0 && local_7c[1] == 0) && local_7c[2] == 0) {
+          if ((iVar11 == 0 && local_7c[1] == 0) && local_7c[2] == 0) {
             local_7c[2] = 0;
             local_7c[1] = 0;
             local_7c[0] = 0;
@@ -9234,111 +9189,113 @@ LAB_009ebaf6:
         }
         iVar5 = local_60;
         local_7c[3] = 1;
-        uVar9 = 0;
-        iVar12 = 0;
-        iVar10 = iVar12;
+        uVar8 = 0;
+        iVar11 = 0;
+        iVar9 = iVar11;
         if (0 < (int)uVar3) {
           do {
-            iVar12 = iVar10;
-            if (local_7c[uVar9 & 3] != 0) {
-              bVar4 = *(byte *)(uVar9 + uVar11);
-              iVar12 = iVar10 + 1;
+            iVar11 = iVar9;
+            if (local_7c[uVar8 & 3] != 0) {
+              bVar4 = *(byte *)(uVar8 + uVar10);
+              iVar11 = iVar9 + 1;
               if ((bVar4 < 0x20) || (0x7e < bVar4)) {
-                iVar12 = iVar10 + 4;
+                iVar11 = iVar9 + 4;
               }
             }
-            uVar9 = uVar9 + 1;
-            iVar10 = iVar12;
-          } while ((int)uVar9 < (int)uVar3);
+            uVar8 = uVar8 + 1;
+            iVar9 = iVar11;
+          } while ((int)uVar8 < (int)uVar3);
         }
-        local_60 = local_60 + 2 + iVar12 + uVar8;
+        local_60 = local_60 + 2 + iVar11 + _Size;
         if (local_80 == 0) {
-          puVar7 = local_6c;
+          pcVar7 = local_6c;
           if ((int)(param_3 - 1) < local_60) goto LAB_009ebc5b;
         }
         else {
-          iVar10 = _BUF_MEM_grow(local_80,local_60 + 1);
-          iVar12 = local_80;
-          if (iVar10 == 0) goto LAB_009ebc2e;
-          puVar7 = *(uchar **)(local_80 + 4);
+          iVar9 = FUN_009e2ea0(local_80,local_60 + 1);
+          iVar11 = local_80;
+          if (iVar9 == 0) goto LAB_009ebc2e;
+          pcVar7 = *(char **)(local_80 + 4);
         }
-        puVar7 = puVar7 + iVar5;
-        *puVar7 = '/';
-        puVar7 = puVar7 + 1;
-        memcpy(puVar7,local_64,uVar8);
-        puVar7[uVar8] = '=';
-        iVar12 = *(int *)(local_58[1] + 8);
-        pbVar13 = puVar7 + uVar8 + 1;
-        uVar11 = 0;
+        pcVar7 = pcVar7 + iVar5;
+        *pcVar7 = '/';
+        pcVar7 = pcVar7 + 1;
+        FID_conflict__memcpy(pcVar7,local_64,_Size);
+        pcVar7[_Size] = '=';
+        iVar11 = *(int *)(local_58[1] + 8);
+        pbVar12 = (byte *)(pcVar7 + _Size + 1);
+        uVar10 = 0;
         if (0 < (int)uVar3) {
           do {
-            if (local_7c[uVar11 & 3] != 0) {
-              bVar4 = *(byte *)(uVar11 + iVar12);
-              uVar9 = (uint)bVar4;
-              if (0x5e < uVar9 - 0x20) {
-                *pbVar13 = 0x5c;
-                pbVar13[1] = 0x78;
-                pbVar13[2] = s_0123456789ABCDEF_00b93328[(int)uVar9 >> 4];
-                pbVar13 = pbVar13 + 3;
-                bVar4 = s_0123456789ABCDEF_00b93328[uVar9 & 0xf];
+            if (local_7c[uVar10 & 3] != 0) {
+              bVar4 = *(byte *)(uVar10 + iVar11);
+              uVar8 = (uint)bVar4;
+              if (0x5e < uVar8 - 0x20) {
+                *pbVar12 = 0x5c;
+                pbVar12[1] = 0x78;
+                pbVar12[2] = s_0123456789ABCDEF_00b93328[(int)uVar8 >> 4];
+                pbVar12 = pbVar12 + 3;
+                bVar4 = s_0123456789ABCDEF_00b93328[uVar8 & 0xf];
               }
-              *pbVar13 = bVar4;
-              pbVar13 = pbVar13 + 1;
+              *pbVar12 = bVar4;
+              pbVar12 = pbVar12 + 1;
             }
-            uVar11 = uVar11 + 1;
-          } while ((int)uVar11 < (int)uVar3);
+            uVar10 = uVar10 + 1;
+          } while ((int)uVar10 < (int)uVar3);
         }
-        *pbVar13 = 0;
-        iVar10 = local_68 + 1;
-        local_68 = iVar10;
-        iVar5 = sk_num(*local_5c);
+        *pbVar12 = 0;
+        iVar9 = local_68 + 1;
+        local_68 = iVar9;
+        iVar5 = FUN_009da820(*local_5c);
         param_1 = local_5c;
-        iVar12 = local_80;
-      } while (iVar10 < iVar5);
+        iVar11 = local_80;
+      } while (iVar9 < iVar5);
     }
-    puVar7 = local_6c;
-    if (iVar12 != 0) {
-      puVar7 = *(uchar **)(iVar12 + 4);
-      _CRYPTO_free(iVar12);
+    pcVar7 = local_6c;
+    if (iVar11 != 0) {
+      pcVar7 = *(char **)(iVar11 + 4);
+      FUN_009d98a0(iVar11);
     }
 LAB_009ebc5b:
     if (local_68 == 0) {
-      *puVar7 = '\0';
+      *pcVar7 = '\0';
     }
   }
-  return puVar7;
+LAB_009ebc67:
+  __security_check_cookie(local_4 ^ (uint)&local_80);
+  return;
 }
 
 
-// 009EBC80  _OBJ_dup  (line unknown)
+// 009EBC80  FUN_009ebc80  (line unknown)
 
-undefined4 * _OBJ_dup(undefined4 *param_1)
+undefined4 * FUN_009ebc80(undefined4 *param_1)
 
 {
   char *pcVar1;
   char cVar2;
   undefined4 *puVar3;
-  uchar *puVar4;
+  void *pvVar4;
   char *pcVar5;
-  uchar *puVar6;
+  void *_Dst;
   
-  puVar6 = (uchar *)0x0;
+  _Dst = (void *)0x0;
   if (param_1 == (undefined4 *)0x0) {
     return (undefined4 *)0x0;
   }
   if ((*(byte *)(param_1 + 5) & 1) == 0) {
     return param_1;
   }
-  puVar3 = (undefined4 *)_ASN1_OBJECT_new();
+  puVar3 = (undefined4 *)FUN_009dbf60();
   if (puVar3 == (undefined4 *)0x0) {
-    _ERR_put_error(8,0x65,0xd,".\\crypto\\objects\\obj_lib.c",0x4f);
+    FUN_009d90b0(8,0x65,0xd,".\\crypto\\objects\\obj_lib.c",0x4f);
     return (undefined4 *)0x0;
   }
-  puVar4 = (uchar *)_CRYPTO_malloc(param_1[3],".\\crypto\\objects\\obj_lib.c",0x52);
-  puVar3[4] = puVar4;
-  if (puVar4 != (uchar *)0x0) {
-    if ((uchar *)param_1[4] != (uchar *)0x0) {
-      memcpy(puVar4,(uchar *)param_1[4],param_1[3]);
+  pvVar4 = (void *)FUN_009d96f0(param_1[3],".\\crypto\\objects\\obj_lib.c",0x52);
+  puVar3[4] = pvVar4;
+  if (pvVar4 != (void *)0x0) {
+    if ((void *)param_1[4] != (void *)0x0) {
+      FID_conflict__memcpy(pvVar4,(void *)param_1[4],param_1[3]);
     }
     puVar3[3] = param_1[3];
     puVar3[2] = param_1[2];
@@ -9351,11 +9308,10 @@ undefined4 * _OBJ_dup(undefined4 *param_1)
         cVar2 = *pcVar5;
         pcVar5 = pcVar5 + 1;
       } while (cVar2 != '\0');
-      puVar6 = (uchar *)_CRYPTO_malloc(pcVar5 + (1 - (int)pcVar1),".\\crypto\\objects\\obj_lib.c",
-                                       0x5d);
-      puVar3[1] = puVar6;
-      if (puVar6 == (uchar *)0x0) goto LAB_009ebd74;
-      memcpy(puVar6,(uchar *)param_1[1],(ulong)(pcVar5 + (1 - (int)pcVar1)));
+      _Dst = (void *)FUN_009d96f0(pcVar5 + (1 - (int)pcVar1),".\\crypto\\objects\\obj_lib.c",0x5d);
+      puVar3[1] = _Dst;
+      if (_Dst == (void *)0x0) goto LAB_009ebd74;
+      FID_conflict__memcpy(_Dst,(void *)param_1[1],(size_t)(pcVar5 + (1 - (int)pcVar1)));
     }
     pcVar5 = (char *)*param_1;
     if (pcVar5 != (char *)0x0) {
@@ -9364,31 +9320,31 @@ undefined4 * _OBJ_dup(undefined4 *param_1)
         cVar2 = *pcVar5;
         pcVar5 = pcVar5 + 1;
       } while (cVar2 != '\0');
-      puVar4 = (uchar *)_CRYPTO_malloc(pcVar5 + (1 - (int)pcVar1),".\\crypto\\objects\\obj_lib.c",
-                                       0x67);
-      *puVar3 = puVar4;
-      if (puVar4 == (uchar *)0x0) goto LAB_009ebd74;
-      memcpy(puVar4,(uchar *)*param_1,(ulong)(pcVar5 + (1 - (int)pcVar1)));
+      pvVar4 = (void *)FUN_009d96f0(pcVar5 + (1 - (int)pcVar1),".\\crypto\\objects\\obj_lib.c",0x67)
+      ;
+      *puVar3 = pvVar4;
+      if (pvVar4 == (void *)0x0) goto LAB_009ebd74;
+      FID_conflict__memcpy(pvVar4,(void *)*param_1,(size_t)(pcVar5 + (1 - (int)pcVar1)));
     }
     puVar3[5] = param_1[5] | 0xd;
     return puVar3;
   }
 LAB_009ebd74:
-  _ERR_put_error(8,0x65,0x41,".\\crypto\\objects\\obj_lib.c",0x6f);
-  if (puVar6 != (uchar *)0x0) {
-    _CRYPTO_free(puVar6);
+  FUN_009d90b0(8,0x65,0x41,".\\crypto\\objects\\obj_lib.c",0x6f);
+  if (_Dst != (void *)0x0) {
+    FUN_009d98a0(_Dst);
   }
   if (puVar3[4] != 0) {
-    _CRYPTO_free(puVar3[4]);
+    FUN_009d98a0(puVar3[4]);
   }
-  _CRYPTO_free(puVar3);
+  FUN_009d98a0(puVar3);
   return (undefined4 *)0x0;
 }
 
 
-// 009EBDE0  _OBJ_cmp  (line unknown)
+// 009EBDE0  FUN_009ebde0  (line unknown)
 
-int _OBJ_cmp(int param_1,int param_2)
+int FUN_009ebde0(int param_1,int param_2)
 
 {
   uint uVar1;
@@ -9437,9 +9393,9 @@ LAB_009ebe1b:
 }
 
 
-// 009EBE80  _ASN1_tag2bit  (line unknown)
+// 009EBE80  FUN_009ebe80  (line unknown)
 
-undefined4 _ASN1_tag2bit(uint param_1)
+undefined4 FUN_009ebe80(uint param_1)
 
 {
   if (param_1 < 0x1f) {
@@ -9449,13 +9405,12 @@ undefined4 _ASN1_tag2bit(uint param_1)
 }
 
 
-// 009EBEA0  asn1_ex_c2i  (line unknown)
+// 009EBEA0  FUN_009ebea0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* asn1_ex_c2i */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 __cdecl
-asn1_ex_c2i(uint *param_1,byte *param_2,uint param_3,uint param_4,char *param_5,int param_6)
+undefined4
+FUN_009ebea0(uint *param_1,byte *param_2,uint param_3,uint param_4,char *param_5,int param_6)
 
 {
   code *pcVar1;
@@ -9479,12 +9434,12 @@ asn1_ex_c2i(uint *param_1,byte *param_2,uint param_3,uint param_4,char *param_5,
   if (*(int *)(param_6 + 4) == -4) {
     local_c = (uint *)*param_1;
     if (local_c == (uint *)0x0) {
-      local_c = (uint *)_ASN1_TYPE_new();
+      local_c = (uint *)FUN_009eaa10();
       if (local_c == (uint *)0x0) goto LAB_009ebfa2;
       *param_1 = (uint)local_c;
     }
     if (uVar2 != *local_c) {
-      _ASN1_TYPE_set(local_c,uVar2,0);
+      FUN_00a07be0(local_c,uVar2,0);
     }
     local_8 = param_1;
     param_1 = local_c + 1;
@@ -9497,7 +9452,7 @@ switchD_009ebf5b_caseD_4:
 LAB_009ec06b:
           puVar5 = (uint *)*param_1;
           if (puVar5 == (uint *)0x0) {
-            puVar5 = (uint *)_ASN1_STRING_type_new(uVar2);
+            puVar5 = (uint *)FUN_009d9b20(uVar2);
             if (puVar5 == (uint *)0x0) {
               uVar7 = 0x407;
               uVar4 = 0x41;
@@ -9511,17 +9466,17 @@ LAB_009ec06b:
           pcVar3 = param_5;
           if (*param_5 != '\0') {
             if (puVar5[2] != 0) {
-              _CRYPTO_free(puVar5[2]);
+              FUN_009d98a0(puVar5[2]);
             }
             puVar5[2] = (uint)param_2;
             *puVar5 = param_3;
             *pcVar3 = '\0';
             goto LAB_009ec135;
           }
-          iVar6 = _ASN1_STRING_set(puVar5,param_2,param_3);
+          iVar6 = FUN_009d9a50(puVar5,param_2,param_3);
           if (iVar6 != 0) goto LAB_009ec135;
-          _ERR_put_error(0xd,0xcc,0x41,".\\crypto\\asn1\\tasn_dec.c",0x41f);
-          _ASN1_STRING_free(puVar5);
+          FUN_009d90b0(0xd,0xcc,0x41,".\\crypto\\asn1\\tasn_dec.c",0x41f);
+          FUN_009d9b70(puVar5);
           *param_1 = 0;
           goto LAB_009ebfa2;
         }
@@ -9536,7 +9491,7 @@ LAB_009ec06b:
       goto LAB_009ebf93;
     }
 switchD_009ebf5b_caseD_2:
-    iVar6 = c2i_ASN1_INTEGER(param_1,&param_2,param_3);
+    iVar6 = FUN_009dd4d0(param_1,&param_2,param_3);
     if (iVar6 != 0) {
       *(uint *)(*param_1 + 4) = *(uint *)(*param_1 + 4) & 0x100 | uVar2;
       goto LAB_009ec135;
@@ -9556,7 +9511,7 @@ switchD_009ebf5b_caseD_2:
   case 2:
     goto switchD_009ebf5b_caseD_2;
   case 3:
-    iVar6 = c2i_ASN1_BIT_STRING(param_1,&param_2,param_3);
+    iVar6 = FUN_00a090b0(param_1,&param_2,param_3);
     goto joined_r0x009ebf77;
   default:
     goto switchD_009ebf5b_caseD_4;
@@ -9569,7 +9524,7 @@ switchD_009ebf5b_caseD_2:
     uVar4 = 0x90;
     break;
   case 6:
-    iVar6 = c2i_ASN1_OBJECT(param_1,&param_2,param_3);
+    iVar6 = FUN_009dc020(param_1,&param_2,param_3);
 joined_r0x009ebf77:
     if (iVar6 != 0) {
 LAB_009ec135:
@@ -9581,9 +9536,9 @@ LAB_009ec135:
     goto LAB_009ebfa2;
   }
 LAB_009ebf93:
-  _ERR_put_error(0xd,0xcc,uVar4,".\\crypto\\asn1\\tasn_dec.c",uVar7);
+  FUN_009d90b0(0xd,0xcc,uVar4,".\\crypto\\asn1\\tasn_dec.c",uVar7);
 LAB_009ebfa2:
-  _ASN1_TYPE_free(local_c);
+  FUN_009eaa20(local_c);
   if (local_8 != (uint *)0x0) {
     *local_8 = 0;
   }
@@ -9609,7 +9564,7 @@ undefined4 FUN_009ec180(int param_1)
 
 // 009EC1B0  FUN_009ec1b0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
 FUN_009ec1b0(int *param_1,int *param_2,undefined1 *param_3,byte *param_4,byte *param_5,int *param_6,
@@ -9629,7 +9584,7 @@ FUN_009ec1b0(int *param_1,int *param_2,undefined1 *param_3,byte *param_4,byte *p
   iVar1 = *param_6;
   if ((param_11 == (char *)0x0) || (*param_11 == '\0')) {
     param_11 = (char *)iVar1;
-    uVar4 = _ASN1_get_object(&param_11,&local_4,&local_8,&local_c,param_7);
+    uVar4 = FUN_009d9cd0(&param_11,&local_4,&local_8,&local_c,param_7);
     if (pcVar2 != (char *)0x0) {
       *(int *)(pcVar2 + 0x10) = local_c;
       *(int *)(pcVar2 + 0xc) = local_8;
@@ -9638,7 +9593,7 @@ FUN_009ec1b0(int *param_1,int *param_2,undefined1 *param_3,byte *param_4,byte *p
       *(int *)(pcVar2 + 0x14) = (int)param_11 - iVar1;
       *pcVar2 = '\x01';
       if (((uVar4 & 0x81) == 0) && (param_7 < ((int)param_11 - iVar1) + local_4)) {
-        _ERR_put_error(0xd,0x68,0x9b,".\\crypto\\asn1\\tasn_dec.c",0x50d);
+        FUN_009d90b0(0xd,0x68,0x9b,".\\crypto\\asn1\\tasn_dec.c",0x50d);
         *pcVar2 = '\0';
         return 0;
       }
@@ -9653,7 +9608,7 @@ FUN_009ec1b0(int *param_1,int *param_2,undefined1 *param_3,byte *param_4,byte *p
   }
   bVar3 = (byte)uVar4;
   if ((char)bVar3 < '\0') {
-    _ERR_put_error(0xd,0x68,0x66,".\\crypto\\asn1\\tasn_dec.c",0x516);
+    FUN_009d90b0(0xd,0x68,0x66,".\\crypto\\asn1\\tasn_dec.c",0x516);
     if (pcVar2 != (char *)0x0) {
       *pcVar2 = '\0';
     }
@@ -9665,7 +9620,7 @@ FUN_009ec1b0(int *param_1,int *param_2,undefined1 *param_3,byte *param_4,byte *p
         if (pcVar2 != (char *)0x0) {
           *pcVar2 = '\0';
         }
-        _ERR_put_error(0xd,0x68,0xa8,".\\crypto\\asn1\\tasn_dec.c",0x523);
+        FUN_009d90b0(0xd,0x68,0xa8,".\\crypto\\asn1\\tasn_dec.c",0x523);
         return 0;
       }
       return 0xffffffff;
@@ -9699,7 +9654,7 @@ FUN_009ec1b0(int *param_1,int *param_2,undefined1 *param_3,byte *param_4,byte *p
 
 // 009EC370  FUN_009ec370  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009ec370(int param_1,int *param_2,undefined4 param_3)
 
@@ -9758,22 +9713,22 @@ LAB_009ec4a4:
         uVar5 = 0x24c;
         uVar6 = 0x89;
       }
-      _ERR_put_error(0xd,0x84,uVar6,".\\crypto\\asn1\\tasn_dec.c",uVar5);
-      _ASN1_template_free(iVar1);
+      FUN_009d90b0(0xd,0x84,uVar6,".\\crypto\\asn1\\tasn_dec.c",uVar5);
+      FUN_009f16b0(iVar1);
       return 0;
     }
     uVar6 = 0x241;
   }
   uVar5 = 0x3a;
 LAB_009ec42b:
-  _ERR_put_error(0xd,0x84,uVar5,".\\crypto\\asn1\\tasn_dec.c",uVar6);
+  FUN_009d90b0(0xd,0x84,uVar5,".\\crypto\\asn1\\tasn_dec.c",uVar6);
   return 0;
 }
 
 
 // 009EC4E0  FUN_009ec4e0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009ec4e0(undefined4 *param_1,char param_2)
 
@@ -9800,10 +9755,10 @@ undefined4 FUN_009ec4e0(undefined4 *param_1,char param_2)
     do {
       if (((in_ECX < 2) || (*pcVar4 != '\0')) || (pcVar4[1] != '\0')) {
         local_10 = pcVar4;
-        bVar1 = _ASN1_get_object(&local_10,&local_c,&local_4,local_8,in_ECX);
+        bVar1 = FUN_009d9cd0(&local_10,&local_c,&local_4,local_8,in_ECX);
         if ((char)bVar1 < '\0') {
-          _ERR_put_error(0xd,0x68,0x66,".\\crypto\\asn1\\tasn_dec.c",0x516);
-          _ERR_put_error(0xd,0xbe,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x45d);
+          FUN_009d90b0(0xd,0x68,0x66,".\\crypto\\asn1\\tasn_dec.c",0x516);
+          FUN_009d90b0(0xd,0xbe,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x45d);
           return 0;
         }
         if ((bVar1 & 1) != 0) {
@@ -9833,14 +9788,14 @@ LAB_009ec5ed:
       return 1;
     }
   }
-  _ERR_put_error(0xd,0xbe,0x89,".\\crypto\\asn1\\tasn_dec.c",0x468);
+  FUN_009d90b0(0xd,0xbe,0x89,".\\crypto\\asn1\\tasn_dec.c",0x468);
   return 0;
 }
 
 
 // 009EC600  FUN_009ec600  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
 FUN_009ec600(int *param_1,undefined4 *param_2,char *param_3,byte param_4,int param_5,int param_6,
@@ -9850,12 +9805,12 @@ FUN_009ec600(int *param_1,undefined4 *param_2,char *param_3,byte param_4,int par
   int *piVar1;
   char *pcVar2;
   int *piVar3;
-  char *pcVar4;
-  byte bVar5;
+  char *_Size;
+  byte bVar4;
+  int iVar5;
   int iVar6;
-  int iVar7;
+  undefined4 uVar7;
   undefined4 uVar8;
-  undefined4 uVar9;
   int *local_18;
   char *local_14;
   int local_10;
@@ -9876,7 +9831,7 @@ FUN_009ec600(int *param_1,undefined4 *param_2,char *param_3,byte param_4,int par
     local_18 = piVar1;
     if ((int)pcVar2 < 1) {
       if (param_4 != 0) {
-        _ERR_put_error(0xd,0x6a,0x89,".\\crypto\\asn1\\tasn_dec.c",0x4b9);
+        FUN_009d90b0(0xd,0x6a,0x89,".\\crypto\\asn1\\tasn_dec.c",0x4b9);
         return 0;
       }
 LAB_009ec85e:
@@ -9887,53 +9842,53 @@ LAB_009ec85e:
     if (((1 < (int)pcVar2) && ((char)*piVar1 == '\0')) && (*(char *)((int)piVar1 + 1) == '\0')) {
       local_18 = (int *)((int)piVar1 + 2);
       if (param_4 == 0) {
-        _ERR_put_error(0xd,0x6a,0x9f,".\\crypto\\asn1\\tasn_dec.c",0x498);
+        FUN_009d90b0(0xd,0x6a,0x9f,".\\crypto\\asn1\\tasn_dec.c",0x498);
         return 0;
       }
       goto LAB_009ec85e;
     }
     param_1 = piVar1;
-    bVar5 = _ASN1_get_object(&param_1,&local_14,&local_10,&local_c,pcVar2);
-    if ((char)bVar5 < '\0') {
-      uVar9 = 0x516;
-      uVar8 = 0x66;
+    bVar4 = FUN_009d9cd0(&param_1,&local_14,&local_10,&local_c,pcVar2);
+    if ((char)bVar4 < '\0') {
+      uVar8 = 0x516;
+      uVar7 = 0x66;
 LAB_009ec7d5:
-      _ERR_put_error(0xd,0x68,uVar8,".\\crypto\\asn1\\tasn_dec.c",uVar9);
-      _ERR_put_error(0xd,0x6a,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x4a2);
+      FUN_009d90b0(0xd,0x68,uVar7,".\\crypto\\asn1\\tasn_dec.c",uVar8);
+      FUN_009d90b0(0xd,0x6a,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x4a2);
       return 0;
     }
     if ((-1 < param_5) && ((param_5 != local_10 || (param_6 != local_c)))) {
-      uVar9 = 0x523;
-      uVar8 = 0xa8;
+      uVar8 = 0x523;
+      uVar7 = 0xa8;
       goto LAB_009ec7d5;
     }
-    if ((bVar5 & 1) != 0) {
+    if ((bVar4 & 1) != 0) {
       local_14 = (char *)((int)piVar1 + ((int)pcVar2 - (int)param_1));
     }
-    pcVar4 = local_14;
-    local_8 = CONCAT31(local_8._1_3_,bVar5) & 0xffffff01;
+    _Size = local_14;
+    local_8 = CONCAT31(local_8._1_3_,bVar4) & 0xffffff01;
     local_18 = param_1;
-    if ((bVar5 & 0x20) == 0) {
+    if ((bVar4 & 0x20) == 0) {
       if (local_14 != (char *)0x0) {
         if (piVar3 != (int *)0x0) {
-          iVar6 = *piVar3;
-          iVar7 = _BUF_MEM_grow_clean(piVar3,local_14 + iVar6);
-          if (iVar7 == 0) {
-            _ERR_put_error(0xd,0x8c,0x41,".\\crypto\\asn1\\tasn_dec.c",0x4c8);
+          iVar5 = *piVar3;
+          iVar6 = FUN_009e2f60(piVar3,local_14 + iVar5);
+          if (iVar6 == 0) {
+            FUN_009d90b0(0xd,0x8c,0x41,".\\crypto\\asn1\\tasn_dec.c",0x4c8);
             return 0;
           }
-          memcpy((uchar *)(piVar3[1] + iVar6),(uchar *)local_18,(ulong)pcVar4);
+          FID_conflict__memcpy((void *)(piVar3[1] + iVar5),local_18,(size_t)_Size);
         }
-        local_18 = (int *)((int)local_18 + (int)pcVar4);
+        local_18 = (int *)((int)local_18 + (int)_Size);
       }
     }
     else {
       if (4 < param_7) {
-        _ERR_put_error(0xd,0x6a,0xc5,".\\crypto\\asn1\\tasn_dec.c",0x4ac);
+        FUN_009d90b0(0xd,0x6a,0xc5,".\\crypto\\asn1\\tasn_dec.c",0x4ac);
         return 0;
       }
-      iVar6 = FUN_009ec600(piVar3,&local_18,local_14,local_8,param_5,param_6,param_7 + 1);
-      if (iVar6 == 0) {
+      iVar5 = FUN_009ec600(piVar3,&local_18,local_14,local_8,param_5,param_6,param_7 + 1);
+      if (iVar5 == 0) {
         return 0;
       }
     }
@@ -9945,7 +9900,7 @@ LAB_009ec7d5:
 
 // 009EC880  FUN_009ec880  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
 FUN_009ec880(int param_1,int *param_2,undefined4 param_3,char *param_4,undefined4 param_5,
@@ -9971,7 +9926,7 @@ FUN_009ec880(int param_1,int *param_2,undefined4 param_3,char *param_4,undefined
   local_4 = 0x9ec88a;
   local_1e = '\0';
   if (param_1 == 0) {
-    _ERR_put_error(0xd,0x6c,0x7d,".\\crypto\\asn1\\tasn_dec.c",0x308);
+    FUN_009d90b0(0xd,0x6c,0x7d,".\\crypto\\asn1\\tasn_dec.c",0x308);
     return 0;
   }
   if (*param_4 == '\x05') {
@@ -9984,11 +9939,11 @@ FUN_009ec880(int param_1,int *param_2,undefined4 param_3,char *param_4,undefined
   iVar1 = local_18;
   if (local_18 == -4) {
     if (-1 < in_ECX) {
-      _ERR_put_error(0xd,0x6c,0x7f,".\\crypto\\asn1\\tasn_dec.c",0x31b);
+      FUN_009d90b0(0xd,0x6c,0x7f,".\\crypto\\asn1\\tasn_dec.c",0x31b);
       return 0;
     }
     if ((char)param_6 != '\0') {
-      _ERR_put_error(0xd,0x6c,0x7e,".\\crypto\\asn1\\tasn_dec.c",0x321);
+      FUN_009d90b0(0xd,0x6c,0x7e,".\\crypto\\asn1\\tasn_dec.c",0x321);
       return 0;
     }
     local_1c = *param_2;
@@ -10012,7 +9967,7 @@ FUN_009ec880(int param_1,int *param_2,undefined4 param_3,char *param_4,undefined
   if (iVar2 == 0) {
     uVar5 = 0x33b;
 LAB_009ec9d2:
-    _ERR_put_error(0xd,0x6c,0x3a,".\\crypto\\asn1\\tasn_dec.c",uVar5);
+    FUN_009d90b0(0xd,0x6c,0x3a,".\\crypto\\asn1\\tasn_dec.c",uVar5);
     return 0;
   }
   if (iVar2 == -1) {
@@ -10022,7 +9977,7 @@ LAB_009ec9d2:
   if ((iVar1 == 0x10) || (iVar1 == 0x11)) {
     if (iVar1 == -3) goto LAB_009ecaca;
     if (local_1d == '\0') {
-      _ERR_put_error(0xd,0x6c,0x9c,".\\crypto\\asn1\\tasn_dec.c",0x350);
+      FUN_009d90b0(0xd,0x6c,0x9c,".\\crypto\\asn1\\tasn_dec.c",0x350);
       return 0;
     }
 LAB_009ecad5:
@@ -10063,9 +10018,9 @@ LAB_009ecaca:
         local_1e = '\x01';
         goto LAB_009ecb78;
       }
-      iVar2 = _BUF_MEM_grow_clean(&local_c,local_c + 1);
+      iVar2 = FUN_009e2f60(&local_c,local_c + 1);
       if (iVar2 == 0) {
-        _ERR_put_error(0xd,0x6c,0x41,".\\crypto\\asn1\\tasn_dec.c",0x378);
+        FUN_009d90b0(0xd,0x6c,0x41,".\\crypto\\asn1\\tasn_dec.c",0x378);
         return 0;
       }
       *(undefined1 *)(local_8 + iVar3) = 0;
@@ -10074,7 +10029,7 @@ LAB_009ecaca:
       iVar2 = local_8;
     }
 LAB_009ecb43:
-    iVar1 = asn1_ex_c2i(param_1,iVar2,iVar3,iVar1,&local_1e,param_4);
+    iVar1 = FUN_009ebea0(param_1,iVar2,iVar3,iVar1,&local_1e,param_4);
     if (iVar1 != 0) {
       *param_2 = iVar4;
       local_10 = 1;
@@ -10085,19 +10040,19 @@ LAB_009ecb43:
   }
 LAB_009ecb78:
   if (local_8 != 0) {
-    _CRYPTO_free(local_8);
+    FUN_009d98a0(local_8);
   }
   return local_10;
 }
 
 
-// 009ECBA0  _ASN1_item_ex_d2i  (line unknown)
+// 009ECBA0  FUN_009ecba0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
-_ASN1_item_ex_d2i(int *param_1,int *param_2,int *param_3,undefined1 *param_4,int param_5,
-                 undefined4 param_6,undefined4 param_7,undefined4 param_8)
+FUN_009ecba0(int *param_1,int *param_2,int *param_3,undefined1 *param_4,int param_5,
+            undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
 {
   int *piVar1;
@@ -10183,7 +10138,7 @@ _ASN1_item_ex_d2i(int *param_1,int *param_2,int *param_3,undefined1 *param_4,int
         uVar12 = 0x18a;
         uVar11 = 0x95;
       }
-      else if ((*piVar1 == 0) && (iVar5 = _ASN1_item_ex_new(piVar1,puVar2), iVar5 == 0)) {
+      else if ((*piVar1 == 0) && (iVar5 = FUN_009f12d0(piVar1,puVar2), iVar5 == 0)) {
         uVar12 = 0x191;
         uVar11 = 0x3a;
       }
@@ -10194,10 +10149,10 @@ _ASN1_item_ex_d2i(int *param_1,int *param_2,int *param_3,undefined1 *param_4,int
         local_14 = (byte *)0x0;
         if (0 < *(int *)(puVar2 + 0xc)) {
           do {
-            pbVar6 = (byte *)asn1_do_adb(piVar1,local_18,1);
+            pbVar6 = (byte *)FUN_00a09560(piVar1,local_18,1);
             pbVar8 = local_c;
             if (pbVar6 == (byte *)0x0) goto LAB_009ed244;
-            local_8 = asn1_get_field_ptr(piVar1,pbVar6);
+            local_8 = FUN_00a09540(piVar1,pbVar6);
             if (piVar7 == (int *)0x0) break;
             pbStack_4 = local_1c;
             uVar10 = FUN_009ec180(piVar7);
@@ -10214,7 +10169,7 @@ _ASN1_item_ex_d2i(int *param_1,int *param_2,int *param_3,undefined1 *param_4,int
             pbVar8 = pbVar6;
             if (iVar5 == 0) goto LAB_009ed244;
             if (iVar5 == -1) {
-              _ASN1_template_free(local_8,pbVar6);
+              FUN_009f16b0(local_8,pbVar6);
             }
             else {
               piVar7 = (int *)((int)piVar7 + ((int)pbStack_4 - (int)local_1c));
@@ -10228,7 +10183,7 @@ LAB_009ed168:
           if (((char)param_1 != '\0') || (piVar7 == (int *)0x0)) {
             if ((int)local_14 < *(int *)(puVar2 + 0xc)) {
               do {
-                pbVar6 = (byte *)asn1_do_adb(piVar1,local_18,1);
+                pbVar6 = (byte *)FUN_00a09560(piVar1,local_18,1);
                 pbVar8 = local_c;
                 if (pbVar6 == (byte *)0x0) goto LAB_009ed244;
                 if ((*pbVar6 & 1) == 0) {
@@ -10237,13 +10192,13 @@ LAB_009ed168:
                   local_c = pbVar6;
                   goto LAB_009ed238;
                 }
-                uVar11 = asn1_get_field_ptr(piVar1,pbVar6);
-                _ASN1_template_free(uVar11,pbVar6);
+                uVar11 = FUN_00a09540(piVar1,pbVar6);
+                FUN_009f16b0(uVar11,pbVar6);
                 local_18 = local_18 + 0x14;
                 local_14 = local_14 + 1;
               } while ((int)local_14 < *(int *)(puVar2 + 0xc));
             }
-            iVar5 = asn1_enc_save(piVar1,*param_2,(int)local_1c - *param_2,puVar2);
+            iVar5 = FUN_00a09450(piVar1,*param_2,(int)local_1c - *param_2,puVar2);
             if (iVar5 != 0) {
               *param_2 = (int)local_1c;
               if (local_10 == (code *)0x0) {
@@ -10266,7 +10221,7 @@ LAB_009ed168:
     break;
   case 2:
     if ((local_10 == (code *)0x0) || (iVar5 = (*local_10)(4,param_1,puVar2), iVar5 != 0)) {
-      if ((*piVar1 == 0) && (iVar5 = _ASN1_item_ex_new(piVar1,puVar2), iVar5 == 0)) {
+      if ((*piVar1 == 0) && (iVar5 = FUN_009f12d0(piVar1,puVar2), iVar5 == 0)) {
         uVar12 = 0x13c;
         uVar11 = 0x3a;
       }
@@ -10277,7 +10232,7 @@ LAB_009ed168:
         bVar9 = *(int *)(puVar2 + 0xc) == 0;
         if (0 < *(int *)(puVar2 + 0xc)) {
           do {
-            uVar11 = asn1_get_field_ptr(piVar1,pbVar8);
+            uVar11 = FUN_00a09540(piVar1,pbVar8);
             iVar4 = FUN_009ec370(uVar11,&local_1c,param_8);
             if (iVar4 != -1) {
               if (iVar4 < 1) {
@@ -10294,7 +10249,7 @@ LAB_009ed168:
           bVar9 = iVar5 == *(int *)(puVar2 + 0xc);
         }
         if (!bVar9) {
-          asn1_set_choice_selector(piVar1,iVar5,puVar2);
+          FUN_00a09350(piVar1,iVar5,puVar2);
           *param_2 = (int)local_1c;
           if (local_10 == (code *)0x0) {
             return 1;
@@ -10307,7 +10262,7 @@ joined_r0x009ecf3a:
           goto LAB_009ed22c;
         }
         if ((char)param_7 != '\0') {
-          _ASN1_item_ex_free(piVar1,puVar2);
+          FUN_009f1770(piVar1,puVar2);
           return 0xffffffff;
         }
         uVar12 = 0x160;
@@ -10369,7 +10324,7 @@ LAB_009ed22c:
       uVar11 = 0x3a;
     }
     else if ((byte)param_4 == '\0') {
-      uVar3 = _ASN1_tag2bit(param_1);
+      uVar3 = FUN_009ebe80(param_1);
       if ((*(uint *)(puVar2 + 4) & uVar3) != 0) {
         uVar11 = FUN_009ec880(piVar1,piVar7,param_3,puVar2,0,0,uVar11);
         return uVar11;
@@ -10392,17 +10347,17 @@ LAB_009ed22c:
     goto switchD_009ecbfe_default;
   }
 LAB_009ed238:
-  _ERR_put_error(0xd,0x78,uVar11,".\\crypto\\asn1\\tasn_dec.c",uVar12);
+  FUN_009d90b0(0xd,0x78,uVar11,".\\crypto\\asn1\\tasn_dec.c",uVar12);
   pbVar8 = local_c;
 LAB_009ed244:
   local_c = pbVar8;
-  _ASN1_item_ex_free(piVar1,puVar2);
+  FUN_009f1770(piVar1,puVar2);
   if (local_c != (byte *)0x0) {
-    _ERR_add_error_data(4,"Field=",*(undefined4 *)(local_c + 0xc),", Type=",
-                        *(undefined4 *)(puVar2 + 0x18));
+    FUN_009d92c0(4,"Field=",*(undefined4 *)(local_c + 0xc),", Type=",*(undefined4 *)(puVar2 + 0x18))
+    ;
     return 0;
   }
-  _ERR_add_error_data(2,"Type=",*(undefined4 *)(puVar2 + 0x18));
+  FUN_009d92c0(2,"Type=",*(undefined4 *)(puVar2 + 0x18));
 switchD_009ecbfe_default:
   return 0;
 }
@@ -10410,7 +10365,7 @@ switchD_009ecbfe_default:
 
 // 009ED2D0  FUN_009ed2d0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
 FUN_009ed2d0(int *param_1,undefined4 *param_2,char *param_3,uint *param_4,undefined4 param_5,
@@ -10442,13 +10397,13 @@ FUN_009ed2d0(int *param_1,undefined4 *param_2,char *param_3,uint *param_4,undefi
   if ((uVar3 & 6) == 0) {
     if ((uVar3 & 8) == 0) {
       uVar8 = (*(code *)param_4[4])(0xffffffff,0,param_5,param_6);
-      iVar4 = _ASN1_item_ex_d2i(param_1,&local_8,param_3,uVar8);
+      iVar4 = FUN_009ecba0(param_1,&local_8,param_3,uVar8);
       if (iVar4 != 0) goto LAB_009ed5af;
       uVar9 = 0x2eb;
     }
     else {
       uVar8 = (*(code *)param_4[4])(param_4[1],uVar6,param_5,param_6);
-      iVar4 = _ASN1_item_ex_d2i(param_1,&local_8,param_3,uVar8);
+      iVar4 = FUN_009ecba0(param_1,&local_8,param_3,uVar8);
       if (iVar4 != 0) {
 LAB_009ed5af:
         if (iVar4 == -1) {
@@ -10472,7 +10427,7 @@ LAB_009ed5c3:
     }
     iVar4 = FUN_009ec1b0(&param_3,0,0,&local_9,0,&local_8,param_3,uVar3,uVar6,param_5,param_6);
     if (iVar4 == 0) {
-      _ERR_put_error(0xd,0x83,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x291);
+      FUN_009d90b0(0xd,0x83,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x291);
       return 0;
     }
     if (iVar4 == -1) {
@@ -10480,16 +10435,16 @@ LAB_009ed5c3:
     }
     iVar4 = *param_1;
     if (iVar4 == 0) {
-      iVar4 = sk_new_null();
+      iVar4 = FUN_009da960();
       *param_1 = iVar4;
     }
     else {
-      iVar5 = sk_num(iVar4);
+      iVar5 = FUN_009da820(iVar4);
       while (0 < iVar5) {
-        local_4 = sk_pop(iVar4);
+        local_4 = FUN_009da7a0(iVar4);
         uVar9 = (*(code *)puVar2[4])();
-        _ASN1_item_ex_free(&local_4,uVar9);
-        iVar5 = sk_num(iVar4);
+        FUN_009f1770(&local_4,uVar9);
+        iVar5 = FUN_009da820(iVar4);
       }
     }
     pcVar7 = param_3;
@@ -10503,26 +10458,26 @@ LAB_009ed5c3:
         if (((1 < (int)pcVar7) && (*pcVar1 == '\0')) && (pcVar1[1] == '\0')) {
           local_8 = pcVar1 + 2;
           if (local_9 == '\0') {
-            _ERR_put_error(0xd,0x83,0x9f,".\\crypto\\asn1\\tasn_dec.c",0x2b7);
-            _ASN1_template_free(param_1,puVar2);
+            FUN_009d90b0(0xd,0x83,0x9f,".\\crypto\\asn1\\tasn_dec.c",0x2b7);
+            FUN_009f16b0(param_1,puVar2);
             return 0;
           }
           goto LAB_009ed5c3;
         }
         local_4 = 0;
         uVar9 = (*(code *)puVar2[4])(0xffffffff,0,0,uVar8);
-        iVar4 = _ASN1_item_ex_d2i(&local_4,&local_8,pcVar7,uVar9);
+        iVar4 = FUN_009ecba0(&local_4,&local_8,pcVar7,uVar9);
         if (iVar4 == 0) {
-          _ERR_put_error(0xd,0x83,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x2c4);
-          _ASN1_template_free(param_1,puVar2);
+          FUN_009d90b0(0xd,0x83,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x2c4);
+          FUN_009f16b0(param_1,puVar2);
           return 0;
         }
         pcVar7 = pcVar1 + ((int)pcVar7 - (int)local_8);
-        iVar4 = sk_push(*param_1,local_4);
+        iVar4 = FUN_009da780(*param_1,local_4);
         pcVar1 = local_8;
         if (iVar4 == 0) {
-          _ERR_put_error(0xd,0x83,0x41,".\\crypto\\asn1\\tasn_dec.c",0x2cb);
-          _ASN1_template_free(param_1,puVar2);
+          FUN_009d90b0(0xd,0x83,0x41,".\\crypto\\asn1\\tasn_dec.c",0x2cb);
+          FUN_009f16b0(param_1,puVar2);
           return 0;
         }
       }
@@ -10531,18 +10486,18 @@ LAB_009ed5c3:
       uVar8 = 0x89;
     }
   }
-  _ERR_put_error(0xd,0x83,uVar8,".\\crypto\\asn1\\tasn_dec.c",uVar9);
-  _ASN1_template_free(param_1,puVar2);
+  FUN_009d90b0(0xd,0x83,uVar8,".\\crypto\\asn1\\tasn_dec.c",uVar9);
+  FUN_009f16b0(param_1,puVar2);
   return 0;
 }
 
 
-// 009ED5E0  _ASN1_item_d2i  (line unknown)
+// 009ED5E0  FUN_009ed5e0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
-_ASN1_item_d2i(undefined4 *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
+FUN_009ed5e0(undefined4 *param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4)
 
 {
   int iVar1;
@@ -10556,7 +10511,7 @@ _ASN1_item_d2i(undefined4 *param_1,undefined4 param_2,undefined4 param_3,undefin
     param_1 = &local_1c;
   }
   local_18[0] = 0;
-  iVar1 = _ASN1_item_ex_d2i(param_1,param_2,param_3,param_4,0xffffffff,0,0,local_18);
+  iVar1 = FUN_009ecba0(param_1,param_2,param_3,param_4,0xffffffff,0,0,local_18);
   if (0 < iVar1) {
     return *param_1;
   }
@@ -10564,11 +10519,11 @@ _ASN1_item_d2i(undefined4 *param_1,undefined4 param_2,undefined4 param_3,undefin
 }
 
 
-// 009ED670  _X509_PUBKEY_get  (line unknown)
+// 009ED670  FUN_009ed670  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-int * _X509_PUBKEY_get(int *param_1)
+int * FUN_009ed670(int *param_1)
 
 {
   int *piVar1;
@@ -10587,25 +10542,25 @@ int * _X509_PUBKEY_get(int *param_1)
     return (int *)0x0;
   }
   if (param_1[2] != 0) {
-    _CRYPTO_add_lock(param_1[2] + 8,1,10,".\\crypto\\asn1\\x_pubkey.c",0x111);
+    FUN_009dfad0(param_1[2] + 8,1,10,".\\crypto\\asn1\\x_pubkey.c",0x111);
     return (int *)piVar2[2];
   }
   if (param_1[1] == 0) {
     return (int *)0x0;
   }
-  uVar3 = _OBJ_obj2nid(*(undefined4 *)*param_1);
-  local_8 = (int *)_EVP_PKEY_new();
+  uVar3 = FUN_009e13d0(*(undefined4 *)*param_1);
+  local_8 = (int *)FUN_009d40a0();
   if (local_8 == (int *)0x0) {
     uVar6 = 0x11a;
     uVar3 = 0x41;
     goto LAB_009ed8ab;
   }
-  iVar4 = _EVP_PKEY_type(uVar3);
+  iVar4 = FUN_009d40f0(uVar3);
   *local_8 = iVar4;
   iVar4 = *piVar2;
   if (*local_8 == 0x74) {
     if ((*(int **)(iVar4 + 4) != (int *)0x0) && (**(int **)(iVar4 + 4) == 0x10)) {
-      iVar5 = _DSA_new();
+      iVar5 = FUN_009eb8c0();
       local_8[3] = iVar5;
       if (local_8[3] == 0) {
         uVar6 = 0x12e;
@@ -10615,16 +10570,16 @@ int * _X509_PUBKEY_get(int *param_1)
       *(undefined4 *)(local_8[3] + 8) = 0;
       param_1 = *(int **)(*(int *)(*(int *)(iVar4 + 4) + 4) + 8);
       local_4 = param_1;
-      iVar4 = d2i_DSAparams(local_8 + 3,&param_1,**(undefined4 **)(*(int *)(iVar4 + 4) + 4));
+      iVar4 = FUN_009e8180(local_8 + 3,&param_1,**(undefined4 **)(*(int *)(iVar4 + 4) + 4));
       if (iVar4 == 0) goto LAB_009ed8b7;
     }
     local_8[4] = 1;
 LAB_009ed87b:
     local_4 = (int *)((undefined4 *)piVar2[1])[2];
-    iVar4 = d2i_PublicKey(uVar3,&local_8,&local_4,*(undefined4 *)piVar2[1]);
+    iVar4 = FUN_00a09600(uVar3,&local_8,&local_4,*(undefined4 *)piVar2[1]);
     if (iVar4 != 0) {
       piVar2[2] = (int)local_8;
-      _CRYPTO_add_lock(local_8 + 2,1,10,".\\crypto\\asn1\\x_pubkey.c",0x173);
+      FUN_009dfad0(local_8 + 2,1,10,".\\crypto\\asn1\\x_pubkey.c",0x173);
       return local_8;
     }
     uVar6 = 0x16e;
@@ -10641,22 +10596,22 @@ LAB_009ed870:
     if (*piVar1 != 0x10) {
       if ((piVar1 != (int *)0x0) && (*piVar1 == 6)) {
         if (local_8[3] == 0) {
-          iVar5 = _EC_KEY_new();
+          iVar5 = FUN_009e5da0();
           local_8[3] = iVar5;
         }
         iVar5 = local_8[3];
         if (iVar5 == 0) goto LAB_009ed8b7;
-        uVar6 = _OBJ_obj2nid(*(undefined4 *)(*(int *)(iVar4 + 4) + 4));
-        iVar4 = _EC_GROUP_new_by_curve_name(uVar6);
+        uVar6 = FUN_009e13d0(*(undefined4 *)(*(int *)(iVar4 + 4) + 4));
+        iVar4 = FUN_009e8db0(uVar6);
         if (iVar4 == 0) goto LAB_009ed8b7;
-        _EC_GROUP_set_asn1_flag(iVar4,1);
-        iVar5 = _EC_KEY_set_group(iVar5,iVar4);
+        FUN_009e6710(iVar4,1);
+        iVar5 = FUN_009e6170(iVar5,iVar4);
         if (iVar5 == 0) goto LAB_009ed8b7;
-        _EC_GROUP_free(iVar4);
+        FUN_009e7480(iVar4);
       }
       goto LAB_009ed870;
     }
-    iVar5 = _EC_KEY_new();
+    iVar5 = FUN_009e5da0();
     local_8[3] = iVar5;
     if (local_8[3] == 0) {
       uVar6 = 0x145;
@@ -10665,25 +10620,25 @@ LAB_009ed870:
     else {
       param_1 = *(int **)(*(int *)(*(int *)(iVar4 + 4) + 4) + 8);
       local_4 = param_1;
-      iVar4 = d2i_ECParameters(local_8 + 3,&param_1,**(undefined4 **)(*(int *)(iVar4 + 4) + 4));
+      iVar4 = FUN_009fa820(local_8 + 3,&param_1,**(undefined4 **)(*(int *)(iVar4 + 4) + 4));
       if (iVar4 != 0) goto LAB_009ed870;
       uVar6 = 0x14c;
       uVar3 = 0x10;
     }
   }
 LAB_009ed8ab:
-  _ERR_put_error(0xb,0x77,uVar3,".\\crypto\\asn1\\x_pubkey.c",uVar6);
+  FUN_009d90b0(0xb,0x77,uVar3,".\\crypto\\asn1\\x_pubkey.c",uVar6);
 LAB_009ed8b7:
   if (local_8 != (int *)0x0) {
-    _EVP_PKEY_free(local_8);
+    FUN_009d43f0(local_8);
   }
   return (int *)0x0;
 }
 
 
-// 009ED900  _UTF8_getc  (line unknown)
+// 009ED900  FUN_009ed900  (line unknown)
 
-undefined4 _UTF8_getc(byte *param_1,int param_2,uint *param_3)
+undefined4 FUN_009ed900(byte *param_1,int param_2,uint *param_3)
 
 {
   byte bVar1;
@@ -10795,9 +10750,9 @@ undefined4 _UTF8_getc(byte *param_1,int param_2,uint *param_3)
 }
 
 
-// 009EDBC0  _UTF8_putc  (line unknown)
+// 009EDBC0  FUN_009edbc0  (line unknown)
 
-undefined4 _UTF8_putc(byte *param_1,int param_2,uint param_3)
+undefined4 FUN_009edbc0(byte *param_1,int param_2,uint param_3)
 
 {
   byte bVar1;
@@ -10876,16 +10831,16 @@ undefined4 _UTF8_putc(byte *param_1,int param_2,uint param_3)
 }
 
 
-// 009EDD70  _ASN1_tag2str  (line unknown)
+// 009EDD70  FUN_009edd70  (line unknown)
 
-char * _ASN1_tag2str(uint param_1)
+char * FUN_009edd70(uint param_1)
 
 {
   if ((param_1 == 0x102) || (param_1 == 0x10a)) {
     param_1 = param_1 & 0xfffffeff;
   }
   if (param_1 < 0x1f) {
-    return (&PTR_s_EOC_00b93340)[param_1];
+    return (&PTR_DAT_00b93340)[param_1];
   }
   return "(unknown)";
 }
@@ -10893,10 +10848,9 @@ char * _ASN1_tag2str(uint param_1)
 
 // 009EDDA0  FUN_009edda0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 FUN_009edda0(void)
+void FUN_009edda0(void)
 
 {
   int iVar1;
@@ -10906,44 +10860,44 @@ undefined4 FUN_009edda0(void)
   undefined1 local_84 [128];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)local_84;
-  iVar1 = _BIO_write();
-  if (iVar1 < 6) {
-    return 0;
-  }
-  _BIO_indent();
+  local_4 = DAT_00b86490 ^ (uint)local_84;
+  iVar1 = FUN_009d4cf0();
+  if (iVar1 < 6) goto LAB_009ede8f;
+  FUN_009d4f10();
   if ((unaff_BL & 0xc0) == 0xc0) {
     pcVar2 = "priv [ %d ] ";
+LAB_009ede0f:
+    FUN_009e9f60(local_84,0x80,pcVar2);
+  }
+  else if ((unaff_BL & 0x80) == 0x80) {
+    FUN_009e9f60(local_84,0x80,"cont [ %d ]");
   }
   else {
-    if ((unaff_BL & 0x80) == 0x80) {
-      _BIO_snprintf(local_84,0x80,"cont [ %d ]");
-      goto LAB_009ede7b;
+    if ((unaff_BL & 0x40) != 0) {
+      pcVar2 = "appl [ %d ]";
+      goto LAB_009ede0f;
     }
-    if ((unaff_BL & 0x40) == 0) {
-      if (unaff_EDI < 0x1f) {
-        _ASN1_tag2str();
-      }
-      else {
-        _BIO_snprintf(local_84,0x80,"<ASN1 %d>");
-      }
-      goto LAB_009ede7b;
+    if (unaff_EDI < 0x1f) {
+      FUN_009edd70();
     }
-    pcVar2 = "appl [ %d ]";
+    else {
+      FUN_009e9f60(local_84,0x80,"<ASN1 %d>");
+    }
   }
-  _BIO_snprintf(local_84,0x80,pcVar2);
-LAB_009ede7b:
-  iVar1 = _BIO_printf();
-  if (iVar1 < 1) {
-    return 0;
+  iVar1 = FUN_009e9f40();
+  if (0 < iVar1) {
+    __security_check_cookie(local_4 ^ (uint)local_84);
+    return;
   }
-  return 1;
+LAB_009ede8f:
+  __security_check_cookie(local_4 ^ (uint)local_84);
+  return;
 }
 
 
 // 009EDEC0  FUN_009edec0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4
 FUN_009edec0(undefined4 param_1,uint *param_2,int param_3,int param_4,uint param_5,int param_6,
@@ -10984,13 +10938,13 @@ LAB_009ee3eb:
     uVar9 = local_1c;
 LAB_009ee1bb:
     if (local_c != 0) {
-      _ASN1_OBJECT_free(local_c);
+      FUN_009dbfb0(local_c);
     }
     if (local_8 == (int *)0x0) {
       *param_2 = local_2c;
       return uVar9;
     }
-    _ASN1_STRING_free(local_8);
+    FUN_009d9b70(local_8);
     *param_2 = local_2c;
     return uVar9;
   }
@@ -10998,10 +10952,10 @@ LAB_009edf03:
   uVar3 = local_2c;
   if (local_2c <= local_20) goto LAB_009ee3eb;
   local_20 = local_2c;
-  uVar4 = _ASN1_get_object(&local_2c,&local_28,&local_18,&local_14,param_3);
+  uVar4 = FUN_009d9cd0(&local_2c,&local_28,&local_18,&local_14,param_3);
   local_4 = uVar4;
   if ((char)uVar4 < '\0') {
-    iVar5 = _BIO_write(param_1,"Error in encoding\n",0x12);
+    iVar5 = FUN_009d4cf0(param_1,"Error in encoding\n",0x12);
     uVar9 = local_1c;
     if (0 < iVar5) {
       local_1c = 0;
@@ -11011,14 +10965,14 @@ LAB_009edf03:
   }
   iVar7 = local_2c - uVar3;
   param_3 = param_3 - iVar7;
-  iVar5 = _BIO_printf(param_1,"%5ld:",(uVar3 - *param_2) + param_4);
+  iVar5 = FUN_009e9f40(param_1,"%5ld:",(uVar3 - *param_2) + param_4);
   uVar9 = local_1c;
   if (iVar5 < 1) goto LAB_009ee1bb;
   if (uVar4 == 0x21) {
-    iVar5 = _BIO_printf(param_1,"d=%-2d hl=%ld l=inf  ",param_5,iVar7);
+    iVar5 = FUN_009e9f40(param_1,"d=%-2d hl=%ld l=inf  ",param_5,iVar7);
   }
   else {
-    iVar5 = _BIO_printf(param_1,"d=%-2d hl=%ld l=%4ld ",param_5,iVar7,local_28);
+    iVar5 = FUN_009e9f40(param_1,"d=%-2d hl=%ld l=%4ld ",param_5,iVar7,local_28);
   }
   uVar9 = local_1c;
   if ((iVar5 < 1) ||
@@ -11027,7 +10981,7 @@ LAB_009edf03:
   if ((local_4 & 0x20) != 0) {
     uVar4 = local_28 + local_2c;
     local_4 = uVar4;
-    iVar5 = _BIO_write(param_1,"\n",1);
+    iVar5 = FUN_009d4cf0(param_1,&DAT_00ad03a0,1);
     uVar9 = local_1c;
     if (0 < iVar5) {
       if (local_28 <= param_3) {
@@ -11051,7 +11005,7 @@ LAB_009edf03:
         }
         goto LAB_009ee3d9;
       }
-      _BIO_printf(param_1,"length is greater than %ld\n",param_3);
+      FUN_009e9f40(param_1,"length is greater than %ld\n",param_3);
 LAB_009ee634:
       uVar9 = 0;
     }
@@ -11059,7 +11013,7 @@ LAB_009ee634:
   }
   if (local_14 != 0) {
     local_2c = local_2c + local_28;
-    iVar5 = _BIO_write(param_1,"\n",1);
+    iVar5 = FUN_009d4cf0(param_1,&DAT_00ad03a0,1);
     uVar9 = local_1c;
     if (0 < iVar5) goto LAB_009ee3d9;
     goto LAB_009ee1bb;
@@ -11068,21 +11022,21 @@ LAB_009ee634:
   if (((((local_18 == 0x13) || (local_18 == 0x14)) || (local_18 == 0x16)) ||
       ((local_18 == 0x1a || (local_18 == 0x12)))) ||
      ((local_18 == 0xc || ((local_18 == 0x17 || (local_18 == 0x18)))))) {
-    iVar5 = _BIO_write(param_1,":",1);
+    iVar5 = FUN_009d4cf0(param_1,&DAT_00abf620,1);
     uVar9 = local_1c;
     if ((0 < iVar5) &&
        ((local_28 < 1 ||
-        (iVar5 = _BIO_write(param_1,local_2c,local_28), uVar9 = local_1c, iVar5 == local_28))))
+        (iVar5 = FUN_009d4cf0(param_1,local_2c,local_28), uVar9 = local_1c, iVar5 == local_28))))
     goto LAB_009ee3a3;
     goto LAB_009ee1bb;
   }
   if (local_18 != 6) {
     if (local_18 == 1) {
       local_24 = local_20;
-      iVar5 = d2i_ASN1_BOOLEAN(0,&local_24,iVar7 + local_28);
+      iVar5 = FUN_00a09700(0,&local_24,iVar7 + local_28);
       if ((-1 < iVar5) ||
-         (iVar7 = _BIO_write(param_1,"Bad boolean\n",0xc), uVar9 = local_1c, 0 < iVar7)) {
-        _BIO_printf(param_1,":%d",iVar5);
+         (iVar7 = FUN_009d4cf0(param_1,"Bad boolean\n",0xc), uVar9 = local_1c, 0 < iVar7)) {
+        FUN_009e9f40(param_1,&DAT_00a827d0,iVar5);
         goto LAB_009ee3a3;
       }
       goto LAB_009ee1bb;
@@ -11092,21 +11046,21 @@ LAB_009ee634:
       if (local_18 != 2) {
         if (local_18 == 10) {
           local_24 = local_20;
-          piVar6 = (int *)d2i_ASN1_ENUMERATED(0,&local_24,iVar7 + local_28);
+          piVar6 = (int *)FUN_009ea880(0,&local_24,iVar7 + local_28);
           if (piVar6 == (int *)0x0) {
             uVar9 = 0xb;
             pcVar8 = "BAD ENUMERATED";
             goto LAB_009ee4a2;
           }
-          iVar5 = _BIO_write(param_1,":",1);
+          iVar5 = FUN_009d4cf0(param_1,&DAT_00abf620,1);
           uVar9 = local_1c;
           if ((0 < iVar5) &&
              ((piVar6[1] != 0x10a ||
-              (iVar5 = _BIO_write(param_1,"-",1), uVar9 = local_1c, 0 < iVar5)))) {
+              (iVar5 = FUN_009d4cf0(param_1,&DAT_00ac1d88,1), uVar9 = local_1c, 0 < iVar5)))) {
             iVar5 = 0;
             if (0 < *piVar6) {
               do {
-                iVar7 = _BIO_printf(param_1,"%02X",*(undefined1 *)(piVar6[2] + iVar5));
+                iVar7 = FUN_009e9f40(param_1,&DAT_00a73764,*(undefined1 *)(piVar6[2] + iVar5));
                 uVar9 = local_1c;
                 if (iVar7 < 1) goto LAB_009ee1bb;
                 iVar5 = iVar5 + 1;
@@ -11117,39 +11071,40 @@ LAB_009ee634:
         }
         else {
           if ((local_28 < 1) || (param_7 == 0)) goto LAB_009ee3a3;
-          iVar5 = _BIO_write(param_1,"\n",1);
+          iVar5 = FUN_009d4cf0(param_1,&DAT_00ad03a0,1);
           uVar9 = local_1c;
           if (0 < iVar5) {
             iVar5 = local_28;
             if ((param_7 != -1) && (param_7 <= local_28)) {
               iVar5 = param_7;
             }
-            iVar5 = _BIO_dump_indent(param_1,local_2c,iVar5,6);
+            iVar5 = FUN_009f25b0(param_1,local_2c,iVar5,6);
             goto LAB_009ee3b3;
           }
         }
         goto LAB_009ee1bb;
       }
       local_24 = local_20;
-      piVar6 = (int *)d2i_ASN1_INTEGER(0,&local_24,iVar7 + local_28);
+      piVar6 = (int *)FUN_009ea810(0,&local_24,iVar7 + local_28);
       if (piVar6 == (int *)0x0) {
         uVar9 = 0xb;
         pcVar8 = "BAD INTEGER";
 LAB_009ee4a2:
-        iVar5 = _BIO_write(param_1,pcVar8,uVar9);
+        iVar5 = FUN_009d4cf0(param_1,pcVar8,uVar9);
         uVar9 = local_1c;
         if (iVar5 < 1) goto LAB_009ee1bb;
       }
       else {
-        iVar5 = _BIO_write(param_1,":",1);
+        iVar5 = FUN_009d4cf0(param_1,&DAT_00abf620,1);
         uVar9 = local_1c;
         if ((iVar5 < 1) ||
-           ((piVar6[1] == 0x102 && (iVar5 = _BIO_write(param_1,"-",1), uVar9 = local_1c, iVar5 < 1))
-           )) goto LAB_009ee1bb;
+           ((piVar6[1] == 0x102 &&
+            (iVar5 = FUN_009d4cf0(param_1,&DAT_00ac1d88,1), uVar9 = local_1c, iVar5 < 1))))
+        goto LAB_009ee1bb;
         iVar5 = 0;
         if (0 < *piVar6) {
           do {
-            iVar7 = _BIO_printf(param_1,"%02X",*(undefined1 *)(piVar6[2] + iVar5));
+            iVar7 = FUN_009e9f40(param_1,&DAT_00a73764,*(undefined1 *)(piVar6[2] + iVar5));
             uVar9 = local_1c;
             if (iVar7 < 1) goto LAB_009ee1bb;
             iVar5 = iVar5 + 1;
@@ -11162,11 +11117,11 @@ LAB_009ee48d:
           goto LAB_009ee4a2;
         }
       }
-      _ASN1_STRING_free(piVar6);
+      FUN_009d9b70(piVar6);
       goto LAB_009ee3a3;
     }
     local_24 = local_20;
-    piVar6 = (int *)d2i_ASN1_OCTET_STRING(0,&local_24,iVar7 + local_28);
+    piVar6 = (int *)FUN_009ea900(0,&local_24,iVar7 + local_28);
     local_8 = piVar6;
     if (piVar6 == (int *)0x0) goto LAB_009ee3a3;
     if (*piVar6 < 1) goto LAB_009ee38e;
@@ -11178,20 +11133,20 @@ LAB_009ee48d:
         if (((((bVar1 < 0x20) && (bVar1 != 10)) && (bVar1 != 0xd)) && (bVar1 != 9)) ||
            (0x7e < bVar1)) {
           if (param_7 == 0) {
-            iVar5 = _BIO_write(param_1,"[HEX DUMP]:",0xb);
+            iVar5 = FUN_009d4cf0(param_1,"[HEX DUMP]:",0xb);
             uVar9 = local_1c;
             if (iVar5 < 1) goto LAB_009ee1bb;
             iVar5 = 0;
             if (*piVar6 < 1) goto LAB_009ee38e;
             goto LAB_009ee320;
           }
-          iVar5 = _BIO_write(param_1,"\n",1);
+          iVar5 = FUN_009d4cf0(param_1,&DAT_00ad03a0,1);
           uVar9 = local_1c;
           if (iVar5 < 1) goto LAB_009ee1bb;
           if ((param_7 == -1) || (iVar5 = param_7, *piVar6 < param_7)) {
             iVar5 = *piVar6;
           }
-          iVar5 = _BIO_dump_indent(param_1,local_24,iVar5,6);
+          iVar5 = FUN_009f25b0(param_1,local_24,iVar5,6);
           uVar9 = local_1c;
           if (iVar5 < 1) goto LAB_009ee1bb;
           bVar2 = true;
@@ -11200,28 +11155,28 @@ LAB_009ee48d:
         iVar5 = iVar5 + 1;
       } while (iVar5 < *piVar6);
     }
-    iVar5 = _BIO_write(param_1,":",1);
+    iVar5 = FUN_009d4cf0(param_1,&DAT_00abf620,1);
     uVar9 = local_1c;
-    if ((iVar5 < 1) || (iVar5 = _BIO_write(param_1,local_24,*piVar6), uVar9 = local_1c, iVar5 < 1))
-    goto LAB_009ee1bb;
+    if ((iVar5 < 1) || (iVar5 = FUN_009d4cf0(param_1,local_24,*piVar6), uVar9 = local_1c, iVar5 < 1)
+       ) goto LAB_009ee1bb;
     goto LAB_009ee38e;
   }
   local_24 = local_20;
-  iVar5 = d2i_ASN1_OBJECT(&local_c,&local_24,iVar7 + local_28);
+  iVar5 = FUN_009dc1a0(&local_c,&local_24,iVar7 + local_28);
   if (iVar5 != 0) {
-    iVar5 = _BIO_write(param_1,":",1);
+    iVar5 = FUN_009d4cf0(param_1,&DAT_00abf620,1);
     uVar9 = local_1c;
     if (0 < iVar5) {
-      i2a_ASN1_OBJECT(param_1,local_c);
+      FUN_009dbe50(param_1,local_c);
       goto LAB_009ee3a3;
     }
     goto LAB_009ee1bb;
   }
-  iVar5 = _BIO_write(param_1,":BAD OBJECT",0xb);
+  iVar5 = FUN_009d4cf0(param_1,":BAD OBJECT",0xb);
   uVar9 = local_1c;
   if (iVar5 < 1) goto LAB_009ee1bb;
 LAB_009ee3a3:
-  iVar5 = _BIO_write(param_1,"\n",1);
+  iVar5 = FUN_009d4cf0(param_1,&DAT_00ad03a0,1);
 LAB_009ee3b3:
   uVar9 = local_1c;
   if (iVar5 < 1) goto LAB_009ee1bb;
@@ -11237,22 +11192,22 @@ LAB_009ee3d9:
   goto LAB_009edf03;
   while (iVar5 = iVar5 + 1, iVar5 < *piVar6) {
 LAB_009ee320:
-    iVar7 = _BIO_printf(param_1,"%02X",*(undefined1 *)(iVar5 + local_24));
+    iVar7 = FUN_009e9f40(param_1,&DAT_00a73764,*(undefined1 *)(iVar5 + local_24));
     uVar9 = local_1c;
     if (iVar7 < 1) goto LAB_009ee1bb;
   }
 LAB_009ee38e:
-  _ASN1_STRING_free(piVar6);
+  FUN_009d9b70(piVar6);
   local_8 = (int *)0x0;
   if (bVar2) goto LAB_009ee3bb;
   goto LAB_009ee3a3;
 }
 
 
-// 009EE670  _ASN1_parse_dump  (line unknown)
+// 009EE670  FUN_009ee670  (line unknown)
 
-void _ASN1_parse_dump(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
-                     undefined4 param_5)
+void FUN_009ee670(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5)
 
 {
   FUN_009edec0(param_1,&param_2,param_3,0,0,param_4,param_5);
@@ -11262,7 +11217,7 @@ void _ASN1_parse_dump(undefined4 param_1,undefined4 param_2,undefined4 param_3,u
 
 // 009EE6A0  FUN_009ee6a0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 int FUN_009ee6a0(int param_1,undefined4 param_2)
 
@@ -11296,7 +11251,7 @@ int FUN_009ee6a0(int param_1,undefined4 param_2)
       in_ECX = in_ECX + -4;
     }
     else {
-      iVar1 = _UTF8_getc(in_EDX,in_ECX,&local_4);
+      iVar1 = FUN_009ed900(in_EDX,in_ECX,&local_4);
       if (iVar1 < 0) {
         return -1;
       }
@@ -11314,7 +11269,7 @@ int FUN_009ee6a0(int param_1,undefined4 param_2)
 undefined4 FUN_009ee870(uint param_1)
 
 {
-  int extraout_EAX;
+  int iVar1;
   
   if (0x7f < param_1) {
     return 0;
@@ -11322,21 +11277,19 @@ undefined4 FUN_009ee870(uint param_1)
   if ((((((int)param_1 < 0x61) || (0x7a < (int)param_1)) &&
        (((int)param_1 < 0x41 || (0x5a < (int)param_1)))) &&
       ((((int)param_1 < 0x30 || (0x39 < (int)param_1)) && (param_1 != 0x20)))) &&
-     (strchr((uchar *)"\'()+,-./:=?",(uchar)param_1), extraout_EAX == 0)) {
+     (iVar1 = FUN_00956d50("\'()+,-./:=?",param_1), iVar1 == 0)) {
     return 0;
   }
   return 1;
 }
 
 
-// 009EE930  _ASN1_mbstring_ncopy  (line unknown)
+// 009EE930  FUN_009ee930  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
-/* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-uint _ASN1_mbstring_ncopy
-               (undefined4 *param_1,char *param_2,uint param_3,int param_4,uint param_5,int param_6,
-               int param_7)
+void FUN_009ee930(undefined4 *param_1,char *param_2,uint param_3,int param_4,uint param_5,
+                 int param_6,int param_7)
 
 {
   char cVar1;
@@ -11360,7 +11313,7 @@ uint _ASN1_mbstring_ncopy
   undefined1 local_24 [32];
   uint local_4;
   
-  local_4 = __security_cookie ^ (uint)auStack_40;
+  local_4 = DAT_00b86490 ^ (uint)auStack_40;
   local_28 = param_1;
   local_30 = param_2;
   local_3c = 0;
@@ -11380,7 +11333,7 @@ uint _ASN1_mbstring_ncopy
   case 0x1000:
     uVar7 = 0;
     for (uVar8 = param_3; uVar8 != 0; uVar8 = uVar8 - iVar5) {
-      iVar5 = _UTF8_getc(param_2,uVar8,&local_38);
+      iVar5 = FUN_009ed900(param_2,uVar8,&local_38);
       if (iVar5 < 0) {
         uVar10 = 0x84;
         uVar9 = 0x86;
@@ -11389,168 +11342,171 @@ uint _ASN1_mbstring_ncopy
       param_2 = param_2 + iVar5;
       uVar7 = uVar7 + 1;
     }
-    break;
+    goto LAB_009eea26;
   case 0x1001:
     uVar7 = param_3;
+LAB_009eea26:
+    iVar2 = param_7;
+    iVar5 = param_6;
+    if ((0 < param_6) && ((int)uVar7 < param_6)) {
+      FUN_009d90b0(0xd,0x7a,0x98,".\\crypto\\asn1\\a_mbstr.c",0x93);
+      FUN_009e9f60(local_24,0x20,&DAT_00a68100,iVar5);
+      FUN_009d92c0(2,"minsize=",local_24);
+      goto LAB_009eed0d;
+    }
+    if ((0 < param_7) && (param_7 < (int)uVar7)) {
+      FUN_009d90b0(0xd,0x7a,0x97,".\\crypto\\asn1\\a_mbstr.c",0x9a);
+      FUN_009e9f60(local_24,0x20,&DAT_00a68100,iVar2);
+      FUN_009d92c0(2,"maxsize=",local_24);
+      goto LAB_009eed0d;
+    }
+    iVar5 = FUN_009ee6a0(param_4,&param_5);
+    puVar3 = local_28;
+    if (iVar5 < 0) {
+      uVar10 = 0xa2;
+      uVar9 = 0x7c;
+    }
+    else {
+      local_38 = 0x1001;
+      if ((param_5 & 2) == 0) {
+        if ((param_5 & 0x10) == 0) {
+          if ((param_5 & 4) == 0) {
+            if ((param_5 & 0x800) == 0) {
+              if ((param_5 & 0x100) == 0) {
+                uVar8 = 0xc;
+                local_38 = 0x1000;
+              }
+              else {
+                uVar8 = 0x1c;
+                local_38 = 0x1004;
+              }
+            }
+            else {
+              uVar8 = 0x1e;
+              local_38 = 0x1002;
+            }
+          }
+          else {
+            uVar8 = 0x14;
+          }
+        }
+        else {
+          uVar8 = 0x16;
+        }
+      }
+      else {
+        uVar8 = 0x13;
+      }
+      if (local_28 == (undefined4 *)0x0) goto LAB_009eecdd;
+      puVar6 = (uint *)*local_28;
+      if (puVar6 == (uint *)0x0) {
+        local_3d = '\x01';
+        puVar6 = (uint *)FUN_009d9b20(uVar8);
+        if (puVar6 == (uint *)0x0) {
+          uVar10 = 0xc5;
+          uVar9 = 0x41;
+          break;
+        }
+        *puVar3 = puVar6;
+      }
+      else {
+        local_3d = '\0';
+        if (puVar6[2] != 0) {
+          *puVar6 = 0;
+          FUN_009d98a0(puVar6[2]);
+          puVar6[2] = 0;
+        }
+        puVar6[1] = uVar8;
+      }
+      if (param_4 == local_38) {
+        iVar5 = FUN_009d9a50(puVar6,local_30,param_3);
+        if (iVar5 != 0) {
+LAB_009eecdd:
+          __security_check_cookie(local_4 ^ (uint)auStack_40);
+          return;
+        }
+        uVar10 = 0xcd;
+        uVar9 = 0x41;
+      }
+      else {
+        switch(local_38) {
+        case 0x1000:
+          local_3c = 0;
+          FUN_009ee6a0(param_4,&local_3c);
+          local_34 = &LAB_009ee840;
+          break;
+        case 0x1001:
+          local_34 = &LAB_009ee7c0;
+          local_3c = uVar7;
+          break;
+        case 0x1002:
+          local_34 = &LAB_009ee7e0;
+          local_3c = uVar7 * 2;
+          break;
+        case 0x1004:
+          local_34 = &LAB_009ee800;
+          local_3c = uVar7 * 4;
+        }
+        local_2c = FUN_009d96f0(local_3c + 1,".\\crypto\\asn1\\a_mbstr.c",0xea);
+        if (local_2c != 0) {
+          *puVar6 = local_3c;
+          puVar6[2] = local_2c;
+          *(undefined1 *)(local_2c + local_3c) = 0;
+          FUN_009ee6a0(param_4,&local_2c);
+          goto LAB_009eecdd;
+        }
+        if (local_3d != '\0') {
+          FUN_009d9b70(puVar6);
+        }
+        uVar10 = 0xec;
+        uVar9 = 0x41;
+      }
+    }
     break;
   case 0x1002:
-    if ((param_3 & 1) != 0) {
-      uVar10 = 0x6f;
-      uVar9 = 0x81;
-      goto LAB_009eed01;
+    if ((param_3 & 1) == 0) {
+      uVar7 = (int)param_3 >> 1;
+      goto LAB_009eea26;
     }
-    uVar7 = (int)param_3 >> 1;
+    uVar10 = 0x6f;
+    uVar9 = 0x81;
     break;
   default:
     uVar10 = 0x8e;
     uVar9 = 0xa0;
-    goto LAB_009eed01;
+    break;
   case 0x1004:
-    if ((param_3 & 3) != 0) {
-      uVar10 = 0x78;
-      uVar9 = 0x85;
-      goto LAB_009eed01;
+    if ((param_3 & 3) == 0) {
+      uVar7 = (int)param_3 >> 2;
+      goto LAB_009eea26;
     }
-    uVar7 = (int)param_3 >> 2;
-  }
-  iVar2 = param_7;
-  iVar5 = param_6;
-  if ((0 < param_6) && ((int)uVar7 < param_6)) {
-    _ERR_put_error(0xd,0x7a,0x98,".\\crypto\\asn1\\a_mbstr.c",0x93);
-    _BIO_snprintf(local_24,0x20,"%ld",iVar5);
-    _ERR_add_error_data(2,"minsize=",local_24);
-    return 0xffffffff;
-  }
-  if ((0 < param_7) && (param_7 < (int)uVar7)) {
-    _ERR_put_error(0xd,0x7a,0x97,".\\crypto\\asn1\\a_mbstr.c",0x9a);
-    _BIO_snprintf(local_24,0x20,"%ld",iVar2);
-    _ERR_add_error_data(2,"maxsize=",local_24);
-    return 0xffffffff;
-  }
-  iVar5 = FUN_009ee6a0(param_4,&param_5);
-  puVar3 = local_28;
-  if (iVar5 < 0) {
-    uVar10 = 0xa2;
-    uVar9 = 0x7c;
-  }
-  else {
-    local_38 = 0x1001;
-    if ((param_5 & 2) == 0) {
-      if ((param_5 & 0x10) == 0) {
-        if ((param_5 & 4) == 0) {
-          if ((param_5 & 0x800) == 0) {
-            if ((param_5 & 0x100) == 0) {
-              uVar8 = 0xc;
-              local_38 = 0x1000;
-            }
-            else {
-              uVar8 = 0x1c;
-              local_38 = 0x1004;
-            }
-          }
-          else {
-            uVar8 = 0x1e;
-            local_38 = 0x1002;
-          }
-        }
-        else {
-          uVar8 = 0x14;
-        }
-      }
-      else {
-        uVar8 = 0x16;
-      }
-    }
-    else {
-      uVar8 = 0x13;
-    }
-    if (local_28 == (undefined4 *)0x0) {
-      return uVar8;
-    }
-    puVar6 = (uint *)*local_28;
-    if (puVar6 == (uint *)0x0) {
-      local_3d = '\x01';
-      puVar6 = (uint *)_ASN1_STRING_type_new(uVar8);
-      if (puVar6 == (uint *)0x0) {
-        uVar10 = 0xc5;
-        uVar9 = 0x41;
-        goto LAB_009eed01;
-      }
-      *puVar3 = puVar6;
-    }
-    else {
-      local_3d = '\0';
-      if (puVar6[2] != 0) {
-        *puVar6 = 0;
-        _CRYPTO_free(puVar6[2]);
-        puVar6[2] = 0;
-      }
-      puVar6[1] = uVar8;
-    }
-    if (param_4 == local_38) {
-      iVar5 = _ASN1_STRING_set(puVar6,local_30,param_3);
-      if (iVar5 != 0) {
-        return uVar8;
-      }
-      uVar10 = 0xcd;
-      uVar9 = 0x41;
-    }
-    else {
-      switch(local_38) {
-      case 0x1000:
-        local_3c = 0;
-        FUN_009ee6a0(param_4,&local_3c);
-        local_34 = &LAB_009ee840;
-        break;
-      case 0x1001:
-        local_34 = &LAB_009ee7c0;
-        local_3c = uVar7;
-        break;
-      case 0x1002:
-        local_34 = &LAB_009ee7e0;
-        local_3c = uVar7 * 2;
-        break;
-      case 0x1004:
-        local_34 = &LAB_009ee800;
-        local_3c = uVar7 * 4;
-      }
-      local_2c = _CRYPTO_malloc(local_3c + 1,".\\crypto\\asn1\\a_mbstr.c",0xea);
-      if (local_2c != 0) {
-        *puVar6 = local_3c;
-        puVar6[2] = local_2c;
-        *(undefined1 *)(local_2c + local_3c) = 0;
-        FUN_009ee6a0(param_4,&local_2c);
-        return uVar8;
-      }
-      if (local_3d != '\0') {
-        _ASN1_STRING_free(puVar6);
-      }
-      uVar10 = 0xec;
-      uVar9 = 0x41;
-    }
+    uVar10 = 0x78;
+    uVar9 = 0x85;
   }
 LAB_009eed01:
-  _ERR_put_error(0xd,0x7a,uVar9,".\\crypto\\asn1\\a_mbstr.c",uVar10);
-  return 0xffffffff;
-}
-
-
-// 009EED50  _ASN1_mbstring_copy  (line unknown)
-
-void _ASN1_mbstring_copy(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4
-                        ,undefined4 param_5)
-
-{
-  _ASN1_mbstring_ncopy(param_1,param_2,param_3,param_4,param_5,0,0);
+  FUN_009d90b0(0xd,0x7a,uVar9,".\\crypto\\asn1\\a_mbstr.c",uVar10);
+LAB_009eed0d:
+  __security_check_cookie(local_4 ^ (uint)auStack_40);
   return;
 }
 
 
-// 009EED80  _X509_TRUST_get_by_id  (line unknown)
+// 009EED50  FUN_009eed50  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+void FUN_009eed50(undefined4 param_1,undefined4 param_2,undefined4 param_3,undefined4 param_4,
+                 undefined4 param_5)
 
-int _X509_TRUST_get_by_id(int param_1)
+{
+  FUN_009ee930(param_1,param_2,param_3,param_4,param_5,0,0);
+  return;
+}
+
+
+// 009EED80  FUN_009eed80  (line unknown)
+
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
+
+int FUN_009eed80(int param_1)
 
 {
   int iVar1;
@@ -11563,7 +11519,7 @@ int _X509_TRUST_get_by_id(int param_1)
   }
   local_18[0] = param_1;
   if (DAT_00eac24c != 0) {
-    iVar1 = sk_find(DAT_00eac24c,local_18);
+    iVar1 = FUN_009daa50(DAT_00eac24c,local_18);
     if (iVar1 != -1) {
       return iVar1 + 7;
     }
@@ -11577,7 +11533,7 @@ int _X509_TRUST_get_by_id(int param_1)
 uint FUN_009eedd0(undefined4 param_1,int param_2)
 
 {
-  _X509_check_purpose(param_2,0xffffffff,0);
+  FUN_009de380(param_2,0xffffffff,0);
   return ((byte)~*(byte *)(param_2 + 0x28) & 0x20 | 0x10) >> 4;
 }
 
@@ -11598,31 +11554,31 @@ undefined4 FUN_009eee00(int param_1,int param_2)
   }
   if (piVar1[1] != 0) {
     iVar4 = 0;
-    iVar2 = sk_num(piVar1[1]);
+    iVar2 = FUN_009da820(piVar1[1]);
     if (0 < iVar2) {
       do {
-        uVar3 = sk_value(piVar1[1],iVar4);
-        iVar2 = _OBJ_obj2nid(uVar3);
+        uVar3 = FUN_009da830(piVar1[1],iVar4);
+        iVar2 = FUN_009e13d0(uVar3);
         if (iVar2 == param_1) {
           return 2;
         }
         iVar4 = iVar4 + 1;
-        iVar2 = sk_num(piVar1[1]);
+        iVar2 = FUN_009da820(piVar1[1]);
       } while (iVar4 < iVar2);
     }
   }
   if (*piVar1 != 0) {
     iVar4 = 0;
-    iVar2 = sk_num(*piVar1);
+    iVar2 = FUN_009da820(*piVar1);
     if (0 < iVar2) {
       do {
-        uVar3 = sk_value(*piVar1,iVar4);
-        iVar2 = _OBJ_obj2nid(uVar3);
+        uVar3 = FUN_009da830(*piVar1,iVar4);
+        iVar2 = FUN_009e13d0(uVar3);
         if (iVar2 == param_1) {
           return 1;
         }
         iVar4 = iVar4 + 1;
-        iVar2 = sk_num(*piVar1);
+        iVar2 = FUN_009da820(*piVar1);
       } while (iVar4 < iVar2);
     }
   }
@@ -11630,9 +11586,9 @@ undefined4 FUN_009eee00(int param_1,int param_2)
 }
 
 
-// 009EEEC0  _X509_check_trust  (line unknown)
+// 009EEEC0  FUN_009eeec0  (line unknown)
 
-undefined4 _X509_check_trust(undefined4 param_1,int param_2,undefined4 param_3)
+undefined4 FUN_009eeec0(undefined4 param_1,int param_2,undefined4 param_3)
 
 {
   int iVar1;
@@ -11642,7 +11598,7 @@ undefined4 _X509_check_trust(undefined4 param_1,int param_2,undefined4 param_3)
   if (param_2 == -1) {
     return 1;
   }
-  iVar1 = _X509_TRUST_get_by_id(param_2);
+  iVar1 = FUN_009eed80(param_2);
   if (iVar1 == -1) {
     uVar2 = (*(code *)PTR_FUN_00b933c0)(param_2,param_1,param_3);
     return uVar2;
@@ -11654,7 +11610,7 @@ undefined4 _X509_check_trust(undefined4 param_1,int param_2,undefined4 param_3)
     puVar3 = &DAT_00b933c8 + iVar1 * 0x18;
   }
   else {
-    puVar3 = (undefined *)sk_value(DAT_00eac24c,iVar1 + -7);
+    puVar3 = (undefined *)FUN_009da830(DAT_00eac24c,iVar1 + -7);
   }
                     /* WARNING: Could not recover jumptable at 0x009eef2f. Too many branches */
                     /* WARNING: Treating indirect jump as call */
@@ -11663,30 +11619,30 @@ undefined4 _X509_check_trust(undefined4 param_1,int param_2,undefined4 param_3)
 }
 
 
-// 009EEFD0  _X509_CRL_INFO_it  (line unknown)
+// 009EEFD0  FUN_009eefd0  (line unknown)
 
-undefined * _X509_CRL_INFO_it(void)
+undefined * FUN_009eefd0(void)
 
 {
   return &DAT_00a82a1c;
 }
 
 
-// 009EEFE0  _X509_CRL_it  (line unknown)
+// 009EEFE0  FUN_009eefe0  (line unknown)
 
-undefined * _X509_CRL_it(void)
+undefined * FUN_009eefe0(void)
 
 {
   return &DAT_00a82a8c;
 }
 
 
-// 009EF010  _X509_CRL_free  (line unknown)
+// 009EF010  FUN_009ef010  (line unknown)
 
-void _X509_CRL_free(undefined4 param_1)
+void FUN_009ef010(undefined4 param_1)
 
 {
-  _ASN1_item_free(param_1,&DAT_00a82a8c);
+  FUN_009f1750(param_1,&DAT_00a82a8c);
   return;
 }
 
@@ -11702,18 +11658,18 @@ undefined4 FUN_009ef080(int param_1)
   int iVar3;
   
   iVar3 = 0;
-  iVar1 = sk_num(*(undefined4 *)(unaff_EBX + 4));
+  iVar1 = FUN_009da820(*(undefined4 *)(unaff_EBX + 4));
   if (0 < iVar1) {
     do {
-      pbVar2 = (byte *)sk_value(*(undefined4 *)(unaff_EBX + 4),iVar3);
+      pbVar2 = (byte *)FUN_009da830(*(undefined4 *)(unaff_EBX + 4),iVar3);
       if (((((*pbVar2 & 2) == 0) || ((*(uint *)(param_1 + 0xc) & 0x200) != 0)) &&
-          ((iVar1 = level_find_node(param_1 + -0x10,*(undefined4 *)(pbVar2 + 4)), iVar1 != 0 ||
+          ((iVar1 = FUN_00a09830(param_1 + -0x10,*(undefined4 *)(pbVar2 + 4)), iVar1 != 0 ||
            (iVar1 = *(int *)(param_1 + -8), iVar1 != 0)))) &&
-         (iVar1 = level_add_node(param_1,pbVar2,iVar1,0), iVar1 == 0)) {
+         (iVar1 = FUN_00a09890(param_1,pbVar2,iVar1,0), iVar1 == 0)) {
         return 0;
       }
       iVar3 = iVar3 + 1;
-      iVar1 = sk_num(*(undefined4 *)(unaff_EBX + 4));
+      iVar1 = FUN_009da820(*(undefined4 *)(unaff_EBX + 4));
     } while (iVar3 < iVar1);
   }
   return 1;
@@ -11733,29 +11689,29 @@ undefined4 FUN_009ef110(int *param_1)
   int iVar5;
   
   iVar5 = 0;
-  iVar2 = sk_num(*(undefined4 *)(unaff_EBX + -0xc));
+  iVar2 = FUN_009da820(*(undefined4 *)(unaff_EBX + -0xc));
   if (0 < iVar2) {
     do {
-      piVar3 = (int *)sk_value(*(undefined4 *)(unaff_EBX + -0xc),iVar5);
+      piVar3 = (int *)FUN_009da830(*(undefined4 *)(unaff_EBX + -0xc),iVar5);
       if (piVar3[2] == 0) {
-        puVar4 = (uint *)policy_data_new(0,((uint *)*piVar3)[1],*(uint *)*piVar3 & 0x10);
+        puVar4 = (uint *)FUN_00a099a0(0,((uint *)*piVar3)[1],*(uint *)*piVar3 & 0x10);
         if (puVar4 == (uint *)0x0) {
           return 0;
         }
         uVar1 = *(uint *)(*param_1 + 8);
         *puVar4 = *puVar4 | 4;
         puVar4[2] = uVar1;
-        iVar2 = level_add_node();
+        iVar2 = FUN_00a09890();
         if (iVar2 == 0) {
-          policy_data_free(puVar4);
+          FUN_00a09960(puVar4);
           return 0;
         }
       }
       iVar5 = iVar5 + 1;
-      iVar2 = sk_num(*(undefined4 *)(unaff_EBX + -0xc));
+      iVar2 = FUN_009da820(*(undefined4 *)(unaff_EBX + -0xc));
     } while (iVar5 < iVar2);
   }
-  if ((*(int *)(unaff_EBX + -8) != 0) && (iVar2 = level_add_node(), iVar2 == 0)) {
+  if ((*(int *)(unaff_EBX + -8) != 0) && (iVar2 = FUN_00a09890(), iVar2 == 0)) {
     return 0;
   }
   return 1;
@@ -11774,25 +11730,25 @@ int FUN_009ef1d0(int *param_1)
   int in_ECX;
   int iVar5;
   
-  iVar2 = sk_num(*(undefined4 *)(in_ECX + 4));
+  iVar2 = FUN_009da820(*(undefined4 *)(in_ECX + 4));
   while (iVar2 = iVar2 + -1, -1 < iVar2) {
-    puVar3 = (undefined4 *)sk_value(*(undefined4 *)(in_ECX + 4),iVar2);
+    puVar3 = (undefined4 *)FUN_009da830(*(undefined4 *)(in_ECX + 4),iVar2);
     if ((*(byte *)*puVar3 & 3) != 0) {
       *(int *)(puVar3[1] + 8) = *(int *)(puVar3[1] + 8) + -1;
-      _CRYPTO_free(puVar3);
-      sk_delete(*(undefined4 *)(in_ECX + 4),iVar2);
+      FUN_009d98a0(puVar3);
+      FUN_009da730(*(undefined4 *)(in_ECX + 4),iVar2);
     }
   }
   do {
     iVar5 = in_ECX;
-    iVar2 = sk_num(*(undefined4 *)(iVar5 + -0xc));
+    iVar2 = FUN_009da820(*(undefined4 *)(iVar5 + -0xc));
     while (iVar2 = iVar2 + -1, -1 < iVar2) {
-      iVar4 = sk_value(*(undefined4 *)(iVar5 + -0xc),iVar2);
+      iVar4 = FUN_009da830(*(undefined4 *)(iVar5 + -0xc),iVar2);
       if (*(int *)(iVar4 + 8) == 0) {
         piVar1 = (int *)(*(int *)(iVar4 + 4) + 8);
         *piVar1 = *piVar1 + -1;
-        _CRYPTO_free(iVar4);
-        sk_delete(*(undefined4 *)(iVar5 + -0xc),iVar2);
+        FUN_009d98a0(iVar4);
+        FUN_009da730(*(undefined4 *)(iVar5 + -0xc),iVar2);
       }
     }
     iVar2 = *(int *)(iVar5 + -8);
@@ -11801,7 +11757,7 @@ int FUN_009ef1d0(int *param_1)
         piVar1 = (int *)(*(int *)(iVar2 + 4) + 8);
         *piVar1 = *piVar1 + -1;
       }
-      _CRYPTO_free(*(undefined4 *)(iVar5 + -8));
+      FUN_009d98a0(*(undefined4 *)(iVar5 + -8));
       *(undefined4 *)(iVar5 + -8) = 0;
     }
     in_ECX = iVar5 + -0x10;
@@ -11812,7 +11768,7 @@ int FUN_009ef1d0(int *param_1)
 
 // 009EF2B0  FUN_009ef2b0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009ef2b0(int *param_1,int *param_2)
 
@@ -11834,17 +11790,17 @@ undefined4 FUN_009ef2b0(int *param_1,int *param_2)
   else {
     piVar6 = param_2;
     if (param_1[3] == 0) {
-      iVar2 = policy_node_cmp_new();
+      iVar2 = FUN_00a097d0();
       param_1[3] = iVar2;
       if (iVar2 == 0) {
         return 0;
       }
     }
     else {
-      iVar2 = sk_find(param_1[3],iVar3);
+      iVar2 = FUN_009daa50(param_1[3],iVar3);
       if (iVar2 != -1) goto LAB_009ef327;
     }
-    iVar3 = sk_push(param_1[3],iVar3);
+    iVar3 = FUN_009da780(param_1[3],iVar3);
     if (iVar3 == 0) {
       return 0;
     }
@@ -11860,30 +11816,30 @@ LAB_009ef327:
       puVar1 = puVar7 + 4;
       puVar7 = puVar7 + 4;
       iVar5 = 0;
-      iVar2 = sk_num(*puVar1);
+      iVar2 = FUN_009da820(*puVar1);
       if (0 < iVar2) {
         do {
-          iVar2 = sk_value(*puVar7,iVar5);
+          iVar2 = FUN_009da830(*puVar7,iVar5);
           if (*(int *)(iVar2 + 4) == iVar3) {
             if (*piVar6 == 0) {
-              iVar4 = policy_node_cmp_new();
+              iVar4 = FUN_00a097d0();
               *piVar6 = iVar4;
               if (iVar4 == 0) {
                 return 0;
               }
             }
             else {
-              iVar4 = sk_find(*piVar6,iVar2);
+              iVar4 = FUN_009daa50(*piVar6,iVar2);
               if (iVar4 != -1) goto LAB_009ef3b4;
             }
-            iVar2 = sk_push(*piVar6,iVar2);
+            iVar2 = FUN_009da780(*piVar6,iVar2);
             if (iVar2 == 0) {
               return 0;
             }
           }
 LAB_009ef3b4:
           iVar5 = iVar5 + 1;
-          iVar2 = sk_num(*puVar7);
+          iVar2 = FUN_009da820(*puVar7);
         } while (iVar5 < iVar2);
       }
       local_c = local_c + 1;
@@ -11899,7 +11855,7 @@ LAB_009ef3b4:
 
 // 009EF410  FUN_009ef410  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
 undefined4 FUN_009ef410(int *param_1,undefined4 param_2)
 
@@ -11911,61 +11867,61 @@ undefined4 FUN_009ef410(int *param_1,undefined4 param_2)
   int iVar5;
   int local_4;
   
-  iVar2 = sk_num();
+  iVar2 = FUN_009da820();
   if (iVar2 < 1) {
     return 1;
   }
   piVar1 = *(int **)(param_1[1] * 0x10 + -8 + *param_1);
   iVar5 = 0;
-  iVar2 = sk_num();
+  iVar2 = FUN_009da820();
   if (0 < iVar2) {
     do {
-      uVar3 = sk_value();
-      iVar2 = _OBJ_obj2nid(uVar3);
+      uVar3 = FUN_009da830();
+      iVar2 = FUN_009e13d0(uVar3);
       if (iVar2 == 0x2ea) {
         param_1[5] = param_1[5] | 2;
         return 1;
       }
       iVar5 = iVar5 + 1;
-      iVar2 = sk_num();
+      iVar2 = FUN_009da820();
     } while (iVar5 < iVar2);
   }
   local_4 = 0;
-  iVar2 = sk_num();
+  iVar2 = FUN_009da820();
   if (iVar2 < 1) {
     return 1;
   }
   do {
-    uVar3 = sk_value();
-    iVar2 = tree_find_sk(param_2,uVar3);
+    uVar3 = FUN_009da830();
+    iVar2 = FUN_00a097e0(param_2,uVar3);
     if (iVar2 == 0) {
       if (piVar1 != (int *)0x0) {
-        puVar4 = (undefined4 *)policy_data_new(0,uVar3,*(uint *)*piVar1 & 0x10);
+        puVar4 = (undefined4 *)FUN_00a099a0(0,uVar3,*(uint *)*piVar1 & 0x10);
         if (puVar4 == (undefined4 *)0x0) {
           return 0;
         }
         puVar4[2] = *(undefined4 *)(*piVar1 + 8);
         *puVar4 = 0xc;
-        iVar2 = level_add_node(0,puVar4,piVar1[1],param_1);
+        iVar2 = FUN_00a09890(0,puVar4,piVar1[1],param_1);
         goto LAB_009ef508;
       }
     }
     else {
 LAB_009ef508:
       if (param_1[4] == 0) {
-        iVar5 = sk_new_null();
+        iVar5 = FUN_009da960();
         param_1[4] = iVar5;
         if (iVar5 == 0) {
           return 1;
         }
       }
-      iVar2 = sk_push(param_1[4],iVar2);
+      iVar2 = FUN_009da780(param_1[4],iVar2);
       if (iVar2 == 0) {
         return 0;
       }
     }
     local_4 = local_4 + 1;
-    iVar2 = sk_num();
+    iVar2 = FUN_009da820();
     if (iVar2 <= local_4) {
       return 1;
     }
@@ -11990,7 +11946,7 @@ int FUN_009ef560(void)
   if (1 < (int)unaff_EDI[1]) {
     do {
       puVar5 = puVar1 + 4;
-      uVar2 = policy_cache_set(*puVar5);
+      uVar2 = FUN_009f5270(*puVar5);
       iVar3 = FUN_009ef080(puVar5);
       if (iVar3 == 0) {
         return 0;
@@ -12010,39 +11966,39 @@ int FUN_009ef560(void)
 }
 
 
-// 009EF5F0  _X509_policy_tree_free  (line unknown)
+// 009EF5F0  FUN_009ef5f0  (line unknown)
 
-void _X509_policy_tree_free(undefined4 *param_1)
+void FUN_009ef5f0(undefined4 *param_1)
 
 {
   int iVar1;
   int *piVar2;
   
   if (param_1 != (undefined4 *)0x0) {
-    sk_free(param_1[3]);
-    sk_pop_free(param_1[4],&LAB_009ef5d0);
+    FUN_009da7f0(param_1[3]);
+    FUN_009daa70(param_1[4],&LAB_009ef5d0);
     piVar2 = (int *)*param_1;
     iVar1 = 0;
     if (0 < (int)param_1[1]) {
       do {
         if (*piVar2 != 0) {
-          _X509_free(*piVar2);
+          FUN_009de580(*piVar2);
         }
         if (piVar2[1] != 0) {
-          sk_pop_free(piVar2[1],policy_node_free);
+          FUN_009daa70(piVar2[1],thunk_FUN_009d98a0);
         }
         if (piVar2[2] != 0) {
-          policy_node_free(piVar2[2]);
+          thunk_FUN_009d98a0(piVar2[2]);
         }
         iVar1 = iVar1 + 1;
         piVar2 = piVar2 + 4;
       } while (iVar1 < (int)param_1[1]);
     }
     if (param_1[2] != 0) {
-      sk_pop_free(param_1[2],policy_data_free);
+      FUN_009daa70(param_1[2],FUN_00a09960);
     }
-    _CRYPTO_free(*param_1);
-    _CRYPTO_free(param_1);
+    FUN_009d98a0(*param_1);
+    FUN_009d98a0(param_1);
   }
   return;
 }
@@ -12050,7 +12006,7 @@ void _X509_policy_tree_free(undefined4 *param_1)
 
 // 009EF690  FUN_009ef690  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 /* WARNING: Removing unreachable block (ram,0x009ef6fd) */
 
 int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
@@ -12062,11 +12018,11 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
   int iVar4;
   int iVar5;
   int *piVar6;
-  uchar *puVar7;
-  undefined4 uVar8;
-  int *piVar9;
+  void *_Dst;
+  undefined4 uVar7;
+  int *piVar8;
   uint in_ECX;
-  int iVar10;
+  int iVar9;
   int local_14;
   int local_10;
   int local_c;
@@ -12074,7 +12030,7 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
   
   local_10 = 1;
   *param_1 = 0;
-  iVar3 = sk_num(param_2);
+  iVar3 = FUN_009da820(param_2);
   if ((in_ECX & 0x100) == 0) {
     local_14 = iVar3 + 1;
   }
@@ -12092,12 +12048,12 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
     return 1;
   }
   iVar1 = iVar3 + -2;
-  iVar10 = iVar1;
+  iVar9 = iVar1;
   if (-1 < iVar1) {
     do {
-      iVar4 = sk_value(param_2,iVar10);
-      _X509_check_purpose(iVar4,0xffffffff,0xffffffff);
-      iVar5 = policy_cache_set(iVar4);
+      iVar4 = FUN_009da830(param_2,iVar9);
+      FUN_009de380(iVar4,0xffffffff,0xffffffff);
+      iVar5 = FUN_009f5270(iVar4);
       if (iVar5 == 0) {
         return 0;
       }
@@ -12118,8 +12074,8 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
           local_14 = iVar4;
         }
       }
-      iVar10 = iVar10 + -1;
-    } while (-1 < iVar10);
+      iVar9 = iVar9 + -1;
+    } while (-1 < iVar9);
     if (local_10 != 1) {
       if (local_10 != 2) {
         return local_10;
@@ -12130,31 +12086,31 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
       return 2;
     }
   }
-  piVar6 = (int *)_CRYPTO_malloc(0x18,".\\crypto\\x509v3\\pcy_tree.c",0x97);
+  piVar6 = (int *)FUN_009d96f0(0x18,".\\crypto\\x509v3\\pcy_tree.c",0x97);
   if (piVar6 != (int *)0x0) {
     piVar6[5] = 0;
-    puVar7 = (uchar *)_CRYPTO_malloc(iVar3 << 4,".\\crypto\\x509v3\\pcy_tree.c",0x9d);
-    *piVar6 = (int)puVar7;
+    _Dst = (void *)FUN_009d96f0(iVar3 << 4,".\\crypto\\x509v3\\pcy_tree.c",0x9d);
+    *piVar6 = (int)_Dst;
     piVar6[1] = 0;
     piVar6[2] = 0;
     piVar6[3] = 0;
     piVar6[4] = 0;
-    if (puVar7 == (uchar *)0x0) {
-      _CRYPTO_free(piVar6);
+    if (_Dst == (void *)0x0) {
+      FUN_009d98a0(piVar6);
       return 0;
     }
-    memset(puVar7,'\0',iVar3 << 4);
+    _memset(_Dst,0,iVar3 << 4);
     piVar2 = (int *)*piVar6;
     piVar6[1] = iVar3;
-    uVar8 = _OBJ_nid2obj(0x2ea,0);
-    iVar3 = policy_data_new(0,uVar8);
-    if ((iVar3 != 0) && (iVar3 = level_add_node(piVar2,iVar3,0,piVar6), iVar3 != 0)) {
+    uVar7 = FUN_009e1070(0x2ea,0);
+    iVar3 = FUN_00a099a0(0,uVar7);
+    if ((iVar3 != 0) && (iVar3 = FUN_00a09890(piVar2,iVar3,0,piVar6), iVar3 != 0)) {
       for (; -1 < iVar1; iVar1 = iVar1 + -1) {
-        iVar3 = sk_value(param_2,iVar1);
-        piVar9 = (int *)policy_cache_set(iVar3);
-        _CRYPTO_add_lock(iVar3 + 0x10,1,3,".\\crypto\\x509v3\\pcy_tree.c",0xbc);
+        iVar3 = FUN_009da830(param_2,iVar1);
+        piVar8 = (int *)FUN_009f5270(iVar3);
+        FUN_009dfad0(iVar3 + 0x10,1,3,".\\crypto\\x509v3\\pcy_tree.c",0xbc);
         piVar2[4] = iVar3;
-        if (*piVar9 == 0) {
+        if (*piVar8 == 0) {
           piVar2[7] = piVar2[7] | 0x200;
         }
         if (local_c == 0) {
@@ -12166,7 +12122,7 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
           if ((*(byte *)(iVar3 + 0x28) & 0x20) == 0) {
             local_c = local_c + -1;
           }
-          iVar3 = piVar9[3];
+          iVar3 = piVar8[3];
           if ((-1 < iVar3) && (iVar3 < local_c)) {
             local_c = iVar3;
           }
@@ -12175,7 +12131,7 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
           piVar2[7] = piVar2[7] | 0x400;
         }
         else {
-          iVar3 = piVar9[5];
+          iVar3 = piVar8[5];
           local_8 = local_8 + -1;
           if ((-1 < iVar3) && (iVar3 < local_8)) {
             local_8 = iVar3;
@@ -12186,17 +12142,17 @@ int FUN_009ef690(undefined4 *param_1,undefined4 param_2)
       *param_1 = piVar6;
       return (uint)(local_14 == 0) * 4 + 1;
     }
-    _X509_policy_tree_free(piVar6);
+    FUN_009ef5f0(piVar6);
   }
   return 0;
 }
 
 
-// 009EF970  _X509_policy_check  (line unknown)
+// 009EF970  FUN_009ef970  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-int _X509_policy_check(int *param_1,int *param_2,undefined4 param_3)
+int FUN_009ef970(int *param_1,int *param_2,undefined4 param_3)
 
 {
   undefined4 uVar1;
@@ -12234,21 +12190,21 @@ LAB_009ef9e1:
     iVar2 = FUN_009ef560();
     if (0 < iVar2) {
       if (iVar2 == 2) {
-        _X509_policy_tree_free(iVar4);
+        FUN_009ef5f0(iVar4);
         return (-(uint)(*param_2 != 0) & 0xfffffffd) + 1;
       }
       iVar2 = FUN_009ef2b0(iVar4,&local_4);
       uVar1 = local_4;
       if ((iVar2 != 0) && (iVar3 = FUN_009ef410(iVar4,local_4), iVar3 != 0)) {
         if (iVar2 == 2) {
-          sk_free(uVar1);
+          FUN_009da7f0(uVar1);
         }
         if (iVar4 != 0) {
           *param_1 = iVar4;
         }
         if (*param_2 != 0) {
-          uVar1 = _X509_policy_tree_get0_user_policies(iVar4);
-          iVar4 = sk_num(uVar1);
+          uVar1 = FUN_00a09a50(iVar4);
+          iVar4 = FUN_009da820(uVar1);
           if (iVar4 < 1) {
             return -2;
           }
@@ -12258,16 +12214,16 @@ LAB_009efa9c:
       }
     }
   }
-  _X509_policy_tree_free(iVar4);
+  FUN_009ef5f0(iVar4);
   return 0;
 }
 
 
-// 009EFAD0  _ASN1_TIME_set  (line unknown)
+// 009EFAD0  FUN_009efad0  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-undefined4 _ASN1_TIME_set(undefined4 param_1,undefined4 param_2,undefined4 param_3)
+undefined4 FUN_009efad0(undefined4 param_1,undefined4 param_2,undefined4 param_3)
 
 {
   int iVar1;
@@ -12276,23 +12232,23 @@ undefined4 _ASN1_TIME_set(undefined4 param_1,undefined4 param_2,undefined4 param
   undefined4 uStack_4;
   
   uStack_4 = 0x9efada;
-  iVar1 = _OPENSSL_gmtime(&param_2,local_24);
+  iVar1 = FUN_00a09a70(&param_2,local_24);
   if (iVar1 == 0) {
-    _ERR_put_error(0xd,0xaf,0xad,".\\crypto\\asn1\\a_time.c",0x6d);
+    FUN_009d90b0(0xd,0xaf,0xad,".\\crypto\\asn1\\a_time.c",0x6d);
     return 0;
   }
   if ((0x31 < *(int *)(iVar1 + 0x14)) && (*(int *)(iVar1 + 0x14) < 0x96)) {
-    uVar2 = _ASN1_UTCTIME_set(param_1,param_2,param_3);
+    uVar2 = FUN_009eff50(param_1,param_2,param_3);
     return uVar2;
   }
-  uVar2 = _ASN1_GENERALIZEDTIME_set(param_1,param_2,param_3);
+  uVar2 = FUN_009efd10(param_1,param_2,param_3);
   return uVar2;
 }
 
 
-// 009EFB60  _ASN1_TIME_check  (line unknown)
+// 009EFB60  FUN_009efb60  (line unknown)
 
-uint _ASN1_TIME_check(int *param_1)
+uint FUN_009efb60(int *param_1)
 
 {
   int iVar1;
@@ -12308,7 +12264,7 @@ uint _ASN1_TIME_check(int *param_1)
     if (param_1[1] != 0x17) {
       return 0;
     }
-    uVar5 = _ASN1_UTCTIME_check();
+    uVar5 = FUN_009efe10();
     return uVar5;
   }
   if (param_1[1] != 0x18) {
@@ -12410,11 +12366,11 @@ uint _ASN1_TIME_check(int *param_1)
 }
 
 
-// 009EFD10  _ASN1_GENERALIZEDTIME_set  (line unknown)
+// 009EFD10  FUN_009efd10  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-uint * _ASN1_GENERALIZEDTIME_set(uint *param_1)
+uint * FUN_009efd10(uint *param_1)
 
 {
   char *pcVar1;
@@ -12426,29 +12382,29 @@ uint * _ASN1_GENERALIZEDTIME_set(uint *param_1)
   
   uStack_4 = 0x9efd1a;
   if (param_1 == (uint *)0x0) {
-    param_1 = (uint *)_ASN1_STRING_type_new(0x18);
+    param_1 = (uint *)FUN_009d9b20(0x18);
     if (param_1 == (uint *)0x0) {
       return (uint *)0x0;
     }
   }
-  puVar3 = (undefined4 *)_OPENSSL_gmtime(&stack0x00000008,local_24);
+  puVar3 = (undefined4 *)FUN_00a09a70(&stack0x00000008,local_24);
   if (puVar3 == (undefined4 *)0x0) {
     return (uint *)0x0;
   }
   pcVar4 = (char *)param_1[2];
   if ((pcVar4 == (char *)0x0) || (*param_1 < 0x14)) {
-    pcVar4 = (char *)_CRYPTO_malloc(0x14,".\\crypto\\asn1\\a_gentm.c",0xe2);
+    pcVar4 = (char *)FUN_009d96f0(0x14,".\\crypto\\asn1\\a_gentm.c",0xe2);
     if (pcVar4 == (char *)0x0) {
-      _ERR_put_error(0xd,0xb9,0x41,".\\crypto\\asn1\\a_gentm.c",0xe6);
+      FUN_009d90b0(0xd,0xb9,0x41,".\\crypto\\asn1\\a_gentm.c",0xe6);
       return (uint *)0x0;
     }
     if (param_1[2] != 0) {
-      _CRYPTO_free(param_1[2]);
+      FUN_009d98a0(param_1[2]);
     }
     param_1[2] = (uint)pcVar4;
   }
-  _BIO_snprintf(pcVar4,0x14,"%04d%02d%02d%02d%02d%02dZ",puVar3[5] + 0x76c,puVar3[4] + 1,puVar3[3],
-                puVar3[2],puVar3[1],*puVar3);
+  FUN_009e9f60(pcVar4,0x14,"%04d%02d%02d%02d%02d%02dZ",puVar3[5] + 0x76c,puVar3[4] + 1,puVar3[3],
+               puVar3[2],puVar3[1],*puVar3);
   pcVar1 = pcVar4 + 1;
   do {
     cVar2 = *pcVar4;
@@ -12460,9 +12416,9 @@ uint * _ASN1_GENERALIZEDTIME_set(uint *param_1)
 }
 
 
-// 009EFE10  _ASN1_UTCTIME_check  (line unknown)
+// 009EFE10  FUN_009efe10  (line unknown)
 
-bool _ASN1_UTCTIME_check(int *param_1)
+bool FUN_009efe10(int *param_1)
 
 {
   int iVar1;
@@ -12559,11 +12515,11 @@ bool _ASN1_UTCTIME_check(int *param_1)
 }
 
 
-// 009EFF50  _ASN1_UTCTIME_set  (line unknown)
+// 009EFF50  FUN_009eff50  (line unknown)
 
-/* WARNING: Function: _chkstk replaced with injection: alloca_probe */
+/* WARNING: Function: __alloca_probe replaced with injection: alloca_probe */
 
-uint * _ASN1_UTCTIME_set(uint *param_1)
+uint * FUN_009eff50(uint *param_1)
 
 {
   char *pcVar1;
@@ -12575,29 +12531,29 @@ uint * _ASN1_UTCTIME_set(uint *param_1)
   
   uStack_4 = 0x9eff5a;
   if (param_1 == (uint *)0x0) {
-    param_1 = (uint *)_ASN1_STRING_type_new(0x17);
+    param_1 = (uint *)FUN_009d9b20(0x17);
     if (param_1 == (uint *)0x0) {
       return (uint *)0x0;
     }
   }
-  puVar3 = (undefined4 *)_OPENSSL_gmtime(&stack0x00000008,local_24);
+  puVar3 = (undefined4 *)FUN_00a09a70(&stack0x00000008,local_24);
   if (puVar3 == (undefined4 *)0x0) {
     return (uint *)0x0;
   }
   pcVar4 = (char *)param_1[2];
   if ((pcVar4 == (char *)0x0) || (*param_1 < 0x14)) {
-    pcVar4 = (char *)_CRYPTO_malloc(0x14,".\\crypto\\asn1\\a_utctm.c",0xce);
+    pcVar4 = (char *)FUN_009d96f0(0x14,".\\crypto\\asn1\\a_utctm.c",0xce);
     if (pcVar4 == (char *)0x0) {
-      _ERR_put_error(0xd,0xbb,0x41,".\\crypto\\asn1\\a_utctm.c",0xd1);
+      FUN_009d90b0(0xd,0xbb,0x41,".\\crypto\\asn1\\a_utctm.c",0xd1);
       return (uint *)0x0;
     }
     if (param_1[2] != 0) {
-      _CRYPTO_free(param_1[2]);
+      FUN_009d98a0(param_1[2]);
     }
     param_1[2] = (uint)pcVar4;
   }
-  _BIO_snprintf(pcVar4,0x14,"%02d%02d%02d%02d%02d%02dZ",(int)puVar3[5] % 100,puVar3[4] + 1,puVar3[3]
-                ,puVar3[2],puVar3[1],*puVar3);
+  FUN_009e9f60(pcVar4,0x14,"%02d%02d%02d%02d%02d%02dZ",(int)puVar3[5] % 100,puVar3[4] + 1,puVar3[3],
+               puVar3[2],puVar3[1],*puVar3);
   pcVar1 = pcVar4 + 1;
   do {
     cVar2 = *pcVar4;

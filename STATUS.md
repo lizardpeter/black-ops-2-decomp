@@ -73,7 +73,7 @@ Preliminary inventory from the exception directory (`.pdata`): every non-leaf fu
 
 | status | functions | reached |
 |---|---:|---|
-| located | 21,784 | ████████████████████ 100.00% |
+| located | 18,691 | ████████████████████ 100.00% |
 | named | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 | typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 | decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
@@ -81,7 +81,7 @@ Preliminary inventory from the exception directory (`.pdata`): every non-leaf fu
 | matches | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 | integrated | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 
-21,784 functions known. Reconstructed (decompiled or better): 0.
+18,691 functions known. Reconstructed (decompiled or better): 0.
 
 ## t6mp
 

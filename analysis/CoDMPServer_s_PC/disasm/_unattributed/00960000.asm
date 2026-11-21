@@ -12,7 +12,7 @@
   00960033  59                   POP ECX
   00960034  C3                   RET
 
-; 00960035  _freeptd  (line unknown)
+; 00960035  __freeptd  (line unknown)
   00960035  8BFF                 MOV EDI,EDI
   00960037  55                   PUSH EBP
   00960038  8BEC                 MOV EBP,ESP
@@ -52,7 +52,7 @@ LAB_009600a1:
   009600A1  5D                   POP EBP
   009600A2  C3                   RET
 
-; 009600A3  _mtinit  (line unknown)
+; 009600A3  __mtinit  (line unknown)
   009600A3  8BFF                 MOV EDI,EDI
   009600A5  57                   PUSH EDI
   009600A6  682C7AA500           PUSH 0xa57a2c
@@ -383,7 +383,7 @@ LAB_009603f3:
   00960403  C9                   LEAVE
   00960404  C3                   RET
 
-; 00960405  __crtLCMapStringA  (line unknown)
+; 00960405  ___crtLCMapStringA  (line unknown)
   00960405  8BFF                 MOV EDI,EDI
   00960407  55                   PUSH EBP
   00960408  8BEC                 MOV EBP,ESP
@@ -411,7 +411,7 @@ LAB_00960449:
   00960449  C9                   LEAVE
   0096044A  C3                   RET
 
-; 0096044B  _isleadbyte_l  (line unknown)
+; 0096044B  __isleadbyte_l  (line unknown)
   0096044B  8BFF                 MOV EDI,EDI
   0096044D  55                   PUSH EBP
   0096044E  8BEC                 MOV EBP,ESP
@@ -432,7 +432,7 @@ LAB_00960481:
   00960481  C9                   LEAVE
   00960482  C3                   RET
 
-; 00960483  isleadbyte  (line unknown)
+; 00960483  _isleadbyte  (line unknown)
   00960483  8BFF                 MOV EDI,EDI
   00960485  55                   PUSH EBP
   00960486  8BEC                 MOV EBP,ESP
@@ -444,7 +444,7 @@ LAB_00960481:
   00960494  5D                   POP EBP
   00960495  C3                   RET
 
-; 00960496  _isctype_l  (line unknown)
+; 00960496  __isctype_l  (line unknown)
   00960496  8BFF                 MOV EDI,EDI
   00960498  55                   PUSH EBP
   00960499  8BEC                 MOV EBP,ESP
@@ -523,7 +523,7 @@ LAB_0096054b:
   0096054C  C9                   LEAVE
   0096054D  C3                   RET
 
-; 0096054E  _heap_init  (line unknown)
+; 0096054E  __heap_init  (line unknown)
   0096054E  6A00                 PUSH 0x0
   00960550  6800100000           PUSH 0x1000
   00960555  6A00                 PUSH 0x0
@@ -535,7 +535,7 @@ LAB_0096054b:
   00960569  8BC1                 MOV EAX,ECX
   0096056B  C3                   RET
 
-; 00960570  strlen  (line unknown)
+; 00960570  _strlen  (line unknown)
   00960570  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   00960574  F7C103000000         TEST ECX,0x3
   0096057A  7424                 JZ 0x009605a0
@@ -589,7 +589,7 @@ LAB_009605f1:
   009605F8  2BC1                 SUB EAX,ECX
   009605FA  C3                   RET
 
-; 009605FB  _inc  (line unknown)
+; 009605FB  __inc  (line unknown)
   009605FB  FF4A04               DEC dword ptr [EDX + 0x4]
   009605FE  7809                 JS 0x00960609
   00960600  8B0A                 MOV ECX,dword ptr [EDX]
@@ -603,7 +603,7 @@ LAB_00960609:
   0096060F  59                   POP ECX
   00960610  C3                   RET
 
-; 00960611  _input_l  (line unknown)
+; 00960611  __input_l  (line unknown)
   00960611  8BFF                 MOV EDI,EDI
   00960613  55                   PUSH EBP
   00960614  8BEC                 MOV EBP,ESP
@@ -1786,7 +1786,7 @@ LAB_00961607:
   00961613  C9                   LEAVE
   00961614  C3                   RET
 
-; 00961615  __check_float_string  (line unknown)
+; 00961615  ___check_float_string  (line unknown)
   00961615  8BFF                 MOV EDI,EDI
   00961617  55                   PUSH EBP
   00961618  8BEC                 MOV EBP,ESP
@@ -1832,7 +1832,7 @@ LAB_00961667:
   0096166A  5D                   POP EBP
   0096166B  C3                   RET
 
-; 0096166C  _hextodec  (line unknown)
+; 0096166C  __hextodec  (line unknown)
   0096166C  8BFF                 MOV EDI,EDI
   0096166E  55                   PUSH EBP
   0096166F  8BEC                 MOV EBP,ESP
@@ -1849,7 +1849,7 @@ LAB_0096168a:
   0096168A  5D                   POP EBP
   0096168B  C3                   RET
 
-; 0096168C  _whiteout  (line unknown)
+; 0096168C  __whiteout  (line unknown)
   0096168C  8BFF                 MOV EDI,EDI
   0096168E  55                   PUSH EBP
   0096168F  8BEC                 MOV EBP,ESP
@@ -1873,7 +1873,7 @@ LAB_009616b1:
   009616B4  5D                   POP EBP
   009616B5  C3                   RET
 
-; 009616B6  _input_s_l  (line unknown)
+; 009616B6  __input_s_l  (line unknown)
   009616B6  8BFF                 MOV EDI,EDI
   009616B8  55                   PUSH EBP
   009616B9  8BEC                 MOV EBP,ESP
@@ -3135,7 +3135,7 @@ LAB_009627cb:
   009627D7  C9                   LEAVE
   009627D8  C3                   RET
 
-; 009627D9  _stbuf  (line unknown)
+; 009627D9  __stbuf  (line unknown)
   009627D9  8BFF                 MOV EDI,EDI
   009627DB  55                   PUSH EBP
   009627DC  8BEC                 MOV EBP,ESP
@@ -3206,7 +3206,7 @@ LAB_00962872:
   00962873  5D                   POP EBP
   00962874  C3                   RET
 
-; 00962875  _ftbuf  (line unknown)
+; 00962875  __ftbuf  (line unknown)
   00962875  8BFF                 MOV EDI,EDI
   00962877  55                   PUSH EBP
   00962878  8BEC                 MOV EBP,ESP
@@ -3265,7 +3265,7 @@ LAB_009628a7:
   00962907  51                   PUSH ECX
   00962908  C3                   RET
 
-; 00962909  _fltin2  (line unknown)
+; 00962909  __fltin2  (line unknown)
   00962909  8BFF                 MOV EDI,EDI
   0096290B  55                   PUSH EBP
   0096290C  8BEC                 MOV EBP,ESP
@@ -3341,7 +3341,7 @@ LAB_00962988:
   009629AE  C9                   LEAVE
   009629AF  C3                   RET
 
-; 009629B0  __strgtold12_l  (line unknown)
+; 009629B0  ___strgtold12_l  (line unknown)
   009629B0  8BFF                 MOV EDI,EDI
   009629B2  55                   PUSH EBP
   009629B3  8BEC                 MOV EBP,ESP
@@ -4038,7 +4038,7 @@ LAB_0096304b:
   00963057  C9                   LEAVE
   00963058  C3                   RET
 
-; 0096308C  abort  (line unknown)
+; 0096308C  _abort  (line unknown)
   0096308C  E8444B0000           CALL 0x00967bd5
   00963091  85C0                 TEST EAX,EAX
   00963093  7408                 JZ 0x0096309d
@@ -4056,8 +4056,9 @@ LAB_0096309d:
 LAB_009630b7:
   009630B7  6A03                 PUSH 0x3
   009630B9  E8077BFFFF           CALL 0x0095abc5
+  009630BE  CC                   INT3
 
-; 009630BF  _set_abort_behavior  (line unknown)
+; 009630BF  __set_abort_behavior  (line unknown)
   009630BF  8BFF                 MOV EDI,EDI
   009630C1  55                   PUSH EBP
   009630C2  8BEC                 MOV EBP,ESP
@@ -4072,7 +4073,7 @@ LAB_009630b7:
   009630DE  5D                   POP EBP
   009630DF  C3                   RET
 
-; 009630E0  _GET_RTERRMSG  (line unknown)
+; 009630E0  __GET_RTERRMSG  (line unknown)
   009630E0  8BFF                 MOV EDI,EDI
   009630E2  55                   PUSH EBP
   009630E3  8BEC                 MOV EBP,ESP
@@ -4092,7 +4093,7 @@ LAB_009630fd:
   00963104  5D                   POP EBP
   00963105  C3                   RET
 
-; 00963106  _NMSG_WRITE  (line unknown)
+; 00963106  __NMSG_WRITE  (line unknown)
   00963106  8BFF                 MOV EDI,EDI
   00963108  55                   PUSH EBP
   00963109  8BEC                 MOV EBP,ESP
@@ -4252,7 +4253,7 @@ LAB_009632a6:
   009632B3  C9                   LEAVE
   009632B4  C3                   RET
 
-; 009632B5  _FF_MSGBANNER  (line unknown)
+; 009632B5  __FF_MSGBANNER  (line unknown)
   009632B5  6A03                 PUSH 0x3
   009632B7  E8EEBA0000           CALL 0x0096edaa
   009632BC  59                   POP ECX
@@ -4275,7 +4276,7 @@ LAB_009632d7:
 LAB_009632ed:
   009632ED  C3                   RET
 
-; 009632EE  _initp_misc_purevirt  (line unknown)
+; 009632EE  FUN_009632ee  (line unknown)
   009632EE  8BFF                 MOV EDI,EDI
   009632F0  55                   PUSH EBP
   009632F1  8BEC                 MOV EBP,ESP
@@ -4329,7 +4330,7 @@ LAB_00963360:
   0096336B  59                   POP ECX
   0096336C  C3                   RET
 
-; 00963370  strcmp  (line unknown)
+; 00963370  _strcmp  (line unknown)
   00963370  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   00963374  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   00963378  F7C203000000         TEST EDX,0x3
@@ -4390,7 +4391,7 @@ LAB_009633dc:
   009633F3  83C102               ADD ECX,0x2
   009633F6  EB88                 JMP 0x00963380
 
-; 009633F8  _malloc_crt  (line unknown)
+; 009633F8  __malloc_crt  (line unknown)
   009633F8  8BFF                 MOV EDI,EDI
   009633FA  55                   PUSH EBP
   009633FB  8BEC                 MOV EBP,ESP
@@ -4423,7 +4424,7 @@ LAB_00963437:
   0096343B  5D                   POP EBP
   0096343C  C3                   RET
 
-; 0096343D  _calloc_crt  (line unknown)
+; 0096343D  __calloc_crt  (line unknown)
   0096343D  8BFF                 MOV EDI,EDI
   0096343F  55                   PUSH EBP
   00963440  8BEC                 MOV EBP,ESP
@@ -4458,7 +4459,7 @@ LAB_00963483:
   00963487  5D                   POP EBP
   00963488  C3                   RET
 
-; 00963489  _realloc_crt  (line unknown)
+; 00963489  __realloc_crt  (line unknown)
   00963489  8BFF                 MOV EDI,EDI
   0096348B  55                   PUSH EBP
   0096348C  8BEC                 MOV EBP,ESP
@@ -4495,7 +4496,7 @@ LAB_009634d1:
   009634D5  5D                   POP EBP
   009634D6  C3                   RET
 
-; 009634D7  _recalloc_crt  (line unknown)
+; 009634D7  __recalloc_crt  (line unknown)
   009634D7  8BFF                 MOV EDI,EDI
   009634D9  55                   PUSH EBP
   009634DA  8BEC                 MOV EBP,ESP
@@ -4532,7 +4533,7 @@ LAB_00963523:
   00963527  5D                   POP EBP
   00963528  C3                   RET
 
-; 00963529  _msize  (line unknown)
+; 00963529  __msize  (line unknown)
   00963529  8BFF                 MOV EDI,EDI
   0096352B  55                   PUSH EBP
   0096352C  8BEC                 MOV EBP,ESP
@@ -4552,7 +4553,7 @@ LAB_00963549:
   0096355A  5D                   POP EBP
   0096355B  C3                   RET
 
-; 0096355C  __libm_error_support  (line unknown)
+; 0096355C  ___libm_error_support  (line unknown)
   0096355C  8BFF                 MOV EDI,EDI
   0096355E  55                   PUSH EBP
   0096355F  8BEC                 MOV EBP,ESP
@@ -4771,114 +4772,7 @@ default:
   009637F1  C9                   LEAVE
   009637F2  C3                   RET
 
-; 00963828  _sse2_mathfcns_init  (line unknown)
-  00963828  6A0A                 PUSH 0xa
-  0096382A  FF151832A300         CALL dword ptr [0x00a33218]
-  00963830  A38051A202           MOV [0x02a25180],EAX
-  00963835  33C0                 XOR EAX,EAX
-  00963837  C3                   RET
-
-; 00963838  _ceil_default  (line unknown)
-  00963838  8BFF                 MOV EDI,EDI
-  0096383A  55                   PUSH EBP
-  0096383B  8BEC                 MOV EBP,ESP
-  0096383D  51                   PUSH ECX
-  0096383E  51                   PUSH ECX
-  0096383F  53                   PUSH EBX
-  00963840  56                   PUSH ESI
-  00963841  BEFFFF0000           MOV ESI,0xffff
-  00963846  56                   PUSH ESI
-  00963847  FF35E070B800         PUSH dword ptr [0x00b870e0]
-  0096384D  E8DF1E0000           CALL 0x00965731
-  00963852  DD4508               FLD double ptr [EBP + 0x8]
-  00963855  59                   POP ECX
-  00963856  59                   POP ECX
-  00963857  0FB74D0E             MOVZX ECX,word ptr [EBP + 0xe]
-  0096385B  8BD8                 MOV EBX,EAX
-  0096385D  B8F07F0000           MOV EAX,0x7ff0
-  00963862  23C8                 AND ECX,EAX
-  00963864  51                   PUSH ECX
-  00963865  51                   PUSH ECX
-  00963866  DD1C24               FSTP double ptr [ESP]
-  00963869  663BC8               CMP CX,AX
-  0096386C  7555                 JNZ 0x009638c3
-  0096386E  E871160000           CALL 0x00964ee4
-  00963873  59                   POP ECX
-  00963874  59                   POP ECX
-  00963875  85C0                 TEST EAX,EAX
-  00963877  7E2D                 JLE 0x009638a6
-  00963879  83F802               CMP EAX,0x2
-  0096387C  7E1A                 JLE 0x00963898
-  0096387E  83F803               CMP EAX,0x3
-  00963881  7523                 JNZ 0x009638a6
-  00963883  DD4508               FLD double ptr [EBP + 0x8]
-  00963886  53                   PUSH EBX
-  00963887  51                   PUSH ECX
-  00963888  51                   PUSH ECX
-  00963889  DD1C24               FSTP double ptr [ESP]
-  0096388C  6A0C                 PUSH 0xc
-  0096388E  E85E1D0000           CALL 0x009655f1
-  00963893  83C410               ADD ESP,0x10
-  00963896  EB74                 JMP 0x0096390c
-LAB_00963898:
-  00963898  56                   PUSH ESI
-  00963899  53                   PUSH EBX
-  0096389A  E8921E0000           CALL 0x00965731
-  0096389F  DD4508               FLD double ptr [EBP + 0x8]
-  009638A2  59                   POP ECX
-  009638A3  59                   POP ECX
-  009638A4  EB66                 JMP 0x0096390c
-LAB_009638a6:
-  009638A6  DD4508               FLD double ptr [EBP + 0x8]
-  009638A9  53                   PUSH EBX
-  009638AA  DC05C860A300         FADD double ptr [0x00a360c8]
-  009638B0  83EC10               SUB ESP,0x10
-  009638B3  DD5C2408             FSTP double ptr [ESP + 0x8]
-  009638B7  DD4508               FLD double ptr [EBP + 0x8]
-  009638BA  DD1C24               FSTP double ptr [ESP]
-  009638BD  6A0C                 PUSH 0xc
-  009638BF  6A08                 PUSH 0x8
-  009638C1  EB41                 JMP 0x00963904
-LAB_009638c3:
-  009638C3  E892B50000           CALL 0x0096ee5a
-  009638C8  DD5DF8               FSTP double ptr [EBP + -0x8]
-  009638CB  DD45F8               FLD double ptr [EBP + -0x8]
-  009638CE  59                   POP ECX
-  009638CF  DD4508               FLD double ptr [EBP + 0x8]
-  009638D2  59                   POP ECX
-  009638D3  DAE9                 FUCOMPP
-  009638D5  DFE0                 FNSTSW AX
-  009638D7  F6C444               TEST AH,0x44
-  009638DA  7A0E                 JP 0x009638ea
-LAB_009638dc:
-  009638DC  56                   PUSH ESI
-  009638DD  53                   PUSH EBX
-  009638DE  E84E1E0000           CALL 0x00965731
-  009638E3  DD45F8               FLD double ptr [EBP + -0x8]
-  009638E6  59                   POP ECX
-  009638E7  59                   POP ECX
-  009638E8  EB22                 JMP 0x0096390c
-LAB_009638ea:
-  009638EA  F6C320               TEST BL,0x20
-  009638ED  75ED                 JNZ 0x009638dc
-  009638EF  DD45F8               FLD double ptr [EBP + -0x8]
-  009638F2  53                   PUSH EBX
-  009638F3  83EC10               SUB ESP,0x10
-  009638F6  DD5C2408             FSTP double ptr [ESP + 0x8]
-  009638FA  DD4508               FLD double ptr [EBP + 0x8]
-  009638FD  DD1C24               FSTP double ptr [ESP]
-  00963900  6A0C                 PUSH 0xc
-  00963902  6A10                 PUSH 0x10
-LAB_00963904:
-  00963904  E83D1D0000           CALL 0x00965646
-  00963909  83C41C               ADD ESP,0x1c
-LAB_0096390c:
-  0096390C  5E                   POP ESI
-  0096390D  5B                   POP EBX
-  0096390E  C9                   LEAVE
-  0096390F  C3                   RET
-
-; 00963910  _mbsnbicoll_l  (line unknown)
+; 00963910  __mbsnbicoll_l  (line unknown)
   00963910  8BFF                 MOV EDI,EDI
   00963912  55                   PUSH EBP
   00963913  8BEC                 MOV EBP,ESP
@@ -4970,7 +4864,7 @@ LAB_009639eb:
   009639EC  C9                   LEAVE
   009639ED  C3                   RET
 
-; 009639EE  _mbsnbicoll  (line unknown)
+; 009639EE  __mbsnbicoll  (line unknown)
   009639EE  8BFF                 MOV EDI,EDI
   009639F0  55                   PUSH EBP
   009639F1  8BEC                 MOV EBP,ESP
@@ -4983,7 +4877,7 @@ LAB_009639eb:
   00963A06  5D                   POP EBP
   00963A07  C3                   RET
 
-; 00963A08  __wtomb_environ  (line unknown)
+; 00963A08  ___wtomb_environ  (line unknown)
   00963A08  8BFF                 MOV EDI,EDI
   00963A0A  55                   PUSH EBP
   00963A0B  8BEC                 MOV EBP,ESP
@@ -5067,7 +4961,7 @@ LAB_00963a94:
   00963A9C  59                   POP ECX
   00963A9D  EBF0                 JMP 0x00963a8f
 
-; 00963A9F  _mtinitlocks  (line unknown)
+; 00963A9F  __mtinitlocks  (line unknown)
   00963A9F  8BFF                 MOV EDI,EDI
   00963AA1  56                   PUSH ESI
   00963AA2  57                   PUSH EDI
@@ -5099,7 +4993,7 @@ LAB_00963add:
   00963AE5  33C0                 XOR EAX,EAX
   00963AE7  EBF1                 JMP 0x00963ada
 
-; 00963AE9  _mtdeletelocks  (line unknown)
+; 00963AE9  __mtdeletelocks  (line unknown)
   00963AE9  8BFF                 MOV EDI,EDI
   00963AEB  53                   PUSH EBX
   00963AEC  8B1DA831A300         MOV EBX,dword ptr [0x00a331a8]
@@ -5140,7 +5034,7 @@ LAB_00963b32:
   00963B3E  5B                   POP EBX
   00963B3F  C3                   RET
 
-; 00963B40  _unlock  (line unknown)
+; 00963B40  FUN_00963b40  (line unknown)
   00963B40  8BFF                 MOV EDI,EDI
   00963B42  55                   PUSH EBP
   00963B43  8BEC                 MOV EBP,ESP
@@ -5150,7 +5044,7 @@ LAB_00963b32:
   00963B55  5D                   POP EBP
   00963B56  C3                   RET
 
-; 00963B57  _mtinitlocknum  (line unknown)
+; 00963B57  __mtinitlocknum  (line unknown)
   00963B57  6A0C                 PUSH 0xc
   00963B59  687014B800           PUSH 0xb81470
   00963B5E  E84DEDFFFF           CALL 0x009628b0
@@ -5165,6 +5059,8 @@ LAB_00963b32:
   00963B7A  E887F5FFFF           CALL 0x00963106
   00963B7F  68FF000000           PUSH 0xff
   00963B84  E8CE6DFFFF           CALL 0x0095a957
+  00963B89  59                   POP ECX
+  00963B8A  59                   POP ECX
 LAB_00963b8b:
   00963B8B  8B7508               MOV ESI,dword ptr [EBP + 0x8]
   00963B8E  8D34F5E870B800       LEA ESI,[ESI*0x8 + 0xb870e8]
@@ -5223,7 +5119,7 @@ LAB_00963c0a:
   00963C17  59                   POP ECX
   00963C18  C3                   RET
 
-; 00963C19  _lock  (line unknown)
+; 00963C19  __lock  (line unknown)
   00963C19  8BFF                 MOV EDI,EDI
   00963C1B  55                   PUSH EBP
   00963C1C  8BEC                 MOV EBP,ESP
@@ -5239,6 +5135,7 @@ LAB_00963c0a:
   00963C37  7508                 JNZ 0x00963c41
   00963C39  6A11                 PUSH 0x11
   00963C3B  E8B96FFFFF           CALL 0x0095abf9
+  00963C40  59                   POP ECX
 LAB_00963c41:
   00963C41  FF36                 PUSH dword ptr [ESI]
   00963C43  FF153C31A300         CALL dword ptr [0x00a3313c]
@@ -5246,7 +5143,7 @@ LAB_00963c41:
   00963C4A  5D                   POP EBP
   00963C4B  C3                   RET
 
-; 00963C4C  strnlen  (line unknown)
+; 00963C4C  _strnlen  (line unknown)
   00963C4C  8BFF                 MOV EDI,EDI
   00963C4E  55                   PUSH EBP
   00963C4F  8BEC                 MOV EBP,ESP
@@ -5265,7 +5162,7 @@ LAB_00963c67:
   00963C67  5D                   POP EBP
   00963C68  C3                   RET
 
-; 00963C69  wfindenv  (line unknown)
+; 00963C69  FUN_00963c69  (line unknown)
   00963C69  8BFF                 MOV EDI,EDI
   00963C6B  55                   PUSH EBP
   00963C6C  8BEC                 MOV EBP,ESP
@@ -5338,6 +5235,7 @@ LAB_00963cdc:
   00963CEF  7508                 JNZ 0x00963cf9
   00963CF1  6A09                 PUSH 0x9
   00963CF3  E8016FFFFF           CALL 0x0095abf9
+  00963CF8  59                   POP ECX
 LAB_00963cf9:
   00963CF9  8B07                 MOV EAX,dword ptr [EDI]
   00963CFB  85C0                 TEST EAX,EAX
@@ -5361,7 +5259,7 @@ LAB_00963d1b:
   00963D1C  C9                   LEAVE
   00963D1D  C3                   RET
 
-; 00963D1E  __crtwsetenv  (line unknown)
+; 00963D1E  ___crtwsetenv  (line unknown)
   00963D1E  8BFF                 MOV EDI,EDI
   00963D20  55                   PUSH EBP
   00963D21  8BEC                 MOV EBP,ESP
@@ -5605,7 +5503,7 @@ LAB_00963f97:
   00963F97  33C0                 XOR EAX,EAX
   00963F99  E92BFEFFFF           JMP 0x00963dc9
 
-; 00963F9E  wcslen  (line unknown)
+; 00963F9E  _wcslen  (line unknown)
   00963F9E  8BFF                 MOV EDI,EDI
   00963FA0  55                   PUSH EBP
   00963FA1  8BEC                 MOV EBP,ESP
@@ -5694,6 +5592,7 @@ LAB_00964029:
   0096403C  7508                 JNZ 0x00964046
   0096403E  6A09                 PUSH 0x9
   00964040  E8B46BFFFF           CALL 0x0095abf9
+  00964045  59                   POP ECX
 LAB_00964046:
   00964046  8B07                 MOV EAX,dword ptr [EDI]
   00964048  85C0                 TEST EAX,EAX
@@ -5717,7 +5616,7 @@ LAB_00964068:
   00964069  C9                   LEAVE
   0096406A  C3                   RET
 
-; 0096406B  __crtsetenv  (line unknown)
+; 0096406B  ___crtsetenv  (line unknown)
   0096406B  8BFF                 MOV EDI,EDI
   0096406D  55                   PUSH EBP
   0096406E  8BEC                 MOV EBP,ESP
@@ -5949,7 +5848,7 @@ LAB_009642a6:
   009642A6  33C0                 XOR EAX,EAX
   009642A8  E954FEFFFF           JMP 0x00964101
 
-; 009642AD  _mbschr_l  (line unknown)
+; 009642AD  __mbschr_l  (line unknown)
   009642AD  8BFF                 MOV EDI,EDI
   009642AF  55                   PUSH EBP
   009642B0  8BEC                 MOV EBP,ESP
@@ -6033,7 +5932,7 @@ LAB_0096435a:
   0096435B  C9                   LEAVE
   0096435C  C3                   RET
 
-; 0096435D  _mbschr  (line unknown)
+; 0096435D  __mbschr  (line unknown)
   0096435D  8BFF                 MOV EDI,EDI
   0096435F  55                   PUSH EBP
   00964360  8BEC                 MOV EBP,ESP
@@ -6045,7 +5944,7 @@ LAB_0096435a:
   00964372  5D                   POP EBP
   00964373  C3                   RET
 
-; 00964374  _initp_heap_handler  (line unknown)
+; 00964374  FUN_00964374  (line unknown)
   00964374  8BFF                 MOV EDI,EDI
   00964376  55                   PUSH EBP
   00964377  8BEC                 MOV EBP,ESP
@@ -6054,7 +5953,7 @@ LAB_0096435a:
   00964381  5D                   POP EBP
   00964382  C3                   RET
 
-; 00964383  _callnewh  (line unknown)
+; 00964383  __callnewh  (line unknown)
   00964383  8BFF                 MOV EDI,EDI
   00964385  55                   PUSH EBP
   00964386  8BEC                 MOV EBP,ESP
@@ -6076,7 +5975,7 @@ LAB_009643a7:
   009643A9  5D                   POP EBP
   009643AA  C3                   RET
 
-; 009643AB  _CxxThrowException  (line unknown)
+; 009643AB  __CxxThrowException@8  (line unknown)
   009643AB  8BFF                 MOV EDI,EDI
   009643AD  55                   PUSH EBP
   009643AE  8BEC                 MOV EBP,ESP
@@ -6109,7 +6008,7 @@ LAB_009643e0:
   009643F3  C9                   LEAVE
   009643F4  C20800               RET 0x8
 
-; 00964400  _alloca_probe_16  (line unknown)
+; 00964400  __alloca_probe_16  (line unknown)
   00964400  51                   PUSH ECX
   00964401  8D4C2408             LEA ECX,[ESP + 0x8]
   00964405  2BC8                 SUB ECX,EAX
@@ -6131,7 +6030,7 @@ LAB_009643e0:
   00964426  59                   POP ECX
   00964427  E90480FFFF           JMP 0x0095c430
 
-; 0096442C  _get_daylight  (line unknown)
+; 0096442C  FID_conflict:__get_dstbias  (line unknown)
   0096442C  8BFF                 MOV EDI,EDI
   0096442E  55                   PUSH EBP
   0096442F  8BEC                 MOV EBP,ESP
@@ -6152,7 +6051,7 @@ LAB_0096444d:
   00964457  5D                   POP EBP
   00964458  C3                   RET
 
-; 00964459  _get_dstbias  (line unknown)
+; 00964459  FID_conflict:__get_dstbias  (line unknown)
   00964459  8BFF                 MOV EDI,EDI
   0096445B  55                   PUSH EBP
   0096445C  8BEC                 MOV EBP,ESP
@@ -6173,7 +6072,7 @@ LAB_0096447a:
   00964484  5D                   POP EBP
   00964485  C3                   RET
 
-; 00964486  _get_timezone  (line unknown)
+; 00964486  FID_conflict:__get_dstbias  (line unknown)
   00964486  8BFF                 MOV EDI,EDI
   00964488  55                   PUSH EBP
   00964489  8BEC                 MOV EBP,ESP
@@ -6194,23 +6093,23 @@ LAB_009644a7:
   009644B1  5D                   POP EBP
   009644B2  C3                   RET
 
-; 009644B3  __daylight  (line unknown)
+; 009644B3  FUN_009644b3  (line unknown)
   009644B3  B81472B800           MOV EAX,0xb87214
   009644B8  C3                   RET
 
-; 009644B9  __dstbias  (line unknown)
+; 009644B9  FUN_009644b9  (line unknown)
   009644B9  B81872B800           MOV EAX,0xb87218
   009644BE  C3                   RET
 
-; 009644BF  __timezone  (line unknown)
+; 009644BF  FUN_009644bf  (line unknown)
   009644BF  B81072B800           MOV EAX,0xb87210
   009644C4  C3                   RET
 
-; 009644C5  __tzname  (line unknown)
+; 009644C5  FUN_009644c5  (line unknown)
   009644C5  B8A072B800           MOV EAX,0xb872a0
   009644CA  C3                   RET
 
-; 009644CB  _tzset_nolock  (line unknown)
+; 009644CB  FUN_009644cb  (line unknown)
   009644CB  6A2C                 PUSH 0x2c
   009644CD  689014B800           PUSH 0xb81490
   009644D2  E8D9E3FFFF           CALL 0x009628b0
@@ -6513,7 +6412,7 @@ LAB_009647d8:
   00964755  59                   POP ECX
   00964756  C3                   RET
 
-; 009647DE  cvtdate  (line unknown)
+; 009647DE  FUN_009647de  (line unknown)
   009647DE  8BFF                 MOV EDI,EDI
   009647E0  55                   PUSH EBP
   009647E1  8BEC                 MOV EBP,ESP
@@ -6709,7 +6608,7 @@ LAB_009649c8:
   009649CE  50                   PUSH EAX
   009649CF  E8D6A6FFFF           CALL 0x0095f0aa
 
-; 009649D5  _isindst_nolock  (line unknown)
+; 009649D5  FUN_009649d5  (line unknown)
   009649D5  8BFF                 MOV EDI,EDI
   009649D7  55                   PUSH EBP
   009649D8  8BEC                 MOV EBP,ESP
@@ -6898,7 +6797,7 @@ LAB_00964ba1:
   00964BA5  56                   PUSH ESI
   00964BA6  E8FFA4FFFF           CALL 0x0095f0aa
 
-; 00964BAC  __tzset  (line unknown)
+; 00964BAC  ___tzset  (line unknown)
   00964BAC  6A08                 PUSH 0x8
   00964BAE  68B014B800           PUSH 0xb814b0
   00964BB3  E8F8DCFFFF           CALL 0x009628b0
@@ -6926,7 +6825,7 @@ LAB_00964bec:
   00964BF9  59                   POP ECX
   00964BFA  C3                   RET
 
-; 00964BFB  _isindst  (line unknown)
+; 00964BFB  __isindst  (line unknown)
   00964BFB  6A0C                 PUSH 0xc
   00964BFD  68D014B800           PUSH 0xb814d0
   00964C02  E8A9DCFFFF           CALL 0x009628b0
@@ -6949,7 +6848,7 @@ LAB_00964bec:
   00964C3A  59                   POP ECX
   00964C3B  C3                   RET
 
-; 00964C40  _alldiv  (line unknown)
+; 00964C40  __alldiv  (line unknown)
   00964C40  57                   PUSH EDI
   00964C41  56                   PUSH ESI
   00964C42  53                   PUSH EBX
@@ -7029,7 +6928,7 @@ LAB_00964ce4:
   00964CE6  5F                   POP EDI
   00964CE7  C21000               RET 0x10
 
-; 00964CF0  _allrem  (line unknown)
+; 00964CF0  __allrem  (line unknown)
   00964CF0  53                   PUSH EBX
   00964CF1  57                   PUSH EDI
   00964CF2  33FF                 XOR EDI,EDI
@@ -7108,7 +7007,7 @@ LAB_00964d9d:
   00964D9E  5B                   POP EBX
   00964D9F  C21000               RET 0x10
 
-; 00964DA2  _modf_default  (line unknown)
+; 00964DA2  __modf_default  (line unknown)
   00964DA2  8BFF                 MOV EDI,EDI
   00964DA4  55                   PUSH EBP
   00964DA5  8BEC                 MOV EBP,ESP
@@ -7221,7 +7120,7 @@ LAB_00964eb2:
   00964EB5  C9                   LEAVE
   00964EB6  C3                   RET
 
-; 00964EB7  _set_exp  (line unknown)
+; 00964EB7  __set_exp  (line unknown)
   00964EB7  8BFF                 MOV EDI,EDI
   00964EB9  55                   PUSH EBP
   00964EBA  8BEC                 MOV EBP,ESP
@@ -7240,7 +7139,7 @@ LAB_00964eb2:
   00964EE2  C9                   LEAVE
   00964EE3  C3                   RET
 
-; 00964EE4  _sptype  (line unknown)
+; 00964EE4  __sptype  (line unknown)
   00964EE4  8BFF                 MOV EDI,EDI
   00964EE6  55                   PUSH EBP
   00964EE7  8BEC                 MOV EBP,ESP
@@ -7290,7 +7189,7 @@ LAB_00964f46:
   00964F48  5D                   POP EBP
   00964F49  C3                   RET
 
-; 00964F4A  _decomp  (line unknown)
+; 00964F4A  FUN_00964f4a  (line unknown)
   00964F4A  8BFF                 MOV EDI,EDI
   00964F4C  55                   PUSH EBP
   00964F4D  8BEC                 MOV EBP,ESP
@@ -7372,7 +7271,7 @@ LAB_00965006:
   0096500B  5D                   POP EBP
   0096500C  C3                   RET
 
-; 0096500D  _raise_exc_ex  (line unknown)
+; 0096500D  __raise_exc_ex  (line unknown)
   0096500D  8BFF                 MOV EDI,EDI
   0096500F  55                   PUSH EBP
   00965010  8BEC                 MOV EBP,ESP
@@ -7677,7 +7576,7 @@ LAB_009652e4:
   009652E7  5D                   POP EBP
   009652E8  C3                   RET
 
-; 009652E9  _raise_exc  (line unknown)
+; 009652E9  __raise_exc  (line unknown)
   009652E9  8BFF                 MOV EDI,EDI
   009652EB  55                   PUSH EBP
   009652EC  8BEC                 MOV EBP,ESP
@@ -7693,7 +7592,7 @@ LAB_009652e4:
   0096530A  5D                   POP EBP
   0096530B  C3                   RET
 
-; 0096530C  _handle_exc  (line unknown)
+; 0096530C  __handle_exc  (line unknown)
   0096530C  8BFF                 MOV EDI,EDI
   0096530E  55                   PUSH EBP
   0096530F  8BEC                 MOV EBP,ESP
@@ -7898,7 +7797,7 @@ LAB_009654e5:
   009654EE  C9                   LEAVE
   009654EF  C3                   RET
 
-; 009654F0  _set_errno_from_matherr  (line unknown)
+; 009654F0  __set_errno_from_matherr  (line unknown)
   009654F0  8BFF                 MOV EDI,EDI
   009654F2  55                   PUSH EBP
   009654F3  8BEC                 MOV EBP,ESP
@@ -7918,7 +7817,7 @@ LAB_0096551b:
   0096551B  5D                   POP EBP
   0096551C  C3                   RET
 
-; 0096551D  _errcode  (line unknown)
+; 0096551D  __errcode  (line unknown)
   0096551D  8BFF                 MOV EDI,EDI
   0096551F  55                   PUSH EBP
   00965520  8BEC                 MOV EBP,ESP
@@ -7954,7 +7853,7 @@ LAB_00965547:
   0096554F  5D                   POP EBP
   00965550  C3                   RET
 
-; 00965551  _umatherr  (line unknown)
+; 00965551  __umatherr  (line unknown)
   00965551  8BFF                 MOV EDI,EDI
   00965553  55                   PUSH EBP
   00965554  8BEC                 MOV EBP,ESP
@@ -8018,7 +7917,7 @@ LAB_009655d4:
   009655EF  C9                   LEAVE
   009655F0  C3                   RET
 
-; 009655F1  _handle_qnan1  (line unknown)
+; 009655F1  __handle_qnan1  (line unknown)
   009655F1  8BFF                 MOV EDI,EDI
   009655F3  55                   PUSH EBP
   009655F4  8BEC                 MOV EBP,ESP
@@ -8050,7 +7949,7 @@ LAB_00965627:
   00965644  5D                   POP EBP
   00965645  C3                   RET
 
-; 00965646  _except1  (line unknown)
+; 00965646  __except1  (line unknown)
   00965646  8BFF                 MOV EDI,EDI
   00965648  53                   PUSH EBX
   00965649  8BDC                 MOV EBX,ESP
@@ -8128,7 +8027,7 @@ LAB_009656ff:
   0096570E  5B                   POP EBX
   0096570F  C3                   RET
 
-; 00965710  _statfp  (line unknown)
+; 00965710  __statfp  (line unknown)
   00965710  8BFF                 MOV EDI,EDI
   00965712  55                   PUSH EBP
   00965713  8BEC                 MOV EBP,ESP
@@ -8138,7 +8037,7 @@ LAB_009656ff:
   0096571E  C9                   LEAVE
   0096571F  C3                   RET
 
-; 00965720  _clrfp  (line unknown)
+; 00965720  __clrfp  (line unknown)
   00965720  8BFF                 MOV EDI,EDI
   00965722  55                   PUSH EBP
   00965723  8BEC                 MOV EBP,ESP
@@ -8149,7 +8048,7 @@ LAB_009656ff:
   0096572F  C9                   LEAVE
   00965730  C3                   RET
 
-; 00965731  _ctrlfp  (line unknown)
+; 00965731  __ctrlfp  (line unknown)
   00965731  8BFF                 MOV EDI,EDI
   00965733  55                   PUSH EBP
   00965734  8BEC                 MOV EBP,ESP
@@ -8168,7 +8067,7 @@ LAB_009656ff:
   0096575A  C9                   LEAVE
   0096575B  C3                   RET
 
-; 0096575C  _set_statfp  (line unknown)
+; 0096575C  FUN_0096575c  (line unknown)
   0096575C  8BFF                 MOV EDI,EDI
   0096575E  55                   PUSH EBP
   0096575F  8BEC                 MOV EBP,ESP
@@ -8212,7 +8111,7 @@ LAB_009657b2:
   009657B2  C9                   LEAVE
   009657B3  C3                   RET
 
-; 009657B4  __set_fpsr_sse2  (line unknown)
+; 009657B4  ___set_fpsr_sse2  (line unknown)
   009657B4  6A08                 PUSH 0x8
   009657B6  68F014B800           PUSH 0xb814f0
   009657BB  E8F0D0FFFF           CALL 0x009628b0
@@ -8236,7 +8135,7 @@ LAB_00965820:
   00965820  E8D0D0FFFF           CALL 0x009628f5
   00965825  C3                   RET
 
-; 00965826  _ioinit  (line unknown)
+; 00965826  __ioinit  (line unknown)
   00965826  8BFF                 MOV EDI,EDI
   00965828  55                   PUSH EBP
   00965829  8BEC                 MOV EBP,ESP
@@ -8458,65 +8357,6 @@ LAB_00965a66:
   00965A66  83C8FF               OR EAX,0xffffffff
   00965A69  EBF6                 JMP 0x00965a61
 
-; 00965A6B  _fcloseall  (line unknown)
-  00965A6B  6A10                 PUSH 0x10
-  00965A6D  681015B800           PUSH 0xb81510
-  00965A72  E839CEFFFF           CALL 0x009628b0
-  00965A77  33DB                 XOR EBX,EBX
-  00965A79  895DE4               MOV dword ptr [EBP + -0x1c],EBX
-  00965A7C  6A01                 PUSH 0x1
-  00965A7E  E896E1FFFF           CALL 0x00963c19
-  00965A83  59                   POP ECX
-  00965A84  895DFC               MOV dword ptr [EBP + -0x4],EBX
-  00965A87  6A03                 PUSH 0x3
-  00965A89  5F                   POP EDI
-LAB_00965a8a:
-  00965A8A  897DE0               MOV dword ptr [EBP + -0x20],EDI
-  00965A8D  3B3DC061A202         CMP EDI,dword ptr [0x02a261c0]
-  00965A93  7D54                 JGE 0x00965ae9
-  00965A95  8BF7                 MOV ESI,EDI
-  00965A97  A1A851A202           MOV EAX,[0x02a251a8]
-  00965A9C  391CB0               CMP dword ptr [EAX + ESI*0x4],EBX
-  00965A9F  7445                 JZ 0x00965ae6
-  00965AA1  8B04B0               MOV EAX,dword ptr [EAX + ESI*0x4]
-  00965AA4  F6400C83             TEST byte ptr [EAX + 0xc],0x83
-  00965AA8  740F                 JZ 0x00965ab9
-  00965AAA  50                   PUSH EAX
-  00965AAB  E87C39FFFF           CALL 0x0095942c
-  00965AB0  59                   POP ECX
-  00965AB1  83F8FF               CMP EAX,-0x1
-  00965AB4  7403                 JZ 0x00965ab9
-  00965AB6  FF45E4               INC dword ptr [EBP + -0x1c]
-LAB_00965ab9:
-  00965AB9  83FF14               CMP EDI,0x14
-  00965ABC  7C28                 JL 0x00965ae6
-  00965ABE  A1A851A202           MOV EAX,[0x02a251a8]
-  00965AC3  8B04B0               MOV EAX,dword ptr [EAX + ESI*0x4]
-  00965AC6  83C020               ADD EAX,0x20
-  00965AC9  50                   PUSH EAX
-  00965ACA  FF15A831A300         CALL dword ptr [0x00a331a8]
-  00965AD0  A1A851A202           MOV EAX,[0x02a251a8]
-  00965AD5  FF34B0               PUSH dword ptr [EAX + ESI*0x4]
-  00965AD8  E8450DFFFF           CALL 0x00956822
-  00965ADD  59                   POP ECX
-  00965ADE  A1A851A202           MOV EAX,[0x02a251a8]
-  00965AE3  891CB0               MOV dword ptr [EAX + ESI*0x4],EBX
-LAB_00965ae6:
-  00965AE6  47                   INC EDI
-  00965AE7  EBA1                 JMP 0x00965a8a
-LAB_00965ae9:
-  00965AE9  C745FCFEFFFFFF       MOV dword ptr [EBP + -0x4],0xfffffffe
-  00965AF0  E809000000           CALL 0x00965afe
-  00965AF5  8B45E4               MOV EAX,dword ptr [EBP + -0x1c]
-  00965AF8  E8F8CDFFFF           CALL 0x009628f5
-  00965AFD  C3                   RET
-
-; 00965AFE  FUN_00965afe  (line unknown)
-  00965AFE  6A01                 PUSH 0x1
-  00965B00  E83BE0FFFF           CALL 0x00963b40
-  00965B05  59                   POP ECX
-  00965B06  C3                   RET
-
 ; 00965B10  __global_unwind2  (line unknown)
   00965B10  55                   PUSH EBP
   00965B11  8BEC                 MOV EBP,ESP
@@ -8529,7 +8369,6 @@ LAB_00965ae9:
   00965B1B  68285B9600           PUSH 0x965b28
   00965B20  FF7508               PUSH dword ptr [EBP + 0x8]
   00965B23  E846A90400           CALL 0x009b046e
-_gu_return:
   00965B28  5D                   POP EBP
   00965B29  5F                   POP EDI
   00965B2A  5E                   POP ESI
@@ -8537,31 +8376,6 @@ _gu_return:
   00965B2C  8BE5                 MOV ESP,EBP
   00965B2E  5D                   POP EBP
   00965B2F  C3                   RET
-
-; 00965B30  __unwind_handler  (line unknown)
-  00965B30  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
-  00965B34  F7410406000000       TEST dword ptr [ECX + 0x4],0x6
-  00965B3B  B801000000           MOV EAX,0x1
-  00965B40  7432                 JZ 0x00965b74
-  00965B42  8B442414             MOV EAX,dword ptr [ESP + 0x14]
-  00965B46  8B48FC               MOV ECX,dword ptr [EAX + -0x4]
-  00965B49  33C8                 XOR ECX,EAX
-  00965B4B  E8F4FFFEFF           CALL 0x00955b44
-  00965B50  55                   PUSH EBP
-  00965B51  8B6810               MOV EBP,dword ptr [EAX + 0x10]
-  00965B54  8B5028               MOV EDX,dword ptr [EAX + 0x28]
-  00965B57  52                   PUSH EDX
-  00965B58  8B5024               MOV EDX,dword ptr [EAX + 0x24]
-  00965B5B  52                   PUSH EDX
-  00965B5C  E814000000           CALL 0x00965b75
-  00965B61  83C408               ADD ESP,0x8
-  00965B64  5D                   POP EBP
-  00965B65  8B442408             MOV EAX,dword ptr [ESP + 0x8]
-  00965B69  8B542410             MOV EDX,dword ptr [ESP + 0x10]
-  00965B6D  8902                 MOV dword ptr [EDX],EAX
-  00965B6F  B803000000           MOV EAX,0x3
-_uh_return:
-  00965B74  C3                   RET
 
 ; 00965B75  __local_unwind2  (line unknown)
   00965B75  53                   PUSH EBX
@@ -8578,7 +8392,7 @@ _uh_return:
   00965B93  50                   PUSH EAX
   00965B94  8D442404             LEA EAX,[ESP + 0x4]
   00965B98  64A300000000         MOV FS:[0x0],EAX
-_lu_top:
+LAB_00965b9e:
   00965B9E  8B442428             MOV EAX,dword ptr [ESP + 0x28]
   00965BA2  8B5808               MOV EBX,dword ptr [EAX + 0x8]
   00965BA5  8B700C               MOV ESI,dword ptr [EAX + 0xc]
@@ -8588,7 +8402,7 @@ _lu_top:
   00965BB2  7406                 JZ 0x00965bba
   00965BB4  3B74242C             CMP ESI,dword ptr [ESP + 0x2c]
   00965BB8  762D                 JBE 0x00965be7
-_continue_:
+LAB_00965bba:
   00965BBA  8D3476               LEA ESI,[ESI + ESI*0x2]
   00965BBD  8B0CB3               MOV ECX,dword ptr [EBX + ESI*0x4]
   00965BC0  894C240C             MOV dword ptr [ESP + 0xc],ECX
@@ -8600,9 +8414,9 @@ _continue_:
   00965BD7  E849000000           CALL 0x00965c25
   00965BDC  8B44B308             MOV EAX,dword ptr [EBX + ESI*0x4 + 0x8]
   00965BE0  E85F000000           CALL 0x00965c44
-_lu_continue:
+LAB_00965be5:
   00965BE5  EBB7                 JMP 0x00965b9e
-_lu_done:
+LAB_00965be7:
   00965BE7  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   00965BEB  64890D00000000       MOV dword ptr FS:[0x0],ECX
   00965BF2  83C418               ADD ESP,0x18
@@ -8611,38 +8425,24 @@ _lu_done:
   00965BF7  5B                   POP EBX
   00965BF8  C3                   RET
 
-; 00965BF9  __abnormal_termination  (line unknown)
-  00965BF9  33C0                 XOR EAX,EAX
-  00965BFB  648B0D00000000       MOV ECX,dword ptr FS:[0x0]
-  00965C02  817904305B9600       CMP dword ptr [ECX + 0x4],0x965b30
-  00965C09  7510                 JNZ 0x00965c1b
-  00965C0B  8B510C               MOV EDX,dword ptr [ECX + 0xc]
-  00965C0E  8B520C               MOV EDX,dword ptr [EDX + 0xc]
-  00965C11  395108               CMP dword ptr [ECX + 0x8],EDX
-  00965C14  7505                 JNZ 0x00965c1b
-  00965C16  B801000000           MOV EAX,0x1
-_at_done:
-  00965C1B  C3                   RET
-
-; 00965C1C  _NLG_Notify1  (line unknown)
+; 00965C1C  __NLG_Notify1  (line unknown)
   00965C1C  53                   PUSH EBX
   00965C1D  51                   PUSH ECX
   00965C1E  BBB074B800           MOV EBX,0xb874b0
   00965C23  EB0B                 JMP 0x00965c30
 
-; 00965C25  _NLG_Notify  (line unknown)
+; 00965C25  __NLG_Notify  (line unknown)
   00965C25  53                   PUSH EBX
   00965C26  51                   PUSH ECX
   00965C27  BBB074B800           MOV EBX,0xb874b0
   00965C2C  8B4C240C             MOV ECX,dword ptr [ESP + 0xc]
-__NLG_Go:
+LAB_00965c30:
   00965C30  894B08               MOV dword ptr [EBX + 0x8],ECX
   00965C33  894304               MOV dword ptr [EBX + 0x4],EAX
   00965C36  896B0C               MOV dword ptr [EBX + 0xc],EBP
   00965C39  55                   PUSH EBP
   00965C3A  51                   PUSH ECX
   00965C3B  50                   PUSH EAX
-__NLG_Dispatch2:
   00965C3C  58                   POP EAX
   00965C3D  59                   POP ECX
   00965C3E  5D                   POP EBP
@@ -8650,12 +8450,11 @@ __NLG_Dispatch2:
   00965C40  5B                   POP EBX
   00965C41  C20400               RET 0x4
 
-; 00965C44  _NLG_Call  (line unknown)
+; 00965C44  FUN_00965c44  (line unknown)
   00965C44  FFD0                 CALL EAX
-__NLG_Return2:
   00965C46  C3                   RET
 
-; 00965C47  _rt_probe_read4  (line unknown)
+; 00965C47  __rt_probe_read4@4  (line unknown)
   00965C47  6A0C                 PUSH 0xc
   00965C49  683015B800           PUSH 0xb81530
   00965C4E  E85DCCFFFF           CALL 0x009628b0
@@ -8670,7 +8469,7 @@ LAB_00965c80:
   00965C8A  E866CCFFFF           CALL 0x009628f5
   00965C8F  C20400               RET 0x4
 
-; 00965C92  _filbuf  (line unknown)
+; 00965C92  __filbuf  (line unknown)
   00965C92  8BFF                 MOV EDI,EDI
   00965C94  55                   PUSH EBP
   00965C95  8BEC                 MOV EBP,ESP
@@ -8783,7 +8582,7 @@ LAB_00965db1:
   00965DB2  5D                   POP EBP
   00965DB3  C3                   RET
 
-; 00965DB4  _read_nolock  (line unknown)
+; 00965DB4  __read_nolock  (line unknown)
   00965DB4  8BFF                 MOV EDI,EDI
   00965DB6  55                   PUSH EBP
   00965DB7  8BEC                 MOV EBP,ESP
@@ -9354,7 +9153,7 @@ LAB_00966368:
   00966369  C9                   LEAVE
   0096636A  C3                   RET
 
-; 0096636B  _read  (line unknown)
+; 0096636B  __read  (line unknown)
   0096636B  6A10                 PUSH 0x10
   0096636D  685015B800           PUSH 0xb81550
   00966372  E839C5FFFF           CALL 0x009628b0
@@ -9437,7 +9236,7 @@ LAB_00966450:
   0096645F  59                   POP ECX
   00966460  C3                   RET
 
-; 00966461  memcpy_s  (line unknown)
+; 00966461  _memcpy_s  (line unknown)
   00966461  8BFF                 MOV EDI,EDI
   00966463  55                   PUSH EBP
   00966464  8BEC                 MOV EBP,ESP
@@ -9495,7 +9294,7 @@ LAB_009664d3:
   009664D4  5D                   POP EBP
   009664D5  C3                   RET
 
-; 009664D6  _write_nolock  (line unknown)
+; 009664D6  __write_nolock  (line unknown)
   009664D6  8BFF                 MOV EDI,EDI
   009664D8  55                   PUSH EBP
   009664D9  8BEC                 MOV EBP,ESP
@@ -10038,7 +9837,7 @@ LAB_00966bc5:
   00966BD1  C9                   LEAVE
   00966BD2  C3                   RET
 
-; 00966BD3  _write  (line unknown)
+; 00966BD3  __write  (line unknown)
   00966BD3  6A10                 PUSH 0x10
   00966BD5  687015B800           PUSH 0xb81570
   00966BDA  E8D1BCFFFF           CALL 0x009628b0
@@ -10109,7 +9908,7 @@ LAB_00966c96:
   00966CA5  59                   POP ECX
   00966CA6  C3                   RET
 
-; 00966CA7  _commit  (line unknown)
+; 00966CA7  __commit  (line unknown)
   00966CA7  6A10                 PUSH 0x10
   00966CA9  689015B800           PUSH 0xb81590
   00966CAE  E8FDBBFFFF           CALL 0x009628b0
@@ -10185,7 +9984,7 @@ LAB_00966d6f:
   00966D7E  59                   POP ECX
   00966D7F  C3                   RET
 
-; 00966D80  __getgmtimebuf  (line unknown)
+; 00966D80  ___getgmtimebuf  (line unknown)
   00966D80  8BFF                 MOV EDI,EDI
   00966D82  56                   PUSH ESI
   00966D83  E8EB90FFFF           CALL 0x0095fe73
@@ -10212,7 +10011,7 @@ LAB_00966db2:
   00966DB5  5E                   POP ESI
   00966DB6  C3                   RET
 
-; 00966DB7  _openfile  (line unknown)
+; 00966DB7  __openfile  (line unknown)
   00966DB7  8BFF                 MOV EDI,EDI
   00966DB9  55                   PUSH EBP
   00966DBA  8BEC                 MOV EBP,ESP
@@ -10468,7 +10267,7 @@ LAB_0096704a:
   0096704C  C9                   LEAVE
   0096704D  C3                   RET
 
-; 0096704E  _getstream  (line unknown)
+; 0096704E  __getstream  (line unknown)
   0096704E  6A10                 PUSH 0x10
   00967050  68B015B800           PUSH 0xb815b0
   00967055  E856B8FFFF           CALL 0x009628b0
@@ -10580,7 +10379,7 @@ LAB_00967161:
   0096717F  59                   POP ECX
   00967180  C3                   RET
 
-; 00967190  _local_unwind4  (line unknown)
+; 00967190  __local_unwind4  (line unknown)
   00967190  53                   PUSH EBX
   00967191  56                   PUSH ESI
   00967192  57                   PUSH EDI
@@ -10598,7 +10397,7 @@ LAB_00967161:
   009671B5  33C4                 XOR EAX,ESP
   009671B7  89442408             MOV dword ptr [ESP + 0x8],EAX
   009671BB  64892500000000       MOV dword ptr FS:[0x0],ESP
-_lu_top:
+LAB_009671c2:
   009671C2  8B442430             MOV EAX,dword ptr [ESP + 0x30]
   009671C6  8B5808               MOV EBX,dword ptr [EAX + 0x8]
   009671C9  8B4C242C             MOV ECX,dword ptr [ESP + 0x2c]
@@ -10625,7 +10424,7 @@ LAB_009671e4:
   00967208  8B4308               MOV EAX,dword ptr [EBX + 0x8]
   0096720B  E834EAFFFF           CALL 0x00965c44
   00967210  EBB0                 JMP 0x009671c2
-_lu_done:
+LAB_00967212:
   00967212  648F0500000000       POP dword ptr FS:[0x0]
   00967219  83C418               ADD ESP,0x18
   0096721C  5F                   POP EDI
@@ -10633,31 +10432,7 @@ _lu_done:
   0096721E  5B                   POP EBX
   0096721F  C3                   RET
 
-; 00967220  _unwind_handler4  (line unknown)
-  00967220  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
-  00967224  F7410406000000       TEST dword ptr [ECX + 0x4],0x6
-  0096722B  B801000000           MOV EAX,0x1
-  00967230  7433                 JZ 0x00967265
-  00967232  8B442408             MOV EAX,dword ptr [ESP + 0x8]
-  00967236  8B4808               MOV ECX,dword ptr [EAX + 0x8]
-  00967239  33C8                 XOR ECX,EAX
-  0096723B  E804E9FEFF           CALL 0x00955b44
-  00967240  55                   PUSH EBP
-  00967241  8B6818               MOV EBP,dword ptr [EAX + 0x18]
-  00967244  FF700C               PUSH dword ptr [EAX + 0xc]
-  00967247  FF7010               PUSH dword ptr [EAX + 0x10]
-  0096724A  FF7014               PUSH dword ptr [EAX + 0x14]
-  0096724D  E83EFFFFFF           CALL 0x00967190
-  00967252  83C40C               ADD ESP,0xc
-  00967255  5D                   POP EBP
-  00967256  8B442408             MOV EAX,dword ptr [ESP + 0x8]
-  0096725A  8B542410             MOV EDX,dword ptr [ESP + 0x10]
-  0096725E  8902                 MOV dword ptr [EDX],EAX
-  00967260  B803000000           MOV EAX,0x3
-LAB_00967265:
-  00967265  C3                   RET
-
-; 00967266  _seh_longjmp_unwind4  (line unknown)
+; 00967266  FUN_00967266  (line unknown)
   00967266  55                   PUSH EBP
   00967267  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   0096726B  8B29                 MOV EBP,dword ptr [ECX]
@@ -10669,7 +10444,7 @@ LAB_00967265:
   0096727E  5D                   POP EBP
   0096727F  C20400               RET 0x4
 
-; 00967282  @_EH4_CallFilterFunc@8  (line unknown)
+; 00967282  _EH4_CallFilterFunc  (line unknown)
   00967282  55                   PUSH EBP
   00967283  56                   PUSH ESI
   00967284  57                   PUSH EDI
@@ -10687,7 +10462,7 @@ LAB_00967265:
   00967297  5D                   POP EBP
   00967298  C3                   RET
 
-; 00967299  @_EH4_TransferToHandler@8  (line unknown)
+; 00967299  _EH4_TransferToHandler  (line unknown)
   00967299  8BEA                 MOV EBP,EDX
   0096729B  8BF1                 MOV ESI,ECX
   0096729D  8BC1                 MOV EAX,ECX
@@ -10700,7 +10475,7 @@ LAB_00967265:
   009672AE  33FF                 XOR EDI,EDI
   009672B0  FFE6                 JMP ESI
 
-; 009672B2  @_EH4_GlobalUnwind2@8  (line unknown)
+; 009672B2  _EH4_GlobalUnwind2  (line unknown)
   009672B2  55                   PUSH EBP
   009672B3  8BEC                 MOV EBP,ESP
   009672B5  53                   PUSH EBX
@@ -10711,14 +10486,13 @@ LAB_00967265:
   009672BB  68C6729600           PUSH 0x9672c6
   009672C0  51                   PUSH ECX
   009672C1  E8A8910400           CALL 0x009b046e
-ReturnPoint:
   009672C6  5F                   POP EDI
   009672C7  5E                   POP ESI
   009672C8  5B                   POP EBX
   009672C9  5D                   POP EBP
   009672CA  C3                   RET
 
-; 009672CB  @_EH4_LocalUnwind@16  (line unknown)
+; 009672CB  _EH4_LocalUnwind  (line unknown)
   009672CB  55                   PUSH EBP
   009672CC  8B6C2408             MOV EBP,dword ptr [ESP + 0x8]
   009672D0  52                   PUSH EDX
@@ -10729,7 +10503,7 @@ ReturnPoint:
   009672DE  5D                   POP EBP
   009672DF  C20800               RET 0x8
 
-; 009672E2  _lseek_nolock  (line unknown)
+; 009672E2  __lseek_nolock  (line unknown)
   009672E2  8BFF                 MOV EDI,EDI
   009672E4  55                   PUSH EBP
   009672E5  8BEC                 MOV EBP,ESP
@@ -10782,7 +10556,7 @@ LAB_00967354:
   00967355  5D                   POP EBP
   00967356  C3                   RET
 
-; 00967357  _lseek  (line unknown)
+; 00967357  __lseek  (line unknown)
   00967357  6A10                 PUSH 0x10
   00967359  68D015B800           PUSH 0xb815d0
   0096735E  E84DB5FFFF           CALL 0x009628b0
@@ -10853,7 +10627,7 @@ LAB_0096741a:
   00967429  59                   POP ECX
   0096742A  C3                   RET
 
-; 0096742B  _close_nolock  (line unknown)
+; 0096742B  __close_nolock  (line unknown)
   0096742B  8BFF                 MOV EDI,EDI
   0096742D  55                   PUSH EBP
   0096742E  8BEC                 MOV EBP,ESP
@@ -10923,7 +10697,7 @@ LAB_009674c3:
   009674C5  5D                   POP EBP
   009674C6  C3                   RET
 
-; 009674C7  _close  (line unknown)
+; 009674C7  __close  (line unknown)
   009674C7  6A10                 PUSH 0x10
   009674C9  68F015B800           PUSH 0xb815f0
   009674CE  E8DDB3FFFF           CALL 0x009628b0
@@ -10990,7 +10764,7 @@ LAB_0096757a:
   00967589  59                   POP ECX
   0096758A  C3                   RET
 
-; 0096758B  _freebuf  (line unknown)
+; 0096758B  __freebuf  (line unknown)
   0096758B  8BFF                 MOV EDI,EDI
   0096758D  55                   PUSH EBP
   0096758E  8BEC                 MOV EBP,ESP
@@ -11014,7 +10788,7 @@ LAB_009675b9:
   009675BA  5D                   POP EBP
   009675BB  C3                   RET
 
-; 009675C0  _aulldvrm  (line unknown)
+; 009675C0  __aulldvrm  (line unknown)
   009675C0  56                   PUSH ESI
   009675C1  8B442414             MOV EAX,dword ptr [ESP + 0x14]
   009675C5  0BC0                 OR EAX,EAX
@@ -11079,7 +10853,7 @@ LAB_00967638:
   00967651  5E                   POP ESI
   00967652  C21000               RET 0x10
 
-; 00967655  __loctotime64_t  (line unknown)
+; 00967655  ___loctotime64_t  (line unknown)
   00967655  8BFF                 MOV EDI,EDI
   00967657  55                   PUSH EBP
   00967658  8BEC                 MOV EBP,ESP
@@ -11328,7 +11102,7 @@ LAB_009678ad:
   009678BA  C9                   LEAVE
   009678BB  C3                   RET
 
-; 009678BC  _getdrive  (line unknown)
+; 009678BC  __getdrive  (line unknown)
   009678BC  8BFF                 MOV EDI,EDI
   009678BE  55                   PUSH EBP
   009678BF  8BEC                 MOV EBP,ESP
@@ -11406,7 +11180,7 @@ LAB_00967979:
   00967988  C9                   LEAVE
   00967989  C3                   RET
 
-; 0096798A  _copysign  (line unknown)
+; 0096798A  __copysign  (line unknown)
   0096798A  8BFF                 MOV EDI,EDI
   0096798C  55                   PUSH EBP
   0096798D  8BEC                 MOV EBP,ESP
@@ -11425,7 +11199,7 @@ LAB_00967979:
   009679B0  C9                   LEAVE
   009679B1  C3                   RET
 
-; 009679B2  _fpclass  (line unknown)
+; 009679B2  __fpclass  (line unknown)
   009679B2  8BFF                 MOV EDI,EDI
   009679B4  55                   PUSH EBP
   009679B5  8BEC                 MOV EBP,ESP
@@ -11520,7 +11294,7 @@ LAB_00967a76:
 LAB_00967a7d:
   00967A7D  E80AB6FFFF           CALL 0x0096308c
 
-; 00967A88  unexpected  (line unknown)
+; 00967A88  FUN_00967a88  (line unknown)
   00967A88  E85F84FFFF           CALL 0x0095feec
   00967A8D  8B407C               MOV EAX,dword ptr [EAX + 0x7c]
   00967A90  85C0                 TEST EAX,EAX
@@ -11544,14 +11318,15 @@ LAB_00967ac6:
   00967AC6  C745FCFEFFFFFF       MOV dword ptr [EBP + -0x4],0xfffffffe
 LAB_00967acd:
   00967ACD  E87DFFFFFF           CALL 0x00967a4f
+  00967AD2  CC                   INT3
 
-; 00967AD3  _initp_eh_hooks  (line unknown)
+; 00967AD3  FUN_00967ad3  (line unknown)
   00967AD3  684F7A9600           PUSH 0x967a4f
   00967AD8  FF157032A300         CALL dword ptr [0x00a33270]
   00967ADE  A318ACEA00           MOV [0x00eaac18],EAX
   00967AE3  C3                   RET
 
-; 00967AE4  _initp_misc_winsig  (line unknown)
+; 00967AE4  __initp_misc_winsig  (line unknown)
   00967AE4  8BFF                 MOV EDI,EDI
   00967AE6  55                   PUSH EBP
   00967AE7  8BEC                 MOV EBP,ESP
@@ -11562,56 +11337,6 @@ LAB_00967acd:
   00967AFB  A328ACEA00           MOV [0x00eaac28],EAX
   00967B00  5D                   POP EBP
   00967B01  C3                   RET
-
-; 00967B02  ctrlevent_capture  (line unknown)
-  00967B02  6A10                 PUSH 0x10
-  00967B04  685016B800           PUSH 0xb81650
-  00967B09  E8A2ADFFFF           CALL 0x009628b0
-  00967B0E  33FF                 XOR EDI,EDI
-  00967B10  57                   PUSH EDI
-  00967B11  E803C1FFFF           CALL 0x00963c19
-  00967B16  59                   POP ECX
-  00967B17  897DFC               MOV dword ptr [EBP + -0x4],EDI
-  00967B1A  397D08               CMP dword ptr [EBP + 0x8],EDI
-  00967B1D  751D                 JNZ 0x00967b3c
-  00967B1F  BE1CACEA00           MOV ESI,0xeaac1c
-  00967B24  FF351CACEA00         PUSH dword ptr [0x00eaac1c]
-  00967B2A  FF157432A300         CALL dword ptr [0x00a33274]
-  00967B30  8945E4               MOV dword ptr [EBP + -0x1c],EAX
-  00967B33  C745E002000000       MOV dword ptr [EBP + -0x20],0x2
-  00967B3A  EB1B                 JMP 0x00967b57
-LAB_00967b3c:
-  00967B3C  BE20ACEA00           MOV ESI,0xeaac20
-  00967B41  FF3520ACEA00         PUSH dword ptr [0x00eaac20]
-  00967B47  FF157432A300         CALL dword ptr [0x00a33274]
-  00967B4D  8945E4               MOV dword ptr [EBP + -0x1c],EAX
-  00967B50  C745E015000000       MOV dword ptr [EBP + -0x20],0x15
-LAB_00967b57:
-  00967B57  3BC7                 CMP EAX,EDI
-  00967B59  740C                 JZ 0x00967b67
-  00967B5B  83F801               CMP EAX,0x1
-  00967B5E  7407                 JZ 0x00967b67
-  00967B60  E89A81FFFF           CALL 0x0095fcff
-  00967B65  8906                 MOV dword ptr [ESI],EAX
-LAB_00967b67:
-  00967B67  C745FCFEFFFFFF       MOV dword ptr [EBP + -0x4],0xfffffffe
-  00967B6E  E80B000000           CALL 0x00967b7e
-  00967B73  397DE4               CMP dword ptr [EBP + -0x1c],EDI
-  00967B76  750E                 JNZ 0x00967b86
-  00967B78  33C0                 XOR EAX,EAX
-  00967B7A  EB1A                 JMP 0x00967b96
-LAB_00967b86:
-  00967B86  837DE401             CMP dword ptr [EBP + -0x1c],0x1
-  00967B8A  7407                 JZ 0x00967b93
-  00967B8C  FF75E0               PUSH dword ptr [EBP + -0x20]
-  00967B8F  FF55E4               CALL dword ptr [EBP + -0x1c]
-  00967B92  59                   POP ECX
-LAB_00967b93:
-  00967B93  33C0                 XOR EAX,EAX
-  00967B95  40                   INC EAX
-LAB_00967b96:
-  00967B96  E85AADFFFF           CALL 0x009628f5
-  00967B9B  C20400               RET 0x4
 
 ; 00967B7E  FUN_00967b7e  (line unknown)
   00967B7E  57                   PUSH EDI
@@ -11649,12 +11374,12 @@ LAB_00967bd3:
   00967BD3  5D                   POP EBP
   00967BD4  C3                   RET
 
-; 00967BD5  __get_sigabrt  (line unknown)
+; 00967BD5  FUN_00967bd5  (line unknown)
   00967BD5  FF3524ACEA00         PUSH dword ptr [0x00eaac24]
   00967BDB  FF157432A300         CALL dword ptr [0x00a33274]
   00967BE1  C3                   RET
 
-; 00967BE2  signal  (line unknown)
+; 00967BE2  _signal  (line unknown)
   00967BE2  6A10                 PUSH 0x10
   00967BE4  687016B800           PUSH 0xb81670
   00967BE9  E8C2ACFFFF           CALL 0x009628b0
@@ -11843,7 +11568,7 @@ LAB_00967e1c:
   00967DEE  59                   POP ECX
   00967DEF  C3                   RET
 
-; 00967E22  raise  (line unknown)
+; 00967E22  _raise  (line unknown)
   00967E22  6A20                 PUSH 0x20
   00967E24  689016B800           PUSH 0xb81690
   00967E29  E882AAFFFF           CALL 0x009628b0
@@ -12009,7 +11734,7 @@ LAB_00967fbf:
 LAB_00967f97:
   00967F97  C3                   RET
 
-; 00967FC5  _initp_misc_rand_s  (line unknown)
+; 00967FC5  FUN_00967fc5  (line unknown)
   00967FC5  8BFF                 MOV EDI,EDI
   00967FC7  55                   PUSH EBP
   00967FC8  8BEC                 MOV EBP,ESP
@@ -12018,7 +11743,7 @@ LAB_00967f97:
   00967FD2  5D                   POP EBP
   00967FD3  C3                   RET
 
-; 00967FD4  _RTC_Initialize  (line unknown)
+; 00967FD4  __RTC_Initialize  (line unknown)
   00967FD4  8BFF                 MOV EDI,EDI
   00967FD6  56                   PUSH ESI
   00967FD7  B838D9B700           MOV EAX,0xb7d938
@@ -12041,30 +11766,7 @@ LAB_00967ff7:
   00967FF8  5E                   POP ESI
   00967FF9  C3                   RET
 
-; 00967FFA  _RTC_Terminate  (line unknown)
-  00967FFA  8BFF                 MOV EDI,EDI
-  00967FFC  56                   PUSH ESI
-  00967FFD  B840D9B700           MOV EAX,0xb7d940
-  00968002  BE40D9B700           MOV ESI,0xb7d940
-  00968007  57                   PUSH EDI
-  00968008  8BF8                 MOV EDI,EAX
-  0096800A  3BC6                 CMP EAX,ESI
-  0096800C  730F                 JNC 0x0096801d
-LAB_0096800e:
-  0096800E  8B07                 MOV EAX,dword ptr [EDI]
-  00968010  85C0                 TEST EAX,EAX
-  00968012  7402                 JZ 0x00968016
-  00968014  FFD0                 CALL EAX
-LAB_00968016:
-  00968016  83C704               ADD EDI,0x4
-  00968019  3BFE                 CMP EDI,ESI
-  0096801B  72F1                 JC 0x0096800e
-LAB_0096801d:
-  0096801D  5F                   POP EDI
-  0096801E  5E                   POP ESI
-  0096801F  C3                   RET
-
-; 00968020  _ValidateImageBase  (line unknown)
+; 00968020  __ValidateImageBase  (line unknown)
   00968020  8BFF                 MOV EDI,EDI
   00968022  55                   PUSH EBP
   00968023  8BEC                 MOV EBP,ESP
@@ -12089,7 +11791,7 @@ LAB_00968036:
   00968053  5D                   POP EBP
   00968054  C3                   RET
 
-; 00968060  _FindPESection  (line unknown)
+; 00968060  __FindPESection  (line unknown)
   00968060  8BFF                 MOV EDI,EDI
   00968062  55                   PUSH EBP
   00968063  8BEC                 MOV EBP,ESP
@@ -12128,7 +11830,7 @@ LAB_0096809f:
   009680A2  5D                   POP EBP
   009680A3  C3                   RET
 
-; 009680B0  _IsNonwritableInCurrentImage  (line unknown)
+; 009680B0  __IsNonwritableInCurrentImage  (line unknown)
   009680B0  8BFF                 MOV EDI,EDI
   009680B2  55                   PUSH EBP
   009680B3  8BEC                 MOV EBP,ESP
@@ -12226,7 +11928,7 @@ LAB_009681bd:
   009681BD  C9                   LEAVE
   009681BE  C3                   RET
 
-; 009681BF  _ismbblead_l  (line unknown)
+; 009681BF  __ismbblead_l  (line unknown)
   009681BF  8BFF                 MOV EDI,EDI
   009681C1  55                   PUSH EBP
   009681C2  8BEC                 MOV EBP,ESP
@@ -12239,7 +11941,7 @@ LAB_009681bd:
   009681D6  5D                   POP EBP
   009681D7  C3                   RET
 
-; 009681D8  _ismbblead  (line unknown)
+; 009681D8  __ismbblead  (line unknown)
   009681D8  8BFF                 MOV EDI,EDI
   009681DA  55                   PUSH EBP
   009681DB  8BEC                 MOV EBP,ESP
@@ -12252,7 +11954,7 @@ LAB_009681bd:
   009681EE  5D                   POP EBP
   009681EF  C3                   RET
 
-; 009681F0  _mbsnbcpy_s  (line unknown)
+; 009681F0  __mbsnbcpy_s  (line unknown)
   009681F0  8BFF                 MOV EDI,EDI
   009681F2  55                   PUSH EBP
   009681F3  8BEC                 MOV EBP,ESP
@@ -12266,7 +11968,7 @@ LAB_009681bd:
   0096820B  5D                   POP EBP
   0096820C  C3                   RET
 
-; 0096820D  _XcptFilter  (line unknown)
+; 0096820D  __XcptFilter  (line unknown)
   0096820D  8BFF                 MOV EDI,EDI
   0096820F  55                   PUSH EBP
   00968210  8BEC                 MOV EBP,ESP
@@ -12423,13 +12125,7 @@ LAB_00968393:
   00968395  5D                   POP EBP
   00968396  C20400               RET 0x4
 
-; 00968399  __CxxSetUnhandledExceptionFilter  (line unknown)
-  00968399  6857839600           PUSH 0x968357
-  0096839E  FF157831A300         CALL dword ptr [0x00a33178]
-  009683A4  33C0                 XOR EAX,EAX
-  009683A6  C3                   RET
-
-; 009683A7  _wincmdln  (line unknown)
+; 009683A7  __wincmdln  (line unknown)
   009683A7  8BFF                 MOV EDI,EDI
   009683A9  56                   PUSH ESI
   009683AA  57                   PUSH EDI
@@ -12482,7 +12178,7 @@ LAB_00968401:
   00968404  5E                   POP ESI
   00968405  C3                   RET
 
-; 00968406  _setenvp  (line unknown)
+; 00968406  FUN_00968406  (line unknown)
   00968406  833DA051A20200       CMP dword ptr [0x02a251a0],0x0
   0096840D  7505                 JNZ 0x00968414
   0096840F  E89475FFFF           CALL 0x0095f9a8
@@ -12789,7 +12485,7 @@ LAB_00968678:
   0096867A  C9                   LEAVE
   0096867B  C3                   RET
 
-; 0096867C  _setargv  (line unknown)
+; 0096867C  __setargv  (line unknown)
   0096867C  8BFF                 MOV EDI,EDI
   0096867E  55                   PUSH EBP
   0096867F  8BEC                 MOV EBP,ESP
@@ -12867,7 +12563,7 @@ LAB_00968732:
   00968735  C9                   LEAVE
   00968736  C3                   RET
 
-; 00968737  __crtGetEnvironmentStringsA  (line unknown)
+; 00968737  ___crtGetEnvironmentStringsA  (line unknown)
   00968737  8BFF                 MOV EDI,EDI
   00968739  55                   PUSH EBP
   0096873A  8BEC                 MOV EBP,ESP
@@ -12948,7 +12644,7 @@ LAB_009687ca:
   009687CC  C9                   LEAVE
   009687CD  C3                   RET
 
-; 009687CE  __security_init_cookie  (line unknown)
+; 009687CE  ___security_init_cookie  (line unknown)
   009687CE  8BFF                 MOV EDI,EDI
   009687D0  55                   PUSH EBP
   009687D1  8BEC                 MOV EBP,ESP
@@ -13008,7 +12704,7 @@ LAB_00968865:
   00968867  C9                   LEAVE
   00968868  C3                   RET
 
-; 00968869  _expand  (line unknown)
+; 00968869  __expand  (line unknown)
   00968869  8BFF                 MOV EDI,EDI
   0096886B  55                   PUSH EBP
   0096886C  8BEC                 MOV EBP,ESP
@@ -13085,11 +12781,7 @@ LAB_00968920:
   00968921  C9                   LEAVE
   00968922  C3                   RET
 
-; 00968923  ~bad_exception  (line unknown)
-  00968923  C7011087A500         MOV dword ptr [ECX],0xa58710
-  00968929  E97505FFFF           JMP 0x00958ea3
-
-; 0096892E  `scalar_deleting_destructor'  (line unknown)
+; 0096892E  FUN_0096892e  (line unknown)
   0096892E  8BFF                 MOV EDI,EDI
   00968930  55                   PUSH EBP
   00968931  8BEC                 MOV EBP,ESP
@@ -13108,7 +12800,7 @@ LAB_0096894e:
   00968951  5D                   POP EBP
   00968952  C20400               RET 0x4
 
-; 00968955  __TypeMatch  (line unknown)
+; 00968955  ___TypeMatch  (line unknown)
   00968955  8BFF                 MOV EDI,EDI
   00968957  55                   PUSH EBP
   00968958  8BEC                 MOV EBP,ESP
@@ -13162,7 +12854,7 @@ LAB_009689b0:
   009689B2  5D                   POP EBP
   009689B3  C3                   RET
 
-; 009689B4  __FrameUnwindFilter  (line unknown)
+; 009689B4  ___FrameUnwindFilter  (line unknown)
   009689B4  8BFF                 MOV EDI,EDI
   009689B6  55                   PUSH EBP
   009689B7  8BEC                 MOV EBP,ESP
@@ -13189,7 +12881,7 @@ LAB_009689ff:
   00968A01  5D                   POP EBP
   00968A02  C3                   RET
 
-; 00968A03  __FrameUnwindToState  (line unknown)
+; 00968A03  ___FrameUnwindToState  (line unknown)
   00968A03  6A10                 PUSH 0x10
   00968A05  68D016B800           PUSH 0xb816d0
   00968A0A  E8A19EFFFF           CALL 0x009628b0
@@ -13255,33 +12947,7 @@ LAB_00968ab6:
 LAB_00968ade:
   00968ADE  C3                   RET
 
-; 00968ADF  ExFilterRethrow  (line unknown)
-  00968ADF  8B00                 MOV EAX,dword ptr [EAX]
-  00968AE1  813863736DE0         CMP dword ptr [EAX],0xe06d7363
-  00968AE7  7538                 JNZ 0x00968b21
-  00968AE9  83781003             CMP dword ptr [EAX + 0x10],0x3
-  00968AED  7532                 JNZ 0x00968b21
-  00968AEF  8B4814               MOV ECX,dword ptr [EAX + 0x14]
-  00968AF2  81F920059319         CMP ECX,0x19930520
-  00968AF8  7410                 JZ 0x00968b0a
-  00968AFA  81F921059319         CMP ECX,0x19930521
-  00968B00  7408                 JZ 0x00968b0a
-  00968B02  81F922059319         CMP ECX,0x19930522
-  00968B08  7517                 JNZ 0x00968b21
-LAB_00968b0a:
-  00968B0A  83781C00             CMP dword ptr [EAX + 0x1c],0x0
-  00968B0E  7511                 JNZ 0x00968b21
-  00968B10  E8D773FFFF           CALL 0x0095feec
-  00968B15  33C9                 XOR ECX,ECX
-  00968B17  41                   INC ECX
-  00968B18  89880C020000         MOV dword ptr [EAX + 0x20c],ECX
-  00968B1E  8BC1                 MOV EAX,ECX
-  00968B20  C3                   RET
-LAB_00968b21:
-  00968B21  33C0                 XOR EAX,EAX
-  00968B23  C3                   RET
-
-; 00968B24  __DestructExceptionObject  (line unknown)
+; 00968B24  ___DestructExceptionObject  (line unknown)
   00968B24  6A08                 PUSH 0x8
   00968B26  68F816B800           PUSH 0xb816f8
   00968B2B  E8809DFFFF           CALL 0x009628b0
@@ -13305,7 +12971,7 @@ LAB_00968b61:
   00968B61  E88F9DFFFF           CALL 0x009628f5
   00968B66  C3                   RET
 
-; 00968B79  __AdjustPointer  (line unknown)
+; 00968B79  ___AdjustPointer  (line unknown)
   00968B79  8BFF                 MOV EDI,EDI
   00968B7B  55                   PUSH EBP
   00968B7C  8BEC                 MOV EBP,ESP
@@ -13327,7 +12993,7 @@ LAB_00968b9f:
   00968BA0  5D                   POP EBP
   00968BA1  C3                   RET
 
-; 00968BA2  IsInExceptionSpec  (line unknown)
+; 00968BA2  FUN_00968ba2  (line unknown)
   00968BA2  8BFF                 MOV EDI,EDI
   00968BA4  55                   PUSH EBP
   00968BA5  8BEC                 MOV EBP,ESP
@@ -13336,6 +13002,7 @@ LAB_00968b9f:
   00968BAC  3BF8                 CMP EDI,EAX
   00968BAE  750A                 JNZ 0x00968bba
   00968BB0  E8E6EEFFFF           CALL 0x00967a9b
+  00968BB5  E895EEFFFF           CALL 0x00967a4f
 LAB_00968bba:
   00968BBA  8845FF               MOV byte ptr [EBP + -0x1],AL
   00968BBD  8945F4               MOV dword ptr [EBP + -0xc],EAX
@@ -13384,7 +13051,7 @@ LAB_00968c13:
   00968C16  C9                   LEAVE
   00968C17  C3                   RET
 
-; 00968C18  CallUnexpected  (line unknown)
+; 00968C18  FUN_00968c18  (line unknown)
   00968C18  6A04                 PUSH 0x4
   00968C1A  B891C4A200           MOV EAX,0xa2c491
   00968C1F  E869780000           CALL 0x0097048d
@@ -13395,6 +13062,8 @@ LAB_00968c13:
 LAB_00968c37:
   00968C37  8365FC00             AND dword ptr [EBP + -0x4],0x0
   00968C3B  E848EEFFFF           CALL 0x00967a88
+  00968C40  834DFCFF             OR dword ptr [EBP + -0x4],0xffffffff
+  00968C44  E806EEFFFF           CALL 0x00967a4f
 
 ; 00968C49  Catch_All@00968c49  (line unknown)
   00968C49  E89E72FFFF           CALL 0x0095feec
@@ -13497,7 +13166,7 @@ LAB_00968dd8:
 LAB_00968dfc:
   00968DFC  C3                   RET
 
-; 00968DFD  __BuildCatchObjectHelper  (line unknown)
+; 00968DFD  ___BuildCatchObjectHelper  (line unknown)
   00968DFD  6A0C                 PUSH 0xc
   00968DFF  689817B800           PUSH 0xb81798
   00968E04  E8A79AFFFF           CALL 0x009628b0
@@ -13650,7 +13319,7 @@ LAB_00968f76:
   00968F76  E87A99FFFF           CALL 0x009628f5
   00968F7B  C3                   RET
 
-; 00968F7C  __BuildCatchObject  (line unknown)
+; 00968F7C  ___BuildCatchObject  (line unknown)
   00968F7C  6A08                 PUSH 0x8
   00968F7E  68B817B800           PUSH 0xb817b8
   00968F83  E82899FFFF           CALL 0x009628b0
@@ -14153,7 +13822,7 @@ LAB_009694f3:
   009694F6  C9                   LEAVE
   009694F7  C3                   RET
 
-; 009694F8  bad_exception  (line unknown)
+; 009694F8  FUN_009694f8  (line unknown)
   009694F8  8BFF                 MOV EDI,EDI
   009694FA  55                   PUSH EBP
   009694FB  8BEC                 MOV EBP,ESP
@@ -14167,7 +13836,7 @@ LAB_009694f3:
   00969511  5D                   POP EBP
   00969512  C20400               RET 0x4
 
-; 00969515  __InternalCxxFrameHandler  (line unknown)
+; 00969515  ___InternalCxxFrameHandler  (line unknown)
   00969515  8BFF                 MOV EDI,EDI
   00969517  55                   PUSH EBP
   00969518  8BEC                 MOV EBP,ESP
@@ -14260,7 +13929,7 @@ LAB_009695f6:
   009695F9  5D                   POP EBP
   009695FA  C3                   RET
 
-; 00969600  _CallSettingFrame  (line unknown)
+; 00969600  __CallSettingFrame@12  (line unknown)
   00969600  55                   PUSH EBP
   00969601  8BEC                 MOV EBP,ESP
   00969603  83EC04               SUB ESP,0x4
@@ -14278,7 +13947,6 @@ LAB_009695f6:
   00969623  56                   PUSH ESI
   00969624  57                   PUSH EDI
   00969625  FFD0                 CALL EAX
-__NLG_Return:
   00969627  5F                   POP EDI
   00969628  5E                   POP ESI
   00969629  8BDD                 MOV EBX,EBP
@@ -14298,34 +13966,12 @@ LAB_0096963f:
   00969648  C9                   LEAVE
   00969649  C20C00               RET 0xc
 
-; 0096968C  AugmentSinCos  (line unknown)
-  0096968C  D9E1                 FABS
-  0096968E  D9C0                 FLD ST0
-  00969690  D9C0                 FLD ST0
-  00969692  D9E8                 FLD1
-  00969694  DEE1                 FSUBRP
-  00969696  D9C9                 FXCH
-  00969698  D9E8                 FLD1
-  0096969A  DEC1                 FADDP
-  0096969C  DEC9                 FMULP
-  0096969E  D9E4                 FTST
-  009696A0  9BDDBD60FFFFFF       FSTSW word ptr [EBP + 0xffffff60]
-  009696A7  9B                   WAIT
-  009696A8  F68561FFFFFF01       TEST byte ptr [EBP + 0xffffff61],0x1
-  009696AF  7505                 JNZ 0x009696b6
-  009696B1  32ED                 XOR CH,CH
-  009696B3  D9FA                 FSQRT
-  009696B5  C3                   RET
-DescriminantNeg:
-  009696B6  58                   POP EAX
-  009696B7  E91A060000           JMP 0x00969cd6
-
-; 009696BC  rtpiby2  (line unknown)
+; 009696BC  FUN_009696bc  (line unknown)
   009696BC  DDD8                 FSTP ST0
   009696BE  DB2D6A90A500         FLD extended double ptr [0x00a5906a]
   009696C4  C3                   RET
 
-; 00969700  _cintrindisp2  (line unknown)
+; 00969700  __cintrindisp2  (line unknown)
   00969700  55                   PUSH EBP
   00969701  8BEC                 MOV EBP,ESP
   00969703  81C430FDFFFF         ADD ESP,0xfffffd30
@@ -14348,7 +13994,7 @@ LAB_0096972f:
   00969739  DD5582               FST double ptr [EBP + -0x7e]
   0096973C  EBDD                 JMP 0x0096971b
 
-; 0096973E  _cintrindisp1  (line unknown)
+; 0096973E  __cintrindisp1  (line unknown)
   0096973E  55                   PUSH EBP
   0096973F  8BEC                 MOV EBP,ESP
   00969741  81C430FDFFFF         ADD ESP,0xfffffd30
@@ -14368,7 +14014,7 @@ LAB_00969773:
   00969773  DD957AFFFFFF         FST double ptr [EBP + 0xffffff7a]
   00969779  EBDD                 JMP 0x00969758
 
-; 0096977B  _ctrandisp2  (line unknown)
+; 0096977B  __ctrandisp2  (line unknown)
   0096977B  55                   PUSH EBP
   0096977C  8BEC                 MOV EBP,ESP
   0096977E  81C430FDFFFF         ADD ESP,0xfffffd30
@@ -14389,10 +14035,10 @@ LAB_00969773:
   009697BA  C9                   LEAVE
   009697BB  C3                   RET
 
-; 009697BC  ctranexit  (line unknown)
+; 009697BC  FUN_009697bc  (line unknown)
   009697BC  80A538FDFFFFFE       AND byte ptr [EBP + 0xfffffd38],0xfe
 
-; 009697C3  cintrinexit  (line unknown)
+; 009697C3  FUN_009697c3  (line unknown)
   009697C3  833DE09FEA0000       CMP dword ptr [0x00ea9fe0],0x0
   009697CA  754F                 JNZ 0x0096981b
   009697CC  DD9530FDFFFF         FST double ptr [EBP + 0xfffffd30]
@@ -14498,7 +14144,7 @@ LAB_009698da:
   00969902  DD458A               FLD double ptr [EBP + -0x76]
   00969905  E911FFFFFF           JMP 0x0096981b
 
-; 0096990A  _ctrandisp1  (line unknown)
+; 0096990A  __ctrandisp1  (line unknown)
   0096990A  55                   PUSH EBP
   0096990B  8BEC                 MOV EBP,ESP
   0096990D  81C430FDFFFF         ADD ESP,0xfffffd30
@@ -14515,7 +14161,7 @@ LAB_009698da:
   0096993B  C9                   LEAVE
   0096993C  C3                   RET
 
-; 0096993D  _fload  (line unknown)
+; 0096993D  __fload  (line unknown)
   0096993D  55                   PUSH EBP
   0096993E  8BEC                 MOV EBP,ESP
   00969940  83C4F4               ADD ESP,-0xc
@@ -14541,7 +14187,7 @@ LAB_00969976:
   00969977  C9                   LEAVE
   00969978  C3                   RET
 
-; 00969980  _CIcos_pentium4  (line unknown)
+; 00969980  FUN_00969980  (line unknown)
   00969980  55                   PUSH EBP
   00969981  8BEC                 MOV EBP,ESP
   00969983  83EC08               SUB ESP,0x8
@@ -14552,7 +14198,7 @@ LAB_00969976:
   00969996  C9                   LEAVE
   00969997  C3                   RET
 
-; 00969998  cos_pentium4  (line unknown)
+; 00969998  FUN_00969998  (line unknown)
   00969998  660F12442404         MOVLPD XMM0,qword ptr [ESP + 0x4]
 
 ; 0096999E  FUN_0096999e  (line unknown)
@@ -14647,7 +14293,7 @@ LAB_00969af7:
 LAB_00969b24:
   00969B24  E92625FFFF           JMP 0x0095c04f
 
-; 00969B30  _trandisp1  (line unknown)
+; 00969B30  __trandisp1  (line unknown)
   00969B30  807A0E05             CMP byte ptr [EDX + 0xe],0x5
   00969B34  7511                 JNZ 0x00969b47
   00969B36  668B9D5CFFFFFF       MOV BX,word ptr [EBP + 0xffffff5c]
@@ -14680,7 +14326,7 @@ LAB_00969b4b:
   00969B92  83C310               ADD EBX,0x10
   00969B95  FF23                 JMP dword ptr [EBX]
 
-; 00969B97  _trandisp2  (line unknown)
+; 00969B97  __trandisp2  (line unknown)
   00969B97  807A0E05             CMP byte ptr [EDX + 0xe],0x5
   00969B9B  7511                 JNZ 0x00969bae
   00969B9D  668B9D5CFFFFFF       MOV BX,word ptr [EBP + 0xffffff5c]
@@ -14727,28 +14373,27 @@ LAB_00969bb2:
   00969C1E  83C310               ADD EBX,0x10
   00969C21  FF23                 JMP dword ptr [EBX]
 
-; 00969CD6  rtindfpop  (line unknown)
-  00969CD6  DDD8                 FSTP ST0
-__rtindfnpop:
-  00969CD8  DDD8                 FSTP ST0
-  00969CDA  DB2D6090A500         FLD extended double ptr [0x00a59060]
-  00969CE0  80BD70FFFFFF00       CMP byte ptr [EBP + 0xffffff70],0x0
-  00969CE7  7F07                 JG 0x00969cf0
-
-; 00969CE9  rttosnpopde  (line unknown)
-  00969CE9  C68570FFFFFF01       MOV byte ptr [EBP + 0xffffff70],0x1
-retj:
-  00969CF0  0AC9                 OR CL,CL
-  00969CF2  C3                   RET
-
-; 00969CF3  rtchsifneg  (line unknown)
+; 00969CF3  FUN_00969cf3  (line unknown)
   00969CF3  0AC9                 OR CL,CL
   00969CF5  7402                 JZ 0x00969cf9
   00969CF7  D9E0                 FCHS
-chsifnegret:
+LAB_00969cf9:
   00969CF9  C3                   RET
 
-; 00969D15  _load_CW  (line unknown)
+; 00969D00  FUN_00969d00  (line unknown)
+  00969D00  D9C0                 FLD ST0
+  00969D02  D9FC                 FRNDINT
+  00969D04  DCE1                 FSUBR ST1,ST0
+  00969D06  D9C9                 FXCH
+  00969D08  D9E0                 FCHS
+  00969D0A  D9F0                 F2XM1
+  00969D0C  D9E8                 FLD1
+  00969D0E  DEC1                 FADDP
+  00969D10  D9FD                 FSCALE
+  00969D12  DDD9                 FSTP ST1
+  00969D14  C3                   RET
+
+; 00969D15  FUN_00969d15  (line unknown)
   00969D15  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   00969D19  81E200030000         AND EDX,0x300
   00969D1F  83CA7F               OR EDX,0x7f
@@ -14756,7 +14401,7 @@ chsifnegret:
   00969D27  D96C2406             FLDCW word ptr [ESP + 0x6]
   00969D2B  C3                   RET
 
-; 00969D2C  _convertTOStoQNaN  (line unknown)
+; 00969D2C  FUN_00969d2c  (line unknown)
   00969D2C  A900000800           TEST EAX,0x80000
   00969D31  7406                 JZ 0x00969d39
   00969D33  B807000000           MOV EAX,0x7
@@ -14766,7 +14411,7 @@ LAB_00969d39:
   00969D3F  B801000000           MOV EAX,0x1
   00969D44  C3                   RET
 
-; 00969D45  _fload_withFB  (line unknown)
+; 00969D45  __fload_withFB  (line unknown)
   00969D45  8B4204               MOV EAX,dword ptr [EDX + 0x4]
   00969D48  250000F07F           AND EAX,0x7ff00000
   00969D4D  3D0000F07F           CMP EAX,0x7ff00000
@@ -14790,7 +14435,7 @@ LAB_00969d57:
   00969D84  8B4204               MOV EAX,dword ptr [EDX + 0x4]
   00969D87  C3                   RET
 
-; 00969D88  _checkTOS_withFB  (line unknown)
+; 00969D88  FUN_00969d88  (line unknown)
   00969D88  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   00969D8C  250000F07F           AND EAX,0x7ff00000
   00969D91  3D0000F07F           CMP EAX,0x7ff00000
@@ -14800,7 +14445,7 @@ LAB_00969d99:
   00969D99  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   00969D9D  C3                   RET
 
-; 00969D9E  _fast_exit  (line unknown)
+; 00969D9E  FUN_00969d9e  (line unknown)
   00969D9E  66813C247F02         CMP word ptr [ESP],0x27f
   00969DA4  7403                 JZ 0x00969da9
   00969DA6  D92C24               FLDCW word ptr [ESP]
@@ -14808,7 +14453,7 @@ LAB_00969da9:
   00969DA9  5A                   POP EDX
   00969DAA  C3                   RET
 
-; 00969DAB  _math_exit  (line unknown)
+; 00969DAB  __math_exit  (line unknown)
   00969DAB  668B0424             MOV AX,word ptr [ESP]
   00969DAF  663D7F02             CMP AX,0x27f
   00969DB3  741E                 JZ 0x00969dd3
@@ -14827,15 +14472,69 @@ LAB_00969dd3:
   00969DD3  5A                   POP EDX
   00969DD4  C3                   RET
 
-; 00969DD5  _check_overflow_exit  (line unknown)
-  00969DD5  83EC08               SUB ESP,0x8
-  00969DD8  DD1424               FST double ptr [ESP]
-  00969DDB  8B442404             MOV EAX,dword ptr [ESP + 0x4]
-  00969DDF  83C408               ADD ESP,0x8
-  00969DE2  250000F07F           AND EAX,0x7ff00000
-  00969DE7  EB14                 JMP 0x00969dfd
+; 00969DE9  FUN_00969de9  (line unknown)
+  00969DE9  83EC08               SUB ESP,0x8
+  00969DEC  DD1424               FST double ptr [ESP]
+  00969DEF  8B442404             MOV EAX,dword ptr [ESP + 0x4]
+  00969DF3  83C408               ADD ESP,0x8
+  00969DF6  250000F07F           AND EAX,0x7ff00000
+  00969DFB  743D                 JZ 0x00969e3a
+  00969DFD  3D0000F07F           CMP EAX,0x7ff00000
+  00969E02  745F                 JZ 0x00969e63
+  00969E04  668B0424             MOV AX,word ptr [ESP]
+  00969E08  663D7F02             CMP AX,0x27f
+  00969E0C  742A                 JZ 0x00969e38
+  00969E0E  6683E020             AND AX,0x20
+  00969E12  7521                 JNZ 0x00969e35
+  00969E14  9BDFE0               FSTSW AX
+  00969E17  6683E020             AND AX,0x20
+  00969E1B  7418                 JZ 0x00969e35
+  00969E1D  B808000000           MOV EAX,0x8
+LAB_00969e22:
+  00969E22  83FA1D               CMP EDX,0x1d
+  00969E25  7407                 JZ 0x00969e2e
+  00969E27  E87B000000           CALL 0x00969ea7
+  00969E2C  5A                   POP EDX
+  00969E2D  C3                   RET
+LAB_00969e2e:
+  00969E2E  E85D000000           CALL 0x00969e90
+  00969E33  5A                   POP EDX
+  00969E34  C3                   RET
+LAB_00969e35:
+  00969E35  D92C24               FLDCW word ptr [ESP]
+LAB_00969e38:
+  00969E38  5A                   POP EDX
+  00969E39  C3                   RET
+LAB_00969e3a:
+  00969E3A  DD05BC90A500         FLD double ptr [0x00a590bc]
+  00969E40  D9C9                 FXCH
+  00969E42  D9FD                 FSCALE
+  00969E44  DDD9                 FSTP ST1
+  00969E46  D9C0                 FLD ST0
+  00969E48  D9E1                 FABS
+  00969E4A  DC1DAC90A500         FCOMP double ptr [0x00a590ac]
+  00969E50  9BDFE0               FSTSW AX
+  00969E53  9E                   SAHF
+  00969E54  B804000000           MOV EAX,0x4
+  00969E59  73C7                 JNC 0x00969e22
+  00969E5B  DC0DCC90A500         FMUL double ptr [0x00a590cc]
+  00969E61  EBBF                 JMP 0x00969e22
+LAB_00969e63:
+  00969E63  DD05B490A500         FLD double ptr [0x00a590b4]
+  00969E69  D9C9                 FXCH
+  00969E6B  D9FD                 FSCALE
+  00969E6D  DDD9                 FSTP ST1
+  00969E6F  D9C0                 FLD ST0
+  00969E71  D9E1                 FABS
+  00969E73  DC1DA490A500         FCOMP double ptr [0x00a590a4]
+  00969E79  9BDFE0               FSTSW AX
+  00969E7C  9E                   SAHF
+  00969E7D  B803000000           MOV EAX,0x3
+  00969E82  769E                 JBE 0x00969e22
+  00969E84  DC0DC490A500         FMUL double ptr [0x00a590c4]
+  00969E8A  EB96                 JMP 0x00969e22
 
-; 00969E90  _startTwoArgErrorHandling  (line unknown)
+; 00969E90  FUN_00969e90  (line unknown)
   00969E90  55                   PUSH EBP
   00969E91  8BEC                 MOV EBP,ESP
   00969E93  83C4E0               ADD ESP,-0x20
@@ -14846,12 +14545,12 @@ LAB_00969dd3:
   00969EA2  8945F4               MOV dword ptr [EBP + -0xc],EAX
   00969EA5  EB09                 JMP 0x00969eb0
 
-; 00969EA7  _startOneArgErrorHandling  (line unknown)
+; 00969EA7  __startOneArgErrorHandling  (line unknown)
   00969EA7  55                   PUSH EBP
   00969EA8  8BEC                 MOV EBP,ESP
   00969EAA  83C4E0               ADD ESP,-0x20
   00969EAD  8945E0               MOV dword ptr [EBP + -0x20],EAX
-_ContinueErrorHandling:
+LAB_00969eb0:
   00969EB0  DD5DF8               FSTP double ptr [EBP + -0x8]
   00969EB3  894DE4               MOV dword ptr [EBP + -0x1c],ECX
   00969EB6  8B4510               MOV EAX,dword ptr [EBP + 0x10]
@@ -14873,7 +14572,7 @@ LAB_00969ee1:
   00969EE1  C9                   LEAVE
   00969EE2  C3                   RET
 
-; 00969EF0  _CIsin_pentium4  (line unknown)
+; 00969EF0  FUN_00969ef0  (line unknown)
   00969EF0  55                   PUSH EBP
   00969EF1  8BEC                 MOV EBP,ESP
   00969EF3  83EC08               SUB ESP,0x8
@@ -14884,7 +14583,7 @@ LAB_00969ee1:
   00969F06  C9                   LEAVE
   00969F07  C3                   RET
 
-; 00969F08  sin_pentium4  (line unknown)
+; 00969F08  FUN_00969f08  (line unknown)
   00969F08  660F12442404         MOVLPD XMM0,qword ptr [ESP + 0x4]
 
 ; 00969F0E  FUN_00969f0e  (line unknown)
@@ -14987,7 +14686,7 @@ LAB_0096a08c:
 LAB_0096a0b2:
   0096A0B2  E9C820FFFF           JMP 0x0095c17f
 
-; 0096A0C0  _CIacos_pentium4  (line unknown)
+; 0096A0C0  FUN_0096a0c0  (line unknown)
   0096A0C0  55                   PUSH EBP
   0096A0C1  8BEC                 MOV EBP,ESP
   0096A0C3  83EC08               SUB ESP,0x8
@@ -14997,9 +14696,6 @@ LAB_0096a0b2:
   0096A0D1  E808000000           CALL 0x0096a0de
   0096A0D6  C9                   LEAVE
   0096A0D7  C3                   RET
-
-; 0096A0D8  acos_pentium4  (line unknown)
-  0096A0D8  660F12442404         MOVLPD XMM0,qword ptr [ESP + 0x4]
 
 ; 0096A0DE  FUN_0096a0de  (line unknown)
   0096A0DE  660F122550B1A500     MOVLPD XMM4,qword ptr [0x00a5b150]
@@ -15305,107 +15001,7 @@ LAB_0096a602:
   0096A60A  BAF0030000           MOV EDX,0x3f0
   0096A60F  E94AFFFFFF           JMP 0x0096a55e
 
-; 0096A614  _floor_default  (line unknown)
-  0096A614  8BFF                 MOV EDI,EDI
-  0096A616  55                   PUSH EBP
-  0096A617  8BEC                 MOV EBP,ESP
-  0096A619  51                   PUSH ECX
-  0096A61A  51                   PUSH ECX
-  0096A61B  53                   PUSH EBX
-  0096A61C  56                   PUSH ESI
-  0096A61D  BEFFFF0000           MOV ESI,0xffff
-  0096A622  56                   PUSH ESI
-  0096A623  FF35E075B800         PUSH dword ptr [0x00b875e0]
-  0096A629  E803B1FFFF           CALL 0x00965731
-  0096A62E  DD4508               FLD double ptr [EBP + 0x8]
-  0096A631  59                   POP ECX
-  0096A632  59                   POP ECX
-  0096A633  0FB74D0E             MOVZX ECX,word ptr [EBP + 0xe]
-  0096A637  8BD8                 MOV EBX,EAX
-  0096A639  B8F07F0000           MOV EAX,0x7ff0
-  0096A63E  23C8                 AND ECX,EAX
-  0096A640  51                   PUSH ECX
-  0096A641  51                   PUSH ECX
-  0096A642  DD1C24               FSTP double ptr [ESP]
-  0096A645  663BC8               CMP CX,AX
-  0096A648  7555                 JNZ 0x0096a69f
-  0096A64A  E895A8FFFF           CALL 0x00964ee4
-  0096A64F  59                   POP ECX
-  0096A650  59                   POP ECX
-  0096A651  85C0                 TEST EAX,EAX
-  0096A653  7E2D                 JLE 0x0096a682
-  0096A655  83F802               CMP EAX,0x2
-  0096A658  7E1A                 JLE 0x0096a674
-  0096A65A  83F803               CMP EAX,0x3
-  0096A65D  7523                 JNZ 0x0096a682
-  0096A65F  DD4508               FLD double ptr [EBP + 0x8]
-  0096A662  53                   PUSH EBX
-  0096A663  51                   PUSH ECX
-  0096A664  51                   PUSH ECX
-  0096A665  DD1C24               FSTP double ptr [ESP]
-  0096A668  6A0B                 PUSH 0xb
-  0096A66A  E882AFFFFF           CALL 0x009655f1
-  0096A66F  83C410               ADD ESP,0x10
-  0096A672  EB74                 JMP 0x0096a6e8
-LAB_0096a674:
-  0096A674  56                   PUSH ESI
-  0096A675  53                   PUSH EBX
-  0096A676  E8B6B0FFFF           CALL 0x00965731
-  0096A67B  DD4508               FLD double ptr [EBP + 0x8]
-  0096A67E  59                   POP ECX
-  0096A67F  59                   POP ECX
-  0096A680  EB66                 JMP 0x0096a6e8
-LAB_0096a682:
-  0096A682  DD4508               FLD double ptr [EBP + 0x8]
-  0096A685  53                   PUSH EBX
-  0096A686  DC05C860A300         FADD double ptr [0x00a360c8]
-  0096A68C  83EC10               SUB ESP,0x10
-  0096A68F  DD5C2408             FSTP double ptr [ESP + 0x8]
-  0096A693  DD4508               FLD double ptr [EBP + 0x8]
-  0096A696  DD1C24               FSTP double ptr [ESP]
-  0096A699  6A0B                 PUSH 0xb
-  0096A69B  6A08                 PUSH 0x8
-  0096A69D  EB41                 JMP 0x0096a6e0
-LAB_0096a69f:
-  0096A69F  E8B6470000           CALL 0x0096ee5a
-  0096A6A4  DD5DF8               FSTP double ptr [EBP + -0x8]
-  0096A6A7  DD45F8               FLD double ptr [EBP + -0x8]
-  0096A6AA  59                   POP ECX
-  0096A6AB  DD4508               FLD double ptr [EBP + 0x8]
-  0096A6AE  59                   POP ECX
-  0096A6AF  DAE9                 FUCOMPP
-  0096A6B1  DFE0                 FNSTSW AX
-  0096A6B3  F6C444               TEST AH,0x44
-  0096A6B6  7A0E                 JP 0x0096a6c6
-LAB_0096a6b8:
-  0096A6B8  56                   PUSH ESI
-  0096A6B9  53                   PUSH EBX
-  0096A6BA  E872B0FFFF           CALL 0x00965731
-  0096A6BF  DD45F8               FLD double ptr [EBP + -0x8]
-  0096A6C2  59                   POP ECX
-  0096A6C3  59                   POP ECX
-  0096A6C4  EB22                 JMP 0x0096a6e8
-LAB_0096a6c6:
-  0096A6C6  F6C320               TEST BL,0x20
-  0096A6C9  75ED                 JNZ 0x0096a6b8
-  0096A6CB  DD45F8               FLD double ptr [EBP + -0x8]
-  0096A6CE  53                   PUSH EBX
-  0096A6CF  83EC10               SUB ESP,0x10
-  0096A6D2  DD5C2408             FSTP double ptr [ESP + 0x8]
-  0096A6D6  DD4508               FLD double ptr [EBP + 0x8]
-  0096A6D9  DD1C24               FSTP double ptr [ESP]
-  0096A6DC  6A0B                 PUSH 0xb
-  0096A6DE  6A10                 PUSH 0x10
-LAB_0096a6e0:
-  0096A6E0  E861AFFFFF           CALL 0x00965646
-  0096A6E5  83C41C               ADD ESP,0x1c
-LAB_0096a6e8:
-  0096A6E8  5E                   POP ESI
-  0096A6E9  5B                   POP EBX
-  0096A6EA  C9                   LEAVE
-  0096A6EB  C3                   RET
-
-; 0096A6F0  _CIlog_pentium4  (line unknown)
+; 0096A6F0  FUN_0096a6f0  (line unknown)
   0096A6F0  55                   PUSH EBP
   0096A6F1  8BEC                 MOV EBP,ESP
   0096A6F3  83EC08               SUB ESP,0x8
@@ -15415,9 +15011,6 @@ LAB_0096a6e8:
   0096A701  E808000000           CALL 0x0096a70e
   0096A706  C9                   LEAVE
   0096A707  C3                   RET
-
-; 0096A708  log_pentium4  (line unknown)
-  0096A708  660F12442404         MOVLPD XMM0,qword ptr [ESP + 0x4]
 
 ; 0096A70E  FUN_0096a70e  (line unknown)
   0096A70E  BA00000000           MOV EDX,0x0
@@ -15561,76 +15154,7 @@ LAB_0096a92f:
   0096A955  BAE8030000           MOV EDX,0x3e8
   0096A95A  EBA6                 JMP 0x0096a902
 
-; 0096AAAE  ffexpm1  (line unknown)
-__rtzeronpop:
-  00969C36  DDD8                 FSTP ST0
-  00969C38  D9EE                 FLDZ
-  00969C3A  C3                   RET
-ExpArgOutOfRange:
-  0096AA60  58                   POP EAX
-  0096AA61  D9E4                 FTST
-  0096AA63  9BDDBD60FFFFFF       FSTSW word ptr [EBP + 0xffffff60]
-  0096AA6A  9B                   WAIT
-  0096AA6B  F68561FFFFFF01       TEST byte ptr [EBP + 0xffffff61],0x1
-  0096AA72  750F                 JNZ 0x0096aa83
-  0096AA74  DDD8                 FSTP ST0
-  0096AA76  DB2DA0BAA500         FLD extended double ptr [0x00a5baa0]
-  0096AA7C  0AED                 OR CH,CH
-  0096AA7E  7402                 JZ 0x0096aa82
-  0096AA80  D9E0                 FCHS
-_expbigret:
-  0096AA82  C3                   RET
-zeronpopue:
-  0096AA83  C68570FFFFFF04       MOV byte ptr [EBP + 0xffffff70],0x4
-  0096AA8A  E9A7F1FFFF           JMP 0x00969c36
-  0096AAAE  D9C0                 FLD ST0
-  0096AAB0  D9E1                 FABS
-  0096AAB2  DB2DBEBAA500         FLD extended double ptr [0x00a5babe]
-  0096AAB8  DED9                 FCOMPP
-  0096AABA  9BDDBD60FFFFFF       FSTSW word ptr [EBP + 0xffffff60]
-  0096AAC1  9B                   WAIT
-  0096AAC2  F68561FFFFFF41       TEST byte ptr [EBP + 0xffffff61],0x41
-  0096AAC9  7595                 JNZ 0x0096aa60
-  0096AACB  D9C0                 FLD ST0
-  0096AACD  D9FC                 FRNDINT
-  0096AACF  D9E4                 FTST
-  0096AAD1  9BDDBD60FFFFFF       FSTSW word ptr [EBP + 0xffffff60]
-  0096AAD8  9B                   WAIT
-  0096AAD9  8A9561FFFFFF         MOV DL,byte ptr [EBP + 0xffffff61]
-  0096AADF  D9C9                 FXCH
-  0096AAE1  D8E1                 FSUB ST0,ST1
-  0096AAE3  D9E4                 FTST
-  0096AAE5  9BDDBD60FFFFFF       FSTSW word ptr [EBP + 0xffffff60]
-  0096AAEC  D9E1                 FABS
-  0096AAEE  D9F0                 F2XM1
-  0096AAF0  C3                   RET
-
-; 0096AAF1  isintTOS  (line unknown)
-  0096AAF1  D9C0                 FLD ST0
-  0096AAF3  D9FC                 FRNDINT
-  0096AAF5  D8D9                 FCOMP
-  0096AAF7  9BDFE0               FSTSW AX
-  0096AAFA  9E                   SAHF
-  0096AAFB  751A                 JNZ 0x0096ab17
-  0096AAFD  D9C0                 FLD ST0
-  0096AAFF  DC0DD2BAA500         FMUL double ptr [0x00a5bad2]
-  0096AB05  D9C0                 FLD ST0
-  0096AB07  D9FC                 FRNDINT
-  0096AB09  DED9                 FCOMPP
-  0096AB0B  9BDFE0               FSTSW AX
-  0096AB0E  9E                   SAHF
-  0096AB0F  740D                 JZ 0x0096ab1e
-  0096AB11  B801000000           MOV EAX,0x1
-_isintTOSret:
-  0096AB16  C3                   RET
-notanint:
-  0096AB17  B800000000           MOV EAX,0x0
-  0096AB1C  EBF8                 JMP 0x0096ab16
-evenint:
-  0096AB1E  B802000000           MOV EAX,0x2
-  0096AB23  EBF1                 JMP 0x0096ab16
-
-; 0096AB60  _CIpow_pentium4  (line unknown)
+; 0096AB60  FUN_0096ab60  (line unknown)
   0096AB60  55                   PUSH EBP
   0096AB61  8BEC                 MOV EBP,ESP
   0096AB63  83EC10               SUB ESP,0x10
@@ -15642,7 +15166,7 @@ evenint:
   0096AB77  C9                   LEAVE
   0096AB78  C3                   RET
 
-; 0096AB79  pow_pentium4  (line unknown)
+; 0096AB79  FUN_0096ab79  (line unknown)
   0096AB79  660F12442404         MOVLPD XMM0,qword ptr [ESP + 0x4]
   0096AB7F  660F123D90F3A500     MOVLPD XMM7,qword ptr [0x00a5f390]
   0096AB87  660F1215A0F3A500     MOVLPD XMM2,qword ptr [0x00a5f3a0]
@@ -16323,7 +15847,7 @@ LAB_0096b680:
   0096B6A6  0F852DFFFFFF         JNZ 0x0096b5d9
   0096B6AC  E94BFFFFFF           JMP 0x0096b5fc
 
-; 0096B6C0  d_inttype  (line unknown)
+; 0096B6C0  __d_inttype  (line unknown)
   0096B6C0  8BFF                 MOV EDI,EDI
   0096B6C2  55                   PUSH EBP
   0096B6C3  8BEC                 MOV EBP,ESP
@@ -16379,7 +15903,7 @@ LAB_0096b726:
   0096B728  C9                   LEAVE
   0096B729  C3                   RET
 
-; 0096B72A  powhlp  (line unknown)
+; 0096B72A  FUN_0096b72a  (line unknown)
   0096B72A  8BFF                 MOV EDI,EDI
   0096B72C  55                   PUSH EBP
   0096B72D  8BEC                 MOV EBP,ESP
@@ -16507,7 +16031,7 @@ LAB_0096b850:
   0096B853  5D                   POP EBP
   0096B854  C3                   RET
 
-; 0096B860  _CIexp_pentium4  (line unknown)
+; 0096B860  FUN_0096b860  (line unknown)
   0096B860  55                   PUSH EBP
   0096B861  8BEC                 MOV EBP,ESP
   0096B863  83EC08               SUB ESP,0x8
@@ -16517,9 +16041,6 @@ LAB_0096b850:
   0096B871  E808000000           CALL 0x0096b87e
   0096B876  C9                   LEAVE
   0096B877  C3                   RET
-
-; 0096B878  exp_pentium4  (line unknown)
-  0096B878  660F12442404         MOVLPD XMM0,qword ptr [ESP + 0x4]
 
 ; 0096B87E  FUN_0096b87e  (line unknown)
   0096B87E  660F14C0             UNPCKLPD XMM0,XMM0
@@ -16687,7 +16208,7 @@ LAB_0096baee:
   0096BB19  83C410               ADD ESP,0x10
   0096BB1C  C3                   RET
 
-; 0096BB20  _calloc_impl  (line unknown)
+; 0096BB20  __calloc_impl  (line unknown)
   0096BB20  8BFF                 MOV EDI,EDI
   0096BB22  55                   PUSH EBP
   0096BB23  8BEC                 MOV EBP,ESP
@@ -16747,7 +16268,7 @@ LAB_0096bb9f:
   0096BBA0  5D                   POP EBP
   0096BBA1  C3                   RET
 
-; 0096BBA2  _set_osfhnd  (line unknown)
+; 0096BBA2  __set_osfhnd  (line unknown)
   0096BBA2  8BFF                 MOV EDI,EDI
   0096BBA4  55                   PUSH EBP
   0096BBA5  8BEC                 MOV EBP,ESP
@@ -16807,7 +16328,7 @@ LAB_0096bc1f:
   0096BC21  5D                   POP EBP
   0096BC22  C3                   RET
 
-; 0096BC23  _free_osfhnd  (line unknown)
+; 0096BC23  __free_osfhnd  (line unknown)
   0096BC23  8BFF                 MOV EDI,EDI
   0096BC25  55                   PUSH EBP
   0096BC26  8BEC                 MOV EBP,ESP
@@ -16869,7 +16390,7 @@ LAB_0096bca4:
   0096BCA7  5D                   POP EBP
   0096BCA8  C3                   RET
 
-; 0096BCA9  _get_osfhandle  (line unknown)
+; 0096BCA9  __get_osfhandle  (line unknown)
   0096BCA9  8BFF                 MOV EDI,EDI
   0096BCAB  55                   PUSH EBP
   0096BCAC  8BEC                 MOV EBP,ESP
@@ -16908,7 +16429,7 @@ LAB_0096bcf4:
   0096BD10  5D                   POP EBP
   0096BD11  C3                   RET
 
-; 0096BD12  __lock_fhandle  (line unknown)
+; 0096BD12  ___lock_fhandle  (line unknown)
   0096BD12  6A0C                 PUSH 0xc
   0096BD14  681018B800           PUSH 0xb81810
   0096BD19  E8926BFFFF           CALL 0x009628b0
@@ -16963,7 +16484,7 @@ LAB_0096bd9a:
   0096BDAF  59                   POP ECX
   0096BDB0  C3                   RET
 
-; 0096BDB1  _unlock_fhandle  (line unknown)
+; 0096BDB1  __unlock_fhandle  (line unknown)
   0096BDB1  8BFF                 MOV EDI,EDI
   0096BDB3  55                   PUSH EBP
   0096BDB4  8BEC                 MOV EBP,ESP
@@ -16979,7 +16500,7 @@ LAB_0096bd9a:
   0096BDD6  5D                   POP EBP
   0096BDD7  C3                   RET
 
-; 0096BDD8  _alloc_osfhnd  (line unknown)
+; 0096BDD8  __alloc_osfhnd  (line unknown)
   0096BDD8  6A18                 PUSH 0x18
   0096BDDA  683018B800           PUSH 0xb81830
   0096BDDF  E8CC6AFFFF           CALL 0x009628b0
@@ -17149,7 +16670,7 @@ LAB_0096bf62:
   0096BFC1  64A300000000         MOV FS:[0x0],EAX
   0096BFC7  C3                   RET
 
-; 0096BFC8  __SEH_epilog4_GS  (line unknown)
+; 0096BFC8  FUN_0096bfc8  (line unknown)
   0096BFC8  8B4DE4               MOV ECX,dword ptr [EBP + -0x1c]
   0096BFCB  33CD                 XOR ECX,EBP
   0096BFCD  E8729BFEFF           CALL 0x00955b44
@@ -17184,7 +16705,7 @@ LAB_0096c007:
   0096C007  FF06                 INC dword ptr [ESI]
   0096C009  C3                   RET
 
-; 0096C00A  _output_s_l  (line unknown)
+; 0096C00A  FUN_0096c00a  (line unknown)
   0096C00A  8BFF                 MOV EDI,EDI
   0096C00C  55                   PUSH EBP
   0096C00D  8BEC                 MOV EBP,ESP
@@ -18073,7 +17594,7 @@ LAB_0096cc0c:
   0096CC19  C9                   LEAVE
   0096CC1A  C3                   RET
 
-; 0096CC40  __ascii_strnicmp  (line unknown)
+; 0096CC40  ___ascii_strnicmp  (line unknown)
   0096CC40  55                   PUSH EBP
   0096CC41  8BEC                 MOV EBP,ESP
   0096CC43  57                   PUSH EDI
@@ -18129,7 +17650,7 @@ LAB_0096cc9a:
   0096CC9F  C9                   LEAVE
   0096CCA0  C3                   RET
 
-; 0096CCA1  _atodbl_l  (line unknown)
+; 0096CCA1  FID_conflict:__atoflt_l  (line unknown)
   0096CCA1  8BFF                 MOV EDI,EDI
   0096CCA3  55                   PUSH EBP
   0096CCA4  8BEC                 MOV EBP,ESP
@@ -18211,7 +17732,7 @@ LAB_0096cd3a:
   0096CD47  C9                   LEAVE
   0096CD48  C3                   RET
 
-; 0096CD49  _atoflt_l  (line unknown)
+; 0096CD49  FID_conflict:__atoflt_l  (line unknown)
   0096CD49  8BFF                 MOV EDI,EDI
   0096CD4B  55                   PUSH EBP
   0096CD4C  8BEC                 MOV EBP,ESP
@@ -18293,7 +17814,7 @@ LAB_0096cde2:
   0096CDEF  C9                   LEAVE
   0096CDF0  C3                   RET
 
-; 0096CDF1  _fptostr  (line unknown)
+; 0096CDF1  __fptostr  (line unknown)
   0096CDF1  8BFF                 MOV EDI,EDI
   0096CDF3  55                   PUSH EBP
   0096CDF4  8BEC                 MOV EBP,ESP
@@ -18393,7 +17914,7 @@ LAB_0096cea0:
   0096CEA2  5D                   POP EBP
   0096CEA3  C3                   RET
 
-; 0096CEA4  __dtold  (line unknown)
+; 0096CEA4  ___dtold  (line unknown)
   0096CEA4  8BFF                 MOV EDI,EDI
   0096CEA6  55                   PUSH EBP
   0096CEA7  8BEC                 MOV EBP,ESP
@@ -18472,7 +17993,7 @@ LAB_0096cf4e:
   0096CF55  C9                   LEAVE
   0096CF56  C3                   RET
 
-; 0096CF57  _fltout2  (line unknown)
+; 0096CF57  FUN_0096cf57  (line unknown)
   0096CF57  8BFF                 MOV EDI,EDI
   0096CF59  55                   PUSH EBP
   0096CF5A  8BEC                 MOV EBP,ESP
@@ -18537,7 +18058,7 @@ LAB_0096cfd8:
   0096CFDE  50                   PUSH EAX
   0096CFDF  E8C620FFFF           CALL 0x0095f0aa
 
-; 0096CFF0  _alldvrm  (line unknown)
+; 0096CFF0  __alldvrm  (line unknown)
   0096CFF0  57                   PUSH EDI
   0096CFF1  56                   PUSH ESI
   0096CFF2  55                   PUSH EBP
@@ -18639,7 +18160,7 @@ LAB_0096d0c9:
   0096D0CB  5F                   POP EDI
   0096D0CC  C21000               RET 0x10
 
-; 0096D0D0  _aullshr  (line unknown)
+; 0096D0D0  __aullshr  (line unknown)
   0096D0D0  80F940               CMP CL,0x40
   0096D0D3  7315                 JNC 0x0096d0ea
   0096D0D5  80F920               CMP CL,0x20
@@ -18658,11 +18179,7 @@ LAB_0096d0ea:
   0096D0EC  33D2                 XOR EDX,EDX
   0096D0EE  C3                   RET
 
-; 0096D0EF  _fptrap  (line unknown)
-  0096D0EF  6A02                 PUSH 0x2
-  0096D0F1  E803DBFEFF           CALL 0x0095abf9
-
-; 0096D0F8  _controlfp_s  (line unknown)
+; 0096D0F8  __controlfp_s  (line unknown)
   0096D0F8  8BFF                 MOV EDI,EDI
   0096D0FA  55                   PUSH EBP
   0096D0FB  8BEC                 MOV EBP,ESP
@@ -18709,11 +18226,11 @@ LAB_0096d154:
   0096D155  5D                   POP EBP
   0096D156  C3                   RET
 
-; 0096D157  _crt_debugger_hook  (line unknown)
+; 0096D157  FUN_0096d157  (line unknown)
   0096D157  83256450A20200       AND dword ptr [0x02a25064],0x0
   0096D15E  C3                   RET
 
-; 0096D15F  _lseeki64_nolock  (line unknown)
+; 0096D15F  __lseeki64_nolock  (line unknown)
   0096D15F  8BFF                 MOV EDI,EDI
   0096D161  55                   PUSH EBP
   0096D162  8BEC                 MOV EBP,ESP
@@ -18771,7 +18288,7 @@ LAB_0096d1e0:
   0096D1E2  C9                   LEAVE
   0096D1E3  C3                   RET
 
-; 0096D1E4  _lseeki64  (line unknown)
+; 0096D1E4  __lseeki64  (line unknown)
   0096D1E4  6A14                 PUSH 0x14
   0096D1E6  685818B800           PUSH 0xb81858
   0096D1EB  E8C056FFFF           CALL 0x009628b0
@@ -18850,7 +18367,7 @@ LAB_0096d2be:
   0096D2CC  59                   POP ECX
   0096D2CD  C3                   RET
 
-; 0096D2CE  _getbuf  (line unknown)
+; 0096D2CE  __getbuf  (line unknown)
   0096D2CE  8BFF                 MOV EDI,EDI
   0096D2D0  55                   PUSH EBP
   0096D2D1  8BEC                 MOV EBP,ESP
@@ -18877,7 +18394,7 @@ LAB_0096d30c:
   0096D315  5D                   POP EBP
   0096D316  C3                   RET
 
-; 0096D317  _isatty  (line unknown)
+; 0096D317  __isatty  (line unknown)
   0096D317  8BFF                 MOV EDI,EDI
   0096D319  55                   PUSH EBP
   0096D31A  8BEC                 MOV EBP,ESP
@@ -18911,7 +18428,7 @@ LAB_0096d351:
   0096D36B  5D                   POP EBP
   0096D36C  C3                   RET
 
-; 0096D36D  _wctomb_s_l  (line unknown)
+; 0096D36D  __wctomb_s_l  (line unknown)
   0096D36D  8BFF                 MOV EDI,EDI
   0096D36F  55                   PUSH EBP
   0096D370  8BEC                 MOV EBP,ESP
@@ -19050,7 +18567,7 @@ LAB_0096d493:
   0096D4BA  83C40C               ADD ESP,0xc
   0096D4BD  E95BFFFFFF           JMP 0x0096d41d
 
-; 0096D4C2  wctomb_s  (line unknown)
+; 0096D4C2  _wctomb_s  (line unknown)
   0096D4C2  8BFF                 MOV EDI,EDI
   0096D4C4  55                   PUSH EBP
   0096D4C5  8BEC                 MOV EBP,ESP
@@ -19167,7 +18684,7 @@ LAB_0096d5b4:
   0096D5C4  C9                   LEAVE
   0096D5C5  C3                   RET
 
-; 0096D5C6  __crtGetStringTypeA  (line unknown)
+; 0096D5C6  ___crtGetStringTypeA  (line unknown)
   0096D5C6  8BFF                 MOV EDI,EDI
   0096D5C8  55                   PUSH EBP
   0096D5C9  8BEC                 MOV EBP,ESP
@@ -19193,7 +18710,7 @@ LAB_0096d604:
   0096D604  C9                   LEAVE
   0096D605  C3                   RET
 
-; 0096D606  __free_lc_time  (line unknown)
+; 0096D606  ___free_lc_time  (line unknown)
   0096D606  8BFF                 MOV EDI,EDI
   0096D608  55                   PUSH EBP
   0096D609  8BEC                 MOV EBP,ESP
@@ -19384,7 +18901,7 @@ LAB_0096d97a:
   0096D97B  5D                   POP EBP
   0096D97C  C3                   RET
 
-; 0096D97D  __free_lconv_num  (line unknown)
+; 0096D97D  ___free_lconv_num  (line unknown)
   0096D97D  8BFF                 MOV EDI,EDI
   0096D97F  55                   PUSH EBP
   0096D980  8BEC                 MOV EBP,ESP
@@ -19431,7 +18948,7 @@ LAB_0096d9e3:
   0096D9E4  5D                   POP EBP
   0096D9E5  C3                   RET
 
-; 0096D9E6  __free_lconv_mon  (line unknown)
+; 0096D9E6  ___free_lconv_mon  (line unknown)
   0096D9E6  8BFF                 MOV EDI,EDI
   0096D9E8  55                   PUSH EBP
   0096D9E9  8BEC                 MOV EBP,ESP
@@ -19534,7 +19051,7 @@ LAB_0096dae1:
   0096DAE2  5D                   POP EBP
   0096DAE3  C3                   RET
 
-; 0096DAE4  ___lc_codepage_func  (line unknown)
+; 0096DAE4  ____lc_codepage_func  (line unknown)
   0096DAE4  E80324FFFF           CALL 0x0095feec
   0096DAE9  8BC8                 MOV ECX,EAX
   0096DAEB  8B416C               MOV EAX,dword ptr [ECX + 0x6c]
@@ -19548,7 +19065,7 @@ LAB_0096db06:
   0096DB06  8B4004               MOV EAX,dword ptr [EAX + 0x4]
   0096DB09  C3                   RET
 
-; 0096DB0A  strncpy_s  (line unknown)
+; 0096DB0A  _strncpy_s  (line unknown)
   0096DB0A  8BFF                 MOV EDI,EDI
   0096DB0C  55                   PUSH EBP
   0096DB0D  8BEC                 MOV EBP,ESP
@@ -19649,7 +19166,7 @@ LAB_0096dbaf:
   0096DBBB  8BF1                 MOV ESI,ECX
   0096DBBD  EB82                 JMP 0x0096db41
 
-; 0096DBC0  strpbrk  (line unknown)
+; 0096DBC0  _strpbrk  (line unknown)
   0096DBC0  55                   PUSH EBP
   0096DBC1  8BEC                 MOV EBP,ESP
   0096DBC3  56                   PUSH ESI
@@ -19688,7 +19205,7 @@ LAB_0096dbfa:
   0096DBFE  C9                   LEAVE
   0096DBFF  C3                   RET
 
-; 0096DC00  _ungetc_nolock  (line unknown)
+; 0096DC00  __ungetc_nolock  (line unknown)
   0096DC00  8BFF                 MOV EDI,EDI
   0096DC02  55                   PUSH EBP
   0096DC03  8BEC                 MOV EBP,ESP
@@ -19793,7 +19310,7 @@ LAB_0096dccb:
   0096DCDC  25FF000000           AND EAX,0xff
   0096DCE1  EB9B                 JMP 0x0096dc7e
 
-; 0096DCE3  _mbtowc_l  (line unknown)
+; 0096DCE3  __mbtowc_l  (line unknown)
   0096DCE3  8BFF                 MOV EDI,EDI
   0096DCE5  55                   PUSH EBP
   0096DCE6  8BEC                 MOV EBP,ESP
@@ -19909,7 +19426,7 @@ LAB_0096ddd2:
   0096DDF1  0F853AFFFFFF         JNZ 0x0096dd31
   0096DDF7  EBBA                 JMP 0x0096ddb3
 
-; 0096DDF9  mbtowc  (line unknown)
+; 0096DDF9  _mbtowc  (line unknown)
   0096DDF9  8BFF                 MOV EDI,EDI
   0096DDFB  55                   PUSH EBP
   0096DDFC  8BEC                 MOV EBP,ESP
@@ -19922,7 +19439,7 @@ LAB_0096ddd2:
   0096DE11  5D                   POP EBP
   0096DE12  C3                   RET
 
-; 0096DE13  _ld12tod  (line unknown)
+; 0096DE13  __ld12tod  (line unknown)
   0096DE13  8BFF                 MOV EDI,EDI
   0096DE15  55                   PUSH EBP
   0096DE16  8BEC                 MOV EBP,ESP
@@ -20498,7 +20015,7 @@ LAB_0096e356:
   0096E362  C9                   LEAVE
   0096E363  C3                   RET
 
-; 0096E364  _ld12tof  (line unknown)
+; 0096E364  __ld12tof  (line unknown)
   0096E364  8BFF                 MOV EDI,EDI
   0096E366  55                   PUSH EBP
   0096E367  8BEC                 MOV EBP,ESP
@@ -21074,7 +20591,7 @@ LAB_0096e8a7:
   0096E8B3  C9                   LEAVE
   0096E8B4  C3                   RET
 
-; 0096E8B5  __mtold12  (line unknown)
+; 0096E8B5  FUN_0096e8b5  (line unknown)
   0096E8B5  8BFF                 MOV EDI,EDI
   0096E8B7  55                   PUSH EBP
   0096E8B8  8BEC                 MOV EBP,ESP
@@ -21275,7 +20792,7 @@ LAB_0096ea8c:
   0096EA97  C9                   LEAVE
   0096EA98  C3                   RET
 
-; 0096EA99  __crtMessageBoxW  (line unknown)
+; 0096EA99  ___crtMessageBoxW  (line unknown)
   0096EA99  8BFF                 MOV EDI,EDI
   0096EA9B  55                   PUSH EBP
   0096EA9C  8BEC                 MOV EBP,ESP
@@ -21417,7 +20934,7 @@ LAB_0096ebf6:
   0096EC03  C9                   LEAVE
   0096EC04  C3                   RET
 
-; 0096EC05  wcscat_s  (line unknown)
+; 0096EC05  _wcscat_s  (line unknown)
   0096EC05  8BFF                 MOV EDI,EDI
   0096EC07  55                   PUSH EBP
   0096EC08  8BEC                 MOV EBP,ESP
@@ -21482,7 +20999,7 @@ LAB_0096ec63:
   0096EC76  8BF1                 MOV ESI,ECX
   0096EC78  EBAA                 JMP 0x0096ec24
 
-; 0096EC7A  wcsncpy_s  (line unknown)
+; 0096EC7A  _wcsncpy_s  (line unknown)
   0096EC7A  8BFF                 MOV EDI,EDI
   0096EC7C  55                   PUSH EBP
   0096EC7D  8BEC                 MOV EBP,ESP
@@ -21587,7 +21104,7 @@ LAB_0096ed33:
   0096ED40  8BF1                 MOV ESI,ECX
   0096ED42  E96AFFFFFF           JMP 0x0096ecb1
 
-; 0096ED47  wcscpy_s  (line unknown)
+; 0096ED47  _wcscpy_s  (line unknown)
   0096ED47  8BFF                 MOV EDI,EDI
   0096ED49  55                   PUSH EBP
   0096ED4A  8BEC                 MOV EBP,ESP
@@ -21641,7 +21158,7 @@ LAB_0096ed93:
   0096EDA6  8BF1                 MOV ESI,ECX
   0096EDA8  EBBC                 JMP 0x0096ed66
 
-; 0096EDAA  _set_error_mode  (line unknown)
+; 0096EDAA  __set_error_mode  (line unknown)
   0096EDAA  8BFF                 MOV EDI,EDI
   0096EDAC  55                   PUSH EBP
   0096EDAD  8BEC                 MOV EBP,ESP
@@ -21668,7 +21185,7 @@ LAB_0096edd4:
   0096EDE7  5D                   POP EBP
   0096EDE8  C3                   RET
 
-; 0096EDE9  _recalloc  (line unknown)
+; 0096EDE9  __recalloc  (line unknown)
   0096EDE9  8BFF                 MOV EDI,EDI
   0096EDEB  55                   PUSH EBP
   0096EDEC  8BEC                 MOV EBP,ESP
@@ -21725,11 +21242,11 @@ LAB_0096ee54:
   0096EE55  5D                   POP EBP
   0096EE56  C3                   RET
 
-; 0096EE57  _matherr  (line unknown)
+; 0096EE57  FUN_0096ee57  (line unknown)
   0096EE57  33C0                 XOR EAX,EAX
   0096EE59  C3                   RET
 
-; 0096EE5A  _frnd  (line unknown)
+; 0096EE5A  __frnd  (line unknown)
   0096EE5A  8BFF                 MOV EDI,EDI
   0096EE5C  55                   PUSH EBP
   0096EE5D  8BEC                 MOV EBP,ESP
@@ -22025,7 +21542,7 @@ LAB_0096f0ca:
   0096F0DA  C9                   LEAVE
   0096F0DB  C3                   RET
 
-; 0096F0DC  __crtCompareStringA  (line unknown)
+; 0096F0DC  ___crtCompareStringA  (line unknown)
   0096F0DC  8BFF                 MOV EDI,EDI
   0096F0DE  55                   PUSH EBP
   0096F0DF  8BEC                 MOV EBP,ESP
@@ -22051,7 +21568,7 @@ LAB_0096f11c:
   0096F11C  C9                   LEAVE
   0096F11D  C3                   RET
 
-; 0096F11E  _strnicoll_l  (line unknown)
+; 0096F11E  __strnicoll_l  (line unknown)
   0096F11E  8BFF                 MOV EDI,EDI
   0096F120  55                   PUSH EBP
   0096F121  8BEC                 MOV EBP,ESP
@@ -22147,7 +21664,7 @@ LAB_0096f205:
   0096F206  C9                   LEAVE
   0096F207  C3                   RET
 
-; 0096F208  _wcsnicoll_l  (line unknown)
+; 0096F208  __wcsnicoll_l  (line unknown)
   0096F208  8BFF                 MOV EDI,EDI
   0096F20A  55                   PUSH EBP
   0096F20B  8BEC                 MOV EBP,ESP
@@ -22263,7 +21780,7 @@ LAB_0096f325:
   0096F326  C9                   LEAVE
   0096F327  C3                   RET
 
-; 0096F328  _wcsnicoll  (line unknown)
+; 0096F328  __wcsnicoll  (line unknown)
   0096F328  8BFF                 MOV EDI,EDI
   0096F32A  55                   PUSH EBP
   0096F32B  8BEC                 MOV EBP,ESP
@@ -22337,7 +21854,7 @@ LAB_0096f3df:
   0096F3E0  5D                   POP EBP
   0096F3E1  C3                   RET
 
-; 0096F3E2  _wcsdup  (line unknown)
+; 0096F3E2  __wcsdup  (line unknown)
   0096F3E2  8BFF                 MOV EDI,EDI
   0096F3E4  55                   PUSH EBP
   0096F3E5  8BEC                 MOV EBP,ESP
@@ -22386,7 +21903,7 @@ LAB_0096f434:
   0096F435  5D                   POP EBP
   0096F436  C3                   RET
 
-; 0096F437  __mbtow_environ  (line unknown)
+; 0096F437  ___mbtow_environ  (line unknown)
   0096F437  8BFF                 MOV EDI,EDI
   0096F439  55                   PUSH EBP
   0096F43A  8BEC                 MOV EBP,ESP
@@ -22462,7 +21979,7 @@ LAB_0096f4b3:
   0096F4BB  59                   POP ECX
   0096F4BC  EBEB                 JMP 0x0096f4a9
 
-; 0096F4BE  _wsetenvp  (line unknown)
+; 0096F4BE  FUN_0096f4be  (line unknown)
   0096F4BE  8BFF                 MOV EDI,EDI
   0096F4C0  56                   PUSH ESI
   0096F4C1  8B3550A0EA00         MOV ESI,dword ptr [0x00eaa050]
@@ -22558,7 +22075,7 @@ LAB_0096f58d:
   0096F593  50                   PUSH EAX
   0096F594  E811FBFEFF           CALL 0x0095f0aa
 
-; 0096F59A  __crtGetEnvironmentStringsW  (line unknown)
+; 0096F59A  FUN_0096f59a  (line unknown)
   0096F59A  8BFF                 MOV EDI,EDI
   0096F59C  56                   PUSH ESI
   0096F59D  FF158430A300         CALL dword ptr [0x00a33084]
@@ -22598,7 +22115,8 @@ LAB_0096f5d8:
   0096F5E2  5B                   POP EBX
   0096F5E3  5E                   POP ESI
   0096F5E4  C3                   RET
-LAB_0096f5e5:
+
+; 0096F5E5  FUN_0096f5e5  (line unknown)
   0096F5E5  53                   PUSH EBX
   0096F5E6  56                   PUSH ESI
   0096F5E7  57                   PUSH EDI
@@ -22606,7 +22124,7 @@ LAB_0096f5e5:
   0096F5ED  83C40C               ADD ESP,0xc
   0096F5F0  EBE6                 JMP 0x0096f5d8
 
-; 0096F5F2  wcschr  (line unknown)
+; 0096F5F2  _wcschr  (line unknown)
   0096F5F2  8BFF                 MOV EDI,EDI
   0096F5F4  55                   PUSH EBP
   0096F5F5  8BEC                 MOV EBP,ESP
@@ -22628,7 +22146,7 @@ LAB_0096f617:
   0096F617  5D                   POP EBP
   0096F618  C3                   RET
 
-; 0096F619  _putwch_nolock  (line unknown)
+; 0096F619  __putwch_nolock  (line unknown)
   0096F619  8BFF                 MOV EDI,EDI
   0096F61B  55                   PUSH EBP
   0096F61C  8BEC                 MOV EBP,ESP
@@ -22659,7 +22177,7 @@ LAB_0096f63e:
   0096F659  C9                   LEAVE
   0096F65A  C3                   RET
 
-; 0096F65B  _tsopen_nolock  (line unknown)
+; 0096F65B  FUN_0096f65b  (line unknown)
   0096F65B  8BFF                 MOV EDI,EDI
   0096F65D  55                   PUSH EBP
   0096F65E  8BEC                 MOV EBP,ESP
@@ -23315,7 +22833,7 @@ LAB_0096fd84:
   0096FD88  53                   PUSH EBX
   0096FD89  E81CF3FEFF           CALL 0x0095f0aa
 
-; 0096FD8F  _open  (line unknown)
+; 0096FD8F  FID_conflict:__open  (line unknown)
   0096FD8F  6A14                 PUSH 0x14
   0096FD91  687818B800           PUSH 0xb81878
   0096FD96  E8152BFFFF           CALL 0x009628b0
@@ -23379,7 +22897,7 @@ LAB_0096fe2a:
 LAB_0096fe33:
   0096FE33  C3                   RET
 
-; 0096FE3D  _sopen_helper  (line unknown)
+; 0096FE3D  FID_conflict:__sopen_helper  (line unknown)
   0096FE3D  6A14                 PUSH 0x14
   0096FE3F  689818B800           PUSH 0xb81898
   0096FE44  E8672AFFFF           CALL 0x009628b0
@@ -23456,7 +22974,7 @@ LAB_0096fef8:
 LAB_0096ff00:
   0096FF00  C3                   RET
 
-; 0096FF01  _sopen_s  (line unknown)
+; 0096FF01  __sopen_s  (line unknown)
   0096FF01  8BFF                 MOV EDI,EDI
   0096FF03  55                   PUSH EBP
   0096FF04  8BEC                 MOV EBP,ESP
@@ -23471,7 +22989,7 @@ LAB_0096ff00:
   0096FF1F  5D                   POP EBP
   0096FF20  C3                   RET
 
-; 0096FF21  _mbsnbicmp_l  (line unknown)
+; 0096FF21  __mbsnbicmp_l  (line unknown)
   0096FF21  8BFF                 MOV EDI,EDI
   0096FF23  55                   PUSH EBP
   0096FF24  8BEC                 MOV EBP,ESP

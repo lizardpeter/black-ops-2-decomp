@@ -56,7 +56,7 @@ LAB_009e00e2:
   009E00E6  5B                   POP EBX
   009E00E7  C3                   RET
 
-; 009E00F0  lh_strhash  (line unknown)
+; 009E00F0  FUN_009e00f0  (line unknown)
   009E00F0  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009E00F4  56                   PUSH ESI
   009E00F5  33F6                 XOR ESI,ESI
@@ -94,7 +94,7 @@ LAB_009e0139:
   009E013B  5E                   POP ESI
   009E013C  C3                   RET
 
-; 009E0140  lh_num_items  (line unknown)
+; 009E0140  FUN_009e0140  (line unknown)
   009E0140  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E0144  85C0                 TEST EAX,EAX
   009E0146  7404                 JZ 0x009e014c
@@ -104,7 +104,7 @@ LAB_009e014c:
   009E014C  33C0                 XOR EAX,EAX
   009E014E  C3                   RET
 
-; 009E0150  lh_new  (line unknown)
+; 009E0150  FUN_009e0150  (line unknown)
   009E0150  56                   PUSH ESI
   009E0151  57                   PUSH EDI
   009E0152  6A77                 PUSH 0x77
@@ -179,7 +179,7 @@ LAB_009e01bc:
   009E0212  5E                   POP ESI
   009E0213  C3                   RET
 
-; 009E0220  lh_insert  (line unknown)
+; 009E0220  FUN_009e0220  (line unknown)
   009E0220  53                   PUSH EBX
   009E0221  56                   PUSH ESI
   009E0222  8B74240C             MOV ESI,dword ptr [ESP + 0xc]
@@ -239,7 +239,7 @@ LAB_009e02a2:
   009E02AC  5B                   POP EBX
   009E02AD  C3                   RET
 
-; 009E02B0  lh_delete  (line unknown)
+; 009E02B0  FUN_009e02b0  (line unknown)
   009E02B0  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E02B4  56                   PUSH ESI
   009E02B5  8B742408             MOV ESI,dword ptr [ESP + 0x8]
@@ -282,7 +282,7 @@ LAB_009e0311:
   009E0314  5E                   POP ESI
   009E0315  C3                   RET
 
-; 009E0320  lh_retrieve  (line unknown)
+; 009E0320  FUN_009e0320  (line unknown)
   009E0320  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E0324  56                   PUSH ESI
   009E0325  8B742408             MOV ESI,dword ptr [ESP + 0x8]
@@ -304,7 +304,7 @@ LAB_009e034a:
   009E0350  5E                   POP ESI
   009E0351  C3                   RET
 
-; 009E0360  _X509_VERIFY_PARAM_new  (line unknown)
+; 009E0360  FUN_009e0360  (line unknown)
   009E0360  56                   PUSH ESI
   009E0361  57                   PUSH EDI
   009E0362  6A5A                 PUSH 0x5a
@@ -347,7 +347,7 @@ LAB_009e03c7:
   009E03CA  5E                   POP ESI
   009E03CB  C3                   RET
 
-; 009E03D0  _X509_VERIFY_PARAM_free  (line unknown)
+; 009E03D0  FUN_009e03d0  (line unknown)
   009E03D0  56                   PUSH ESI
   009E03D1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E03D5  57                   PUSH EDI
@@ -376,7 +376,7 @@ LAB_009e0409:
   009E0413  5E                   POP ESI
   009E0414  C3                   RET
 
-; 009E0420  _X509_VERIFY_PARAM_set_flags  (line unknown)
+; 009E0420  FUN_009e0420  (line unknown)
   009E0420  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E0424  8B542408             MOV EDX,dword ptr [ESP + 0x8]
   009E0428  095014               OR dword ptr [EAX + 0x14],EDX
@@ -389,7 +389,7 @@ LAB_009e043f:
   009E043F  B801000000           MOV EAX,0x1
   009E0444  C3                   RET
 
-; 009E0450  _X509_VERIFY_PARAM_set1_policies  (line unknown)
+; 009E0450  FUN_009e0450  (line unknown)
   009E0450  55                   PUSH EBP
   009E0451  8B6C2408             MOV EBP,dword ptr [ESP + 0x8]
   009E0455  57                   PUSH EDI
@@ -480,7 +480,7 @@ LAB_009e0501:
   009E0506  5D                   POP EBP
   009E0507  C3                   RET
 
-; 009E0550  _X509_VERIFY_PARAM_lookup  (line unknown)
+; 009E0550  FUN_009e0550  (line unknown)
   009E0550  B828000000           MOV EAX,0x28
   009E0555  E8D6BEF7FF           CALL 0x0095c430
   009E055A  8B44242C             MOV EAX,dword ptr [ESP + 0x2c]
@@ -514,7 +514,7 @@ LAB_009e0590:
   009E05AB  83C428               ADD ESP,0x28
   009E05AE  C3                   RET
 
-; 009E05B0  _X509_VERIFY_PARAM_inherit  (line unknown)
+; 009E05B0  FUN_009e05b0  (line unknown)
   009E05B0  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E05B4  85C9                 TEST ECX,ECX
   009E05B6  7506                 JNZ 0x009e05be
@@ -621,7 +621,7 @@ LAB_009e068b:
   009E0692  5B                   POP EBX
   009E0693  C3                   RET
 
-; 009E06A0  _X509_VERIFY_PARAM_set1  (line unknown)
+; 009E06A0  FUN_009e06a0  (line unknown)
   009E06A0  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E06A4  56                   PUSH ESI
   009E06A5  8B742408             MOV ESI,dword ptr [ESP + 0x8]
@@ -639,7 +639,7 @@ LAB_009e068b:
   009E06C3  5E                   POP ESI
   009E06C4  C3                   RET
 
-; 009E06D0  _BIO_s_socket  (line unknown)
+; 009E06D0  FUN_009e06d0  (line unknown)
   009E06D0  B8F09EB800           MOV EAX,0xb89ef0
   009E06D5  C3                   RET
 
@@ -671,7 +671,7 @@ LAB_009e071b:
   009E0720  5E                   POP ESI
   009E0721  C3                   RET
 
-; 009E0930  engine_unlocked_init  (line unknown)
+; 009E0930  FUN_009e0930  (line unknown)
   009E0930  56                   PUSH ESI
   009E0931  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E0935  837E5400             CMP dword ptr [ESI + 0x54],0x0
@@ -692,7 +692,7 @@ LAB_009e0959:
   009E0959  5E                   POP ESI
   009E095A  C3                   RET
 
-; 009E0960  engine_unlocked_finish  (line unknown)
+; 009E0960  FUN_009e0960  (line unknown)
   009E0960  56                   PUSH ESI
   009E0961  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E0965  834654FF             ADD dword ptr [ESI + 0x54],-0x1
@@ -754,7 +754,7 @@ LAB_009e09e6:
   009E09E9  5E                   POP ESI
   009E09EA  C3                   RET
 
-; 009E09F0  _ENGINE_init  (line unknown)
+; 009E09F0  FUN_009e09f0  (line unknown)
   009E09F0  56                   PUSH ESI
   009E09F1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E09F5  85F6                 TEST ESI,ESI
@@ -804,7 +804,7 @@ LAB_009e0a4f:
   009E0A68  5E                   POP ESI
   009E0A69  C3                   RET
 
-; 009E0A70  _ENGINE_finish  (line unknown)
+; 009E0A70  FUN_009e0a70  (line unknown)
   009E0A70  56                   PUSH ESI
   009E0A71  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E0A75  85F6                 TEST ESI,ESI
@@ -891,13 +891,13 @@ LAB_009e0b4c:
   009E0B4F  5E                   POP ESI
   009E0B50  C3                   RET
 
-; 009E0B70  _X509_NAME_ENTRY_new  (line unknown)
+; 009E0B70  FUN_009e0b70  (line unknown)
   009E0B70  68B456A700           PUSH 0xa756b4
   009E0B75  E826080100           CALL 0x009f13a0
   009E0B7A  83C404               ADD ESP,0x4
   009E0B7D  C3                   RET
 
-; 009E0B80  _X509_NAME_ENTRY_free  (line unknown)
+; 009E0B80  FUN_009e0b80  (line unknown)
   009E0B80  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E0B84  68B456A700           PUSH 0xa756b4
   009E0B89  50                   PUSH EAX
@@ -905,7 +905,7 @@ LAB_009e0b4c:
   009E0B8F  83C408               ADD ESP,0x8
   009E0B92  C3                   RET
 
-; 009E0BA0  _X509_NAME_ENTRY_dup  (line unknown)
+; 009E0BA0  FUN_009e0ba0  (line unknown)
   009E0BA0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E0BA4  50                   PUSH EAX
   009E0BA5  68B456A700           PUSH 0xa756b4
@@ -913,7 +913,7 @@ LAB_009e0b4c:
   009E0BAF  83C408               ADD ESP,0x8
   009E0BB2  C3                   RET
 
-; 009E0BE0  d2i_X509_NAME  (line unknown)
+; 009E0BE0  FUN_009e0be0  (line unknown)
   009E0BE0  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E0BE4  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E0BE8  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -925,7 +925,7 @@ LAB_009e0b4c:
   009E0BF9  83C410               ADD ESP,0x10
   009E0BFC  C3                   RET
 
-; 009E0C00  i2d_X509_NAME  (line unknown)
+; 009E0C00  FUN_009e0c00  (line unknown)
   009E0C00  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E0C04  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E0C08  684857A700           PUSH 0xa75748
@@ -935,13 +935,13 @@ LAB_009e0b4c:
   009E0C14  83C40C               ADD ESP,0xc
   009E0C17  C3                   RET
 
-; 009E0C20  _X509_NAME_new  (line unknown)
+; 009E0C20  FUN_009e0c20  (line unknown)
   009E0C20  684857A700           PUSH 0xa75748
   009E0C25  E876070100           CALL 0x009f13a0
   009E0C2A  83C404               ADD ESP,0x4
   009E0C2D  C3                   RET
 
-; 009E0C30  _X509_NAME_free  (line unknown)
+; 009E0C30  FUN_009e0c30  (line unknown)
   009E0C30  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E0C34  684857A700           PUSH 0xa75748
   009E0C39  50                   PUSH EAX
@@ -949,7 +949,7 @@ LAB_009e0b4c:
   009E0C3F  83C408               ADD ESP,0x8
   009E0C42  C3                   RET
 
-; 009E0C50  _X509_NAME_dup  (line unknown)
+; 009E0C50  FUN_009e0c50  (line unknown)
   009E0C50  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E0C54  50                   PUSH EAX
   009E0C55  684857A700           PUSH 0xa75748
@@ -1284,7 +1284,7 @@ LAB_009e0fe5:
   009E1025  83C40C               ADD ESP,0xc
   009E1028  C3                   RET
 
-; 009E1070  _OBJ_nid2obj  (line unknown)
+; 009E1070  FUN_009e1070  (line unknown)
   009E1070  B820000000           MOV EAX,0x20
   009E1075  E8B6B3F7FF           CALL 0x0095c430
   009E107A  8B442424             MOV EAX,dword ptr [ESP + 0x24]
@@ -1334,7 +1334,7 @@ LAB_009e10f9:
   009E10FB  83C420               ADD ESP,0x20
   009E10FE  C3                   RET
 
-; 009E1100  _OBJ_nid2sn  (line unknown)
+; 009E1100  FUN_009e1100  (line unknown)
   009E1100  B820000000           MOV EAX,0x20
   009E1105  E826B3F7FF           CALL 0x0095c430
   009E110A  8B442424             MOV EAX,dword ptr [ESP + 0x24]
@@ -1385,7 +1385,7 @@ LAB_009e118b:
   009E118D  83C420               ADD ESP,0x20
   009E1190  C3                   RET
 
-; 009E11A0  _OBJ_nid2ln  (line unknown)
+; 009E11A0  FUN_009e11a0  (line unknown)
   009E11A0  B820000000           MOV EAX,0x20
   009E11A5  E886B2F7FF           CALL 0x0095c430
   009E11AA  8B442424             MOV EAX,dword ptr [ESP + 0x24]
@@ -1514,7 +1514,7 @@ LAB_009e12df:
   009E12E0  5E                   POP ESI
   009E12E1  C3                   RET
 
-; 009E12F0  _OBJ_bsearch_ex  (line unknown)
+; 009E12F0  FUN_009e12f0  (line unknown)
   009E12F0  55                   PUSH EBP
   009E12F1  8B6C2410             MOV EBP,dword ptr [ESP + 0x10]
   009E12F5  56                   PUSH ESI
@@ -1605,7 +1605,7 @@ LAB_009e1397:
   009E139C  5D                   POP EBP
   009E139D  C3                   RET
 
-; 009E13A0  _OBJ_bsearch  (line unknown)
+; 009E13A0  FUN_009e13a0  (line unknown)
   009E13A0  8B442414             MOV EAX,dword ptr [ESP + 0x14]
   009E13A4  8B4C2410             MOV ECX,dword ptr [ESP + 0x10]
   009E13A8  8B54240C             MOV EDX,dword ptr [ESP + 0xc]
@@ -1621,7 +1621,7 @@ LAB_009e1397:
   009E13C0  83C418               ADD ESP,0x18
   009E13C3  C3                   RET
 
-; 009E13D0  _OBJ_obj2nid  (line unknown)
+; 009E13D0  FUN_009e13d0  (line unknown)
   009E13D0  B808000000           MOV EAX,0x8
   009E13D5  E856B0F7FF           CALL 0x0095c430
   009E13DA  8B4C240C             MOV ECX,dword ptr [ESP + 0xc]
@@ -1654,7 +1654,8 @@ LAB_009e13ec:
   009E1420  5F                   POP EDI
   009E1421  83C408               ADD ESP,0x8
   009E1424  C3                   RET
-LAB_009e1425:
+
+; 009E1425  FUN_009e1425  (line unknown)
   009E1425  53                   PUSH EBX
   009E1426  55                   PUSH EBP
   009E1427  56                   PUSH ESI
@@ -1706,7 +1707,7 @@ LAB_009e147b:
   009E147C  83C408               ADD ESP,0x8
   009E147F  C3                   RET
 
-; 009E1480  _OBJ_obj2txt  (line unknown)
+; 009E1480  FUN_009e1480  (line unknown)
   009E1480  B838000000           MOV EAX,0x38
   009E1485  E8A6AFF7FF           CALL 0x0095c430
   009E148A  A19064B800           MOV EAX,[0x00b86490]
@@ -2029,7 +2030,7 @@ LAB_009e17ae:
   009E17C1  83C438               ADD ESP,0x38
   009E17C4  C3                   RET
 
-; 009E17D0  _OBJ_ln2nid  (line unknown)
+; 009E17D0  FUN_009e17d0  (line unknown)
   009E17D0  B820000000           MOV EAX,0x20
   009E17D5  E856ACF7FF           CALL 0x0095c430
   009E17DA  8B442424             MOV EAX,dword ptr [ESP + 0x24]
@@ -2122,7 +2123,7 @@ LAB_009e1888:
   009E1891  83C420               ADD ESP,0x20
   009E1894  C3                   RET
 
-; 009E18A0  _OBJ_sn2nid  (line unknown)
+; 009E18A0  FUN_009e18a0  (line unknown)
   009E18A0  B820000000           MOV EAX,0x20
   009E18A5  E886ABF7FF           CALL 0x0095c430
   009E18AA  8B442424             MOV EAX,dword ptr [ESP + 0x24]
@@ -2215,7 +2216,7 @@ LAB_009e1958:
   009E1961  83C420               ADD ESP,0x20
   009E1964  C3                   RET
 
-; 009E1970  _OBJ_txt2obj  (line unknown)
+; 009E1970  FUN_009e1970  (line unknown)
   009E1970  B804000000           MOV EAX,0x4
   009E1975  E8B6AAF7FF           CALL 0x0095c430
   009E197A  837C240C00           CMP dword ptr [ESP + 0xc],0x0
@@ -2310,7 +2311,7 @@ LAB_009e19f5:
   009E1A3A  59                   POP ECX
   009E1A3B  C3                   RET
 
-; 009E1A40  _DH_new_method  (line unknown)
+; 009E1A40  FUN_009e1a40  (line unknown)
   009E1A40  56                   PUSH ESI
   009E1A41  57                   PUSH EDI
   009E1A42  6A6F                 PUSH 0x6f
@@ -2452,7 +2453,7 @@ LAB_009e1b90:
   009E1B94  5E                   POP ESI
   009E1B95  C3                   RET
 
-; 009E1BA0  _DH_free  (line unknown)
+; 009E1BA0  FUN_009e1ba0  (line unknown)
   009E1BA0  56                   PUSH ESI
   009E1BA1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E1BA5  85F6                 TEST ESI,ESI
@@ -2551,7 +2552,7 @@ LAB_009e1c87:
   009E1C87  5E                   POP ESI
   009E1C88  C3                   RET
 
-; 009E1C90  _DH_size  (line unknown)
+; 009E1C90  FUN_009e1c90  (line unknown)
   009E1C90  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E1C94  8B4808               MOV ECX,dword ptr [EAX + 0x8]
   009E1C97  51                   PUSH ECX
@@ -2564,34 +2565,34 @@ LAB_009e1c87:
   009E1CA9  C1F803               SAR EAX,0x3
   009E1CAC  C3                   RET
 
-; 009E1CB0  _DH_new  (line unknown)
+; 009E1CB0  FUN_009e1cb0  (line unknown)
   009E1CB0  6A00                 PUSH 0x0
   009E1CB2  E889FDFFFF           CALL 0x009e1a40
   009E1CB7  83C404               ADD ESP,0x4
   009E1CBA  C3                   RET
 
-; 009E1CC0  _RSA_public_encrypt  (line unknown)
+; 009E1CC0  FUN_009e1cc0  (line unknown)
   009E1CC0  8B442410             MOV EAX,dword ptr [ESP + 0x10]
   009E1CC4  8B4808               MOV ECX,dword ptr [EAX + 0x8]
   009E1CC7  89442410             MOV dword ptr [ESP + 0x10],EAX
   009E1CCB  8B4904               MOV ECX,dword ptr [ECX + 0x4]
   009E1CCE  FFE1                 JMP ECX
 
-; 009E1CD0  _RSA_private_encrypt  (line unknown)
+; 009E1CD0  FUN_009e1cd0  (line unknown)
   009E1CD0  8B442410             MOV EAX,dword ptr [ESP + 0x10]
   009E1CD4  8B4808               MOV ECX,dword ptr [EAX + 0x8]
   009E1CD7  89442410             MOV dword ptr [ESP + 0x10],EAX
   009E1CDB  8B490C               MOV ECX,dword ptr [ECX + 0xc]
   009E1CDE  FFE1                 JMP ECX
 
-; 009E1CE0  _RSA_public_decrypt  (line unknown)
+; 009E1CE0  FUN_009e1ce0  (line unknown)
   009E1CE0  8B442410             MOV EAX,dword ptr [ESP + 0x10]
   009E1CE4  8B4808               MOV ECX,dword ptr [EAX + 0x8]
   009E1CE7  89442410             MOV dword ptr [ESP + 0x10],EAX
   009E1CEB  8B4908               MOV ECX,dword ptr [ECX + 0x8]
   009E1CEE  FFE1                 JMP ECX
 
-; 009E1CF0  _RSA_size  (line unknown)
+; 009E1CF0  FUN_009e1cf0  (line unknown)
   009E1CF0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E1CF4  8B4810               MOV ECX,dword ptr [EAX + 0x10]
   009E1CF7  51                   PUSH ECX
@@ -2690,7 +2691,7 @@ LAB_009e1de1:
   009E1DE3  59                   POP ECX
   009E1DE4  C3                   RET
 
-; 009E1DF0  _RSA_setup_blinding  (line unknown)
+; 009E1DF0  FUN_009e1df0  (line unknown)
   009E1DF0  B814000000           MOV EAX,0x14
   009E1DF5  E836A6F7FF           CALL 0x0095c430
   009E1DFA  55                   PUSH EBP
@@ -2848,7 +2849,7 @@ LAB_009e1f86:
   009E1F8C  83C414               ADD ESP,0x14
   009E1F8F  C3                   RET
 
-; 009E1F90  _COMP_CTX_new  (line unknown)
+; 009E1F90  FUN_009e1f90  (line unknown)
   009E1F90  56                   PUSH ESI
   009E1F91  6A0B                 PUSH 0xb
   009E1F93  68B8A8A700           PUSH 0xa7a8b8
@@ -2885,7 +2886,7 @@ LAB_009e1fe0:
   009E1FE0  5E                   POP ESI
   009E1FE1  C3                   RET
 
-; 009E1FF0  _COMP_CTX_free  (line unknown)
+; 009E1FF0  FUN_009e1ff0  (line unknown)
   009E1FF0  56                   PUSH ESI
   009E1FF1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E1FF5  85F6                 TEST ESI,ESI
@@ -2905,7 +2906,7 @@ LAB_009e2011:
   009E2011  5E                   POP ESI
   009E2012  C3                   RET
 
-; 009E2020  _COMP_compress_block  (line unknown)
+; 009E2020  FUN_009e2020  (line unknown)
   009E2020  56                   PUSH ESI
   009E2021  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E2025  8B06                 MOV EAX,dword ptr [ESI]
@@ -2937,7 +2938,7 @@ LAB_009e2058:
   009E2059  5E                   POP ESI
   009E205A  C3                   RET
 
-; 009E2060  _COMP_expand_block  (line unknown)
+; 009E2060  FUN_009e2060  (line unknown)
   009E2060  56                   PUSH ESI
   009E2061  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E2065  8B06                 MOV EAX,dword ptr [ESI]
@@ -2969,7 +2970,7 @@ LAB_009e2098:
   009E2099  5E                   POP ESI
   009E209A  C3                   RET
 
-; 009E20A0  _EVP_CIPHER_CTX_init  (line unknown)
+; 009E20A0  FUN_009e20a0  (line unknown)
   009E20A0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E20A4  688C000000           PUSH 0x8c
   009E20A9  6A00                 PUSH 0x0
@@ -3031,7 +3032,7 @@ LAB_009e212e:
   009E213A  5E                   POP ESI
   009E213B  C3                   RET
 
-; 009E2140  _EVP_CIPHER_CTX_cleanup  (line unknown)
+; 009E2140  FUN_009e2140  (line unknown)
   009E2140  56                   PUSH ESI
   009E2141  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E2145  8B06                 MOV EAX,dword ptr [ESI]
@@ -3081,14 +3082,14 @@ LAB_009e2194:
   009E21A9  5E                   POP ESI
   009E21AA  C3                   RET
 
-; 009E21B0  _EVP_Cipher  (line unknown)
+; 009E21B0  FUN_009e21b0  (line unknown)
   009E21B0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E21B4  8B08                 MOV ECX,dword ptr [EAX]
   009E21B6  89442404             MOV dword ptr [ESP + 0x4],EAX
   009E21BA  8B4118               MOV EAX,dword ptr [ECX + 0x18]
   009E21BD  FFE0                 JMP EAX
 
-; 009E21C0  _EVP_CIPHER_CTX_ctrl  (line unknown)
+; 009E21C0  FUN_009e21c0  (line unknown)
   009E21C0  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E21C4  8B01                 MOV EAX,dword ptr [ECX]
   009E21C6  85C0                 TEST EAX,EAX
@@ -3138,13 +3139,13 @@ LAB_009e220d:
 LAB_009e2244:
   009E2244  C3                   RET
 
-; 009E2250  _EVP_CIPHER_CTX_flags  (line unknown)
+; 009E2250  FUN_009e2250  (line unknown)
   009E2250  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E2254  8B08                 MOV ECX,dword ptr [EAX]
   009E2256  8B4110               MOV EAX,dword ptr [ECX + 0x10]
   009E2259  C3                   RET
 
-; 009E2260  _EVP_CipherInit_ex  (line unknown)
+; 009E2260  FUN_009e2260  (line unknown)
   009E2260  53                   PUSH EBX
   009E2261  55                   PUSH EBP
   009E2262  56                   PUSH ESI
@@ -3349,7 +3350,7 @@ LAB_009e244d:
   009E2465  5B                   POP EBX
   009E2466  C3                   RET
 
-; 009E2480  _BIO_f_buffer  (line unknown)
+; 009E2480  FUN_009e2480  (line unknown)
   009E2480  B86432B900           MOV EAX,0xb93264
   009E2485  C3                   RET
 
@@ -3778,7 +3779,7 @@ LAB_009e2d5e:
   009E2D6C  59                   POP ECX
   009E2D6D  C3                   RET
 
-; 009E2DA0  _X509_STORE_load_locations  (line unknown)
+; 009E2DA0  FUN_009e2da0  (line unknown)
   009E2DA0  53                   PUSH EBX
   009E2DA1  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E2DA5  56                   PUSH ESI
@@ -3844,7 +3845,7 @@ LAB_009e2e16:
   009E2E1D  5B                   POP EBX
   009E2E1E  C3                   RET
 
-; 009E2E20  _BUF_MEM_new  (line unknown)
+; 009E2E20  FUN_009e2e20  (line unknown)
   009E2E20  6A43                 PUSH 0x43
   009E2E22  68A8A9A700           PUSH 0xa7a9a8
   009E2E27  6A0C                 PUSH 0xc
@@ -3868,7 +3869,7 @@ LAB_009e2e4f:
   009E2E54  894804               MOV dword ptr [EAX + 0x4],ECX
   009E2E57  C3                   RET
 
-; 009E2E60  _BUF_MEM_free  (line unknown)
+; 009E2E60  FUN_009e2e60  (line unknown)
   009E2E60  56                   PUSH ESI
   009E2E61  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E2E65  85F6                 TEST ESI,ESI
@@ -3893,7 +3894,7 @@ LAB_009e2e91:
   009E2E91  5E                   POP ESI
   009E2E92  C3                   RET
 
-; 009E2EA0  _BUF_MEM_grow  (line unknown)
+; 009E2EA0  FUN_009e2ea0  (line unknown)
   009E2EA0  53                   PUSH EBX
   009E2EA1  8B5C240C             MOV EBX,dword ptr [ESP + 0xc]
   009E2EA5  57                   PUSH EDI
@@ -3979,7 +3980,7 @@ LAB_009e2f32:
   009E2F52  5B                   POP EBX
   009E2F53  C3                   RET
 
-; 009E2F60  _BUF_MEM_grow_clean  (line unknown)
+; 009E2F60  FUN_009e2f60  (line unknown)
   009E2F60  53                   PUSH EBX
   009E2F61  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E2F65  8B03                 MOV EAX,dword ptr [EBX]
@@ -4084,7 +4085,7 @@ LAB_009e301b:
   009E303C  5B                   POP EBX
   009E303D  C3                   RET
 
-; 009E30A0  i2d_OCSP_RESPID  (line unknown)
+; 009E30A0  FUN_009e30a0  (line unknown)
   009E30A0  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E30A4  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E30A8  6820AFA700           PUSH 0xa7af20
@@ -4094,7 +4095,7 @@ LAB_009e301b:
   009E30B4  83C40C               ADD ESP,0xc
   009E30B7  C3                   RET
 
-; 009E3170  i2d_X509_EXTENSIONS  (line unknown)
+; 009E3170  FUN_009e3170  (line unknown)
   009E3170  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E3174  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E3178  6878B2A700           PUSH 0xa7b278
@@ -4104,7 +4105,7 @@ LAB_009e301b:
   009E3184  83C40C               ADD ESP,0xc
   009E3187  C3                   RET
 
-; 009E3190  _RSA_new_method  (line unknown)
+; 009E3190  FUN_009e3190  (line unknown)
   009E3190  56                   PUSH ESI
   009E3191  57                   PUSH EDI
   009E3192  6892000000           PUSH 0x92
@@ -4268,7 +4269,7 @@ LAB_009e331b:
   009E331F  5E                   POP ESI
   009E3320  C3                   RET
 
-; 009E3330  _RSA_free  (line unknown)
+; 009E3330  FUN_009e3330  (line unknown)
   009E3330  56                   PUSH ESI
   009E3331  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E3335  85F6                 TEST ESI,ESI
@@ -4388,7 +4389,7 @@ LAB_009e3447:
   009E3447  5E                   POP ESI
   009E3448  C3                   RET
 
-; 009E3450  _RSA_up_ref  (line unknown)
+; 009E3450  FUN_009e3450  (line unknown)
   009E3450  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E3454  6816010000           PUSH 0x116
   009E3459  68BCB2A700           PUSH 0xa7b2bc
@@ -4404,7 +4405,7 @@ LAB_009e3447:
   009E3476  8BC1                 MOV EAX,ECX
   009E3478  C3                   RET
 
-; 009E3480  _RSA_flags  (line unknown)
+; 009E3480  FUN_009e3480  (line unknown)
   009E3480  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E3484  85C0                 TEST EAX,EAX
   009E3486  7501                 JNZ 0x009e3489
@@ -4414,13 +4415,13 @@ LAB_009e3489:
   009E348C  8B4024               MOV EAX,dword ptr [EAX + 0x24]
   009E348F  C3                   RET
 
-; 009E3490  _RSA_new  (line unknown)
+; 009E3490  FUN_009e3490  (line unknown)
   009E3490  6A00                 PUSH 0x0
   009E3492  E8F9FCFFFF           CALL 0x009e3190
   009E3497  83C404               ADD ESP,0x4
   009E349A  C3                   RET
 
-; 009E34A0  _X509_verify  (line unknown)
+; 009E34A0  FUN_009e34a0  (line unknown)
   009E34A0  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E34A4  50                   PUSH EAX
   009E34A5  8B442408             MOV EAX,dword ptr [ESP + 0x8]
@@ -4436,7 +4437,7 @@ LAB_009e3489:
   009E34BF  83C414               ADD ESP,0x14
   009E34C2  C3                   RET
 
-; 009E34D0  _X509_CRL_verify  (line unknown)
+; 009E34D0  FUN_009e34d0  (line unknown)
   009E34D0  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E34D4  50                   PUSH EAX
   009E34D5  8B442408             MOV EAX,dword ptr [ESP + 0x8]
@@ -4452,7 +4453,7 @@ LAB_009e3489:
   009E34EF  83C414               ADD ESP,0x14
   009E34F2  C3                   RET
 
-; 009E3500  d2i_X509_bio  (line unknown)
+; 009E3500  FUN_009e3500  (line unknown)
   009E3500  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E3504  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E3508  50                   PUSH EAX
@@ -4463,7 +4464,7 @@ LAB_009e3489:
   009E3515  83C40C               ADD ESP,0xc
   009E3518  C3                   RET
 
-; 009E3520  d2i_X509_CRL_bio  (line unknown)
+; 009E3520  FUN_009e3520  (line unknown)
   009E3520  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E3524  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E3528  50                   PUSH EAX
@@ -4474,7 +4475,7 @@ LAB_009e3489:
   009E3535  83C40C               ADD ESP,0xc
   009E3538  C3                   RET
 
-; 009E3540  _X509_digest  (line unknown)
+; 009E3540  FUN_009e3540  (line unknown)
   009E3540  8B442410             MOV EAX,dword ptr [ESP + 0x10]
   009E3544  8B4C240C             MOV ECX,dword ptr [ESP + 0xc]
   009E3548  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -4489,7 +4490,7 @@ LAB_009e3489:
   009E355F  83C414               ADD ESP,0x14
   009E3562  C3                   RET
 
-; 009E3570  d2i_PrivateKey_bio  (line unknown)
+; 009E3570  FUN_009e3570  (line unknown)
   009E3570  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E3574  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E3578  50                   PUSH EAX
@@ -4500,7 +4501,7 @@ LAB_009e3489:
   009E3589  83C410               ADD ESP,0x10
   009E358C  C3                   RET
 
-; 009E3590  _PEM_read_bio_PrivateKey  (line unknown)
+; 009E3590  FUN_009e3590  (line unknown)
   009E3590  B81C040000           MOV EAX,0x41c
   009E3595  E8968EF7FF           CALL 0x0095c430
   009E359A  A19064B800           MOV EAX,[0x00b86490]
@@ -4727,7 +4728,7 @@ LAB_009e37cd:
   009E3809  81C41C040000         ADD ESP,0x41c
   009E380F  C3                   RET
 
-; 009E3810  _BIO_s_file  (line unknown)
+; 009E3810  FUN_009e3810  (line unknown)
   009E3810  B88C32B900           MOV EAX,0xb9328c
   009E3815  C3                   RET
 
@@ -4808,7 +4809,7 @@ LAB_009e3906:
   009E3906  5E                   POP ESI
   009E3907  C3                   RET
 
-; 009E3CE0  _BIO_new_file  (line unknown)
+; 009E3CE0  FUN_009e3ce0  (line unknown)
   009E3CE0  53                   PUSH EBX
   009E3CE1  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E3CE5  56                   PUSH ESI
@@ -4895,7 +4896,7 @@ LAB_009e3d98:
   009E3DB2  5B                   POP EBX
   009E3DB3  C3                   RET
 
-; 009E3DC0  d2i_PrivateKey  (line unknown)
+; 009E3DC0  FUN_009e3dc0  (line unknown)
   009E3DC0  56                   PUSH ESI
   009E3DC1  57                   PUSH EDI
   009E3DC2  8B7C2410             MOV EDI,dword ptr [ESP + 0x10]
@@ -5006,7 +5007,7 @@ LAB_009e3eb6:
   009E3EB9  5E                   POP ESI
   009E3EBA  C3                   RET
 
-; 009E3EC0  _d2i_AutoPrivateKey  (line unknown)
+; 009E3EC0  FUN_009e3ec0  (line unknown)
   009E3EC0  53                   PUSH EBX
   009E3EC1  8B5C240C             MOV EBX,dword ptr [ESP + 0xc]
   009E3EC5  8B03                 MOV EAX,dword ptr [EBX]
@@ -5059,7 +5060,7 @@ LAB_009e3f20:
   009E3F3E  5B                   POP EBX
   009E3F3F  C3                   RET
 
-; 009E3F40  _PEM_read_bio_X509_CRL  (line unknown)
+; 009E3F40  FUN_009e3f40  (line unknown)
   009E3F40  8B442410             MOV EAX,dword ptr [ESP + 0x10]
   009E3F44  8B4C240C             MOV ECX,dword ptr [ESP + 0xc]
   009E3F48  8B542408             MOV EDX,dword ptr [ESP + 0x8]
@@ -5074,7 +5075,7 @@ LAB_009e3f20:
   009E3F63  83C418               ADD ESP,0x18
   009E3F66  C3                   RET
 
-; 009E3FC0  d2i_RSAPrivateKey  (line unknown)
+; 009E3FC0  FUN_009e3fc0  (line unknown)
   009E3FC0  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E3FC4  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E3FC8  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -5086,7 +5087,7 @@ LAB_009e3f20:
   009E3FD9  83C410               ADD ESP,0x10
   009E3FDC  C3                   RET
 
-; 009E4000  d2i_RSAPublicKey  (line unknown)
+; 009E4000  FUN_009e4000  (line unknown)
   009E4000  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E4004  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E4008  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -5098,7 +5099,7 @@ LAB_009e3f20:
   009E4019  83C410               ADD ESP,0x10
   009E401C  C3                   RET
 
-; 009E4020  _RSAPrivateKey_dup  (line unknown)
+; 009E4020  FUN_009e4020  (line unknown)
   009E4020  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E4024  50                   PUSH EAX
   009E4025  68B4B4A700           PUSH 0xa7b4b4
@@ -5106,7 +5107,7 @@ LAB_009e3f20:
   009E402F  83C408               ADD ESP,0x8
   009E4032  C3                   RET
 
-; 009E4040  _PEM_read_bio_X509_AUX  (line unknown)
+; 009E4040  FUN_009e4040  (line unknown)
   009E4040  8B442410             MOV EAX,dword ptr [ESP + 0x10]
   009E4044  8B4C240C             MOV ECX,dword ptr [ESP + 0xc]
   009E4048  8B542408             MOV EDX,dword ptr [ESP + 0x8]
@@ -5121,31 +5122,31 @@ LAB_009e3f20:
   009E4063  83C418               ADD ESP,0x18
   009E4066  C3                   RET
 
-; 009E4070  _EVP_ecdsa  (line unknown)
+; 009E4070  FUN_009e4070  (line unknown)
   009E4070  B840B5A700           MOV EAX,0xa7b540
   009E4075  C3                   RET
 
-; 009E40B0  _EVP_dss1  (line unknown)
+; 009E40B0  FUN_009e40b0  (line unknown)
   009E40B0  B888B5A700           MOV EAX,0xa7b588
   009E40B5  C3                   RET
 
-; 009E40D0  _EVP_sha1  (line unknown)
+; 009E40D0  FUN_009e40d0  (line unknown)
   009E40D0  B8D0B5A700           MOV EAX,0xa7b5d0
   009E40D5  C3                   RET
 
-; 009E4130  _EVP_sha224  (line unknown)
+; 009E4130  FUN_009e4130  (line unknown)
   009E4130  B818B6A700           MOV EAX,0xa7b618
   009E4135  C3                   RET
 
-; 009E4140  _EVP_sha256  (line unknown)
+; 009E4140  FUN_009e4140  (line unknown)
   009E4140  B860B6A700           MOV EAX,0xa7b660
   009E4145  C3                   RET
 
-; 009E41A0  _EVP_sha384  (line unknown)
+; 009E41A0  FUN_009e41a0  (line unknown)
   009E41A0  B8A8B6A700           MOV EAX,0xa7b6a8
   009E41A5  C3                   RET
 
-; 009E41B0  _EVP_sha512  (line unknown)
+; 009E41B0  FUN_009e41b0  (line unknown)
   009E41B0  B8F0B6A700           MOV EAX,0xa7b6f0
   009E41B5  C3                   RET
 
@@ -5214,7 +5215,7 @@ LAB_009e4238:
   009E4239  5B                   POP EBX
   009E423A  C3                   RET
 
-; 009E42A0  _OBJ_NAME_remove  (line unknown)
+; 009E42A0  FUN_009e42a0  (line unknown)
   009E42A0  B810000000           MOV EAX,0x10
   009E42A5  E88681F7FF           CALL 0x0095c430
   009E42AA  A184BDEA00           MOV EAX,[0x00eabd84]
@@ -5276,7 +5277,7 @@ LAB_009e432f:
   009E4332  83C410               ADD ESP,0x10
   009E4335  C3                   RET
 
-; 009E4370  _OBJ_NAME_cleanup  (line unknown)
+; 009E4370  FUN_009e4370  (line unknown)
   009E4370  A184BDEA00           MOV EAX,[0x00eabd84]
   009E4375  85C0                 TEST EAX,EAX
   009E4377  7469                 JZ 0x009e43e2
@@ -5313,7 +5314,7 @@ LAB_009e43d7:
 LAB_009e43e2:
   009E43E2  C3                   RET
 
-; 009E43F0  _OBJ_NAME_init  (line unknown)
+; 009E43F0  FUN_009e43f0  (line unknown)
   009E43F0  833D84BDEA0000       CMP dword ptr [0x00eabd84],0x0
   009E43F7  7406                 JZ 0x009e43ff
   009E43F9  B801000000           MOV EAX,0x1
@@ -5333,7 +5334,7 @@ LAB_009e43ff:
   009E442C  0F95C0               SETNZ AL
   009E442F  C3                   RET
 
-; 009E4430  _OBJ_NAME_get  (line unknown)
+; 009E4430  FUN_009e4430  (line unknown)
   009E4430  B810000000           MOV EAX,0x10
   009E4435  E8F67FF7FF           CALL 0x0095c430
   009E443A  53                   PUSH EBX
@@ -5403,7 +5404,7 @@ LAB_009e44cb:
   009E44D1  83C410               ADD ESP,0x10
   009E44D4  C3                   RET
 
-; 009E44E0  _OBJ_NAME_add  (line unknown)
+; 009E44E0  FUN_009e44e0  (line unknown)
   009E44E0  833D84BDEA0000       CMP dword ptr [0x00eabd84],0x0
   009E44E7  7537                 JNZ 0x009e4520
   009E44E9  6A03                 PUSH 0x3
@@ -5491,23 +5492,23 @@ LAB_009e45bd:
   009E45CA  5E                   POP ESI
   009E45CB  C3                   RET
 
-; 009E4610  _EVP_md5  (line unknown)
+; 009E4610  FUN_009e4610  (line unknown)
   009E4610  B858B7A700           MOV EAX,0xa7b758
   009E4615  C3                   RET
 
-; 009E4620  _EVP_aes_128_cbc  (line unknown)
+; 009E4620  FUN_009e4620  (line unknown)
   009E4620  B8A0B7A700           MOV EAX,0xa7b7a0
   009E4625  C3                   RET
 
-; 009E4660  _EVP_aes_192_cbc  (line unknown)
+; 009E4660  FUN_009e4660  (line unknown)
   009E4660  B870B8A700           MOV EAX,0xa7b870
   009E4665  C3                   RET
 
-; 009E4740  _EVP_aes_256_cbc  (line unknown)
+; 009E4740  FUN_009e4740  (line unknown)
   009E4740  B840B9A700           MOV EAX,0xa7b940
   009E4745  C3                   RET
 
-; 009E4950  _EVP_rc2_cbc  (line unknown)
+; 009E4950  FUN_009e4950  (line unknown)
   009E4950  B860BBA700           MOV EAX,0xa7bb60
   009E4955  C3                   RET
 
@@ -5634,11 +5635,11 @@ LAB_009e4b03:
   009E4B14  83C418               ADD ESP,0x18
   009E4B17  C3                   RET
 
-; 009E4BD0  _EVP_rc4  (line unknown)
+; 009E4BD0  FUN_009e4bd0  (line unknown)
   009E4BD0  B8C0BCA700           MOV EAX,0xa7bcc0
   009E4BD5  C3                   RET
 
-; 009E4D30  _EVP_idea_cbc  (line unknown)
+; 009E4D30  FUN_009e4d30  (line unknown)
   009E4D30  B828BDA700           MOV EAX,0xa7bd28
   009E4D35  C3                   RET
 
@@ -5693,7 +5694,7 @@ LAB_009e4d9c:
   009E4DD4  81C4D8000000         ADD ESP,0xd8
   009E4DDA  C3                   RET
 
-; 009E5010  _EVP_des_ede3_cbc  (line unknown)
+; 009E5010  FUN_009e5010  (line unknown)
   009E5010  B8C8BEA700           MOV EAX,0xa7bec8
   009E5015  C3                   RET
 
@@ -5763,11 +5764,11 @@ LAB_009e52bf:
   009E52C5  59                   POP ECX
   009E52C6  C3                   RET
 
-; 009E5300  _EVP_des_cbc  (line unknown)
+; 009E5300  FUN_009e5300  (line unknown)
   009E5300  B800C0A700           MOV EAX,0xa7c000
   009E5305  C3                   RET
 
-; 009E5370  _ERR_load_crypto_strings  (line unknown)
+; 009E5370  FUN_009e5370  (line unknown)
   009E5370  E82BF60100           CALL 0x00a049a0
   009E5375  E8F6F40100           CALL 0x00a04870
   009E537A  E8C1F40100           CALL 0x00a04840
@@ -5795,7 +5796,7 @@ LAB_009e52bf:
   009E53E8  E833F00100           CALL 0x00a04420
   009E53ED  E9FEEF0100           JMP 0x00a043f0
 
-; 009E5400  _OPENSSL_cleanse  (line unknown)
+; 009E5400  FUN_009e5400  (line unknown)
   009E5400  8B542408             MOV EDX,dword ptr [ESP + 0x8]
   009E5404  85D2                 TEST EDX,EDX
   009E5406  53                   PUSH EBX
@@ -5837,7 +5838,7 @@ LAB_009e5454:
   009E545B  5B                   POP EBX
   009E545C  C3                   RET
 
-; 009E5460  _ENGINE_load_ssl_client_cert  (line unknown)
+; 009E5460  FUN_009e5460  (line unknown)
   009E5460  56                   PUSH ESI
   009E5461  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E5465  85F6                 TEST ESI,ESI
@@ -5917,7 +5918,7 @@ LAB_009e5512:
   009E553B  5E                   POP ESI
   009E553C  C3                   RET
 
-; 009E5540  _BUF_memdup  (line unknown)
+; 009E5540  FUN_009e5540  (line unknown)
   009E5540  57                   PUSH EDI
   009E5541  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E5545  85FF                 TEST EDI,EDI
@@ -5956,7 +5957,7 @@ LAB_009e5580:
   009E558C  5F                   POP EDI
   009E558D  C3                   RET
 
-; 009E5590  _BUF_strlcpy  (line unknown)
+; 009E5590  FUN_009e5590  (line unknown)
   009E5590  8B4C240C             MOV ECX,dword ptr [ESP + 0xc]
   009E5594  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E5598  56                   PUSH ESI
@@ -5993,7 +5994,7 @@ LAB_009e55c8:
   009E55D6  5E                   POP ESI
   009E55D7  C3                   RET
 
-; 009E55E0  _BUF_strlcat  (line unknown)
+; 009E55E0  FUN_009e55e0  (line unknown)
   009E55E0  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E55E4  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E55E8  53                   PUSH EBX
@@ -6047,7 +6048,7 @@ LAB_009e5636:
   009E5646  5B                   POP EBX
   009E5647  C3                   RET
 
-; 009E5650  _BUF_strndup  (line unknown)
+; 009E5650  FUN_009e5650  (line unknown)
   009E5650  53                   PUSH EBX
   009E5651  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E5655  85DB                 TEST EBX,EBX
@@ -6092,7 +6093,7 @@ LAB_009e5697:
   009E56A6  5B                   POP EBX
   009E56A7  C3                   RET
 
-; 009E56B0  _BUF_strdup  (line unknown)
+; 009E56B0  FUN_009e56b0  (line unknown)
   009E56B0  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009E56B4  85D2                 TEST EDX,EDX
   009E56B6  7503                 JNZ 0x009e56bb
@@ -6115,7 +6116,7 @@ LAB_009e56c1:
   009E56D6  5E                   POP ESI
   009E56D7  C3                   RET
 
-; 009E56E0  _EVP_MD_CTX_init  (line unknown)
+; 009E56E0  FUN_009e56e0  (line unknown)
   009E56E0  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E56E4  33C0                 XOR EAX,EAX
   009E56E6  8901                 MOV dword ptr [ECX],EAX
@@ -6209,7 +6210,7 @@ LAB_009e57b6:
   009E57DB  5E                   POP ESI
   009E57DC  C3                   RET
 
-; 009E57E0  _EVP_DigestInit_ex  (line unknown)
+; 009E57E0  FUN_009e57e0  (line unknown)
   009E57E0  53                   PUSH EBX
   009E57E1  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E57E5  836308FD             AND dword ptr [EBX + 0x8],0xfffffffd
@@ -6280,14 +6281,14 @@ LAB_009e587a:
   009E5886  5B                   POP EBX
   009E5887  C3                   RET
 
-; 009E5890  _EVP_DigestUpdate  (line unknown)
+; 009E5890  FUN_009e5890  (line unknown)
   009E5890  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E5894  8B08                 MOV ECX,dword ptr [EAX]
   009E5896  89442404             MOV dword ptr [ESP + 0x4],EAX
   009E589A  8B4114               MOV EAX,dword ptr [ECX + 0x14]
   009E589D  FFE0                 JMP EAX
 
-; 009E58A0  _EVP_DigestFinal_ex  (line unknown)
+; 009E58A0  FUN_009e58a0  (line unknown)
   009E58A0  56                   PUSH ESI
   009E58A1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E58A5  8B06                 MOV EAX,dword ptr [ESI]
@@ -6337,7 +6338,7 @@ LAB_009e58f9:
   009E5910  5E                   POP ESI
   009E5911  C3                   RET
 
-; 009E5920  _EVP_MD_CTX_cleanup  (line unknown)
+; 009E5920  FUN_009e5920  (line unknown)
   009E5920  56                   PUSH ESI
   009E5921  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E5925  8B06                 MOV EAX,dword ptr [ESI]
@@ -6387,7 +6388,7 @@ LAB_009e597b:
   009E598D  5E                   POP ESI
   009E598E  C3                   RET
 
-; 009E5990  _EVP_MD_CTX_copy_ex  (line unknown)
+; 009E5990  FUN_009e5990  (line unknown)
   009E5990  57                   PUSH EDI
   009E5991  8B7C240C             MOV EDI,dword ptr [ESP + 0xc]
   009E5995  85FF                 TEST EDI,EDI
@@ -6505,7 +6506,7 @@ LAB_009e5a87:
   009E5AA1  5F                   POP EDI
   009E5AA2  C3                   RET
 
-; 009E5AB0  _EVP_Digest  (line unknown)
+; 009E5AB0  FUN_009e5ab0  (line unknown)
   009E5AB0  B810000000           MOV EAX,0x10
   009E5AB5  E87669F7FF           CALL 0x0095c430
   009E5ABA  8B4C2424             MOV ECX,dword ptr [ESP + 0x24]
@@ -6567,7 +6568,7 @@ LAB_009e5b3d:
   009E5B4F  83C410               ADD ESP,0x10
   009E5B52  C3                   RET
 
-; 009E5B60  _EVP_SignFinal  (line unknown)
+; 009E5B60  FUN_009e5b60  (line unknown)
   009E5B60  B860000000           MOV EAX,0x60
   009E5B65  E8C668F7FF           CALL 0x0095c430
   009E5B6A  A19064B800           MOV EAX,[0x00b86490]
@@ -6700,7 +6701,7 @@ LAB_009e5c7e:
   009E5C9E  83C460               ADD ESP,0x60
   009E5CA1  C3                   RET
 
-; 009E5CB0  _EVP_CIPHER_get_asn1_iv  (line unknown)
+; 009E5CB0  FUN_009e5cb0  (line unknown)
   009E5CB0  53                   PUSH EBX
   009E5CB1  55                   PUSH EBP
   009E5CB2  56                   PUSH ESI
@@ -6754,23 +6755,23 @@ LAB_009e5d16:
   009E5D1B  5B                   POP EBX
   009E5D1C  C3                   RET
 
-; 009E5D70  _EVP_CIPHER_CTX_key_length  (line unknown)
+; 009E5D70  FUN_009e5d70  (line unknown)
   009E5D70  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E5D74  8B4058               MOV EAX,dword ptr [EAX + 0x58]
   009E5D77  C3                   RET
 
-; 009E5D80  _EVP_MD_block_size  (line unknown)
+; 009E5D80  FUN_009e5d80  (line unknown)
   009E5D80  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E5D84  8B4040               MOV EAX,dword ptr [EAX + 0x40]
   009E5D87  C3                   RET
 
-; 009E5D90  _EVP_MD_CTX_set_flags  (line unknown)
+; 009E5D90  FUN_009e5d90  (line unknown)
   009E5D90  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E5D94  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E5D98  094808               OR dword ptr [EAX + 0x8],ECX
   009E5D9B  C3                   RET
 
-; 009E5DA0  _EC_KEY_new  (line unknown)
+; 009E5DA0  FUN_009e5da0  (line unknown)
   009E5DA0  6A49                 PUSH 0x49
   009E5DA2  6808C2A700           PUSH 0xa7c208
   009E5DA7  6A20                 PUSH 0x20
@@ -6799,7 +6800,7 @@ LAB_009e5dd2:
   009E5DF2  89481C               MOV dword ptr [EAX + 0x1c],ECX
   009E5DF5  C3                   RET
 
-; 009E5E00  _EC_KEY_free  (line unknown)
+; 009E5E00  FUN_009e5e00  (line unknown)
   009E5E00  56                   PUSH ESI
   009E5E01  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E5E05  85F6                 TEST ESI,ESI
@@ -6848,7 +6849,7 @@ LAB_009e5e6e:
   009E5E6E  5E                   POP ESI
   009E5E6F  C3                   RET
 
-; 009E5E70  _EC_KEY_copy  (line unknown)
+; 009E5E70  FUN_009e5e70  (line unknown)
   009E5E70  53                   PUSH EBX
   009E5E71  57                   PUSH EDI
   009E5E72  8B7C240C             MOV EDI,dword ptr [ESP + 0xc]
@@ -7000,7 +7001,7 @@ LAB_009e5fa2:
   009E5FC0  5B                   POP EBX
   009E5FC1  C3                   RET
 
-; 009E5FD0  _EC_KEY_dup  (line unknown)
+; 009E5FD0  FUN_009e5fd0  (line unknown)
   009E5FD0  56                   PUSH ESI
   009E5FD1  E8CAFDFFFF           CALL 0x009e5da0
   009E5FD6  8BF0                 MOV ESI,EAX
@@ -7025,7 +7026,7 @@ LAB_009e5ffb:
   009E5FFD  5E                   POP ESI
   009E5FFE  C3                   RET
 
-; 009E6000  _EC_KEY_up_ref  (line unknown)
+; 009E6000  FUN_009e6000  (line unknown)
   009E6000  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E6004  68DB000000           PUSH 0xdb
   009E6009  6808C2A700           PUSH 0xa7c208
@@ -7041,7 +7042,7 @@ LAB_009e5ffb:
   009E6026  8BC1                 MOV EAX,ECX
   009E6028  C3                   RET
 
-; 009E6030  _EC_KEY_generate_key  (line unknown)
+; 009E6030  FUN_009e6030  (line unknown)
   009E6030  B804000000           MOV EAX,0x4
   009E6035  E8F663F7FF           CALL 0x0095c430
   009E603A  53                   PUSH EBX
@@ -7166,7 +7167,7 @@ LAB_009e613f:
   009E615F  59                   POP ECX
   009E6160  C3                   RET
 
-; 009E6170  _EC_KEY_set_group  (line unknown)
+; 009E6170  FUN_009e6170  (line unknown)
   009E6170  56                   PUSH ESI
   009E6171  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6175  8B4604               MOV EAX,dword ptr [ESI + 0x4]
@@ -7188,7 +7189,7 @@ LAB_009e6185:
   009E619D  8BC1                 MOV EAX,ECX
   009E619F  C3                   RET
 
-; 009E61A0  _EC_KEY_set_public_key  (line unknown)
+; 009E61A0  FUN_009e61a0  (line unknown)
   009E61A0  56                   PUSH ESI
   009E61A1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E61A5  8B4608               MOV EAX,dword ptr [ESI + 0x8]
@@ -7212,13 +7213,13 @@ LAB_009e61b5:
   009E61D1  8BC2                 MOV EAX,EDX
   009E61D3  C3                   RET
 
-; 009E61E0  _EC_KEY_get_key_method_data  (line unknown)
+; 009E61E0  FUN_009e61e0  (line unknown)
   009E61E0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E61E4  8B481C               MOV ECX,dword ptr [EAX + 0x1c]
   009E61E7  894C2404             MOV dword ptr [ESP + 0x4],ECX
   009E61EB  E900070000           JMP 0x009e68f0
 
-; 009E61F0  _EC_KEY_insert_key_method_data  (line unknown)
+; 009E61F0  FUN_009e61f0  (line unknown)
   009E61F0  53                   PUSH EBX
   009E61F1  55                   PUSH EBP
   009E61F2  56                   PUSH ESI
@@ -7449,7 +7450,7 @@ LAB_009e641f:
 LAB_009e6423:
   009E6423  C3                   RET
 
-; 009E6430  _BN_CTX_new  (line unknown)
+; 009E6430  FUN_009e6430  (line unknown)
   009E6430  68D8000000           PUSH 0xd8
   009E6435  6820C2A700           PUSH 0xa7c220
   009E643A  6A2C                 PUSH 0x2c
@@ -7481,7 +7482,7 @@ LAB_009e6465:
   009E6482  894828               MOV dword ptr [EAX + 0x28],ECX
   009E6485  C3                   RET
 
-; 009E6490  _BN_CTX_free  (line unknown)
+; 009E6490  FUN_009e6490  (line unknown)
   009E6490  57                   PUSH EDI
   009E6491  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E6495  85FF                 TEST EDI,EDI
@@ -7501,7 +7502,7 @@ LAB_009e64b9:
   009E64B9  5F                   POP EDI
   009E64BA  C3                   RET
 
-; 009E64C0  _BN_CTX_start  (line unknown)
+; 009E64C0  FUN_009e64c0  (line unknown)
   009E64C0  57                   PUSH EDI
   009E64C1  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E64C5  8B4724               MOV EAX,dword ptr [EDI + 0x24]
@@ -7535,7 +7536,7 @@ LAB_009e650d:
   009E650D  5F                   POP EDI
   009E650E  C3                   RET
 
-; 009E6510  _BN_CTX_end  (line unknown)
+; 009E6510  FUN_009e6510  (line unknown)
   009E6510  56                   PUSH ESI
   009E6511  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6515  8B4624               MOV EAX,dword ptr [ESI + 0x24]
@@ -7563,7 +7564,7 @@ LAB_009e6540:
   009E654B  5E                   POP ESI
   009E654C  C3                   RET
 
-; 009E6550  _BN_CTX_get  (line unknown)
+; 009E6550  FUN_009e6550  (line unknown)
   009E6550  56                   PUSH ESI
   009E6551  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6555  837E2400             CMP dword ptr [ESI + 0x24],0x0
@@ -7602,7 +7603,7 @@ LAB_009e65a5:
   009E65A7  5E                   POP ESI
   009E65A8  C3                   RET
 
-; 009E65B0  _EC_GROUP_new  (line unknown)
+; 009E65B0  FUN_009e65b0  (line unknown)
   009E65B0  53                   PUSH EBX
   009E65B1  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E65B5  57                   PUSH EDI
@@ -7692,17 +7693,17 @@ LAB_009e6674:
   009E6678  5B                   POP EBX
   009E6679  C3                   RET
 
-; 009E6680  _SSL_version  (line unknown)
+; 009E6680  FUN_009e6680  (line unknown)
   009E6680  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E6684  8B00                 MOV EAX,dword ptr [EAX]
   009E6686  C3                   RET
 
-; 009E6690  _EC_KEY_get0_group  (line unknown)
+; 009E6690  FUN_009e6690  (line unknown)
   009E6690  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E6694  8B4004               MOV EAX,dword ptr [EAX + 0x4]
   009E6697  C3                   RET
 
-; 009E66A0  _EC_GROUP_get_order  (line unknown)
+; 009E66A0  FUN_009e66a0  (line unknown)
   009E66A0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E66A4  56                   PUSH ESI
   009E66A5  8B74240C             MOV ESI,dword ptr [ESP + 0xc]
@@ -7722,7 +7723,7 @@ LAB_009e66bc:
   009E66C2  0F95C0               SETNZ AL
   009E66C5  C3                   RET
 
-; 009E66D0  _EC_GROUP_get_cofactor  (line unknown)
+; 009E66D0  FUN_009e66d0  (line unknown)
   009E66D0  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E66D4  56                   PUSH ESI
   009E66D5  8B742408             MOV ESI,dword ptr [ESP + 0x8]
@@ -7742,25 +7743,25 @@ LAB_009e66ec:
   009E66F2  0F95C0               SETNZ AL
   009E66F5  C3                   RET
 
-; 009E6700  _EC_GROUP_set_curve_name  (line unknown)
+; 009E6700  FUN_009e6700  (line unknown)
   009E6700  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E6704  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E6708  894130               MOV dword ptr [ECX + 0x30],EAX
   009E670B  C3                   RET
 
-; 009E6710  _EC_GROUP_set_asn1_flag  (line unknown)
+; 009E6710  FUN_009e6710  (line unknown)
   009E6710  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E6714  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E6718  894134               MOV dword ptr [ECX + 0x34],EAX
   009E671B  C3                   RET
 
-; 009E6720  _EC_GROUP_set_point_conversion_form  (line unknown)
+; 009E6720  FUN_009e6720  (line unknown)
   009E6720  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009E6724  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E6728  894138               MOV dword ptr [ECX + 0x38],EAX
   009E672B  C3                   RET
 
-; 009E6730  _EC_GROUP_set_seed  (line unknown)
+; 009E6730  FUN_009e6730  (line unknown)
   009E6730  53                   PUSH EBX
   009E6731  56                   PUSH ESI
   009E6732  57                   PUSH EDI
@@ -7811,7 +7812,7 @@ LAB_009e6797:
   009E679E  5B                   POP EBX
   009E679F  C3                   RET
 
-; 009E67A0  _EC_GROUP_set_curve_GFp  (line unknown)
+; 009E67A0  FUN_009e67a0  (line unknown)
   009E67A0  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E67A4  8B01                 MOV EAX,dword ptr [ECX]
   009E67A6  8B4014               MOV EAX,dword ptr [EAX + 0x14]
@@ -7830,7 +7831,7 @@ LAB_009e67c8:
   009E67C8  894C2404             MOV dword ptr [ESP + 0x4],ECX
   009E67CC  FFE0                 JMP EAX
 
-; 009E67D0  _EC_GROUP_set_curve_GF2m  (line unknown)
+; 009E67D0  FUN_009e67d0  (line unknown)
   009E67D0  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E67D4  8B01                 MOV EAX,dword ptr [ECX]
   009E67D6  8B4014               MOV EAX,dword ptr [EAX + 0x14]
@@ -7849,7 +7850,7 @@ LAB_009e67fb:
   009E67FB  894C2404             MOV dword ptr [ESP + 0x4],ECX
   009E67FF  FFE0                 JMP EAX
 
-; 009E6810  _EC_GROUP_get_degree  (line unknown)
+; 009E6810  FUN_009e6810  (line unknown)
   009E6810  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E6814  8B01                 MOV EAX,dword ptr [ECX]
   009E6816  8B401C               MOV EAX,dword ptr [EAX + 0x1c]
@@ -7868,7 +7869,7 @@ LAB_009e683b:
   009E683B  894C2404             MOV dword ptr [ESP + 0x4],ECX
   009E683F  FFE0                 JMP EAX
 
-; 009E6850  _EC_EX_DATA_set_data  (line unknown)
+; 009E6850  FUN_009e6850  (line unknown)
   009E6850  56                   PUSH ESI
   009E6851  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6855  85F6                 TEST ESI,ESI
@@ -7944,7 +7945,7 @@ LAB_009e68e6:
   009E68EE  5E                   POP ESI
   009E68EF  C3                   RET
 
-; 009E68F0  _EC_EX_DATA_get_data  (line unknown)
+; 009E68F0  FUN_009e68f0  (line unknown)
   009E68F0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E68F4  85C0                 TEST EAX,EAX
   009E68F6  56                   PUSH ESI
@@ -7972,7 +7973,7 @@ LAB_009e691e:
   009E6921  5E                   POP ESI
   009E6922  C3                   RET
 
-; 009E6930  _EC_EX_DATA_free_data  (line unknown)
+; 009E6930  FUN_009e6930  (line unknown)
   009E6930  56                   PUSH ESI
   009E6931  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6935  85F6                 TEST ESI,ESI
@@ -8015,7 +8016,7 @@ LAB_009e6984:
   009E6984  5E                   POP ESI
   009E6985  C3                   RET
 
-; 009E6990  _EC_EX_DATA_free_all_data  (line unknown)
+; 009E6990  FUN_009e6990  (line unknown)
   009E6990  53                   PUSH EBX
   009E6991  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E6995  85DB                 TEST EBX,EBX
@@ -8045,7 +8046,7 @@ LAB_009e69c3:
   009E69C3  5B                   POP EBX
   009E69C4  C3                   RET
 
-; 009E69D0  _EC_EX_DATA_clear_free_all_data  (line unknown)
+; 009E69D0  FUN_009e69d0  (line unknown)
   009E69D0  53                   PUSH EBX
   009E69D1  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E69D5  85DB                 TEST EBX,EBX
@@ -8075,7 +8076,7 @@ LAB_009e6a03:
   009E6A03  5B                   POP EBX
   009E6A04  C3                   RET
 
-; 009E6A10  _EC_POINT_new  (line unknown)
+; 009E6A10  FUN_009e6a10  (line unknown)
   009E6A10  57                   PUSH EDI
   009E6A11  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E6A15  85FF                 TEST EDI,EDI
@@ -8147,7 +8148,7 @@ LAB_009e6ab0:
   009E6AB3  5F                   POP EDI
   009E6AB4  C3                   RET
 
-; 009E6AC0  _EC_POINT_free  (line unknown)
+; 009E6AC0  FUN_009e6ac0  (line unknown)
   009E6AC0  56                   PUSH ESI
   009E6AC1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6AC5  85F6                 TEST ESI,ESI
@@ -8167,7 +8168,7 @@ LAB_009e6ae1:
   009E6AE1  5E                   POP ESI
   009E6AE2  C3                   RET
 
-; 009E6AF0  _EC_POINT_clear_free  (line unknown)
+; 009E6AF0  FUN_009e6af0  (line unknown)
   009E6AF0  56                   PUSH ESI
   009E6AF1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6AF5  85F6                 TEST ESI,ESI
@@ -8200,7 +8201,7 @@ LAB_009e6b29:
   009E6B29  5E                   POP ESI
   009E6B2A  C3                   RET
 
-; 009E6B30  _EC_POINT_copy  (line unknown)
+; 009E6B30  FUN_009e6b30  (line unknown)
   009E6B30  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009E6B34  8B02                 MOV EAX,dword ptr [EDX]
   009E6B36  56                   PUSH ESI
@@ -8245,7 +8246,7 @@ LAB_009e6b89:
   009E6B90  5E                   POP ESI
   009E6B91  C3                   RET
 
-; 009E6BA0  _EC_POINT_dup  (line unknown)
+; 009E6BA0  FUN_009e6ba0  (line unknown)
   009E6BA0  57                   PUSH EDI
   009E6BA1  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E6BA5  85FF                 TEST EDI,EDI
@@ -8290,7 +8291,7 @@ LAB_009e6bec:
   009E6BEF  5F                   POP EDI
   009E6BF0  C3                   RET
 
-; 009E6C00  _EC_POINT_set_to_infinity  (line unknown)
+; 009E6C00  FUN_009e6c00  (line unknown)
   009E6C00  56                   PUSH ESI
   009E6C01  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6C05  8B06                 MOV EAX,dword ptr [ESI]
@@ -8329,7 +8330,7 @@ LAB_009e6c4e:
   009E6C55  5E                   POP ESI
   009E6C56  C3                   RET
 
-; 009E6C60  _EC_POINT_set_Jprojective_coordinates_GFp  (line unknown)
+; 009E6C60  FUN_009e6c60  (line unknown)
   009E6C60  56                   PUSH ESI
   009E6C61  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6C65  8B06                 MOV EAX,dword ptr [ESI]
@@ -8376,7 +8377,7 @@ LAB_009e6cae:
   009E6CC9  5E                   POP ESI
   009E6CCA  C3                   RET
 
-; 009E6CD0  _EC_POINT_set_affine_coordinates_GFp  (line unknown)
+; 009E6CD0  FUN_009e6cd0  (line unknown)
   009E6CD0  56                   PUSH ESI
   009E6CD1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6CD5  8B06                 MOV EAX,dword ptr [ESI]
@@ -8421,7 +8422,7 @@ LAB_009e6d1e:
   009E6D34  5E                   POP ESI
   009E6D35  C3                   RET
 
-; 009E6D40  _EC_POINT_set_affine_coordinates_GF2m  (line unknown)
+; 009E6D40  FUN_009e6d40  (line unknown)
   009E6D40  56                   PUSH ESI
   009E6D41  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6D45  8B06                 MOV EAX,dword ptr [ESI]
@@ -8466,7 +8467,7 @@ LAB_009e6d94:
   009E6DAA  5E                   POP ESI
   009E6DAB  C3                   RET
 
-; 009E6DB0  _EC_POINT_get_affine_coordinates_GFp  (line unknown)
+; 009E6DB0  FUN_009e6db0  (line unknown)
   009E6DB0  56                   PUSH ESI
   009E6DB1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6DB5  8B06                 MOV EAX,dword ptr [ESI]
@@ -8511,7 +8512,7 @@ LAB_009e6dfe:
   009E6E14  5E                   POP ESI
   009E6E15  C3                   RET
 
-; 009E6E20  _EC_POINT_get_affine_coordinates_GF2m  (line unknown)
+; 009E6E20  FUN_009e6e20  (line unknown)
   009E6E20  56                   PUSH ESI
   009E6E21  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6E25  8B06                 MOV EAX,dword ptr [ESI]
@@ -8556,7 +8557,7 @@ LAB_009e6e74:
   009E6E8A  5E                   POP ESI
   009E6E8B  C3                   RET
 
-; 009E6E90  _EC_POINT_set_compressed_coordinates_GFp  (line unknown)
+; 009E6E90  FUN_009e6e90  (line unknown)
   009E6E90  56                   PUSH ESI
   009E6E91  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6E95  8B06                 MOV EAX,dword ptr [ESI]
@@ -8601,7 +8602,7 @@ LAB_009e6ede:
   009E6EF4  5E                   POP ESI
   009E6EF5  C3                   RET
 
-; 009E6F00  _EC_POINT_set_compressed_coordinates_GF2m  (line unknown)
+; 009E6F00  FUN_009e6f00  (line unknown)
   009E6F00  56                   PUSH ESI
   009E6F01  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6F05  8B06                 MOV EAX,dword ptr [ESI]
@@ -8646,7 +8647,7 @@ LAB_009e6f54:
   009E6F6A  5E                   POP ESI
   009E6F6B  C3                   RET
 
-; 009E6F70  _EC_POINT_point2oct  (line unknown)
+; 009E6F70  FUN_009e6f70  (line unknown)
   009E6F70  56                   PUSH ESI
   009E6F71  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6F75  8B06                 MOV EAX,dword ptr [ESI]
@@ -8693,7 +8694,7 @@ LAB_009e6fbe:
   009E6FD9  5E                   POP ESI
   009E6FDA  C3                   RET
 
-; 009E6FE0  _EC_POINT_oct2point  (line unknown)
+; 009E6FE0  FUN_009e6fe0  (line unknown)
   009E6FE0  56                   PUSH ESI
   009E6FE1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E6FE5  8B06                 MOV EAX,dword ptr [ESI]
@@ -8738,7 +8739,7 @@ LAB_009e702e:
   009E7044  5E                   POP ESI
   009E7045  C3                   RET
 
-; 009E7050  _EC_POINT_add  (line unknown)
+; 009E7050  FUN_009e7050  (line unknown)
   009E7050  53                   PUSH EBX
   009E7051  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E7055  8B0B                 MOV ECX,dword ptr [EBX]
@@ -8796,7 +8797,7 @@ LAB_009e70ab:
   009E70C7  5B                   POP EBX
   009E70C8  C3                   RET
 
-; 009E70D0  _EC_POINT_dbl  (line unknown)
+; 009E70D0  FUN_009e70d0  (line unknown)
   009E70D0  57                   PUSH EDI
   009E70D1  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E70D5  8B07                 MOV EAX,dword ptr [EDI]
@@ -8845,7 +8846,7 @@ LAB_009e711d:
   009E7138  5F                   POP EDI
   009E7139  C3                   RET
 
-; 009E7140  _EC_POINT_invert  (line unknown)
+; 009E7140  FUN_009e7140  (line unknown)
   009E7140  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009E7144  8B02                 MOV EAX,dword ptr [EDX]
   009E7146  83785800             CMP dword ptr [EAX + 0x58],0x0
@@ -8884,7 +8885,7 @@ LAB_009e7190:
   009E71A0  5E                   POP ESI
   009E71A1  C3                   RET
 
-; 009E71B0  _EC_POINT_is_at_infinity  (line unknown)
+; 009E71B0  FUN_009e71b0  (line unknown)
   009E71B0  56                   PUSH ESI
   009E71B1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E71B5  8B06                 MOV EAX,dword ptr [ESI]
@@ -8923,7 +8924,7 @@ LAB_009e71fe:
   009E7205  5E                   POP ESI
   009E7206  C3                   RET
 
-; 009E7210  _EC_POINT_is_on_curve  (line unknown)
+; 009E7210  FUN_009e7210  (line unknown)
   009E7210  56                   PUSH ESI
   009E7211  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E7215  8B06                 MOV EAX,dword ptr [ESI]
@@ -8964,7 +8965,7 @@ LAB_009e725e:
   009E726A  5E                   POP ESI
   009E726B  C3                   RET
 
-; 009E7270  _EC_POINT_cmp  (line unknown)
+; 009E7270  FUN_009e7270  (line unknown)
   009E7270  57                   PUSH EDI
   009E7271  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E7275  8B07                 MOV EAX,dword ptr [EDI]
@@ -9013,7 +9014,7 @@ LAB_009e72bd:
   009E72D8  5F                   POP EDI
   009E72D9  C3                   RET
 
-; 009E72E0  _EC_POINT_make_affine  (line unknown)
+; 009E72E0  FUN_009e72e0  (line unknown)
   009E72E0  56                   PUSH ESI
   009E72E1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E72E5  8B06                 MOV EAX,dword ptr [ESI]
@@ -9054,7 +9055,7 @@ LAB_009e732e:
   009E733A  5E                   POP ESI
   009E733B  C3                   RET
 
-; 009E7340  _EC_POINTs_make_affine  (line unknown)
+; 009E7340  FUN_009e7340  (line unknown)
   009E7340  53                   PUSH EBX
   009E7341  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E7345  8B13                 MOV EDX,dword ptr [EBX]
@@ -9117,7 +9118,7 @@ LAB_009e73a1:
   009E73C1  5B                   POP EBX
   009E73C2  C3                   RET
 
-; 009E73D0  _EC_POINT_mul  (line unknown)
+; 009E73D0  FUN_009e73d0  (line unknown)
   009E73D0  B804000000           MOV EAX,0x4
   009E73D5  E85650F7FF           CALL 0x0095c430
   009E73DA  8B442414             MOV EAX,dword ptr [ESP + 0x14]
@@ -9174,7 +9175,7 @@ LAB_009e742c:
   009E744E  59                   POP ECX
   009E744F  C3                   RET
 
-; 009E7450  _EC_GROUP_have_precompute_mult  (line unknown)
+; 009E7450  FUN_009e7450  (line unknown)
   009E7450  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009E7454  8B01                 MOV EAX,dword ptr [ECX]
   009E7456  83787400             CMP dword ptr [EAX + 0x74],0x0
@@ -9191,7 +9192,7 @@ LAB_009e7472:
   009E7472  33C0                 XOR EAX,EAX
   009E7474  C3                   RET
 
-; 009E7480  _EC_GROUP_free  (line unknown)
+; 009E7480  FUN_009e7480  (line unknown)
   009E7480  56                   PUSH ESI
   009E7481  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E7485  85F6                 TEST ESI,ESI
@@ -9246,7 +9247,7 @@ LAB_009e74f3:
   009E74F3  5E                   POP ESI
   009E74F4  C3                   RET
 
-; 009E7500  _EC_GROUP_clear_free  (line unknown)
+; 009E7500  FUN_009e7500  (line unknown)
   009E7500  56                   PUSH ESI
   009E7501  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E7505  85F6                 TEST ESI,ESI
@@ -9307,7 +9308,7 @@ LAB_009e7586:
   009E7586  5E                   POP ESI
   009E7587  C3                   RET
 
-; 009E7590  _EC_GROUP_copy  (line unknown)
+; 009E7590  FUN_009e7590  (line unknown)
   009E7590  57                   PUSH EDI
   009E7591  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E7595  8B07                 MOV EAX,dword ptr [EDI]
@@ -9499,7 +9500,7 @@ LAB_009e772d:
   009E7742  5F                   POP EDI
   009E7743  C3                   RET
 
-; 009E7750  _EC_GROUP_dup  (line unknown)
+; 009E7750  FUN_009e7750  (line unknown)
   009E7750  57                   PUSH EDI
   009E7751  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009E7755  85FF                 TEST EDI,EDI
@@ -9536,7 +9537,7 @@ LAB_009e778b:
   009E778E  5F                   POP EDI
   009E778F  C3                   RET
 
-; 009E7790  _EC_GROUP_set_generator  (line unknown)
+; 009E7790  FUN_009e7790  (line unknown)
   009E7790  57                   PUSH EDI
   009E7791  8B7C240C             MOV EDI,dword ptr [ESP + 0xc]
   009E7795  85FF                 TEST EDI,EDI
@@ -9616,7 +9617,7 @@ LAB_009e7834:
   009E783A  5F                   POP EDI
   009E783B  C3                   RET
 
-; 009E7840  _EC_GROUP_cmp  (line unknown)
+; 009E7840  FUN_009e7840  (line unknown)
   009E7840  B814000000           MOV EAX,0x14
   009E7845  E8E64BF7FF           CALL 0x0095c430
   009E784A  53                   PUSH EBX
@@ -9831,7 +9832,7 @@ LAB_009e7a53:
   009E7A5A  83C414               ADD ESP,0x14
   009E7A5D  C3                   RET
 
-; 009E7A60  _ECDH_compute_key  (line unknown)
+; 009E7A60  FUN_009e7a60  (line unknown)
   009E7A60  56                   PUSH ESI
   009E7A61  8B742414             MOV ESI,dword ptr [ESP + 0x14]
   009E7A65  56                   PUSH ESI
@@ -9858,21 +9859,21 @@ LAB_009e7a74:
   009E7A94  5E                   POP ESI
   009E7A95  C3                   RET
 
-; 009E7AA0  _DH_generate_key  (line unknown)
+; 009E7AA0  FUN_009e7aa0  (line unknown)
   009E7AA0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009E7AA4  8B4844               MOV ECX,dword ptr [EAX + 0x44]
   009E7AA7  89442404             MOV dword ptr [ESP + 0x4],EAX
   009E7AAB  8B5104               MOV EDX,dword ptr [ECX + 0x4]
   009E7AAE  FFE2                 JMP EDX
 
-; 009E7AB0  _DH_compute_key  (line unknown)
+; 009E7AB0  FUN_009e7ab0  (line unknown)
   009E7AB0  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E7AB4  8B4844               MOV ECX,dword ptr [EAX + 0x44]
   009E7AB7  8944240C             MOV dword ptr [ESP + 0xc],EAX
   009E7ABB  8B4908               MOV ECX,dword ptr [ECX + 0x8]
   009E7ABE  FFE1                 JMP ECX
 
-; 009E7AC0  _DH_OpenSSL  (line unknown)
+; 009E7AC0  FUN_009e7ac0  (line unknown)
   009E7AC0  B8C832B900           MOV EAX,0xb932c8
   009E7AC5  C3                   RET
 
@@ -10167,7 +10168,7 @@ LAB_009e7da6:
   009E7DAC  83C408               ADD ESP,0x8
   009E7DAF  C3                   RET
 
-; 009E7E40  _ASN1_dup  (line unknown)
+; 009E7E40  FUN_009e7e40  (line unknown)
   009E7E40  B804000000           MOV EAX,0x4
   009E7E45  E8E645F7FF           CALL 0x0095c430
   009E7E4A  57                   PUSH EDI
@@ -10230,7 +10231,7 @@ LAB_009e7e98:
   009E7EC4  59                   POP ECX
   009E7EC5  C3                   RET
 
-; 009E7ED0  _ASN1_item_dup  (line unknown)
+; 009E7ED0  FUN_009e7ed0  (line unknown)
   009E7ED0  B804000000           MOV EAX,0x4
   009E7ED5  E85645F7FF           CALL 0x0095c430
   009E7EDA  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
@@ -10280,7 +10281,7 @@ LAB_009e7f24:
   009E7F48  59                   POP ECX
   009E7F49  C3                   RET
 
-; 009E7FE0  _ECDSA_sign_ex  (line unknown)
+; 009E7FE0  FUN_009e7fe0  (line unknown)
   009E7FE0  53                   PUSH EBX
   009E7FE1  56                   PUSH ESI
   009E7FE2  8B742414             MOV ESI,dword ptr [ESP + 0x14]
@@ -10333,7 +10334,7 @@ LAB_009e8031:
   009E8052  5B                   POP EBX
   009E8053  C3                   RET
 
-; 009E8060  _ECDSA_sign_setup  (line unknown)
+; 009E8060  FUN_009e8060  (line unknown)
   009E8060  56                   PUSH ESI
   009E8061  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009E8065  56                   PUSH ESI
@@ -10358,7 +10359,7 @@ LAB_009e8074:
   009E808F  5E                   POP ESI
   009E8090  C3                   RET
 
-; 009E80A0  _ECDSA_sign  (line unknown)
+; 009E80A0  FUN_009e80a0  (line unknown)
   009E80A0  8B442418             MOV EAX,dword ptr [ESP + 0x18]
   009E80A4  8B4C2414             MOV ECX,dword ptr [ESP + 0x14]
   009E80A8  8B542410             MOV EDX,dword ptr [ESP + 0x10]
@@ -10377,7 +10378,7 @@ LAB_009e8074:
   009E80C7  83C420               ADD ESP,0x20
   009E80CA  C3                   RET
 
-; 009E8160  d2i_DSAPrivateKey  (line unknown)
+; 009E8160  FUN_009e8160  (line unknown)
   009E8160  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E8164  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E8168  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -10389,7 +10390,7 @@ LAB_009e8074:
   009E8179  83C410               ADD ESP,0x10
   009E817C  C3                   RET
 
-; 009E8180  d2i_DSAparams  (line unknown)
+; 009E8180  FUN_009e8180  (line unknown)
   009E8180  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E8184  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E8188  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -10401,7 +10402,7 @@ LAB_009e8074:
   009E8199  83C410               ADD ESP,0x10
   009E819C  C3                   RET
 
-; 009E81B0  d2i_DSAPublicKey  (line unknown)
+; 009E81B0  FUN_009e81b0  (line unknown)
   009E81B0  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009E81B4  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E81B8  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -10413,7 +10414,7 @@ LAB_009e8074:
   009E81C9  83C410               ADD ESP,0x10
   009E81CC  C3                   RET
 
-; 009E81D0  _DSA_sign  (line unknown)
+; 009E81D0  FUN_009e81d0  (line unknown)
   009E81D0  56                   PUSH ESI
   009E81D1  8B742410             MOV ESI,dword ptr [ESP + 0x10]
   009E81D5  57                   PUSH EDI
@@ -10451,7 +10452,7 @@ LAB_009e81ff:
   009E8224  5E                   POP ESI
   009E8225  C3                   RET
 
-; 009E8230  _DSA_size  (line unknown)
+; 009E8230  FUN_009e8230  (line unknown)
   009E8230  B810000000           MOV EAX,0x10
   009E8235  E8F641F7FF           CALL 0x0095c430
   009E823A  8B442414             MOV EAX,dword ptr [ESP + 0x14]
@@ -10480,7 +10481,7 @@ LAB_009e81ff:
   009E8284  83C428               ADD ESP,0x28
   009E8287  C3                   RET
 
-; 009E8290  _DSA_verify  (line unknown)
+; 009E8290  FUN_009e8290  (line unknown)
   009E8290  B804000000           MOV EAX,0x4
   009E8295  E89641F7FF           CALL 0x0095c430
   009E829A  56                   PUSH ESI
@@ -10526,7 +10527,7 @@ LAB_009e82ee:
   009E82FE  59                   POP ECX
   009E82FF  C3                   RET
 
-; 009E8300  _RSA_sign  (line unknown)
+; 009E8300  FUN_009e8300  (line unknown)
   009E8300  B830000000           MOV EAX,0x30
   009E8305  E82641F7FF           CALL 0x0095c430
   009E830A  53                   PUSH EBX
@@ -10739,7 +10740,7 @@ LAB_009e8504:
   009E850A  83C430               ADD ESP,0x30
   009E850D  C3                   RET
 
-; 009E8510  _RSA_verify  (line unknown)
+; 009E8510  FUN_009e8510  (line unknown)
   009E8510  B80C000000           MOV EAX,0xc
   009E8515  E8163FF7FF           CALL 0x0095c430
   009E851A  56                   PUSH ESI
@@ -11064,7 +11065,7 @@ LAB_009e883e:
   009E885A  83C40C               ADD ESP,0xc
   009E885D  C3                   RET
 
-; 009E8860  _X509_certificate_type  (line unknown)
+; 009E8860  FUN_009e8860  (line unknown)
   009E8860  53                   PUSH EBX
   009E8861  57                   PUSH EDI
   009E8862  8B7C240C             MOV EDI,dword ptr [ESP + 0xc]
@@ -11160,7 +11161,7 @@ LAB_009e8925:
   009E892A  5B                   POP EBX
   009E892B  C3                   RET
 
-; 009E8930  _EVP_VerifyFinal  (line unknown)
+; 009E8930  FUN_009e8930  (line unknown)
   009E8930  B860000000           MOV EAX,0x60
   009E8935  E8F63AF7FF           CALL 0x0095c430
   009E893A  A19064B800           MOV EAX,[0x00b86490]
@@ -11576,7 +11577,7 @@ LAB_009e8d9a:
   009E8D9F  83C41C               ADD ESP,0x1c
   009E8DA2  C3                   RET
 
-; 009E8DB0  _EC_GROUP_new_by_curve_name  (line unknown)
+; 009E8DB0  FUN_009e8db0  (line unknown)
   009E8DB0  53                   PUSH EBX
   009E8DB1  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009E8DB5  33C0                 XOR EAX,EAX
@@ -11624,11 +11625,11 @@ LAB_009e8e1c:
   009E8E1C  5B                   POP EBX
   009E8E1D  C3                   RET
 
-; 009E8E20  _COMP_zlib  (line unknown)
+; 009E8E20  FUN_009e8e20  (line unknown)
   009E8E20  B8F032B900           MOV EAX,0xb932f0
   009E8E25  C3                   RET
 
-; 009E8E30  _CRYPTO_mem_ctrl  (line unknown)
+; 009E8E30  FUN_009e8e30  (line unknown)
   009E8E30  56                   PUSH ESI
   009E8E31  8B358CBDEA00         MOV ESI,dword ptr [0x00eabd8c]
   009E8E37  68A1000000           PUSH 0xa1
@@ -11707,11 +11708,11 @@ default:
   009E8F54  5E                   POP ESI
   009E8F55  C3                   RET
 
-; 009E8F70  _EVP_enc_null  (line unknown)
+; 009E8F70  FUN_009e8f70  (line unknown)
   009E8F70  B8541CA800           MOV EAX,0xa81c54
   009E8F75  C3                   RET
 
-; 009E8F80  get_type  (line unknown)
+; 009E8F80  FUN_009e8f80  (line unknown)
   009E8F80  B801000000           MOV EAX,0x1
   009E8F85  C3                   RET
 
@@ -12982,7 +12983,7 @@ caseD_26:
   009E9D50  33C0                 XOR EAX,EAX
   009E9D52  E932FAFFFF           JMP 0x009e9789
 
-; 009E9E60  _BIO_vprintf  (line unknown)
+; 009E9E60  FUN_009e9e60  (line unknown)
   009E9E60  B818080000           MOV EAX,0x818
   009E9E65  E8C625F7FF           CALL 0x0095c430
   009E9E6A  A19064B800           MOV EAX,[0x00b86490]
@@ -13050,7 +13051,7 @@ LAB_009e9f16:
   009E9F2E  81C418080000         ADD ESP,0x818
   009E9F34  C3                   RET
 
-; 009E9F40  _BIO_printf  (line unknown)
+; 009E9F40  FUN_009e9f40  (line unknown)
   009E9F40  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009E9F44  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009E9F48  8D44240C             LEA EAX,[ESP + 0xc]
@@ -13061,7 +13062,7 @@ LAB_009e9f16:
   009E9F54  83C40C               ADD ESP,0xc
   009E9F57  C3                   RET
 
-; 009E9F60  _BIO_snprintf  (line unknown)
+; 009E9F60  FUN_009e9f60  (line unknown)
   009E9F60  B808000000           MOV EAX,0x8
   009E9F65  E8C624F7FF           CALL 0x0095c430
   009E9F6A  8B442410             MOV EAX,dword ptr [ESP + 0x10]
@@ -13093,7 +13094,7 @@ LAB_009e9fb5:
   009E9FB5  83C408               ADD ESP,0x8
   009E9FB8  C3                   RET
 
-; 009E9FC0  _EVP_EncryptInit_ex  (line unknown)
+; 009E9FC0  FUN_009e9fc0  (line unknown)
   009E9FC0  8B442414             MOV EAX,dword ptr [ESP + 0x14]
   009E9FC4  8B4C2410             MOV ECX,dword ptr [ESP + 0x10]
   009E9FC8  8B54240C             MOV EDX,dword ptr [ESP + 0xc]
@@ -13109,7 +13110,7 @@ LAB_009e9fb5:
   009E9FE0  83C418               ADD ESP,0x18
   009E9FE3  C3                   RET
 
-; 009E9FF0  _EVP_DecryptInit_ex  (line unknown)
+; 009E9FF0  FUN_009e9ff0  (line unknown)
   009E9FF0  8B442414             MOV EAX,dword ptr [ESP + 0x14]
   009E9FF4  8B4C2410             MOV ECX,dword ptr [ESP + 0x10]
   009E9FF8  8B54240C             MOV EDX,dword ptr [ESP + 0xc]
@@ -13125,7 +13126,7 @@ LAB_009e9fb5:
   009EA010  83C418               ADD ESP,0x18
   009EA013  C3                   RET
 
-; 009EA020  _EVP_EncryptUpdate  (line unknown)
+; 009EA020  FUN_009ea020  (line unknown)
   009EA020  57                   PUSH EDI
   009EA021  8B7C2418             MOV EDI,dword ptr [ESP + 0x18]
   009EA025  85FF                 TEST EDI,EDI
@@ -13285,7 +13286,7 @@ LAB_009ea173:
   009EA17E  5F                   POP EDI
   009EA17F  C3                   RET
 
-; 009EA180  _EVP_EncryptFinal_ex  (line unknown)
+; 009EA180  FUN_009ea180  (line unknown)
   009EA180  56                   PUSH ESI
   009EA181  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009EA185  8B06                 MOV EAX,dword ptr [ESI]
@@ -13362,7 +13363,7 @@ LAB_009ea233:
   009EA234  5E                   POP ESI
   009EA235  C3                   RET
 
-; 009EA240  _EVP_DecryptUpdate  (line unknown)
+; 009EA240  FUN_009ea240  (line unknown)
   009EA240  53                   PUSH EBX
   009EA241  8B5C2418             MOV EBX,dword ptr [ESP + 0x18]
   009EA245  85DB                 TEST EBX,EBX
@@ -13466,7 +13467,7 @@ LAB_009ea32b:
   009EA333  5B                   POP EBX
   009EA334  C3                   RET
 
-; 009EA340  _EVP_DecryptFinal_ex  (line unknown)
+; 009EA340  FUN_009ea340  (line unknown)
   009EA340  55                   PUSH EBP
   009EA341  8B6C2410             MOV EBP,dword ptr [ESP + 0x10]
   009EA345  56                   PUSH ESI
@@ -13583,7 +13584,7 @@ LAB_009ea460:
   009EA46E  5D                   POP EBP
   009EA46F  C3                   RET
 
-; 009EA470  _EVP_CIPHER_CTX_set_key_length  (line unknown)
+; 009EA470  FUN_009ea470  (line unknown)
   009EA470  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EA474  8B08                 MOV ECX,dword ptr [EAX]
   009EA476  8B5110               MOV EDX,dword ptr [ECX + 0x10]
@@ -13620,7 +13621,7 @@ LAB_009ea4ab:
   009EA4C6  33C0                 XOR EAX,EAX
   009EA4C8  C3                   RET
 
-; 009EA4D0  _EVP_CipherUpdate  (line unknown)
+; 009EA4D0  FUN_009ea4d0  (line unknown)
   009EA4D0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EA4D4  83780800             CMP dword ptr [EAX + 0x8],0x0
   009EA4D8  7409                 JZ 0x009ea4e3
@@ -13630,7 +13631,7 @@ LAB_009ea4e3:
   009EA4E3  89442404             MOV dword ptr [ESP + 0x4],EAX
   009EA4E7  E954FDFFFF           JMP 0x009ea240
 
-; 009EA4F0  _EVP_CipherFinal_ex  (line unknown)
+; 009EA4F0  FUN_009ea4f0  (line unknown)
   009EA4F0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EA4F4  83780800             CMP dword ptr [EAX + 0x8],0x0
   009EA4F8  7409                 JZ 0x009ea503
@@ -13640,7 +13641,7 @@ LAB_009ea503:
   009EA503  89442404             MOV dword ptr [ESP + 0x4],EAX
   009EA507  E934FEFFFF           JMP 0x009ea340
 
-; 009EA510  _HMAC_Init_ex  (line unknown)
+; 009EA510  FUN_009ea510  (line unknown)
   009EA510  B88C000000           MOV EAX,0x8c
   009EA515  E8161FF7FF           CALL 0x0095c430
   009EA51A  A19064B800           MOV EAX,[0x00b86490]
@@ -13799,13 +13800,13 @@ LAB_009ea6a5:
   009EA6C7  81C48C000000         ADD ESP,0x8c
   009EA6CD  C3                   RET
 
-; 009EA6D0  _HMAC_Update  (line unknown)
+; 009EA6D0  FUN_009ea6d0  (line unknown)
   009EA6D0  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009EA6D4  83C204               ADD EDX,0x4
   009EA6D7  89542404             MOV dword ptr [ESP + 0x4],EDX
   009EA6DB  E9B0B1FFFF           JMP 0x009e5890
 
-; 009EA6E0  _HMAC_Final  (line unknown)
+; 009EA6E0  FUN_009ea6e0  (line unknown)
   009EA6E0  B848000000           MOV EAX,0x48
   009EA6E5  E8461DF7FF           CALL 0x0095c430
   009EA6EA  A19064B800           MOV EAX,[0x00b86490]
@@ -13850,7 +13851,7 @@ LAB_009ea6a5:
   009EA74F  83C448               ADD ESP,0x48
   009EA752  C3                   RET
 
-; 009EA760  _HMAC_CTX_init  (line unknown)
+; 009EA760  FUN_009ea760  (line unknown)
   009EA760  56                   PUSH ESI
   009EA761  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009EA765  8D4614               LEA EAX,[ESI + 0x14]
@@ -13866,7 +13867,7 @@ LAB_009ea6a5:
   009EA783  5E                   POP ESI
   009EA784  C3                   RET
 
-; 009EA790  _HMAC_CTX_cleanup  (line unknown)
+; 009EA790  FUN_009ea790  (line unknown)
   009EA790  56                   PUSH ESI
   009EA791  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009EA795  8D4614               LEA EAX,[ESI + 0x14]
@@ -13886,7 +13887,7 @@ LAB_009ea6a5:
   009EA7C0  5E                   POP ESI
   009EA7C1  C3                   RET
 
-; 009EA7D0  _HMAC_CTX_set_flags  (line unknown)
+; 009EA7D0  FUN_009ea7d0  (line unknown)
   009EA7D0  56                   PUSH ESI
   009EA7D1  8B74240C             MOV ESI,dword ptr [ESP + 0xc]
   009EA7D5  57                   PUSH EDI
@@ -13908,7 +13909,7 @@ LAB_009ea6a5:
   009EA7FC  5E                   POP ESI
   009EA7FD  C3                   RET
 
-; 009EA810  d2i_ASN1_INTEGER  (line unknown)
+; 009EA810  FUN_009ea810  (line unknown)
   009EA810  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009EA814  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009EA818  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -13920,7 +13921,7 @@ LAB_009ea6a5:
   009EA829  83C410               ADD ESP,0x10
   009EA82C  C3                   RET
 
-; 009EA830  i2d_ASN1_INTEGER  (line unknown)
+; 009EA830  FUN_009ea830  (line unknown)
   009EA830  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009EA834  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009EA838  68701FA800           PUSH 0xa81f70
@@ -13930,7 +13931,7 @@ LAB_009ea6a5:
   009EA844  83C40C               ADD ESP,0xc
   009EA847  C3                   RET
 
-; 009EA850  _ASN1_INTEGER_free  (line unknown)
+; 009EA850  FUN_009ea850  (line unknown)
   009EA850  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EA854  68701FA800           PUSH 0xa81f70
   009EA859  50                   PUSH EAX
@@ -13938,7 +13939,7 @@ LAB_009ea6a5:
   009EA85F  83C408               ADD ESP,0x8
   009EA862  C3                   RET
 
-; 009EA880  d2i_ASN1_ENUMERATED  (line unknown)
+; 009EA880  FUN_009ea880  (line unknown)
   009EA880  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009EA884  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009EA888  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -13950,7 +13951,7 @@ LAB_009ea6a5:
   009EA899  83C410               ADD ESP,0x10
   009EA89C  C3                   RET
 
-; 009EA8B0  i2d_ASN1_BIT_STRING  (line unknown)
+; 009EA8B0  FUN_009ea8b0  (line unknown)
   009EA8B0  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009EA8B4  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009EA8B8  68A81FA800           PUSH 0xa81fa8
@@ -13960,7 +13961,7 @@ LAB_009ea6a5:
   009EA8C4  83C40C               ADD ESP,0xc
   009EA8C7  C3                   RET
 
-; 009EA8D0  _ASN1_BIT_STRING_free  (line unknown)
+; 009EA8D0  FUN_009ea8d0  (line unknown)
   009EA8D0  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EA8D4  68A81FA800           PUSH 0xa81fa8
   009EA8D9  50                   PUSH EAX
@@ -13968,7 +13969,7 @@ LAB_009ea6a5:
   009EA8DF  83C408               ADD ESP,0x8
   009EA8E2  C3                   RET
 
-; 009EA900  d2i_ASN1_OCTET_STRING  (line unknown)
+; 009EA900  FUN_009ea900  (line unknown)
   009EA900  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009EA904  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009EA908  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -13980,13 +13981,13 @@ LAB_009ea6a5:
   009EA919  83C410               ADD ESP,0x10
   009EA91C  C3                   RET
 
-; 009EA920  _ASN1_OCTET_STRING_new  (line unknown)
+; 009EA920  FUN_009ea920  (line unknown)
   009EA920  68C41FA800           PUSH 0xa81fc4
   009EA925  E8766A0000           CALL 0x009f13a0
   009EA92A  83C404               ADD ESP,0x4
   009EA92D  C3                   RET
 
-; 009EA930  _ASN1_OCTET_STRING_free  (line unknown)
+; 009EA930  FUN_009ea930  (line unknown)
   009EA930  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EA934  68C41FA800           PUSH 0xa81fc4
   009EA939  50                   PUSH EAX
@@ -13994,7 +13995,7 @@ LAB_009ea6a5:
   009EA93F  83C408               ADD ESP,0x8
   009EA942  C3                   RET
 
-; 009EA9D0  d2i_ASN1_TYPE  (line unknown)
+; 009EA9D0  FUN_009ea9d0  (line unknown)
   009EA9D0  8B44240C             MOV EAX,dword ptr [ESP + 0xc]
   009EA9D4  8B4C2408             MOV ECX,dword ptr [ESP + 0x8]
   009EA9D8  8B542404             MOV EDX,dword ptr [ESP + 0x4]
@@ -14006,7 +14007,7 @@ LAB_009ea6a5:
   009EA9E9  83C410               ADD ESP,0x10
   009EA9EC  C3                   RET
 
-; 009EA9F0  i2d_ASN1_TYPE  (line unknown)
+; 009EA9F0  FUN_009ea9f0  (line unknown)
   009EA9F0  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009EA9F4  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009EA9F8  683021A800           PUSH 0xa82130
@@ -14016,13 +14017,13 @@ LAB_009ea6a5:
   009EAA04  83C40C               ADD ESP,0xc
   009EAA07  C3                   RET
 
-; 009EAA10  _ASN1_TYPE_new  (line unknown)
+; 009EAA10  FUN_009eaa10  (line unknown)
   009EAA10  683021A800           PUSH 0xa82130
   009EAA15  E886690000           CALL 0x009f13a0
   009EAA1A  83C404               ADD ESP,0x4
   009EAA1D  C3                   RET
 
-; 009EAA20  _ASN1_TYPE_free  (line unknown)
+; 009EAA20  FUN_009eaa20  (line unknown)
   009EAA20  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EAA24  683021A800           PUSH 0xa82130
   009EAA29  50                   PUSH EAX
@@ -14030,7 +14031,7 @@ LAB_009ea6a5:
   009EAA2F  83C408               ADD ESP,0x8
   009EAA32  C3                   RET
 
-; 009EAAA0  _RAND_SSLeay  (line unknown)
+; 009EAAA0  FUN_009eaaa0  (line unknown)
   009EAAA0  B81033B900           MOV EAX,0xb93310
   009EAAA5  C3                   RET
 
@@ -14669,14 +14670,14 @@ LAB_009eb1f0:
   009EB2D6  83C438               ADD ESP,0x38
   009EB2D9  C3                   RET
 
-; 009EB430  _ENGINE_get_default_RAND  (line unknown)
+; 009EB430  FUN_009eb430  (line unknown)
   009EB430  6A01                 PUSH 0x1
   009EB432  6840C2EA00           PUSH 0xeac240
   009EB437  E8F4C80100           CALL 0x00a07d30
   009EB43C  83C408               ADD ESP,0x8
   009EB43F  C3                   RET
 
-; 009EB440  _ENGINE_get_RAND  (line unknown)
+; 009EB440  FUN_009eb440  (line unknown)
   009EB440  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EB444  8B401C               MOV EAX,dword ptr [EAX + 0x1c]
   009EB447  C3                   RET
@@ -14778,7 +14779,7 @@ LAB_009eb545:
   009EB562  5E                   POP ESI
   009EB563  C3                   RET
 
-; 009EB570  ecdsa_check  (line unknown)
+; 009EB570  FUN_009eb570  (line unknown)
   009EB570  53                   PUSH EBX
   009EB571  8B5C2408             MOV EBX,dword ptr [ESP + 0x8]
   009EB575  56                   PUSH ESI
@@ -14819,7 +14820,7 @@ LAB_009eb5c4:
   009EB5C7  5B                   POP EBX
   009EB5C8  C3                   RET
 
-; 009EB5D0  _ECDSA_size  (line unknown)
+; 009EB5D0  FUN_009eb5d0  (line unknown)
   009EB5D0  B810000000           MOV EAX,0x10
   009EB5D5  E8560EF7FF           CALL 0x0095c430
   009EB5DA  8B442414             MOV EAX,dword ptr [ESP + 0x14]
@@ -14891,7 +14892,7 @@ LAB_009eb628:
   009EB679  83C410               ADD ESP,0x10
   009EB67C  C3                   RET
 
-; 009EB680  _DSA_new_method  (line unknown)
+; 009EB680  FUN_009eb680  (line unknown)
   009EB680  56                   PUSH ESI
   009EB681  57                   PUSH EDI
   009EB682  6884000000           PUSH 0x84
@@ -15033,7 +15034,7 @@ LAB_009eb7da:
   009EB7DE  5E                   POP ESI
   009EB7DF  C3                   RET
 
-; 009EB7E0  _DSA_free  (line unknown)
+; 009EB7E0  FUN_009eb7e0  (line unknown)
   009EB7E0  56                   PUSH ESI
   009EB7E1  8B742408             MOV ESI,dword ptr [ESP + 0x8]
   009EB7E5  85F6                 TEST ESI,ESI
@@ -15125,13 +15126,13 @@ LAB_009eb8b7:
   009EB8B7  5E                   POP ESI
   009EB8B8  C3                   RET
 
-; 009EB8C0  _DSA_new  (line unknown)
+; 009EB8C0  FUN_009eb8c0  (line unknown)
   009EB8C0  6A00                 PUSH 0x0
   009EB8C2  E8B9FDFFFF           CALL 0x009eb680
   009EB8C7  83C404               ADD ESP,0x4
   009EB8CA  C3                   RET
 
-; 009EB910  _X509_NAME_oneline  (line unknown)
+; 009EB910  FUN_009eb910  (line unknown)
   009EB910  B880000000           MOV EAX,0x80
   009EB915  E8160BF7FF           CALL 0x0095c430
   009EB91A  A19064B800           MOV EAX,[0x00b86490]
@@ -15451,7 +15452,7 @@ LAB_009ebc67:
   009EBC79  81C480000000         ADD ESP,0x80
   009EBC7F  C3                   RET
 
-; 009EBC80  _OBJ_dup  (line unknown)
+; 009EBC80  FUN_009ebc80  (line unknown)
   009EBC80  55                   PUSH EBP
   009EBC81  57                   PUSH EDI
   009EBC82  8B7C240C             MOV EDI,dword ptr [ESP + 0xc]
@@ -15608,7 +15609,7 @@ LAB_009ebdc3:
   009EBDD1  5D                   POP EBP
   009EBDD2  C3                   RET
 
-; 009EBDE0  _OBJ_cmp  (line unknown)
+; 009EBDE0  FUN_009ebde0  (line unknown)
   009EBDE0  8B542404             MOV EDX,dword ptr [ESP + 0x4]
   009EBDE4  8B420C               MOV EAX,dword ptr [EDX + 0xc]
   009EBDE7  56                   PUSH ESI
@@ -15684,7 +15685,7 @@ LAB_009ebe7b:
   009EBE7C  5E                   POP ESI
   009EBE7D  C3                   RET
 
-; 009EBE80  _ASN1_tag2bit  (line unknown)
+; 009EBE80  FUN_009ebe80  (line unknown)
   009EBE80  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EBE84  83F81E               CMP EAX,0x1e
   009EBE87  7708                 JA 0x009ebe91
@@ -15694,7 +15695,7 @@ LAB_009ebe91:
   009EBE91  33C0                 XOR EAX,EAX
   009EBE93  C3                   RET
 
-; 009EBEA0  asn1_ex_c2i  (line unknown)
+; 009EBEA0  FUN_009ebea0  (line unknown)
   009EBEA0  B80C000000           MOV EAX,0xc
   009EBEA5  E88605F7FF           CALL 0x0095c430
   009EBEAA  8B4C2424             MOV ECX,dword ptr [ESP + 0x24]
@@ -16972,7 +16973,7 @@ LAB_009ecb89:
   009ECB91  83C420               ADD ESP,0x20
   009ECB94  C3                   RET
 
-; 009ECBA0  _ASN1_item_ex_d2i  (line unknown)
+; 009ECBA0  FUN_009ecba0  (line unknown)
   009ECBA0  B820000000           MOV EAX,0x20
   009ECBA5  E886F8F6FF           CALL 0x0095c430
   009ECBAA  53                   PUSH EBX
@@ -17953,7 +17954,7 @@ LAB_009ed5c3:
   009ED5D2  83C40C               ADD ESP,0xc
   009ED5D5  C3                   RET
 
-; 009ED5E0  _ASN1_item_d2i  (line unknown)
+; 009ED5E0  FUN_009ed5e0  (line unknown)
   009ED5E0  B81C000000           MOV EAX,0x1c
   009ED5E5  E846EEF6FF           CALL 0x0095c430
   009ED5EA  56                   PUSH ESI
@@ -17991,7 +17992,7 @@ LAB_009ed62d:
   009ED630  83C41C               ADD ESP,0x1c
   009ED633  C3                   RET
 
-; 009ED670  _X509_PUBKEY_get  (line unknown)
+; 009ED670  FUN_009ed670  (line unknown)
   009ED670  B808000000           MOV EAX,0x8
   009ED675  E8B6EDF6FF           CALL 0x0095c430
   009ED67A  53                   PUSH EBX
@@ -18226,7 +18227,7 @@ LAB_009ed8d2:
   009ED8FB  83C408               ADD ESP,0x8
   009ED8FE  C3                   RET
 
-; 009ED900  _UTF8_getc  (line unknown)
+; 009ED900  FUN_009ed900  (line unknown)
   009ED900  8B442408             MOV EAX,dword ptr [ESP + 0x8]
   009ED904  85C0                 TEST EAX,EAX
   009ED906  7F03                 JG 0x009ed90b
@@ -18478,7 +18479,7 @@ LAB_009edbb8:
   009EDBBE  5E                   POP ESI
   009EDBBF  C3                   RET
 
-; 009EDBC0  _UTF8_putc  (line unknown)
+; 009EDBC0  FUN_009edbc0  (line unknown)
   009EDBC0  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009EDBC4  85C9                 TEST ECX,ECX
   009EDBC6  751A                 JNZ 0x009edbe2
@@ -18649,7 +18650,7 @@ LAB_009edd61:
   009EDD61  B806000000           MOV EAX,0x6
   009EDD66  C3                   RET
 
-; 009EDD70  _ASN1_tag2str  (line unknown)
+; 009EDD70  FUN_009edd70  (line unknown)
   009EDD70  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EDD74  3D02010000           CMP EAX,0x102
   009EDD79  7407                 JZ 0x009edd82
@@ -19417,7 +19418,7 @@ LAB_009ee656:
   009EE662  83C42C               ADD ESP,0x2c
   009EE665  C3                   RET
 
-; 009EE670  _ASN1_parse_dump  (line unknown)
+; 009EE670  FUN_009ee670  (line unknown)
   009EE670  8B442414             MOV EAX,dword ptr [ESP + 0x14]
   009EE674  8B4C2410             MOV ECX,dword ptr [ESP + 0x10]
   009EE678  8B54240C             MOV EDX,dword ptr [ESP + 0xc]
@@ -19566,7 +19567,7 @@ LAB_009ee8b1:
   009EE8B1  B801000000           MOV EAX,0x1
   009EE8B6  C3                   RET
 
-; 009EE930  _ASN1_mbstring_ncopy  (line unknown)
+; 009EE930  FUN_009ee930  (line unknown)
   009EE930  B840000000           MOV EAX,0x40
   009EE935  E8F6DAF6FF           CALL 0x0095c430
   009EE93A  A19064B800           MOV EAX,[0x00b86490]
@@ -19909,7 +19910,7 @@ LAB_009eed0d:
   009EED1F  83C440               ADD ESP,0x40
   009EED22  C3                   RET
 
-; 009EED50  _ASN1_mbstring_copy  (line unknown)
+; 009EED50  FUN_009eed50  (line unknown)
   009EED50  8B442414             MOV EAX,dword ptr [ESP + 0x14]
   009EED54  8B4C2410             MOV ECX,dword ptr [ESP + 0x10]
   009EED58  8B54240C             MOV EDX,dword ptr [ESP + 0xc]
@@ -19926,7 +19927,7 @@ LAB_009eed0d:
   009EED72  83C41C               ADD ESP,0x1c
   009EED75  C3                   RET
 
-; 009EED80  _X509_TRUST_get_by_id  (line unknown)
+; 009EED80  FUN_009eed80  (line unknown)
   009EED80  B818000000           MOV EAX,0x18
   009EED85  E8A6D6F6FF           CALL 0x0095c430
   009EED8A  8B44241C             MOV EAX,dword ptr [ESP + 0x1c]
@@ -20061,7 +20062,7 @@ LAB_009eeeaa:
   009EEEB1  5E                   POP ESI
   009EEEB2  C3                   RET
 
-; 009EEEC0  _X509_check_trust  (line unknown)
+; 009EEEC0  FUN_009eeec0  (line unknown)
   009EEEC0  56                   PUSH ESI
   009EEEC1  8B74240C             MOV ESI,dword ptr [ESP + 0xc]
   009EEEC5  83FEFF               CMP ESI,-0x1
@@ -20110,15 +20111,15 @@ LAB_009eef1f:
   009EEF2B  89542408             MOV dword ptr [ESP + 0x8],EDX
   009EEF2F  FFE0                 JMP EAX
 
-; 009EEFD0  _X509_CRL_INFO_it  (line unknown)
+; 009EEFD0  FUN_009eefd0  (line unknown)
   009EEFD0  B81C2AA800           MOV EAX,0xa82a1c
   009EEFD5  C3                   RET
 
-; 009EEFE0  _X509_CRL_it  (line unknown)
+; 009EEFE0  FUN_009eefe0  (line unknown)
   009EEFE0  B88C2AA800           MOV EAX,0xa82a8c
   009EEFE5  C3                   RET
 
-; 009EF010  _X509_CRL_free  (line unknown)
+; 009EF010  FUN_009ef010  (line unknown)
   009EF010  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EF014  688C2AA800           PUSH 0xa82a8c
   009EF019  50                   PUSH EAX
@@ -20707,7 +20708,7 @@ LAB_009ef5c6:
   009EF5CA  5B                   POP EBX
   009EF5CB  C3                   RET
 
-; 009EF5F0  _X509_policy_tree_free  (line unknown)
+; 009EF5F0  FUN_009ef5f0  (line unknown)
   009EF5F0  57                   PUSH EDI
   009EF5F1  8B7C2408             MOV EDI,dword ptr [ESP + 0x8]
   009EF5F5  85FF                 TEST EDI,EDI
@@ -21045,7 +21046,7 @@ LAB_009ef959:
   009EF95D  83C414               ADD ESP,0x14
   009EF960  C3                   RET
 
-; 009EF970  _X509_policy_check  (line unknown)
+; 009EF970  FUN_009ef970  (line unknown)
   009EF970  B808000000           MOV EAX,0x8
   009EF975  E8B6CAF6FF           CALL 0x0095c430
   009EF97A  8B4C2414             MOV ECX,dword ptr [ESP + 0x14]
@@ -21185,7 +21186,7 @@ LAB_009efa9c:
   009EFAA0  83C408               ADD ESP,0x8
   009EFAA3  C3                   RET
 
-; 009EFAD0  _ASN1_TIME_set  (line unknown)
+; 009EFAD0  FUN_009efad0  (line unknown)
   009EFAD0  B824000000           MOV EAX,0x24
   009EFAD5  E856C9F6FF           CALL 0x0095c430
   009EFADA  8D0424               LEA EAX,[ESP]
@@ -21234,7 +21235,7 @@ LAB_009efb3a:
   009EFB51  83C424               ADD ESP,0x24
   009EFB54  C3                   RET
 
-; 009EFB60  _ASN1_TIME_check  (line unknown)
+; 009EFB60  FUN_009efb60  (line unknown)
   009EFB60  8B4C2404             MOV ECX,dword ptr [ESP + 0x4]
   009EFB64  8B4104               MOV EAX,dword ptr [ECX + 0x4]
   009EFB67  83F818               CMP EAX,0x18
@@ -21249,7 +21250,7 @@ LAB_009efb75:
 LAB_009efb83:
   009EFB83  33C0                 XOR EAX,EAX
   009EFB85  C3                   RET
-_ASN1_GENERALIZEDTIME_check:
+LAB_009efb90:
   009EFB90  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EFB94  83780418             CMP dword ptr [EAX + 0x4],0x18
   009EFB98  7403                 JZ 0x009efb9d
@@ -21392,7 +21393,7 @@ LAB_009efd06:
   009EFD0A  5B                   POP EBX
   009EFD0B  C3                   RET
 
-; 009EFD10  _ASN1_GENERALIZEDTIME_set  (line unknown)
+; 009EFD10  FUN_009efd10  (line unknown)
   009EFD10  B824000000           MOV EAX,0x24
   009EFD15  E816C7F6FF           CALL 0x0095c430
   009EFD1A  57                   PUSH EDI
@@ -21499,7 +21500,7 @@ LAB_009efdf0:
   009EFE09  83C424               ADD ESP,0x24
   009EFE0C  C3                   RET
 
-; 009EFE10  _ASN1_UTCTIME_check  (line unknown)
+; 009EFE10  FUN_009efe10  (line unknown)
   009EFE10  8B442404             MOV EAX,dword ptr [ESP + 0x4]
   009EFE14  83780417             CMP dword ptr [EAX + 0x4],0x17
   009EFE18  7403                 JZ 0x009efe1d
@@ -21619,7 +21620,7 @@ LAB_009eff47:
   009EFF4B  5B                   POP EBX
   009EFF4C  C3                   RET
 
-; 009EFF50  _ASN1_UTCTIME_set  (line unknown)
+; 009EFF50  FUN_009eff50  (line unknown)
   009EFF50  B824000000           MOV EAX,0x24
   009EFF55  E8D6C4F6FF           CALL 0x0095c430
   009EFF5A  57                   PUSH EDI
