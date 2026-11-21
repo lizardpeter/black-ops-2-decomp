@@ -968,7 +968,7 @@ static inline int CL_MouseMoveToInt(float move)
 // Mouse look. The movement (CL_GetMouseMovement) is scaled by the profile's sensitivity plus cl_mouseAccel times the
 // mouse rate (counts per millisecond), and by the cgame's FOV scale. Turning with m_yaw/m_pitch degrees per count,
 // capped per frame at the cgame's turn rate; strafing (+strafe) or without mouse look, the movement walks instead.
-// Aim assist then gets the angles. The x87 arithmetic in the original runs here in doubles (same precision).
+// Aim assist then gets the angles. The server's x87 chains run here in x87_t (t6_compiler.h).
 void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base)
 {
 	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
@@ -979,11 +979,11 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 	CL_GetMouseMovement(cl, &mx, &my);
 	if (!frame_msec)
 		return;
-	float rate = (float)(__builtin_sqrt((double)mx * mx + (double)my * my) / frame_msec);
+	float rate = (float)(sqrt_x87((x87_t)mx * mx + (x87_t)my * my) / frame_msec);
 	float sensitivity = GamerProfile_GetFloat(PROFILE_MOUSE_SENSITIVITY,
 	                                          Com_LocalClient_GetControllerIndex(localClientNum));
 	float accelSensitivity =
-		(float)(((double)Dvar_GetFloat(cl_mouseAccel) * rate + sensitivity) * cl->cgameFOVSensitivityScale);
+		(float)(((x87_t)Dvar_GetFloat(cl_mouseAccel) * rate + sensitivity) * cl->cgameFOVSensitivityScale);
 	if (rate != 0.0f && Dvar_GetBool(cl_showMouseRate))
 		Com_Printf(25, "%f : %f\n", (double)rate, (double)accelSensitivity);
 	if (cl->snap.ps.pm_flags & PMF_FROZEN)
@@ -1021,7 +1021,7 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 					cap = 360.0f;
 				if (cap > 0.0f)
 				{
-					cap = (float)((double)frame_msec * cap * 0.001f);
+					cap = (float)((x87_t)frame_msec * cap * 0.001f);
 					yaw = I_fmax(-cap, I_fmin(cap, yaw));
 				}
 				cl->viewangles.y -= yaw;
@@ -1040,7 +1040,7 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 					cap = 360.0f;
 				if (cap > 0.0f)
 				{
-					cap = (float)((double)frame_msec * cap * 0.001f);
+					cap = (float)((x87_t)frame_msec * cap * 0.001f);
 					pitch = I_fmax(-cap, I_fmin(cap, pitch));
 				}
 				cl->viewangles.x += pitch;

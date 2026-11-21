@@ -15,6 +15,7 @@
 #include "client/client.h"
 #include "qcommon/qcommon.h"
 #include "t6_assert.h"
+#include "t6_compiler.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
 #include "win32/win_shared.h"
@@ -111,13 +112,13 @@ void IN_GamepadsMove()
 	int time = Sys_Milliseconds();
 	if (!GPad_IsActive(CONTROLLER_INDEX_0))
 		return;
-	// the x87 product truncated unrounded: in double, the same
-	int lx = (int)((double)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_LX) * 65535.0f);
-	int ly = (int)((double)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_LY) * 65535.0f);
-	int rx = (int)((double)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_RX) * 65535.0f);
-	int ry = (int)((double)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_RY) * 65535.0f);
-	int leftTrig = (int)((double)GPad_GetButton(CONTROLLER_INDEX_0, GPAD_L_TRIG) * 65535.0f);
-	int rightTrig = (int)((double)GPad_GetButton(CONTROLLER_INDEX_0, GPAD_R_TRIG) * 65535.0f);
+	// the x87 product truncated unrounded (x87_t)
+	int lx = (int)((x87_t)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_LX) * 65535.0f);
+	int ly = (int)((x87_t)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_LY) * 65535.0f);
+	int rx = (int)((x87_t)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_RX) * 65535.0f);
+	int ry = (int)((x87_t)GPad_GetStick(CONTROLLER_INDEX_0, GPAD_RY) * 65535.0f);
+	int leftTrig = (int)((x87_t)GPad_GetButton(CONTROLLER_INDEX_0, GPAD_L_TRIG) * 65535.0f);
+	int rightTrig = (int)((x87_t)GPad_GetButton(CONTROLLER_INDEX_0, GPAD_R_TRIG) * 65535.0f);
 	CL_GamepadEvent(CONTROLLER_INDEX_0, 0, rx, time);
 	CL_GamepadEvent(CONTROLLER_INDEX_0, 1, ry, time);
 	CL_GamepadEvent(CONTROLLER_INDEX_0, 2, lx, time);
