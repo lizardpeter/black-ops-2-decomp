@@ -37,3 +37,4 @@ CoDMPServer_PC	004EE1F0	CG_HandleLocationSelectionInput	stack,ecx	localClientNum
 CoDMPServer_PC	004EEB30	CL_GamepadMove	stack,ecx,stack	localClientNum at [EBP+8], cmd in ECX (moved to EDI), frametime_base at [EBP+0xC]
 CoDMPServer_PC	004EF530	CL_CreateCmd	ecx,edi	returns usercmd_s through the hidden pointer in ECX (also returned in EAX); localClientNum in EDI
 CoDMPServer_PC	004EF7A0	CL_CreateNewCommands	eax	localClientNum in EAX (moved to EDI; CL_Input jumps here with it)
+CoDMPServer_PC	00797D50	IN_ClampMouseMove	esi	curPos in ESI (IN_MouseMove loads LEA ESI,[EBP-8] before the call)

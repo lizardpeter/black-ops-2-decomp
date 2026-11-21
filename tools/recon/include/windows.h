@@ -6,6 +6,8 @@
 #pragma once
 
 typedef int BOOL;
+#define FALSE 0
+#define TRUE 1
 typedef unsigned int UINT;
 typedef __UINTPTR_TYPE__ WPARAM;  // UINT_PTR
 typedef __INTPTR_TYPE__ LPARAM;   // LONG_PTR
@@ -14,6 +16,10 @@ typedef unsigned long DWORD;
 
 struct HWND__ { int unused; };
 typedef struct HWND__ *HWND;
+struct HINSTANCE__ { int unused; };
+typedef struct HINSTANCE__ *HINSTANCE;
+struct HHOOK__ { int unused; };
+typedef struct HHOOK__ *HHOOK;
 
 typedef struct tagPOINT
 {

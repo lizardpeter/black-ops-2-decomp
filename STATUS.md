@@ -61,13 +61,13 @@ Preliminary inventory from the exception directory (`.pdata`): every non-leaf fu
 |---|---:|---|
 | located | 103 | ████████████████████ 100.00% |
 | named | 3,381 | ████████████████████ 99.64% |
-| typed | 24,892 | ██████████████████░░ 87.79% |
-| decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.53% |
-| compiles | 1 | ░░░░░░░░░░░░░░░░░░░░ 0.53% |
-| matches | 150 | ░░░░░░░░░░░░░░░░░░░░ 0.53% |
+| typed | 24,882 | ██████████████████░░ 87.79% |
+| decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.56% |
+| compiles | 1 | ░░░░░░░░░░░░░░░░░░░░ 0.56% |
+| matches | 160 | ░░░░░░░░░░░░░░░░░░░░ 0.56% |
 | integrated | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 
-28,527 functions known. Reconstructed (decompiled or better): 151.
+28,527 functions known. Reconstructed (decompiled or better): 161.
 
 ## CoDMPServer_s_PC
 

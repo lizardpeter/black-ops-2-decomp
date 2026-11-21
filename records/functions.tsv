@@ -134,6 +134,16 @@ CoDMPServer_PC	00790180	matches	src/universal/q_shared.cpp	OrientationInvert; te
 CoDMPServer_PC	00790280	matches	src/universal/q_shared.cpp	Com_IsLegacyXModelName; tests/differential/test_q_shared.py
 CoDMPServer_PC	007902C0	matches	src/universal/q_shared.cpp	Com_DefaultExtension; tests/differential/test_q_shared.py
 CoDMPServer_PC	00790340	matches	src/universal/q_shared.cpp	CMD_GetAnalogButtonValue; tests/differential/test_q_shared.py
+CoDMPServer_PC	00797A70	matches	src/win32/win_input.cpp	IN_GamepadsMove; tests/differential/test_win_input.py
+CoDMPServer_PC	00797C70	matches	src/win32/win_input.cpp	IN_RecenterMouse; tests/differential/test_win_input.py
+CoDMPServer_PC	00797CD0	matches	src/win32/win_input.cpp	IN_ActivateMouse; tests/differential/test_win_input.py
+CoDMPServer_PC	00797D50	matches	src/win32/win_input.cpp	IN_ClampMouseMove; tests/differential/test_win_input.py
+CoDMPServer_PC	00797DC0	matches	src/win32/win_input.cpp	IN_MouseMove; tests/differential/test_win_input.py
+CoDMPServer_PC	00797EF0	matches	src/win32/win_input.cpp	IN_SetCursorPos; tests/differential/test_win_input.py
+CoDMPServer_PC	00797F40	matches	src/win32/win_input.cpp	IN_ShowSystemCursor; tests/differential/test_win_input.py
+CoDMPServer_PC	00797F80	matches	src/win32/win_input.cpp	IN_DeactivateWin32Mouse; tests/differential/test_win_input.py
+CoDMPServer_PC	00797FB0	matches	src/win32/win_input.cpp	IN_Shutdown; tests/differential/test_win_input.py
+CoDMPServer_PC	00797FD0	matches	src/win32/win_input.cpp	IN_Frame; tests/differential/test_win_input.py
 CoDMPServer_PC	0079DF60	matches	src/win32/win_voice.cpp	Voice_StopClientSamples; tests/differential/test_win_voice.py
 CoDMPServer_PC	0079DF90	matches	src/win32/win_voice.cpp	Voice_IncomingVoiceData_Platform; tests/differential/test_win_voice.py
 CoDMPServer_PC	0079E0F0	matches	src/win32/win_voice.cpp	Voice_IsClientTalking; tests/differential/test_win_voice.py

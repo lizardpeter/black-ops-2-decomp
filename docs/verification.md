@@ -90,6 +90,8 @@ Harness specifics:
   (`Machine.crt_thread_data`). `_vsnprintf` needs it to format numbers.
 - **Program objects:** data a global pointer points to (the heap-allocated `clients` array) goes in the `OBJECTS`
   region, whose writes are compared like the images' globals.
+- **Observed calls:** the hooked function and pointer-sized arguments (`q`) that point into the reconstruction are
+  mapped back to the original's addresses; integers (`i`) are compared as they are, even inside the DLL's range.
 - **Conventions:** originals in `records/conventions.tsv` are called with their registers; reconstructed `__thiscall`
   members get `this` in ECX.
 - **Float results:** a fake returning a Python float leaves it in ST0 on x86 (through a `fld; ret` stub), XMM0 on

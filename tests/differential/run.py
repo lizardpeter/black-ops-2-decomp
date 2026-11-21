@@ -196,7 +196,10 @@ def main():
                 continue  # the original itself crashes on this input: not a usable case
             got = m.call(target, args, case["ret"], setup, fakes, observe,
                          convention=recon_convention(r["symbol"], len(args)))
-            got_calls = [tuple(canon.code(x) if isinstance(x, int) else x for x in c) for c in got[3]]
+            # the hooked function, and pointer-sized arguments (q), may be reconstructed code: map them back to the
+            # original's. Integers (i) are values, even when they happen to fall inside the DLL's address range.
+            got_calls = [(canon.code(c[0]),) + tuple(canon.code(x) if k == "q" and isinstance(x, int) else x
+                                                    for k, x in zip(observe.get(c[0], ""), c[1:])) for c in got[3]]
             used += 1
             ww, gw = canon.writes(want[2]), canon.writes(got[2])
             if not (same(want[0], got[0]) and want[1] == got[1] and ww == gw and want[3] == got_calls):
