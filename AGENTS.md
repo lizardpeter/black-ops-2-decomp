@@ -19,10 +19,10 @@ If a generated file is wrong, fix the script that wrote it and re-run. Don't pat
 | `target.toml` | Every original build: kind, architecture, R2 keys, SHA-256, PDB identity, `analyze` flag |
 | `analysis/<build>/` | PE inventory (`pe.json`, x64 `pdata.tsv`), PDB/MAP tables (`pdb/`, `map/`), Ghidra exports (`ghidra/`, saved project split under 100 MB), `functions.tsv`, `pseudocode/`, `disasm/`, `match/`, `logs/` |
 | `src/`, `include/` | Faithful behaviour, including original quirks |
-| `enhanced/` | Replacement translation units for intentional improvements (`enhanced/sources.cmake`) |
+| `enhanced/` | Overrides for intentional improvements, same layout as `src/`; a function defined there replaces the faithful one in the enhanced build |
 | `records/` | `functions.tsv` (status), `names.tsv` (identifications in builds without symbols), `bugs.tsv`, `patches.tsv` |
-| `tests/differential/` | Reconstructions against the original code under Unicorn, x86 or x64 |
-| `tools/` | Fetching, inventory, PDB extraction, Ghidra scripts, matching, status and graph generation |
+| `tests/differential/` | Reconstructions against the original code under Unicorn, x86 or x64 (`harness.py`, `run.py`, cases in `test_*.py`) |
+| `tools/` | Fetching, inventory, PDB extraction, Ghidra scripts, matching, the hybrid-link build (`build_recon.py`, `symbols.py`, `recon/`), status and graph generation |
 
 ## Addresses
 
@@ -45,9 +45,9 @@ x64 builds at 0x140000000 read `1407B51D0`. Every tool uses that form. Server ad
 - `named`: original name known (PDB/MAP, or a recorded identification in `records/names.tsv`)
 - `typed`: original prototype known
 - `decompiled` / `compiles`: authored source exists / builds in CI
-- `matches`: passes `tests/differential/reference.py` against that build's original bytes. Optimised builds won't
-  byte-match; the test compares behaviour. CI fails if `records/functions.tsv` claims `matches` for a function the
-  test does not cover, or the reverse.
+- `matches`: passes `tests/differential/run.py --build <build>` against that build's original code. Optimised builds
+  won't byte-match; the test compares behaviour. CI fails if `records/functions.tsv` claims `matches` for a function
+  that doesn't pass.
 - `integrated`: linked into the runnable reconstruction
 
 `STATUS.md` and the `re_t6` graph import set are computed from `analysis/` and `records/` (`python tools/status.py`,
@@ -62,10 +62,19 @@ address position across differently linked builds. Methods: `string`, `constant`
 
 ## Faithful and enhanced
 
-`src/` is original behaviour, bugs included. The enhanced build replaces whole translation units through
-`enhanced/sources.cmake`, each recorded in `records/patches.tsv`. Never fix a bug in `src/`; record it in
+`src/` is original behaviour, bugs included. The enhanced build (`tools/build_recon.py --enhanced`) compiles
+`enhanced/` with `src/`; a function defined in `enhanced/` replaces the faithful one, and each change is recorded in
+`records/patches.tsv`. Planned improvements live in `docs/roadmap.md`. Never fix a bug in `src/`; record it in
 `records/bugs.tsv` (the enhanced build's fix queue: anything in the original worth fixing or improving, not only
 outright bugs) and fix it in `enhanced/`.
+
+## Building and testing
+
+`tools/build_recon.py --build <id>` compiles every `.cpp` under `src/` into one Windows DLL for the build's
+architecture, hybrid-linked against its original exe: anything not reconstructed yet resolves to the original
+(`tools/symbols.py`). `tests/differential/run.py --build <id>` runs each exported function and the original on the
+same inputs in one emulator. Write source as C++ with the original prototypes: the server MAP's decorated names
+check them. See `docs/verification.md`.
 
 ## Originals
 

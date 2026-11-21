@@ -1,32 +1,43 @@
 name: Reconstruction checks
 
+# Every push: the reconstruction compiles for every build it is tested on (hybrid-linked DLLs: x86 for the servers
+# and the Steam exe, x64 for the Store build), every differential test passes, records/ claims only what the tests
+# show, and the generated inventory and STATUS.md are current.
 on: [push, pull_request, workflow_dispatch]
 
 permissions:
   contents: read
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
+  cancel-in-progress: true
+
 jobs:
   differential:
     runs-on: ubuntu-latest
+    env:
+      T6_ORIGINALS: originals
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
-      - run: pip install -r tests/differential/requirements.txt
-      - run: cmake -S . -B build -DCMAKE_BUILD_TYPE=Release && cmake --build build
-      - run: |
-          python tools/fetch_originals.py CoDMPServer_PC originals --only exe
-          python tools/fetch_originals.py t6mp originals --only exe
-          python tools/fetch_originals.py t6mp_msstore originals --only exe
-      - run: |
-          python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_faithful.so
-          python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_enhanced.so
-          python tests/differential/reference.py originals/t6mp.exe build/libt6_faithful.so --build t6mp
-          python tests/differential/reference.py originals/t6mp.exe build/libt6_enhanced.so --build t6mp
-          python tests/differential/reference.py originals/t6mp_msstore.exe build/libt6_faithful.so --build t6mp_msstore
-          python tests/differential/reference.py originals/t6mp_msstore.exe build/libt6_enhanced.so --build t6mp_msstore
-      - run: |
+      - name: Toolchain
+        run: |
+          sudo apt-get update -q >/dev/null && sudo apt-get install -y -q clang lld llvm >/dev/null
+          clang --version | head -1
+          pip install -q -r tests/differential/requirements.txt
+      - name: Fetch originals
+        run: |
+          for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/fetch_originals.py $b originals --only exe; done
+      - name: Compile reconstruction
+        run: |
+          for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/build_recon.py --build $b; done
+      - name: Differential tests
+        run: |
+          for b in CoDMPServer_PC t6mp t6mp_msstore; do python tests/differential/run.py --build $b --check-records; done
+      - name: Generated files are current
+        run: |
           python tools/inventory/retail_calls.py originals/t6mp.exe
           (cd tools && python inventory.py t6mp_msstore ../originals/t6mp_msstore.exe)
           python tools/status.py

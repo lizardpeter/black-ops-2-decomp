@@ -58,11 +58,10 @@ once reviewed, starting with the subsystems being reconstructed.
 
 ## tools/match/behaviour.py: small leaves by behaviour
 
-Short leaf functions often have no string, constant or call edge to anchor them. For those already reconstructed,
-`python tools/match/behaviour.py <build> <exe> build/libt6_faithful.so [name ...]` runs every candidate entry of the
-original (x64 `.pdata` starts, direct call targets, and 16-byte-aligned entries after `int3` padding: 37,499 in
-`t6mp_msstore`) under Unicorn on probe inputs, compares with the reconstruction, and runs the full differential case
-set on survivors. Output: `analysis/<build>/match/behaviour.tsv`.
+Short leaf functions often have no string, constant or call edge to anchor them. `python tools/match/behaviour.py <build> [name ...]` takes the reference server's original function as the oracle
+(run on its differential case's inputs) and runs every candidate entry of the target (x64 `.pdata` starts, direct call targets, and 16-byte-aligned entries after `int3` padding: 37,499 in
+`t6mp_msstore`) under Unicorn on probe inputs, and runs the full input set on survivors. Return values and buffers are compared, not
+global writes (the builds' globals are at different addresses). Output: `analysis/<build>/match/behaviour.tsv`.
 
 Results on `t6mp_msstore`:
 
