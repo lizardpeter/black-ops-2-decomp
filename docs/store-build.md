@@ -39,8 +39,14 @@ Store build (`d:\workspace\outrun\iw6-depot`), so the two Store ports share thei
 
 ## The upload in R2 (`bo2/DUMP/`)
 
-The package layout (`layout_05042768-….xml`) lists 1,009 entries. Uploaded so far: the three executables,
-`gamelaunchhelper.exe`, `XCurl.dll`, `binkw64.dll`, the manifests and logos, `main/english` fonts, 169 sound banks and
-98 videos. Not yet uploaded: `zone/all/` (147 entries including `base.ipak`) and `zone/english/` (74 fastfiles), 28
-videos, and the French, German, Italian and Spanish localisation (likely not installed). The code work needs only the
-executables; the fastfiles are needed for asset work and for running the game.
+The package layout (`layout_05042768-….xml`) lists 1,009 entries. Uploaded (540 objects): the three executables,
+`gamelaunchhelper.exe`, `XCurl.dll`, `binkw64.dll`, the manifests and logos, `main/english` fonts, 169 sound banks,
+126 videos, `zone/all/` (147 entries including `base.ipak`) and `zone/english/` (74 fastfiles). Not uploaded: the
+French, German, Italian and Spanish localisation (likely not installed). The code work needs only the executables;
+the fastfiles are needed for asset work and for running the game.
+
+## Structure layouts
+
+Reconstructed structures (`include/`) carry the server's x86 offsets, checked by `static_assert`. The Store build is
+x64: pointers and alignment move its fields, so a function using a structure is tested against the Store only once
+that structure has the Store's offsets (per-architecture layouts, from the Store's own code).

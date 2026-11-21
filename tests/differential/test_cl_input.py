@@ -40,16 +40,26 @@ DVAR_HANDLES = {0x011C16DC: 0x7101,  # cl_leanCountMin
                 0x079EF194: 0x7109,  # cl_pitchspeed
                 0x012374B0: 0x710A,  # m_filter
                 0x08232590: 0x710B,  # bg_useClientDamageKick
-                0x01DA7F64: 0x710C}  # cl_paused
+                0x01DA7F64: 0x710C,  # cl_paused
+                0x01237040: 0x710D,  # cl_mouseAccel
+                0x079875E4: 0x710E,  # cl_showMouseRate
+                0x012374A8: 0x710F,  # m_side
+                0x01232E4C: 0x7110,  # m_yaw
+                0x01232E50: 0x7111,  # m_pitch
+                0x01237038: 0x7112,  # m_forward
+                0x01237578: 0x7113}  # cl_freelook
 LEAN_MIN, HOLD, DELAY, STANDING = 0x7101, 0x7102, 0x7103, 0x7104
 STANCE_HOLD, DTP_HOLD, ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, M_FILTER = 0x7105, 0x7106, 0x7107, 0x7108, 0x7109, 0x710A
 DAMAGE_KICK, PAUSED = 0x710B, 0x710C
+MOUSE_ACCEL, SHOW_RATE, M_SIDE, M_YAW, M_PITCH, M_FORWARD, FREELOOK = range(0x710D, 0x7114)
 
 # clientActive_t fields
 USING_ADS, SNAP_VALID, PS = 0x44, 0x50, 0x70
 CMDS, CMD_NUMBER, CMD_SIZE = 0x42CA8, 0x44EA8, 0x44
 SWITCHING_TO_INVENTORY, MAX_PITCH_SPEED, MAX_YAW_SPEED, WAS_IN_VEHICLE = 0x2BE4, 0x2BF8, 0x2BFC, 0x8A7C4
 PS_INVENTORY_WEAPON = 0x570
+PS_PM_TYPE, PS_OTHER_FLAGS, PS_EFLAGS2, PS_WEAPONSTATE, PS_LINK_FLAGS = 0x4, 0x18, 0x100, 0x1D0, 0x484
+FOV_SCALE = 0x2BF4
 # cg_t fields
 CG_DAMAGE_KICK, CG_WEAPON_SELECT = 0x64A74, 0x69674
 PS_PM_FLAGS, PS_DELTA_ANGLES, PS_EFLAGS, PS_WEAPON, PS_VIEWHEIGHT = 0xC, 0x98, 0xFC, 0x1B8, 0x208
@@ -205,6 +215,14 @@ def mouse_move(mu):
     STATE["machine"].program_write(cmd + 0x2A, struct.pack("<h", 0x1234))  # gunPitch, as a marker
 
 
+def aim_assist(mu):
+    """AimAssist_UpdateMouseInput's fake: an output that depends on every input field the caller sets."""
+    inp = bytes(mu.mem_read(arg(mu, 0), 0x30))
+    dt, pitch, pa, pm, yaw, ya, ym, fa, ra, b0, b1, lc = struct.unpack("<9fIIi", inp)
+    out = struct.pack("<fffHB", pitch * 0.5 + dt + pa + pm, yaw - 1.0 + ya + ym + fa + ra, 0.0, (b0 ^ b1 ^ lc) & 0xFFFF, 7)
+    mu.mem_write(arg(mu, 1), out)  # the caller's local
+
+
 def finish_move(mu):
     cmd = arg(mu, 1)
     STATE["machine"].program_write(cmd, struct.pack("<I", STATE.get("server_time", 4321) & 0xFFFFFFFF))
@@ -272,7 +290,58 @@ def keydown_cheat_inputs():
     return out
 
 
+MOUSE_FAKES = {k: v for k, v in FAKES.items() if k != "CL_MouseMove"}
+MOUSE_FAKES.update({
+    "GamerProfile_GetFloat": lambda mu: STATE.get("sens", 5.0),
+    "Demo_IsPlaying": lambda mu: STATE.get("demo", 0),
+    "GPad_InUse": lambda mu: STATE.get("gpad_in_use", 0),
+    "CG_ShouldUpdateViewAngles": lambda mu: STATE.get("update_view", 1),
+    "AimAssist_UpdateMouseInput": lambda mu: aim_assist(mu),
+    "Com_Printf": lambda mu: None,
+})
+MOUSE_SEEN = dict(SEEN, GamerProfile_GetFloat="ii", Demo_IsPlaying="", GPad_InUse="i", CG_ShouldUpdateViewAngles="i",
+                  AimAssist_UpdateMouseInput="xx", Com_Printf="is")
+
+
+def mouse_inputs(n=400):
+    out = []
+    for _ in range(n):
+        kb = {KB["STRAFE"]: kbutton(active=rng.random() < 0.25), KB["MLOOK"]: kbutton(active=rng.random() < 0.5)}
+        client = {PS + PS_PM_FLAGS: rng.choice([0, 0, 0, 0x800]),
+                  PS + PS_WEAPONSTATE: rng.choice([0, 0, 0, 0x2C]),
+                  PS + PS_OTHER_FLAGS: rng.choice([0, 0, 0, 0x400]),
+                  PS + PS_EFLAGS2: rng.choice([0, 0, 0, 0x40000]),
+                  PS + PS_PM_TYPE: rng.choice([0, 1, 1]), PS + PS_LINK_FLAGS: rng.choice([0, 1]),
+                  FOV_SCALE: struct.pack("<f", rng.choice([1.0, rng.uniform(0.3, 1.5)])),
+                  MAX_YAW_SPEED: struct.pack("<f", rng.choice([0.0, -5.0, 90.0, 400.0, 1e-3, rng.uniform(1, 500)])),
+                  MAX_PITCH_SPEED: struct.pack("<f", rng.choice([0.0, 60.0, 720.0, rng.uniform(1, 500)])),
+                  VIEWANGLES: struct.pack("<ff", rng.uniform(-80, 80), rng.uniform(-180, 180)),
+                  0x2C80 + 0x0: 0}
+        mouse = struct.pack("<5i", rng.choice([0, 3, -40, 1000, rng.randrange(-500, 500)]), rng.choice([0, -2, 15]),
+                            rng.choice([0, 9, -300, rng.randrange(-500, 500)]), rng.choice([0, 4]), rng.randrange(2))
+        cmd = struct.pack("<III", 0, rng.getrandbits(32), rng.getrandbits(32)) + bytes(0x18) + \
+            bytes([rng.randrange(256) for _ in range(5)]) + bytes(0x44 - 0x29)
+        out.append({"args": [0, cmd, ("f", rng.choice([16.0, 6.9, 33.3]))],
+                    "setup": setup(kb=kb, client=client, globals_={MOUSE_IN: mouse},
+                                   frame_msec=rng.choice([0, 1, 7, 16, 33, rng.randrange(2, 60)]),
+                                   dvars={M_FILTER: rng.randrange(2), MOUSE_ACCEL: rng.choice([0.0, 0.5, rng.uniform(0, 3)]),
+                                          SHOW_RATE: rng.randrange(2), M_SIDE: rng.choice([0.25, rng.uniform(0.01, 1)]), M_YAW: rng.choice([0.022, rng.uniform(0.5, 5)]),
+                                          M_PITCH: rng.choice([0.022, -0.022, 0.0, rng.uniform(-5, 5)]),
+                                          M_FORWARD: rng.choice([0.25, rng.uniform(0.01, 1)]),
+                                          FREELOOK: rng.choice([1, 1, 0])},
+                                   sens=rng.choice([5.0, rng.uniform(0.5, 20)]), demo=rng.random() < 0.2,
+                                   gpad_in_use=rng.random() < 0.2, update_view=rng.random() < 0.8,
+                                   mark=None)})
+    return out
+
+
 CASES = [
+    {"name": "CL_MouseMove", "ret": "void", "builds": SERVER, "fakes": MOUSE_FAKES, "observe": MOUSE_SEEN,
+     "inputs": mouse_inputs()},
+    {"name": "I_fmin", "ret": "float", "builds": SERVER,
+     "inputs": [[("f", a), ("f", b)] for a in (0.0, -0.0, 1.5, -2.0, float("nan"), float("inf")) for b in (0.0, 1.5, float("nan"), -float("inf"))]},
+    {"name": "I_fmax", "ret": "float", "builds": SERVER,
+     "inputs": [[("f", a), ("f", b)] for a in (0.0, -0.0, 1.5, -2.0, float("nan"), float("inf")) for b in (0.0, 1.5, float("nan"), -float("inf"))]},
     {"name": "CL_LeanCount_Reset", "ret": "void", "builds": SERVER,
      "inputs": [{"args": [], "setup": setup(globals_={G_LEANED: 7})}]},
     {"name": "CL_LeanCount_Increment", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,

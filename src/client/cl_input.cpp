@@ -44,7 +44,6 @@ bool CL_IsFirstActiveLocalClient(LocalClientNum_t localClientNum);
 // not reconstructed yet in this file
 bool CG_HandleLocationSelectionInput(LocalClientNum_t localClientNum, usercmd_s *cmd);
 void CL_CmdButtons(LocalClientNum_t localClientNum, usercmd_s *cmd);
-void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base);
 void CL_GamepadMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base);
 void CL_HandleSpecialStateInput(LocalClientNum_t localClientNum, bitarray<64> *buttons);
 
@@ -63,6 +62,16 @@ void IN_Frame();
 float AngleDelta(float a1, float a2);
 float AngleNormalize360(float angle);
 
+// game, aim assist, cgame
+struct AimInput;
+struct AimOutput;
+enum profile_setting { PROFILE_MOUSE_SENSITIVITY = 0x29 };
+float GamerProfile_GetFloat(profile_setting setting, ControllerIndex_t controllerIndex);
+void AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output);
+bool CG_ShouldUpdateViewAngles(LocalClientNum_t localClientNum);
+bool GPad_InUse(LocalClientNum_t localClientNum);
+bool Demo_IsPlaying();
+
 // ui, devgui, win32
 void UI_UpdateMouseScreenPosition(LocalClientNum_t localClientNum, int x, int y);
 bool UI_KeysBypassMenu(LocalClientNum_t localClientNum);
@@ -72,6 +81,24 @@ bool DevGui_IsActive();
 void DevGui_MouseEvent(int dx, int dy);
 void IN_SetCursorPos(int x, int y);
 void IN_ShowSystemCursor(int show);
+
+struct AimInput
+{
+	float deltaTime;
+	float pitch;
+	float pitchAxis;
+	float pitchMax;
+	float yaw;
+	float yawAxis;
+	float yawMax;
+	float forwardAxis;
+	float rightAxis;
+	bitarray<64> button_bits;
+	LocalClientNum_t localClientNum;
+	const playerState_s *ps;
+	float adsFrac;
+};
+static_assert(sizeof(void *) != 4 || sizeof(AimInput) == 0x38, "AimInput (the server's x86 layout)");
 
 struct AimOutput
 {
@@ -91,6 +118,13 @@ extern const dvar_t *cl_yawspeed;            // universal/dvar.cpp
 extern const dvar_t *cl_pitchspeed;          // universal/dvar.cpp
 extern const dvar_t *m_filter;               // cl_main.cpp
 extern const dvar_t *cl_paused;              // qcommon/common.cpp
+extern const dvar_t *cl_mouseAccel;          // cl_main.cpp
+extern const dvar_t *cl_freelook;            // cl_main.cpp
+extern const dvar_t *m_pitch;                // cl_main.cpp
+extern const dvar_t *m_yaw;                  // cl_main.cpp
+extern const dvar_t *m_forward;              // cl_main.cpp
+extern const dvar_t *m_side;                 // cl_main.cpp
+extern const dvar_t *cl_showMouseRate;       // universal/dvar.cpp
 extern const dvar_t *bg_useClientDamageKick; // bgame
 
 T6_GLOBAL const dvar_t *cl_leanCountMin;
@@ -919,6 +953,134 @@ void CL_SetCursorPos(int x, int y)
 void CL_ShowSystemCursor(int show)
 {
 	IN_ShowSystemCursor(show);
+}
+
+// Mouse movement into move keys: VC100 adds 2^-30 to the (float) value and rounds to nearest on the x87 stack, so a
+// half rounds up and anything else to the nearer integer. In double precision, as the original's x87 runs.
+static inline int CL_MouseMoveToInt(float move)
+{
+	typedef double v2df __attribute__((__vector_size__(16)));
+	v2df v = {move + 9.313225746154785e-10, 0.0};  // cvtsd2si: round to nearest, as fistp
+	return __builtin_ia32_cvtsd2si(v);
+}
+
+// 004EEF00  client/cl_input.cpp:1710
+// Mouse look. The movement (CL_GetMouseMovement) is scaled by the profile's sensitivity plus cl_mouseAccel times the
+// mouse rate (counts per millisecond), and by the cgame's FOV scale. Turning with m_yaw/m_pitch degrees per count,
+// capped per frame at the cgame's turn rate; strafing (+strafe) or without mouse look, the movement walks instead.
+// Aim assist then gets the angles. The x87 arithmetic in the original runs here in doubles (same precision).
+void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base)
+{
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	float oldYaw = cl->viewangles.y;
+	float oldPitch = cl->viewangles.x;
+	float mx;
+	float my;
+	CL_GetMouseMovement(cl, &mx, &my);
+	if (!frame_msec)
+		return;
+	float rate = (float)(__builtin_sqrt((double)mx * mx + (double)my * my) / frame_msec);
+	float sensitivity = GamerProfile_GetFloat(PROFILE_MOUSE_SENSITIVITY,
+	                                          Com_LocalClient_GetControllerIndex(localClientNum));
+	float accelSensitivity =
+		(float)(((double)Dvar_GetFloat(cl_mouseAccel) * rate + sensitivity) * cl->cgameFOVSensitivityScale);
+	if (rate != 0.0f && Dvar_GetBool(cl_showMouseRate))
+		Com_Printf(25, "%f : %f\n", (double)rate, (double)accelSensitivity);
+	if (cl->snap.ps.pm_flags & PMF_FROZEN)
+		return;
+	if (cl->snap.ps.weaponstate == WEAPON_DEPLOYED)
+		return;
+	mx *= accelSensitivity;
+	my *= accelSensitivity;
+	if ((cl->snap.ps.otherFlags & POF_NO_MOVE_INPUT) && !Demo_IsPlaying())
+	{
+		cmd->forwardmove = 0;
+		cmd->rightmove = 0;
+		cmd->pitchmove = 0;
+		cmd->yawmove = 0;
+	}
+	else
+	{
+		if (mx != 0.0f || my != 0.0f)
+		{
+			kbutton_t *kb = playersKb[localClientNum];
+			int yawMove = 0;
+			int pitchMove = 0;
+			// linked to an entity (and not a link that keeps its own view): the turn cap is at most 360 a second
+			bool bLinkedView = cl->snap.ps.pm_type == PM_NORMAL_LINKED && !(cl->snap.ps.linkFlags & 1);
+			if (kb[KB_STRAFE].active)
+			{
+				float side = Dvar_GetFloat(m_side) * mx;
+				cmd->rightmove = ClampChar(cmd->rightmove + CL_MouseMoveToInt(side));
+			}
+			else
+			{
+				float yaw = Dvar_GetFloat(m_yaw) * mx;
+				float cap = cl->cgameMaxYawSpeed;
+				if (bLinkedView && (cap <= 0.0f || 360.0f - cap < 0.0f))
+					cap = 360.0f;
+				if (cap > 0.0f)
+				{
+					cap = (float)((double)frame_msec * cap * 0.001f);
+					yaw = I_fmax(-cap, I_fmin(cap, yaw));
+				}
+				cl->viewangles.y -= yaw;
+				yawMove = -(int)I_fmin(mx, 127.0f);
+			}
+			if ((!kb[KB_MLOOK].active && !Dvar_GetBool(cl_freelook)) || kb[KB_STRAFE].active)
+			{
+				my = Dvar_GetFloat(m_forward) * my;
+				cmd->forwardmove = ClampChar(cmd->forwardmove - CL_MouseMoveToInt(my));
+			}
+			else
+			{
+				float pitch = Dvar_GetFloat(m_pitch) * my;
+				float cap = cl->cgameMaxPitchSpeed;
+				if (bLinkedView && (cap <= 0.0f || 360.0f - cap < 0.0f))
+					cap = 360.0f;
+				if (cap > 0.0f)
+				{
+					cap = (float)((double)frame_msec * cap * 0.001f);
+					pitch = I_fmax(-cap, I_fmin(cap, pitch));
+				}
+				cl->viewangles.x += pitch;
+				int sign = Dvar_GetFloat(m_pitch) > 0.0f ? 1 : -1;
+				pitchMove = (int)(I_fmin(my, 127.0f) * sign);
+			}
+			cmd->pitchmove = ClampChar(cmd->pitchmove + pitchMove);
+			cmd->yawmove = ClampChar(cmd->yawmove + yawMove);
+		}
+		if (!Demo_IsPlaying() && (cl->snap.ps.eFlags2 & EF2_VIEW_LOCKED))
+		{
+			// the view may not turn: put it back
+			cl->viewangles.y = oldYaw;
+			cl->viewangles.x = oldPitch;
+			return;
+		}
+	}
+	if (!GPad_InUse(localClientNum) && CG_ShouldUpdateViewAngles(localClientNum))
+	{
+		// ps and adsFrac are left unset, as in the original
+		AimInput aimInput;
+		aimInput.deltaTime = frametime_base;
+		aimInput.pitch = cl->viewangles.x;
+		aimInput.pitchAxis = 0.0f;
+		aimInput.pitchMax = 0.0f;
+		aimInput.yaw = cl->viewangles.y;
+		aimInput.yawAxis = 0.0f;
+		aimInput.yawMax = 0.0f;
+		aimInput.forwardAxis = 0.0f;
+		aimInput.rightAxis = 0.0f;
+		aimInput.button_bits = cmd->button_bits;
+		aimInput.localClientNum = LOCAL_CLIENT_0;
+		AimOutput aimOutput;
+		AimAssist_UpdateMouseInput(&aimInput, &aimOutput);
+		cl->viewangles.x = aimOutput.pitch;
+		cl->viewangles.y = aimOutput.yaw;
+		SetMeleeChargeCmd(&aimOutput, cmd);
+	}
+	CL_UpdateAirburstMarkDistance(localClientNum, &cl->snap.ps, cmd, cmd->forwardmove, cmd->rightmove,
+	                              cmd->pitchmove, cmd->yawmove, 127.0f);
 }
 
 // 004EBF00  client/cl_input.cpp:2783
