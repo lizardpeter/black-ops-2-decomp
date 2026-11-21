@@ -75,11 +75,13 @@ struct usercmd_s
 	char upmove;
 	char pitchmove;
 	char yawmove;
+#ifndef T6_STORE  // the Store revision dropped the gun and Wii U aim fields (0x3C bytes, from its CL_MouseMove)
 	short gunPitch;
 	short gunYaw;
 	short wiiumoteAimX;
 	short wiiumoteAimY;
 	char wiiuControllerType;
+#endif
 	unsigned short meleeChargeEnt;
 	unsigned char meleeChargeDist;
 	union
@@ -92,6 +94,13 @@ struct usercmd_s
 	unsigned short airburstMarkDistance;
 	unsigned short lastInput;
 };
+#ifdef T6_STORE
+static_assert(sizeof(usercmd_s) == 0x3C, "usercmd_s");
+static_assert(__builtin_offsetof(usercmd_s, meleeChargeEnt) == 0x2A, "usercmd_s.meleeChargeEnt");
+#else
+static_assert(sizeof(usercmd_s) == 0x44, "usercmd_s");
+static_assert(__builtin_offsetof(usercmd_s, airburstMarkDistance) == 0x40, "usercmd_s.airburstMarkDistance");
+#endif
 
 enum csParseFieldType_t
 {

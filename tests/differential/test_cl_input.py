@@ -13,6 +13,7 @@ from harness import OBJECTS, SCRATCH
 rng = random.Random(2042)
 STATE = {}
 SERVER = ["CoDMPServer_PC"]
+BOTH = ["CoDMPServer_PC", "t6mp_msstore"]
 
 PLAYERS_KB = 0x011C16E0
 KB_SIZE, NUM_BUTTONS = 0x18, 45
@@ -95,6 +96,25 @@ def kb_va(button, lc=0):
     return PLAYERS_KB + lc * KB_SIZE * NUM_BUTTONS + button * KB_SIZE
 
 
+# Globals per architecture (the x86 server, the x64 Store build: records/names.tsv). A Store-ready case uses only
+# these; the server-only cases still name server addresses directly.
+ADDR = {
+    "x86": {"client_ui": CLIENT_UI, "max_local_clients": CL_MAX_LOCAL_CLIENTS, "clients_ptr": CLIENTS_PTR,
+            "cg_array_ptr": CG_ARRAY_PTR, "cls_frametime": CLS_FRAMETIME, "com_frametime": COM_FRAMETIME,
+            "frame_msec": FRAME_MSEC, "players_kb": PLAYERS_KB},
+    "x64": {"client_ui": 0x140E61790, "max_local_clients": 0x140E5CA9C, "clients_ptr": 0x140E61BF8,
+            "cg_array_ptr": 0x140E53A20, "com_frametime": 0x141F04894, "frame_msec": 0x140E5C804,
+            "players_kb": 0x143C0C790},
+}
+
+
+# clientActive_t fields by name, per architecture (client.h's static_asserts)
+FIELDS = {"x86": {"stance": STANCE, "stance_held": STANCE_HELD, "stance_position": STANCE_POSITION,
+                  "stance_time": STANCE_TIME, "using_ads": USING_ADS},
+          "x64": {"stance": 0x2BE8, "stance_held": 0x2BE4, "stance_position": 0x2BEC, "stance_time": 0x2BF0,
+                  "using_ads": 0x5C}}
+
+
 def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dvars=None, ps=None, globals_=None,
           cg=None, cg_null=False, frametime=16, **state):
     """kb: {button index: kbutton bytes}; client: {field offset: bytes or int}; ps: predicted playerState fields."""
@@ -103,20 +123,25 @@ def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dv
         STATE.update(state)
         STATE["dvars"] = dvars or {}
         STATE["machine"] = w.m
-        w.u32(CLIENT_UI + 8, ui_state)
-        w.u32(CL_MAX_LOCAL_CLIENTS, 1)
-        w.u32(CLIENTS_PTR, CLIENTS)
-        w.u32(CG_ARRAY_PTR, 0 if cg_null else CG)
-        w.u32(CLS_FRAMETIME, frametime)
+        x64 = w.m.x64
+        a = ADDR["x64" if x64 else "x86"]
+        w.u32(a["client_ui"] + 8, ui_state)
+        w.u32(a["max_local_clients"], 1)
+        (w.u64 if x64 else w.u32)(a["clients_ptr"], CLIENTS)
+        (w.u64 if x64 else w.u32)(a["cg_array_ptr"], 0 if cg_null else CG)
+        if "cls_frametime" in a:
+            w.u32(a["cls_frametime"], frametime)
         for off, v in (cg or {}).items():
             w.write(CG + off, v if isinstance(v, bytes) else struct.pack("<i", v))
-        w.u32(COM_FRAMETIME, frame_time)
-        w.u32(FRAME_MSEC, frame_msec)
-        for va, handle in DVAR_HANDLES.items():
-            w.u32(va, handle)
+        w.u32(a["com_frametime"], frame_time)
+        w.u32(a["frame_msec"], frame_msec)
+        if not x64:
+            for va, handle in DVAR_HANDLES.items():
+                w.u32(va, handle)
         for button, data in (kb or {}).items():
-            w.write(kb_va(button), data)
+            w.write(a["players_kb"] + button * KB_SIZE, data)
         for off, v in (client or {}).items():
+            off = FIELDS["x64" if x64 else "x86"][off] if isinstance(off, str) else off
             w.write(CLIENTS + off, v if isinstance(v, bytes) else struct.pack("<i", v))
         for off, v in (ps or {}).items():
             w.write(PREDICTED_PS + off, v if isinstance(v, bytes) else struct.pack("<i", v))
@@ -361,7 +386,8 @@ CASES = [
      "inputs": keydown_cheat_inputs()},
     {"name": "IN_KeyUpCheat", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": keydown_cheat_inputs()},
-    {"name": "CL_KeyState", "ret": "float", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CL_KeyState", "ret": "float", "builds": BOTH, "fakes": {"Assert_MyHandler": lambda mu: 1},
+     "observe": {"Assert_MyHandler": "siiss"},
      "inputs": keystate_inputs()},
     {"name": "CL_SetStance", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [0, s], "setup": setup(kb={KB["PRONE"]: kbutton(active=p), KB["DOWN"]: kbutton(active=d)})}
@@ -449,6 +475,9 @@ CASES = [
      "inputs": [[0], [1]]},
     {"name": "CL_GetLocalClientConnectionState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(ui_state=u)} for lc in (0, 1) for u in (0, 5, 10)]},
+    {"name": "CL_GetLocalClientGlobals", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [lc], "setup": setup(globals_={CL_MAX_LOCAL_CLIENTS: m, CLIENTS_PTR: c})}
+                for lc in (0, 1, 2) for m in (0, 1, 2) for c in (0, CLIENTS)]},
     {"name": "CL_GetLocalClientMigrationState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(globals_={CLIENT_UI + 0x10: m})} for lc in (0, 1) for m in range(4)]},
     {"name": "CG_GetLocalClientGlobals", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
@@ -480,8 +509,9 @@ CASES = [
                                 dvars={STANDING: 60, STANCE_HOLD: 300, DTP_HOLD: 150})}
                 for h in (0, 1) for sp in range(4) for t in (9600, 9700, 9800, 9900) for f in (0, 0x8000)
                 for tp in (0, 1) if tp == 0 or (sp == 0 and t == 9600)]},
-    {"name": "CL_AddCurrentStanceToCmd", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
-     "inputs": [{"args": [0, struct.pack("<III", 0, b0, b1) + bytes(0x38)], "setup": setup(client={STANCE: st})}
+    {"name": "CL_AddCurrentStanceToCmd", "ret": "void", "builds": BOTH, "fakes": {"Assert_MyHandler": lambda mu: 1},
+     "observe": {"Assert_MyHandler": "siiss"},
+     "inputs": [{"args": [0, struct.pack("<III", 0, b0, b1) + bytes(0x38)], "setup": setup(client={"stance": st})}
                 for st in range(5) for b0, b1 in ((0, 0), (0xFFFFFFFF, 0xFFFFFFFF), (0x12345678, 0x9ABCDEF0))]},
     {"name": "CL_WeapNextButtonUpdate", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [0, bytes(0x44)],

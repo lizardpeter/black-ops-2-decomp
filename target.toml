@@ -24,6 +24,7 @@ source_roots = ['c:\t6\code\src', 'e:\t6\pc\dev\code\src_noserver']
 id = "t6mp_msstore"
 kind = "retail"
 architecture = "x64"
+store = true  # the Store revision of the source (T6_STORE): its own layouts and changes
 image_base = 0x140000000
 analyze = false  # analysed (analysis/t6mp_msstore)
 timestamp = "2024-12-10T22:23:11Z"
@@ -36,6 +37,7 @@ exe = { key = "bo2/DUMP/t6mp.exe", sha256 = "cf80b8058bce7e00e4c61ff3d673308c1fc
 id = "t6zm_msstore"
 kind = "retail"
 architecture = "x64"
+store = true  # the Store revision of the source (T6_STORE): its own layouts and changes
 image_base = 0x140000000
 analyze = false  # after multiplayer
 timestamp = "2024-12-10T22:10:24Z"
@@ -48,6 +50,7 @@ exe = { key = "bo2/DUMP/t6zm.exe", sha256 = "7152ebe1c892ea8b1ea7a73811cb82bcdc2
 id = "t6sp_msstore"
 kind = "retail"
 architecture = "x64"
+store = true  # the Store revision of the source (T6_STORE): its own layouts and changes
 image_base = 0x140000000
 analyze = false  # after multiplayer
 timestamp = "2024-12-10T22:23:07Z"

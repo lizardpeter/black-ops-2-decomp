@@ -106,13 +106,37 @@ struct alignas(8) clSnapshot_t  // playerState_s holds 8-byte members
 };
 static_assert(sizeof(clSnapshot_t) == 0x2A48, "clSnapshot_t");
 
+struct MatchState;
+struct entityState_s;
+struct clientState_s;
+struct actorState_s;
+struct outPacket_t;
+
+// The server PDB's declaration. Pointer fields keep their types, so the Store build's x64 layout follows (they
+// widen to 8 bytes: everything from usingAds moves 0x18 further in), and its smaller usercmd_s shrinks the ring.
 struct clientActive_t
 {
-	unsigned char unknown0[0x44];
+	MatchState *parseMatchStatesBuf;
+	int numParseMatchStates;
+	int maxParseMatchStates;
+	entityState_s *parseEntitiesBuf;
+	int numParseEntities;
+	int maxParseEntities;
+	clientState_s *parseClientsBuf;
+	int numParseClients;
+	int maxParseClients;
+	actorState_s *parseActorsBuf;
+	int numParseActors;
+	int maxParseActors;
+	outPacket_t *outPackets;
+	clSnapshot_t *snapshots;
+	int packetBackupCount;
+	int packetBackupMask;
+	int gameStateMarker;
 	bool usingAds;
 	int timeoutcount;
 	clSnapshot_t snap;
-	unsigned char unknown2A98[0x2BCC - 0x2A98];
+	unsigned char unknown2A98[0x2BCC - 0x2A98];  // snapServerTime .. parseActorsIndex
 	bool stanceHeld;
 	StanceState stance;
 	StanceState stancePosition;
@@ -126,19 +150,37 @@ struct clientActive_t
 	float cgameFOVSensitivityScale;
 	float cgameMaxPitchSpeed;
 	float cgameMaxYawSpeed;
-	unsigned char unknown2C00[0x2C8C - 0x2C00];
+	unsigned char unknown2C00[0x2C8C - 0x2C00];  // cgameKickAngles .. cgamePredictedDataServerTime
 	vec3_t viewangles;
-	unsigned char unknown2C98[0x42CA8 - 0x2C98];
+	int skelTimeStamp;
+	volatile int skelMemPos;
+	char skelMemory[262144];
+	char *skelMemoryStart;
+	bool allowedAllocSkel;
 	usercmd_s cmds[128];  // a ring: cmdNumber & 0x7F
 	int cmdNumber;
-	unsigned char unknown44EAC[0x8A7B4 - 0x44EAC];
+	unsigned char unknown44EAC[0x8A7B4 - 0x44EAC];  // clientArchive .. translationVersion
 	int lastFireTime;
 	bool useHeld;
 	int useTime;
 	int useCount;
 	int wasInVehicle;
-	unsigned char unknown8A7C8[0x8A7E0 - 0x8A7C8];
+	int serverFrameMS;
+	int serverKbps;
+	int serverKbpsAvg[2];
+	int serverKbpsCount[2];
 };
+#ifdef T6_STORE
+// t6mp_msstore, from its code: CL_KeyMove 140192D50, CL_CreateNewCommands 1401954D0
+static_assert(__builtin_offsetof(clientActive_t, usingAds) == 0x5C, "clientActive_t.usingAds");
+static_assert(__builtin_offsetof(clientActive_t, snap) == 0x68, "clientActive_t.snap");
+static_assert(__builtin_offsetof(clientActive_t, stanceHeld) == 0x2BE4, "clientActive_t.stanceHeld");
+static_assert(__builtin_offsetof(clientActive_t, switchingToInventory) == 0x2BFC, "clientActive_t.switchingToInventory");
+static_assert(__builtin_offsetof(clientActive_t, cmds) == 0x42CC4, "clientActive_t.cmds");
+static_assert(__builtin_offsetof(clientActive_t, cmdNumber) == 0x44AC4, "clientActive_t.cmdNumber");
+static_assert(__builtin_offsetof(clientActive_t, useTime) == 0x8A3D8, "clientActive_t.useTime");
+static_assert(__builtin_offsetof(clientActive_t, wasInVehicle) == 0x8A3E0, "clientActive_t.wasInVehicle");
+#else
 static_assert(sizeof(clientActive_t) == 0x8A7E0, "clientActive_t");
 static_assert(__builtin_offsetof(clientActive_t, cgameMaxYawSpeed) == 0x2BFC, "clientActive_t.cgameMaxYawSpeed");
 static_assert(__builtin_offsetof(clientActive_t, wasInVehicle) == 0x8A7C4, "clientActive_t.wasInVehicle");
@@ -147,6 +189,7 @@ static_assert(__builtin_offsetof(clientActive_t, snap) == 0x50, "clientActive_t.
 static_assert(__builtin_offsetof(clientActive_t, stance) == 0x2BD0, "clientActive_t.stance");
 static_assert(__builtin_offsetof(clientActive_t, viewangles) == 0x2C8C, "clientActive_t.viewangles");
 static_assert(__builtin_offsetof(clientActive_t, lastFireTime) == 0x8A7B4, "clientActive_t.lastFireTime");
+#endif
 
 struct clientMouse_t
 {
@@ -185,7 +228,20 @@ extern clientStatic_t cls;  // cl_main.cpp
 
 // cl_main.cpp
 extern unsigned int frame_msec;
-clientActive_t *CL_GetLocalClientGlobals(LocalClientNum_t localClientNum);
+extern int cl_maxLocalClients;
+extern clientActive_t *clients;  // allocated for cl_maxLocalClients
+
+// 0042E740  client/client.h:665 (the Store build inlines it everywhere). Returns the one clientActive_t, or null for
+// an index past cl_maxLocalClients.
+inline clientActive_t *CL_GetLocalClientGlobals(LocalClientNum_t localClientNum)
+{
+	if (localClientNum >= cl_maxLocalClients)
+		return 0;
+	assert_in("c:\\t6\\code\\src\\client_mp\\../client/client.h", 669, clients);
+	assertf_in("c:\\t6\\code\\src\\client_mp\\../client/client.h", 676, (localClientNum == 0),
+	           "(localClientNum) = %i", localClientNum);
+	return clients;
+}
 
 // cl_input.cpp
 bool IN_IsTalkKeyHeld();

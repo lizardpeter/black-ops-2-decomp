@@ -201,6 +201,8 @@ def main():
         flags = [f"-I{ROOT / 'enhanced' / 'include'}"] if enhanced else []
         if not symbols.build_spec(build).get("asserts"):
             flags.append("-DT6_NO_ASSERTS")  # retail and ship builds compiled their asserts out
+        if symbols.build_spec(build).get("store"):
+            flags.append("-DT6_STORE")  # the Store builds' source revision: its own structure layouts and changes
         compile_unit(src, obj, arch, flags)
         objs.append(obj)
         sources.append(obj)

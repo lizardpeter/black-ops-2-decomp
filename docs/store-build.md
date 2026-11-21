@@ -45,8 +45,23 @@ The package layout (`layout_05042768-….xml`) lists 1,009 entries. Uploaded (54
 French, German, Italian and Spanish localisation (likely not installed). The code work needs only the executables;
 the fastfiles are needed for asset work and for running the game.
 
-## Structure layouts
+## Reconstructing against the Store build
 
-Reconstructed structures (`include/`) carry the server's x86 offsets, checked by `static_assert`. The Store build is
-x64: pointers and alignment move its fields, so a function using a structure is tested against the Store only once
-that structure has the Store's offsets (per-architecture layouts, from the Store's own code).
+The Store builds are the target; the server is the reference that names things. Differences found so far, and how
+the source handles them:
+
+- **Source revision.** `store = true` in `target.toml` compiles with `T6_STORE`. The Store's source is later than
+  the 2013 servers': `usercmd_s` is 0x3C bytes (no `gunPitch`, `gunYaw` or Wii U aim fields), and some code
+  changed (`CL_KeyMove`'s stance hold times are constants, 300 and 200 ms, where the server reads
+  `cl_stanceHoldTime` and `cl_dtpHoldTime`). Code that differs is written for each revision under `T6_STORE`.
+- **Layouts.** Structures keep the PDB's field types, so pointers widen on x64 and the Store offsets follow; each
+  structure has `static_assert`s for both builds, the Store's taken from its code (the function named beside them).
+- **Arithmetic.** The Store build is SSE throughout, in float. Where the server kept a chain on the x87 stack, the
+  source uses `x87_t` (double on x86, float on x64) and `X87_MATH` (x86 only): `t6_compiler.h`.
+- **Inlining.** Link-time code generation inlined most small functions (`CL_GetLocalClientGlobals`, `Dvar_GetInt`,
+  `ClampChar`, `CL_AdjustAngles`, ...) and removed unused arguments (`CG_IsSprinting` takes none). A function the
+  Store doesn't have is verified there through its caller; header functions are inline in `include/` as they were
+  in the original. A Store case can't fake or observe a function the Store inlined.
+- **Identification.** `records/names.tsv` rows for the Store come from `tools/match/match.py`, behaviour, or the
+  structure of the code (the call order and field accesses of a function whose server twin is reconstructed),
+  with the evidence written out.

@@ -5,6 +5,7 @@ CoDMPServer_PC	0041D690	matches	include/universal/com_math.h	I_fmax; tests/diffe
 CoDMPServer_PC	0041D6D0	matches	include/universal/com_math.h	I_fmin; tests/differential/test_cl_input.py
 CoDMPServer_PC	0041D9A0	matches	include/client/client.h	CL_GetLocalClientConnectionState; tests/differential/test_cl_input.py
 CoDMPServer_PC	00426AD0	matches	include/client/client.h	CL_GetLocalClientMigrationState; tests/differential/test_cl_input.py
+CoDMPServer_PC	0042E740	matches	include/client/client.h	CL_GetLocalClientGlobals; tests/differential/test_cl_input.py
 CoDMPServer_PC	00464890	matches	src/client/cl_input.cpp	CL_GetLocalClientUIGlobals; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA830	matches	src/client/cl_input.cpp	CL_LeanCount_Reset; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA840	matches	src/client/cl_input.cpp	CL_LeanCount_Increment; tests/differential/test_cl_input.py
@@ -168,6 +169,8 @@ t6mp	00645340	matches	src/universal/com_math.cpp	ClampShort; tests/differential/
 t6mp	006580F0	matches	src/universal/q_shared.cpp	I_isdigit; tests/differential/test_q_shared.py
 t6mp	006F5A40	matches	src/universal/com_shared.cpp	Com_HashKey; tests/differential/test_universal.py
 t6mp	007043C0	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
+t6mp_msstore	1401926D0	matches	src/client/cl_input.cpp	CL_KeyState (the Store divides in float, SSE); tests/differential/test_cl_input.py
+t6mp_msstore	140192CD0	matches	src/client/cl_input.cpp	CL_AddCurrentStanceToCmd; tests/differential/test_cl_input.py
 t6mp_msstore	1403E9910	matches	src/universal/q_shared.cpp	I_DrawStrlen; tests/differential/test_q_shared.py
 t6mp_msstore	140471A90	matches	src/universal/q_shared.cpp	I_atoui; tests/differential/test_q_shared.py
 t6mp_msstore	140471B00	matches	src/universal/q_shared.cpp	I_strncpyz; tests/differential/test_q_shared.py
