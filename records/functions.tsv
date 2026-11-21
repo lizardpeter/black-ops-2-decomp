@@ -16,3 +16,4 @@ t6mp	00645340	matches	src/universal/com_math.c	ClampShort; tests/differential/re
 t6mp	006580F0	matches	src/universal/q_shared.c	I_isdigit; tests/differential/reference.py --build t6mp
 t6mp	006F5A40	matches	src/universal/com_shared.c	Com_HashKey; tests/differential/reference.py --build t6mp
 t6mp	007043C0	matches	src/universal/com_math.c	ClampChar; tests/differential/reference.py --build t6mp
+t6mp_msstore	1407B51D0	matches	src/universal/q_shared.c	LongSwap; tests/differential/reference.py

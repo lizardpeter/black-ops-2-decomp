@@ -1,28 +1,191 @@
+# What this repo reverses. Originals are never committed; they live in R2 under these keys and every tool
+# verifies the sha256 before use.
+
 project = "t6"
-title = "Call of Duty: Black Ops II (PC, x86)"
+title = "Call of Duty: Black Ops II (PC; Microsoft Store x64 target)"
 graph = "re_t6"
 r2_public = "https://r2.houseofkublai.com/"
 ghidra = "12.1.4"
+compiler = "Store target: VS2019 16.11 (cl 19.29.30154), x64, LTCG, GDK. Servers and Steam exe: VS2010 (linker 10.00), x86"
+# Original source roots, for turning PDB/MAP paths into repo paths (tools/pdb/extract.py).
 source_roots = ['c:\t6\code\src', 'e:\t6\pc\dev\code\src_noserver']
 
-[[build]]
-id = "t6mp"
-kind = "retail"
-architecture = "x86"
-image_base = 0x00400000
-timestamp = "2015-01-30T01:23:23Z"
-pdb_guid = "DE575CD6-25F4-4C45-81EB-60450E0D2A61"
-pdb_age = 1
-exe = { key = "bo2/exes/t6mp.exe", sha256 = "7c6aa5e703ea096a981e6fb8962d2d13a1e80f80d3498e4836e8c8466322810d" }
+# kind: "retail"    = the final target: the Microsoft Store (GDK) build, package 38985CA0.CallofDutyBlackOps2PCMS 1.1.8.0
+#                     (docs/store-build.md). x64, no Arxan, no Steam, no relocations (fixed base 0x140000000).
+#       "reference" = has symbols (PDB/MAP): the March 2013 PC dedicated servers, x86.
+#       "related"   = no symbols but helpful: the 2015 Steam t6mp.exe (x86), already fully analysed. Community
+#                     clients (Plutonium T6) name its addresses, which can be carried to the target by matching.
+# `analyze = true` puts a build in the next Ghidra pipeline run (.github/workflows/ghidra.yml); a manual run can name
+# any builds instead. Set it back to false once analysis/<build>/ is committed.
+# `ghidra_pdb = false` analyses a symbol build blind, so its own PDB/MAP can score tools/match (docs/matching.md).
 
+# Final target, multiplayer first. Rebuilt with VS2019 16.11 in d:\workspace\outrun\t6 (the same port as Ghosts' Store build).
+[[build]]
+id = "t6mp_msstore"
+kind = "retail"
+architecture = "x64"
+image_base = 0x140000000
+analyze = true
+timestamp = "2024-12-10T22:23:11Z"
+pdb_path = 'd:\workspace\outrun\t6\pc\dev\game\pc\t6mp_msstore.pdb'
+pdb_guid = "ABBFB2F5-97CF-4E1D-8D20-67833D167727"
+pdb_age = 3
+exe = { key = "bo2/DUMP/t6mp.exe", sha256 = "cf80b8058bce7e00e4c61ff3d673308c1fcd8061f18fe66710803538eab4bc01" }
+
+[[build]]
+id = "t6zm_msstore"
+kind = "retail"
+architecture = "x64"
+image_base = 0x140000000
+analyze = false  # after multiplayer
+timestamp = "2024-12-10T22:10:24Z"
+pdb_path = 'd:\workspace\outrun\t6\pc\dev\game\pc\t6zm_msstore.pdb'
+pdb_guid = "4E9D993B-5580-423E-A76F-7E858F0933F1"
+pdb_age = 2
+exe = { key = "bo2/DUMP/t6zm.exe", sha256 = "7152ebe1c892ea8b1ea7a73811cb82bcdc22088816f5c731a6637d5461bb7416" }
+
+[[build]]
+id = "t6sp_msstore"
+kind = "retail"
+architecture = "x64"
+image_base = 0x140000000
+analyze = false  # after multiplayer
+timestamp = "2024-12-10T22:23:07Z"
+pdb_path = 'd:\workspace\outrun\t6\pc\dev\game\pc\t6sp_msstore.pdb'
+pdb_guid = "2264CC0D-D741-4057-BEA6-0E9EC12D0746"
+pdb_age = 3
+exe = { key = "bo2/DUMP/t6sp.exe", sha256 = "0404f79cb36394b14cfc3321b7aa126a08518531564fa042fc14b82debe45c89" }
+
+# Primary reference: PC dedicated server, configuration "codmpRelease DedicatedServer - PC" (optimised, asserts and
+# dev code kept, so more names and strings than the ship build). Full private PDB and linker MAP.
 [[build]]
 id = "CoDMPServer_PC"
 kind = "reference"
 architecture = "x86"
 image_base = 0x00400000
-timestamp = "2013-03-11T19:15:45Z"
+analyze = true
+timestamp = "2013-03-11T23:15:45Z"
+pdb_path = 'c:\t6\game\pc\CoDMPServer_PC.pdb'
 pdb_guid = "3C12954B-A78E-4C6E-B4E8-5A8FD595F0DB"
 pdb_age = 51
 exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_PC.exe", sha256 = "f67eb68a494b93b5b229985205bdc94e26fdfe677663410e2207c25f6f27a55d" }
 pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_PC.pdb", sha256 = "7874efc2c9992467a72dbf48cc6f66d8cfa3c9a701275e41df1f8483a3d971fc" }
 map = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_PC.map", sha256 = "34e16e517072031629307ffa0520d59f3c586539b943d081f60c59ee9ce1c3bf" }
+
+# Second reference: the same server's ship configuration ("codmpReleaseShip DedicatedServer - PC"), linked six minutes
+# later. Analysed blind: matched against CoDMPServer_PC and scored with its own PDB/MAP, it is the ground-truth pair
+# for tools/match (docs/matching.md).
+[[build]]
+id = "CoDMPServer_s_PC"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = true
+ghidra_pdb = false
+timestamp = "2013-03-11T23:21:34Z"
+pdb_path = 'c:\t6\game\pc\CoDMPServer_s_PC.pdb'
+pdb_guid = "A9CA5DF4-97BA-42DE-A071-C8F69DBA6EC8"
+pdb_age = 52
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_s_PC.exe", sha256 = "229904e2cd94cb8b12ff547edc2e51cb89ac5218780e6a747573d0075fa5a612" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_s_PC.pdb", sha256 = "6fba421607a34d581453bf193f4a6b14c40cea2691598d67fff224ca45627fd5" }
+map = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PC Server/CoDMPServer_s_PC.map", sha256 = "1a8e8058d90b2d9819497b971c1dc65c19dd18f0052cbf13bb50c5e61ea12a31" }
+
+# Related: the final Steam multiplayer exe (2015), the previous target. Fully analysed (analysis/t6mp).
+[[build]]
+id = "t6mp"
+kind = "related"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false  # analysed (analysis/t6mp)
+ghidra_prescript = "InventoryOptions.java"
+timestamp = "2015-01-30T01:23:23Z"
+pdb_guid = "DE575CD6-25F4-4C45-81EB-60450E0D2A61"
+pdb_age = 1
+exe = { key = "bo2/exes/t6mp.exe", sha256 = "7c6aa5e703ea096a981e6fb8962d2d13a1e80f80d3498e4836e8c8466322810d" }
+
+# Console-host dedicated servers: Windows x86 exes that hosted each console's matches, each with its full private PDB
+# (no MAP). Release and ship configurations, like the PC server. Pinned for cross-checking names and types; not analysed yet.
+
+# Xbox 360 host, title update 8 tree (D:\t6\tu8): the latest server build in the drop.
+[[build]]
+id = "CoDMPServer_XBOX"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false
+timestamp = "2013-03-13T01:49:15Z"
+pdb_path = 'D:\t6\tu8\game\pc\CoDMPServer.pdb'
+pdb_guid = "08687965-C0FB-46A4-81EE-1580E273B0A9"
+pdb_age = 1
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/Xbox 360 Server/CoDMPServer_XBOX.exe", sha256 = "d1e1cb914fe61c5fb39a240a0b558de5e92bc421d07db0a9ecb9666fa42224ca" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/Xbox 360 Server/CoDMPServer_XBOX.pdb", sha256 = "00f5af65913affc267093cd87b88b21cfc08956c7463e37f52b84111615c9687" }
+
+# Ship configuration of the same host.
+[[build]]
+id = "CoDMPServer_s_XBOX"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false
+timestamp = "2013-03-13T02:04:03Z"
+pdb_path = 'D:\t6\tu8\game\pc\CoDMPServer_s.pdb'
+pdb_guid = "BAEE2C91-3C41-4FE2-988A-FEEF24A866FF"
+pdb_age = 1
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/Xbox 360 Server/CoDMPServer_s_XBOX.exe", sha256 = "e9bf9549c973f7b781df502930cfba0b703fc1563ac3c7cfc79610e4edb8a680" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/Xbox 360 Server/CoDMPServer_s_XBOX.pdb", sha256 = "7c669d18b2fee040bab4154531ed09da6ff9d97a84a7af611d1f4796bde1ec72" }
+
+# PS3 host.
+[[build]]
+id = "CoDMPServer_PS3"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false
+timestamp = "2013-03-05T21:35:28Z"
+pdb_path = 'D:\t6\game\pc\CoDMPServer.pdb'
+pdb_guid = "99C1BEF9-B9C8-4C52-B63A-EEA834964DF3"
+pdb_age = 1
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PS3 Server/CoDMPServer_PS3.exe", sha256 = "4c3ec16ce909b6bf8618f37c364b405253f32b2bff6f821336674efe98b73f32" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PS3 Server/CoDMPServer_PS3.pdb", sha256 = "7c591f7b9d586be9bd1a81f0a364f2d076f9c3b625308174479436ef96be2618" }
+
+# Ship configuration of the same host.
+[[build]]
+id = "CoDMPServer_s_PS3"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false
+timestamp = "2013-03-05T21:31:26Z"
+pdb_path = 'D:\t6\game\pc\CoDMPServer_s.pdb'
+pdb_guid = "B06F5618-72D7-4A29-BC00-BC25E44EB870"
+pdb_age = 1
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PS3 Server/CoDMPServer_s_PS3.exe", sha256 = "bac79be94ff2bf9424e547819b25cf51896d04fec696563391a5103d4ddc2721" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/PS3 Server/CoDMPServer_s_PS3.pdb", sha256 = "68a4adf171867ff413b669e8e9a54cf950ec8f528bfb60a67f7fb000ac1d630c" }
+
+# Wii U host, January 2013: the oldest server build in the drop.
+[[build]]
+id = "CoDMPServer_WIIU"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false
+timestamp = "2013-01-22T02:51:38Z"
+pdb_path = 'c:\t6\game\pc\CoDMPServer.pdb'
+pdb_guid = "27AD8AD3-51A7-4E26-89E2-AD72C0C659B1"
+pdb_age = 5
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/WiiU Server/CoDMPServer_WIIU.exe", sha256 = "3efd0734e28d37bbe146235083a0bb9174520c06a1397cb07e732788da0ee015" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/WiiU Server/CoDMPServer_WIIU.pdb", sha256 = "bf911f60945a655cdefac00b5aaa1aa2e6e557537820ff7b60e0c98a2955a768" }
+
+# Ship configuration of the same host.
+[[build]]
+id = "CoDMPServer_s_WIIU"
+kind = "reference"
+architecture = "x86"
+image_base = 0x00400000
+analyze = false
+timestamp = "2013-01-22T21:28:43Z"
+pdb_path = 'c:\t6\game\pc\CoDMPServer_s.pdb'
+pdb_guid = "622C52F4-68FF-419D-8801-57BE319157FF"
+pdb_age = 3
+exe = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/WiiU Server/CoDMPServer_s_WIIU.exe", sha256 = "c1446925346bd8aaaf4ef4cfc21783a437c05f5c213c012d26a213fd0b0f54a9" }
+pdb = { key = "bo2/exes/Call of Duty - Black Ops 2 (Server Files) [2013-03-11]/WiiU Server/CoDMPServer_s_WIIU.pdb", sha256 = "bac11919c18db95f77b62d2fe34cd38a6c52efbb44999a05b1002a3a5d942075" }

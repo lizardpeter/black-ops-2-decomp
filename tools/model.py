@@ -80,6 +80,9 @@ def load(build: str) -> dict[str, Fn]:
     joined = a / "functions.tsv"
     compact = a / "inventory.tsv"
     if not joined.is_file() and not compact.is_file():
+        for r in read_tsv(a / "pdata.tsv"):  # x64 exception directory, until Ghidra's inventory exists
+            if not r["part_of"]:
+                get(r["va"]).size = int(r["size"])
         for r in read_tsv(a / "direct-entries.tsv"):
             get(r["va"]).extra["direct_calls"] = int(r["direct_calls"])
     if not joined.is_file():

@@ -18,12 +18,16 @@ jobs:
       - run: |
           python tools/fetch_originals.py CoDMPServer_PC originals --only exe
           python tools/fetch_originals.py t6mp originals --only exe
+          python tools/fetch_originals.py t6mp_msstore originals --only exe
       - run: |
           python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_faithful.so
           python tests/differential/reference.py originals/CoDMPServer_PC.exe build/libt6_enhanced.so
           python tests/differential/reference.py originals/t6mp.exe build/libt6_faithful.so --build t6mp
           python tests/differential/reference.py originals/t6mp.exe build/libt6_enhanced.so --build t6mp
+          python tests/differential/reference.py originals/t6mp_msstore.exe build/libt6_faithful.so --build t6mp_msstore
+          python tests/differential/reference.py originals/t6mp_msstore.exe build/libt6_enhanced.so --build t6mp_msstore
       - run: |
           python tools/inventory/retail_calls.py originals/t6mp.exe
+          (cd tools && python inventory.py t6mp_msstore ../originals/t6mp_msstore.exe)
           python tools/status.py
-          git diff --exit-code -- analysis/t6mp/direct-entries.tsv STATUS.md
+          git diff --exit-code -- analysis/t6mp/direct-entries.tsv analysis/t6mp_msstore/pe.json analysis/t6mp_msstore/pdata.tsv STATUS.md

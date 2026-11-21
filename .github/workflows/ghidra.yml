@@ -1,86 +1,235 @@
-name: Ghidra analysis
+# Ghidra pipeline: extract each symbol build's PDB/MAP tables (tools/pdb/extract.py), fetch each build, import it (with its original PDB when it has one and ghidra_pdb is not false),
+# export everything, decompile in shards, then commit the results to analysis/<build>/. Runs when the pipeline itself or target.toml
+# changes, on the builds marked `analyze = true` in target.toml; a manual run can name any builds.
+name: ghidra
 
 on:
   workflow_dispatch:
     inputs:
-      build:
-        description: Original build to analyze
-        type: choice
-        default: CoDMPServer_PC
-        options:
-          - CoDMPServer_PC
-          - t6mp
+      builds:
+        description: "Space-separated build ids (empty: those with analyze = true in target.toml)"
+        required: false
+        default: ""
+  push:
+    branches: [main]
+    paths:
+      - target.toml
+      - tools/ghidra/**
+      - tools/pdb/**
+      - tools/fetch_originals.py
+      - .github/workflows/ghidra.yml
 
-permissions:
-  contents: read
+concurrency:
+  group: ghidra
+  cancel-in-progress: false
+
+env:
+  GHIDRA_TAG: Ghidra_12.1.4_build
+  SHARDS: 6
 
 jobs:
-  analyze:
+  setup:
     runs-on: ubuntu-latest
-    timeout-minutes: 300
-    env:
-      BUILD_ID: ${{ inputs.build }}
-      GH_TOKEN: ${{ github.token }}
+    outputs:
+      builds: ${{ steps.pick.outputs.builds }}
+      shards: ${{ steps.pick.outputs.shards }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: pick
+        env: { REQUESTED: "${{ github.event.inputs.builds }}" }
+        run: |
+          python3 - <<'PY' >> "$GITHUB_OUTPUT"
+          import json, os, tomllib
+          cfg = tomllib.load(open("target.toml", "rb"))
+          req = os.environ.get("REQUESTED", "").split()
+          builds = req or [b["id"] for b in cfg["build"] if b.get("analyze")]
+          shards = [{"build": b, "shard": s} for b in builds for s in range(int(os.environ.get("SHARDS", 6)))]
+          print("builds=" + json.dumps(builds))
+          print("shards=" + json.dumps(shards))
+          PY
+
+  symbols:
+    # PDB/MAP tables for builds that have them. Runs here rather than on a workstation: resymc needs more memory
+    # than 8 GB for a full server PDB. The analyze job applies locals.tsv; publish commits the tables.
+    needs: setup
+    if: ${{ needs.setup.outputs.builds != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      matrix:
+        build: ${{ fromJSON(needs.setup.outputs.builds) }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: has
+        run: |
+          python3 -c "import tomllib; b=[b for b in tomllib.load(open('target.toml','rb'))['build'] if b['id']=='${{ matrix.build }}'][0]; print('pdb=' + ('yes' if 'pdb' in b else 'no')); print('map=' + ('yes' if 'map' in b else 'no'))" >> "$GITHUB_OUTPUT"
+      - uses: actions/cache@v4
+        if: steps.has.outputs.pdb == 'yes'
+        with:
+          path: ~/.cargo/bin/resymc
+          key: resymc-5be09381-${{ runner.os }}
+      - name: Install llvm-pdbutil and resymc
+        if: steps.has.outputs.pdb == 'yes'
+        run: |
+          sudo apt-get install -y -q llvm >/dev/null
+          command -v llvm-pdbutil || sudo ln -s "$(ls /usr/bin/llvm-pdbutil-* | sort -V | tail -1)" /usr/local/bin/llvm-pdbutil
+          test -x ~/.cargo/bin/resymc || cargo install --locked --git https://github.com/ergrelet/resym --rev 5be09381 resymc
+      - name: Extract
+        if: steps.has.outputs.pdb == 'yes'
+        run: |
+          python3 tools/fetch_originals.py ${{ matrix.build }} /tmp/in
+          map=-; [ "${{ steps.has.outputs.map }}" = yes ] && map=/tmp/in/${{ matrix.build }}.map
+          PATH="$HOME/.cargo/bin:$PATH" python3 tools/pdb/extract.py ${{ matrix.build }} /tmp/in/${{ matrix.build }}.exe /tmp/in/${{ matrix.build }}.pdb "$map"
+          mkdir -p /tmp/sym; cp -r analysis/${{ matrix.build }}/pdb analysis/${{ matrix.build }}/map /tmp/sym/ 2>/dev/null || true
+          du -sh /tmp/sym/*
+      - uses: actions/upload-artifact@v4
+        if: steps.has.outputs.pdb == 'yes'
+        with:
+          name: symbols-${{ matrix.build }}
+          path: /tmp/sym
+          retention-days: 5
+
+  analyze:
+    needs: [setup, symbols]
+    if: ${{ needs.setup.outputs.builds != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        build: ${{ fromJSON(needs.setup.outputs.builds) }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Install pinned Ghidra
+        with: { distribution: temurin, java-version: "21" }
+      - name: Install Ghidra
+        env: { GH_TOKEN: "${{ github.token }}" }
         run: |
-          version=$(python3 -c 'import tomllib; print(tomllib.load(open("target.toml", "rb"))["ghidra"])')
-          gh release download "Ghidra_${version}_build" --repo NationalSecurityAgency/ghidra --pattern 'ghidra_*_PUBLIC_*.zip' --dir /tmp
-          unzip -q /tmp/ghidra_*.zip -d /tmp/ghidra
-      - name: Import and analyze original
-        env:
-          GHIDRA_HEADLESS_MAXMEM: 6200M
+          gh release download "$GHIDRA_TAG" --repo NationalSecurityAgency/ghidra --pattern 'ghidra_*_PUBLIC_*.zip' --dir /tmp
+          unzip -q /tmp/ghidra_*.zip -d /opt && mv /opt/ghidra_* /opt/ghidra
+          # Ghidra 12 names the default MAXMEM_DEFAULT; PrepAnalysis.java aborts if the heap is still small
+          sed -i -E 's/^#?MAXMEM(_DEFAULT)?=.*/MAXMEM\1=13G/' /opt/ghidra/support/analyzeHeadless
+          grep -n 'MAXMEM' /opt/ghidra/support/analyzeHeadless; free -g
+      - uses: actions/download-artifact@v4
+        continue-on-error: true  # builds without a PDB have none
+        with: { name: "symbols-${{ matrix.build }}", path: "analysis/${{ matrix.build }}" }
+      - name: Fetch originals
+        run: python3 tools/fetch_originals.py ${{ matrix.build }} /tmp/in
+      - name: Analyze (with the original PDB when the build has one) and export
+        timeout-minutes: 330  # a Ghidra that hit an error can hang instead of exiting; a full server PDB takes hours of type rebuilding
         run: |
-          python3 tools/fetch_originals.py "$BUILD_ID" originals
-          mkdir -p "$RUNNER_TEMP/project" "$RUNNER_TEMP/raw"
-          prepare=()
-          if [ "$BUILD_ID" = t6mp ]; then
-            prepare=(-preScript InventoryOptions.java)
-          elif [ -f "originals/$BUILD_ID.pdb" ]; then
-            prepare=(-preScript PrepPdb.java "$PWD/originals/$BUILD_ID.pdb")
+          mkdir -p /tmp/proj /tmp/raw
+          pdbargs=()
+          # ghidra_pdb = false analyses a symbol build blind (as a matcher ground-truth pair); its PDB tables still
+          # come from tools/pdb/extract.py
+          usepdb=$(python3 -c "import tomllib; b=[b for b in tomllib.load(open('target.toml','rb'))['build'] if b['id']=='${{ matrix.build }}'][0]; print(b.get('ghidra_pdb', True))")
+          if [ -f /tmp/in/${{ matrix.build }}.pdb ] && [ "$usepdb" = "True" ]; then
+            pdbargs=(-preScript PrepPdb.java /tmp/in/${{ matrix.build }}.pdb)
+            if [ -s "$GITHUB_WORKSPACE/analysis/${{ matrix.build }}/pdb/locals.tsv" ]; then
+              pdbargs+=(-postScript ApplyPdbNames.java "$GITHUB_WORKSPACE/analysis/${{ matrix.build }}/pdb/locals.tsv")
+            fi
           fi
-          /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
-            -import "$PWD/originals/$BUILD_ID.exe" -scriptPath tools/ghidra "${prepare[@]}" \
-            -analysisTimeoutPerFile 7200 -max-cpu 2 -log "$RUNNER_TEMP/raw/analyze.log"
-          grep -F 'Analysis succeeded for file:' "$RUNNER_TEMP/raw/analyze.log"
-          if [ "$BUILD_ID" = t6mp ]; then
-            grep -F 'Disabled x86 Constant Reference Analyzer' "$RUNNER_TEMP/raw/analyze.log"
-          fi
-      - name: Export function inventory and disassembly
-        env:
-          GHIDRA_HEADLESS_MAXMEM: 3500M
-        run: |
-          /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
-            -process "$BUILD_ID.exe" -noanalysis -scriptPath tools/ghidra \
-            -postScript ExportAll.java "$RUNNER_TEMP/raw" -max-cpu 2
-          test -s "$RUNNER_TEMP/raw/export.complete"
-          python3 tools/ghidra/publish.py "$BUILD_ID" "$RUNNER_TEMP/raw" --inventory-only
+          # a build can name an extra pre-script (t6mp: InventoryOptions.java, which its committed analysis used)
+          extra=$(python3 -c "import tomllib; b=[b for b in tomllib.load(open('target.toml','rb'))['build'] if b['id']=='${{ matrix.build }}'][0]; print(b.get('ghidra_prescript',''))")
+          if [ -n "$extra" ]; then pdbargs=(-preScript "$extra" "${pdbargs[@]}"); fi
+          /opt/ghidra/support/analyzeHeadless /tmp/proj t6 \
+            -import /tmp/in/${{ matrix.build }}.exe \
+            -scriptPath tools/ghidra \
+            -preScript PrepAnalysis.java \
+            "${pdbargs[@]}" \
+            -postScript ExportAll.java /tmp/raw \
+            -analysisTimeoutPerFile 19000 \
+            -log /tmp/raw/analyze.log -scriptlog /tmp/raw/analyze-scripts.log
+          test -s /tmp/raw/functions.tsv || { echo "::error::Ghidra produced no export; see analyze.log"; tar -C /tmp/proj -czf /tmp/raw/project.tar.gz .; exit 1; }
+          # the saved Ghidra project itself: reused by the decompile shards and committed to git
+          tar -C /tmp/proj -czf /tmp/raw/project.tar.gz .
+          ls -la /tmp/raw
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: ghidra-inventory-${{ inputs.build }}
-          path: |
-            analysis/${{ inputs.build }}/inventory.tsv
-            ${{ runner.temp }}/raw/functions.tsv
-            ${{ runner.temp }}/raw/analyze.log
-          if-no-files-found: error
-      - name: Decompile saved project and publish analysis
-        env:
-          GHIDRA_HEADLESS_MAXMEM: 3500M
+          name: raw-${{ matrix.build }}
+          path: /tmp/raw
+          retention-days: 5
+
+  decompile:
+    needs: [setup, analyze]
+    # run each build's shards even if another build's analysis failed
+    if: ${{ !cancelled() && needs.setup.outputs.builds != '[]' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    strategy:
+      fail-fast: false
+      matrix:
+        include: ${{ fromJSON(needs.setup.outputs.shards) }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with: { distribution: temurin, java-version: "21" }
+      - name: Install Ghidra
+        env: { GH_TOKEN: "${{ github.token }}" }
         run: |
-          /tmp/ghidra/ghidra_*/support/analyzeHeadless "$RUNNER_TEMP/project" t6 \
-            -process "$BUILD_ID.exe" -noanalysis -scriptPath tools/ghidra \
-            -postScript Decompile.java "$RUNNER_TEMP/raw/decomp-0.jsonl" 0 1 30 -max-cpu 2
-          test -s "$RUNNER_TEMP/raw/decomp-0.jsonl"
-          python3 tools/ghidra/publish.py "$BUILD_ID" "$RUNNER_TEMP/raw"
-          python3 tools/status.py
+          gh release download "$GHIDRA_TAG" --repo NationalSecurityAgency/ghidra --pattern 'ghidra_*_PUBLIC_*.zip' --dir /tmp
+          unzip -q /tmp/ghidra_*.zip -d /opt && mv /opt/ghidra_* /opt/ghidra
+          # Ghidra 12 names the default MAXMEM_DEFAULT; PrepAnalysis.java aborts if the heap is still small
+          sed -i -E 's/^#?MAXMEM(_DEFAULT)?=.*/MAXMEM\1=13G/' /opt/ghidra/support/analyzeHeadless
+          grep -n 'MAXMEM' /opt/ghidra/support/analyzeHeadless; free -g
+      - uses: actions/download-artifact@v4
+        with: { name: "raw-${{ matrix.build }}", path: /tmp/raw }
+      - name: Decompile shard
+        run: |
+          if [ ! -s /tmp/raw/project.tar.gz ]; then echo "::error::no analysed project for ${{ matrix.build }}"; exit 1; fi
+          mkdir -p /tmp/proj /tmp/out
+          tar -C /tmp/proj -xzf /tmp/raw/project.tar.gz
+          /opt/ghidra/support/analyzeHeadless /tmp/proj t6 \
+            -process ${{ matrix.build }}.exe -noanalysis -readOnly \
+            -scriptPath tools/ghidra \
+            -postScript Decompile.java /tmp/out/decomp-${{ matrix.shard }}.jsonl ${{ matrix.shard }} $SHARDS 90 \
+            -log /tmp/out/decompile-${{ matrix.shard }}.log -scriptlog /tmp/out/decompile-${{ matrix.shard }}-scripts.log
       - uses: actions/upload-artifact@v4
+        if: always()
         with:
-          name: ghidra-${{ inputs.build }}
-          path: |
-            analysis/${{ inputs.build }}/
-            STATUS.md
+          name: decomp-${{ matrix.build }}-${{ matrix.shard }}
+          path: /tmp/out
+          retention-days: 5
+
+  publish:
+    needs: [setup, symbols, analyze, decompile]
+    # not after a cancel: a cancelled run's partial output must not overwrite good results
+    if: ${{ !cancelled() && needs.setup.outputs.builds != '[]' }}
+    runs-on: ubuntu-latest
+    permissions: { contents: write }
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with: { path: /tmp/art }
+      - name: Assemble analysis/<build>/
+        run: |
+          for b in $(echo '${{ needs.setup.outputs.builds }}' | python3 -c 'import json,sys; print(" ".join(json.load(sys.stdin)))'); do
+            raw=/tmp/assembled/$b; mkdir -p $raw
+            if [ -d /tmp/art/symbols-$b ]; then mkdir -p analysis/$b; cp -r /tmp/art/symbols-$b/. analysis/$b/; fi
+            cp -r /tmp/art/raw-$b/. $raw/ 2>/dev/null || true
+            for d in /tmp/art/decomp-$b-*; do cp -r $d/. $raw/ 2>/dev/null || true; done
+            if [ -f $raw/functions.tsv ]; then python3 tools/ghidra/publish.py $b $raw; fi
+            mkdir -p analysis/$b/logs analysis/$b/ghidra
+            cp $raw/*.log analysis/$b/logs/ 2>/dev/null || true
+            if [ -s $raw/project.tar.gz ]; then
+              # Ghidra project (.gpr/.rep), split under GitHub's 100 MB file limit.
+              # Restore: cat project.tar.gz.part-* | tar -xz
+              rm -f analysis/$b/ghidra/project.*
+              split -b 95m -d -a 2 $raw/project.tar.gz analysis/$b/ghidra/project.tar.gz.part-
+              sha256sum $raw/project.tar.gz | cut -d' ' -f1 > analysis/$b/ghidra/project.tar.gz.sha256
+            fi
+          done
+      - name: Commit
+        run: |
+          git config user.name "ghidra-pipeline"
+          git config user.email "ghidra-pipeline@users.noreply.github.com"
+          # STATUS.md and the graph import set are derived from analysis/: keep them current with it
+          python3 tools/status.py >/dev/null
+          python3 tools/graph/sync.py >/dev/null
+          git add analysis STATUS.md
+          builds=$(echo '${{ needs.setup.outputs.builds }}' | python3 -c 'import json,sys; print(" ".join(json.load(sys.stdin)))')
+          git commit -q -m "Ghidra ${GHIDRA_TAG#Ghidra_} analysis of ${builds} (${{ github.sha }})" || { echo "nothing to commit"; exit 0; }
+          # analysis/ is generated: on a conflict with an older pipeline commit, this run's output wins
+          for i in 1 2 3; do git pull -q --rebase -X theirs && git push -q && exit 0; git rebase --abort || true; sleep 10; done; exit 1

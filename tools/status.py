@@ -27,7 +27,10 @@ def main():
         if b["kind"] == "retail":
             analysis = ROOT / "analysis" / b["id"]
             if not any((analysis / name).is_file() for name in ("functions.tsv", "inventory.tsv")):
-                if (analysis / "direct-entries.tsv").is_file():
+                if (analysis / "pdata.tsv").is_file():
+                    out += ["Preliminary inventory from the exception directory (`.pdata`): every non-leaf function. "
+                            "Leaf functions without unwind data are missing until Ghidra's inventory replaces it.", ""]
+                elif (analysis / "direct-entries.tsv").is_file():
                     out += ["Preliminary inventory from decoded direct calls to aligned, "
                             "padded entries. Coverage is measured over this inventory.", ""]
                 else:

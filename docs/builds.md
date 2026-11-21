@@ -1,11 +1,25 @@
 # Build provenance
 
+The target is the Microsoft Store build (docs/store-build.md). This page covers the reference and related builds.
+
 | Build | Role | PE timestamp (UTC) | CodeView record |
 |---|---|---|---|
-| `t6mp` | Retail PC multiplayer target | 2015-01-30 01:23:23 | `t6mp.pdb`, `DE575CD6-25F4-4C45-81EB-60450E0D2A61`, age 1 |
-| `CoDMPServer_PC` | PC dedicated server reference | 2013-03-11 19:15:45 | `CoDMPServer_PC.pdb`, `3C12954B-A78E-4C6E-B4E8-5A8FD595F0DB`, age 51 |
+| `t6mp_msstore` | Store multiplayer, x64: **final target** | 2024-12-10 22:23:11 | `t6mp_msstore.pdb`, `ABBFB2F5-97CF-4E1D-8D20-67833D167727`, age 3 |
+| `CoDMPServer_PC` | PC dedicated server, Release: primary reference (PDB + MAP) | 2013-03-11 23:15:45 | `c:\t6\game\pc\CoDMPServer_PC.pdb`, `3C12954B-A78E-4C6E-B4E8-5A8FD595F0DB`, age 51 |
+| `CoDMPServer_s_PC` | PC dedicated server, ReleaseShip (PDB + MAP): matcher ground truth, analysed blind | 2013-03-11 23:21:34 | `c:\t6\game\pc\CoDMPServer_s_PC.pdb`, `A9CA5DF4-97BA-42DE-A071-C8F69DBA6EC8`, age 52 |
+| `CoDMPServer_XBOX`, `_s_XBOX` | Xbox 360 host server, Release / ship (PDB) | 2013-03-13 01:49:15 / 02:04:03 | `D:\t6\tu8\game\pc\CoDMPServer.pdb` / `CoDMPServer_s.pdb` |
+| `CoDMPServer_PS3`, `_s_PS3` | PS3 host server, Release / ship (PDB) | 2013-03-05 21:35:28 / 21:31:26 | `D:\t6\game\pc\CoDMPServer.pdb` / `CoDMPServer_s.pdb` |
+| `CoDMPServer_WIIU`, `_s_WIIU` | Wii U host server, Release / ship (PDB) | 2013-01-22 02:51:38 / 21:28:43 | `c:\t6\game\pc\CoDMPServer.pdb` / `CoDMPServer_s.pdb` |
+| `t6mp` | Steam multiplayer (2015), related | 2015-01-30 01:23:23 | `t6mp.pdb`, `DE575CD6-25F4-4C45-81EB-60450E0D2A61`, age 1 |
 
-Both files were downloaded from R2, hashed, and inspected as PE32 with a preferred image base of `00400000` and linker version 10.00. The downloaded server PDB's GUID and age agree with the executable. The retail executable is the 2015 object in R2. Its hash and CodeView identity identify this specific build.
+All servers are Windows x86 exes from the "Server Files [2013-03-11]" drop in R2 (`bo2/exes/`), each with its full
+private PDB; only the PC pair also has linker MAPs. The console-host servers ran matches for each console and differ in
+platform code; the Xbox 360 host is the newest (title update 8 tree, `D:\t6\tu8`). The PC pair's hashes and identities
+agree with `lizardpeter/bo2-pc-server-decompile`'s `config/reference_builds.json`.
+
+## Steam t6mp (related build)
+
+The Steam exe and the PC server were downloaded from R2, hashed, and inspected as PE32 with a preferred image base of `00400000` and linker version 10.00. The downloaded server PDB's GUID and age agree with the executable. The retail executable is the 2015 object in R2. Its hash and CodeView identity identify this specific build.
 
 The server linker MAP supplies symbol names and object files. The retail PE inventory records imports and sections.
 
