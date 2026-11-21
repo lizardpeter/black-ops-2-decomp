@@ -429,36 +429,36 @@ LAB_00b2664a:
 undefined4 FUN_00b26780(undefined4 *param_1,undefined4 param_2)
 
 {
-  ulong uVar1;
-  int *piVar2;
-  uchar *puVar3;
-  int iVar4;
+  ulong count;
+  int *piVar1;
+  uchar *dst;
+  int iVar2;
   
-  iVar4 = 0;
-  for (piVar2 = (int *)*param_1; piVar2 != (int *)0x0; piVar2 = (int *)piVar2[3]) {
-    if ((piVar2[1] != 0) && (iVar4 < *(int *)(*piVar2 + 0x18))) {
-      iVar4 = *(int *)(*piVar2 + 0x18);
+  iVar2 = 0;
+  for (piVar1 = (int *)*param_1; piVar1 != (int *)0x0; piVar1 = (int *)piVar1[3]) {
+    if ((piVar1[1] != 0) && (iVar2 < *(int *)(*piVar1 + 0x18))) {
+      iVar2 = *(int *)(*piVar1 + 0x18);
     }
   }
-  uVar1 = iVar4 * 4 + 4;
-  puVar3 = (uchar *)_CRYPTO_malloc(uVar1,".\\ssl\\ssl_ciph.c",0x2e8);
-  if (puVar3 == (uchar *)0x0) {
+  count = iVar2 * 4 + 4;
+  dst = (uchar *)_CRYPTO_malloc(count,".\\ssl\\ssl_ciph.c",0x2e8);
+  if (dst == (uchar *)0x0) {
     _ERR_put_error(0x14,0xe7,0x41,".\\ssl\\ssl_ciph.c",0x2eb);
     return 0;
   }
-  memset(puVar3,'\0',uVar1);
-  for (piVar2 = (int *)*param_1; piVar2 != (int *)0x0; piVar2 = (int *)piVar2[3]) {
-    if (piVar2[1] != 0) {
-      *(int *)(puVar3 + *(int *)(*piVar2 + 0x18) * 4) =
-           *(int *)(puVar3 + *(int *)(*piVar2 + 0x18) * 4) + 1;
+  memset(dst,'\0',count);
+  for (piVar1 = (int *)*param_1; piVar1 != (int *)0x0; piVar1 = (int *)piVar1[3]) {
+    if (piVar1[1] != 0) {
+      *(int *)(dst + *(int *)(*piVar1 + 0x18) * 4) =
+           *(int *)(dst + *(int *)(*piVar1 + 0x18) * 4) + 1;
     }
   }
-  for (; -1 < iVar4; iVar4 = iVar4 + -1) {
-    if (0 < *(int *)(puVar3 + iVar4 * 4)) {
-      FUN_00b265a0(0,0,0,0,0,0,4,iVar4,param_1,param_2);
+  for (; -1 < iVar2; iVar2 = iVar2 + -1) {
+    if (0 < *(int *)(dst + iVar2 * 4)) {
+      FUN_00b265a0(0,0,0,0,0,0,4,iVar2,param_1,param_2);
     }
   }
-  _CRYPTO_free(puVar3);
+  _CRYPTO_free(dst);
   return 1;
 }
 
@@ -478,9 +478,9 @@ undefined4 FUN_00b26860(undefined4 param_1,undefined4 param_2,int *param_3)
   int iVar6;
   char *in_ECX;
   undefined4 uVar7;
-  char *pcVar8;
-  uint uVar9;
-  int iVar10;
+  char *first;
+  uint count;
+  int iVar8;
   undefined4 local_30;
   int local_2c;
   uint local_28;
@@ -508,15 +508,15 @@ LAB_00b268fc:
       local_24 = 0;
       local_14 = 0;
       do {
-        pcVar8 = in_ECX;
-        iVar10 = 0;
-        uVar9 = 0;
-        for (in_ECX = pcVar8;
+        first = in_ECX;
+        iVar8 = 0;
+        count = 0;
+        for (in_ECX = first;
             ((((cVar5 = *in_ECX, '@' < cVar5 && (cVar5 < '[')) || (('/' < cVar5 && (cVar5 < ':'))))
              || (('`' < cVar5 && (cVar5 < '{')))) || (cVar5 == '-')); in_ECX = in_ECX + 1) {
-          uVar9 = uVar9 + 1;
+          count = count + 1;
         }
-        if (uVar9 == 0) {
+        if (count == 0) {
           _ERR_put_error(0x14,0xe6,0x118,".\\ssl\\ssl_ciph.c",0x346);
           bVar4 = false;
           local_30 = 0;
@@ -534,13 +534,13 @@ LAB_00b268fc:
         piVar3 = param_3;
         while( true ) {
           if (iVar6 == 0) goto LAB_00b269b9;
-          iVar6 = strncmp(pcVar8,*(char **)(*piVar3 + 4),uVar9);
-          if ((iVar6 == 0) && (*(char *)(*(int *)(*piVar3 + 4) + uVar9) == '\0')) break;
-          iVar10 = iVar10 + 1;
-          iVar6 = param_3[iVar10];
-          piVar3 = param_3 + iVar10;
+          iVar6 = strncmp(first,*(char **)(*piVar3 + 4),count);
+          if ((iVar6 == 0) && (*(char *)(*(int *)(*piVar3 + 4) + count) == '\0')) break;
+          iVar8 = iVar8 + 1;
+          iVar6 = param_3[iVar8];
+          piVar3 = param_3 + iVar8;
         }
-        piVar3 = (int *)param_3[iVar10];
+        piVar3 = (int *)param_3[iVar8];
         uVar1 = local_24 | piVar3[8];
         local_14 = ~local_24 & piVar3[3] | ~piVar3[8] & local_14 | piVar3[3] & local_14;
         uVar2 = local_28 | piVar3[9];
@@ -549,17 +549,17 @@ LAB_00b268fc:
         local_28 = uVar2;
         local_24 = uVar1;
         if (*piVar3 != 0) {
-          local_c = *(undefined4 *)(param_3[iVar10] + 8);
-          local_10 = *(uint *)(param_3[iVar10] + 0xc) & 0x3000000;
+          local_c = *(undefined4 *)(param_3[iVar8] + 8);
+          local_10 = *(uint *)(param_3[iVar8] + 0xc) & 0x3000000;
           break;
         }
       } while (cVar5 == '+');
 LAB_00b269b9:
       if (local_2c == 5) {
 LAB_00b269c6:
-        if ((uVar9 == 8) && (iVar10 = strncmp(pcVar8,"STRENGTH",8), iVar10 == 0)) {
-          iVar10 = FUN_00b26780(param_1,param_2);
-          if (iVar10 == 0) goto LAB_00b26a00;
+        if ((count == 8) && (iVar8 = strncmp(first,"STRENGTH",8), iVar8 == 0)) {
+          iVar8 = FUN_00b26780(param_1,param_2);
+          if (iVar8 == 0) goto LAB_00b26a00;
         }
         else {
           _ERR_put_error(0x14,0xe6,0x118,".\\ssl\\ssl_ciph.c",0x39c);

@@ -52,14 +52,14 @@ ulong _RSA_padding_check_SSLv23(uchar *param_1,int param_2,char *param_3,int par
   uchar uVar1;
   int iVar2;
   int iVar3;
-  uchar *puVar4;
-  ulong uVar5;
+  uchar *src;
+  ulong count;
   
   if (param_4 < 10) {
     _ERR_put_error(4,0x72,0x6f,".\\crypto\\rsa\\rsa_ssl.c",0x72);
     return 0xffffffff;
   }
-  if ((param_5 != param_4 + 1) || (puVar4 = (uchar *)(param_3 + 1), *param_3 != '\x02')) {
+  if ((param_5 != param_4 + 1) || (src = (uchar *)(param_3 + 1), *param_3 != '\x02')) {
     _ERR_put_error(4,0x72,0x6b,".\\crypto\\rsa\\rsa_ssl.c",0x77);
     return 0xffffffff;
   }
@@ -67,8 +67,8 @@ ulong _RSA_padding_check_SSLv23(uchar *param_1,int param_2,char *param_3,int par
   iVar3 = 0;
   if (0 < param_4) {
     do {
-      uVar1 = *puVar4;
-      puVar4 = puVar4 + 1;
+      uVar1 = *src;
+      src = src + 1;
       if (uVar1 == '\0') break;
       iVar3 = iVar3 + 1;
     } while (iVar3 < param_4);
@@ -79,17 +79,17 @@ ulong _RSA_padding_check_SSLv23(uchar *param_1,int param_2,char *param_3,int par
   }
   iVar2 = -9;
   do {
-    if (puVar4[iVar2] != '\x03') break;
+    if (src[iVar2] != '\x03') break;
     iVar2 = iVar2 + 1;
   } while (iVar2 < -1);
   if (iVar2 == -1) {
     _ERR_put_error(4,0x72,0x73,".\\crypto\\rsa\\rsa_ssl.c",0x8b);
     return 0xffffffff;
   }
-  uVar5 = param_4 + (-1 - iVar3);
-  if ((int)uVar5 <= param_2) {
-    memcpy(param_1,puVar4,uVar5);
-    return uVar5;
+  count = param_4 + (-1 - iVar3);
+  if ((int)count <= param_2) {
+    memcpy(param_1,src,count);
+    return count;
   }
   _ERR_put_error(4,0x72,0x6d,".\\crypto\\rsa\\rsa_ssl.c",0x93);
   return 0xffffffff;

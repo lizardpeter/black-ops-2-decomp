@@ -85,15 +85,15 @@ undefined4 * FUN_00afc8d0(uchar *param_1,undefined4 param_2)
 
 {
   undefined4 *puVar1;
-  uchar *puVar2;
+  uchar *dst;
   ulong unaff_EBX;
   
   puVar1 = (undefined4 *)(*(code *)_Curl_cmalloc)(0xc);
   if (puVar1 != (undefined4 *)0x0) {
-    puVar2 = (uchar *)(*(code *)_Curl_cmalloc)();
-    if (puVar2 != (uchar *)0x0) {
-      memcpy(puVar2,param_1,unaff_EBX);
-      puVar1[1] = puVar2;
+    dst = (uchar *)(*(code *)_Curl_cmalloc)();
+    if (dst != (uchar *)0x0) {
+      memcpy(dst,param_1,unaff_EBX);
+      puVar1[1] = dst;
       puVar1[2] = unaff_EBX;
       *puVar1 = param_2;
       return puVar1;

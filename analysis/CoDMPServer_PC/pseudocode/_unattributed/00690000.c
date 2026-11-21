@@ -5,34 +5,34 @@
 void FUN_0069e67c(void)
 
 {
-  uchar *puVar1;
-  int iVar2;
+  uchar *src;
+  int iVar1;
   uchar *unaff_EBX;
   int unaff_EBP;
   uchar *unaff_ESI;
   uint unaff_EDI;
   
-  iVar2 = 0;
+  iVar1 = 0;
   if (*(ulong *)(unaff_EBP + 0xc) != 0) {
-    puVar1 = unaff_ESI;
+    src = unaff_ESI;
     if (0xf < *(uint *)(unaff_ESI + 0x14)) {
-      puVar1 = *(uchar **)unaff_ESI;
+      src = *(uchar **)unaff_ESI;
     }
-    memcpy(unaff_EBX,puVar1,*(ulong *)(unaff_EBP + 0xc));
-    iVar2 = *(int *)(unaff_EBP + 0xc);
+    memcpy(unaff_EBX,src,*(ulong *)(unaff_EBP + 0xc));
+    iVar1 = *(int *)(unaff_EBP + 0xc);
   }
   if (0xf < *(uint *)(unaff_ESI + 0x14)) {
     operator_delete(*(void **)unaff_ESI);
-    iVar2 = *(int *)(unaff_EBP + 0xc);
+    iVar1 = *(int *)(unaff_EBP + 0xc);
   }
   *unaff_ESI = '\0';
   *(uchar **)unaff_ESI = unaff_EBX;
   *(uint *)(unaff_ESI + 0x14) = unaff_EDI;
-  *(int *)(unaff_ESI + 0x10) = iVar2;
+  *(int *)(unaff_ESI + 0x10) = iVar1;
   if (0xf < unaff_EDI) {
     unaff_ESI = unaff_EBX;
   }
-  unaff_ESI[iVar2] = '\0';
+  unaff_ESI[iVar1] = '\0';
   ExceptionList = *(void **)(unaff_EBP + -0xc);
   return;
 }

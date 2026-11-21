@@ -194,25 +194,25 @@ switchD_00b04d14_caseD_2:
 bool FUN_00b04ee0(undefined4 param_1,uint *param_2)
 
 {
-  uint *puVar1;
+  uint *dst;
   uint in_EAX;
-  undefined4 uVar2;
-  int iVar3;
-  uint uVar4;
+  undefined4 uVar1;
+  int iVar2;
+  uint count;
   
-  puVar1 = param_2;
-  uVar2 = _BIO_s_mem();
-  uVar2 = _BIO_new(uVar2);
-  iVar3 = _X509_NAME_print_ex(uVar2,param_1,0,0x20000);
-  _BIO_ctrl(uVar2,0x73,0,&param_2);
-  uVar4 = *param_2;
-  if (in_EAX <= uVar4) {
-    uVar4 = in_EAX - 1;
+  dst = param_2;
+  uVar1 = _BIO_s_mem();
+  uVar1 = _BIO_new(uVar1);
+  iVar2 = _X509_NAME_print_ex(uVar1,param_1,0,0x20000);
+  _BIO_ctrl(uVar1,0x73,0,&param_2);
+  count = *param_2;
+  if (in_EAX <= count) {
+    count = in_EAX - 1;
   }
-  memcpy((uchar *)puVar1,(uchar *)param_2[1],uVar4);
-  *(undefined1 *)(uVar4 + (int)puVar1) = 0;
-  _BIO_free(uVar2);
-  return iVar3 == 0;
+  memcpy((uchar *)dst,(uchar *)param_2[1],count);
+  *(undefined1 *)(count + (int)dst) = 0;
+  _BIO_free(uVar1);
+  return iVar2 == 0;
 }
 
 
@@ -445,7 +445,7 @@ undefined4 FUN_00b052d0(int *param_1,undefined4 param_2)
   byte *pbVar9;
   int iVar10;
   int iVar11;
-  ulong uVar12;
+  ulong count;
   uchar *local_18;
   int local_14;
   int iStack_10;
@@ -544,9 +544,9 @@ LAB_00b053ca:
         if ((-1 < (int)uVar8) &&
            (local_18 = (uchar *)_CRYPTO_malloc(uVar8 + 1,".\\ssluse.c",0x483),
            local_18 != (uchar *)0x0)) {
-          uVar12 = uVar8;
+          count = uVar8;
           puVar5 = (uchar *)_EVP_CIPHER_key_length(iVar10);
-          memcpy(local_18,puVar5,uVar12);
+          memcpy(local_18,puVar5,count);
           local_18[uVar8] = '\0';
         }
       }
@@ -1492,8 +1492,8 @@ int FUN_00b06d70(int *param_1,char param_2)
   int iVar1;
   int iVar2;
   undefined4 uVar3;
-  _iobuf *p_Var4;
-  int iVar5;
+  _iobuf *stream;
+  int iVar4;
   int unaff_ESI;
   int local_108;
   undefined1 local_104 [256];
@@ -1530,8 +1530,8 @@ int FUN_00b06d70(int *param_1,char param_2)
       if (iVar2 == 0) {
         _Curl_infof(iVar1,"\t issuer: %s\n",local_104);
         if (*(char **)(iVar1 + 0x30c) != (char *)0x0) {
-          p_Var4 = fopen(*(char **)(iVar1 + 0x30c),"r");
-          if (p_Var4 == (_iobuf *)0x0) {
+          stream = fopen(*(char **)(iVar1 + 0x30c),"r");
+          if (stream == (_iobuf *)0x0) {
             if (param_2 != '\0') {
               _Curl_failf(iVar1,"SSL: Unable to open issuer cert (%s)\n",
                           *(undefined4 *)(iVar1 + 0x30c));
@@ -1540,7 +1540,7 @@ int FUN_00b06d70(int *param_1,char param_2)
             local_108 = 0x53;
             goto LAB_00b0710b;
           }
-          iVar2 = _PEM_read_X509(p_Var4,0,0,0);
+          iVar2 = _PEM_read_X509(stream,0,0,0);
           if (iVar2 == 0) {
             if (param_2 != '\0') {
               _Curl_failf(iVar1,"SSL: Unable to read issuer cert (%s)\n",
@@ -1548,12 +1548,12 @@ int FUN_00b06d70(int *param_1,char param_2)
             }
             _X509_free(*(undefined4 *)(unaff_ESI + 0x10));
             _X509_free(0);
-            fclose(p_Var4);
+            fclose(stream);
             return 0x53;
           }
-          fclose(p_Var4);
-          iVar5 = _X509_check_issued(iVar2,*(undefined4 *)(unaff_ESI + 0x10));
-          if (iVar5 != 0) {
+          fclose(stream);
+          iVar4 = _X509_check_issued(iVar2,*(undefined4 *)(unaff_ESI + 0x10));
+          if (iVar4 != 0) {
             if (param_2 != '\0') {
               _Curl_failf(iVar1,"SSL: Certificate issuer check failed (%s)\n",
                           *(undefined4 *)(iVar1 + 0x30c));

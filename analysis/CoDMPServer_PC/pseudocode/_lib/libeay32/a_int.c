@@ -29,90 +29,90 @@ int __cdecl i2c_ASN1_INTEGER(ulong *param_1,int *param_2)
 {
   byte bVar1;
   uint uVar2;
-  uchar *puVar3;
-  ulong *puVar4;
-  int iVar5;
+  uchar *src;
+  ulong *puVar3;
+  int iVar4;
+  byte *pbVar5;
+  uchar *dst;
   byte *pbVar6;
-  uchar *puVar7;
-  byte *pbVar8;
-  uchar uVar9;
-  int iVar11;
-  ulong uVar12;
-  uchar uVar10;
+  uchar uVar7;
+  int iVar9;
+  ulong uVar10;
+  uchar uVar8;
   
-  puVar4 = param_1;
-  iVar11 = 0;
-  uVar10 = '\0';
-  uVar9 = '\0';
-  if ((param_1 == (ulong *)0x0) || (pbVar6 = (byte *)param_1[2], pbVar6 == (byte *)0x0)) {
+  puVar3 = param_1;
+  iVar9 = 0;
+  uVar8 = '\0';
+  uVar7 = '\0';
+  if ((param_1 == (ulong *)0x0) || (pbVar5 = (byte *)param_1[2], pbVar5 == (byte *)0x0)) {
     return 0;
   }
-  uVar12 = *param_1;
+  uVar10 = *param_1;
   uVar2 = param_1[1];
-  if (uVar12 == 0) {
+  if (uVar10 == 0) {
     param_1 = (ulong *)0x1;
     goto LAB_00b3961b;
   }
-  bVar1 = *pbVar6;
-  uVar9 = uVar10;
+  bVar1 = *pbVar5;
+  uVar7 = uVar8;
   if ((uVar2 & 0x100) == 0) {
     if (0x7f < bVar1) {
-      uVar9 = '\0';
+      uVar7 = '\0';
 LAB_00b39612:
-      iVar11 = 1;
+      iVar9 = 1;
     }
   }
   else {
     if (0x80 < bVar1) {
 LAB_00b3960f:
-      uVar9 = 0xff;
+      uVar7 = 0xff;
       goto LAB_00b39612;
     }
-    if ((bVar1 == 0x80) && (iVar5 = 1, 1 < (int)uVar12)) {
+    if ((bVar1 == 0x80) && (iVar4 = 1, 1 < (int)uVar10)) {
       do {
-        if (pbVar6[iVar5] != 0) goto LAB_00b3960f;
-        iVar5 = iVar5 + 1;
-      } while (iVar5 < (int)uVar12);
+        if (pbVar5[iVar4] != 0) goto LAB_00b3960f;
+        iVar4 = iVar4 + 1;
+      } while (iVar4 < (int)uVar10);
     }
   }
-  param_1 = (ulong *)(uVar12 + iVar11);
+  param_1 = (ulong *)(uVar10 + iVar9);
 LAB_00b3961b:
   if (param_2 == (int *)0x0) {
     return (int)param_1;
   }
-  puVar7 = (uchar *)*param_2;
-  if (iVar11 != 0) {
-    *puVar7 = uVar9;
-    puVar7 = puVar7 + 1;
+  dst = (uchar *)*param_2;
+  if (iVar9 != 0) {
+    *dst = uVar7;
+    dst = dst + 1;
   }
-  uVar12 = *puVar4;
-  if (uVar12 != 0) {
-    puVar3 = (uchar *)puVar4[2];
+  uVar10 = *puVar3;
+  if (uVar10 != 0) {
+    src = (uchar *)puVar3[2];
     if ((uVar2 & 0x100) != 0) {
-      pbVar6 = puVar3 + (uVar12 - 1);
-      pbVar8 = puVar7 + (uVar12 - 1);
-      bVar1 = puVar3[uVar12 - 1];
+      pbVar5 = src + (uVar10 - 1);
+      pbVar6 = dst + (uVar10 - 1);
+      bVar1 = src[uVar10 - 1];
       while (bVar1 == 0) {
-        *pbVar8 = 0;
+        *pbVar6 = 0;
+        pbVar5 = pbVar5 + -1;
         pbVar6 = pbVar6 + -1;
-        pbVar8 = pbVar8 + -1;
-        uVar12 = uVar12 - 1;
-        bVar1 = *pbVar6;
+        uVar10 = uVar10 - 1;
+        bVar1 = *pbVar5;
       }
-      *pbVar8 = ~*pbVar6 + 1;
-      while (uVar12 = uVar12 - 1, 0 < (int)uVar12) {
-        pbVar8 = pbVar8 + -1;
+      *pbVar6 = ~*pbVar5 + 1;
+      while (uVar10 = uVar10 - 1, 0 < (int)uVar10) {
         pbVar6 = pbVar6 + -1;
-        *pbVar8 = ~*pbVar6;
+        pbVar5 = pbVar5 + -1;
+        *pbVar6 = ~*pbVar5;
       }
       *param_2 = *param_2 + (int)param_1;
       return (int)param_1;
     }
-    memcpy(puVar7,puVar3,uVar12);
+    memcpy(dst,src,uVar10);
     *param_2 = *param_2 + (int)param_1;
     return (int)param_1;
   }
-  *puVar7 = '\0';
+  *dst = '\0';
   *param_2 = *param_2 + (int)param_1;
   return (int)param_1;
 }
@@ -129,11 +129,11 @@ ulong * __cdecl c2i_ASN1_INTEGER(int *param_1,int *param_2,ulong param_3)
   byte *pbVar1;
   byte bVar2;
   ulong *puVar3;
-  uchar *puVar4;
+  uchar *dst;
+  byte *pbVar4;
   byte *pbVar5;
-  byte *pbVar6;
-  byte *pbVar7;
-  ulong uVar8;
+  byte *src;
+  ulong uVar6;
   
   if ((param_1 == (int *)0x0) || (puVar3 = (ulong *)*param_1, puVar3 == (ulong *)0x0)) {
     puVar3 = (ulong *)_ASN1_STRING_type_new(2);
@@ -142,10 +142,10 @@ ulong * __cdecl c2i_ASN1_INTEGER(int *param_1,int *param_2,ulong param_3)
     }
     puVar3[1] = 2;
   }
-  pbVar7 = (byte *)*param_2;
-  pbVar1 = pbVar7 + param_3;
-  puVar4 = (uchar *)_CRYPTO_malloc(param_3 + 1,".\\crypto\\asn1\\a_int.c",199);
-  if (puVar4 == (uchar *)0x0) {
+  src = (byte *)*param_2;
+  pbVar1 = src + param_3;
+  dst = (uchar *)_CRYPTO_malloc(param_3 + 1,".\\crypto\\asn1\\a_int.c",199);
+  if (dst == (uchar *)0x0) {
     _ERR_put_error(0xd,0xc2,0x41,".\\crypto\\asn1\\a_int.c",0x103);
     if ((puVar3 != (ulong *)0x0) && ((param_1 == (int *)0x0 || ((ulong *)*param_1 != puVar3)))) {
       _ASN1_STRING_free(puVar3);
@@ -155,51 +155,51 @@ ulong * __cdecl c2i_ASN1_INTEGER(int *param_1,int *param_2,ulong param_3)
   if (param_3 == 0) {
     puVar3[1] = 2;
   }
-  else if ((*pbVar7 & 0x80) == 0) {
+  else if ((*src & 0x80) == 0) {
     puVar3[1] = 2;
-    if ((*pbVar7 == 0) && (param_3 != 1)) {
-      pbVar7 = pbVar7 + 1;
+    if ((*src == 0) && (param_3 != 1)) {
+      src = src + 1;
       param_3 = param_3 - 1;
     }
-    memcpy(puVar4,pbVar7,param_3);
+    memcpy(dst,src,param_3);
   }
   else {
     puVar3[1] = 0x102;
-    if ((*pbVar7 == 0xff) && (param_3 != 1)) {
-      pbVar7 = pbVar7 + 1;
+    if ((*src == 0xff) && (param_3 != 1)) {
+      src = src + 1;
       param_3 = param_3 - 1;
     }
-    pbVar5 = pbVar7 + (param_3 - 1);
-    pbVar6 = puVar4 + (param_3 - 1);
-    bVar2 = pbVar7[param_3 - 1];
-    uVar8 = param_3;
+    pbVar4 = src + (param_3 - 1);
+    pbVar5 = dst + (param_3 - 1);
+    bVar2 = src[param_3 - 1];
+    uVar6 = param_3;
     while (bVar2 == 0) {
-      if (uVar8 == 0) goto LAB_00b397cd;
-      *pbVar6 = 0;
+      if (uVar6 == 0) goto LAB_00b397cd;
+      *pbVar5 = 0;
+      pbVar4 = pbVar4 + -1;
       pbVar5 = pbVar5 + -1;
-      pbVar6 = pbVar6 + -1;
-      uVar8 = uVar8 - 1;
-      bVar2 = *pbVar5;
+      uVar6 = uVar6 - 1;
+      bVar2 = *pbVar4;
     }
-    if (uVar8 == 0) {
+    if (uVar6 == 0) {
 LAB_00b397cd:
-      *puVar4 = '\x01';
-      puVar4[param_3] = '\0';
+      *dst = '\x01';
+      dst[param_3] = '\0';
       param_3 = param_3 + 1;
     }
     else {
-      *pbVar6 = ~*pbVar5 + 1;
-      while (uVar8 = uVar8 - 1, 0 < (int)uVar8) {
-        pbVar6 = pbVar6 + -1;
+      *pbVar5 = ~*pbVar4 + 1;
+      while (uVar6 = uVar6 - 1, 0 < (int)uVar6) {
         pbVar5 = pbVar5 + -1;
-        *pbVar6 = ~*pbVar5;
+        pbVar4 = pbVar4 + -1;
+        *pbVar5 = ~*pbVar4;
       }
     }
   }
   if (puVar3[2] != 0) {
     _CRYPTO_free(puVar3[2]);
   }
-  puVar3[2] = (ulong)puVar4;
+  puVar3[2] = (ulong)dst;
   *puVar3 = param_3;
   if (param_1 != (int *)0x0) {
     *param_1 = (int)puVar3;

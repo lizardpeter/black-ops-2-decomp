@@ -6,20 +6,20 @@ undefined4
 _RSA_padding_add_PKCS1_type_1(undefined1 *param_1,int param_2,uchar *param_3,ulong param_4)
 
 {
-  ulong uVar1;
-  uchar *puVar2;
+  ulong count;
+  uchar *dst;
   
   if (param_2 + -0xb < (int)param_4) {
     _ERR_put_error(4,0x6c,0x6e,".\\crypto\\rsa\\rsa_pk1.c",0x49);
     return 0;
   }
   *param_1 = 0;
-  uVar1 = (param_2 - param_4) - 3;
+  count = (param_2 - param_4) - 3;
   param_1[1] = 1;
-  puVar2 = param_1 + 2;
-  memset(puVar2,0xff,uVar1);
-  puVar2[uVar1] = '\0';
-  memcpy(puVar2 + uVar1 + 1,param_3,param_4);
+  dst = param_1 + 2;
+  memset(dst,0xff,count);
+  dst[count] = '\0';
+  memcpy(dst + count + 1,param_3,param_4);
   return 1;
 }
 
@@ -31,10 +31,10 @@ ulong _RSA_padding_check_PKCS1_type_1
 
 {
   int iVar1;
-  uchar *puVar2;
-  ulong uVar3;
+  uchar *src;
+  ulong count;
   
-  if ((param_5 != param_4 + 1) || (puVar2 = (uchar *)(param_3 + 1), *param_3 != '\x01')) {
+  if ((param_5 != param_4 + 1) || (src = (uchar *)(param_3 + 1), *param_3 != '\x01')) {
     _ERR_put_error(4,0x70,0x6a,".\\crypto\\rsa\\rsa_pk1.c",100);
     return 0xffffffff;
   }
@@ -42,16 +42,16 @@ ulong _RSA_padding_check_PKCS1_type_1
   iVar1 = 0;
   if (0 < param_4) {
     do {
-      if (*puVar2 != 0xff) {
-        if (*puVar2 != '\0') {
+      if (*src != 0xff) {
+        if (*src != '\0') {
           _ERR_put_error(4,0x70,0x66,".\\crypto\\rsa\\rsa_pk1.c",0x71);
           return 0xffffffff;
         }
-        puVar2 = puVar2 + 1;
+        src = src + 1;
         break;
       }
       iVar1 = iVar1 + 1;
-      puVar2 = puVar2 + 1;
+      src = src + 1;
     } while (iVar1 < param_4);
   }
   if (iVar1 == param_4) {
@@ -59,10 +59,10 @@ ulong _RSA_padding_check_PKCS1_type_1
     return 0xffffffff;
   }
   if (7 < iVar1) {
-    uVar3 = param_4 + (-1 - iVar1);
-    if ((int)uVar3 <= param_2) {
-      memcpy(param_1,puVar2,uVar3);
-      return uVar3;
+    count = param_4 + (-1 - iVar1);
+    if ((int)count <= param_2) {
+      memcpy(param_1,src,count);
+      return count;
     }
     _ERR_put_error(4,0x70,0x6d,".\\crypto\\rsa\\rsa_pk1.c",0x87);
     return 0xffffffff;
@@ -125,10 +125,10 @@ ulong _RSA_padding_check_PKCS1_type_2
 {
   uchar uVar1;
   int iVar2;
-  uchar *puVar3;
-  ulong uVar4;
+  uchar *src;
+  ulong count;
   
-  if ((param_5 != param_4 + 1) || (puVar3 = (uchar *)(param_3 + 1), *param_3 != '\x02')) {
+  if ((param_5 != param_4 + 1) || (src = (uchar *)(param_3 + 1), *param_3 != '\x02')) {
     _ERR_put_error(4,0x71,0x6b,".\\crypto\\rsa\\rsa_pk1.c",0xbe);
     return 0xffffffff;
   }
@@ -136,8 +136,8 @@ ulong _RSA_padding_check_PKCS1_type_2
   iVar2 = 0;
   if (0 < param_4) {
     do {
-      uVar1 = *puVar3;
-      puVar3 = puVar3 + 1;
+      uVar1 = *src;
+      src = src + 1;
       if (uVar1 == '\0') break;
       iVar2 = iVar2 + 1;
     } while (iVar2 < param_4);
@@ -147,10 +147,10 @@ ulong _RSA_padding_check_PKCS1_type_2
     return 0xffffffff;
   }
   if (7 < iVar2) {
-    uVar4 = param_4 + (-1 - iVar2);
-    if ((int)uVar4 <= param_2) {
-      memcpy(param_1,puVar3,uVar4);
-      return uVar4;
+    count = param_4 + (-1 - iVar2);
+    if ((int)count <= param_2) {
+      memcpy(param_1,src,count);
+      return count;
     }
     _ERR_put_error(4,0x71,0x6d,".\\crypto\\rsa\\rsa_pk1.c",0xd9);
     return 0xffffffff;

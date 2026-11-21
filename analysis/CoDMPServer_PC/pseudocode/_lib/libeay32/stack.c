@@ -260,15 +260,15 @@ int * __cdecl sk_dup(int *param_1)
 
 {
   int *piVar1;
-  uchar *puVar2;
+  uchar *dst;
   
   piVar1 = (int *)sk_new(param_1[4]);
   if (piVar1 != (int *)0x0) {
-    puVar2 = (uchar *)_CRYPTO_realloc(piVar1[1],param_1[3] * 4,".\\crypto\\stack\\stack.c",99);
-    if (puVar2 != (uchar *)0x0) {
-      piVar1[1] = (int)puVar2;
+    dst = (uchar *)_CRYPTO_realloc(piVar1[1],param_1[3] * 4,".\\crypto\\stack\\stack.c",99);
+    if (dst != (uchar *)0x0) {
+      piVar1[1] = (int)dst;
       *piVar1 = *param_1;
-      memcpy(puVar2,(uchar *)param_1[1],*param_1 * 4);
+      memcpy(dst,(uchar *)param_1[1],*param_1 * 4);
       piVar1[2] = param_1[2];
       piVar1[3] = param_1[3];
       piVar1[4] = param_1[4];

@@ -5,18 +5,18 @@
 undefined4 _BUF_memdup(uchar *param_1,ulong param_2)
 
 {
-  uchar *puVar1;
+  uchar *dst;
   undefined4 extraout_EAX;
   
   if (param_1 == (uchar *)0x0) {
     return 0;
   }
-  puVar1 = (uchar *)_CRYPTO_malloc(param_2,".\\crypto\\buffer\\buf_str.c",0x58);
-  if (puVar1 == (uchar *)0x0) {
+  dst = (uchar *)_CRYPTO_malloc(param_2,".\\crypto\\buffer\\buf_str.c",0x58);
+  if (dst == (uchar *)0x0) {
     _ERR_put_error(7,0x67,0x41,".\\crypto\\buffer\\buf_str.c",0x5b);
     return 0;
   }
-  memcpy(puVar1,param_1,param_2);
+  memcpy(dst,param_1,param_2);
   return extraout_EAX;
 }
 

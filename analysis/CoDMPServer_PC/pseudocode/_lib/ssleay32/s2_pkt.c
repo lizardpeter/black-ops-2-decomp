@@ -12,11 +12,11 @@ ulong FUN_00b2ba50(ulong param_1,int param_2)
   int in_ECX;
   ulong unaff_EBX;
   int iVar5;
-  ulong uVar6;
+  ulong count;
   
   iVar2 = *(int *)(in_ECX + 0x54);
-  uVar6 = *(ulong *)(iVar2 + 0x28);
-  if ((int)unaff_EBX <= (int)uVar6) {
+  count = *(ulong *)(iVar2 + 0x28);
+  if ((int)unaff_EBX <= (int)count) {
     if (param_2 == 0) {
       iVar5 = *(int *)(iVar2 + 0x30);
       iVar3 = *(int *)(iVar2 + 0x2c);
@@ -40,29 +40,29 @@ ulong FUN_00b2ba50(ulong param_1,int param_2)
     param_1 = 0x8001;
   }
   iVar5 = 0;
-  if (uVar6 == 0) {
+  if (count == 0) {
     if ((*(int *)(in_ECX + 0x50) == 0) || (param_2 == 0)) {
-      uVar6 = 0;
+      count = 0;
       goto LAB_00b2bb06;
     }
 LAB_00b2bac5:
     iVar5 = *(int *)(in_ECX + 0x50);
     if (*(uchar **)(in_ECX + 0x4c) != *(uchar **)(iVar2 + 0x30)) {
-      memcpy(*(uchar **)(iVar2 + 0x30),*(uchar **)(in_ECX + 0x4c),uVar6 + iVar5);
+      memcpy(*(uchar **)(iVar2 + 0x30),*(uchar **)(in_ECX + 0x4c),count + iVar5);
     }
   }
   else {
     if (param_2 != 0) goto LAB_00b2bac5;
     if (*(int *)(iVar2 + 0x2c) != 0) {
-      memcpy(*(uchar **)(iVar2 + 0x30),*(uchar **)(iVar2 + 0x30) + *(int *)(iVar2 + 0x2c),uVar6);
+      memcpy(*(uchar **)(iVar2 + 0x30),*(uchar **)(iVar2 + 0x30) + *(int *)(iVar2 + 0x2c),count);
       *(undefined4 *)(*(int *)(in_ECX + 0x54) + 0x2c) = 0;
     }
   }
   *(undefined4 *)(*(int *)(in_ECX + 0x54) + 0x28) = 0;
 LAB_00b2bb06:
-  iVar2 = uVar6 - unaff_EBX;
+  iVar2 = count - unaff_EBX;
   *(undefined4 *)(in_ECX + 0x4c) = *(undefined4 *)(*(int *)(in_ECX + 0x54) + 0x30);
-  if ((int)uVar6 < (int)unaff_EBX) {
+  if ((int)count < (int)unaff_EBX) {
     do {
       SetLastError(0);
       if (*(int *)(in_ECX + 0xc) == 0) {
@@ -70,24 +70,24 @@ LAB_00b2bb06:
         uVar4 = 0xffffffff;
 LAB_00b2bb82:
         piVar1 = (int *)(*(int *)(in_ECX + 0x54) + 0x28);
-        *piVar1 = *piVar1 + uVar6;
+        *piVar1 = *piVar1 + count;
         return uVar4;
       }
       *(undefined4 *)(in_ECX + 0x18) = 3;
       uVar4 = _BIO_read(*(int *)(in_ECX + 0xc),
-                        *(int *)(*(int *)(in_ECX + 0x54) + 0x30) + uVar6 + iVar5,param_1 - uVar6);
+                        *(int *)(*(int *)(in_ECX + 0x54) + 0x30) + count + iVar5,param_1 - count);
       if ((int)uVar4 < 1) goto LAB_00b2bb82;
-      uVar6 = uVar6 + uVar4;
-    } while ((int)uVar6 < (int)unaff_EBX);
-    iVar2 = uVar6 - unaff_EBX;
+      count = count + uVar4;
+    } while ((int)count < (int)unaff_EBX);
+    iVar2 = count - unaff_EBX;
   }
-  if (uVar6 == unaff_EBX || SBORROW4(uVar6,unaff_EBX) != iVar2 < 0) {
+  if (count == unaff_EBX || SBORROW4(count,unaff_EBX) != iVar2 < 0) {
     *(undefined4 *)(*(int *)(in_ECX + 0x54) + 0x2c) = 0;
     *(undefined4 *)(*(int *)(in_ECX + 0x54) + 0x28) = 0;
   }
   else {
     *(ulong *)(*(int *)(in_ECX + 0x54) + 0x2c) = iVar5 + unaff_EBX;
-    *(ulong *)(*(int *)(in_ECX + 0x54) + 0x28) = uVar6 - unaff_EBX;
+    *(ulong *)(*(int *)(in_ECX + 0x54) + 0x28) = count - unaff_EBX;
   }
   if (param_2 == 0) {
     *(ulong *)(in_ECX + 0x50) = unaff_EBX;
@@ -161,10 +161,10 @@ void FUN_00b2bca0(uchar *param_1)
   uint uVar7;
   int in_EDX;
   uint uVar8;
-  ulong uVar9;
+  ulong count;
   int local_8;
   
-  uVar9 = 0;
+  count = 0;
   if (*(int *)(*(int *)(in_EDX + 0x54) + 0x20) != 0) {
     FUN_00b2bbd0(param_1);
     return;
@@ -182,18 +182,18 @@ void FUN_00b2bca0(uchar *param_1)
     if ((uVar7 < 0x4000) || ((*(undefined4 **)(in_EDX + 0x54))[2] != 0)) {
       if ((uVar4 < 2) && ((*(undefined4 **)(in_EDX + 0x54))[2] == 0)) {
         **(undefined4 **)(in_EDX + 0x54) = 0;
-        uVar9 = 0;
+        count = 0;
       }
       else {
         if (uVar7 % uVar4 == 0) {
-          uVar9 = 0;
+          count = 0;
         }
         else {
-          uVar9 = uVar4 - uVar7 % uVar4;
+          count = uVar4 - uVar7 % uVar4;
         }
         puVar2 = *(uint **)(in_EDX + 0x54);
         if (puVar2[2] == 0) {
-          *puVar2 = (uint)(uVar9 != 0);
+          *puVar2 = (uint)(count != 0);
         }
         else {
           *puVar2 = 1;
@@ -205,7 +205,7 @@ void FUN_00b2bca0(uchar *param_1)
         uVar7 = 0x7fff;
       }
       **(undefined4 **)(in_EDX + 0x54) = 0;
-      uVar9 = 0;
+      count = 0;
       uVar8 = (uVar7 - uVar7 % uVar4) - local_8;
     }
   }
@@ -216,18 +216,18 @@ void FUN_00b2bca0(uchar *param_1)
     **(undefined4 **)(in_EDX + 0x54) = 0;
   }
   *(uint *)(*(int *)(in_EDX + 0x54) + 0x48) = uVar8;
-  *(ulong *)(*(int *)(in_EDX + 0x54) + 0x3c) = uVar9;
+  *(ulong *)(*(int *)(in_EDX + 0x54) + 0x3c) = count;
   *(int *)(*(int *)(in_EDX + 0x54) + 0x58) = *(int *)(*(int *)(in_EDX + 0x54) + 0x34) + 3;
   *(int *)(*(int *)(in_EDX + 0x54) + 0x54) = *(int *)(*(int *)(in_EDX + 0x54) + 0x34) + 3 + local_8;
   memcpy(*(uchar **)(*(int *)(in_EDX + 0x54) + 0x54),param_1,uVar8);
-  if (uVar9 != 0) {
-    memset((uchar *)(*(int *)(*(int *)(in_EDX + 0x54) + 0x54) + uVar8),'\0',uVar9);
+  if (count != 0) {
+    memset((uchar *)(*(int *)(*(int *)(in_EDX + 0x54) + 0x54) + uVar8),'\0',count);
   }
   if (*(int *)(*(int *)(in_EDX + 0x54) + 4) == 0) {
-    *(ulong *)(*(int *)(in_EDX + 0x54) + 0x4c) = uVar9 + uVar8;
+    *(ulong *)(*(int *)(in_EDX + 0x54) + 0x4c) = count + uVar8;
     ssl2_mac();
     piVar1 = (int *)(*(int *)(in_EDX + 0x54) + 0x48);
-    *piVar1 = *piVar1 + uVar9 + local_8;
+    *piVar1 = *piVar1 + count + local_8;
     ssl2_enc();
   }
   *(undefined4 *)(*(int *)(in_EDX + 0x54) + 0x20) = *(undefined4 *)(*(int *)(in_EDX + 0x54) + 0x48);
@@ -554,18 +554,18 @@ int __cdecl ssl2_write(int param_1,int param_2,int param_3)
 int __cdecl ssl2_part_read(int param_1,undefined4 param_2,int param_3)
 
 {
-  uchar *puVar1;
-  undefined4 uVar2;
+  uchar *dst;
+  undefined4 uVar1;
   
   if (-1 < param_3) {
     *(int *)(param_1 + 0x44) = *(int *)(param_1 + 0x44) + param_3;
     if ((2 < *(int *)(param_1 + 0x44)) &&
-       (puVar1 = *(uchar **)(*(int *)(param_1 + 0x3c) + 4), *puVar1 == '\0')) {
-      uVar2 = FUN_00b2bee0(CONCAT11(puVar1[1],puVar1[2]),".\\ssl\\s2_pkt.c",0x2a3);
-      _ERR_put_error(0x14,param_2,uVar2);
+       (dst = *(uchar **)(*(int *)(param_1 + 0x3c) + 4), *dst == '\0')) {
+      uVar1 = FUN_00b2bee0(CONCAT11(dst[1],dst[2]),".\\ssl\\s2_pkt.c",0x2a3);
+      _ERR_put_error(0x14,param_2,uVar1);
       *(int *)(param_1 + 0x44) = *(int *)(param_1 + 0x44) + -3;
       if (0 < (int)*(ulong *)(param_1 + 0x44)) {
-        memmove(puVar1,puVar1 + 3,*(ulong *)(param_1 + 0x44));
+        memmove(dst,dst + 3,*(ulong *)(param_1 + 0x44));
       }
     }
     param_3 = 0;

@@ -27,17 +27,17 @@ int _SSL_get_ex_data_X509_STORE_CTX_idx(void)
 int * __cdecl ssl_cert_new(void)
 
 {
-  int *piVar1;
+  int *dst;
   
-  piVar1 = (int *)_CRYPTO_malloc(0x5c,".\\ssl\\ssl_cert.c",0xa7);
-  if (piVar1 == (int *)0x0) {
+  dst = (int *)_CRYPTO_malloc(0x5c,".\\ssl\\ssl_cert.c",0xa7);
+  if (dst == (int *)0x0) {
     _ERR_put_error(0x14,0xa2,0x41,".\\ssl\\ssl_cert.c",0xaa);
     return (int *)0x0;
   }
-  memset((uchar *)piVar1,'\0',0x5c);
-  *piVar1 = (int)(piVar1 + 10);
-  piVar1[0x16] = 1;
-  return piVar1;
+  memset((uchar *)dst,'\0',0x5c);
+  *dst = (int)(dst + 10);
+  dst[0x16] = 1;
+  return dst;
 }
 
 
@@ -233,20 +233,20 @@ undefined4 __cdecl ssl_cert_inst(int *param_1)
 uchar * __cdecl ssl_sess_cert_new(void)
 
 {
-  uchar *puVar1;
+  uchar *dst;
   
-  puVar1 = (uchar *)_CRYPTO_malloc(0x4c,".\\ssl\\ssl_cert.c",0x1a0);
-  if (puVar1 == (uchar *)0x0) {
+  dst = (uchar *)_CRYPTO_malloc(0x4c,".\\ssl\\ssl_cert.c",0x1a0);
+  if (dst == (uchar *)0x0) {
     _ERR_put_error(0x14,0xe1,0x41,".\\ssl\\ssl_cert.c",0x1a3);
     return (uchar *)0x0;
   }
-  memset(puVar1,'\0',0x4c);
-  *(uchar **)(puVar1 + 8) = puVar1 + 0xc;
-  puVar1[0x48] = '\x01';
-  puVar1[0x49] = '\0';
-  puVar1[0x4a] = '\0';
-  puVar1[0x4b] = '\0';
-  return puVar1;
+  memset(dst,'\0',0x4c);
+  *(uchar **)(dst + 8) = dst + 0xc;
+  dst[0x48] = '\x01';
+  dst[0x49] = '\0';
+  dst[0x4a] = '\0';
+  dst[0x4b] = '\0';
+  return dst;
 }
 
 

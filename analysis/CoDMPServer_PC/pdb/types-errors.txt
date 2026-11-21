@@ -1,0 +1,2 @@
+Error encountered while reconstructing 'DispLocals': feature not implemented: /* FIXME: Unhandled primitive kind: 'F80' */ void
+Error encountered while reconstructing '_unnamed_0x78f8': pdb error: Support for types of kind 0x0000 is not implemented

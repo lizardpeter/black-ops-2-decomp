@@ -1,18 +1,18 @@
-2026-11-21 10:17:23 INFO  (LoggingInitialization) Using log config file: jar:file:/opt/ghidra/Ghidra/Framework/Generic/lib/Generic.jar!/generic.log4j.xml  
-2026-11-21 10:17:23 INFO  (LoggingInitialization) Using log file: /tmp/out/decompile-5.log  
-2026-11-21 10:17:23 DEBUG (GhidraObjectInputFilter) Including serial input filter: FileSystem/data/client.rmi.serial.filter  
-2026-11-21 10:17:23 INFO  (Preferences) Loading user preferences: /home/runner/.config/ghidra/ghidra_12.1.4_PUBLIC/preferences  
-2026-11-21 10:17:23 INFO  (ClassSearcher) Searching for classes...  
-2026-11-21 10:17:24 INFO  (ClassSearcher) Class search complete (756 ms)  
-2026-11-21 10:17:24 INFO  (DefaultSSLContextInitializer) Initializing SSL Context  
-2026-11-21 10:17:24 INFO  (SecureRandomFactory) Initializing Random Number Generator...  
-2026-11-21 10:17:24 INFO  (SecureRandomFactory) Random Number Generator initialization complete: NativePRNGNonBlocking  
-2026-11-21 10:17:24 INFO  (DefaultTrustManagerFactory) Trust manager disabled, cacerts have not been set  
-2026-11-21 10:17:24 INFO  (FileCacheMaintenanceDaemon) Starting cache cleanup: /var/tmp/runner-ghidra/fscache2  
-2026-11-21 10:17:24 INFO  (FileCacheMaintenanceDaemon) Finished cache cleanup, estimated storage used: 0  
-2026-11-21 10:17:25 INFO  (AnalyzeHeadless) Headless startup complete (2498 ms)  
-2026-11-21 10:17:25 INFO  (ClassSearcher) Class searcher loaded 59 extension points (20 false positives)  
-2026-11-21 10:17:25 INFO  (HeadlessAnalyzer) HEADLESS Script Paths:
+2026-11-21 10:54:37 INFO  (LoggingInitialization) Using log config file: jar:file:/opt/ghidra/Ghidra/Framework/Generic/lib/Generic.jar!/generic.log4j.xml  
+2026-11-21 10:54:37 INFO  (LoggingInitialization) Using log file: /tmp/out/decompile-5.log  
+2026-11-21 10:54:37 DEBUG (GhidraObjectInputFilter) Including serial input filter: FileSystem/data/client.rmi.serial.filter  
+2026-11-21 10:54:37 INFO  (Preferences) Loading user preferences: /home/runner/.config/ghidra/ghidra_12.1.4_PUBLIC/preferences  
+2026-11-21 10:54:37 INFO  (ClassSearcher) Searching for classes...  
+2026-11-21 10:54:38 INFO  (ClassSearcher) Class search complete (1096 ms)  
+2026-11-21 10:54:40 INFO  (DefaultSSLContextInitializer) Initializing SSL Context  
+2026-11-21 10:54:40 INFO  (SecureRandomFactory) Initializing Random Number Generator...  
+2026-11-21 10:54:40 INFO  (SecureRandomFactory) Random Number Generator initialization complete: NativePRNGNonBlocking  
+2026-11-21 10:54:40 INFO  (DefaultTrustManagerFactory) Trust manager disabled, cacerts have not been set  
+2026-11-21 10:54:40 INFO  (FileCacheMaintenanceDaemon) Starting cache cleanup: /var/tmp/runner-ghidra/fscache2  
+2026-11-21 10:54:40 INFO  (FileCacheMaintenanceDaemon) Finished cache cleanup, estimated storage used: 0  
+2026-11-21 10:54:41 INFO  (AnalyzeHeadless) Headless startup complete (5543 ms)  
+2026-11-21 10:54:41 INFO  (ClassSearcher) Class searcher loaded 59 extension points (20 false positives)  
+2026-11-21 10:54:41 INFO  (HeadlessAnalyzer) HEADLESS Script Paths:
     /opt/ghidra/Ghidra/Features/SystemEmulation/ghidra_scripts
     /opt/ghidra/Ghidra/Features/GnuDemangler/ghidra_scripts
     /home/runner/work/black-ops-2-decomp/black-ops-2-decomp/tools/ghidra
@@ -36,24 +36,24 @@
     /opt/ghidra/Ghidra/Features/FileFormats/ghidra_scripts
     /opt/ghidra/Ghidra/Features/BSim/ghidra_scripts
     /opt/ghidra/Ghidra/Features/BytePatterns/ghidra_scripts  
-2026-11-21 10:17:25 INFO  (HeadlessAnalyzer) HEADLESS: execution starts  
-2026-11-21 10:17:25 INFO  (HeadlessAnalyzer) Opening existing project: /tmp/proj/t6  
-2026-11-21 10:17:25 DEBUG (DefaultProjectManager) No tools found; Installing default tools  
-2026-11-21 10:17:25 DEBUG (DefaultProjectManager) 	no recent project directories found  
-2026-11-21 10:17:25 INFO  (HeadlessProject) Opening project: /tmp/proj/t6  
-2026-11-21 10:17:26 INFO  (HeadlessAnalyzer) REPORT: Processing read-only project file: /CoDMPServer_PC.exe  
-2026-11-21 10:17:26 INFO  (HeadlessAnalyzer) REPORT: Execute script: Decompile.java '/tmp/out/decomp-5.jsonl' '5' '6' '90'   
-2026-11-21 10:17:27 INFO  (HeadlessAnalyzer) SCRIPT: /home/runner/work/black-ops-2-decomp/black-ops-2-decomp/tools/ghidra/Decompile.java  
-2026-11-21 10:17:48 INFO  (GhidraScript) Decompile.java> shard 5: 1000 ok, 0 failed, 20s  
-2026-11-21 10:18:02 INFO  (GhidraScript) Decompile.java> shard 5: 2000 ok, 0 failed, 34s  
-2026-11-21 10:19:45 INFO  (GhidraScript) Decompile.java> shard 5: 2999 ok, 1 failed, 137s  
-2026-11-21 10:19:56 INFO  (GhidraScript) Decompile.java> shard 5: 3999 ok, 1 failed, 148s  
-2026-11-21 10:20:00 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9c298: Unable to resolve constructor at 00b9c298  
-2026-11-21 10:20:00 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9d200: Unable to resolve constructor at 00b9d200  
-2026-11-21 10:20:00 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9e276: Failed to resolve varnode <Sreg>, index=7  
-2026-11-21 10:20:00 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00ba2b7a: Unable to resolve constructor at 00ba2b7a  
-2026-11-21 10:20:01 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00ba7d32: Failed to resolve varnode <Sreg>, index=7  
-2026-11-21 10:20:02 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9e156: Unable to resolve constructor at 00b9e156  
-2026-11-21 10:20:02 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9d20c: Unable to resolve constructor at 00b9d20c  
-2026-11-21 10:20:02 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9d208: Unable to resolve constructor at 00b9d208  
-2026-11-21 10:21:30 INFO  (GhidraScript) Decompile.java> shard 5 done: 4617 ok, 2 failed  
+2026-11-21 10:54:41 INFO  (HeadlessAnalyzer) HEADLESS: execution starts  
+2026-11-21 10:54:41 INFO  (HeadlessAnalyzer) Opening existing project: /tmp/proj/t6  
+2026-11-21 10:54:41 DEBUG (DefaultProjectManager) No tools found; Installing default tools  
+2026-11-21 10:54:41 DEBUG (DefaultProjectManager) 	no recent project directories found  
+2026-11-21 10:54:42 INFO  (HeadlessProject) Opening project: /tmp/proj/t6  
+2026-11-21 10:54:44 INFO  (HeadlessAnalyzer) REPORT: Processing read-only project file: /CoDMPServer_PC.exe  
+2026-11-21 10:54:44 INFO  (HeadlessAnalyzer) REPORT: Execute script: Decompile.java '/tmp/out/decomp-5.jsonl' '5' '6' '90'   
+2026-11-21 10:54:46 INFO  (HeadlessAnalyzer) SCRIPT: /home/runner/work/black-ops-2-decomp/black-ops-2-decomp/tools/ghidra/Decompile.java  
+2026-11-21 10:55:15 INFO  (GhidraScript) Decompile.java> shard 5: 1000 ok, 0 failed, 29s  
+2026-11-21 10:55:34 INFO  (GhidraScript) Decompile.java> shard 5: 2000 ok, 0 failed, 47s  
+2026-11-21 10:57:22 INFO  (GhidraScript) Decompile.java> shard 5: 2999 ok, 1 failed, 155s  
+2026-11-21 10:57:35 INFO  (GhidraScript) Decompile.java> shard 5: 3999 ok, 1 failed, 169s  
+2026-11-21 10:57:40 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9c298: Unable to resolve constructor at 00b9c298  
+2026-11-21 10:57:40 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9d200: Unable to resolve constructor at 00b9d200  
+2026-11-21 10:57:41 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9e276: Failed to resolve varnode <Sreg>, index=7  
+2026-11-21 10:57:41 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00ba2b7a: Unable to resolve constructor at 00ba2b7a  
+2026-11-21 10:57:42 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00ba7d32: Failed to resolve varnode <Sreg>, index=7  
+2026-11-21 10:57:44 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9e156: Unable to resolve constructor at 00b9e156  
+2026-11-21 10:57:44 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9d20c: Unable to resolve constructor at 00b9d20c  
+2026-11-21 10:57:44 WARN  (DecompileCallback) Decompiling 00b9ab4c, pcode error at 00b9d208: Unable to resolve constructor at 00b9d208  
+2026-11-21 10:59:10 INFO  (GhidraScript) Decompile.java> shard 5 done: 4617 ok, 2 failed  

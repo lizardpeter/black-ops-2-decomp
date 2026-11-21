@@ -21,39 +21,39 @@ undefined4 _MD4_Init(undefined4 *param_1)
 undefined4 _MD5_Update(int param_1,uchar *param_2,ulong param_3)
 
 {
-  uchar *puVar1;
-  int iVar2;
-  ulong uVar3;
-  uint uVar4;
+  uchar *dst;
+  int iVar1;
+  ulong count;
+  uint uVar2;
   
   if (param_3 != 0) {
-    uVar4 = *(uint *)(param_1 + 0x10) + param_3 * 8;
-    if (uVar4 < *(uint *)(param_1 + 0x10)) {
+    uVar2 = *(uint *)(param_1 + 0x10) + param_3 * 8;
+    if (uVar2 < *(uint *)(param_1 + 0x10)) {
       *(int *)(param_1 + 0x14) = *(int *)(param_1 + 0x14) + 1;
     }
     *(int *)(param_1 + 0x14) = *(int *)(param_1 + 0x14) + (param_3 >> 0x1d);
-    iVar2 = *(int *)(param_1 + 0x58);
-    *(uint *)(param_1 + 0x10) = uVar4;
-    if (iVar2 != 0) {
-      puVar1 = (uchar *)(param_1 + 0x18);
-      if ((param_3 < 0x40) && (iVar2 + param_3 < 0x40)) {
-        memcpy(puVar1 + iVar2,param_2,param_3);
+    iVar1 = *(int *)(param_1 + 0x58);
+    *(uint *)(param_1 + 0x10) = uVar2;
+    if (iVar1 != 0) {
+      dst = (uchar *)(param_1 + 0x18);
+      if ((param_3 < 0x40) && (iVar1 + param_3 < 0x40)) {
+        memcpy(dst + iVar1,param_2,param_3);
         *(int *)(param_1 + 0x58) = *(int *)(param_1 + 0x58) + param_3;
         return 1;
       }
-      uVar3 = 0x40 - iVar2;
-      memcpy(puVar1 + iVar2,param_2,uVar3);
-      md5_block_asm_data_order(param_1,puVar1,1);
-      param_2 = param_2 + uVar3;
-      param_3 = param_3 - uVar3;
+      count = 0x40 - iVar1;
+      memcpy(dst + iVar1,param_2,count);
+      md5_block_asm_data_order(param_1,dst,1);
+      param_2 = param_2 + count;
+      param_3 = param_3 - count;
       *(undefined4 *)(param_1 + 0x58) = 0;
-      memset(puVar1,'\0',0x40);
+      memset(dst,'\0',0x40);
     }
-    uVar4 = param_3 >> 6;
-    if (uVar4 != 0) {
-      md5_block_asm_data_order(param_1,param_2,uVar4);
-      param_2 = param_2 + uVar4 * 0x40;
-      param_3 = param_3 + uVar4 * -0x40;
+    uVar2 = param_3 >> 6;
+    if (uVar2 != 0) {
+      md5_block_asm_data_order(param_1,param_2,uVar2);
+      param_2 = param_2 + uVar2 * 0x40;
+      param_3 = param_3 + uVar2 * -0x40;
     }
     if (param_3 != 0) {
       *(ulong *)(param_1 + 0x58) = param_3;

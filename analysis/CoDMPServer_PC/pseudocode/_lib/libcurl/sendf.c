@@ -73,16 +73,16 @@ void __cdecl curl_slist_free_all(int *param_1)
 undefined4 FUN_00af23f0(undefined4 param_1,uchar *param_2)
 
 {
-  uchar *puVar1;
+  uchar *dst;
   ulong unaff_EBX;
   int unaff_ESI;
   
-  puVar1 = (uchar *)(*(code *)_Curl_cmalloc)();
-  if (puVar1 == (uchar *)0x0) {
+  dst = (uchar *)(*(code *)_Curl_cmalloc)();
+  if (dst == (uchar *)0x0) {
     return 0x1b;
   }
-  memcpy(puVar1,param_2,unaff_EBX);
-  *(uchar **)(unaff_ESI + 0x8478) = puVar1;
+  memcpy(dst,param_2,unaff_EBX);
+  *(uchar **)(unaff_ESI + 0x8478) = dst;
   *(ulong *)(unaff_ESI + 0x847c) = unaff_EBX;
   *(undefined4 *)(unaff_ESI + 0x8480) = param_1;
   *(uint *)(unaff_ESI + 0xc0) = *(uint *)(unaff_ESI + 0xc0) | 0x10;
@@ -115,11 +115,11 @@ int _Curl_read(int *param_1,int param_2,uchar *param_3,uint param_4,ulong *param
 {
   bool bVar1;
   char cVar2;
-  ulong uVar3;
-  int iVar4;
-  uint uVar5;
-  uchar *puVar6;
-  uint uVar7;
+  ulong count;
+  int iVar3;
+  uint uVar4;
+  uchar *puVar5;
+  uint uVar6;
   ulong local_4;
   
   local_4 = 0;
@@ -130,39 +130,39 @@ int _Curl_read(int *param_1,int param_2,uchar *param_3,uint param_4,ulong *param
   }
   bVar1 = false;
 LAB_00af24b1:
-  iVar4 = param_1[0x36];
+  iVar3 = param_1[0x36];
   *param_5 = 0;
   if (bVar1) {
-    uVar7 = param_1[0x6a] - param_1[0x69];
-    if (param_4 <= uVar7) {
-      uVar7 = param_4;
+    uVar6 = param_1[0x6a] - param_1[0x69];
+    if (param_4 <= uVar6) {
+      uVar6 = param_4;
     }
-    if (uVar7 != 0) {
-      memcpy(param_3,(uchar *)(param_1[0x68] + param_1[0x69]),uVar7);
-      param_1[0x69] = param_1[0x69] + uVar7;
+    if (uVar6 != 0) {
+      memcpy(param_3,(uchar *)(param_1[0x68] + param_1[0x69]),uVar6);
+      param_1[0x69] = param_1[0x69] + uVar6;
       *(undefined1 *)(param_1 + 0x57) = 0;
-      *param_5 = uVar7;
+      *param_5 = uVar6;
       return 0;
     }
     if (0x3fff < param_4) {
       param_4 = 0x4000;
     }
-    puVar6 = (uchar *)param_1[0x68];
+    puVar5 = (uchar *)param_1[0x68];
   }
   else {
-    uVar7 = *(uint *)(*param_1 + 0x22c);
-    uVar5 = uVar7;
-    if (uVar7 == 0) {
-      uVar5 = 0x4000;
+    uVar6 = *(uint *)(*param_1 + 0x22c);
+    uVar4 = uVar6;
+    if (uVar6 == 0) {
+      uVar4 = 0x4000;
     }
-    puVar6 = param_3;
-    if (((int)uVar5 <= (int)param_4) && (param_4 = uVar7, uVar7 == 0)) {
+    puVar5 = param_3;
+    if (((int)uVar4 <= (int)param_4) && (param_4 = uVar6, uVar6 == 0)) {
       param_4 = 0x4000;
     }
   }
-  if (param_1[(uint)(param_2 == iVar4) * 6 + 0x38] == 2) {
-    uVar3 = _Curl_ssl_recv(param_1,(uint)(param_2 == iVar4),puVar6,param_4);
-    if (uVar3 == 0xffffffff) {
+  if (param_1[(uint)(param_2 == iVar3) * 6 + 0x38] == 2) {
+    count = _Curl_ssl_recv(param_1,(uint)(param_2 == iVar3),puVar5,param_4);
+    if (count == 0xffffffff) {
       return -1;
     }
   }
@@ -170,19 +170,19 @@ LAB_00af24b1:
     if (param_1[99] != 0) {
       return 0;
     }
-    iVar4 = _Curl_read_plain(param_2,puVar6,param_4,&local_4);
-    uVar3 = local_4;
-    if (iVar4 != 0) {
-      return iVar4;
+    iVar3 = _Curl_read_plain(param_2,puVar5,param_4,&local_4);
+    count = local_4;
+    if (iVar3 != 0) {
+      return iVar3;
     }
   }
-  if (-1 < (int)uVar3) {
+  if (-1 < (int)count) {
     if (bVar1) {
-      memcpy(param_3,(uchar *)param_1[0x68],uVar3);
-      param_1[0x6a] = uVar3;
-      param_1[0x69] = uVar3;
+      memcpy(param_3,(uchar *)param_1[0x68],count);
+      param_1[0x6a] = count;
+      param_1[0x69] = count;
     }
-    *param_5 = *param_5 + uVar3;
+    *param_5 = *param_5 + count;
   }
   return 0;
 }

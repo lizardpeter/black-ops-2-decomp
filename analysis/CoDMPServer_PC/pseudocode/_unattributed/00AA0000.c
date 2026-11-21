@@ -13,16 +13,16 @@ void FUN_00aaec38(int param_1,uint param_2)
   float10 in_ST0;
   float10 extraout_ST0;
   ulong unaff_retaddr;
-  ulong uVar1;
+  ulong savCW;
   
-  uVar1 = CONCAT22((short)((uint)in_EDX >> 0x10),in_FPUControlWord);
+  savCW = CONCAT22((short)((uint)in_EDX >> 0x10),in_FPUControlWord);
   if (in_ZF) {
     if (((in_EAX & 0xfffff) != 0) || (param_1 != 0)) {
       _convertTOStoQNaN();
     }
 LAB_00aaecc7:
     if (__fastflag == 0) {
-      _startOneArgErrorHandling(uVar1,unaff_retaddr,CONCAT44(param_2,param_1));
+      _startOneArgErrorHandling(savCW,unaff_retaddr,CONCAT44(param_2,param_1));
       return;
     }
   }
@@ -105,16 +105,16 @@ void FUN_00aaff68(int param_1,uint param_2)
   float10 in_ST0;
   float10 extraout_ST0;
   ulong unaff_retaddr;
-  ulong uVar1;
+  ulong savCW;
   
-  uVar1 = CONCAT22((short)((uint)in_EDX >> 0x10),in_FPUControlWord);
+  savCW = CONCAT22((short)((uint)in_EDX >> 0x10),in_FPUControlWord);
   if (in_ZF) {
     if (((in_EAX & 0xfffff) != 0) || (param_1 != 0)) {
       _convertTOStoQNaN();
     }
 LAB_00aafff7:
     if (__fastflag == 0) {
-      _startOneArgErrorHandling(uVar1,unaff_retaddr,CONCAT44(param_2,param_1));
+      _startOneArgErrorHandling(savCW,unaff_retaddr,CONCAT44(param_2,param_1));
       return;
     }
   }

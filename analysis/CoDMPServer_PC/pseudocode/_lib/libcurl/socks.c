@@ -241,8 +241,8 @@ _Curl_SOCKS5(int *param_1,uchar *param_2,uchar *param_3,undefined4 param_4,int p
   uchar *puVar7;
   int iVar8;
   int iVar9;
-  ulong uVar10;
-  char *pcVar11;
+  ulong count;
+  char *pcVar10;
   undefined1 auStack_2c8 [3];
   bool local_2c5;
   int *local_2c4;
@@ -295,7 +295,7 @@ _Curl_SOCKS5(int *param_1,uchar *param_2,uchar *param_3,undefined4 param_4,int p
   _Curl_nonblock(iVar8,1);
   uVar5 = _Curl_socket_ready(0xffffffff,iVar8,iVar4);
   if (uVar5 == 0xffffffff) {
-    pcVar11 = "SOCKS5: no connection here";
+    pcVar10 = "SOCKS5: no connection here";
     iVar9 = *param_6;
   }
   else {
@@ -304,7 +304,7 @@ _Curl_SOCKS5(int *param_1,uchar *param_2,uchar *param_3,undefined4 param_4,int p
       return 0x1c;
     }
     if ((uVar5 & 4) != 0) {
-      pcVar11 = "SOCKS5: error occured during connection";
+      pcVar10 = "SOCKS5: error occured during connection";
       iVar9 = *param_6;
       goto LAB_00b09015;
     }
@@ -315,13 +315,13 @@ _Curl_SOCKS5(int *param_1,uchar *param_2,uchar *param_3,undefined4 param_4,int p
     _Curl_nonblock(iVar8,0);
     iVar6 = _Curl_write_plain(param_6,iVar8,&local_29c,local_29b + 2,&local_2b8);
     if ((iVar6 != 0) || (local_2b8 != local_29b + 2)) {
-      pcVar11 = "Unable to send initial SOCKS5 request.";
+      pcVar10 = "Unable to send initial SOCKS5 request.";
       goto LAB_00b09015;
     }
     _Curl_nonblock(iVar8,1);
     uVar5 = _Curl_socket_ready(iVar8,0xffffffff,iVar4);
     if (uVar5 == 0xffffffff) {
-      pcVar11 = "SOCKS5 nothing to read";
+      pcVar10 = "SOCKS5 nothing to read";
       iVar9 = *param_6;
       goto LAB_00b09015;
     }
@@ -337,34 +337,34 @@ _Curl_SOCKS5(int *param_1,uchar *param_2,uchar *param_3,undefined4 param_4,int p
     iVar4 = FUN_00b084e0(iVar8,&local_29c,&local_2bc);
     piVar2 = local_2c4;
     if ((iVar4 != 0) || (local_2bc != 2)) {
-      pcVar11 = "Unable to receive initial SOCKS5 response.";
+      pcVar10 = "Unable to receive initial SOCKS5 response.";
       goto LAB_00b09015;
     }
     if (local_29c != '\x05') {
-      pcVar11 = "Received invalid version in initial SOCKS5 response.";
+      pcVar10 = "Received invalid version in initial SOCKS5 response.";
       goto LAB_00b09015;
     }
     if (local_29b != 0) {
       if (local_29b != 2) {
         if (local_29b == 1) {
-          pcVar11 = "SOCKS5 GSSAPI per-message authentication is not supported.";
+          pcVar10 = "SOCKS5 GSSAPI per-message authentication is not supported.";
         }
         else if (local_29b == 0xff) {
           if ((local_2c4 == (int *)0x0) || ((char)*local_2c4 == '\0')) {
-            pcVar11 = 
+            pcVar10 = 
             "No authentication method was acceptable. (It is quite likely that the SOCKS5 server wanted a username/password, since none was supplied to the server on this connection.)"
             ;
           }
           else {
-            pcVar11 = "No authentication method was acceptable.";
+            pcVar10 = "No authentication method was acceptable.";
           }
         }
         else {
-          pcVar11 = "Undocumented SOCKS5 mode attempted to be used by server.";
+          pcVar10 = "Undocumented SOCKS5 mode attempted to be used by server.";
         }
         goto LAB_00b09015;
       }
-      uVar10 = 0;
+      count = 0;
       if ((local_2c4 == (int *)0x0) || (local_2a8 == (uchar *)0x0)) {
         local_2c4 = (int *)0x0;
       }
@@ -380,26 +380,26 @@ _Curl_SOCKS5(int *param_1,uchar *param_2,uchar *param_3,undefined4 param_4,int p
           uVar1 = *puVar7;
           puVar7 = puVar7 + 1;
         } while (uVar1 != '\0');
-        uVar10 = (int)puVar7 - (int)(local_2a8 + 1);
+        count = (int)puVar7 - (int)(local_2a8 + 1);
       }
       local_29b = (byte)local_2c4;
       local_29c = '\x01';
       memcpy(local_29a,(uchar *)piVar2,(ulong)local_2c4);
       puVar7 = local_2a8;
       piVar2 = local_2c4;
-      *(uchar *)((int)local_2c4 + (int)local_29a) = (uchar)uVar10;
-      memcpy((uchar *)((int)piVar2 + (int)(local_29a + 1)),puVar7,uVar10);
+      *(uchar *)((int)local_2c4 + (int)local_29a) = (uchar)count;
+      memcpy((uchar *)((int)piVar2 + (int)(local_29a + 1)),puVar7,count);
       iVar9 = local_2ac;
-      iVar4 = (int)piVar2 + uVar10 + 3;
+      iVar4 = (int)piVar2 + count + 3;
       iVar8 = _Curl_write_plain(param_6,local_2ac,&local_29c,iVar4,&local_2b8);
       if ((iVar8 != 0) || (iVar4 != local_2b8)) {
-        pcVar11 = "Failed to send SOCKS5 sub-negotiation request.";
+        pcVar10 = "Failed to send SOCKS5 sub-negotiation request.";
         iVar9 = local_2c0;
         goto LAB_00b09015;
       }
       iVar9 = FUN_00b084e0(iVar9,&local_29c,&local_2bc);
       if ((iVar9 != 0) || (local_2bc != 2)) {
-        pcVar11 = "Unable to receive SOCKS5 sub-negotiation response.";
+        pcVar10 = "Unable to receive SOCKS5 sub-negotiation response.";
         iVar9 = local_2c0;
         goto LAB_00b09015;
       }
@@ -454,18 +454,18 @@ LAB_00b08e54:
     }
     iVar4 = _Curl_write_plain(param_6,iVar8,&local_29c,iVar9,&local_2b8);
     if ((iVar4 != 0) || (local_2b8 != iVar9)) {
-      pcVar11 = "Failed to send SOCKS5 connect request.";
+      pcVar10 = "Failed to send SOCKS5 connect request.";
       iVar9 = local_2c0;
       goto LAB_00b09015;
     }
     iVar4 = FUN_00b084e0(iVar8,&local_29c,&local_2bc);
     iVar9 = local_2c0;
     if ((iVar4 != 0) || (local_2bc != 10)) {
-      pcVar11 = "Failed to receive SOCKS5 connect request ack.";
+      pcVar10 = "Failed to receive SOCKS5 connect request ack.";
       goto LAB_00b09015;
     }
     if (local_29c != '\x05') {
-      pcVar11 = "SOCKS5 reply has wrong version, version should be 5.";
+      pcVar10 = "SOCKS5 reply has wrong version, version should be 5.";
       goto LAB_00b09015;
     }
     if (local_29b != 0) {
@@ -488,11 +488,11 @@ LAB_00b08f98:
       _Curl_nonblock(iVar8,1);
       return 0;
     }
-    pcVar11 = "Failed to receive SOCKS5 connect request ack.";
+    pcVar10 = "Failed to receive SOCKS5 connect request ack.";
     iVar9 = local_2c0;
   }
 LAB_00b09015:
-  _Curl_failf(iVar9,pcVar11);
+  _Curl_failf(iVar9,pcVar10);
   return 7;
 }
 

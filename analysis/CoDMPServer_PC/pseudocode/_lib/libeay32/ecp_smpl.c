@@ -378,7 +378,7 @@ ec_GFp_simple_point2oct
   int iVar4;
   uint uVar5;
   uint uVar6;
-  uint uVar7;
+  uint count;
   uint local_c;
   int local_8;
   
@@ -444,14 +444,14 @@ ec_GFp_simple_point2oct
     if (uVar6 == uVar5 + 1) {
       if ((param_3 == 4) || (param_3 == 6)) {
         iVar1 = _BN_num_bits(puVar3);
-        uVar7 = uVar5 - ((int)(iVar1 + 7 + (iVar1 + 7 >> 0x1f & 7U)) >> 3);
-        if (uVar5 < uVar7) {
+        count = uVar5 - ((int)(iVar1 + 7 + (iVar1 + 7 >> 0x1f & 7U)) >> 3);
+        if (uVar5 < count) {
           uVar2 = 0x35a;
           goto LAB_00b73419;
         }
-        if (uVar7 != 0) {
-          memset((uchar *)(param_4 + uVar6),'\0',uVar7);
-          uVar6 = uVar6 + uVar7;
+        if (count != 0) {
+          memset((uchar *)(param_4 + uVar6),'\0',count);
+          uVar6 = uVar6 + count;
         }
         iVar1 = _BN_bn2bin(puVar3,param_4 + uVar6);
         uVar6 = uVar6 + iVar1;

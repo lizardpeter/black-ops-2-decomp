@@ -19,15 +19,15 @@ undefined4 FUN_00b53d40(uchar *param_1,undefined4 param_2)
   uchar *puVar1;
   int *piVar2;
   char cVar3;
+  char *first;
   char *pcVar4;
-  char *pcVar5;
-  int iVar6;
-  uchar *puVar7;
-  uchar *puVar8;
-  undefined4 uVar9;
-  uint uVar10;
+  int iVar5;
+  uchar *dst;
+  uchar *dst_00;
+  undefined4 uVar6;
+  uint count;
   int unaff_ESI;
-  int iVar11;
+  int iVar7;
   uchar *local_8;
   
   if ((param_1 == (uchar *)0x0) || (*param_1 == '\0')) {
@@ -37,54 +37,54 @@ undefined4 FUN_00b53d40(uchar *param_1,undefined4 param_2)
   local_8 = param_1;
   do {
     if ((*param_1 == ';') || (puVar1 = local_8, *param_1 == '\0')) {
-      uVar10 = (int)param_1 - (int)local_8;
+      count = (int)param_1 - (int)local_8;
       puVar1 = param_1 + 1;
-      if (uVar10 != 0) {
-        iVar11 = 0;
+      if (count != 0) {
+        iVar7 = 0;
         if (0 < *(int *)(unaff_ESI + 4)) {
           do {
-            pcVar4 = *(char **)(*(int *)(unaff_ESI + 8) + iVar11 * 4);
-            pcVar5 = pcVar4;
+            first = *(char **)(*(int *)(unaff_ESI + 8) + iVar7 * 4);
+            pcVar4 = first;
             do {
-              cVar3 = *pcVar5;
-              pcVar5 = pcVar5 + 1;
+              cVar3 = *pcVar4;
+              pcVar4 = pcVar4 + 1;
             } while (cVar3 != '\0');
-          } while ((((int)pcVar5 - (int)(pcVar4 + 1) != uVar10) ||
-                   (iVar6 = strncmp(pcVar4,(char *)local_8,uVar10), iVar6 != 0)) &&
-                  (iVar11 = iVar11 + 1, iVar11 < *(int *)(unaff_ESI + 4)));
+          } while ((((int)pcVar4 - (int)(first + 1) != count) ||
+                   (iVar5 = strncmp(first,(char *)local_8,count), iVar5 != 0)) &&
+                  (iVar7 = iVar7 + 1, iVar7 < *(int *)(unaff_ESI + 4)));
         }
-        if (*(int *)(unaff_ESI + 4) <= iVar11) {
+        if (*(int *)(unaff_ESI + 4) <= iVar7) {
           if (*(int *)(unaff_ESI + 0x10) < *(int *)(unaff_ESI + 4) + 1) {
-            iVar11 = *(int *)(unaff_ESI + 0x10) + 10;
-            *(int *)(unaff_ESI + 0x10) = iVar11;
-            puVar7 = (uchar *)_CRYPTO_malloc(iVar11 * 4,".\\crypto\\x509\\by_dir.c",0xd6);
-            puVar8 = (uchar *)_CRYPTO_malloc(*(int *)(unaff_ESI + 0x10) * 4,
+            iVar7 = *(int *)(unaff_ESI + 0x10) + 10;
+            *(int *)(unaff_ESI + 0x10) = iVar7;
+            dst = (uchar *)_CRYPTO_malloc(iVar7 * 4,".\\crypto\\x509\\by_dir.c",0xd6);
+            dst_00 = (uchar *)_CRYPTO_malloc(*(int *)(unaff_ESI + 0x10) * 4,
                                              ".\\crypto\\x509\\by_dir.c",0xd8);
-            if ((puVar7 == (uchar *)0x0) || (puVar8 == (uchar *)0x0)) {
+            if ((dst == (uchar *)0x0) || (dst_00 == (uchar *)0x0)) {
               _ERR_put_error(0xb,100,0x41,".\\crypto\\x509\\by_dir.c",0xdb);
               return 0;
             }
-            memcpy(puVar7,*(uchar **)(unaff_ESI + 8),*(int *)(unaff_ESI + 0x10) * 4 - 0x28);
-            memcpy(puVar8,*(uchar **)(unaff_ESI + 0xc),*(int *)(unaff_ESI + 0x10) * 4 - 0x28);
+            memcpy(dst,*(uchar **)(unaff_ESI + 8),*(int *)(unaff_ESI + 0x10) * 4 - 0x28);
+            memcpy(dst_00,*(uchar **)(unaff_ESI + 0xc),*(int *)(unaff_ESI + 0x10) * 4 - 0x28);
             if (*(int *)(unaff_ESI + 8) != 0) {
               _CRYPTO_free(*(int *)(unaff_ESI + 8));
             }
             if (*(int *)(unaff_ESI + 0xc) != 0) {
               _CRYPTO_free(*(int *)(unaff_ESI + 0xc));
             }
-            *(uchar **)(unaff_ESI + 8) = puVar7;
-            *(uchar **)(unaff_ESI + 0xc) = puVar8;
+            *(uchar **)(unaff_ESI + 8) = dst;
+            *(uchar **)(unaff_ESI + 0xc) = dst_00;
           }
           *(undefined4 *)(*(int *)(unaff_ESI + 0xc) + *(int *)(unaff_ESI + 4) * 4) = param_2;
-          uVar9 = _CRYPTO_malloc(uVar10 + 1,".\\crypto\\x509\\by_dir.c",0xea);
-          *(undefined4 *)(*(int *)(unaff_ESI + 8) + *(int *)(unaff_ESI + 4) * 4) = uVar9;
+          uVar6 = _CRYPTO_malloc(count + 1,".\\crypto\\x509\\by_dir.c",0xea);
+          *(undefined4 *)(*(int *)(unaff_ESI + 8) + *(int *)(unaff_ESI + 4) * 4) = uVar6;
           piVar2 = (int *)(*(int *)(unaff_ESI + 8) + *(int *)(unaff_ESI + 4) * 4);
           if (*piVar2 == 0) {
             return 0;
           }
-          strncpy((uchar *)*piVar2,local_8,uVar10);
-          *(undefined1 *)(*(int *)(*(int *)(unaff_ESI + 8) + *(int *)(unaff_ESI + 4) * 4) + uVar10)
-               = 0;
+          strncpy((uchar *)*piVar2,local_8,count);
+          *(undefined1 *)(*(int *)(*(int *)(unaff_ESI + 8) + *(int *)(unaff_ESI + 4) * 4) + count) =
+               0;
           *(int *)(unaff_ESI + 4) = *(int *)(unaff_ESI + 4) + 1;
           if (*param_1 == '\0') {
             return 1;

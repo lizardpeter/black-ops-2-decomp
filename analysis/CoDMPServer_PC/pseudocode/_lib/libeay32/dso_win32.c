@@ -12,8 +12,8 @@ char * FUN_00b782c0(undefined4 param_1,uchar *param_2)
   int extraout_EAX;
   int extraout_EAX_00;
   int extraout_EAX_01;
-  char *pcVar5;
-  undefined4 uVar6;
+  char *string;
+  undefined4 uVar5;
   
   puVar4 = param_2;
   do {
@@ -27,27 +27,27 @@ char * FUN_00b782c0(undefined4 param_1,uchar *param_2)
       strstr(param_2,":");
       if (extraout_EAX_01 == 0) {
         bVar2 = true;
-        uVar6 = 0x279;
+        uVar5 = 0x279;
         iVar3 = 5 - (int)(param_2 + 1);
         goto LAB_00b7832a;
       }
     }
   }
   bVar2 = false;
-  uVar6 = 0x27c;
+  uVar5 = 0x27c;
   iVar3 = 1 - (int)(param_2 + 1);
 LAB_00b7832a:
-  pcVar5 = (char *)_CRYPTO_malloc(puVar4 + iVar3,".\\crypto\\dso\\dso_win32.c",uVar6);
-  if (pcVar5 == (char *)0x0) {
+  string = (char *)_CRYPTO_malloc(puVar4 + iVar3,".\\crypto\\dso\\dso_win32.c",uVar5);
+  if (string == (char *)0x0) {
     _ERR_put_error(0x25,0x7d,0x6d,".\\crypto\\dso\\dso_win32.c",0x280);
     return (char *)0x0;
   }
   if (bVar2) {
-    sprintf(pcVar5,"%s.dll");
-    return pcVar5;
+    sprintf(string,"%s.dll");
+    return string;
   }
-  sprintf(pcVar5,"%s");
-  return pcVar5;
+  sprintf(string,"%s");
+  return string;
 }
 
 
@@ -60,21 +60,21 @@ uchar * FUN_00b78390(void)
 {
   uchar *puVar1;
   int iVar2;
+  uchar *dest;
   uchar *puVar3;
   uchar *puVar4;
   uchar *puVar5;
-  uchar *puVar6;
   int *unaff_ESI;
-  int iVar7;
+  int iVar6;
+  undefined4 uVar7;
   undefined4 uVar8;
-  undefined4 uVar9;
   uchar *local_8;
   
   iVar2 = 0;
-  iVar7 = 0;
+  iVar6 = 0;
   if (unaff_ESI == (int *)0x0) {
-    uVar9 = 0x1b3;
-    uVar8 = 0x43;
+    uVar8 = 0x1b3;
+    uVar7 = 0x43;
     goto LAB_00b783af;
   }
   if (*unaff_ESI == 0) {
@@ -99,92 +99,92 @@ LAB_00b783e8:
     iVar2 = iVar2 + 1;
   }
   if (iVar2 + unaff_ESI[9] == 0) {
-    uVar9 = 0x1ce;
-    uVar8 = 0x71;
+    uVar8 = 0x1ce;
+    uVar7 = 0x71;
 LAB_00b783af:
-    _ERR_put_error(0x25,0x87,uVar8,".\\crypto\\dso\\dso_win32.c",uVar9);
+    _ERR_put_error(0x25,0x87,uVar7,".\\crypto\\dso\\dso_win32.c",uVar8);
     return (uchar *)0x0;
   }
-  puVar3 = (uchar *)_CRYPTO_malloc(iVar2 + unaff_ESI[9] + 1,".\\crypto\\dso\\dso_win32.c",0x1d2);
-  if (puVar3 == (uchar *)0x0) {
+  dest = (uchar *)_CRYPTO_malloc(iVar2 + unaff_ESI[9] + 1,".\\crypto\\dso\\dso_win32.c",0x1d2);
+  if (dest == (uchar *)0x0) {
     _ERR_put_error(0x25,0x87,0x41,".\\crypto\\dso\\dso_win32.c",0x1d6);
     return (uchar *)0x0;
   }
   if (*unaff_ESI == 0) {
     if ((uchar *)unaff_ESI[2] == (uchar *)0x0) goto LAB_00b784ca;
-    strncpy(puVar3,(uchar *)unaff_ESI[2],unaff_ESI[3]);
-    iVar7 = unaff_ESI[3];
-    puVar3[iVar7] = ':';
+    strncpy(dest,(uchar *)unaff_ESI[2],unaff_ESI[3]);
+    iVar6 = unaff_ESI[3];
+    dest[iVar6] = ':';
   }
   else {
-    puVar3[0] = '\\';
-    puVar3[1] = '\\';
-    puVar3[2] = '\0';
-    strncpy(puVar3 + 2,(uchar *)*unaff_ESI,unaff_ESI[1]);
-    iVar7 = unaff_ESI[1] + 2;
+    dest[0] = '\\';
+    dest[1] = '\\';
+    dest[2] = '\0';
+    strncpy(dest + 2,(uchar *)*unaff_ESI,unaff_ESI[1]);
+    iVar6 = unaff_ESI[1] + 2;
     if (((unaff_ESI[4] == 0) && (unaff_ESI[6] == 0)) && (unaff_ESI[8] == 0)) goto LAB_00b784ca;
-    puVar3[iVar7] = '\\';
+    dest[iVar6] = '\\';
   }
-  iVar7 = iVar7 + 1;
+  iVar6 = iVar6 + 1;
 LAB_00b784ca:
-  puVar4 = (uchar *)unaff_ESI[4];
+  puVar3 = (uchar *)unaff_ESI[4];
   iVar2 = unaff_ESI[5];
-  puVar5 = puVar4;
+  puVar4 = puVar3;
   if (0 < iVar2) {
     do {
-      puVar5 = puVar5 + iVar2;
+      puVar4 = puVar4 + iVar2;
       local_8 = (uchar *)0x0;
-      puVar6 = puVar4;
-      puVar1 = puVar5;
-      if (puVar5 != puVar4) {
+      puVar5 = puVar3;
+      puVar1 = puVar4;
+      if (puVar4 != puVar3) {
         do {
-          puVar1 = puVar5;
-          if ((*puVar6 == '\0') || (puVar1 = puVar6, *puVar6 == '/')) break;
+          puVar1 = puVar4;
+          if ((*puVar5 == '\0') || (puVar1 = puVar5, *puVar5 == '/')) break;
           local_8 = (uchar *)((int)local_8 + 1);
-          puVar6 = puVar6 + 1;
-          puVar1 = puVar5;
-        } while (local_8 < (uint)((int)puVar5 - (int)puVar4));
+          puVar5 = puVar5 + 1;
+          puVar1 = puVar4;
+        } while (local_8 < (uint)((int)puVar4 - (int)puVar3));
       }
       local_8 = puVar1;
-      strncpy(puVar3 + iVar7,puVar4,(int)local_8 - (int)puVar4);
-      iVar7 = iVar7 + ((int)local_8 - (int)puVar4);
-      puVar3[iVar7] = '\\';
+      strncpy(dest + iVar6,puVar3,(int)local_8 - (int)puVar3);
+      iVar6 = iVar6 + ((int)local_8 - (int)puVar3);
+      dest[iVar6] = '\\';
       iVar2 = unaff_ESI[5];
-      puVar4 = local_8 + 1;
-      iVar7 = iVar7 + 1;
-      puVar5 = (uchar *)unaff_ESI[4];
-    } while ((int)puVar4 - unaff_ESI[4] < iVar2);
+      puVar3 = local_8 + 1;
+      iVar6 = iVar6 + 1;
+      puVar4 = (uchar *)unaff_ESI[4];
+    } while ((int)puVar3 - unaff_ESI[4] < iVar2);
   }
-  puVar4 = (uchar *)unaff_ESI[6];
+  puVar3 = (uchar *)unaff_ESI[6];
   iVar2 = unaff_ESI[7];
-  puVar5 = puVar4;
+  puVar4 = puVar3;
   if (0 < iVar2) {
     do {
-      puVar5 = puVar5 + iVar2;
+      puVar4 = puVar4 + iVar2;
       local_8 = (uchar *)0x0;
-      puVar6 = puVar4;
-      puVar1 = puVar5;
-      if (puVar5 != puVar4) {
+      puVar5 = puVar3;
+      puVar1 = puVar4;
+      if (puVar4 != puVar3) {
         do {
-          puVar1 = puVar5;
-          if ((*puVar6 == '\0') || (puVar1 = puVar6, *puVar6 == '/')) break;
+          puVar1 = puVar4;
+          if ((*puVar5 == '\0') || (puVar1 = puVar5, *puVar5 == '/')) break;
           local_8 = (uchar *)((int)local_8 + 1);
-          puVar6 = puVar6 + 1;
-          puVar1 = puVar5;
-        } while (local_8 < (uint)((int)puVar5 - (int)puVar4));
+          puVar5 = puVar5 + 1;
+          puVar1 = puVar4;
+        } while (local_8 < (uint)((int)puVar4 - (int)puVar3));
       }
       local_8 = puVar1;
-      strncpy(puVar3 + iVar7,puVar4,(int)local_8 - (int)puVar4);
-      iVar7 = iVar7 + ((int)local_8 - (int)puVar4);
-      puVar3[iVar7] = '\\';
-      puVar5 = (uchar *)unaff_ESI[6];
+      strncpy(dest + iVar6,puVar3,(int)local_8 - (int)puVar3);
+      iVar6 = iVar6 + ((int)local_8 - (int)puVar3);
+      dest[iVar6] = '\\';
+      puVar4 = (uchar *)unaff_ESI[6];
       iVar2 = unaff_ESI[7];
-      puVar4 = local_8 + 1;
-      iVar7 = iVar7 + 1;
-    } while ((int)puVar4 - (int)puVar5 < iVar2);
+      puVar3 = local_8 + 1;
+      iVar6 = iVar6 + 1;
+    } while ((int)puVar3 - (int)puVar4 < iVar2);
   }
-  strncpy(puVar3 + iVar7,(uchar *)unaff_ESI[8],unaff_ESI[9]);
-  puVar3[iVar7 + unaff_ESI[9]] = '\0';
-  return puVar3;
+  strncpy(dest + iVar6,(uchar *)unaff_ESI[8],unaff_ESI[9]);
+  dest[iVar6 + unaff_ESI[9]] = '\0';
+  return dest;
 }
 

@@ -10,9 +10,9 @@ undefined4 * _OBJ_dup(undefined4 *param_1)
   undefined4 *puVar3;
   uchar *puVar4;
   char *pcVar5;
-  uchar *puVar6;
+  uchar *dst;
   
-  puVar6 = (uchar *)0x0;
+  dst = (uchar *)0x0;
   if (param_1 == (undefined4 *)0x0) {
     return (undefined4 *)0x0;
   }
@@ -41,11 +41,11 @@ undefined4 * _OBJ_dup(undefined4 *param_1)
         cVar2 = *pcVar5;
         pcVar5 = pcVar5 + 1;
       } while (cVar2 != '\0');
-      puVar6 = (uchar *)_CRYPTO_malloc(pcVar5 + (1 - (int)pcVar1),".\\crypto\\objects\\obj_lib.c",
-                                       0x5d);
-      puVar3[1] = puVar6;
-      if (puVar6 == (uchar *)0x0) goto LAB_00b47f84;
-      memcpy(puVar6,(uchar *)param_1[1],(ulong)(pcVar5 + (1 - (int)pcVar1)));
+      dst = (uchar *)_CRYPTO_malloc(pcVar5 + (1 - (int)pcVar1),".\\crypto\\objects\\obj_lib.c",0x5d)
+      ;
+      puVar3[1] = dst;
+      if (dst == (uchar *)0x0) goto LAB_00b47f84;
+      memcpy(dst,(uchar *)param_1[1],(ulong)(pcVar5 + (1 - (int)pcVar1)));
     }
     pcVar5 = (char *)*param_1;
     if (pcVar5 != (char *)0x0) {
@@ -65,8 +65,8 @@ undefined4 * _OBJ_dup(undefined4 *param_1)
   }
 LAB_00b47f84:
   _ERR_put_error(8,0x65,0x41,".\\crypto\\objects\\obj_lib.c",0x6f);
-  if (puVar6 != (uchar *)0x0) {
-    _CRYPTO_free(puVar6);
+  if (dst != (uchar *)0x0) {
+    _CRYPTO_free(dst);
   }
   if (puVar3[4] != 0) {
     _CRYPTO_free(puVar3[4]);

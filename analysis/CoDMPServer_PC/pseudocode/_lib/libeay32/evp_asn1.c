@@ -104,10 +104,10 @@ ulong _ASN1_TYPE_get_int_octetstring(int *param_1,undefined4 *param_2,uchar *par
   int iVar3;
   uint uVar4;
   undefined4 uVar5;
-  ulong uVar6;
-  int iVar7;
-  ulong *puVar8;
-  ulong uVar9;
+  ulong count;
+  int iVar6;
+  ulong *puVar7;
+  ulong uVar8;
   int local_30;
   int *local_2c;
   uint local_28;
@@ -120,9 +120,9 @@ ulong _ASN1_TYPE_get_int_octetstring(int *param_1,undefined4 *param_2,uchar *par
   undefined4 local_4;
   
   local_4 = 0xb5d60a;
-  uVar9 = 0xffffffff;
-  iVar7 = 0;
-  puVar8 = (ulong *)0x0;
+  uVar8 = 0xffffffff;
+  iVar6 = 0;
+  puVar7 = (ulong *)0x0;
   if ((*param_1 == 0x10) && (param_1[1] != 0)) {
     piVar1 = param_1 + 1;
     param_1 = (int *)((int *)*piVar1)[2];
@@ -137,12 +137,12 @@ ulong _ASN1_TYPE_get_int_octetstring(int *param_1,undefined4 *param_2,uchar *par
     }
     else {
       local_c = local_2c;
-      iVar7 = d2i_ASN1_INTEGER(0,&local_2c,local_14);
-      if (iVar7 != 0) {
+      iVar6 = d2i_ASN1_INTEGER(0,&local_2c,local_14);
+      if (iVar6 != 0) {
         local_14 = (int)local_c + (local_14 - (int)local_2c);
         local_c = local_2c;
-        puVar8 = (ulong *)d2i_ASN1_OCTET_STRING(0,&local_2c,local_14);
-        if (puVar8 != (ulong *)0x0) {
+        puVar7 = (ulong *)d2i_ASN1_OCTET_STRING(0,&local_2c,local_14);
+        if (puVar7 != (ulong *)0x0) {
           local_14 = (int)local_c + (local_14 - (int)local_2c);
           if ((local_20 & 1) == 0) {
             uVar4 = (uint)(local_14 < 1);
@@ -154,16 +154,16 @@ ulong _ASN1_TYPE_get_int_octetstring(int *param_1,undefined4 *param_2,uchar *par
           puVar2 = param_2;
           if (uVar4 != 0) {
             if (param_2 != (undefined4 *)0x0) {
-              uVar5 = _ASN1_INTEGER_get(iVar7);
+              uVar5 = _ASN1_INTEGER_get(iVar6);
               *puVar2 = uVar5;
             }
-            uVar9 = *puVar8;
-            uVar6 = param_4;
-            if ((int)uVar9 < (int)param_4) {
-              uVar6 = uVar9;
+            uVar8 = *puVar7;
+            count = param_4;
+            if ((int)uVar8 < (int)param_4) {
+              count = uVar8;
             }
             if (param_3 != (uchar *)0x0) {
-              memcpy(param_3,(uchar *)puVar8[2],uVar6);
+              memcpy(param_3,(uchar *)puVar7[2],count);
             }
             goto LAB_00b5d685;
           }
@@ -173,12 +173,12 @@ ulong _ASN1_TYPE_get_int_octetstring(int *param_1,undefined4 *param_2,uchar *par
   }
   _ERR_put_error(0xd,0x86,0x6d,".\\crypto\\asn1\\evp_asn1.c",0xb7);
 LAB_00b5d685:
-  if (puVar8 != (ulong *)0x0) {
-    _ASN1_STRING_free(puVar8);
+  if (puVar7 != (ulong *)0x0) {
+    _ASN1_STRING_free(puVar7);
   }
-  if (iVar7 != 0) {
-    _ASN1_STRING_free(iVar7);
+  if (iVar6 != 0) {
+    _ASN1_STRING_free(iVar6);
   }
-  return uVar9;
+  return uVar8;
 }
 

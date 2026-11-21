@@ -119,65 +119,65 @@ undefined4 _BN_lshift(int *param_1,int *param_2,uint param_3)
 
 {
   int iVar1;
-  uchar *puVar2;
-  uint uVar3;
-  int *piVar4;
-  int iVar5;
-  uint *puVar6;
-  int iVar7;
-  uchar *puVar8;
+  uchar *dst;
+  uint uVar2;
+  int *piVar3;
+  int iVar4;
+  uint *puVar5;
+  int iVar6;
+  uchar *puVar7;
   
   param_1[3] = param_2[3];
-  iVar7 = (int)(param_3 + ((int)param_3 >> 0x1f & 0x1fU)) >> 5;
-  iVar1 = param_2[1] + 1 + iVar7;
-  piVar4 = param_1;
+  iVar6 = (int)(param_3 + ((int)param_3 >> 0x1f & 0x1fU)) >> 5;
+  iVar1 = param_2[1] + 1 + iVar6;
+  piVar3 = param_1;
   if (param_1[2] < iVar1) {
-    piVar4 = (int *)bn_expand2(param_1,iVar1);
+    piVar3 = (int *)bn_expand2(param_1,iVar1);
   }
-  if (piVar4 != (int *)0x0) {
+  if (piVar3 != (int *)0x0) {
     param_3 = param_3 & 0x8000001f;
     if ((int)param_3 < 0) {
       param_3 = (param_3 - 1 | 0xffffffe0) + 1;
     }
     iVar1 = *param_2;
-    puVar2 = (uchar *)*param_1;
-    puVar8 = puVar2 + (param_2[1] + iVar7) * 4;
-    puVar8[0] = '\0';
-    puVar8[1] = '\0';
-    puVar8[2] = '\0';
-    puVar8[3] = '\0';
+    dst = (uchar *)*param_1;
+    puVar7 = dst + (param_2[1] + iVar6) * 4;
+    puVar7[0] = '\0';
+    puVar7[1] = '\0';
+    puVar7[2] = '\0';
+    puVar7[3] = '\0';
     if (param_3 == 0) {
-      iVar5 = param_2[1] + -1;
-      if (-1 < iVar5) {
-        puVar8 = puVar2 + (iVar5 + iVar7) * 4;
+      iVar4 = param_2[1] + -1;
+      if (-1 < iVar4) {
+        puVar7 = dst + (iVar4 + iVar6) * 4;
         do {
-          *(undefined4 *)puVar8 = *(undefined4 *)(iVar1 + iVar5 * 4);
-          iVar5 = iVar5 + -1;
-          puVar8 = puVar8 + -4;
-        } while (-1 < iVar5);
+          *(undefined4 *)puVar7 = *(undefined4 *)(iVar1 + iVar4 * 4);
+          iVar4 = iVar4 + -1;
+          puVar7 = puVar7 + -4;
+        } while (-1 < iVar4);
       }
     }
     else {
-      iVar5 = param_2[1] + -1;
-      if (-1 < iVar5) {
-        puVar6 = (uint *)(puVar2 + (iVar7 + iVar5) * 4 + 4);
+      iVar4 = param_2[1] + -1;
+      if (-1 < iVar4) {
+        puVar5 = (uint *)(dst + (iVar6 + iVar4) * 4 + 4);
         do {
-          uVar3 = *(uint *)(iVar1 + iVar5 * 4);
-          iVar5 = iVar5 + -1;
-          *puVar6 = *puVar6 | uVar3 >> (0x20 - (byte)param_3 & 0x1f);
-          puVar6 = puVar6 + -1;
-          *puVar6 = uVar3 << ((byte)param_3 & 0x1f);
-        } while (-1 < iVar5);
+          uVar2 = *(uint *)(iVar1 + iVar4 * 4);
+          iVar4 = iVar4 + -1;
+          *puVar5 = *puVar5 | uVar2 >> (0x20 - (byte)param_3 & 0x1f);
+          puVar5 = puVar5 + -1;
+          *puVar5 = uVar2 << ((byte)param_3 & 0x1f);
+        } while (-1 < iVar4);
       }
     }
-    memset(puVar2,'\0',iVar7 * 4);
-    iVar7 = param_2[1] + 1 + iVar7;
-    param_1[1] = iVar7;
-    if (0 < iVar7) {
-      piVar4 = (int *)(*param_1 + -4 + iVar7 * 4);
+    memset(dst,'\0',iVar6 * 4);
+    iVar6 = param_2[1] + 1 + iVar6;
+    param_1[1] = iVar6;
+    if (0 < iVar6) {
+      piVar3 = (int *)(*param_1 + -4 + iVar6 * 4);
       do {
-        iVar1 = *piVar4;
-        piVar4 = piVar4 + -1;
+        iVar1 = *piVar3;
+        piVar3 = piVar3 + -1;
         if (iVar1 != 0) {
           return 1;
         }

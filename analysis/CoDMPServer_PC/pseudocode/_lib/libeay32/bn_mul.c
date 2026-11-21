@@ -83,15 +83,15 @@ bn_mul_recursive(int param_1,int param_2,int param_3,int param_4,int param_5,int
   int iVar10;
   uint uVar11;
   undefined4 *puVar12;
-  uchar *puVar13;
-  uint *puVar14;
-  int iVar15;
-  uint uVar16;
+  uchar *dst;
+  uint *puVar13;
+  int iVar14;
+  uint uVar15;
   int local_18;
   
-  iVar15 = param_4 / 2;
-  iVar8 = iVar15 + param_5;
-  iVar9 = iVar15 + param_6;
+  iVar14 = param_4 / 2;
+  iVar8 = iVar14 + param_5;
+  iVar9 = iVar14 + param_6;
   if (param_4 == 8) {
     if ((param_5 == 0) && (param_6 == 0)) {
       bn_mul_comba8(param_1,param_2,param_3);
@@ -107,18 +107,18 @@ LAB_00b52d1a:
     return;
   }
   if (param_4 < 0x10) goto LAB_00b52d1a;
-  iVar4 = iVar15 - iVar8;
-  iVar10 = param_2 + iVar15 * 4;
+  iVar4 = iVar14 - iVar8;
+  iVar10 = param_2 + iVar14 * 4;
   iVar5 = bn_cmp_part_words(param_2,iVar10,iVar8,iVar4);
   bVar3 = false;
   bVar2 = false;
-  iVar6 = iVar9 - iVar15;
-  iVar1 = param_3 + iVar15 * 4;
+  iVar6 = iVar9 - iVar14;
+  iVar1 = param_3 + iVar14 * 4;
   iVar7 = bn_cmp_part_words(iVar1,param_3,iVar9,iVar6);
   switch(iVar7 + 4 + iVar5 * 3) {
   case 0:
-    bn_sub_part_words(param_7,iVar10,param_2,iVar8,iVar8 - iVar15);
-    iVar6 = iVar15 - iVar9;
+    bn_sub_part_words(param_7,iVar10,param_2,iVar8,iVar8 - iVar14);
+    iVar6 = iVar14 - iVar9;
     iVar8 = iVar1;
     iVar4 = param_3;
     goto LAB_00b52e96;
@@ -130,13 +130,13 @@ LAB_00b52d1a:
     bVar2 = true;
     break;
   case 2:
-    bn_sub_part_words(param_7,iVar10,param_2,iVar8,iVar8 - iVar15);
-    bn_sub_part_words(param_7 + iVar15 * 4,iVar1,param_3,iVar9,iVar6);
+    bn_sub_part_words(param_7,iVar10,param_2,iVar8,iVar8 - iVar14);
+    bn_sub_part_words(param_7 + iVar14 * 4,iVar1,param_3,iVar9,iVar6);
     bVar3 = true;
     break;
   case 6:
     bn_sub_part_words(param_7,param_2,iVar10,iVar8,iVar4);
-    bn_sub_part_words(param_7 + iVar15 * 4,param_3,iVar1,iVar9,iVar15 - iVar9);
+    bn_sub_part_words(param_7 + iVar14 * 4,param_3,iVar1,iVar9,iVar14 - iVar9);
     bVar3 = true;
     break;
   case 8:
@@ -144,9 +144,9 @@ LAB_00b52d1a:
     iVar8 = param_3;
     iVar4 = iVar1;
 LAB_00b52e96:
-    bn_sub_part_words(param_7 + iVar15 * 4,iVar4,iVar8,iVar9,iVar6);
+    bn_sub_part_words(param_7 + iVar14 * 4,iVar4,iVar8,iVar9,iVar6);
   }
-  if (iVar15 == 4) {
+  if (iVar14 == 4) {
     if ((param_5 == 0) && (param_6 == 0)) {
       local_18 = param_4 * 4;
       if (bVar2) {
@@ -163,14 +163,14 @@ LAB_00b52e96:
       else {
         bn_mul_comba4(local_18 + param_7,param_7,param_7 + 0x10);
       }
-      puVar13 = (uchar *)(local_18 + param_7);
+      dst = (uchar *)(local_18 + param_7);
       bn_mul_comba4(param_1,param_2,param_3);
       local_18 = local_18 + param_1;
       bn_mul_comba4(local_18,param_2 + 0x10,param_3 + 0x10);
       goto LAB_00b53056;
     }
   }
-  else if (((iVar15 == 8) && (param_5 == 0)) && (param_6 == 0)) {
+  else if (((iVar14 == 8) && (param_5 == 0)) && (param_6 == 0)) {
     local_18 = param_4 * 4;
     if (bVar2) {
       memset((uchar *)(local_18 + param_7),'\0',0x40);
@@ -178,7 +178,7 @@ LAB_00b52e96:
     else {
       bn_mul_comba8(local_18 + param_7,param_7,param_7 + 0x20);
     }
-    puVar13 = (uchar *)(local_18 + param_7);
+    dst = (uchar *)(local_18 + param_7);
     bn_mul_comba8(param_1,param_2,param_3);
     local_18 = local_18 + param_1;
     bn_mul_comba8(local_18,param_2 + 0x20,param_3 + 0x20);
@@ -186,39 +186,39 @@ LAB_00b52e96:
   }
   iVar8 = param_7 + param_4 * 8;
   if (bVar2) {
-    puVar13 = (uchar *)(param_4 * 4 + param_7);
-    memset(puVar13,'\0',param_4 * 4);
+    dst = (uchar *)(param_4 * 4 + param_7);
+    memset(dst,'\0',param_4 * 4);
   }
   else {
-    puVar13 = (uchar *)(param_4 * 4 + param_7);
-    bn_mul_recursive(puVar13,param_7,param_7 + iVar15 * 4,iVar15,0,0,iVar8);
+    dst = (uchar *)(param_4 * 4 + param_7);
+    bn_mul_recursive(dst,param_7,param_7 + iVar14 * 4,iVar14,0,0,iVar8);
   }
   local_18 = param_4 * 4;
-  bn_mul_recursive(param_1,param_2,param_3,iVar15,0,0,iVar8);
+  bn_mul_recursive(param_1,param_2,param_3,iVar14,0,0,iVar8);
   local_18 = local_18 + param_1;
-  bn_mul_recursive(local_18,iVar10,iVar1,iVar15,param_5,param_6,iVar8);
+  bn_mul_recursive(local_18,iVar10,iVar1,iVar14,param_5,param_6,iVar8);
 LAB_00b53056:
   iVar8 = bn_add_words(param_7,param_1,local_18,param_4);
   if (bVar3) {
-    iVar9 = bn_sub_words(puVar13,param_7,puVar13,param_4);
+    iVar9 = bn_sub_words(dst,param_7,dst,param_4);
     iVar9 = -iVar9;
   }
   else {
-    iVar9 = bn_add_words(puVar13,puVar13,param_7,param_4);
+    iVar9 = bn_add_words(dst,dst,param_7,param_4);
   }
-  iVar10 = param_1 + iVar15 * 4;
-  iVar10 = bn_add_words(iVar10,iVar10,puVar13,param_4);
-  uVar16 = iVar8 + iVar9 + iVar10;
-  if (uVar16 != 0) {
-    puVar14 = (uint *)(param_1 + (iVar15 + param_4) * 4);
-    uVar11 = *(int *)(param_1 + (iVar15 + param_4) * 4) + uVar16;
-    *puVar14 = uVar11;
-    if (uVar11 < uVar16) {
+  iVar10 = param_1 + iVar14 * 4;
+  iVar10 = bn_add_words(iVar10,iVar10,dst,param_4);
+  uVar15 = iVar8 + iVar9 + iVar10;
+  if (uVar15 != 0) {
+    puVar13 = (uint *)(param_1 + (iVar14 + param_4) * 4);
+    uVar11 = *(int *)(param_1 + (iVar14 + param_4) * 4) + uVar15;
+    *puVar13 = uVar11;
+    if (uVar11 < uVar15) {
       do {
-        uVar16 = puVar14[1];
-        puVar14 = puVar14 + 1;
-        *puVar14 = uVar16 + 1;
-      } while (uVar16 + 1 == 0);
+        uVar15 = puVar13[1];
+        puVar13 = puVar13 + 1;
+        *puVar13 = uVar15 + 1;
+      } while (uVar15 + 1 == 0);
     }
   }
   return;
@@ -235,17 +235,17 @@ bn_mul_part_recursive
           (int param_1,int param_2,int param_3,int param_4,int param_5,int param_6,int param_7)
 
 {
-  ulong uVar1;
-  bool bVar2;
+  ulong count;
+  bool bVar1;
+  int iVar2;
   int iVar3;
   int iVar4;
   int iVar5;
   int iVar6;
   int iVar7;
-  int iVar8;
-  uint *puVar9;
+  uint *puVar8;
+  uint uVar9;
   uint uVar10;
-  uint uVar11;
   uchar *local_18;
   int local_c;
   
@@ -253,41 +253,41 @@ bn_mul_part_recursive
     bn_mul_normal(param_1,param_2,param_4 + param_5,param_3,param_4 + param_6);
     return;
   }
-  iVar3 = param_4 - param_5;
-  iVar8 = param_2 + param_4 * 4;
-  iVar4 = bn_cmp_part_words(param_2,iVar8,param_5,iVar3);
-  iVar5 = param_6 - param_4;
-  iVar7 = param_3 + param_4 * 4;
-  bVar2 = false;
-  iVar6 = bn_cmp_part_words(iVar7,param_3,param_6,iVar5);
-  switch(iVar6 + 4 + iVar4 * 3) {
+  iVar2 = param_4 - param_5;
+  iVar7 = param_2 + param_4 * 4;
+  iVar3 = bn_cmp_part_words(param_2,iVar7,param_5,iVar2);
+  iVar4 = param_6 - param_4;
+  iVar6 = param_3 + param_4 * 4;
+  bVar1 = false;
+  iVar5 = bn_cmp_part_words(iVar6,param_3,param_6,iVar4);
+  switch(iVar5 + 4 + iVar3 * 3) {
   case 0:
-    bn_sub_part_words(param_7,iVar8,param_2,param_5,param_5 - param_4);
-    iVar5 = param_4 - param_6;
-    iVar3 = iVar7;
-    iVar4 = param_3;
+    bn_sub_part_words(param_7,iVar7,param_2,param_5,param_5 - param_4);
+    iVar4 = param_4 - param_6;
+    iVar2 = iVar6;
+    iVar3 = param_3;
     goto LAB_00b53278;
   case 1:
   case 2:
-    bn_sub_part_words(param_7,iVar8,param_2,param_5,param_5 - param_4);
-    bn_sub_part_words(param_7 + param_4 * 4,iVar7,param_3,param_6,iVar5);
-    bVar2 = true;
+    bn_sub_part_words(param_7,iVar7,param_2,param_5,param_5 - param_4);
+    bn_sub_part_words(param_7 + param_4 * 4,iVar6,param_3,param_6,iVar4);
+    bVar1 = true;
     break;
   case 3:
   case 4:
   case 5:
   case 6:
-    bn_sub_part_words(param_7,param_2,iVar8,param_5,iVar3);
-    bn_sub_part_words(param_7 + param_4 * 4,param_3,iVar7,param_6,param_4 - param_6);
-    bVar2 = true;
+    bn_sub_part_words(param_7,param_2,iVar7,param_5,iVar2);
+    bn_sub_part_words(param_7 + param_4 * 4,param_3,iVar6,param_6,param_4 - param_6);
+    bVar1 = true;
     break;
   case 7:
   case 8:
-    bn_sub_part_words(param_7,param_2,iVar8,param_5,iVar3);
-    iVar3 = param_3;
-    iVar4 = iVar7;
+    bn_sub_part_words(param_7,param_2,iVar7,param_5,iVar2);
+    iVar2 = param_3;
+    iVar3 = iVar6;
 LAB_00b53278:
-    bn_sub_part_words(param_7 + param_4 * 4,iVar4,iVar3,param_6,iVar5);
+    bn_sub_part_words(param_7 + param_4 * 4,iVar3,iVar2,param_6,iVar4);
   }
   if (param_4 == 8) {
     local_c = param_7 + 0x40;
@@ -299,68 +299,68 @@ LAB_00b53278:
           );
   }
   else {
-    iVar3 = param_7 + param_4 * 0x10;
-    uVar1 = param_4 * 8;
-    local_c = uVar1 + param_7;
-    bn_mul_recursive(local_c,param_7,param_7 + param_4 * 4,param_4,0,0,iVar3);
-    bn_mul_recursive(param_1,param_2,param_3,param_4,0,0,iVar3);
-    iVar4 = param_4 / 2;
-    iVar5 = param_5;
+    iVar2 = param_7 + param_4 * 0x10;
+    count = param_4 * 8;
+    local_c = count + param_7;
+    bn_mul_recursive(local_c,param_7,param_7 + param_4 * 4,param_4,0,0,iVar2);
+    bn_mul_recursive(param_1,param_2,param_3,param_4,0,0,iVar2);
+    iVar3 = param_4 / 2;
+    iVar4 = param_5;
     if (param_5 <= param_6) {
-      iVar5 = param_6;
+      iVar4 = param_6;
     }
-    if (iVar5 == iVar4) {
-      local_18 = (uchar *)(uVar1 + param_1);
-      bn_mul_recursive(local_18,iVar8,iVar7,iVar4,param_5 - iVar4,param_6 - iVar4,iVar3);
-      memset((uchar *)(param_1 + (param_4 * 2 + iVar4 * 2) * 4),'\0',uVar1 + iVar4 * -8);
+    if (iVar4 == iVar3) {
+      local_18 = (uchar *)(count + param_1);
+      bn_mul_recursive(local_18,iVar7,iVar6,iVar3,param_5 - iVar3,param_6 - iVar3,iVar2);
+      memset((uchar *)(param_1 + (param_4 * 2 + iVar3 * 2) * 4),'\0',count + iVar3 * -8);
     }
-    else if (iVar5 == iVar4 || iVar5 - iVar4 < 0) {
-      local_18 = (uchar *)(uVar1 + param_1);
-      memset(local_18,'\0',uVar1);
+    else if (iVar4 == iVar3 || iVar4 - iVar3 < 0) {
+      local_18 = (uchar *)(count + param_1);
+      memset(local_18,'\0',count);
       if ((param_5 < 0x10) && (param_6 < 0x10)) {
-        bn_mul_normal(local_18,iVar8,param_5,iVar7,param_6);
+        bn_mul_normal(local_18,iVar7,param_5,iVar6,param_6);
       }
       else {
         do {
-          iVar4 = iVar4 / 2;
-          if ((iVar4 < param_5) || (iVar4 < param_6)) {
-            bn_mul_part_recursive(local_18,iVar8,iVar7,iVar4,param_5 - iVar4,param_6 - iVar4,iVar3);
+          iVar3 = iVar3 / 2;
+          if ((iVar3 < param_5) || (iVar3 < param_6)) {
+            bn_mul_part_recursive(local_18,iVar7,iVar6,iVar3,param_5 - iVar3,param_6 - iVar3,iVar2);
             goto LAB_00b53498;
           }
-        } while ((iVar4 != param_5) && (iVar4 != param_6));
-        bn_mul_recursive(local_18,iVar8,iVar7,iVar4,param_5 - iVar4,param_6 - iVar4,iVar3);
+        } while ((iVar3 != param_5) && (iVar3 != param_6));
+        bn_mul_recursive(local_18,iVar7,iVar6,iVar3,param_5 - iVar3,param_6 - iVar3,iVar2);
       }
     }
     else {
-      local_18 = (uchar *)(uVar1 + param_1);
-      bn_mul_part_recursive(local_18,iVar8,iVar7,iVar4,param_5 - iVar4,param_6 - iVar4,iVar3);
+      local_18 = (uchar *)(count + param_1);
+      bn_mul_part_recursive(local_18,iVar7,iVar6,iVar3,param_5 - iVar3,param_6 - iVar3,iVar2);
       memset((uchar *)(param_1 + (param_4 * 2 + param_5 + param_6) * 4),'\0',
              ((param_4 * 2 - param_5) - param_6) * 4);
     }
   }
 LAB_00b53498:
-  iVar8 = param_4 * 2;
-  iVar7 = bn_add_words(param_7,param_1,local_18,iVar8);
-  if (bVar2) {
-    iVar3 = bn_sub_words(local_c,param_7,local_c);
-    iVar3 = -iVar3;
+  iVar7 = param_4 * 2;
+  iVar6 = bn_add_words(param_7,param_1,local_18,iVar7);
+  if (bVar1) {
+    iVar2 = bn_sub_words(local_c,param_7,local_c);
+    iVar2 = -iVar2;
   }
   else {
-    iVar3 = bn_add_words(local_c,local_c,param_7,iVar8);
+    iVar2 = bn_add_words(local_c,local_c,param_7,iVar7);
   }
-  iVar4 = param_1 + param_4 * 4;
-  iVar8 = bn_add_words(iVar4,iVar4,local_c,iVar8);
-  uVar11 = iVar7 + iVar3 + iVar8;
-  if (uVar11 != 0) {
-    puVar9 = (uint *)(param_1 + param_4 * 0xc);
-    uVar10 = *(int *)(param_1 + param_4 * 0xc) + uVar11;
-    *puVar9 = uVar10;
-    if (uVar10 < uVar11) {
+  iVar3 = param_1 + param_4 * 4;
+  iVar7 = bn_add_words(iVar3,iVar3,local_c,iVar7);
+  uVar10 = iVar6 + iVar2 + iVar7;
+  if (uVar10 != 0) {
+    puVar8 = (uint *)(param_1 + param_4 * 0xc);
+    uVar9 = *(int *)(param_1 + param_4 * 0xc) + uVar10;
+    *puVar8 = uVar9;
+    if (uVar9 < uVar10) {
       do {
-        uVar11 = puVar9[1];
-        puVar9 = puVar9 + 1;
-        *puVar9 = uVar11 + 1;
-      } while (uVar11 + 1 == 0);
+        uVar10 = puVar8[1];
+        puVar8 = puVar8 + 1;
+        *puVar8 = uVar10 + 1;
+      } while (uVar10 + 1 == 0);
     }
   }
   return;

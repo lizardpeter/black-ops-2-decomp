@@ -11,102 +11,101 @@ i2d_ASN1_SET(uchar *param_1,undefined4 *param_2,code *param_3,undefined4 param_4
 
 {
   int iVar1;
-  uchar *puVar2;
-  int iVar3;
-  undefined4 uVar4;
-  int iVar5;
-  undefined4 uVar6;
-  void *pvVar7;
-  ulong uVar8;
-  uint uVar9;
-  uchar *puVar10;
-  int iVar11;
-  ulong *puVar12;
-  uint uVar13;
-  code *pcVar14;
+  uchar *dst;
+  int iVar2;
+  undefined4 uVar3;
+  int iVar4;
+  undefined4 uVar5;
+  void *base;
+  ulong count;
+  uint num;
+  uchar *src;
+  int iVar6;
+  ulong *puVar7;
+  uint width;
+  code *pcVar8;
   
   iVar1 = (int)param_1;
-  iVar11 = 0;
+  iVar6 = 0;
   if (param_1 == (uchar *)0x0) {
     return 0;
   }
-  iVar3 = sk_num(param_1);
-  pcVar14 = param_3;
-  uVar4 = param_4;
-  while (iVar3 = iVar3 + -1, param_4 = uVar4, -1 < iVar3) {
-    uVar4 = sk_value(iVar1,iVar3,0);
-    iVar5 = (*pcVar14)(uVar4);
-    iVar11 = iVar11 + iVar5;
-    uVar4 = param_4;
+  iVar2 = sk_num(param_1);
+  pcVar8 = param_3;
+  uVar3 = param_4;
+  while (iVar2 = iVar2 + -1, param_4 = uVar3, -1 < iVar2) {
+    uVar3 = sk_value(iVar1,iVar2,0);
+    iVar4 = (*pcVar8)(uVar3);
+    iVar6 = iVar6 + iVar4;
+    uVar3 = param_4;
   }
-  uVar6 = _ASN1_object_size(1,iVar11,uVar4);
+  uVar5 = _ASN1_object_size(1,iVar6,uVar3);
   if (param_2 != (undefined4 *)0x0) {
     param_1 = (uchar *)*param_2;
-    _ASN1_put_object(&param_1,1,iVar11,uVar4,param_5);
-    if ((param_6 != 0) && (iVar11 = sk_num(iVar1), puVar2 = param_1, 1 < iVar11)) {
-      iVar11 = sk_num(iVar1,".\\crypto\\asn1\\a_set.c",0x7a);
-      pvVar7 = (void *)_CRYPTO_malloc(iVar11 * 8);
-      if (pvVar7 == (void *)0x0) {
-        uVar4 = 0x7d;
+    _ASN1_put_object(&param_1,1,iVar6,uVar3,param_5);
+    if ((param_6 != 0) && (iVar6 = sk_num(iVar1), dst = param_1, 1 < iVar6)) {
+      iVar6 = sk_num(iVar1,".\\crypto\\asn1\\a_set.c",0x7a);
+      base = (void *)_CRYPTO_malloc(iVar6 * 8);
+      if (base == (void *)0x0) {
+        uVar3 = 0x7d;
       }
       else {
-        iVar3 = 0;
-        iVar11 = sk_num(iVar1);
-        if (0 < iVar11) {
+        iVar2 = 0;
+        iVar6 = sk_num(iVar1);
+        if (0 < iVar6) {
           do {
-            *(uchar **)((int)pvVar7 + iVar3 * 8) = param_1;
-            uVar4 = sk_value(iVar1,iVar3,&param_1);
-            (*pcVar14)(uVar4);
-            *(int *)((int)pvVar7 + iVar3 * 8 + 4) = (int)param_1 - *(int *)((int)pvVar7 + iVar3 * 8)
-            ;
-            iVar3 = iVar3 + 1;
-            iVar11 = sk_num(iVar1);
-          } while (iVar3 < iVar11);
+            *(uchar **)((int)base + iVar2 * 8) = param_1;
+            uVar3 = sk_value(iVar1,iVar2,&param_1);
+            (*pcVar8)(uVar3);
+            *(int *)((int)base + iVar2 * 8 + 4) = (int)param_1 - *(int *)((int)base + iVar2 * 8);
+            iVar2 = iVar2 + 1;
+            iVar6 = sk_num(iVar1);
+          } while (iVar2 < iVar6);
         }
         *param_2 = param_1;
-        uVar8 = (int)param_1 - (int)puVar2;
-        pcVar14 = FUN_00b4c880;
-        uVar13 = 8;
-        uVar9 = sk_num(iVar1);
-        qsort(pvVar7,uVar9,uVar13,pcVar14);
-        puVar10 = (uchar *)_CRYPTO_malloc(uVar8,".\\crypto\\asn1\\a_set.c",0x8f);
-        if (puVar10 != (uchar *)0x0) {
-          iVar3 = 0;
-          param_1 = puVar10;
-          iVar11 = sk_num(iVar1);
-          if (0 < iVar11) {
-            puVar12 = (ulong *)((int)pvVar7 + 4);
+        count = (int)param_1 - (int)dst;
+        pcVar8 = FUN_00b4c880;
+        width = 8;
+        num = sk_num(iVar1);
+        qsort(base,num,width,pcVar8);
+        src = (uchar *)_CRYPTO_malloc(count,".\\crypto\\asn1\\a_set.c",0x8f);
+        if (src != (uchar *)0x0) {
+          iVar2 = 0;
+          param_1 = src;
+          iVar6 = sk_num(iVar1);
+          if (0 < iVar6) {
+            puVar7 = (ulong *)((int)base + 4);
             do {
-              memcpy(param_1,(uchar *)puVar12[-1],*puVar12);
-              param_1 = param_1 + *puVar12;
-              iVar3 = iVar3 + 1;
-              puVar12 = puVar12 + 2;
-              iVar11 = sk_num(iVar1);
-            } while (iVar3 < iVar11);
+              memcpy(param_1,(uchar *)puVar7[-1],*puVar7);
+              param_1 = param_1 + *puVar7;
+              iVar2 = iVar2 + 1;
+              puVar7 = puVar7 + 2;
+              iVar6 = sk_num(iVar1);
+            } while (iVar2 < iVar6);
           }
-          memcpy(puVar2,puVar10,uVar8);
-          _CRYPTO_free(puVar10);
-          _CRYPTO_free(pvVar7);
-          return uVar6;
+          memcpy(dst,src,count);
+          _CRYPTO_free(src);
+          _CRYPTO_free(base);
+          return uVar5;
         }
-        uVar4 = 0x91;
+        uVar3 = 0x91;
       }
-      _ERR_put_error(0xd,0xbc,0x41,".\\crypto\\asn1\\a_set.c",uVar4);
+      _ERR_put_error(0xd,0xbc,0x41,".\\crypto\\asn1\\a_set.c",uVar3);
       return 0;
     }
-    iVar3 = 0;
-    iVar11 = sk_num(iVar1);
-    if (0 < iVar11) {
+    iVar2 = 0;
+    iVar6 = sk_num(iVar1);
+    if (0 < iVar6) {
       do {
-        uVar4 = sk_value(iVar1,iVar3,&param_1);
-        (*pcVar14)(uVar4);
-        iVar3 = iVar3 + 1;
-        iVar11 = sk_num(iVar1);
-      } while (iVar3 < iVar11);
+        uVar3 = sk_value(iVar1,iVar2,&param_1);
+        (*pcVar8)(uVar3);
+        iVar2 = iVar2 + 1;
+        iVar6 = sk_num(iVar1);
+      } while (iVar2 < iVar6);
     }
     *param_2 = param_1;
   }
-  return uVar6;
+  return uVar5;
 }
 
 

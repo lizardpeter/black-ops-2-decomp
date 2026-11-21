@@ -295,9 +295,9 @@ bool FUN_00b68cb0(uchar *param_1,undefined4 param_2)
   int extraout_EAX;
   int iVar1;
   undefined4 uVar2;
-  uchar *puVar3;
+  uchar *dest;
   int unaff_EBX;
-  ulong uVar4;
+  ulong count;
   
   strchr(param_1,';');
   if (extraout_EAX != 0) {
@@ -308,13 +308,13 @@ bool FUN_00b68cb0(uchar *param_1,undefined4 param_2)
       uVar2 = _ASN1_generate_v3(extraout_EAX + 1,param_2);
       *(undefined4 *)(*(int *)(unaff_EBX + 4) + 4) = uVar2;
       if (*(int *)(*(int *)(unaff_EBX + 4) + 4) != 0) {
-        uVar4 = extraout_EAX - (int)param_1;
-        puVar3 = (uchar *)_CRYPTO_malloc(uVar4 + 1,".\\crypto\\x509v3\\v3_alt.c",0x227);
-        strncpy(puVar3,param_1,uVar4);
-        puVar3[uVar4] = '\0';
-        uVar2 = _OBJ_txt2obj(puVar3,0);
+        count = extraout_EAX - (int)param_1;
+        dest = (uchar *)_CRYPTO_malloc(count + 1,".\\crypto\\x509v3\\v3_alt.c",0x227);
+        strncpy(dest,param_1,count);
+        dest[count] = '\0';
+        uVar2 = _OBJ_txt2obj(dest,0);
         **(undefined4 **)(unaff_EBX + 4) = uVar2;
-        _CRYPTO_free(puVar3);
+        _CRYPTO_free(dest);
         return **(int **)(unaff_EBX + 4) != 0;
       }
     }

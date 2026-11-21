@@ -109,26 +109,26 @@ undefined4 __cdecl asn1_enc_save(int *param_1,uchar *param_2,ulong param_3,int p
 
 {
   int iVar1;
-  uchar *puVar2;
-  int *piVar3;
+  uchar *dst;
+  int *piVar2;
   
   if ((((param_1 == (int *)0x0) || (*param_1 == 0)) ||
       (iVar1 = *(int *)(param_4 + 0x10), iVar1 == 0)) ||
      (((*(byte *)(iVar1 + 4) & 2) == 0 ||
-      (piVar3 = (int *)(*(int *)(iVar1 + 0x14) + *param_1), piVar3 == (int *)0x0)))) {
+      (piVar2 = (int *)(*(int *)(iVar1 + 0x14) + *param_1), piVar2 == (int *)0x0)))) {
     return 1;
   }
-  if (*piVar3 != 0) {
-    _CRYPTO_free(*piVar3);
+  if (*piVar2 != 0) {
+    _CRYPTO_free(*piVar2);
   }
-  puVar2 = (uchar *)_CRYPTO_malloc(param_3,".\\crypto\\asn1\\tasn_utl.c",0xaf);
-  *piVar3 = (int)puVar2;
-  if (puVar2 == (uchar *)0x0) {
+  dst = (uchar *)_CRYPTO_malloc(param_3,".\\crypto\\asn1\\tasn_utl.c",0xaf);
+  *piVar2 = (int)dst;
+  if (dst == (uchar *)0x0) {
     return 0;
   }
-  memcpy(puVar2,param_2,param_3);
-  piVar3[1] = param_3;
-  piVar3[2] = 0;
+  memcpy(dst,param_2,param_3);
+  piVar2[1] = param_3;
+  piVar2[2] = 0;
   return 1;
 }
 

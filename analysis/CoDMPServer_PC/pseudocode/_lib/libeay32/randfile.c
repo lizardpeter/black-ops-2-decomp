@@ -10,7 +10,7 @@ int _RAND_load_file(char *param_1,uint param_2)
 {
   int iVar1;
   uint uVar2;
-  uint uVar3;
+  uint count;
   undefined1 auStack_4b4 [48];
   int local_484;
   _iobuf *local_480;
@@ -28,15 +28,15 @@ int _RAND_load_file(char *param_1,uint param_2)
   local_480 = fopen(param_1,"rb");
   if (local_480 != (_iobuf *)0x0) {
     do {
-      if (((int)param_2 < 1) || (uVar3 = param_2, 0x3ff < (int)param_2)) {
-        uVar3 = 0x400;
+      if (((int)param_2 < 1) || (count = param_2, 0x3ff < (int)param_2)) {
+        count = 0x400;
       }
-      uVar2 = fread(local_448,1,uVar3,local_480);
+      uVar2 = fread(local_448,1,count,local_480);
       local_47c = uVar2;
       if ((int)uVar2 < 1) break;
-      _RAND_add(local_448,uVar3,(double)(int)uVar2);
+      _RAND_add(local_448,count,(double)(int)uVar2);
       local_484 = local_484 + uVar2;
-    } while (((int)param_2 < 1) || (param_2 = param_2 - uVar3, 0 < (int)param_2));
+    } while (((int)param_2 < 1) || (param_2 = param_2 - count, 0 < (int)param_2));
     fclose(local_480);
     _OPENSSL_cleanse(local_448,0x400);
   }

@@ -162,7 +162,7 @@ void _EVP_EncodeUpdate(ulong *param_1,undefined1 *param_2,int *param_3,uchar *pa
 {
   ulong uVar1;
   int iVar2;
-  ulong uVar3;
+  ulong count;
   int local_4;
   
   local_4 = 0;
@@ -178,10 +178,10 @@ void _EVP_EncodeUpdate(ulong *param_1,undefined1 *param_2,int *param_3,uchar *pa
       return;
     }
     if (uVar1 != 0) {
-      uVar3 = param_1[1] - uVar1;
-      memcpy((uchar *)(uVar1 + 8 + (int)param_1),param_4,uVar3);
-      param_4 = param_4 + uVar3;
-      param_5 = param_5 - uVar3;
+      count = param_1[1] - uVar1;
+      memcpy((uchar *)(uVar1 + 8 + (int)param_1),param_4,count);
+      param_4 = param_4 + count;
+      param_5 = param_5 - count;
       local_4 = _EVP_EncodeBlock(param_2,param_1 + 2,param_1[1]);
       *param_1 = 0;
       param_2[local_4] = 10;

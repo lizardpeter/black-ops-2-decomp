@@ -18,16 +18,16 @@ undefined4 __cdecl ssl3_num_ciphers(void)
 undefined4 __cdecl ssl3_new(int param_1)
 
 {
-  uchar *puVar1;
+  uchar *dst;
   
-  puVar1 = (uchar *)_CRYPTO_malloc(0x418,".\\ssl\\s3_lib.c",0x67d);
-  if (puVar1 == (uchar *)0x0) {
+  dst = (uchar *)_CRYPTO_malloc(0x418,".\\ssl\\s3_lib.c",0x67d);
+  if (dst == (uchar *)0x0) {
     return 0;
   }
-  memset(puVar1,'\0',0x418);
-  _EVP_MD_CTX_init(puVar1 + 0x174);
-  _EVP_MD_CTX_init(puVar1 + 0x184);
-  *(uchar **)(param_1 + 0x58) = puVar1;
+  memset(dst,'\0',0x418);
+  _EVP_MD_CTX_init(dst + 0x174);
+  _EVP_MD_CTX_init(dst + 0x184);
+  *(uchar **)(param_1 + 0x58) = dst;
   (**(code **)(*(int *)(param_1 + 8) + 8))(param_1);
   return 1;
 }

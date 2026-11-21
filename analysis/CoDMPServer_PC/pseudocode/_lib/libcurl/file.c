@@ -70,15 +70,15 @@ int FUN_00b07b10(int *param_1)
   undefined4 *puVar1;
   uint uVar2;
   int extraout_EAX;
-  _iobuf *p_Var3;
-  int iVar4;
-  void *pvVar5;
-  uint uVar6;
-  int iVar7;
-  uint uVar8;
-  bool bVar9;
-  undefined4 uVar10;
-  _stat64 *p_Var11;
+  _iobuf *stream;
+  int iVar3;
+  void *buffer;
+  uint uVar4;
+  int iVar5;
+  uint count;
+  bool bVar6;
+  undefined4 uVar7;
+  _stat64 *buf;
   uint local_4c;
   uint local_48;
   int local_44;
@@ -87,95 +87,95 @@ int FUN_00b07b10(int *param_1)
   
   puVar1 = *(undefined4 **)(*param_1 + 0x8550);
   strchr((uchar *)*puVar1,'\\');
-  iVar7 = *param_1;
+  iVar5 = *param_1;
   local_48 = 0;
   local_44 = 0;
   local_40 = curlx_tvnow();
-  param_1[0x6d] = *(int *)(iVar7 + 0x138);
-  param_1[0x6e] = *(int *)(iVar7 + 0xf4);
-  *(int *)(*param_1 + 0xd4) = iVar7 + 0x45c;
+  param_1[0x6d] = *(int *)(iVar5 + 0x138);
+  param_1[0x6e] = *(int *)(iVar5 + 0xf4);
+  *(int *)(*param_1 + 0xd4) = iVar5 + 0x45c;
   if ((extraout_EAX == 0) || (*(char *)(extraout_EAX + 1) == '\0')) {
     return 0x25;
   }
-  if (*(int *)(iVar7 + 0x8548) == 0 && *(int *)(iVar7 + 0x854c) == 0) {
-    iVar4 = _open((char *)*puVar1,0x8301);
-    if (iVar4 < 0) {
-      uVar10 = *puVar1;
+  if (*(int *)(iVar5 + 0x8548) == 0 && *(int *)(iVar5 + 0x854c) == 0) {
+    iVar3 = _open((char *)*puVar1,0x8301);
+    if (iVar3 < 0) {
+      uVar7 = *puVar1;
       goto LAB_00b07bd0;
     }
-    _close(iVar4);
-    p_Var3 = fopen((char *)*puVar1,"wb");
+    _close(iVar3);
+    stream = fopen((char *)*puVar1,"wb");
   }
   else {
-    p_Var3 = fopen((char *)*puVar1,"ab");
+    stream = fopen((char *)*puVar1,"ab");
   }
-  if (p_Var3 != (_iobuf *)0x0) {
-    if ((*(int *)(iVar7 + 0x180) != -1) || (*(int *)(iVar7 + 0x184) != -1)) {
-      _Curl_pgrsSetUploadSize(iVar7,*(int *)(iVar7 + 0x180),*(int *)(iVar7 + 0x184));
+  if (stream != (_iobuf *)0x0) {
+    if ((*(int *)(iVar5 + 0x180) != -1) || (*(int *)(iVar5 + 0x184) != -1)) {
+      _Curl_pgrsSetUploadSize(iVar5,*(int *)(iVar5 + 0x180),*(int *)(iVar5 + 0x184));
     }
-    if ((*(int *)(iVar7 + 0x854c) < 1) && (*(int *)(iVar7 + 0x854c) < 0)) {
-      p_Var11 = &local_38;
-      iVar4 = _fileno(p_Var3);
-      iVar4 = _fstat64(iVar4,p_Var11);
-      if (iVar4 != 0) {
-        fclose(p_Var3);
-        _Curl_failf(iVar7,"Can\'t get the size of %s",*puVar1);
+    if ((*(int *)(iVar5 + 0x854c) < 1) && (*(int *)(iVar5 + 0x854c) < 0)) {
+      buf = &local_38;
+      iVar3 = _fileno(stream);
+      iVar3 = _fstat64(iVar3,buf);
+      if (iVar3 != 0) {
+        fclose(stream);
+        _Curl_failf(iVar5,"Can\'t get the size of %s",*puVar1);
         return 0x17;
       }
-      *(undefined4 *)(iVar7 + 0x8548) = (undefined4)local_38.st_size;
-      *(undefined4 *)(iVar7 + 0x854c) = local_38.st_size._4_4_;
+      *(undefined4 *)(iVar5 + 0x8548) = (undefined4)local_38.st_size;
+      *(undefined4 *)(iVar5 + 0x854c) = local_38.st_size._4_4_;
     }
     while( true ) {
-      iVar4 = _Curl_fillreadbuffer(param_1,0x4000,&local_4c);
-      if (iVar4 != 0) goto LAB_00b07dc0;
+      iVar3 = _Curl_fillreadbuffer(param_1,0x4000,&local_4c);
+      if (iVar3 != 0) goto LAB_00b07dc0;
       if ((int)local_4c < 1) break;
-      uVar6 = *(uint *)(iVar7 + 0x8548);
-      uVar2 = *(uint *)(iVar7 + 0x854c);
-      uVar8 = local_4c;
-      if (uVar6 == 0 && uVar2 == 0) {
+      uVar4 = *(uint *)(iVar5 + 0x8548);
+      uVar2 = *(uint *)(iVar5 + 0x854c);
+      count = local_4c;
+      if (uVar4 == 0 && uVar2 == 0) {
 LAB_00b07d05:
-        pvVar5 = (void *)(iVar7 + 0x45c);
+        buffer = (void *)(iVar5 + 0x45c);
       }
       else {
-        if ((uVar2 < 0x80000000) && ((0 < (int)uVar2 || (local_4c <= uVar6)))) {
-          *(uint *)(iVar7 + 0x8548) = uVar6 - local_4c;
-          *(uint *)(iVar7 + 0x854c) = uVar2 - (uVar6 < local_4c);
-          uVar8 = 0;
+        if ((uVar2 < 0x80000000) && ((0 < (int)uVar2 || (local_4c <= uVar4)))) {
+          *(uint *)(iVar5 + 0x8548) = uVar4 - local_4c;
+          *(uint *)(iVar5 + 0x854c) = uVar2 - (uVar4 < local_4c);
+          count = 0;
           goto LAB_00b07d05;
         }
-        uVar8 = local_4c - uVar6;
-        pvVar5 = (void *)(uVar6 + 0x45c + iVar7);
-        *(undefined4 *)(iVar7 + 0x8548) = 0;
-        *(undefined4 *)(iVar7 + 0x854c) = 0;
+        count = local_4c - uVar4;
+        buffer = (void *)(uVar4 + 0x45c + iVar5);
+        *(undefined4 *)(iVar5 + 0x8548) = 0;
+        *(undefined4 *)(iVar5 + 0x854c) = 0;
       }
-      uVar6 = fwrite(pvVar5,1,uVar8,p_Var3);
-      if (uVar6 != uVar8) {
-        fclose(p_Var3);
+      uVar4 = fwrite(buffer,1,count,stream);
+      if (uVar4 != count) {
+        fclose(stream);
         return 0x37;
       }
-      bVar9 = CARRY4(local_48,uVar8);
-      local_48 = local_48 + uVar8;
-      local_44 = local_44 + (uint)bVar9;
-      _Curl_pgrsSetUploadCounter(iVar7,local_48,local_44);
-      iVar4 = _Curl_pgrsUpdate(param_1);
-      if (iVar4 != 0) goto LAB_00b07dbb;
-      iVar4 = _Curl_speedcheck(iVar7,local_40);
-      if (iVar4 != 0) {
-        fclose(p_Var3);
-        return iVar4;
+      bVar6 = CARRY4(local_48,count);
+      local_48 = local_48 + count;
+      local_44 = local_44 + (uint)bVar6;
+      _Curl_pgrsSetUploadCounter(iVar5,local_48,local_44);
+      iVar3 = _Curl_pgrsUpdate(param_1);
+      if (iVar3 != 0) goto LAB_00b07dbb;
+      iVar3 = _Curl_speedcheck(iVar5,local_40);
+      if (iVar3 != 0) {
+        fclose(stream);
+        return iVar3;
       }
     }
-    iVar7 = _Curl_pgrsUpdate(param_1);
-    if (iVar7 == 0) goto LAB_00b07dc0;
+    iVar5 = _Curl_pgrsUpdate(param_1);
+    if (iVar5 == 0) goto LAB_00b07dc0;
 LAB_00b07dbb:
-    iVar4 = 0x2a;
+    iVar3 = 0x2a;
 LAB_00b07dc0:
-    fclose(p_Var3);
-    return iVar4;
+    fclose(stream);
+    return iVar3;
   }
-  uVar10 = *puVar1;
+  uVar7 = *puVar1;
 LAB_00b07bd0:
-  _Curl_failf(iVar7,"Can\'t open %s for writing",uVar10);
+  _Curl_failf(iVar5,"Can\'t open %s for writing",uVar7);
   return 0x17;
 }
 
@@ -185,142 +185,142 @@ LAB_00b07bd0:
 int FUN_00b07de0(int *param_1,undefined1 *param_2)
 
 {
+  int fildes;
   int iVar1;
   int iVar2;
   int iVar3;
-  int iVar4;
-  tm *ptVar5;
-  uint uVar6;
+  tm *ptVar4;
+  uint uVar5;
   int unaff_EDI;
-  uint uVar7;
-  bool bVar8;
-  long64 lVar9;
+  uint uVar6;
+  bool bVar7;
+  long64 lVar8;
   int local_4c;
   uint local_48;
   int local_44;
   undefined8 local_40;
   _stat64 local_38;
   
-  iVar4 = *param_1;
+  iVar3 = *param_1;
   local_4c = 0;
-  iVar2 = iVar4 + 0x45c;
+  iVar1 = iVar3 + 0x45c;
   local_48 = 0;
   local_44 = 0;
   local_40 = curlx_tvnow();
   *param_2 = 1;
-  _Curl_initinfo(iVar4);
-  _Curl_pgrsStartNow(iVar4);
-  if (*(char *)(iVar4 + 0x25d) != '\0') {
-    iVar2 = FUN_00b07b10(param_1);
-    return iVar2;
+  _Curl_initinfo(iVar3);
+  _Curl_pgrsStartNow(iVar3);
+  if (*(char *)(iVar3 + 0x25d) != '\0') {
+    iVar1 = FUN_00b07b10(param_1);
+    return iVar1;
   }
-  iVar1 = *(int *)(*(int *)(*param_1 + 0x8550) + 8);
-  iVar3 = _fstat64(iVar1,&local_38);
-  bVar8 = iVar3 != -1;
-  iVar3 = 0;
-  uVar6 = 0;
-  if (bVar8) {
-    *(undefined4 *)(iVar4 + 0x8564) = (undefined4)local_38.st_mtime;
-    iVar3 = local_38.st_size._4_4_;
-    uVar6 = (uint)local_38.st_size;
+  fildes = *(int *)(*(int *)(*param_1 + 0x8550) + 8);
+  iVar2 = _fstat64(fildes,&local_38);
+  bVar7 = iVar2 != -1;
+  iVar2 = 0;
+  uVar5 = 0;
+  if (bVar7) {
+    *(undefined4 *)(iVar3 + 0x8564) = (undefined4)local_38.st_mtime;
+    iVar2 = local_38.st_size._4_4_;
+    uVar5 = (uint)local_38.st_size;
   }
-  if (((*(char *)(iVar4 + 0x25b) == '\0') || (*(char *)(iVar4 + 600) == '\0')) || (!bVar8)) {
+  if (((*(char *)(iVar3 + 0x25b) == '\0') || (*(char *)(iVar3 + 600) == '\0')) || (!bVar7)) {
     FUN_00b079f0();
-    iVar2 = *(int *)(iVar4 + 0x854c);
-    uVar7 = *(uint *)(iVar4 + 0x8548);
-    if ((iVar2 < 1) && (iVar2 < 0)) {
-      if (!bVar8) {
-        _Curl_failf(iVar4,"Can\'t get the size of file.");
+    iVar1 = *(int *)(iVar3 + 0x854c);
+    uVar6 = *(uint *)(iVar3 + 0x8548);
+    if ((iVar1 < 1) && (iVar1 < 0)) {
+      if (!bVar7) {
+        _Curl_failf(iVar3,"Can\'t get the size of file.");
         return 0x1a;
       }
-      *(uint *)(iVar4 + 0x8548) = uVar7 + (uint)local_38.st_size;
-      *(uint *)(iVar4 + 0x854c) =
-           iVar2 + local_38.st_size._4_4_ + (uint)CARRY4(uVar7,(uint)local_38.st_size);
+      *(uint *)(iVar3 + 0x8548) = uVar6 + (uint)local_38.st_size;
+      *(uint *)(iVar3 + 0x854c) =
+           iVar1 + local_38.st_size._4_4_ + (uint)CARRY4(uVar6,(uint)local_38.st_size);
     }
-    iVar2 = *(int *)(iVar4 + 0x854c);
-    uVar7 = *(uint *)(iVar4 + 0x8548);
-    if ((iVar3 < iVar2) || ((iVar3 <= iVar2 && (uVar6 < uVar7)))) {
-      _Curl_failf(iVar4,"failed to resume file:// transfer");
-      iVar4 = 0x24;
+    iVar1 = *(int *)(iVar3 + 0x854c);
+    uVar6 = *(uint *)(iVar3 + 0x8548);
+    if ((iVar2 < iVar1) || ((iVar2 <= iVar1 && (uVar5 < uVar6)))) {
+      _Curl_failf(iVar3,"failed to resume file:// transfer");
+      iVar3 = 0x24;
     }
     else {
-      iVar3 = (iVar3 - iVar2) - (uint)(uVar6 < uVar7);
-      iVar2 = *(int *)(iVar4 + 0x2c);
-      uVar7 = uVar6 - uVar7;
-      if ((-1 < iVar2) && ((0 < iVar2 || (*(uint *)(iVar4 + 0x28) != 0)))) {
-        iVar3 = iVar2;
-        uVar7 = *(uint *)(iVar4 + 0x28);
+      iVar2 = (iVar2 - iVar1) - (uint)(uVar5 < uVar6);
+      iVar1 = *(int *)(iVar3 + 0x2c);
+      uVar6 = uVar5 - uVar6;
+      if ((-1 < iVar1) && ((0 < iVar1 || (*(uint *)(iVar3 + 0x28) != 0)))) {
+        iVar2 = iVar1;
+        uVar6 = *(uint *)(iVar3 + 0x28);
       }
-      if (bVar8) {
-        if (uVar7 == 0 && iVar3 == 0) {
+      if (bVar7) {
+        if (uVar6 == 0 && iVar2 == 0) {
           return 0;
         }
-        _Curl_pgrsSetDownloadSize(iVar4,uVar7,iVar3);
+        _Curl_pgrsSetDownloadSize(iVar3,uVar6,iVar2);
       }
-      if (*(int *)(iVar4 + 0x8548) != 0 || *(uint *)(iVar4 + 0x854c) != 0) {
-        lVar9 = _lseeki64(iVar1,(ulonglong)*(uint *)(iVar4 + 0x854c),unaff_EDI);
-        if ((*(int *)(iVar4 + 0x8548) != (int)lVar9) ||
-           (*(int *)(iVar4 + 0x854c) != (int)((ulonglong)lVar9 >> 0x20))) {
+      if (*(int *)(iVar3 + 0x8548) != 0 || *(uint *)(iVar3 + 0x854c) != 0) {
+        lVar8 = _lseeki64(fildes,(ulonglong)*(uint *)(iVar3 + 0x854c),unaff_EDI);
+        if ((*(int *)(iVar3 + 0x8548) != (int)lVar8) ||
+           (*(int *)(iVar3 + 0x854c) != (int)((ulonglong)lVar8 >> 0x20))) {
           return 0x24;
         }
       }
-      _Curl_pgrsTime(iVar4,5);
+      _Curl_pgrsTime(iVar3,5);
       do {
-        if ((0 < iVar3) || ((uVar6 = uVar7, -1 < iVar3 && (0x3ffe < uVar7)))) {
-          uVar6 = 0x3fff;
+        if ((0 < iVar2) || ((uVar5 = uVar6, -1 < iVar2 && (0x3ffe < uVar6)))) {
+          uVar5 = 0x3fff;
         }
-        uVar6 = _read(iVar1,(void *)(iVar4 + 0x45c),uVar6);
-        if (((int)uVar6 < 1) ||
-           (*(undefined1 *)(uVar6 + iVar4 + 0x45c) = 0, uVar7 == 0 && iVar3 == 0)) break;
-        bVar8 = CARRY4(local_48,uVar6);
-        local_48 = local_48 + uVar6;
-        local_44 = local_44 + ((int)uVar6 >> 0x1f) + (uint)bVar8;
-        bVar8 = uVar7 < uVar6;
-        uVar7 = uVar7 - uVar6;
-        iVar3 = (iVar3 - ((int)uVar6 >> 0x1f)) - (uint)bVar8;
-        iVar2 = _Curl_client_write(param_1,1,iVar4 + 0x45c,uVar6);
-        if (iVar2 != 0) {
-          return iVar2;
+        uVar5 = _read(fildes,(void *)(iVar3 + 0x45c),uVar5);
+        if (((int)uVar5 < 1) ||
+           (*(undefined1 *)(uVar5 + iVar3 + 0x45c) = 0, uVar6 == 0 && iVar2 == 0)) break;
+        bVar7 = CARRY4(local_48,uVar5);
+        local_48 = local_48 + uVar5;
+        local_44 = local_44 + ((int)uVar5 >> 0x1f) + (uint)bVar7;
+        bVar7 = uVar6 < uVar5;
+        uVar6 = uVar6 - uVar5;
+        iVar2 = (iVar2 - ((int)uVar5 >> 0x1f)) - (uint)bVar7;
+        iVar1 = _Curl_client_write(param_1,1,iVar3 + 0x45c,uVar5);
+        if (iVar1 != 0) {
+          return iVar1;
         }
-        _Curl_pgrsSetDownloadCounter(iVar4,local_48,local_44);
-        iVar2 = _Curl_pgrsUpdate(param_1);
-        if (iVar2 != 0) {
+        _Curl_pgrsSetDownloadCounter(iVar3,local_48,local_44);
+        iVar1 = _Curl_pgrsUpdate(param_1);
+        if (iVar1 != 0) {
           local_4c = 0x2a;
           break;
         }
-        local_4c = _Curl_speedcheck(iVar4,local_40);
+        local_4c = _Curl_speedcheck(iVar3,local_40);
       } while (local_4c == 0);
-      iVar2 = _Curl_pgrsUpdate(param_1);
-      iVar4 = 0x2a;
-      if (iVar2 == 0) {
+      iVar1 = _Curl_pgrsUpdate(param_1);
+      iVar3 = 0x2a;
+      if (iVar1 == 0) {
         return local_4c;
       }
     }
   }
   else {
-    curl_msnprintf(iVar2,0x4001,"Content-Length: %lld\r\n",uVar6,iVar3);
-    iVar4 = _Curl_client_write(param_1,3,iVar2,0);
-    if (iVar4 == 0) {
-      iVar4 = _Curl_client_write(param_1,3,"Accept-ranges: bytes\r\n",0);
-      if (iVar4 == 0) {
+    curl_msnprintf(iVar1,0x4001,"Content-Length: %lld\r\n",uVar5,iVar2);
+    iVar3 = _Curl_client_write(param_1,3,iVar1,0);
+    if (iVar3 == 0) {
+      iVar3 = _Curl_client_write(param_1,3,"Accept-ranges: bytes\r\n",0);
+      if (iVar3 == 0) {
         local_40._0_4_ = (undefined4)local_38.st_mtime;
         local_40._4_4_ = local_38.st_mtime._4_4_;
-        ptVar5 = _gmtime64(&local_40);
-        if (ptVar5->tm_wday == 0) {
-          iVar4 = 6;
+        ptVar4 = _gmtime64(&local_40);
+        if (ptVar4->tm_wday == 0) {
+          iVar3 = 6;
         }
         else {
-          iVar4 = ptVar5->tm_wday + -1;
+          iVar3 = ptVar4->tm_wday + -1;
         }
-        curl_msnprintf(iVar2,0x3fff,"Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
-                       (&_Curl_wkday)[iVar4],ptVar5->tm_mday,(&_Curl_month)[ptVar5->tm_mon],
-                       ptVar5->tm_year + 0x76c,ptVar5->tm_hour,ptVar5->tm_min,ptVar5->tm_sec);
-        iVar2 = _Curl_client_write(param_1,3,iVar2,0);
-        return iVar2;
+        curl_msnprintf(iVar1,0x3fff,"Last-Modified: %s, %02d %s %4d %02d:%02d:%02d GMT\r\n",
+                       (&_Curl_wkday)[iVar3],ptVar4->tm_mday,(&_Curl_month)[ptVar4->tm_mon],
+                       ptVar4->tm_year + 0x76c,ptVar4->tm_hour,ptVar4->tm_min,ptVar4->tm_sec);
+        iVar1 = _Curl_client_write(param_1,3,iVar1,0);
+        return iVar1;
       }
     }
   }
-  return iVar4;
+  return iVar3;
 }
 
 
@@ -335,7 +335,7 @@ undefined4 FUN_00b08160(int *param_1,undefined1 *param_2)
   undefined4 *puVar4;
   char *pcVar5;
   int iVar6;
-  char *pcVar7;
+  char *path;
   
   iVar2 = *param_1;
   pcVar3 = (char *)curl_easy_unescape(iVar2,*(undefined4 *)(iVar2 + 0x853c),0,0);
@@ -361,13 +361,13 @@ undefined4 FUN_00b08160(int *param_1,undefined1 *param_2)
     puVar4[1] = 0;
     puVar4[2] = 0xffffffff;
   }
-  pcVar7 = pcVar3;
+  path = pcVar3;
   if (((*pcVar3 == '/') && (pcVar3[1] != '\0')) && ((pcVar3[2] == ':' || (pcVar3[2] == '|')))) {
     pcVar3[2] = ':';
-    pcVar7 = pcVar3 + 1;
+    path = pcVar3 + 1;
   }
-  cVar1 = *pcVar7;
-  pcVar5 = pcVar7;
+  cVar1 = *path;
+  pcVar5 = path;
   while (cVar1 != '\0') {
     if (*pcVar5 == '/') {
       *pcVar5 = '\\';
@@ -375,8 +375,8 @@ undefined4 FUN_00b08160(int *param_1,undefined1 *param_2)
     pcVar5 = pcVar5 + 1;
     cVar1 = *pcVar5;
   }
-  iVar6 = _open(pcVar7,0x8000);
-  *puVar4 = pcVar7;
+  iVar6 = _open(path,0x8000);
+  *puVar4 = path;
   puVar4[1] = pcVar3;
   puVar4[2] = iVar6;
   if ((*(char *)(iVar2 + 0x25d) == '\0') && (iVar6 == -1)) {

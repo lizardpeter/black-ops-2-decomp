@@ -60,8 +60,8 @@ Preliminary inventory from the exception directory (`.pdata`): every non-leaf fu
 | status | functions | reached |
 |---|---:|---|
 | located | 103 | ████████████████████ 100.00% |
-| named | 28,413 | ████████████████████ 99.64% |
-| typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
+| named | 3,381 | ████████████████████ 99.64% |
+| typed | 25,032 | ██████████████████░░ 87.79% |
 | decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
 | compiles | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
 | matches | 11 | ░░░░░░░░░░░░░░░░░░░░ 0.04% |
@@ -73,15 +73,15 @@ Preliminary inventory from the exception directory (`.pdata`): every non-leaf fu
 
 | status | functions | reached |
 |---|---:|---|
-| located | 18,691 | ████████████████████ 100.00% |
-| named | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
-| typed | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
+| located | 95 | ████████████████████ 100.00% |
+| named | 3,349 | ████████████████████ 99.58% |
+| typed | 19,073 | █████████████████░░░ 84.70% |
 | decompiled | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 | compiles | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 | matches | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 | integrated | 0 | ░░░░░░░░░░░░░░░░░░░░ 0.00% |
 
-18,691 functions known. Reconstructed (decompiled or better): 0.
+22,517 functions known. Reconstructed (decompiled or better): 0.
 
 ## t6mp
 

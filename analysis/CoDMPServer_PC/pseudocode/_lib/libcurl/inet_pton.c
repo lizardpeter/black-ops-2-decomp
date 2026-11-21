@@ -9,22 +9,22 @@ undefined4 FUN_00b0b770(uchar *param_1,undefined4 *param_2)
   int extraout_EAX;
   uint uVar2;
   uchar *puVar3;
-  uchar uVar4;
-  byte *pbVar5;
+  uchar chr;
+  byte *pbVar4;
   undefined4 local_4;
   
   puVar3 = param_1;
-  uVar4 = *param_1;
+  chr = *param_1;
   bVar1 = false;
   param_1 = (uchar *)0x0;
-  pbVar5 = (byte *)&local_4;
+  pbVar4 = (byte *)&local_4;
   local_4 = 0;
-  if (uVar4 != '\0') {
+  if (chr != '\0') {
     do {
       puVar3 = puVar3 + 1;
-      strchr((uchar *)"0123456789",uVar4);
+      strchr((uchar *)"0123456789",chr);
       if (extraout_EAX == 0) {
-        if (uVar4 != '.') {
+        if (chr != '.') {
           return 0;
         }
         if (!bVar1) {
@@ -33,16 +33,16 @@ undefined4 FUN_00b0b770(uchar *param_1,undefined4 *param_2)
         if (param_1 == (uchar *)0x4) {
           return 0;
         }
-        pbVar5 = pbVar5 + 1;
-        *pbVar5 = 0;
+        pbVar4 = pbVar4 + 1;
+        *pbVar4 = 0;
         bVar1 = false;
       }
       else {
-        uVar2 = (uint)*pbVar5 * 10 + -0xd62660 + extraout_EAX;
+        uVar2 = (uint)*pbVar4 * 10 + -0xd62660 + extraout_EAX;
         if (0xff < uVar2) {
           return 0;
         }
-        *pbVar5 = (byte)uVar2;
+        *pbVar4 = (byte)uVar2;
         if (!bVar1) {
           param_1 = (uchar *)((int)param_1 + 1);
           if (4 < (int)param_1) {
@@ -51,8 +51,8 @@ undefined4 FUN_00b0b770(uchar *param_1,undefined4 *param_2)
           bVar1 = true;
         }
       }
-      uVar4 = *puVar3;
-    } while (uVar4 != '\0');
+      chr = *puVar3;
+    } while (chr != '\0');
     if (3 < (int)param_1) {
       *param_2 = local_4;
       return 1;

@@ -62,31 +62,31 @@ uint FUN_00b3faa0(int param_1,void *param_2,uint param_3)
 int _BIO_new_file(char *param_1,char *param_2)
 
 {
-  _iobuf *p_Var1;
-  DWORD DVar2;
-  int *piVar3;
-  int iVar4;
-  char *pcVar5;
-  undefined4 uVar6;
+  _iobuf *stream;
+  DWORD DVar1;
+  int *piVar2;
+  int iVar3;
+  char *pcVar4;
+  undefined4 uVar5;
   
-  p_Var1 = fopen(param_1,param_2);
-  if (p_Var1 != (_iobuf *)0x0) {
-    iVar4 = _BIO_new(&DAT_010cdea4);
-    if (iVar4 == 0) {
-      fclose(p_Var1);
+  stream = fopen(param_1,param_2);
+  if (stream != (_iobuf *)0x0) {
+    iVar3 = _BIO_new(&DAT_010cdea4);
+    if (iVar3 == 0) {
+      fclose(stream);
       return 0;
     }
-    _BIO_clear_flags(iVar4,0);
-    _BIO_ctrl(iVar4,0x6a,1,p_Var1);
-    return iVar4;
+    _BIO_clear_flags(iVar3,0);
+    _BIO_ctrl(iVar3,0x6a,1,stream);
+    return iVar3;
   }
-  uVar6 = 0x7e;
-  pcVar5 = ".\\crypto\\bio\\bss_file.c";
-  DVar2 = GetLastError();
-  _ERR_put_error(2,1,DVar2,pcVar5,uVar6);
+  uVar5 = 0x7e;
+  pcVar4 = ".\\crypto\\bio\\bss_file.c";
+  DVar1 = GetLastError();
+  _ERR_put_error(2,1,DVar1,pcVar4,uVar5);
   _ERR_add_error_data(5,"fopen(\'",param_1,"\',\'",param_2,"\')");
-  piVar3 = _errno();
-  if (*piVar3 == 2) {
+  piVar2 = _errno();
+  if (*piVar2 == 2) {
     _ERR_put_error(0x20,0x6d,0x80,".\\crypto\\bio\\bss_file.c",0x81);
     return 0;
   }

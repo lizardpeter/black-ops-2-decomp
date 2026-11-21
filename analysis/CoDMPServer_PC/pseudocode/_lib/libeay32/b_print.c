@@ -6,8 +6,8 @@ void FUN_00b451d0(uint *param_1,undefined1 param_2)
 
 {
   uint uVar1;
-  uchar *puVar2;
-  int iVar3;
+  uchar *dst;
+  int iVar2;
   int *unaff_EBX;
   uint *unaff_ESI;
   int *unaff_EDI;
@@ -18,17 +18,17 @@ void FUN_00b451d0(uint *param_1,undefined1 param_2)
         if (*unaff_ESI == 0) {
           *unaff_ESI = 0x400;
         }
-        puVar2 = (uchar *)_CRYPTO_malloc(*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2e5);
-        *unaff_EDI = (int)puVar2;
+        dst = (uchar *)_CRYPTO_malloc(*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2e5);
+        *unaff_EDI = (int)dst;
         if (*param_1 != 0) {
-          memcpy(puVar2,(uchar *)*unaff_EBX,*param_1);
+          memcpy(dst,(uchar *)*unaff_EBX,*param_1);
         }
         *unaff_EBX = 0;
       }
       else {
         *unaff_ESI = *unaff_ESI + 0x400;
-        iVar3 = _CRYPTO_realloc(*unaff_EDI,*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2ed);
-        *unaff_EDI = iVar3;
+        iVar2 = _CRYPTO_realloc(*unaff_EDI,*unaff_ESI,".\\crypto\\bio\\b_print.c",0x2ed);
+        *unaff_EDI = iVar2;
       }
     } while (*unaff_ESI <= *param_1);
   }

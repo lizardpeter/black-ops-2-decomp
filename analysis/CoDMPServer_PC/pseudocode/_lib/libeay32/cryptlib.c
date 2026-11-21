@@ -148,7 +148,7 @@ void _OPENSSL_showfatal(char *param_1)
   DWORD DVar2;
   _iobuf *p_Var3;
   int iVar4;
-  char *pcVar5;
+  char *ap;
   char *local_108;
   char local_104 [255];
   undefined1 local_5;
@@ -159,9 +159,9 @@ void _OPENSSL_showfatal(char *param_1)
   if (pvVar1 != (HANDLE)0x0) {
     DVar2 = GetFileType(pvVar1);
     if (DVar2 != 0) {
-      pcVar5 = &stack0x00000008;
+      ap = &stack0x00000008;
       p_Var3 = __iob_func();
-      vfprintf(p_Var3 + 2,param_1,pcVar5);
+      vfprintf(p_Var3 + 2,param_1,ap);
       return;
     }
   }

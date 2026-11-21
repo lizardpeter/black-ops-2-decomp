@@ -5,29 +5,29 @@
 undefined4 _RSA_padding_add_X931(undefined1 *param_1,int param_2,uchar *param_3,ulong param_4)
 
 {
-  uchar *puVar1;
-  int iVar2;
+  uchar *dst;
+  int iVar1;
   
-  iVar2 = (param_2 - param_4) + -2;
-  if (iVar2 < 0) {
+  iVar1 = (param_2 - param_4) + -2;
+  if (iVar1 < 0) {
     _ERR_put_error(4,0x7f,0x6e,".\\crypto\\rsa\\rsa_x931.c",0x50);
     return 0xffffffff;
   }
-  puVar1 = param_1 + 1;
-  if (iVar2 == 0) {
+  dst = param_1 + 1;
+  if (iVar1 == 0) {
     *param_1 = 0x6a;
   }
   else {
     *param_1 = 0x6b;
-    if (1 < iVar2) {
-      memset(puVar1,0xbb,(param_2 - param_4) - 3);
-      puVar1 = param_1 + iVar2;
+    if (1 < iVar1) {
+      memset(dst,0xbb,(param_2 - param_4) - 3);
+      dst = param_1 + iVar1;
     }
-    *puVar1 = 0xba;
-    puVar1 = puVar1 + 1;
+    *dst = 0xba;
+    dst = dst + 1;
   }
-  memcpy(puVar1,param_3,param_4);
-  puVar1[param_4] = 0xcc;
+  memcpy(dst,param_3,param_4);
+  dst[param_4] = 0xcc;
   return 1;
 }
 
@@ -41,20 +41,20 @@ ulong _RSA_padding_check_X931
   char cVar1;
   uchar uVar2;
   int iVar3;
-  uchar *puVar4;
-  ulong uVar5;
+  uchar *src;
+  ulong count;
   
   if (param_5 == param_4) {
     cVar1 = *param_3;
     if ((cVar1 == 'j') || (cVar1 == 'k')) {
-      puVar4 = (uchar *)(param_3 + 1);
+      src = (uchar *)(param_3 + 1);
       if (cVar1 == 'k') {
         param_4 = param_4 + -3;
         iVar3 = 0;
         if (0 < param_4) {
           do {
-            uVar2 = *puVar4;
-            puVar4 = puVar4 + 1;
+            uVar2 = *src;
+            src = src + 1;
             if (uVar2 == 0xba) break;
             if (uVar2 != 0xbb) {
               _ERR_put_error(4,0x80,0x8a,".\\crypto\\rsa\\rsa_x931.c",0x81);
@@ -63,21 +63,21 @@ ulong _RSA_padding_check_X931
             iVar3 = iVar3 + 1;
           } while (iVar3 < param_4);
         }
-        uVar5 = param_4 - iVar3;
+        count = param_4 - iVar3;
         if (iVar3 == 0) {
           _ERR_put_error(4,0x80,0x8a,".\\crypto\\rsa\\rsa_x931.c",0x8a);
           return 0xffffffff;
         }
       }
       else {
-        uVar5 = param_4 - 2;
+        count = param_4 - 2;
       }
-      if (puVar4[uVar5] != 0xcc) {
+      if (src[count] != 0xcc) {
         _ERR_put_error(4,0x80,0x8b,".\\crypto\\rsa\\rsa_x931.c",0x93);
         return 0xffffffff;
       }
-      memcpy(param_1,puVar4,uVar5);
-      return uVar5;
+      memcpy(param_1,src,count);
+      return count;
     }
   }
   _ERR_put_error(4,0x80,0x89,".\\crypto\\rsa\\rsa_x931.c",0x72);

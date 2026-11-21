@@ -5,27 +5,27 @@
 void _OPENSSL_cleanse(uchar *param_1,ulong param_2)
 
 {
-  byte bVar1;
-  uchar *puVar2;
+  byte chr;
+  uchar *puVar1;
   int extraout_EAX;
-  ulong uVar3;
-  uint uVar4;
+  ulong uVar2;
+  uint uVar3;
   
-  uVar4 = (uint)_cleanse_ctr;
-  bVar1 = _cleanse_ctr;
-  puVar2 = param_1;
-  for (uVar3 = param_2; uVar3 != 0; uVar3 = uVar3 - 1) {
-    *puVar2 = (uchar)uVar4;
-    puVar2 = puVar2 + 1;
-    uVar4 = uVar4 + 0x11 + ((uint)puVar2 & 0xf);
-    bVar1 = (byte)uVar4;
+  uVar3 = (uint)_cleanse_ctr;
+  chr = _cleanse_ctr;
+  puVar1 = param_1;
+  for (uVar2 = param_2; uVar2 != 0; uVar2 = uVar2 - 1) {
+    *puVar1 = (uchar)uVar3;
+    puVar1 = puVar1 + 1;
+    uVar3 = uVar3 + 0x11 + ((uint)puVar1 & 0xf);
+    chr = (byte)uVar3;
   }
-  memchr(param_1,bVar1,param_2);
+  memchr(param_1,chr,param_2);
   if (extraout_EAX != 0) {
-    _cleanse_ctr = bVar1 + 0x3f + (char)extraout_EAX;
+    _cleanse_ctr = chr + 0x3f + (char)extraout_EAX;
     return;
   }
-  _cleanse_ctr = bVar1;
+  _cleanse_ctr = chr;
   return;
 }
 

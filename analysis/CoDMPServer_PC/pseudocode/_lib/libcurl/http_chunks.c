@@ -32,46 +32,46 @@ void _Curl_httpchunk_init(int param_1)
 undefined4 _Curl_httpchunk_read(int *param_1,char *param_2,uint param_3,int *param_4)
 
 {
-  int *piVar1;
-  int iVar2;
-  char cVar3;
-  int iVar4;
-  ulong uVar5;
+  int *nptr;
+  int iVar1;
+  char cVar2;
+  int iVar3;
+  ulong uVar4;
   char extraout_CL;
-  uint uVar6;
+  uint uVar5;
   int local_8;
   
-  iVar2 = *param_1;
+  iVar1 = *param_1;
   *param_4 = 0;
-  piVar1 = param_1 + 1;
-  if (((*(char *)(iVar2 + 0x284) != '\0') && (*(char *)(iVar2 + 0xc5) == '\0')) &&
-     (iVar4 = _Curl_client_write(param_1,1,param_2,param_3), iVar4 != 0)) {
+  nptr = param_1 + 1;
+  if (((*(char *)(iVar1 + 0x284) != '\0') && (*(char *)(iVar1 + 0xc5) == '\0')) &&
+     (iVar3 = _Curl_client_write(param_1,1,param_2,param_3), iVar3 != 0)) {
     return 4;
   }
   local_8 = 0;
-  uVar6 = param_3;
+  uVar5 = param_3;
 joined_r0x00b0b35c:
-  if (uVar6 == 0) {
+  if (uVar5 == 0) {
     return 0;
   }
   switch(param_1[7]) {
   case 1:
-    cVar3 = FUN_00b0b2b0();
-    iVar4 = param_1[6];
-    if (cVar3 == '\0') {
-      if (iVar4 == 0) {
+    cVar2 = FUN_00b0b2b0();
+    iVar3 = param_1[6];
+    if (cVar2 == '\0') {
+      if (iVar3 == 0) {
         return 2;
       }
-      *(char *)(iVar4 + (int)piVar1) = '\0';
-      uVar5 = strtoul((char *)piVar1,(char **)0x0,0x10);
-      param_1[8] = uVar5;
+      *(char *)(iVar3 + (int)nptr) = '\0';
+      uVar4 = strtoul((char *)nptr,(char **)0x0,0x10);
+      param_1[8] = uVar4;
       param_1[7] = 2;
       goto joined_r0x00b0b35c;
     }
-    if (0xf < iVar4) {
+    if (0xf < iVar3) {
       return 1;
     }
-    *(char *)(iVar4 + (int)piVar1) = extraout_CL;
+    *(char *)(iVar3 + (int)nptr) = extraout_CL;
     param_1[6] = param_1[6] + 1;
     break;
   case 2:
@@ -82,7 +82,7 @@ joined_r0x00b0b35c:
   case 3:
     if (*param_2 == '\n') {
       if (param_1[8] == 0) {
-        if (*(char *)(iVar2 + 0xdc) == '\x01') goto LAB_00b0b5cc;
+        if (*(char *)(iVar1 + 0xdc) == '\x01') goto LAB_00b0b5cc;
         param_1[7] = 7;
       }
       else {
@@ -94,12 +94,12 @@ joined_r0x00b0b35c:
     }
     break;
   case 4:
-    if ((uint)param_1[8] < uVar6) {
-      uVar6 = param_1[8];
+    if ((uint)param_1[8] < uVar5) {
+      uVar5 = param_1[8];
     }
-    if (*(char *)(iVar2 + 0xc5) == '\0') {
-      if (*(char *)(iVar2 + 0x284) == '\0') {
-        local_8 = _Curl_client_write(param_1,1,param_2,uVar6);
+    if (*(char *)(iVar1 + 0xc5) == '\0') {
+      if (*(char *)(iVar1 + 0x284) == '\0') {
+        local_8 = _Curl_client_write(param_1,1,param_2,uVar5);
         goto LAB_00b0b45b;
       }
       local_8 = 0;
@@ -110,11 +110,11 @@ LAB_00b0b45b:
         return 4;
       }
     }
-    *param_4 = *param_4 + uVar6;
-    param_1[8] = param_1[8] - uVar6;
-    param_3 = param_3 - uVar6;
-    param_2 = param_2 + uVar6;
-    uVar6 = param_3;
+    *param_4 = *param_4 + uVar5;
+    param_1[8] = param_1[8] - uVar5;
+    param_3 = param_3 - uVar5;
+    param_2 = param_2 + uVar5;
+    uVar5 = param_3;
     if (param_1[8] == 0) {
       param_1[7] = 5;
     }
@@ -141,23 +141,23 @@ LAB_00b0b45b:
     if (*param_2 != '\n') {
       return 3;
     }
-    param_1[9] = uVar6 - 1;
+    param_1[9] = uVar5 - 1;
     return 0xffffffff;
   case 9:
-    iVar4 = param_1[0xbe];
-    if (iVar4 <= param_1[0xbf]) {
-      if (iVar4 == 0) {
+    iVar3 = param_1[0xbe];
+    if (iVar3 <= param_1[0xbf]) {
+      if (iVar3 == 0) {
         param_1[0xbe] = 0x80;
-        iVar4 = (*(code *)_Curl_cmalloc)(0x80);
+        iVar3 = (*(code *)_Curl_cmalloc)(0x80);
       }
       else {
-        param_1[0xbe] = iVar4 * 2;
-        iVar4 = (*(code *)_Curl_crealloc)(param_1[0xbd],iVar4 * 2);
+        param_1[0xbe] = iVar3 * 2;
+        iVar3 = (*(code *)_Curl_crealloc)(param_1[0xbd],iVar3 * 2);
       }
-      if (iVar4 == 0) {
+      if (iVar3 == 0) {
         return 7;
       }
-      param_1[0xbd] = iVar4;
+      param_1[0xbd] = iVar3;
     }
     *(char *)(param_1[0xbd] + param_1[0xbf]) = *param_2;
     param_1[0xbf] = param_1[0xbf] + 1;
@@ -178,11 +178,11 @@ LAB_00b0b45b:
     param_1[0xbf] = param_1[0xbf] + 1;
     *(undefined1 *)(param_1[0xbf] + param_1[0xbd]) = 0;
     if (param_1[0xbf] == 2) {
-      param_1[9] = uVar6 - 1;
+      param_1[9] = uVar5 - 1;
       param_1[7] = 8;
       return 0xffffffff;
     }
-    if ((*(char *)(iVar2 + 0x284) == '\0') &&
+    if ((*(char *)(iVar1 + 0x284) == '\0') &&
        (local_8 = _Curl_client_write(param_1,2,param_1[0xbd],param_1[0xbf]), local_8 != 0)) {
       return 4;
     }
@@ -193,9 +193,9 @@ LAB_00b0b5cc:
   default:
     return 5;
   }
-  param_3 = uVar6 - 1;
+  param_3 = uVar5 - 1;
   param_2 = param_2 + 1;
-  uVar6 = param_3;
+  uVar5 = param_3;
   goto joined_r0x00b0b35c;
 }
 

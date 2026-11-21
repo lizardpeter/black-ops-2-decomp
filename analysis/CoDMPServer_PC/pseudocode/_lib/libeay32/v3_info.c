@@ -83,10 +83,10 @@ int FUN_00b54420(undefined4 param_1,undefined4 param_2,undefined4 param_3)
   int *piVar3;
   int iVar4;
   int extraout_EAX;
-  uchar *puVar5;
-  ulong uVar6;
-  undefined4 uVar7;
-  undefined4 uVar8;
+  uchar *dest;
+  ulong count;
+  undefined4 uVar5;
+  undefined4 uVar6;
   int local_14;
   undefined1 local_c [4];
   int local_8;
@@ -105,42 +105,42 @@ int FUN_00b54420(undefined4 param_1,undefined4 param_2,undefined4 param_3)
       iVar2 = sk_value(param_3,local_14);
       piVar3 = (int *)_ASN1_item_new(&DAT_00d79084);
       if ((piVar3 == (int *)0x0) || (iVar4 = sk_push(iVar1,piVar3), iVar4 == 0)) {
-        uVar8 = 0x97;
+        uVar6 = 0x97;
 LAB_00b545c8:
-        uVar7 = 0x41;
+        uVar5 = 0x41;
 LAB_00b545cf:
-        _ERR_put_error(0x22,0x8b,uVar7,".\\crypto\\x509v3\\v3_info.c",uVar8);
+        _ERR_put_error(0x22,0x8b,uVar5,".\\crypto\\x509v3\\v3_info.c",uVar6);
 LAB_00b545de:
         sk_pop_free(iVar1,&_ACCESS_DESCRIPTION_free);
         return 0;
       }
       strchr(*(uchar **)(iVar2 + 4),';');
       if (extraout_EAX == 0) {
-        uVar8 = 0x9c;
-        uVar7 = 0x8f;
+        uVar6 = 0x9c;
+        uVar5 = 0x8f;
         goto LAB_00b545cf;
       }
-      uVar6 = extraout_EAX - *(int *)(iVar2 + 4);
+      count = extraout_EAX - *(int *)(iVar2 + 4);
       local_8 = extraout_EAX + 1;
       local_4 = *(undefined4 *)(iVar2 + 8);
       iVar4 = v2i_GENERAL_NAME_ex(piVar3[1],param_1,param_2,local_c,0);
       if (iVar4 == 0) goto LAB_00b545de;
-      puVar5 = (uchar *)_CRYPTO_malloc(uVar6 + 1,".\\crypto\\x509v3\\v3_info.c",0xa4);
-      if (puVar5 == (uchar *)0x0) {
-        uVar8 = 0xa5;
+      dest = (uchar *)_CRYPTO_malloc(count + 1,".\\crypto\\x509v3\\v3_info.c",0xa4);
+      if (dest == (uchar *)0x0) {
+        uVar6 = 0xa5;
         goto LAB_00b545c8;
       }
-      strncpy(puVar5,*(uchar **)(iVar2 + 4),uVar6);
-      puVar5[uVar6] = '\0';
-      iVar2 = _OBJ_txt2obj(puVar5,0);
+      strncpy(dest,*(uchar **)(iVar2 + 4),count);
+      dest[count] = '\0';
+      iVar2 = _OBJ_txt2obj(dest,0);
       *piVar3 = iVar2;
       if (iVar2 == 0) {
         _ERR_put_error(0x22,0x8b,0x77,".\\crypto\\x509v3\\v3_info.c",0xac);
-        _ERR_add_error_data(2,"value=",puVar5);
-        _CRYPTO_free(puVar5);
+        _ERR_add_error_data(2,"value=",dest);
+        _CRYPTO_free(dest);
         goto LAB_00b545de;
       }
-      _CRYPTO_free(puVar5);
+      _CRYPTO_free(dest);
       local_14 = local_14 + 1;
       iVar2 = sk_num(param_3);
     } while (local_14 < iVar2);

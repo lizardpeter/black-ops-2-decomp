@@ -60,8 +60,8 @@ void __cdecl bn_sqr_recursive(int param_1,int param_2,int param_3,int param_4)
   uint uVar5;
   uint *puVar6;
   int iVar7;
-  uchar *puVar8;
-  bool bVar9;
+  uchar *dst;
+  bool bVar8;
   
   iVar7 = param_3 / 2;
   if (param_3 == 4) {
@@ -72,32 +72,32 @@ void __cdecl bn_sqr_recursive(int param_1,int param_2,int param_3,int param_4)
     if (0xf < param_3) {
       iVar3 = param_2 + iVar7 * 4;
       iVar1 = bn_cmp_words(param_2,iVar3,iVar7);
-      bVar9 = -1 < iVar1;
+      bVar8 = -1 < iVar1;
       if (iVar1 < 1) {
-        if (!bVar9) {
+        if (!bVar8) {
           bn_sub_words(param_4,iVar3,param_2,iVar7);
         }
       }
       else {
         bn_sub_words(param_4,param_2,iVar3,iVar7);
-        bVar9 = false;
+        bVar8 = false;
       }
       iVar1 = param_4 + param_3 * 8;
-      if (bVar9) {
-        puVar8 = (uchar *)(param_4 + param_3 * 4);
-        memset(puVar8,'\0',param_3 * 4);
+      if (bVar8) {
+        dst = (uchar *)(param_4 + param_3 * 4);
+        memset(dst,'\0',param_3 * 4);
       }
       else {
-        puVar8 = (uchar *)(param_4 + param_3 * 4);
-        bn_sqr_recursive(puVar8,param_4,iVar7,iVar1);
+        dst = (uchar *)(param_4 + param_3 * 4);
+        bn_sqr_recursive(dst,param_4,iVar7,iVar1);
       }
       bn_sqr_recursive(param_1,param_2,iVar7,iVar1);
       iVar1 = param_1 + param_3 * 4;
       bn_sqr_recursive(iVar1,iVar3,iVar7,param_4 + param_3 * 8);
       iVar1 = bn_add_words(param_4,param_1,iVar1,param_3);
-      iVar2 = bn_sub_words(puVar8,param_4,puVar8,param_3);
+      iVar2 = bn_sub_words(dst,param_4,dst,param_3);
       iVar3 = param_1 + iVar7 * 4;
-      iVar3 = bn_add_words(iVar3,iVar3,puVar8,param_3);
+      iVar3 = bn_add_words(iVar3,iVar3,dst,param_3);
       uVar5 = (iVar1 - iVar2) + iVar3;
       if (uVar5 != 0) {
         puVar6 = (uint *)(param_1 + (iVar7 + param_3) * 4);

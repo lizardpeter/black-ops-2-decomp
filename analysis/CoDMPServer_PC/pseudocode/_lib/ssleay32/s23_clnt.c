@@ -16,11 +16,11 @@ int FUN_00b25560(int param_1)
   byte *pbVar7;
   undefined1 *puVar8;
   uint uVar9;
-  ulong uVar10;
-  undefined4 *puVar11;
-  byte *pbVar12;
-  long64 lVar13;
-  undefined4 uVar14;
+  ulong count;
+  undefined4 *puVar10;
+  byte *pbVar11;
+  long64 lVar12;
+  undefined4 uVar13;
   byte local_14;
   uint local_10;
   int local_c;
@@ -50,11 +50,11 @@ LAB_00b2559f:
   pbVar1 = *(byte **)(*(int *)(param_1 + 0x3c) + 4);
   if (*(int *)(param_1 + 0x34) != 0x1210) goto LAB_00b25940;
   iVar4 = *(int *)(param_1 + 0x58);
-  lVar13 = _time64((long64 *)0x0);
-  *(char *)(iVar4 + 0xb8) = (char)((ulonglong)lVar13 >> 0x18);
-  *(char *)(iVar4 + 0xb9) = (char)((ulonglong)lVar13 >> 0x10);
-  *(char *)(iVar4 + 0xba) = (char)((ulonglong)lVar13 >> 8);
-  *(char *)(iVar4 + 0xbb) = (char)lVar13;
+  lVar12 = _time64((long64 *)0x0);
+  *(char *)(iVar4 + 0xb8) = (char)((ulonglong)lVar12 >> 0x18);
+  *(char *)(iVar4 + 0xb9) = (char)((ulonglong)lVar12 >> 0x10);
+  *(char *)(iVar4 + 0xba) = (char)((ulonglong)lVar12 >> 8);
+  *(char *)(iVar4 + 0xbb) = (char)lVar12;
   iVar4 = _RAND_pseudo_bytes(iVar4 + 0xbc,0x1c);
   if (iVar4 < 1) {
     return -1;
@@ -79,12 +79,12 @@ LAB_00b2559f:
   if (local_10 == 0) {
     pbVar1[9] = (byte)param_1;
     pbVar1[10] = local_14;
-    puVar11 = (undefined4 *)(*(int *)(iVar3 + 0x58) + 0xb8);
-    pbVar12 = pbVar1 + 0xb;
+    puVar10 = (undefined4 *)(*(int *)(iVar3 + 0x58) + 0xb8);
+    pbVar11 = pbVar1 + 0xb;
     for (iVar4 = 8; iVar4 != 0; iVar4 = iVar4 + -1) {
-      *(undefined4 *)pbVar12 = *puVar11;
-      puVar11 = puVar11 + 1;
-      pbVar12 = pbVar12 + 4;
+      *(undefined4 *)pbVar11 = *puVar10;
+      puVar10 = puVar10 + 1;
+      pbVar11 = pbVar11 + 4;
     }
     pbVar1[0x2b] = 0;
     uVar5 = _SSL_get_ciphers(iVar3,pbVar1 + 0x2e,&_ssl3_put_cipher_by_char);
@@ -100,20 +100,20 @@ LAB_00b2559f:
         iVar6 = sk_num(iVar6);
       }
       pbVar1[iVar4 + 0x2e] = (char)iVar6 + 1;
-      pbVar12 = pbVar1 + iVar4 + 0x2e + 1;
+      pbVar11 = pbVar1 + iVar4 + 0x2e + 1;
       iVar4 = 0;
       if (0 < iVar6) {
         do {
           pbVar7 = (byte *)sk_value(*(undefined4 *)(*(int *)(iVar3 + 0xd8) + 0x98),iVar4);
-          *pbVar12 = *pbVar7;
+          *pbVar11 = *pbVar7;
           iVar4 = iVar4 + 1;
-          pbVar12 = pbVar12 + 1;
+          pbVar11 = pbVar11 + 1;
         } while (iVar4 < iVar6);
       }
-      *pbVar12 = 0;
-      puVar8 = (undefined1 *)ssl_add_clienthello_tlsext(iVar3,pbVar12 + 1,pbVar1 + 0x4000);
+      *pbVar11 = 0;
+      puVar8 = (undefined1 *)ssl_add_clienthello_tlsext(iVar3,pbVar11 + 1,pbVar1 + 0x4000);
       if (puVar8 == (undefined1 *)0x0) {
-        uVar14 = 0x187;
+        uVar13 = 0x187;
         uVar5 = 0x44;
         goto LAB_00b256e8;
       }
@@ -125,7 +125,7 @@ LAB_00b2559f:
       uVar9 = iVar4 + 4;
       pbVar1[7] = (byte)((uint)iVar4 >> 8);
       if (0x4000 < uVar9) {
-        uVar14 = 0x198;
+        uVar13 = 0x198;
         uVar5 = 0x44;
         goto LAB_00b256e8;
       }
@@ -139,23 +139,23 @@ LAB_00b2559f:
       ssl3_finish_mac(iVar3,pbVar1 + 5,((int)puVar8 - (int)pbVar1) + -5);
       goto LAB_00b2592e;
     }
-    uVar14 = 0x16f;
+    uVar13 = 0x16f;
   }
   else {
     pbVar1[2] = 1;
-    pbVar12 = pbVar1 + 0xb;
+    pbVar11 = pbVar1 + 0xb;
     pbVar1[3] = (byte)param_1;
     pbVar1[4] = local_14;
-    uVar5 = _SSL_get_ciphers(iVar3,pbVar12,0);
+    uVar5 = _SSL_get_ciphers(iVar3,pbVar11,0);
     iVar4 = ssl_cipher_list_to_bytes(iVar3,uVar5);
     if (iVar4 != 0) {
       pbVar1[6] = (byte)iVar4;
       pbVar1[5] = (byte)((uint)iVar4 >> 8);
       pbVar1[7] = 0;
       pbVar1[8] = 0;
-      uVar10 = (-(uint)((*(byte *)(iVar3 + 0xf4) & 2) != 0) & 0xfffffff0) + 0x20;
-      pbVar1[10] = (byte)uVar10;
-      pbVar1[9] = (byte)(uVar10 >> 8);
+      count = (-(uint)((*(byte *)(iVar3 + 0xf4) & 2) != 0) & 0xfffffff0) + 0x20;
+      pbVar1[10] = (byte)count;
+      pbVar1[9] = (byte)(count >> 8);
       iVar6 = *(int *)(iVar3 + 0x58);
       *(undefined4 *)(iVar6 + 0xb8) = 0;
       *(undefined4 *)(iVar6 + 0xbc) = 0;
@@ -165,17 +165,17 @@ LAB_00b2559f:
       *(undefined4 *)(iVar6 + 0xcc) = 0;
       *(undefined4 *)(iVar6 + 0xd0) = 0;
       *(undefined4 *)(iVar6 + 0xd4) = 0;
-      iVar6 = _RAND_pseudo_bytes((*(int *)(iVar3 + 0x58) - uVar10) + 0xd8,uVar10);
+      iVar6 = _RAND_pseudo_bytes((*(int *)(iVar3 + 0x58) - count) + 0xd8,count);
       if (iVar6 < 1) {
         return -1;
       }
-      memcpy(pbVar12 + iVar4,(uchar *)((*(int *)(iVar3 + 0x58) - uVar10) + 0xd8),uVar10);
-      pbVar12 = pbVar12 + iVar4 + (uVar10 - (int)pbVar1) + -2;
-      *pbVar1 = (byte)((uint)pbVar12 >> 8) | 0x80;
-      pbVar1[1] = (byte)pbVar12;
-      *(byte **)(iVar3 + 0x44) = pbVar12 + 2;
+      memcpy(pbVar11 + iVar4,(uchar *)((*(int *)(iVar3 + 0x58) - count) + 0xd8),count);
+      pbVar11 = pbVar11 + iVar4 + (count - (int)pbVar1) + -2;
+      *pbVar1 = (byte)((uint)pbVar11 >> 8) | 0x80;
+      pbVar1[1] = (byte)pbVar11;
+      *(byte **)(iVar3 + 0x44) = pbVar11 + 2;
       *(undefined4 *)(iVar3 + 0x48) = 0;
-      ssl3_finish_mac(iVar3,pbVar1 + 2,pbVar12);
+      ssl3_finish_mac(iVar3,pbVar1 + 2,pbVar11);
 LAB_00b2592e:
       *(undefined4 *)(iVar3 + 0x34) = 0x1211;
       *(undefined4 *)(iVar3 + 0x48) = 0;
@@ -192,11 +192,11 @@ LAB_00b25940:
       }
       return iVar4;
     }
-    uVar14 = 0x132;
+    uVar13 = 0x132;
   }
   uVar5 = 0xb5;
 LAB_00b256e8:
-  _ERR_put_error(0x14,0x74,uVar5,".\\ssl\\s23_clnt.c",uVar14);
+  _ERR_put_error(0x14,0x74,uVar5,".\\ssl\\s23_clnt.c",uVar13);
   return -1;
 }
 
@@ -214,10 +214,10 @@ int FUN_00b259d0(void)
   char *pcVar3;
   undefined4 *puVar4;
   int iVar5;
-  ulong uVar6;
-  code *pcVar7;
+  ulong count;
+  code *pcVar6;
   undefined4 *unaff_ESI;
-  undefined4 uVar8;
+  undefined4 uVar7;
   undefined1 auStack_c [6];
   char local_6;
   uint local_4;
@@ -229,7 +229,7 @@ int FUN_00b259d0(void)
   }
   pcVar3 = (char *)unaff_ESI[0x13];
   local_6 = pcVar3[6];
-  uVar8 = *(undefined4 *)pcVar3;
+  uVar7 = *(undefined4 *)pcVar3;
   uVar2 = *(undefined2 *)(pcVar3 + 4);
   cVar1 = *pcVar3;
   if ((((cVar1 < '\0') && (pcVar3[2] == '\x04')) && (pcVar3[5] == '\0')) && (pcVar3[6] == '\x02')) {
@@ -243,9 +243,9 @@ int FUN_00b259d0(void)
       else {
         ssl2_clear();
       }
-      uVar6 = (-(uint)((*(byte *)(unaff_ESI + 0x3d) & 2) != 0) & 0xfffffff0) + 0x20;
-      *(ulong *)(unaff_ESI[0x15] + 100) = uVar6;
-      memcpy((uchar *)(unaff_ESI[0x15] + 0x68),(uchar *)((unaff_ESI[0x16] - uVar6) + 0xd8),uVar6);
+      count = (-(uint)((*(byte *)(unaff_ESI + 0x3d) & 2) != 0) & 0xfffffff0) + 0x20;
+      *(ulong *)(unaff_ESI[0x15] + 100) = count;
+      memcpy((uchar *)(unaff_ESI[0x15] + 0x68),(uchar *)((unaff_ESI[0x16] - count) + 0xd8),count);
       if (unaff_ESI[0x16] != 0) {
         ssl3_free();
       }
@@ -259,7 +259,7 @@ int FUN_00b259d0(void)
         unaff_ESI[0x14] = 7;
         puVar4 = *(undefined4 **)(unaff_ESI[0x15] + 0x30);
         unaff_ESI[0x13] = puVar4;
-        *puVar4 = uVar8;
+        *puVar4 = uVar7;
         *(undefined2 *)(puVar4 + 1) = uVar2;
         *(char *)((int)puVar4 + 6) = local_6;
         *(undefined4 *)(unaff_ESI[0x15] + 0x28) = 7;
@@ -267,14 +267,14 @@ int FUN_00b259d0(void)
         *(undefined4 *)(unaff_ESI[0x15] + 0xd4) = 1;
         iVar5 = _SSLv2_client_method();
         unaff_ESI[2] = iVar5;
-        uVar8 = *(undefined4 *)(iVar5 + 0x14);
+        uVar7 = *(undefined4 *)(iVar5 + 0x14);
         goto LAB_00b25c13;
       }
-      uVar8 = 0x1f7;
+      uVar7 = 0x1f7;
       iVar5 = 7;
     }
     else {
-      uVar8 = 0x1db;
+      uVar7 = 0x1db;
       iVar5 = 0x102;
     }
   }
@@ -290,7 +290,7 @@ int FUN_00b259d0(void)
       unaff_ESI[0x14] = 7;
       puVar4 = *(undefined4 **)(unaff_ESI[0x16] + 0xe0);
       unaff_ESI[0x13] = puVar4;
-      *puVar4 = uVar8;
+      *puVar4 = uVar7;
       *(undefined2 *)(puVar4 + 1) = uVar2;
       *(char *)((int)puVar4 + 6) = local_6;
       *(undefined4 *)(unaff_ESI[0x16] + 0xec) = 7;
@@ -301,7 +301,7 @@ int FUN_00b259d0(void)
       }
       else {
         if ((pcVar3[2] != '\x01') || ((unaff_ESI[0x3d] & 0x4000000) != 0)) {
-          uVar8 = 0x23c;
+          uVar7 = 0x23c;
           iVar5 = 0x102;
           goto LAB_00b25cd6;
         }
@@ -309,9 +309,9 @@ int FUN_00b259d0(void)
         iVar5 = _TLSv1_client_method();
       }
       unaff_ESI[2] = iVar5;
-      uVar8 = *(undefined4 *)(iVar5 + 0x14);
+      uVar7 = *(undefined4 *)(iVar5 + 0x14);
 LAB_00b25c13:
-      unaff_ESI[8] = uVar8;
+      unaff_ESI[8] = uVar7;
       unaff_ESI[0x11] = 0;
       iVar5 = ssl_get_new_session();
       if (iVar5 == 0) {
@@ -323,22 +323,22 @@ LAB_00b25c13:
     if ((((cVar1 == '\x15') && (pcVar3[1] == '\x03')) &&
         ((pcVar3[2] == '\0' || (pcVar3[2] == '\x01')))) &&
        ((pcVar3[3] == '\0' && (pcVar3[4] == '\x02')))) {
-      pcVar7 = (code *)unaff_ESI[0x33];
-      if ((pcVar7 != (code *)0x0) ||
-         (pcVar7 = *(code **)(unaff_ESI[0x36] + 0x9c), pcVar7 != (code *)0x0)) {
-        (*pcVar7)();
+      pcVar6 = (code *)unaff_ESI[0x33];
+      if ((pcVar6 != (code *)0x0) ||
+         (pcVar6 = *(code **)(unaff_ESI[0x36] + 0x9c), pcVar6 != (code *)0x0)) {
+        (*pcVar6)();
       }
       unaff_ESI[6] = 1;
-      uVar8 = 0x25a;
+      uVar7 = 0x25a;
       iVar5 = (byte)pcVar3[6] + 1000;
     }
     else {
-      uVar8 = 0x25f;
+      uVar7 = 0x25f;
       iVar5 = 0xfc;
     }
   }
 LAB_00b25cd6:
-  _ERR_put_error(0x14,0x77,iVar5,".\\ssl\\s23_clnt.c",uVar8);
+  _ERR_put_error(0x14,0x77,iVar5,".\\ssl\\s23_clnt.c",uVar7);
   return -1;
 }
 

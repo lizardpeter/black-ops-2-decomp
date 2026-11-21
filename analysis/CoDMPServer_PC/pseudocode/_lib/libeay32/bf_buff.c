@@ -124,7 +124,7 @@ int FUN_00b3e8e0(int param_1,uchar *param_2,ulong param_3)
   int *piVar1;
   int iVar2;
   int iVar3;
-  ulong uVar4;
+  ulong count;
   int local_4;
   
   local_4 = 0;
@@ -136,16 +136,16 @@ int FUN_00b3e8e0(int param_1,uchar *param_2,ulong param_3)
     return 0;
   }
   _BIO_clear_flags(param_1,0xf);
-  uVar4 = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
-  if ((int)uVar4 < (int)param_3) {
+  count = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
+  if ((int)count < (int)param_3) {
     do {
       if (*(int *)(iVar2 + 0x18) != 0) {
-        if (0 < (int)uVar4) {
-          memcpy((uchar *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,uVar4);
-          param_2 = param_2 + uVar4;
-          local_4 = local_4 + uVar4;
-          param_3 = param_3 - uVar4;
-          *(int *)(iVar2 + 0x18) = *(int *)(iVar2 + 0x18) + uVar4;
+        if (0 < (int)count) {
+          memcpy((uchar *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,count);
+          param_2 = param_2 + count;
+          local_4 = local_4 + count;
+          param_3 = param_3 - count;
+          *(int *)(iVar2 + 0x18) = *(int *)(iVar2 + 0x18) + count;
         }
         do {
           iVar3 = _BIO_write(*(undefined4 *)(param_1 + 0x24),
@@ -188,8 +188,8 @@ LAB_00b3ea26:
           }
         } while (*(int *)(iVar2 + 4) <= (int)param_3);
       }
-      uVar4 = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
-    } while ((int)uVar4 < (int)param_3);
+      count = (*(int *)(iVar2 + 4) - *(int *)(iVar2 + 0x1c)) - *(int *)(iVar2 + 0x18);
+    } while ((int)count < (int)param_3);
   }
   memcpy((uchar *)(*(int *)(iVar2 + 0x14) + *(int *)(iVar2 + 0x18)),param_2,param_3);
   *(int *)(iVar2 + 0x18) = *(int *)(iVar2 + 0x18) + param_3;

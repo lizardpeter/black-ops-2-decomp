@@ -6,30 +6,30 @@ void FUN_00b424a0(undefined4 param_1)
 
 {
   int iVar1;
-  uchar *puVar2;
-  uint uVar3;
+  uchar *dst;
+  uint uVar2;
   int *unaff_ESI;
   
   iVar1 = unaff_ESI[2];
   if (unaff_ESI[1] == iVar1) {
     if (iVar1 == 0) {
-      uVar3 = 0x20;
+      uVar2 = 0x20;
     }
     else {
-      uVar3 = (uint)(iVar1 * 3) >> 1;
+      uVar2 = (uint)(iVar1 * 3) >> 1;
     }
-    puVar2 = (uchar *)_CRYPTO_malloc(uVar3 * 4,".\\crypto\\bn\\bn_ctx.c",0x152);
-    if (puVar2 == (uchar *)0x0) {
+    dst = (uchar *)_CRYPTO_malloc(uVar2 * 4,".\\crypto\\bn\\bn_ctx.c",0x152);
+    if (dst == (uchar *)0x0) {
       return;
     }
     if (unaff_ESI[1] != 0) {
-      memcpy(puVar2,(uchar *)*unaff_ESI,unaff_ESI[1] * 4);
+      memcpy(dst,(uchar *)*unaff_ESI,unaff_ESI[1] * 4);
     }
     if (unaff_ESI[2] != 0) {
       _CRYPTO_free(*unaff_ESI);
     }
-    *unaff_ESI = (int)puVar2;
-    unaff_ESI[2] = uVar3;
+    *unaff_ESI = (int)dst;
+    unaff_ESI[2] = uVar2;
   }
   *(undefined4 *)(*unaff_ESI + unaff_ESI[1] * 4) = param_1;
   unaff_ESI[1] = unaff_ESI[1] + 1;

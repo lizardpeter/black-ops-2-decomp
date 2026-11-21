@@ -18,10 +18,10 @@ uchar * __cdecl ssl_add_clienthello_tlsext(int *param_1,uchar *param_2,uchar *pa
   uchar *puVar8;
   uchar uVar9;
   char *pcVar10;
-  uchar *puVar11;
-  ulong uVar12;
-  int iVar13;
-  undefined4 uVar14;
+  uchar *count;
+  ulong count_00;
+  int iVar11;
+  undefined4 uVar12;
   uchar *local_4;
   
   puVar8 = param_3;
@@ -41,30 +41,30 @@ uchar * __cdecl ssl_add_clienthello_tlsext(int *param_1,uchar *param_2,uchar *pa
         cVar2 = *pcVar10;
         pcVar10 = pcVar10 + 1;
       } while (cVar2 != '\0');
-      puVar11 = (uchar *)(pcVar10 + -(int)pcVar1);
-      if (param_3 + (-9 - (int)local_4) < puVar11) {
+      count = (uchar *)(pcVar10 + -(int)pcVar1);
+      if (param_3 + (-9 - (int)local_4) < count) {
         return (uchar *)0x0;
       }
       *local_4 = '\0';
       param_2[3] = '\0';
-      param_2[4] = (uchar)((uint)(puVar11 + 5) >> 8);
-      uVar9 = (uchar)puVar11;
+      param_2[4] = (uchar)((uint)(count + 5) >> 8);
+      uVar9 = (uchar)count;
       param_2[5] = uVar9 + '\x05';
-      param_2[6] = (uchar)((uint)(puVar11 + 3) >> 8);
+      param_2[6] = (uchar)((uint)(count + 3) >> 8);
       param_2[7] = uVar9 + '\x03';
       param_2[8] = '\0';
-      param_2[9] = (uchar)((uint)puVar11 >> 8);
+      param_2[9] = (uchar)((uint)count >> 8);
       param_2[10] = uVar9;
       local_4 = param_2 + 0xb;
-      memcpy(local_4,(uchar *)param_1[0x44],(ulong)puVar11);
-      local_4 = local_4 + (int)puVar11;
+      memcpy(local_4,(uchar *)param_1[0x44],(ulong)count);
+      local_4 = local_4 + (int)count;
     }
     if (piVar3[10] != 0) {
       iVar5 = ssl_add_clienthello_renegotiate_ext(piVar3,0,&param_1,0);
       if (iVar5 == 0) {
-        uVar14 = 0xb9;
+        uVar12 = 0xb9;
 LAB_00b29e01:
-        _ERR_put_error(0x14,0x110,0x44,".\\ssl\\t1_lib.c",uVar14);
+        _ERR_put_error(0x14,0x110,0x44,".\\ssl\\t1_lib.c",uVar12);
         return (uchar *)0x0;
       }
       if ((int)(puVar8 + (-(int)param_2 - (int)param_1) + -4) < 0) {
@@ -77,7 +77,7 @@ LAB_00b29e01:
       local_4 = local_4 + 4;
       iVar5 = ssl_add_clienthello_renegotiate_ext(piVar3,local_4,&param_1,param_1);
       if (iVar5 == 0) {
-        uVar14 = 0xc4;
+        uVar12 = 0xc4;
         goto LAB_00b29e01;
       }
       local_4 = local_4 + (int)param_1;
@@ -86,39 +86,39 @@ LAB_00b29e01:
     if ((uVar6 & 0x4000) == 0) {
       if (((piVar3[10] == 0) && (iVar5 = piVar3[0x2f], iVar5 != 0)) && (*(int *)(iVar5 + 0xcc) != 0)
          ) {
-        uVar12 = *(ulong *)(iVar5 + 0xd0);
+        count_00 = *(ulong *)(iVar5 + 0xd0);
       }
       else {
-        uVar12 = 0;
+        count_00 = 0;
       }
-      if ((int)(puVar8 + (-(int)local_4 - uVar12) + -4) < 0) {
+      if ((int)(puVar8 + (-(int)local_4 - count_00) + -4) < 0) {
         return (uchar *)0x0;
       }
       *local_4 = '\0';
       local_4[1] = '#';
-      local_4[2] = (uchar)(uVar12 >> 8);
-      local_4[3] = (uchar)uVar12;
+      local_4[2] = (uchar)(count_00 >> 8);
+      local_4[3] = (uchar)count_00;
       local_4 = local_4 + 4;
-      if (uVar12 != 0) {
-        memcpy(local_4,*(uchar **)(piVar3[0x2f] + 0xcc),uVar12);
-        local_4 = local_4 + uVar12;
+      if (count_00 != 0) {
+        memcpy(local_4,*(uchar **)(piVar3[0x2f] + 0xcc),count_00);
+        local_4 = local_4 + count_00;
       }
     }
     if ((piVar3[0x46] == 1) && (*piVar3 != 0xfeff)) {
       iVar5 = 0;
-      iVar13 = 0;
+      iVar11 = 0;
       iVar7 = sk_num(piVar3[0x48]);
       if (0 < iVar7) {
         do {
-          uVar14 = sk_value(piVar3[0x48],iVar13);
-          iVar7 = i2d_OCSP_RESPID(uVar14,0);
+          uVar12 = sk_value(piVar3[0x48],iVar11);
+          iVar7 = i2d_OCSP_RESPID(uVar12,0);
           if (iVar7 < 1) {
             return (uchar *)0x0;
           }
           iVar5 = iVar5 + 2 + iVar7;
-          iVar13 = iVar13 + 1;
+          iVar11 = iVar11 + 1;
           iVar7 = sk_num(piVar3[0x48]);
-        } while (iVar13 < iVar7);
+        } while (iVar11 < iVar7);
       }
       iVar7 = 0;
       if (piVar3[0x49] == 0) {
@@ -148,9 +148,9 @@ LAB_00b29e01:
       if (0 < iVar5) {
         do {
           puVar8 = local_4;
-          uVar14 = sk_value(piVar3[0x48],iVar7);
+          uVar12 = sk_value(piVar3[0x48],iVar7);
           local_4 = local_4 + 2;
-          uVar4 = i2d_OCSP_RESPID(uVar14,&local_4);
+          uVar4 = i2d_OCSP_RESPID(uVar12,&local_4);
           *puVar8 = (uchar)((ushort)uVar4 >> 8);
           puVar8[1] = (uchar)uVar4;
           iVar7 = iVar7 + 1;

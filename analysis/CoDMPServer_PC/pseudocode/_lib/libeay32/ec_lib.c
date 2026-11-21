@@ -105,7 +105,7 @@ void _EC_GROUP_set_point_conversion_form(int param_1,undefined4 param_2)
 ulong _EC_GROUP_set_seed(int param_1,uchar *param_2,ulong param_3)
 
 {
-  uchar *puVar1;
+  uchar *dst;
   
   if (*(int *)(param_1 + 0x3c) != 0) {
     _CRYPTO_free(*(int *)(param_1 + 0x3c));
@@ -113,12 +113,12 @@ ulong _EC_GROUP_set_seed(int param_1,uchar *param_2,ulong param_3)
     *(undefined4 *)(param_1 + 0x40) = 0;
   }
   if ((param_3 != 0) && (param_2 != (uchar *)0x0)) {
-    puVar1 = (uchar *)_CRYPTO_malloc(param_3,".\\crypto\\ec\\ec_lib.c",0x182);
-    *(uchar **)(param_1 + 0x3c) = puVar1;
-    if (puVar1 == (uchar *)0x0) {
+    dst = (uchar *)_CRYPTO_malloc(param_3,".\\crypto\\ec\\ec_lib.c",0x182);
+    *(uchar **)(param_1 + 0x3c) = dst;
+    if (dst == (uchar *)0x0) {
       return 0;
     }
-    memcpy(puVar1,param_2,param_3);
+    memcpy(dst,param_2,param_3);
     *(ulong *)(param_1 + 0x40) = param_3;
     return param_3;
   }
@@ -971,9 +971,9 @@ undefined4 _EC_GROUP_copy(int *param_1,int *param_2)
 {
   undefined4 *puVar1;
   int iVar2;
-  uchar *puVar3;
+  uchar *dst;
   int extraout_EAX;
-  undefined4 uVar4;
+  undefined4 uVar3;
   
   if (*(int *)(*param_1 + 0x10) == 0) {
     _ERR_put_error(0x10,0x6a,0x42,".\\crypto\\ec\\ec_lib.c",0xb1);
@@ -1029,19 +1029,19 @@ undefined4 _EC_GROUP_copy(int *param_1,int *param_2)
       }
       param_1[0xf] = 0;
       param_1[0x10] = 0;
-      uVar4 = (**(code **)(*param_1 + 0x10))(param_1,param_2);
-      return uVar4;
+      uVar3 = (**(code **)(*param_1 + 0x10))(param_1,param_2);
+      return uVar3;
     }
     if (iVar2 != 0) {
       _CRYPTO_free(iVar2);
     }
-    puVar3 = (uchar *)_CRYPTO_malloc(param_2[0x10],".\\crypto\\ec\\ec_lib.c",0xe6);
-    param_1[0xf] = (int)puVar3;
-    if ((puVar3 != (uchar *)0x0) &&
-       (memcpy(puVar3,(uchar *)param_2[0xf],param_2[0x10]), extraout_EAX != 0)) {
+    dst = (uchar *)_CRYPTO_malloc(param_2[0x10],".\\crypto\\ec\\ec_lib.c",0xe6);
+    param_1[0xf] = (int)dst;
+    if ((dst != (uchar *)0x0) &&
+       (memcpy(dst,(uchar *)param_2[0xf],param_2[0x10]), extraout_EAX != 0)) {
       param_1[0x10] = param_2[0x10];
-      uVar4 = (**(code **)(*param_1 + 0x10))(param_1,param_2);
-      return uVar4;
+      uVar3 = (**(code **)(*param_1 + 0x10))(param_1,param_2);
+      return uVar3;
     }
   }
   return 0;

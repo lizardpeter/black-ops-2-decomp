@@ -125,71 +125,70 @@ int FUN_00b3cf50(int *param_1,undefined4 *param_2,undefined4 param_3,undefined4 
                 undefined4 param_5,undefined4 param_6,undefined4 param_7,undefined4 param_8)
 
 {
-  uchar *puVar1;
-  undefined4 *puVar2;
+  uchar *src;
+  undefined4 *puVar1;
+  int iVar2;
   int iVar3;
-  int iVar4;
-  undefined4 uVar5;
-  int iVar6;
+  undefined4 uVar4;
+  int iVar5;
   undefined4 local_10;
   uchar *local_c;
   undefined4 *local_8;
   int local_4;
   
   local_4 = 0xb3cf5a;
-  puVar1 = (uchar *)*param_2;
+  src = (uchar *)*param_2;
   local_10 = 0;
   local_8 = (undefined4 *)0x0;
-  local_c = puVar1;
-  iVar3 = _ASN1_item_ex_d2i(&local_10,&local_c,param_3,&DAT_00d6b2cc,param_5,param_6,param_7,param_8
+  local_c = src;
+  iVar2 = _ASN1_item_ex_d2i(&local_10,&local_c,param_3,&DAT_00d6b2cc,param_5,param_6,param_7,param_8
                            );
-  if (0 < iVar3) {
-    puVar2 = (undefined4 *)*param_1;
-    local_4 = iVar3;
-    if (puVar2 != (undefined4 *)0x0) {
-      _BUF_MEM_free(puVar2[2]);
-      sk_pop_free(*puVar2,_X509_NAME_ENTRY_free);
-      _CRYPTO_free(puVar2);
+  if (0 < iVar2) {
+    puVar1 = (undefined4 *)*param_1;
+    local_4 = iVar2;
+    if (puVar1 != (undefined4 *)0x0) {
+      _BUF_MEM_free(puVar1[2]);
+      sk_pop_free(*puVar1,_X509_NAME_ENTRY_free);
+      _CRYPTO_free(puVar1);
       *param_1 = 0;
     }
-    iVar4 = FUN_00b3ce80(&local_8,0);
-    puVar2 = local_8;
-    if ((iVar4 == 0) || (iVar4 = _BUF_MEM_grow(local_8[2],(int)local_c - (int)puVar1), iVar4 == 0))
-    {
+    iVar3 = FUN_00b3ce80(&local_8,0);
+    puVar1 = local_8;
+    if ((iVar3 == 0) || (iVar3 = _BUF_MEM_grow(local_8[2],(int)local_c - (int)src), iVar3 == 0)) {
 LAB_00b3d0d7:
       _ERR_put_error(0xd,0x9e,0x3a,".\\crypto\\asn1\\x_name.c",200);
       return 0;
     }
-    memcpy(*(uchar **)(puVar2[2] + 4),puVar1,(int)local_c - (int)puVar1);
-    iVar6 = 0;
-    iVar4 = sk_num(local_10);
-    if (0 < iVar4) {
+    memcpy(*(uchar **)(puVar1[2] + 4),src,(int)local_c - (int)src);
+    iVar5 = 0;
+    iVar3 = sk_num(local_10);
+    if (0 < iVar3) {
       do {
-        uVar5 = sk_value(local_10,iVar6);
-        iVar4 = 0;
-        iVar3 = sk_num(uVar5);
-        if (0 < iVar3) {
+        uVar4 = sk_value(local_10,iVar5);
+        iVar3 = 0;
+        iVar2 = sk_num(uVar4);
+        if (0 < iVar2) {
           do {
-            iVar3 = sk_value(uVar5,iVar4);
-            *(int *)(iVar3 + 8) = iVar6;
-            iVar3 = sk_push(*puVar2,iVar3);
-            if (iVar3 == 0) goto LAB_00b3d0d7;
-            iVar4 = iVar4 + 1;
-            iVar3 = sk_num(uVar5);
-          } while (iVar4 < iVar3);
+            iVar2 = sk_value(uVar4,iVar3);
+            *(int *)(iVar2 + 8) = iVar5;
+            iVar2 = sk_push(*puVar1,iVar2);
+            if (iVar2 == 0) goto LAB_00b3d0d7;
+            iVar3 = iVar3 + 1;
+            iVar2 = sk_num(uVar4);
+          } while (iVar3 < iVar2);
         }
-        sk_free(uVar5);
-        iVar6 = iVar6 + 1;
-        iVar4 = sk_num(local_10);
-        iVar3 = local_4;
-      } while (iVar6 < iVar4);
+        sk_free(uVar4);
+        iVar5 = iVar5 + 1;
+        iVar3 = sk_num(local_10);
+        iVar2 = local_4;
+      } while (iVar5 < iVar3);
     }
     sk_free(local_10);
-    puVar2[1] = 0;
-    *param_1 = (int)puVar2;
+    puVar1[1] = 0;
+    *param_1 = (int)puVar1;
     *param_2 = local_c;
   }
-  return iVar3;
+  return iVar2;
 }
 
 

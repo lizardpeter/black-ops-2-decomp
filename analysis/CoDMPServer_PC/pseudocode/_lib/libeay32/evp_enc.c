@@ -29,8 +29,8 @@ bool _EVP_EncryptUpdate(int *param_1,int param_2,uint *param_3,uchar *param_4,ui
 {
   int iVar1;
   int iVar2;
-  ulong uVar3;
-  uint uVar4;
+  ulong count;
+  uint uVar3;
   
   if ((int)param_5 < 1) {
     *param_3 = 0;
@@ -46,33 +46,33 @@ bool _EVP_EncryptUpdate(int *param_1,int param_2,uint *param_3,uchar *param_4,ui
     *param_3 = param_5;
     return true;
   }
-  uVar4 = *(uint *)(*param_1 + 4);
-  if (0x20 < (int)uVar4) {
+  uVar3 = *(uint *)(*param_1 + 4);
+  if (0x20 < (int)uVar3) {
     _OpenSSLDie(".\\crypto\\evp\\evp_enc.c",0xa7,"bl <= (int)sizeof(ctx->buf)");
   }
   if (iVar1 == 0) {
     *param_3 = 0;
   }
   else {
-    if ((int)(iVar1 + param_5) < (int)uVar4) {
+    if ((int)(iVar1 + param_5) < (int)uVar3) {
       memcpy((uchar *)(iVar1 + 0x30 + (int)param_1),param_4,param_5);
       param_1[3] = param_1[3] + param_5;
       *param_3 = 0;
       return true;
     }
-    uVar3 = uVar4 - iVar1;
-    memcpy((uchar *)(iVar1 + 0x30 + (int)param_1),param_4,uVar3);
-    iVar1 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_1 + 0xc,uVar4);
+    count = uVar3 - iVar1;
+    memcpy((uchar *)(iVar1 + 0x30 + (int)param_1),param_4,count);
+    iVar1 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_1 + 0xc,uVar3);
     if (iVar1 == 0) {
       return false;
     }
-    param_4 = param_4 + uVar3;
-    param_5 = param_5 - uVar3;
-    param_2 = param_2 + uVar4;
-    *param_3 = uVar4;
+    param_4 = param_4 + count;
+    param_5 = param_5 - count;
+    param_2 = param_2 + uVar3;
+    *param_3 = uVar3;
   }
-  uVar4 = uVar4 - 1 & param_5;
-  iVar1 = param_5 - uVar4;
+  uVar3 = uVar3 - 1 & param_5;
+  iVar1 = param_5 - uVar3;
   if (0 < iVar1) {
     iVar2 = (**(code **)(*param_1 + 0x18))(param_1,param_2,param_4,iVar1);
     if (iVar2 == 0) {
@@ -80,10 +80,10 @@ bool _EVP_EncryptUpdate(int *param_1,int param_2,uint *param_3,uchar *param_4,ui
     }
     *param_3 = *param_3 + iVar1;
   }
-  if (uVar4 != 0) {
-    memcpy((uchar *)(param_1 + 0xc),param_4 + iVar1,uVar4);
+  if (uVar3 != 0) {
+    memcpy((uchar *)(param_1 + 0xc),param_4 + iVar1,uVar3);
   }
-  param_1[3] = uVar4;
+  param_1[3] = uVar3;
   return true;
 }
 

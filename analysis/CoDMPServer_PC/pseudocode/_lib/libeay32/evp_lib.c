@@ -14,24 +14,24 @@ undefined4 _EC_KEY_get0_group(int param_1)
 uint _EVP_CIPHER_get_asn1_iv(int param_1,int param_2)
 
 {
+  uint count;
   uint uVar1;
-  uint uVar2;
   
-  uVar2 = 0;
+  uVar1 = 0;
   if (param_2 != 0) {
-    uVar1 = _EVP_CIPHER_CTX_iv_length(param_1);
-    if (0x10 < uVar1) {
+    count = _EVP_CIPHER_CTX_iv_length(param_1);
+    if (0x10 < count) {
       _OpenSSLDie(".\\crypto\\evp\\evp_lib.c",0x62,"l <= sizeof(c->iv)");
     }
-    uVar2 = _ASN1_TYPE_get_octetstring(param_2,(uchar *)(param_1 + 0x10),uVar1);
-    if (uVar2 != uVar1) {
+    uVar1 = _ASN1_TYPE_get_octetstring(param_2,(uchar *)(param_1 + 0x10),count);
+    if (uVar1 != count) {
       return 0xffffffff;
     }
-    if (0 < (int)uVar2) {
-      memcpy((uchar *)(param_1 + 0x20),(uchar *)(param_1 + 0x10),uVar1);
+    if (0 < (int)uVar1) {
+      memcpy((uchar *)(param_1 + 0x20),(uchar *)(param_1 + 0x10),count);
     }
   }
-  return uVar2;
+  return uVar1;
 }
 
 

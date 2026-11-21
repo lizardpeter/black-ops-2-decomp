@@ -22,47 +22,47 @@ int _SSL_get1_session(int param_1)
 uchar * _SSL_SESSION_new(void)
 
 {
-  uchar *puVar1;
-  long64 lVar2;
+  uchar *dst;
+  long64 lVar1;
   
-  puVar1 = (uchar *)_CRYPTO_malloc(0xd8,".\\ssl\\ssl_sess.c",0x71);
-  if (puVar1 == (uchar *)0x0) {
+  dst = (uchar *)_CRYPTO_malloc(0xd8,".\\ssl\\ssl_sess.c",0x71);
+  if (dst == (uchar *)0x0) {
     _ERR_put_error(0x14,0xbd,0x41,".\\ssl\\ssl_sess.c",0x74);
     return (uchar *)0x0;
   }
-  memset(puVar1,'\0',0xd8);
-  puVar1[0x98] = '\x01';
-  puVar1[0x99] = '\0';
-  puVar1[0x9a] = '\0';
-  puVar1[0x9b] = '\0';
-  puVar1[0x9c] = '\x01';
-  puVar1[0x9d] = '\0';
-  puVar1[0x9e] = '\0';
-  puVar1[0x9f] = '\0';
-  puVar1[0xa0] = '0';
-  puVar1[0xa1] = '\x01';
-  puVar1[0xa2] = '\0';
-  puVar1[0xa3] = '\0';
-  lVar2 = _time64((long64 *)0x0);
-  *(int *)(puVar1 + 0xa4) = (int)lVar2;
-  puVar1[0xc0] = '\0';
-  puVar1[0xc1] = '\0';
-  puVar1[0xc2] = '\0';
-  puVar1[0xc3] = '\0';
-  puVar1[0xc4] = '\0';
-  puVar1[0xc5] = '\0';
-  puVar1[0xc6] = '\0';
-  puVar1[199] = '\0';
-  puVar1[0xa8] = '\0';
-  puVar1[0xa9] = '\0';
-  puVar1[0xaa] = '\0';
-  puVar1[0xab] = '\0';
-  puVar1[200] = '\0';
-  puVar1[0xc9] = '\0';
-  puVar1[0xca] = '\0';
-  puVar1[0xcb] = '\0';
-  _CRYPTO_new_ex_data(3,puVar1,puVar1 + 0xb8);
-  return puVar1;
+  memset(dst,'\0',0xd8);
+  dst[0x98] = '\x01';
+  dst[0x99] = '\0';
+  dst[0x9a] = '\0';
+  dst[0x9b] = '\0';
+  dst[0x9c] = '\x01';
+  dst[0x9d] = '\0';
+  dst[0x9e] = '\0';
+  dst[0x9f] = '\0';
+  dst[0xa0] = '0';
+  dst[0xa1] = '\x01';
+  dst[0xa2] = '\0';
+  dst[0xa3] = '\0';
+  lVar1 = _time64((long64 *)0x0);
+  *(int *)(dst + 0xa4) = (int)lVar1;
+  dst[0xc0] = '\0';
+  dst[0xc1] = '\0';
+  dst[0xc2] = '\0';
+  dst[0xc3] = '\0';
+  dst[0xc4] = '\0';
+  dst[0xc5] = '\0';
+  dst[0xc6] = '\0';
+  dst[199] = '\0';
+  dst[0xa8] = '\0';
+  dst[0xa9] = '\0';
+  dst[0xaa] = '\0';
+  dst[0xab] = '\0';
+  dst[200] = '\0';
+  dst[0xc9] = '\0';
+  dst[0xca] = '\0';
+  dst[0xcb] = '\0';
+  _CRYPTO_new_ex_data(3,dst,dst + 0xb8);
+  return dst;
 }
 
 

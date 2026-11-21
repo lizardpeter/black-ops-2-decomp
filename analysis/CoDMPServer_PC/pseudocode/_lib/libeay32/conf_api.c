@@ -235,7 +235,7 @@ undefined4 * __CONF_new_section(int param_1,uchar *param_2)
   int iVar2;
   undefined4 *puVar3;
   uchar *puVar4;
-  uchar *puVar5;
+  uchar *dst;
   
   iVar2 = sk_new_null();
   if (iVar2 != 0) {
@@ -246,11 +246,11 @@ undefined4 * __CONF_new_section(int param_1,uchar *param_2)
         uVar1 = *puVar4;
         puVar4 = puVar4 + 1;
       } while (uVar1 != '\0');
-      puVar5 = (uchar *)_CRYPTO_malloc(puVar4 + (1 - (int)(param_2 + 1)),
-                                       ".\\crypto\\conf\\conf_api.c",0x120);
-      *puVar3 = puVar5;
-      if (puVar5 != (uchar *)0x0) {
-        memcpy(puVar5,param_2,(ulong)(puVar4 + (1 - (int)(param_2 + 1))));
+      dst = (uchar *)_CRYPTO_malloc(puVar4 + (1 - (int)(param_2 + 1)),".\\crypto\\conf\\conf_api.c",
+                                    0x120);
+      *puVar3 = dst;
+      if (dst != (uchar *)0x0) {
+        memcpy(dst,param_2,(ulong)(puVar4 + (1 - (int)(param_2 + 1))));
         puVar3[1] = 0;
         puVar3[2] = iVar2;
         lh_insert(*(undefined4 *)(param_1 + 8),puVar3);

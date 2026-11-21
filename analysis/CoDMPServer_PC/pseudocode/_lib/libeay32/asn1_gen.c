@@ -161,20 +161,20 @@ undefined4 FUN_00b6f700(char *param_1,int param_2,int *param_3)
   uint uVar4;
   int iVar5;
   int iVar6;
-  char *pcVar7;
+  char *first;
+  undefined4 uVar7;
   undefined4 uVar8;
   undefined4 uVar9;
-  undefined4 uVar10;
   
   pcVar2 = param_1;
-  pcVar7 = (char *)0x0;
+  first = (char *)0x0;
   iVar6 = 0;
   pcVar3 = param_1;
   iVar5 = param_2;
   if (0 < param_2) {
     do {
       if (*pcVar3 == ':') {
-        pcVar7 = pcVar3 + 1;
+        first = pcVar3 + 1;
         iVar5 = (int)pcVar3 - (int)param_1;
         break;
       }
@@ -190,12 +190,12 @@ undefined4 FUN_00b6f700(char *param_1,int param_2,int *param_3)
   }
   if ((uVar4 & 0x10000) == 0) {
     param_3[2] = uVar4;
-    param_3[4] = (int)pcVar7;
-    if ((pcVar7 != (char *)0x0) || (pcVar2[iVar5] == '\0')) {
+    param_3[4] = (int)first;
+    if ((first != (char *)0x0) || (pcVar2[iVar5] == '\0')) {
       return 0;
     }
-    uVar10 = 0x136;
-    uVar8 = 0xbd;
+    uVar9 = 0x136;
+    uVar7 = 0xbd;
     goto LAB_00b6f79f;
   }
   switch(uVar4) {
@@ -207,8 +207,8 @@ undefined4 FUN_00b6f700(char *param_1,int param_2,int *param_3)
       }
       return 1;
     }
-    uVar10 = 0x143;
-    uVar8 = 0xb5;
+    uVar9 = 0x143;
+    uVar7 = 0xb5;
     goto LAB_00b6f79f;
   case 0x10002:
     iVar5 = FUN_00b6f3e0(&param_1);
@@ -226,65 +226,65 @@ undefined4 FUN_00b6f700(char *param_1,int param_2,int *param_3)
         piVar1[3] = 0;
         return 1;
       }
-      uVar10 = 0x210;
-      uVar8 = 0xae;
+      uVar9 = 0x210;
+      uVar7 = 0xae;
     }
     else {
-      uVar10 = 0x20a;
-      uVar8 = 0xb3;
+      uVar9 = 0x20a;
+      uVar7 = 0xb3;
     }
-    _ERR_put_error(0xd,0xb0,uVar8,".\\crypto\\asn1\\asn1_gen.c",uVar10);
+    _ERR_put_error(0xd,0xb0,uVar7,".\\crypto\\asn1\\asn1_gen.c",uVar9);
     return 0xffffffff;
   default:
     goto switchD_00b6f7c7_caseD_10003;
   case 0x10004:
-    uVar9 = 1;
-    uVar10 = 0;
-    uVar8 = 3;
+    uVar8 = 1;
+    uVar9 = 0;
+    uVar7 = 3;
     break;
   case 0x10005:
-    uVar10 = 0;
-    uVar8 = 4;
+    uVar9 = 0;
+    uVar7 = 4;
     goto LAB_00b6f8ad;
   case 0x10006:
-    uVar10 = 1;
-    uVar8 = 0x10;
+    uVar9 = 1;
+    uVar7 = 0x10;
 LAB_00b6f8ad:
-    uVar9 = 0;
+    uVar8 = 0;
     break;
   case 0x10007:
-    uVar9 = 0;
-    uVar10 = 1;
-    uVar8 = 0x11;
+    uVar8 = 0;
+    uVar9 = 1;
+    uVar7 = 0x11;
     break;
   case 0x10008:
-    iVar5 = strncmp(pcVar7,"ASCII",5);
+    iVar5 = strncmp(first,"ASCII",5);
     if (iVar5 == 0) {
       param_3[3] = 1;
       return 1;
     }
-    iVar5 = strncmp(pcVar7,"UTF8",4);
+    iVar5 = strncmp(first,"UTF8",4);
     if (iVar5 == 0) {
       param_3[3] = 2;
       return 1;
     }
-    iVar5 = strncmp(pcVar7,"HEX",3);
+    iVar5 = strncmp(first,"HEX",3);
     if (iVar5 == 0) {
       param_3[3] = 3;
       return 1;
     }
-    iVar5 = strncmp(pcVar7,"BITLIST",3);
+    iVar5 = strncmp(first,"BITLIST",3);
     if (iVar5 == 0) {
       param_3[3] = 4;
       return 1;
     }
-    uVar10 = 0x171;
-    uVar8 = 0xc3;
+    uVar9 = 0x171;
+    uVar7 = 0xc3;
 LAB_00b6f79f:
-    _ERR_put_error(0xd,0xb1,uVar8,".\\crypto\\asn1\\asn1_gen.c",uVar10);
+    _ERR_put_error(0xd,0xb1,uVar7,".\\crypto\\asn1\\asn1_gen.c",uVar9);
     return 0xffffffff;
   }
-  iVar5 = FUN_00b6f530(param_3,uVar8,0,uVar10,uVar9,1);
+  iVar5 = FUN_00b6f530(param_3,uVar7,0,uVar9,uVar8,1);
   if (iVar5 == 0) {
     return 0xffffffff;
   }

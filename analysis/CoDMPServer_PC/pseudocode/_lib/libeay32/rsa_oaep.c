@@ -166,8 +166,8 @@ ulong _RSA_padding_check_PKCS1_OAEP
   int iVar6;
   byte *pbVar7;
   byte *pbVar8;
-  ulong uVar9;
-  bool bVar10;
+  ulong count;
+  bool bVar9;
   byte *local_3c;
   uint local_38;
   undefined4 local_34;
@@ -184,13 +184,13 @@ ulong _RSA_padding_check_PKCS1_OAEP
   local_34 = param_6;
   local_38 = 0;
   if ((int)uVar1 < 0x29) goto LAB_00b6bc2f;
-  uVar9 = uVar1 - param_4;
-  bVar10 = (int)uVar9 < 0;
-  if (bVar10) {
-    uVar9 = 0;
+  count = uVar1 - param_4;
+  bVar9 = (int)count < 0;
+  if (bVar9) {
+    count = 0;
     param_4 = uVar1;
   }
-  local_38 = (uint)bVar10;
+  local_38 = (uint)bVar9;
   param_5 = param_5 + -0x15;
   pbVar8 = (byte *)_CRYPTO_malloc(uVar1 + param_5,".\\crypto\\rsa\\rsa_oaep.c",0x79);
   if (pbVar8 == (byte *)0x0) {
@@ -198,8 +198,8 @@ ulong _RSA_padding_check_PKCS1_OAEP
     return 0xffffffff;
   }
   pbVar3 = pbVar8 + param_5;
-  memset(pbVar3,'\0',uVar9);
-  memcpy(pbVar3 + uVar9,local_3c,param_4);
+  memset(pbVar3,'\0',count);
+  memcpy(pbVar3 + count,local_3c,param_4);
   local_3c = pbVar3 + 0x14;
   uVar2 = _EVP_sha1();
   _PKCS1_MGF1(local_2c,0x14,pbVar3 + 0x14,param_5,uVar2);
@@ -261,15 +261,15 @@ LAB_00b6bb28:
   }
   if ((iVar5 == 0) && (local_38 == 0)) {
     iVar6 = 0x14;
-    bVar10 = param_5 == 0x14;
+    bVar9 = param_5 == 0x14;
     if (0x14 < param_5) {
       do {
         if (pbVar8[iVar6] != 0) break;
         iVar6 = iVar6 + 1;
       } while (iVar6 < param_5);
-      bVar10 = iVar6 == param_5;
+      bVar9 = iVar6 == param_5;
     }
-    if ((!bVar10) && (pbVar8[iVar6] == 1)) {
+    if ((!bVar9) && (pbVar8[iVar6] == 1)) {
       uVar1 = param_5 - (iVar6 + 1);
       if (param_2 < (int)uVar1) {
         _ERR_put_error(4,0x7a,0x6d,".\\crypto\\rsa\\rsa_oaep.c",0xa2);

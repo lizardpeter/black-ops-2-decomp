@@ -191,7 +191,7 @@ ulong __cdecl asn1_ex_i2c(int *param_1,uchar *param_2,int *param_3,char *param_4
   ulong *puVar2;
   ulong uVar3;
   int iVar4;
-  uchar *puVar5;
+  uchar *src;
   
   if ((*(int *)(param_4 + 0x10) != 0) &&
      (pcVar1 = *(code **)(*(int *)(param_4 + 0x10) + 0x18), pcVar1 != (code *)0x0)) {
@@ -237,7 +237,7 @@ switchD_00b4c9b6_caseD_2:
         }
       }
       param_4 = (char *)CONCAT31(param_4._1_3_,(char)iVar4);
-      puVar5 = (uchar *)&param_4;
+      src = (uchar *)&param_4;
       uVar3 = 1;
       break;
     case 2:
@@ -248,11 +248,11 @@ switchD_00b4c9b6_caseD_2:
     default:
       goto switchD_00b4c9b6_caseD_4;
     case 5:
-      puVar5 = (uchar *)0x0;
+      src = (uchar *)0x0;
       uVar3 = 0;
       break;
     case 6:
-      puVar5 = *(uchar **)(*param_1 + 0x10);
+      src = *(uchar **)(*param_1 + 0x10);
       uVar3 = *(ulong *)(*param_1 + 0xc);
     }
   }
@@ -267,11 +267,11 @@ switchD_00b4c9b6_caseD_4:
       }
       return 0xfffffffe;
     }
-    puVar5 = (uchar *)puVar2[2];
+    src = (uchar *)puVar2[2];
     uVar3 = *puVar2;
   }
   if ((param_2 != (uchar *)0x0) && (uVar3 != 0)) {
-    memcpy(param_2,puVar5,uVar3);
+    memcpy(param_2,src,uVar3);
   }
   return uVar3;
 }
@@ -473,91 +473,91 @@ FUN_00b4cee0(undefined4 param_1,int *param_2,undefined4 param_3,undefined4 param
 
 {
   int iVar1;
-  void *pvVar2;
-  undefined4 uVar3;
-  uint uVar4;
-  int iVar5;
-  undefined4 *puVar6;
-  ulong *puVar7;
-  uint uVar8;
-  code *pcVar9;
+  void *base;
+  undefined4 uVar2;
+  uint num;
+  int iVar3;
+  undefined4 *puVar4;
+  ulong *puVar5;
+  uint width;
+  code *comp;
   uchar *local_10;
   undefined4 local_c;
   void *local_8;
   uchar *local_4;
   
   local_4 = (uchar *)0xb4ceea;
-  iVar5 = 0;
+  iVar3 = 0;
   local_10 = (uchar *)0x0;
   if ((param_5 == 0) || (iVar1 = sk_num(param_1), iVar1 < 2)) {
     iVar1 = 0;
-    iVar5 = sk_num(param_1);
-    if (0 < iVar5) {
+    iVar3 = sk_num(param_1);
+    if (0 < iVar3) {
       do {
         local_c = sk_value(param_1,iVar1);
         _ASN1_item_ex_i2d(&local_c,param_2,param_4,0xffffffff,param_6);
         iVar1 = iVar1 + 1;
-        iVar5 = sk_num(param_1);
-      } while (iVar1 < iVar5);
+        iVar3 = sk_num(param_1);
+      } while (iVar1 < iVar3);
       return 1;
     }
   }
   else {
     iVar1 = sk_num(param_1,".\\crypto\\asn1\\tasn_enc.c",0x1c7);
-    pvVar2 = (void *)_CRYPTO_malloc(iVar1 * 0xc);
-    local_8 = pvVar2;
+    base = (void *)_CRYPTO_malloc(iVar1 * 0xc);
+    local_8 = base;
     local_10 = (uchar *)_CRYPTO_malloc(param_3,".\\crypto\\asn1\\tasn_enc.c",0x1c8);
-    if ((pvVar2 == (void *)0x0) || (local_10 == (uchar *)0x0)) {
+    if ((base == (void *)0x0) || (local_10 == (uchar *)0x0)) {
       return 0;
     }
     local_4 = local_10;
     iVar1 = sk_num(param_1);
     if (0 < iVar1) {
-      puVar6 = (undefined4 *)((int)pvVar2 + 8);
+      puVar4 = (undefined4 *)((int)base + 8);
       do {
-        local_c = sk_value(param_1,iVar5);
-        puVar6[-2] = local_10;
-        uVar3 = _ASN1_item_ex_i2d(&local_c,&local_10,param_4,0xffffffff,param_6);
-        puVar6[-1] = uVar3;
-        *puVar6 = local_c;
-        iVar5 = iVar5 + 1;
-        puVar6 = puVar6 + 3;
+        local_c = sk_value(param_1,iVar3);
+        puVar4[-2] = local_10;
+        uVar2 = _ASN1_item_ex_i2d(&local_c,&local_10,param_4,0xffffffff,param_6);
+        puVar4[-1] = uVar2;
+        *puVar4 = local_c;
+        iVar3 = iVar3 + 1;
+        puVar4 = puVar4 + 3;
         iVar1 = sk_num(param_1);
-        pvVar2 = local_8;
-      } while (iVar5 < iVar1);
+        base = local_8;
+      } while (iVar3 < iVar1);
     }
-    pcVar9 = FUN_00b4c880;
-    uVar8 = 0xc;
-    uVar4 = sk_num(param_1);
-    qsort(pvVar2,uVar4,uVar8,pcVar9);
+    comp = FUN_00b4c880;
+    width = 0xc;
+    num = sk_num(param_1);
+    qsort(base,num,width,comp);
     local_10 = (uchar *)*param_2;
     iVar1 = 0;
-    iVar5 = sk_num(param_1);
-    if (0 < iVar5) {
-      puVar7 = (ulong *)((int)pvVar2 + 4);
+    iVar3 = sk_num(param_1);
+    if (0 < iVar3) {
+      puVar5 = (ulong *)((int)base + 4);
       do {
-        memcpy(local_10,(uchar *)puVar7[-1],*puVar7);
-        local_10 = local_10 + *puVar7;
+        memcpy(local_10,(uchar *)puVar5[-1],*puVar5);
+        local_10 = local_10 + *puVar5;
         iVar1 = iVar1 + 1;
-        puVar7 = puVar7 + 3;
-        iVar5 = sk_num(param_1);
-      } while (iVar1 < iVar5);
+        puVar5 = puVar5 + 3;
+        iVar3 = sk_num(param_1);
+      } while (iVar1 < iVar3);
     }
     *param_2 = (int)local_10;
     if (param_5 == 2) {
       iVar1 = 0;
-      iVar5 = sk_num(param_1);
-      if (0 < iVar5) {
-        puVar6 = (undefined4 *)((int)pvVar2 + 8);
+      iVar3 = sk_num(param_1);
+      if (0 < iVar3) {
+        puVar4 = (undefined4 *)((int)base + 8);
         do {
-          sk_set(param_1,iVar1,*puVar6);
+          sk_set(param_1,iVar1,*puVar4);
           iVar1 = iVar1 + 1;
-          puVar6 = puVar6 + 3;
-          iVar5 = sk_num(param_1);
-        } while (iVar1 < iVar5);
+          puVar4 = puVar4 + 3;
+          iVar3 = sk_num(param_1);
+        } while (iVar1 < iVar3);
       }
     }
-    _CRYPTO_free(pvVar2);
+    _CRYPTO_free(base);
     _CRYPTO_free(local_4);
   }
   return 1;

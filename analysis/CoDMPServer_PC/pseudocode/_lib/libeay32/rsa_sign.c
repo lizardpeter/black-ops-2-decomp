@@ -103,7 +103,7 @@ _RSA_verify(int param_1,byte *param_2,uint param_3,undefined4 param_4,int param_
   _iobuf *p_Var8;
   byte *pbVar9;
   undefined4 uVar10;
-  char *pcVar11;
+  char *format;
   undefined4 local_8;
   byte *pbStack_4;
   
@@ -186,9 +186,9 @@ LAB_00b4486b:
       if (param_1 == 4) {
         if (iVar2 == 8) {
 LAB_00b44985:
-          pcVar11 = "signature has problems, re-make with post SSLeay045\n";
+          format = "signature has problems, re-make with post SSLeay045\n";
           p_Var8 = __iob_func();
-          fprintf(p_Var8 + 2,pcVar11);
+          fprintf(p_Var8 + 2,format);
           goto LAB_00b4499b;
         }
       }

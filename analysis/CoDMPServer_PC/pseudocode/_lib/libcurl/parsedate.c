@@ -118,9 +118,9 @@ longlong FUN_00b0aec0(byte *param_1)
   char *pcVar4;
   long lVar5;
   uint uVar6;
-  byte *pbVar7;
-  int iVar8;
-  longlong lVar9;
+  byte *string;
+  int iVar7;
+  longlong lVar8;
   undefined1 auStack_54 [3];
   char local_51;
   byte *local_50;
@@ -154,7 +154,7 @@ longlong FUN_00b0aec0(byte *param_1)
   local_34 = -1;
   local_48 = -1;
   local_4c = -1;
-  iVar8 = -1;
+  iVar7 = -1;
   uVar6 = 0xffffffff;
   local_40 = 0;
   local_28 = param_1;
@@ -164,20 +164,20 @@ longlong FUN_00b0aec0(byte *param_1)
       if (5 < local_44) break;
       local_51 = '\0';
       FUN_00b0ad40();
-      pbVar7 = local_50;
+      string = local_50;
       iVar3 = isalpha((uint)*local_50);
       if (iVar3 == 0) {
-        iVar3 = isdigit((uint)*pbVar7);
+        iVar3 = isdigit((uint)*string);
         if (iVar3 != 0) {
-          if ((local_38 == -1) && (iVar3 = sscanf((char *)pbVar7,"%02d:%02d:%02d"), iVar3 == 3)) {
-            local_50 = pbVar7 + 8;
-            pbVar7 = local_50;
+          if ((local_38 == -1) && (iVar3 = sscanf((char *)string,"%02d:%02d:%02d"), iVar3 == 3)) {
+            local_50 = string + 8;
+            string = local_50;
           }
           else {
-            lVar5 = strtol((char *)pbVar7,(char **)&local_3c,10);
+            lVar5 = strtol((char *)string,(char **)&local_3c,10);
             if (((uVar6 == 0xffffffff) &&
-                ((((int)local_3c - (int)pbVar7 == 4 && (lVar5 < 0x579)) && (local_28 < pbVar7)))) &&
-               ((bVar2 = pbVar7[-1], bVar2 == 0x2b || (bVar2 == 0x2d)))) {
+                ((((int)local_3c - (int)string == 4 && (lVar5 < 0x579)) && (local_28 < string)))) &&
+               ((bVar2 = string[-1], bVar2 == 0x2b || (bVar2 == 0x2d)))) {
               iVar3 = lVar5 + (lVar5 / 100) * -0x28;
               uVar6 = iVar3 * 0x3c;
               local_51 = '\x01';
@@ -186,15 +186,15 @@ longlong FUN_00b0aec0(byte *param_1)
               }
             }
             local_50 = local_3c;
-            if ((((int)local_3c - (int)pbVar7 == 8) && (iVar8 == -1)) &&
+            if ((((int)local_3c - (int)string == 8) && (iVar7 == -1)) &&
                ((local_48 == -1 && (local_4c == -1)))) {
-              iVar8 = lVar5 / 10000;
+              iVar7 = lVar5 / 10000;
               local_48 = (lVar5 % 10000) / 100 + -1;
               local_4c = lVar5 % 100;
-              pbVar7 = local_3c;
+              string = local_3c;
             }
             else {
-              pbVar7 = local_3c;
+              string = local_3c;
               if (local_51 == '\0') {
                 if (local_40 == 0) {
                   if (local_4c != -1) {
@@ -210,12 +210,12 @@ longlong FUN_00b0aec0(byte *param_1)
                 else if (local_40 != 1) {
                   return -1;
                 }
-                if (iVar8 != -1) {
+                if (iVar7 != -1) {
                   return -1;
                 }
-                iVar8 = lVar5;
-                if ((lVar5 < 0x76c) && (iVar8 = lVar5 + 0x76c, lVar5 < 0x47)) {
-                  iVar8 = lVar5 + 2000;
+                iVar7 = lVar5;
+                if ((lVar5 < 0x76c) && (iVar7 = lVar5 + 0x76c, lVar5 < 0x47)) {
+                  iVar7 = lVar5 + 2000;
                 }
                 if (local_4c == -1) {
                   local_40 = 0;
@@ -236,7 +236,7 @@ longlong FUN_00b0aec0(byte *param_1)
         local_b = 0;
         local_7 = 0;
         local_5 = 0;
-        sscanf((char *)pbVar7,"%31[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]");
+        sscanf((char *)string,"%31[ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz]");
         pcVar4 = (char *)&local_24;
         do {
           cVar1 = *pcVar4;
@@ -253,12 +253,12 @@ longlong FUN_00b0aec0(byte *param_1)
             return -1;
           }
         }
-        local_50 = pbVar7 + (int)local_50;
-        pbVar7 = local_50;
+        local_50 = string + (int)local_50;
+        string = local_50;
       }
 LAB_00b0b18f:
       local_44 = local_44 + 1;
-    } while (*pbVar7 != 0);
+    } while (*string != 0);
     uStack_1c = local_2c;
     uStack_20 = local_30;
     local_24 = local_38;
@@ -268,19 +268,19 @@ LAB_00b0b18f:
   uStack_20 = 0;
   local_24 = 0;
 LAB_00b0b1eb:
-  if (((local_4c != -1) && (local_48 != -1)) && (iVar8 != -1)) {
-    iStack_10 = iVar8 + -0x76c;
+  if (((local_4c != -1) && (local_48 != -1)) && (iVar7 != -1)) {
+    iStack_10 = iVar7 + -0x76c;
     iStack_18 = local_4c;
     iStack_14 = local_48;
-    lVar9 = FUN_00b0ad70();
-    if ((int)lVar9 != -1) {
+    lVar8 = FUN_00b0ad70();
+    if ((int)lVar8 != -1) {
       uVar6 = -(uint)(uVar6 != 0xffffffff) & uVar6;
-      if ((0 < (int)uVar6) && (lVar9 + (int)uVar6 < lVar9)) {
+      if ((0 < (int)uVar6) && (lVar8 + (int)uVar6 < lVar8)) {
         return -1;
       }
-      lVar9 = lVar9 + (int)uVar6;
+      lVar8 = lVar8 + (int)uVar6;
     }
-    return lVar9;
+    return lVar8;
   }
   return -1;
 }

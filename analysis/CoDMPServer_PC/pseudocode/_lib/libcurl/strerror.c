@@ -387,47 +387,47 @@ uchar * _Curl_strerror(int param_1,DWORD param_2)
 {
   DWORD dwErrCode;
   int *piVar1;
-  uchar *puVar2;
-  int iVar3;
+  uchar *source;
+  int iVar2;
   undefined1 *extraout_EAX;
   undefined1 *extraout_EAX_00;
-  DWORD DVar4;
-  uchar *lpBuffer;
-  ulong uVar5;
+  DWORD DVar3;
+  uchar *dest;
+  ulong count;
   
   dwErrCode = GetLastError();
-  lpBuffer = (uchar *)(param_1 + 0x1dc);
-  *lpBuffer = '\0';
+  dest = (uchar *)(param_1 + 0x1dc);
+  *dest = '\0';
   if (-1 < (int)param_2) {
     piVar1 = __sys_nerr();
     if ((int)param_2 < *piVar1) {
-      uVar5 = 0xff;
-      puVar2 = (uchar *)strerror(param_2);
-      strncpy(lpBuffer,puVar2,uVar5);
+      count = 0xff;
+      source = (uchar *)strerror(param_2);
+      strncpy(dest,source,count);
       goto LAB_00af3493;
     }
   }
-  iVar3 = FUN_00af2df0();
-  if (iVar3 == 0) {
-    DVar4 = FormatMessageA(0x1000,(LPCVOID)0x0,param_2,0,(LPSTR)lpBuffer,0xff,(va_list *)0x0);
-    if (DVar4 == 0) {
-      curl_msnprintf(lpBuffer,0xff,"Unknown error %d (%#x)",param_2,param_2);
+  iVar2 = FUN_00af2df0();
+  if (iVar2 == 0) {
+    DVar3 = FormatMessageA(0x1000,(LPCVOID)0x0,param_2,0,(LPSTR)dest,0xff,(va_list *)0x0);
+    if (DVar3 == 0) {
+      curl_msnprintf(dest,0xff,"Unknown error %d (%#x)",param_2,param_2);
     }
   }
 LAB_00af3493:
   *(undefined1 *)(param_1 + 0x2db) = 0;
-  strrchr(lpBuffer,'\n');
-  if ((extraout_EAX != (undefined1 *)0x0) && (1 < (int)extraout_EAX - (int)lpBuffer)) {
+  strrchr(dest,'\n');
+  if ((extraout_EAX != (undefined1 *)0x0) && (1 < (int)extraout_EAX - (int)dest)) {
     *extraout_EAX = 0;
   }
-  strrchr(lpBuffer,'\r');
-  if ((extraout_EAX_00 != (undefined1 *)0x0) && (0 < (int)extraout_EAX_00 - (int)lpBuffer)) {
+  strrchr(dest,'\r');
+  if ((extraout_EAX_00 != (undefined1 *)0x0) && (0 < (int)extraout_EAX_00 - (int)dest)) {
     *extraout_EAX_00 = 0;
   }
-  DVar4 = GetLastError();
-  if (dwErrCode != DVar4) {
+  DVar3 = GetLastError();
+  if (dwErrCode != DVar3) {
     SetLastError(dwErrCode);
   }
-  return lpBuffer;
+  return dest;
 }
 

@@ -413,12 +413,12 @@ FUN_00b48810(int *param_1,undefined4 *param_2,char *param_3,byte param_4,int par
   int *piVar1;
   char *pcVar2;
   int *piVar3;
-  char *pcVar4;
-  byte bVar5;
+  char *count;
+  byte bVar4;
+  int iVar5;
   int iVar6;
-  int iVar7;
+  undefined4 uVar7;
   undefined4 uVar8;
-  undefined4 uVar9;
   int *local_18;
   char *local_14;
   int local_10;
@@ -456,38 +456,38 @@ LAB_00b48a6e:
       goto LAB_00b48a6e;
     }
     param_1 = piVar1;
-    bVar5 = _ASN1_get_object(&param_1,&local_14,&local_10,&local_c,pcVar2);
-    if ((char)bVar5 < '\0') {
-      uVar9 = 0x516;
-      uVar8 = 0x66;
+    bVar4 = _ASN1_get_object(&param_1,&local_14,&local_10,&local_c,pcVar2);
+    if ((char)bVar4 < '\0') {
+      uVar8 = 0x516;
+      uVar7 = 0x66;
 LAB_00b489e5:
-      _ERR_put_error(0xd,0x68,uVar8,".\\crypto\\asn1\\tasn_dec.c",uVar9);
+      _ERR_put_error(0xd,0x68,uVar7,".\\crypto\\asn1\\tasn_dec.c",uVar8);
       _ERR_put_error(0xd,0x6a,0x3a,".\\crypto\\asn1\\tasn_dec.c",0x4a2);
       return 0;
     }
     if ((-1 < param_5) && ((param_5 != local_10 || (param_6 != local_c)))) {
-      uVar9 = 0x523;
-      uVar8 = 0xa8;
+      uVar8 = 0x523;
+      uVar7 = 0xa8;
       goto LAB_00b489e5;
     }
-    if ((bVar5 & 1) != 0) {
+    if ((bVar4 & 1) != 0) {
       local_14 = (char *)((int)piVar1 + ((int)pcVar2 - (int)param_1));
     }
-    pcVar4 = local_14;
-    local_8 = CONCAT31(local_8._1_3_,bVar5) & 0xffffff01;
+    count = local_14;
+    local_8 = CONCAT31(local_8._1_3_,bVar4) & 0xffffff01;
     local_18 = param_1;
-    if ((bVar5 & 0x20) == 0) {
+    if ((bVar4 & 0x20) == 0) {
       if (local_14 != (char *)0x0) {
         if (piVar3 != (int *)0x0) {
-          iVar6 = *piVar3;
-          iVar7 = _BUF_MEM_grow_clean(piVar3,local_14 + iVar6);
-          if (iVar7 == 0) {
+          iVar5 = *piVar3;
+          iVar6 = _BUF_MEM_grow_clean(piVar3,local_14 + iVar5);
+          if (iVar6 == 0) {
             _ERR_put_error(0xd,0x8c,0x41,".\\crypto\\asn1\\tasn_dec.c",0x4c8);
             return 0;
           }
-          memcpy((uchar *)(piVar3[1] + iVar6),(uchar *)local_18,(ulong)pcVar4);
+          memcpy((uchar *)(piVar3[1] + iVar5),(uchar *)local_18,(ulong)count);
         }
-        local_18 = (int *)((int)local_18 + (int)pcVar4);
+        local_18 = (int *)((int)local_18 + (int)count);
       }
     }
     else {
@@ -495,8 +495,8 @@ LAB_00b489e5:
         _ERR_put_error(0xd,0x6a,0xc5,".\\crypto\\asn1\\tasn_dec.c",0x4ac);
         return 0;
       }
-      iVar6 = FUN_00b48810(piVar3,&local_18,local_14,local_8,param_5,param_6,param_7 + 1);
-      if (iVar6 == 0) {
+      iVar5 = FUN_00b48810(piVar3,&local_18,local_14,local_8,param_5,param_6,param_7 + 1);
+      if (iVar5 == 0) {
         return 0;
       }
     }

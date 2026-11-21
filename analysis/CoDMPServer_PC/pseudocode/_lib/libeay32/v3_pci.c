@@ -10,18 +10,18 @@ undefined4 FUN_00b66350(int *param_1,int *param_2)
 {
   char cVar1;
   int iVar2;
-  uchar *puVar3;
-  ulong uVar4;
-  char *pcVar5;
+  uchar *src;
+  ulong count;
+  char *pcVar3;
   int *in_ECX;
-  int iVar6;
+  int iVar4;
   undefined4 *unaff_EBX;
-  char *pcVar7;
-  char *pcVar8;
-  bool bVar9;
+  char *pcVar5;
+  char *pcVar6;
+  bool bVar7;
+  undefined4 uVar8;
+  undefined4 uVar9;
   undefined4 uVar10;
-  undefined4 uVar11;
-  undefined4 uVar12;
   int *local_810;
   int *local_80c;
   int local_808;
@@ -30,94 +30,94 @@ undefined4 FUN_00b66350(int *param_1,int *param_2)
   
   local_4 = __security_cookie ^ (uint)&local_810;
   local_80c = param_1;
-  pcVar5 = (char *)unaff_EBX[1];
-  iVar6 = 9;
-  bVar9 = true;
-  pcVar7 = pcVar5;
-  pcVar8 = "language";
+  pcVar3 = (char *)unaff_EBX[1];
+  iVar4 = 9;
+  bVar7 = true;
+  pcVar5 = pcVar3;
+  pcVar6 = "language";
   do {
-    if (iVar6 == 0) break;
-    iVar6 = iVar6 + -1;
-    bVar9 = *pcVar7 == *pcVar8;
-    pcVar7 = pcVar7 + 1;
-    pcVar8 = pcVar8 + 1;
-  } while (bVar9);
+    if (iVar4 == 0) break;
+    iVar4 = iVar4 + -1;
+    bVar7 = *pcVar5 == *pcVar6;
+    pcVar5 = pcVar5 + 1;
+    pcVar6 = pcVar6 + 1;
+  } while (bVar7);
   local_808 = 0;
-  if (bVar9) {
+  if (bVar7) {
     if (*param_1 != 0) {
-      uVar12 = 0x55;
-      uVar11 = 0x9b;
+      uVar10 = 0x55;
+      uVar9 = 0x9b;
 LAB_00b663b6:
-      _ERR_put_error(0x22,0x96,uVar11,".\\crypto\\x509v3\\v3_pci.c",uVar12);
-      uVar11 = unaff_EBX[2];
-      uVar12 = unaff_EBX[1];
-      uVar10 = *unaff_EBX;
+      _ERR_put_error(0x22,0x96,uVar9,".\\crypto\\x509v3\\v3_pci.c",uVar10);
+      uVar9 = unaff_EBX[2];
+      uVar10 = unaff_EBX[1];
+      uVar8 = *unaff_EBX;
       goto LAB_00b663d7;
     }
-    iVar6 = _OBJ_txt2obj(unaff_EBX[2],0);
-    *local_80c = iVar6;
-    if (iVar6 != 0) {
+    iVar4 = _OBJ_txt2obj(unaff_EBX[2],0);
+    *local_80c = iVar4;
+    if (iVar4 != 0) {
       return 1;
     }
-    uVar12 = 0x5b;
-    uVar11 = 0x6e;
+    uVar10 = 0x5b;
+    uVar9 = 0x6e;
   }
   else {
-    iVar6 = 8;
-    bVar9 = true;
-    pcVar7 = pcVar5;
-    pcVar8 = "pathlen";
+    iVar4 = 8;
+    bVar7 = true;
+    pcVar5 = pcVar3;
+    pcVar6 = "pathlen";
     do {
-      if (iVar6 == 0) break;
-      iVar6 = iVar6 + -1;
-      bVar9 = *pcVar7 == *pcVar8;
-      pcVar7 = pcVar7 + 1;
-      pcVar8 = pcVar8 + 1;
-    } while (bVar9);
-    if (!bVar9) {
-      iVar6 = 7;
-      bVar9 = true;
-      pcVar7 = "policy";
+      if (iVar4 == 0) break;
+      iVar4 = iVar4 + -1;
+      bVar7 = *pcVar5 == *pcVar6;
+      pcVar5 = pcVar5 + 1;
+      pcVar6 = pcVar6 + 1;
+    } while (bVar7);
+    if (!bVar7) {
+      iVar4 = 7;
+      bVar7 = true;
+      pcVar5 = "policy";
       do {
-        if (iVar6 == 0) break;
-        iVar6 = iVar6 + -1;
-        bVar9 = *pcVar5 == *pcVar7;
+        if (iVar4 == 0) break;
+        iVar4 = iVar4 + -1;
+        bVar7 = *pcVar3 == *pcVar5;
+        pcVar3 = pcVar3 + 1;
         pcVar5 = pcVar5 + 1;
-        pcVar7 = pcVar7 + 1;
-      } while (bVar9);
-      if (!bVar9) {
+      } while (bVar7);
+      if (!bVar7) {
         return 1;
       }
-      iVar6 = 0;
+      iVar4 = 0;
       local_810 = in_ECX;
       if (*param_2 == 0) {
         iVar2 = _ASN1_OCTET_STRING_new();
         *param_2 = iVar2;
         if (iVar2 == 0) {
-          uVar12 = 0x78;
-          uVar11 = 0x41;
+          uVar10 = 0x78;
+          uVar9 = 0x41;
           goto LAB_00b663b6;
         }
         local_808 = 1;
       }
       iVar2 = strncmp((char *)unaff_EBX[2],"hex:",4);
       if (iVar2 == 0) {
-        puVar3 = (uchar *)string_to_hex((char *)unaff_EBX[2] + 4,&local_810);
-        if (puVar3 == (uchar *)0x0) {
-          uVar12 = 0x85;
-          uVar11 = 0x71;
+        src = (uchar *)string_to_hex((char *)unaff_EBX[2] + 4,&local_810);
+        if (src == (uchar *)0x0) {
+          uVar10 = 0x85;
+          uVar9 = 0x71;
 LAB_00b66510:
-          _ERR_put_error(0x22,0x96,uVar11,".\\crypto\\x509v3\\v3_pci.c",uVar12);
-          uVar11 = unaff_EBX[2];
-          uVar12 = unaff_EBX[1];
-          uVar10 = *unaff_EBX;
+          _ERR_put_error(0x22,0x96,uVar9,".\\crypto\\x509v3\\v3_pci.c",uVar10);
+          uVar9 = unaff_EBX[2];
+          uVar10 = unaff_EBX[1];
+          uVar8 = *unaff_EBX;
         }
         else {
-          iVar6 = _CRYPTO_realloc(((int *)*param_2)[2],
+          iVar4 = _CRYPTO_realloc(((int *)*param_2)[2],
                                   (char *)((int)local_810 + *(int *)*param_2 + 1),
                                   ".\\crypto\\x509v3\\v3_pci.c",0x8b);
-          if (iVar6 == 0) {
-            _CRYPTO_free(puVar3);
+          if (iVar4 == 0) {
+            _CRYPTO_free(src);
             *(undefined4 *)(*param_2 + 8) = 0;
             *(undefined4 *)*param_2 = 0;
             _ERR_put_error(0x22,0x96,0x41,".\\crypto\\x509v3\\v3_pci.c",0x9a);
@@ -125,19 +125,19 @@ LAB_00b66510:
                                );
             goto LAB_00b66816;
           }
-          *(int *)(*param_2 + 8) = iVar6;
-          memcpy((uchar *)(((int *)*param_2)[2] + *(int *)*param_2),puVar3,(ulong)local_810);
+          *(int *)(*param_2 + 8) = iVar4;
+          memcpy((uchar *)(((int *)*param_2)[2] + *(int *)*param_2),src,(ulong)local_810);
           *(int *)*param_2 = (int)(*(int *)*param_2 + (int)local_810);
           *(undefined1 *)(((int *)*param_2)[2] + *(int *)*param_2) = 0;
-          _CRYPTO_free(puVar3);
+          _CRYPTO_free(src);
 LAB_00b6677f:
-          if (iVar6 != 0) {
+          if (iVar4 != 0) {
             return 1;
           }
           _ERR_put_error(0x22,0x96,0x41,".\\crypto\\x509v3\\v3_pci.c",0xe4);
-          uVar11 = unaff_EBX[2];
-          uVar12 = unaff_EBX[1];
-          uVar10 = *unaff_EBX;
+          uVar9 = unaff_EBX[2];
+          uVar10 = unaff_EBX[1];
+          uVar8 = *unaff_EBX;
         }
       }
       else {
@@ -147,67 +147,67 @@ LAB_00b6677f:
           if (local_80c != (int *)0x0) {
             while( true ) {
               while( true ) {
-                uVar4 = _BIO_read(local_80c,local_804,0x800);
-                if (0 < (int)uVar4) break;
-                if ((uVar4 != 0) || (iVar2 = _BIO_test_flags(local_80c,8), iVar2 == 0))
+                count = _BIO_read(local_80c,local_804,0x800);
+                if (0 < (int)count) break;
+                if ((count != 0) || (iVar2 = _BIO_test_flags(local_80c,8), iVar2 == 0))
                 goto LAB_00b66672;
               }
-              iVar6 = _CRYPTO_realloc(((int *)*param_2)[2],uVar4 + 1 + *(int *)*param_2,
+              iVar4 = _CRYPTO_realloc(((int *)*param_2)[2],count + 1 + *(int *)*param_2,
                                       ".\\crypto\\x509v3\\v3_pci.c",0xb1);
-              if (iVar6 == 0) break;
-              *(int *)(*param_2 + 8) = iVar6;
-              memcpy((uchar *)(((int *)*param_2)[2] + *(int *)*param_2),local_804,uVar4);
-              *(int *)*param_2 = *(int *)*param_2 + uVar4;
+              if (iVar4 == 0) break;
+              *(int *)(*param_2 + 8) = iVar4;
+              memcpy((uchar *)(((int *)*param_2)[2] + *(int *)*param_2),local_804,count);
+              *(int *)*param_2 = *(int *)*param_2 + count;
               *(undefined1 *)(((int *)*param_2)[2] + *(int *)*param_2) = 0;
             }
 LAB_00b66672:
             _BIO_free_all(local_80c);
-            if ((int)uVar4 < 0) {
-              uVar12 = 0xc0;
-              uVar11 = 0x20;
+            if ((int)count < 0) {
+              uVar10 = 0xc0;
+              uVar9 = 0x20;
               goto LAB_00b66510;
             }
             goto LAB_00b6677f;
           }
-          uVar12 = 0xa7;
-          uVar11 = 0x20;
+          uVar10 = 0xa7;
+          uVar9 = 0x20;
         }
         else {
-          iVar6 = strncmp((char *)unaff_EBX[2],"text:",5);
-          if (iVar6 == 0) {
-            pcVar5 = (char *)(unaff_EBX[2] + 5);
+          iVar4 = strncmp((char *)unaff_EBX[2],"text:",5);
+          if (iVar4 == 0) {
+            pcVar3 = (char *)(unaff_EBX[2] + 5);
             do {
-              cVar1 = *pcVar5;
-              pcVar5 = pcVar5 + 1;
+              cVar1 = *pcVar3;
+              pcVar3 = pcVar3 + 1;
             } while (cVar1 != '\0');
-            local_810 = (int *)(pcVar5 + -(unaff_EBX[2] + 6));
-            iVar6 = _CRYPTO_realloc(((int *)*param_2)[2],
+            local_810 = (int *)(pcVar3 + -(unaff_EBX[2] + 6));
+            iVar4 = _CRYPTO_realloc(((int *)*param_2)[2],
                                     (char *)((int)local_810 + *(int *)*param_2 + 1),
                                     ".\\crypto\\x509v3\\v3_pci.c",0xc9);
-            if (iVar6 != 0) {
-              *(int *)(*param_2 + 8) = iVar6;
+            if (iVar4 != 0) {
+              *(int *)(*param_2 + 8) = iVar4;
               memcpy((uchar *)(((int *)*param_2)[2] + *(int *)*param_2),(uchar *)(unaff_EBX[2] + 5),
                      (ulong)local_810);
               *(int *)*param_2 = (int)(*(int *)*param_2 + (int)local_810);
               *(undefined1 *)(((int *)*param_2)[2] + *(int *)*param_2) = 0;
               goto LAB_00b6677f;
             }
-            uVar12 = 0xd7;
+            uVar10 = 0xd7;
             *(undefined4 *)(*param_2 + 8) = 0;
             *(undefined4 *)*param_2 = 0;
-            uVar11 = 0x41;
+            uVar9 = 0x41;
           }
           else {
-            uVar12 = 0xde;
-            uVar11 = 0x98;
+            uVar10 = 0xde;
+            uVar9 = 0x98;
           }
         }
-        _ERR_put_error(0x22,0x96,uVar11,".\\crypto\\x509v3\\v3_pci.c",uVar12);
-        uVar11 = unaff_EBX[2];
-        uVar12 = unaff_EBX[1];
-        uVar10 = *unaff_EBX;
+        _ERR_put_error(0x22,0x96,uVar9,".\\crypto\\x509v3\\v3_pci.c",uVar10);
+        uVar9 = unaff_EBX[2];
+        uVar10 = unaff_EBX[1];
+        uVar8 = *unaff_EBX;
       }
-      _ERR_add_error_data(6,"section:",uVar10,",name:",uVar12,",value:",uVar11);
+      _ERR_add_error_data(6,"section:",uVar8,",name:",uVar10,",value:",uVar9);
 LAB_00b66816:
       if (local_808 != 0) {
         _ASN1_OCTET_STRING_free(*param_2);
@@ -216,24 +216,24 @@ LAB_00b66816:
       return 0;
     }
     if (*in_ECX == 0) {
-      iVar6 = _X509V3_get_value_int();
-      if (iVar6 != 0) {
+      iVar4 = _X509V3_get_value_int();
+      if (iVar4 != 0) {
         return 1;
       }
-      uVar12 = 0x6a;
-      uVar11 = 0x9c;
+      uVar10 = 0x6a;
+      uVar9 = 0x9c;
     }
     else {
-      uVar12 = 100;
-      uVar11 = 0x9d;
+      uVar10 = 100;
+      uVar9 = 0x9d;
     }
   }
-  _ERR_put_error(0x22,0x96,uVar11,".\\crypto\\x509v3\\v3_pci.c",uVar12);
-  uVar11 = unaff_EBX[2];
-  uVar12 = unaff_EBX[1];
-  uVar10 = *unaff_EBX;
+  _ERR_put_error(0x22,0x96,uVar9,".\\crypto\\x509v3\\v3_pci.c",uVar10);
+  uVar9 = unaff_EBX[2];
+  uVar10 = unaff_EBX[1];
+  uVar8 = *unaff_EBX;
 LAB_00b663d7:
-  _ERR_add_error_data(6,"section:",uVar10,",name:",uVar12,",value:",uVar11);
+  _ERR_add_error_data(6,"section:",uVar8,",name:",uVar10,",value:",uVar9);
   return 0;
 }
 

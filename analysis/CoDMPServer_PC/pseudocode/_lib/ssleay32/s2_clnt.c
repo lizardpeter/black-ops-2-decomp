@@ -6,59 +6,59 @@ undefined4 FUN_00b20af0(int *param_1)
 
 {
   undefined1 *puVar1;
-  uint uVar2;
-  int iVar3;
-  undefined4 uVar4;
-  uchar *puVar5;
+  uint count;
+  int iVar2;
+  undefined4 uVar3;
+  uchar *dst;
   
   puVar1 = *(undefined1 **)(param_1[0xf] + 4);
   if (param_1[0xd] == 0x1010) {
     if ((((int *)param_1[0x2f] == (int *)0x0) || (*(int *)param_1[0x2f] != *param_1)) &&
-       (iVar3 = ssl_get_new_session(param_1,0), iVar3 == 0)) {
+       (iVar2 = ssl_get_new_session(param_1,0), iVar2 == 0)) {
       ssl2_return_error(param_1,0);
       return 0xffffffff;
     }
     *puVar1 = 1;
     puVar1[1] = 0;
     puVar1[2] = 2;
-    uVar4 = _SSL_get_ciphers(param_1,puVar1 + 9,0);
-    iVar3 = ssl_cipher_list_to_bytes(param_1,uVar4);
-    puVar5 = puVar1 + 9 + iVar3;
-    if (iVar3 == 0) {
+    uVar3 = _SSL_get_ciphers(param_1,puVar1 + 9,0);
+    iVar2 = ssl_cipher_list_to_bytes(param_1,uVar3);
+    dst = puVar1 + 9 + iVar2;
+    if (iVar2 == 0) {
       _ERR_put_error(0x14,0x65,0xb5,".\\ssl\\s2_clnt.c",0x23f);
       return 0xffffffff;
     }
-    puVar1[3] = (char)((uint)iVar3 >> 8);
-    puVar1[4] = (char)iVar3;
-    uVar2 = *(uint *)(param_1[0x2f] + 0x44);
-    if ((uVar2 == 0) || (0x20 < uVar2)) {
+    puVar1[3] = (char)((uint)iVar2 >> 8);
+    puVar1[4] = (char)iVar2;
+    count = *(uint *)(param_1[0x2f] + 0x44);
+    if ((count == 0) || (0x20 < count)) {
       puVar1[5] = 0;
       puVar1[6] = 0;
     }
     else {
-      puVar1[5] = (char)(uVar2 >> 8);
-      puVar1[6] = (char)uVar2;
-      memcpy(puVar5,(uchar *)(param_1[0x2f] + 0x48),uVar2);
-      puVar5 = puVar5 + uVar2;
+      puVar1[5] = (char)(count >> 8);
+      puVar1[6] = (char)count;
+      memcpy(dst,(uchar *)(param_1[0x2f] + 0x48),count);
+      dst = dst + count;
     }
     *(undefined4 *)(param_1[0x15] + 100) = 0x10;
     puVar1[7] = 0;
     puVar1[8] = 0x10;
-    iVar3 = _RAND_pseudo_bytes(param_1[0x15] + 0x68,0x10);
-    if (iVar3 < 1) {
+    iVar2 = _RAND_pseudo_bytes(param_1[0x15] + 0x68,0x10);
+    if (iVar2 < 1) {
       return 0xffffffff;
     }
-    iVar3 = param_1[0x15];
-    *(undefined4 *)puVar5 = *(undefined4 *)(iVar3 + 0x68);
-    *(undefined4 *)(puVar5 + 4) = *(undefined4 *)(iVar3 + 0x6c);
-    *(undefined4 *)(puVar5 + 8) = *(undefined4 *)(iVar3 + 0x70);
-    *(undefined4 *)(puVar5 + 0xc) = *(undefined4 *)(iVar3 + 0x74);
+    iVar2 = param_1[0x15];
+    *(undefined4 *)dst = *(undefined4 *)(iVar2 + 0x68);
+    *(undefined4 *)(dst + 4) = *(undefined4 *)(iVar2 + 0x6c);
+    *(undefined4 *)(dst + 8) = *(undefined4 *)(iVar2 + 0x70);
+    *(undefined4 *)(dst + 0xc) = *(undefined4 *)(iVar2 + 0x74);
     param_1[0xd] = 0x1011;
-    param_1[0x11] = (int)(puVar5 + (0x10 - (int)puVar1));
+    param_1[0x11] = (int)(dst + (0x10 - (int)puVar1));
     param_1[0x12] = 0;
   }
-  uVar4 = ssl2_do_write(param_1);
-  return uVar4;
+  uVar3 = ssl2_do_write(param_1);
+  return uVar3;
 }
 
 
@@ -68,25 +68,25 @@ undefined4 FUN_00b20c50(void)
 
 {
   undefined1 *puVar1;
-  uint uVar2;
-  undefined4 uVar3;
+  uint count;
+  undefined4 uVar2;
   int unaff_ESI;
   
   if (*(int *)(unaff_ESI + 0x34) == 0x1040) {
     puVar1 = *(undefined1 **)(*(int *)(unaff_ESI + 0x3c) + 4);
     *puVar1 = 3;
-    uVar2 = *(uint *)(*(int *)(unaff_ESI + 0x54) + 0x88);
-    if (0x10 < uVar2) {
+    count = *(uint *)(*(int *)(unaff_ESI + 0x54) + 0x88);
+    if (0x10 < count) {
       _ERR_put_error(0x14,0xa7,0x44,".\\ssl\\s2_clnt.c",0x2dd);
       return 0xffffffff;
     }
-    memcpy(puVar1 + 1,(uchar *)(*(int *)(unaff_ESI + 0x54) + 0x8c),uVar2);
+    memcpy(puVar1 + 1,(uchar *)(*(int *)(unaff_ESI + 0x54) + 0x8c),count);
     *(undefined4 *)(unaff_ESI + 0x34) = 0x1041;
     *(int *)(unaff_ESI + 0x44) = *(int *)(*(int *)(unaff_ESI + 0x54) + 0x88) + 1;
     *(undefined4 *)(unaff_ESI + 0x48) = 0;
   }
-  uVar3 = ssl2_do_write();
-  return uVar3;
+  uVar2 = ssl2_do_write();
+  return uVar2;
 }
 
 
@@ -542,7 +542,7 @@ undefined4 FUN_00b21680(void)
   int iVar7;
   int iVar8;
   uint *unaff_ESI;
-  uchar *puVar9;
+  uchar *src;
   
   pcVar1 = *(char **)(unaff_ESI[0xf] + 4);
   if (unaff_ESI[0xd] == 0x1020) {
@@ -586,7 +586,7 @@ undefined4 FUN_00b21680(void)
   if ((code *)unaff_ESI[0x19] != (code *)0x0) {
     (*(code *)unaff_ESI[0x19])(0,*unaff_ESI,0,pcVar1,uVar2);
   }
-  puVar9 = (uchar *)(pcVar1 + 0xb);
+  src = (uchar *)(pcVar1 + 0xb);
   if (unaff_ESI[0x1b] == 0) {
     if ((*(int *)(unaff_ESI[0x2f] + 0x44) != 0) && (iVar4 = ssl_get_new_session(), iVar4 == 0)) {
       ssl2_return_error();
@@ -604,7 +604,7 @@ undefined4 FUN_00b21680(void)
       return 0xffffffff;
     }
     iVar6 = ssl_bytes_to_cipher_list();
-    puVar9 = puVar9 + *(int *)(unaff_ESI[0x15] + 0xe4) + iVar4;
+    src = src + *(int *)(unaff_ESI[0x15] + 0xe4) + iVar4;
     if (iVar6 == 0) {
       ssl2_return_error();
       _ERR_put_error(0x14,0x6d,0x41,".\\ssl\\s2_clnt.c",0x1d1);
@@ -670,7 +670,7 @@ undefined4 FUN_00b21680(void)
       _ERR_put_error(0x14,0x6d,299,".\\ssl\\s2_clnt.c",0x218);
       return 0xffffffff;
     }
-    memcpy((uchar *)(uVar2 + 0x8c),puVar9,*(ulong *)(uVar2 + 0xd8));
+    memcpy((uchar *)(uVar2 + 0x8c),src,*(ulong *)(uVar2 + 0xd8));
     return 1;
   }
   ssl2_return_error();

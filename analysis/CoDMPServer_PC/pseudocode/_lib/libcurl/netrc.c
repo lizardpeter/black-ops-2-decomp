@@ -9,10 +9,10 @@ undefined4 _Curl_parsenetrc(undefined4 param_1,uchar *param_2,uchar *param_3,cha
 {
   int iVar1;
   char *pcVar2;
-  uchar *puVar3;
+  uchar *source;
+  int iVar3;
+  _iobuf *stream;
   int iVar4;
-  _iobuf *p_Var5;
-  int iVar6;
   char local_128;
   char local_127;
   char local_126;
@@ -30,9 +30,9 @@ undefined4 _Curl_parsenetrc(undefined4 param_1,uchar *param_2,uchar *param_3,cha
   
   local_4 = __security_cookie ^ (uint)&local_128;
   local_118 = (uint)(*param_2 != '\0');
-  iVar4 = 0;
+  iVar3 = 0;
   local_10c = param_1;
-  iVar6 = 0;
+  iVar4 = 0;
   local_120 = param_3;
   local_124 = param_4;
   local_11c = 1;
@@ -61,70 +61,70 @@ LAB_00b092e3:
     local_124 = param_4;
     local_110 = fopen(param_4,"r");
     if (local_110 != (_iobuf *)0x0) {
-      while (p_Var5 = local_110, pcVar2 = fgets(local_104,0x100,local_110), pcVar2 != (char *)0x0) {
+      while (stream = local_110, pcVar2 = fgets(local_104,0x100,local_110), pcVar2 != (char *)0x0) {
         pcVar2 = local_104;
 LAB_00b0932a:
-        puVar3 = (uchar *)_Curl_strtok_r(pcVar2," \t\n",local_108);
-        if (puVar3 != (uchar *)0x0) {
-          if ((*param_2 != '\0') && (p_Var5 = local_110, *local_120 != '\0')) break;
-          if (iVar6 == 0) {
-            iVar1 = _Curl_raw_equal("machine",puVar3);
+        source = (uchar *)_Curl_strtok_r(pcVar2," \t\n",local_108);
+        if (source != (uchar *)0x0) {
+          if ((*param_2 != '\0') && (stream = local_110, *local_120 != '\0')) break;
+          if (iVar4 == 0) {
+            iVar1 = _Curl_raw_equal("machine",source);
             if (iVar1 != 0) {
 LAB_00b094aa:
-              iVar6 = 1;
+              iVar4 = 1;
             }
           }
           else {
-            if (iVar6 == 1) {
-              iVar6 = _Curl_raw_equal(local_10c,puVar3);
-              if (iVar6 == 0) {
-                iVar6 = 0;
+            if (iVar4 == 1) {
+              iVar4 = _Curl_raw_equal(local_10c,source);
+              if (iVar4 == 0) {
+                iVar4 = 0;
                 pcVar2 = (char *)0x0;
               }
               else {
-                iVar6 = 3;
+                iVar4 = 3;
                 local_11c = 0;
                 pcVar2 = (char *)0x0;
               }
               goto LAB_00b0932a;
             }
-            if (iVar6 != 3) goto LAB_00b094af;
+            if (iVar4 != 3) goto LAB_00b094af;
             if (local_128 != '\0') {
               if (local_118 == 0) {
-                strncpy(param_2,puVar3,0x3f);
+                strncpy(param_2,source,0x3f);
                 local_128 = '\0';
                 pcVar2 = (char *)0x0;
               }
               else {
-                iVar4 = _Curl_raw_equal(param_2,puVar3);
+                iVar3 = _Curl_raw_equal(param_2,source);
                 local_128 = '\0';
                 pcVar2 = (char *)0x0;
               }
               goto LAB_00b0932a;
             }
             if (local_127 != '\0') {
-              if ((iVar4 != 0) || (local_118 == 0)) {
-                strncpy(local_120,puVar3,0x3f);
+              if ((iVar3 != 0) || (local_118 == 0)) {
+                strncpy(local_120,source,0x3f);
               }
               local_127 = '\0';
               pcVar2 = (char *)0x0;
               goto LAB_00b0932a;
             }
-            iVar1 = _Curl_raw_equal("login",puVar3);
+            iVar1 = _Curl_raw_equal("login",source);
             if (iVar1 != 0) {
               local_128 = '\x01';
               pcVar2 = (char *)0x0;
               goto LAB_00b0932a;
             }
-            iVar1 = _Curl_raw_equal("password",puVar3);
+            iVar1 = _Curl_raw_equal("password",source);
             if (iVar1 != 0) {
               local_127 = '\x01';
               pcVar2 = (char *)0x0;
               goto LAB_00b0932a;
             }
-            iVar1 = _Curl_raw_equal("machine",puVar3);
+            iVar1 = _Curl_raw_equal("machine",source);
             if (iVar1 != 0) {
-              iVar4 = 0;
+              iVar3 = 0;
               goto LAB_00b094aa;
             }
           }
@@ -133,7 +133,7 @@ LAB_00b094af:
           goto LAB_00b0932a;
         }
       }
-      fclose(p_Var5);
+      fclose(stream);
     }
     if (local_126 != '\0') {
       (*(code *)_Curl_cfree)(local_114);

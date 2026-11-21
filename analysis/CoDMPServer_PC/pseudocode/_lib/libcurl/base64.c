@@ -40,45 +40,45 @@ int _Curl_base64_decode(char *param_1,int *param_2)
   char cVar1;
   int iVar2;
   int iVar3;
-  uchar *puVar4;
-  ulong uVar5;
-  int iVar6;
-  ulong uVar7;
+  uchar *dst;
+  ulong uVar4;
+  int iVar5;
+  ulong count;
   
   iVar2 = 0;
   *param_2 = 0;
-  iVar6 = 0;
+  iVar5 = 0;
   cVar1 = *param_1;
   while ((cVar1 != '=' && (cVar1 != '\0'))) {
     iVar3 = iVar2 + 1;
     iVar2 = iVar2 + 1;
     cVar1 = param_1[iVar3];
   }
-  if ((param_1[iVar2] == '=') && (iVar6 = 1, param_1[iVar2 + 1] == '=')) {
-    iVar6 = 2;
+  if ((param_1[iVar2] == '=') && (iVar5 = 1, param_1[iVar2 + 1] == '=')) {
+    iVar5 = 2;
   }
-  iVar2 = (int)(iVar2 + iVar6 + (iVar2 + iVar6 >> 0x1f & 3U)) >> 2;
+  iVar2 = (int)(iVar2 + iVar5 + (iVar2 + iVar5 >> 0x1f & 3U)) >> 2;
   if (0 < iVar2) {
-    iVar3 = iVar2 * 3 - iVar6;
-    puVar4 = (uchar *)(*(code *)_Curl_cmalloc)(iVar3 + 4);
-    if (puVar4 != (uchar *)0x0) {
+    iVar3 = iVar2 * 3 - iVar5;
+    dst = (uchar *)(*(code *)_Curl_cmalloc)(iVar3 + 4);
+    if (dst != (uchar *)0x0) {
       iVar2 = iVar2 + -1;
-      *param_2 = (int)puVar4;
+      *param_2 = (int)dst;
       if (0 < iVar2) {
         do {
-          FUN_00b0b850(puVar4);
-          puVar4 = puVar4 + 3;
+          FUN_00b0b850(dst);
+          dst = dst + 3;
           iVar2 = iVar2 + -1;
         } while (iVar2 != 0);
       }
       FUN_00b0b850(&param_2);
-      uVar7 = 3 - iVar6;
-      uVar5 = 0;
-      if (0 < (int)uVar7) {
-        memcpy(puVar4,(uchar *)&param_2,uVar7);
-        uVar5 = uVar7;
+      count = 3 - iVar5;
+      uVar4 = 0;
+      if (0 < (int)count) {
+        memcpy(dst,(uchar *)&param_2,count);
+        uVar4 = count;
       }
-      puVar4[uVar5] = '\0';
+      dst[uVar4] = '\0';
       return iVar3;
     }
     return 0;

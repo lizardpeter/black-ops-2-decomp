@@ -292,71 +292,71 @@ void _ASN1_OBJECT_free(int *param_1)
 undefined4 * __cdecl c2i_ASN1_OBJECT(undefined4 *param_1,undefined4 *param_2,ulong param_3)
 
 {
-  uchar *puVar1;
-  int iVar2;
-  undefined4 *puVar3;
-  ulong uVar4;
-  byte *pbVar5;
+  uchar *src;
+  int iVar1;
+  undefined4 *puVar2;
+  ulong uVar3;
+  byte *pbVar4;
   
-  iVar2 = 0;
-  pbVar5 = (byte *)*param_2;
+  iVar1 = 0;
+  pbVar4 = (byte *)*param_2;
   if (0 < (int)(param_3 - 1)) {
     do {
-      if ((((byte *)*param_2)[iVar2 + 1] == 0x80) && ((iVar2 == 0 || ((*pbVar5 & 0x80) == 0)))) {
+      if ((((byte *)*param_2)[iVar1 + 1] == 0x80) && ((iVar1 == 0 || ((*pbVar4 & 0x80) == 0)))) {
         _ERR_put_error(0xd,0xc4,0xd4,".\\crypto\\asn1\\a_object.c",0x12d);
         return (undefined4 *)0x0;
       }
-      iVar2 = iVar2 + 1;
-      pbVar5 = pbVar5 + 1;
-    } while (iVar2 < (int)(param_3 - 1));
+      iVar1 = iVar1 + 1;
+      pbVar4 = pbVar4 + 1;
+    } while (iVar1 < (int)(param_3 - 1));
   }
   if (((param_1 == (undefined4 *)0x0) ||
-      (puVar3 = (undefined4 *)*param_1, puVar3 == (undefined4 *)0x0)) ||
-     ((*(byte *)(puVar3 + 5) & 1) == 0)) {
-    puVar3 = (undefined4 *)_CRYPTO_malloc(0x18,".\\crypto\\asn1\\a_object.c",0x159);
-    if (puVar3 == (undefined4 *)0x0) {
+      (puVar2 = (undefined4 *)*param_1, puVar2 == (undefined4 *)0x0)) ||
+     ((*(byte *)(puVar2 + 5) & 1) == 0)) {
+    puVar2 = (undefined4 *)_CRYPTO_malloc(0x18,".\\crypto\\asn1\\a_object.c",0x159);
+    if (puVar2 == (undefined4 *)0x0) {
       _ERR_put_error(0xd,0x7b,0x41,".\\crypto\\asn1\\a_object.c",0x15c);
       return (undefined4 *)0x0;
     }
-    puVar3[3] = 0;
-    puVar3[4] = 0;
-    puVar3[2] = 0;
-    *puVar3 = 0;
-    puVar3[1] = 0;
-    puVar3[5] = 1;
+    puVar2[3] = 0;
+    puVar2[4] = 0;
+    puVar2[2] = 0;
+    *puVar2 = 0;
+    puVar2[1] = 0;
+    puVar2[5] = 1;
   }
-  iVar2 = puVar3[4];
-  puVar1 = (uchar *)*param_2;
-  if (iVar2 != 0) {
-    if ((int)param_3 <= (int)puVar3[3]) goto LAB_00b3835e;
-    if (iVar2 != 0) {
-      _CRYPTO_free(iVar2);
+  iVar1 = puVar2[4];
+  src = (uchar *)*param_2;
+  if (iVar1 != 0) {
+    if ((int)param_3 <= (int)puVar2[3]) goto LAB_00b3835e;
+    if (iVar1 != 0) {
+      _CRYPTO_free(iVar1);
     }
   }
-  uVar4 = param_3;
+  uVar3 = param_3;
   if (param_3 == 0) {
-    uVar4 = 1;
+    uVar3 = 1;
   }
-  iVar2 = _CRYPTO_malloc(uVar4,".\\crypto\\asn1\\a_object.c",0x13f);
-  puVar3[5] = puVar3[5] | 8;
-  puVar3[4] = iVar2;
-  if (iVar2 == 0) {
+  iVar1 = _CRYPTO_malloc(uVar3,".\\crypto\\asn1\\a_object.c",0x13f);
+  puVar2[5] = puVar2[5] | 8;
+  puVar2[4] = iVar1;
+  if (iVar1 == 0) {
     _ERR_put_error(0xd,0xc4,0x41,".\\crypto\\asn1\\a_object.c",0x14f);
-    if ((param_1 == (undefined4 *)0x0) || ((undefined4 *)*param_1 != puVar3)) {
-      _ASN1_OBJECT_free(puVar3);
+    if ((param_1 == (undefined4 *)0x0) || ((undefined4 *)*param_1 != puVar2)) {
+      _ASN1_OBJECT_free(puVar2);
     }
     return (undefined4 *)0x0;
   }
 LAB_00b3835e:
-  memcpy((uchar *)puVar3[4],puVar1,param_3);
-  puVar3[3] = param_3;
-  *puVar3 = 0;
-  puVar3[1] = 0;
+  memcpy((uchar *)puVar2[4],src,param_3);
+  puVar2[3] = param_3;
+  *puVar2 = 0;
+  puVar2[1] = 0;
   if (param_1 != (undefined4 *)0x0) {
-    *param_1 = puVar3;
+    *param_1 = puVar2;
   }
-  *param_2 = puVar1 + param_3;
-  return puVar3;
+  *param_2 = src + param_3;
+  return puVar2;
 }
 
 

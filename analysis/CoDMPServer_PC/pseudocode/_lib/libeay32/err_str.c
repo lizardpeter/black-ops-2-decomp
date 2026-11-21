@@ -5,10 +5,10 @@
 void FUN_00b60a80(void)
 
 {
-  uchar *puVar1;
-  int iVar2;
-  int *piVar3;
-  uchar *puVar4;
+  uchar *source;
+  int errnum;
+  int *piVar1;
+  uchar *dest;
   
   _CRYPTO_lock(5,1,".\\crypto\\err\\err_str.c",0xee);
   if (DAT_010d13b8 == 0) {
@@ -21,26 +21,26 @@ void FUN_00b60a80(void)
     _CRYPTO_lock(10,1,".\\crypto\\err\\err_str.c",0xf9);
     return;
   }
-  iVar2 = 1;
-  puVar4 = &DAT_08570d78;
-  piVar3 = &DAT_08571d5c;
+  errnum = 1;
+  dest = &DAT_08570d78;
+  piVar1 = &DAT_08571d5c;
   do {
-    piVar3[-1] = iVar2;
-    if (*piVar3 == 0) {
-      puVar1 = (uchar *)strerror(iVar2);
-      if (puVar1 != (uchar *)0x0) {
-        strncpy(puVar4,puVar1,0x20);
-        puVar4[0x1f] = '\0';
-        *piVar3 = (int)puVar4;
+    piVar1[-1] = errnum;
+    if (*piVar1 == 0) {
+      source = (uchar *)strerror(errnum);
+      if (source != (uchar *)0x0) {
+        strncpy(dest,source,0x20);
+        dest[0x1f] = '\0';
+        *piVar1 = (int)dest;
       }
-      if (*piVar3 == 0) {
-        *piVar3 = (int)"unknown";
+      if (*piVar1 == 0) {
+        *piVar1 = (int)"unknown";
       }
     }
-    piVar3 = piVar3 + 2;
-    iVar2 = iVar2 + 1;
-    puVar4 = puVar4 + 0x20;
-  } while ((int)piVar3 < 0x857214d);
+    piVar1 = piVar1 + 2;
+    errnum = errnum + 1;
+    dest = dest + 0x20;
+  } while ((int)piVar1 < 0x857214d);
   DAT_010d13b8 = 0;
   _CRYPTO_lock(10,1,".\\crypto\\err\\err_str.c",0x116);
   return;

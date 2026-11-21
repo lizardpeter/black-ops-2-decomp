@@ -10,9 +10,9 @@ ulong _PEM_def_callback(uchar *param_1,ulong param_2,undefined4 param_3,uchar *p
   char *pcVar3;
   int iVar4;
   _iobuf *p_Var5;
-  ulong uVar6;
-  char *pcVar7;
-  undefined4 uVar8;
+  ulong count;
+  char *format;
+  undefined4 uVar6;
   
   if (param_4 != (uchar *)0x0) {
     puVar2 = param_4;
@@ -20,12 +20,12 @@ ulong _PEM_def_callback(uchar *param_1,ulong param_2,undefined4 param_3,uchar *p
       uVar1 = *puVar2;
       puVar2 = puVar2 + 1;
     } while (uVar1 != '\0');
-    uVar6 = (int)puVar2 - (int)(param_4 + 1);
+    count = (int)puVar2 - (int)(param_4 + 1);
     if ((int)param_2 < (int)puVar2 - (int)(param_4 + 1)) {
-      uVar6 = param_2;
+      count = param_2;
     }
-    memcpy(param_1,param_4,uVar6);
-    return uVar6;
+    memcpy(param_1,param_4,count);
+    return count;
   }
   pcVar3 = (char *)_EVP_get_pw_prompt();
   if (pcVar3 == (char *)0x0) {
@@ -44,12 +44,12 @@ ulong _PEM_def_callback(uchar *param_1,ulong param_2,undefined4 param_3,uchar *p
       puVar2 = puVar2 + 1;
     } while (uVar1 != '\0');
     if (3 < (int)puVar2 - (int)(param_1 + 1)) break;
-    uVar8 = 4;
-    pcVar7 = "phrase is too short, needs to be at least %d chars\n";
+    uVar6 = 4;
+    format = "phrase is too short, needs to be at least %d chars\n";
     p_Var5 = __iob_func();
     p_Var5 = p_Var5 + 2;
-    fprintf(p_Var5,pcVar7);
-    iVar4 = _EVP_read_pw_string(param_1,param_2,pcVar3,param_3,p_Var5,pcVar7,uVar8);
+    fprintf(p_Var5,format);
+    iVar4 = _EVP_read_pw_string(param_1,param_2,pcVar3,param_3,p_Var5,format,uVar6);
   }
   return (int)puVar2 - (int)(param_1 + 1);
 }

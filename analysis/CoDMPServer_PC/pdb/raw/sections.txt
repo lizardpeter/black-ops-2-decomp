@@ -1,0 +1,81 @@
+
+
+                      Section Headers                       
+============================================================
+  
+  SECTION HEADER #1
+     .text name
+    78A542 virtual size
+      1000 virtual address
+    78A600 size of raw data
+       400 file pointer to raw data
+         0 file pointer to relocation table
+         0 file pointer to line numbers
+         0 number of relocations
+         0 number of line numbers
+  60000020 flags
+           IMAGE_SCN_CNT_CODE
+           IMAGE_SCN_MEM_EXECUTE
+           IMAGE_SCN_MEM_READ
+  
+  SECTION HEADER #2
+    .rdata name
+    2042D9 virtual size
+    78C000 virtual address
+    204400 size of raw data
+    78AA00 file pointer to raw data
+         0 file pointer to relocation table
+         0 file pointer to line numbers
+         0 number of relocations
+         0 number of line numbers
+  40000040 flags
+           IMAGE_SCN_CNT_INITIALIZED_DATA
+           IMAGE_SCN_MEM_READ
+  
+  SECTION HEADER #3
+     .data name
+   77E24A4 virtual size
+    991000 virtual address
+    341200 size of raw data
+    98EE00 file pointer to raw data
+         0 file pointer to relocation table
+         0 file pointer to line numbers
+         0 number of relocations
+         0 number of line numbers
+  C0000040 flags
+           IMAGE_SCN_CNT_INITIALIZED_DATA
+           IMAGE_SCN_MEM_READ
+           IMAGE_SCN_MEM_WRITE
+  
+  SECTION HEADER #4
+      .tls name
+      3AA5 virtual size
+   8174000 virtual address
+      3C00 size of raw data
+    CD0000 file pointer to raw data
+         0 file pointer to relocation table
+         0 file pointer to line numbers
+         0 number of relocations
+         0 number of line numbers
+  C0000040 flags
+           IMAGE_SCN_CNT_INITIALIZED_DATA
+           IMAGE_SCN_MEM_READ
+           IMAGE_SCN_MEM_WRITE
+  
+  SECTION HEADER #5
+     .rsrc name
+     3FE00 virtual size
+   8178000 virtual address
+     3FE00 size of raw data
+    CD3C00 file pointer to raw data
+         0 file pointer to relocation table
+         0 file pointer to line numbers
+         0 number of relocations
+         0 number of line numbers
+  40000040 flags
+           IMAGE_SCN_CNT_INITIALIZED_DATA
+           IMAGE_SCN_MEM_READ
+
+                  Original Section Headers                  
+============================================================
+  PDB does not contain the requested image section header type

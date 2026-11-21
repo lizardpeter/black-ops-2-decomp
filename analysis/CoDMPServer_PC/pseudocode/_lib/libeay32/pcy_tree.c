@@ -371,11 +371,11 @@ int FUN_00b4b8a0(undefined4 *param_1,undefined4 param_2)
   int iVar4;
   int iVar5;
   int *piVar6;
-  uchar *puVar7;
-  undefined4 uVar8;
-  int *piVar9;
+  uchar *dst;
+  undefined4 uVar7;
+  int *piVar8;
   uint in_ECX;
-  int iVar10;
+  int iVar9;
   int local_14;
   int local_10;
   int local_c;
@@ -401,10 +401,10 @@ int FUN_00b4b8a0(undefined4 *param_1,undefined4 param_2)
     return 1;
   }
   iVar1 = iVar3 + -2;
-  iVar10 = iVar1;
+  iVar9 = iVar1;
   if (-1 < iVar1) {
     do {
-      iVar4 = sk_value(param_2,iVar10);
+      iVar4 = sk_value(param_2,iVar9);
       _X509_check_purpose(iVar4,0xffffffff,0xffffffff);
       iVar5 = policy_cache_set(iVar4);
       if (iVar5 == 0) {
@@ -427,8 +427,8 @@ int FUN_00b4b8a0(undefined4 *param_1,undefined4 param_2)
           local_14 = iVar4;
         }
       }
-      iVar10 = iVar10 + -1;
-    } while (-1 < iVar10);
+      iVar9 = iVar9 + -1;
+    } while (-1 < iVar9);
     if (local_10 != 1) {
       if (local_10 != 2) {
         return local_10;
@@ -442,28 +442,28 @@ int FUN_00b4b8a0(undefined4 *param_1,undefined4 param_2)
   piVar6 = (int *)_CRYPTO_malloc(0x18,".\\crypto\\x509v3\\pcy_tree.c",0x97);
   if (piVar6 != (int *)0x0) {
     piVar6[5] = 0;
-    puVar7 = (uchar *)_CRYPTO_malloc(iVar3 << 4,".\\crypto\\x509v3\\pcy_tree.c",0x9d);
-    *piVar6 = (int)puVar7;
+    dst = (uchar *)_CRYPTO_malloc(iVar3 << 4,".\\crypto\\x509v3\\pcy_tree.c",0x9d);
+    *piVar6 = (int)dst;
     piVar6[1] = 0;
     piVar6[2] = 0;
     piVar6[3] = 0;
     piVar6[4] = 0;
-    if (puVar7 == (uchar *)0x0) {
+    if (dst == (uchar *)0x0) {
       _CRYPTO_free(piVar6);
       return 0;
     }
-    memset(puVar7,'\0',iVar3 << 4);
+    memset(dst,'\0',iVar3 << 4);
     piVar2 = (int *)*piVar6;
     piVar6[1] = iVar3;
-    uVar8 = _OBJ_nid2obj(0x2ea,0);
-    iVar3 = policy_data_new(0,uVar8);
+    uVar7 = _OBJ_nid2obj(0x2ea,0);
+    iVar3 = policy_data_new(0,uVar7);
     if ((iVar3 != 0) && (iVar3 = level_add_node(piVar2,iVar3,0,piVar6), iVar3 != 0)) {
       for (; -1 < iVar1; iVar1 = iVar1 + -1) {
         iVar3 = sk_value(param_2,iVar1);
-        piVar9 = (int *)policy_cache_set(iVar3);
+        piVar8 = (int *)policy_cache_set(iVar3);
         _CRYPTO_add_lock(iVar3 + 0x10,1,3,".\\crypto\\x509v3\\pcy_tree.c",0xbc);
         piVar2[4] = iVar3;
-        if (*piVar9 == 0) {
+        if (*piVar8 == 0) {
           piVar2[7] = piVar2[7] | 0x200;
         }
         if (local_c == 0) {
@@ -475,7 +475,7 @@ int FUN_00b4b8a0(undefined4 *param_1,undefined4 param_2)
           if ((*(byte *)(iVar3 + 0x28) & 0x20) == 0) {
             local_c = local_c + -1;
           }
-          iVar3 = piVar9[3];
+          iVar3 = piVar8[3];
           if ((-1 < iVar3) && (iVar3 < local_c)) {
             local_c = iVar3;
           }
@@ -484,7 +484,7 @@ int FUN_00b4b8a0(undefined4 *param_1,undefined4 param_2)
           piVar2[7] = piVar2[7] | 0x400;
         }
         else {
-          iVar3 = piVar9[5];
+          iVar3 = piVar8[5];
           local_8 = local_8 + -1;
           if ((-1 < iVar3) && (iVar3 < local_8)) {
             local_8 = iVar3;

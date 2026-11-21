@@ -216,7 +216,7 @@ int _Curl_FormReader(int param_1,int param_2,int param_3,int *param_4)
   int iVar2;
   int iVar3;
   int iVar4;
-  uint uVar5;
+  uint count;
   
   param_2 = param_2 * param_3;
   if (*param_4 == 0) {
@@ -227,14 +227,14 @@ int _Curl_FormReader(int param_1,int param_2,int param_3,int *param_4)
     iVar4 = 0;
     do {
       iVar1 = *param_4;
-      uVar5 = *(int *)(iVar1 + 0xc) - param_4[1];
-      if ((uint)(param_2 - iVar4) < uVar5) {
+      count = *(int *)(iVar1 + 0xc) - param_4[1];
+      if ((uint)(param_2 - iVar4) < count) {
         memcpy((uchar *)(iVar4 + param_1),(uchar *)(*(int *)(iVar1 + 8) + param_4[1]),
                param_2 - iVar4);
         param_4[1] = param_4[1] + (param_2 - iVar4);
         return param_2;
       }
-      memcpy((uchar *)(iVar4 + param_1),(uchar *)(*(int *)(iVar1 + 8) + param_4[1]),uVar5);
+      memcpy((uchar *)(iVar4 + param_1),(uchar *)(*(int *)(iVar1 + 8) + param_4[1]),count);
       iVar1 = ((int *)*param_4)[3];
       iVar2 = param_4[1];
       param_4[1] = 0;
@@ -325,12 +325,12 @@ int _Curl_getFormData(undefined4 *param_1,int *param_2,char *param_3,int *param_
   int iVar2;
   int iVar3;
   int iVar4;
+  _iobuf *stream;
   _iobuf *p_Var5;
-  _iobuf *p_Var6;
-  uint uVar7;
-  int *piVar8;
-  undefined4 *puVar9;
-  undefined4 uVar10;
+  uint uVar6;
+  int *piVar7;
+  undefined4 *puVar8;
+  undefined4 uVar9;
   undefined4 local_228;
   int local_224;
   int local_220;
@@ -376,7 +376,7 @@ int _Curl_getFormData(undefined4 *param_1,int *param_2,char *param_3,int *param_
            (iVar3 = FUN_00b0bc40(&local_224,"\""), iVar2 = local_218, iVar3 != 0))
         goto LAB_00b0c44a;
         iVar4 = 0;
-        piVar8 = param_2;
+        piVar7 = param_2;
         if (param_2[9] != 0) {
           local_210 = _Curl_FormBoundary();
           iVar3 = FUN_00b0bc40(&local_224,"\r\nContent-Type: multipart/mixed, boundary=%s\r\n",
@@ -386,7 +386,7 @@ int _Curl_getFormData(undefined4 *param_1,int *param_2,char *param_3,int *param_
           if (iVar3 != 0) goto LAB_00b0c44a;
         }
         do {
-          local_214 = piVar8;
+          local_214 = piVar7;
           if (param_2[9] == 0) {
             iVar2 = iVar4;
             if ((*(byte *)(param_2 + 10) & 0x51) != 0) {
@@ -405,14 +405,14 @@ int _Curl_getFormData(undefined4 *param_1,int *param_2,char *param_3,int *param_
             }
           }
           else {
-            if (piVar8[0xb] == 0) {
+            if (piVar7[0xb] == 0) {
               iVar2 = FUN_00b0bd30();
             }
             else {
               iVar2 = 0;
             }
-            iVar3 = piVar8[0xb];
-            if (piVar8[0xb] == 0) {
+            iVar3 = piVar7[0xb];
+            if (piVar7[0xb] == 0) {
               iVar3 = iVar2;
             }
             iVar4 = FUN_00b0bc40(&local_224,
@@ -425,11 +425,11 @@ LAB_00b0c1d2:
             iVar2 = 0;
             if (iVar4 != 0) goto LAB_00b0c29f;
           }
-          if ((piVar8[7] != 0) &&
-             (iVar4 = FUN_00b0bc40(&local_224,"\r\nContent-Type: %s",piVar8[7]), iVar2 = 0,
+          if ((piVar7[7] != 0) &&
+             (iVar4 = FUN_00b0bc40(&local_224,"\r\nContent-Type: %s",piVar7[7]), iVar2 = 0,
              iVar4 != 0)) goto LAB_00b0c29f;
-          puVar9 = (undefined4 *)piVar8[8];
-          if (puVar9 == (undefined4 *)0x0) {
+          puVar8 = (undefined4 *)piVar7[8];
+          if (puVar8 == (undefined4 *)0x0) {
             if (iVar2 != 0) {
 LAB_00b0c40a:
               _Curl_formclean(&local_21c);
@@ -439,59 +439,59 @@ LAB_00b0c40a:
           }
           else {
             do {
-              iVar2 = FUN_00b0bc40(&local_224,"\r\n%s",*puVar9);
+              iVar2 = FUN_00b0bc40(&local_224,"\r\n%s",*puVar8);
               if (iVar2 != 0) goto LAB_00b0c40a;
-              puVar9 = (undefined4 *)puVar9[1];
-            } while (puVar9 != (undefined4 *)0x0);
+              puVar8 = (undefined4 *)puVar8[1];
+            } while (puVar8 != (undefined4 *)0x0);
           }
           iVar4 = FUN_00b0bc40(&local_224,"\r\n\r\n");
           if (iVar4 != 0) goto LAB_00b0c29f;
-          uVar7 = param_2[10];
-          if ((uVar7 & 3) == 0) {
-            if ((uVar7 & 0x10) == 0) {
-              if ((uVar7 & 0x40) == 0) {
-                uVar10 = 1;
+          uVar6 = param_2[10];
+          if ((uVar6 & 3) == 0) {
+            if ((uVar6 & 0x10) == 0) {
+              if ((uVar6 & 0x40) == 0) {
+                uVar9 = 1;
               }
               else {
-                uVar10 = 2;
+                uVar9 = 2;
               }
             }
             else {
-              uVar10 = 1;
+              uVar9 = 1;
             }
-            iVar4 = FUN_00b0bb40(&local_228,uVar10,&local_224);
+            iVar4 = FUN_00b0bb40(&local_228,uVar9,&local_224);
             if (iVar4 != 0) goto LAB_00b0c29f;
           }
           else {
-            iVar2 = curl_strequal("-",piVar8[3]);
+            iVar2 = curl_strequal("-",piVar7[3]);
             if (iVar2 == 0) {
-              p_Var5 = fopen((char *)piVar8[3],"rb");
+              stream = fopen((char *)piVar7[3],"rb");
             }
             else {
-              p_Var5 = __iob_func();
+              stream = __iob_func();
             }
-            if (p_Var5 == (_iobuf *)0x0) {
+            if (stream == (_iobuf *)0x0) {
               _Curl_formclean(&local_21c);
               (*(code *)_Curl_cfree)(local_218);
               *local_20c = 0;
               return 0x1a;
             }
-            p_Var6 = __iob_func();
-            if (p_Var5 == p_Var6) {
-              uVar7 = fread(auStack_204,1,0x200,p_Var5);
+            p_Var5 = __iob_func();
+            if (stream == p_Var5) {
+              uVar6 = fread(auStack_204,1,0x200,stream);
               piVar1 = local_214;
-              while (local_214 = piVar8, uVar7 != 0) {
+              while (local_214 = piVar7, uVar6 != 0) {
                 local_214 = piVar1;
                 iVar2 = FUN_00b0bb40(&local_228,1,&local_224);
                 if (iVar2 != 0) goto LAB_00b0c426;
-                uVar7 = fread(auStack_204,1,0x200,p_Var5);
+                uVar6 = fread(auStack_204,1,0x200,stream);
                 iVar4 = 0;
-                piVar8 = local_214;
+                piVar7 = local_214;
                 piVar1 = local_214;
               }
             }
             else {
-              fclose(p_Var5);
+              fclose(stream);
               iVar2 = FUN_00b0bb40(&local_228,3,&local_224);
               iVar4 = 0;
               if (iVar2 != 0) {
@@ -502,10 +502,10 @@ LAB_00b0c426:
               }
             }
           }
-          uVar10 = local_210;
-          piVar8 = (int *)local_214[9];
-        } while (piVar8 != (int *)0x0);
-        local_214 = piVar8;
+          uVar9 = local_210;
+          piVar7 = (int *)local_214[9];
+        } while (piVar7 != (int *)0x0);
+        local_214 = piVar7;
         if (iVar4 != 0) {
 LAB_00b0c29f:
           _Curl_formclean(&local_21c);
@@ -515,7 +515,7 @@ LAB_00b0c29f:
         iVar3 = 0;
         if (param_2[9] != 0) {
           iVar3 = FUN_00b0bc40(&local_224,"\r\n--%s--",local_210);
-          (*(code *)_Curl_cfree)(uVar10);
+          (*(code *)_Curl_cfree)(uVar9);
           iVar2 = local_218;
           if (iVar3 != 0) goto LAB_00b0c44a;
         }
