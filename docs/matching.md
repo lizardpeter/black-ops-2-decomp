@@ -30,9 +30,19 @@ strings and functions, so the x86 servers match the x64 Store build directly. Ta
     python tools/match/match.py CoDMPServer_PC CoDMPServer_s_PC --same-compiler
     python tools/match/validate.py CoDMPServer_PC CoDMPServer_s_PC
 
-Results are recorded here once the Ghidra pipeline has published both builds. That pair shares compiler and
-architecture, so it measures the method, not the harder x86-to-x64 case; the Store matches also get the call-graph
-consistency estimate and a manual review, as in Ghosts.
+On the blind analysis published at 69fed58: **6,933 of 18,659 ship-build functions matched (37.2%)** in ten
+propagation rounds, **98.3% precision** (6,757 correct, 118 wrong, 58 unverifiable):
+
+| method | correct | wrong | unverifiable | precision |
+|---|---:|---:|---:|---:|
+| string | 2,631 | 45 | 2 | 98.3% |
+| named | 115 | 2 | 0 | 98.3% |
+| constant | 36 | 0 | 1 | 100.0% |
+| callee | 2,175 | 41 | 28 | 98.1% |
+| caller | 1,800 | 30 | 27 | 98.4% |
+
+That pair shares compiler and architecture, so it measures the method, not the harder x86-to-x64 case: Store matches
+are reviewed before they become records.
 
 ### CoDMPServer_PC → t6mp_msstore (x86 → x64)
 
