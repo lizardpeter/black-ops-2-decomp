@@ -15,8 +15,10 @@
 #include <stdlib.h>
 
 #include "bgame/bg_public.h"
+#include "cgame_mp/cg_local_mp.h"
 #include "qcommon/qcommon.h"
 #include "t6_assert.h"
+#include "universal/com_math.h"
 #include "t6_compiler.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
@@ -25,13 +27,43 @@
 // cgame
 const playerState_s *CG_GetPredictedPlayerState(LocalClientNum_t localClientNum);
 void CG_CycleWeapon(LocalClientNum_t localClientNum, int cycleForward);
+int CG_AirburstLazeCancelledByMovement(float forwardMove, float rightMove, float pitchMove, float yawMove,
+                                       float moveScale);
+int CG_GetAirburstMarkDistance(LocalClientNum_t localClientNum, playerState_s *ps, bitarray<64> &buttons,
+                               unsigned int *markDistance, int cancelled);
+
+// ui, devgui, win32
+void UI_UpdateMouseScreenPosition(LocalClientNum_t localClientNum, int x, int y);
+bool UI_KeysBypassMenu(LocalClientNum_t localClientNum);
+bool UI_IsFocusedMenuUi3dWindow(LocalClientNum_t localClientNum);
+void UI_MouseEvent(LocalClientNum_t localClientNum, int x, int y);
+bool DevGui_IsActive();
+void DevGui_MouseEvent(int dx, int dy);
+void IN_SetCursorPos(int x, int y);
+void IN_ShowSystemCursor(int show);
+
+struct AimOutput
+{
+	float pitch;
+	float yaw;
+	float meleeChargeYaw;
+	unsigned short meleeChargeEnt;
+	unsigned char meleeChargeDist;
+};
 
 extern const dvar_t *cl_dblTapMaxHoldTime;   // universal/dvar.cpp
 extern const dvar_t *cl_dblTapMaxDelayTime;  // universal/dvar.cpp
+extern const dvar_t *cl_stanceHoldTime;      // universal/dvar.cpp
+extern const dvar_t *cl_dtpHoldTime;         // universal/dvar.cpp
+extern const dvar_t *cl_anglespeedkey;       // universal/dvar.cpp
+extern const dvar_t *cl_yawspeed;            // universal/dvar.cpp
+extern const dvar_t *cl_pitchspeed;          // universal/dvar.cpp
+extern const dvar_t *m_filter;               // cl_main.cpp
 
 T6_GLOBAL const dvar_t *cl_leanCountMin;
 T6_GLOBAL int g_leaned;
 T6_GLOBAL bool gAttackEdgeDetected[1];
+T6_GLOBAL clientMouse_t mouseIn;
 
 T6_STATIC kbutton_t playersKb[1][NUM_BUTTONS] T6_AT("", "playersKb");
 
@@ -212,10 +244,16 @@ X87_MATH float CL_KeyState(kbutton_t *key)
 	return held / frame;
 }
 
+// Inlined everywhere (named by CL_StanceButtonUpdate's assert): a hold-to-prone or hold-to-crouch key is down.
+static inline bool IN_IsTempStanceKeyActive(LocalClientNum_t localClientNum)
+{
+	return playersKb[localClientNum][KB_PRONE].active || playersKb[localClientNum][KB_DOWN].active;
+}
+
 // 004EAB50  client/cl_input.cpp:390
 void CL_SetStance(LocalClientNum_t localClientNum, StanceState stance)
 {
-	if (playersKb[localClientNum][KB_PRONE].active || playersKb[localClientNum][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(localClientNum))
 		return;
 	CL_GetLocalClientGlobals(localClientNum)->stance = stance;
 }
@@ -224,7 +262,7 @@ void CL_SetStance(LocalClientNum_t localClientNum, StanceState stance)
 // Toggles between stance and standing; going prone while sprinting dives.
 void CL_ToggleStance(LocalClientNum_t localClientNum, StanceState stance)
 {
-	if (playersKb[localClientNum][KB_PRONE].active || playersKb[localClientNum][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(localClientNum))
 		return;
 	if (CG_IsSprinting(localClientNum) && stance == CL_STANCE_PRONE)
 		stance = CL_STANCE_DIVE_TO_PRONE;
@@ -237,7 +275,7 @@ void CL_ToggleStance(LocalClientNum_t localClientNum, StanceState stance)
 void IN_UpDown()
 {
 	IN_KeyDownCheat(&playersKb[0][KB_ANYUP]);
-	if (playersKb[0][KB_PRONE].active || playersKb[0][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(LOCAL_CLIENT_0))
 		return;
 	clientActive_t *cl = CL_GetLocalClientGlobals(LOCAL_CLIENT_0);
 	if (cl->stance == CL_STANCE_CROUCH)
@@ -440,7 +478,7 @@ void IN_Stance_Down(LocalClientNum_t localClientNum, int key, unsigned int time,
 		IN_KeyDown(&playersKb[localClientNum][KB_DOWN], key, time, value);
 		return;
 	}
-	if (playersKb[localClientNum][KB_PRONE].active || playersKb[localClientNum][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(localClientNum))
 		return;
 	bool sprinting = CG_IsSprinting(localClientNum);
 	cl->stanceHeld = true;
@@ -468,7 +506,7 @@ void IN_Stance_Up(LocalClientNum_t localClientNum, int key, unsigned int time)
 		IN_KeyUp(&playersKb[localClientNum][KB_VEHICLEMOVEDOWN], key, time);
 		return;
 	}
-	if (playersKb[localClientNum][KB_PRONE].active || playersKb[localClientNum][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(localClientNum))
 		return;
 	if (CG_IsSprinting(localClientNum))
 	{
@@ -537,7 +575,7 @@ void IN_LowerStance()
 {
 	if (CL_GetLocalClientConnectionState(LOCAL_CLIENT_0) < CA_CONNECTED)
 		return;
-	if (playersKb[0][KB_PRONE].active || playersKb[0][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(LOCAL_CLIENT_0))
 		return;
 	clientActive_t *cl = CL_GetLocalClientGlobals(LOCAL_CLIENT_0);
 	if (cl->stance == CL_STANCE_STAND)
@@ -553,7 +591,7 @@ void IN_RaiseStance()
 {
 	if (CL_GetLocalClientConnectionState(LOCAL_CLIENT_0) < CA_CONNECTED)
 		return;
-	if (playersKb[0][KB_PRONE].active || playersKb[0][KB_DOWN].active)
+	if (IN_IsTempStanceKeyActive(LOCAL_CLIENT_0))
 		return;
 	clientActive_t *cl = CL_GetLocalClientGlobals(LOCAL_CLIENT_0);
 	if (cl->stance == CL_STANCE_CROUCH)
@@ -564,8 +602,297 @@ void IN_RaiseStance()
 		assertt_at(909, 1, cl->stance == CL_STANCE_STAND);
 }
 
+// 004ED810  client/cl_input.cpp:918
+// The airburst rangefinder: while it marks a distance (CG_GetAirburstMarkDistance), the command carries it.
+void CL_UpdateAirburstMarkDistance(LocalClientNum_t localClientNum, playerState_s *ps, usercmd_s *cmd,
+                                   float forwardMove, float rightMove, float pitchMove, float yawMove,
+                                   float moveScale)
+{
+	assert_at(922, cmd);
+	unsigned int markDistance;
+	if (CG_GetAirburstMarkDistance(localClientNum, ps, cmd->button_bits, &markDistance,
+	                               CG_AirburstLazeCancelledByMovement(forwardMove, rightMove, pitchMove, yawMove,
+	                                                                  moveScale)))
+	{
+		assert_at(929, markDistance <= (1 << sizeof( cmd->airburstMarkDistance ) * 8) - 1);
+		cmd->airburstMarkDistance = markDistance;
+		cmd->button_bits.setBit(BUTTON_AIRBURST_MARK);
+	}
+}
+
 // 004EBB10  client/cl_input.cpp:959
 bool IN_IsTalkKeyHeld()
 {
 	return playersKb[0][KB_TALK].active;
+}
+
+// 004EBB20  client/cl_input.cpp:1151
+// Turning with keys. The keys' held fractions stay unrounded on the x87 stack into the angle arithmetic, as in the
+// original (X87_MATH, one expression per angle change); the speeds are floats.
+X87_MATH void CL_AdjustAngles(LocalClientNum_t localClientNum)
+{
+	kbutton_t *kb = playersKb[localClientNum];
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	if (cl->snap.ps.pm_flags & PMF_FROZEN)
+		return;
+	float speed;
+	if (kb[KB_SPEED].active)
+	{
+		float scale = Dvar_GetFloat(cl_anglespeedkey);  // first: the product below stays on the x87 stack
+		speed = cls.frametime * 0.001f * scale;
+	}
+	else
+	{
+		speed = cls.frametime * 0.001f;
+	}
+	float angleSpeed;
+	if (!kb[KB_STRAFE].active)
+	{
+		if (cl->cgameMaxYawSpeed > 0.0f)
+			angleSpeed = cl->cgameMaxYawSpeed * speed;
+		else
+			angleSpeed = Dvar_GetFloat(cl_yawspeed) * speed;
+		cl->viewangles.y -= CL_KeyState(&kb[KB_RIGHT]) * angleSpeed;
+		cl->viewangles.y += CL_KeyState(&kb[KB_LEFT]) * angleSpeed;
+	}
+	if (cl->cgameMaxPitchSpeed > 0.0f)
+		angleSpeed = cl->cgameMaxPitchSpeed * speed;
+	else
+		angleSpeed = Dvar_GetFloat(cl_pitchspeed) * speed;
+	cl->viewangles.x -= CL_KeyState(&kb[KB_LOOKUP]) * angleSpeed;
+	cl->viewangles.x += CL_KeyState(&kb[KB_LOOKDOWN]) * angleSpeed;
+}
+
+// 004EBC70  client/cl_input.cpp:1196
+// The stance key held: past cl_stanceHoldTime goes prone (or back up from prone); while sprinting, past
+// cl_dtpHoldTime dives.
+void CL_StanceButtonUpdate(LocalClientNum_t localClientNum)
+{
+	assert_at(1201, !IN_IsTempStanceKeyActive( localClientNum ));
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	if (!cl->stanceHeld)
+		return;
+	bool sprinting = CG_IsSprinting(localClientNum);
+	if (com_frameTime - cl->stanceTime < Dvar_GetInt(sprinting ? cl_dtpHoldTime : cl_stanceHoldTime))
+		return;
+	if (sprinting)
+	{
+		cl->stance = CL_STANCE_DIVE_TO_PRONE;
+	}
+	else
+	{
+		cl->stance = cl->stancePosition != CL_STANCE_PRONE ? CL_STANCE_PRONE : CL_STANCE_STAND;
+	}
+	cl->stanceHeld = false;
+}
+
+// 004ED8E0  client/cl_input.cpp:1239
+void CL_AddCurrentStanceToCmd(LocalClientNum_t localClientNum, usercmd_s *cmd)
+{
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	switch (cl->stance)
+	{
+	case CL_STANCE_CROUCH:
+		cmd->button_bits.resetBit(BUTTON_PRONE);
+		cmd->button_bits.setBit(BUTTON_CROUCH);
+		cmd->button_bits.resetBit(BUTTON_STANCE_KEY);
+		break;
+	case CL_STANCE_DIVE_TO_PRONE:
+		cmd->button_bits.setBit(BUTTON_DIVE_TO_PRONE);
+		// fall through: diving ends prone
+	case CL_STANCE_PRONE:
+		cmd->button_bits.resetBit(BUTTON_CROUCH);
+		cmd->button_bits.setBit(BUTTON_PRONE);
+		cmd->button_bits.resetBit(BUTTON_STANCE_KEY);
+		break;
+	default:
+		assert_at(1257, cl->stance == CL_STANCE_STAND);
+		cmd->button_bits.resetBit(BUTTON_PRONE);
+		cmd->button_bits.resetBit(BUTTON_CROUCH);
+		cmd->button_bits.resetBit(BUTTON_STANCE_KEY);
+		break;
+	}
+}
+
+// 004ED970  client/cl_input.cpp:1269
+// After a hold on weapnext (IN_WeapNextInventoryUp) chose the inventory weapon: ask for it until it's in hand.
+void CL_WeapNextButtonUpdate(LocalClientNum_t localClientNum, usercmd_s *cmd)
+{
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	cg_t *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+	if (!cl->switchingToInventory)
+		return;
+	if (cgameGlob->weaponSelect.weaponData == cl->snap.ps.inventoryWeapon.weaponData &&
+	    cl->snap.ps.weapon.weaponData != cgameGlob->weaponSelect.weaponData)
+	{
+		cmd->button_bits.setBit(BUTTON_SWITCH_TO_INVENTORY);
+		return;
+	}
+	cl->switchingToInventory = false;
+}
+
+// 004EDA00  client/cl_input.cpp:1314
+// The movement keys and buttons into the command. Each key's held fraction is scaled to +-127 and truncated from the
+// x87 stack (X87_MATH: one expression per key).
+X87_MATH void CL_KeyMove(LocalClientNum_t localClientNum, usercmd_s *cmd)
+{
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	kbutton_t *kb = playersKb[localClientNum];
+	if (cl->snap.ps.eFlags & EF_VEHICLE_DRIVER)
+	{
+		cl->wasInVehicle = 1;
+	}
+	else if (cl->wasInVehicle)
+	{
+		// leaving a vehicle lets go of the down button the stance key held there (but see B0014)
+		kb[KB_DOWN].active = false;
+		kb[KB_DOWN].down[1] = 0;
+		kb[KB_DOWN].down[0] = 0;
+		cl->wasInVehicle = 0;
+	}
+	if (kb[KB_PRONE].active)
+	{
+		cmd->button_bits.resetBit(BUTTON_CROUCH);
+		cmd->button_bits.setBit(BUTTON_PRONE);
+		cmd->button_bits.setBit(BUTTON_STANCE_KEY);
+	}
+	else if (kb[KB_DOWN].active)
+	{
+		cmd->button_bits.resetBit(BUTTON_PRONE);
+		cmd->button_bits.setBit(BUTTON_CROUCH);
+		cmd->button_bits.setBit(BUTTON_STANCE_KEY);
+	}
+	else
+	{
+		CL_StanceButtonUpdate(localClientNum);
+		CL_AddCurrentStanceToCmd(localClientNum, cmd);
+	}
+	CL_WeapNextButtonUpdate(localClientNum, cmd);
+	clientActive_t *client = CL_GetLocalClientGlobals(localClientNum);
+	if (client->useCount == 2)
+	{
+		cmd->button_bits.setBit(BUTTON_USE_DOUBLE_TAP);
+		client->useCount = 0;
+		client->useTime = 0;
+	}
+	if (kb[KB_SPEED].active == !cl->usingAds)
+		cmd->button_bits.setBit(BUTTON_ADS);
+	else
+		cmd->button_bits.resetBit(BUTTON_ADS);
+	int side = (int)(CL_KeyState(&kb[KB_MOVERIGHT]) * 127.0f);
+	side += (int)(CL_KeyState(&kb[KB_MOVELEFT]) * -127.0f);
+	int forward = (int)(CL_KeyState(&kb[KB_FORWARD]) * 127.0f);
+	forward += (int)(CL_KeyState(&kb[KB_BACK]) * -127.0f);
+	if (!kb[KB_BACK].active)
+	{
+		if (kb[KB_SPRINT].active || kb[KB_SPRINT].wasPressed)
+		{
+			cmd->button_bits.setBit(BUTTON_SPRINT);
+			kb[KB_SPRINT].wasPressed = false;
+		}
+		else
+		{
+			cmd->button_bits.resetBit(BUTTON_SPRINT);
+		}
+	}
+	if (kb[KB_STRAFE].active && !cmd->button_bits.testBit(BUTTON_SPRINT))
+	{
+		side += (int)(CL_KeyState(&kb[KB_RIGHT]) * 127.0f);
+		side += (int)(CL_KeyState(&kb[KB_LEFT]) * -127.0f);
+	}
+	cmd->forwardmove = ClampChar(forward);
+	cmd->rightmove = ClampChar(side);
+	if (kb[KB_LOOKUP].active || kb[KB_LOOKDOWN].active)
+	{
+		int pitch = 0;
+		if (kb[KB_LOOKUP].active)
+			pitch = -127;
+		if (kb[KB_LOOKDOWN].active)
+			pitch += 127;
+		cmd->pitchmove = ClampChar(pitch);
+	}
+	if (kb[KB_RIGHT].active || kb[KB_LEFT].active)
+	{
+		int yaw = 0;
+		if (kb[KB_RIGHT].active)
+			yaw = -127;
+		if (kb[KB_LEFT].active)
+			yaw += 127;
+		cmd->yawmove = ClampChar(yaw);
+	}
+}
+
+// 004EDC60  client/cl_input.cpp:1554
+// Mouse motion: to the dev GUI, to a menu that takes the mouse, or accumulated for CL_MouseMove. Returns false when a
+// menu took it.
+int CL_MouseEvent(LocalClientNum_t localClientNum, int x, int y, int dx, int dy)
+{
+	if (DevGui_IsActive())
+	{
+		DevGui_MouseEvent(dx, dy);
+		return 1;
+	}
+	clientUIActive_t *clientUIActive = CL_GetLocalClientUIGlobals(localClientNum);
+	UI_UpdateMouseScreenPosition(localClientNum, x, y);
+	if ((dx || dy) && (clientUIActive->keyCatchers & 0x48) && !UI_KeysBypassMenu(localClientNum) &&
+	    !UI_IsFocusedMenuUi3dWindow(localClientNum))
+	{
+		UI_MouseEvent(localClientNum, x, y);
+		return 0;
+	}
+	IN_ShowSystemCursor(0);
+	mouseIn.mouseDx[mouseIn.mouseIndex] += dx;
+	mouseIn.mouseDy[mouseIn.mouseIndex] += dy;
+	return 1;
+}
+
+// 004EBD70  client/cl_input.cpp:1641
+// This frame's mouse movement (with m_filter, averaged with the last frame's), and starts the next frame's.
+void CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
+{
+	assert_at(1642, mx);
+	assert_at(1643, my);
+	if (Dvar_GetBool(m_filter))
+	{
+		*mx = (mouseIn.mouseDx[0] + mouseIn.mouseDx[1]) * 0.5f;
+		*my = (mouseIn.mouseDy[0] + mouseIn.mouseDy[1]) * 0.5f;
+	}
+	else
+	{
+		*mx = (float)mouseIn.mouseDx[mouseIn.mouseIndex];
+		*my = (float)mouseIn.mouseDy[mouseIn.mouseIndex];
+	}
+	mouseIn.mouseIndex ^= 1;
+	mouseIn.mouseDx[mouseIn.mouseIndex] = 0;
+	mouseIn.mouseDy[mouseIn.mouseIndex] = 0;
+}
+
+// 004EBE80  client/cl_input.cpp:1661
+void SetMeleeChargeCmd(const AimOutput *aimOutput, usercmd_s *cmd)
+{
+	assert_at(1662, aimOutput);
+	assert_at(1663, cmd);
+	cmd->meleeChargeEnt = aimOutput->meleeChargeEnt;
+	cmd->meleeChargeDist = aimOutput->meleeChargeDist;
+}
+
+// 004EBEE0  client/cl_input.cpp:1676
+void CL_SetCursorPos(int x, int y)
+{
+	IN_SetCursorPos(x, y);
+}
+
+// 004EBEF0  client/cl_input.cpp:1684
+void CL_ShowSystemCursor(int show)
+{
+	IN_ShowSystemCursor(show);
+}
+
+// 004EBF00  client/cl_input.cpp:2783
+// The damage kick, as short angles (truncated, not wrapped as ANGLE2SHORT would).
+void CL_CopyDamageKickAngles(LocalClientNum_t localClientNum, usercmd_s *cmd)
+{
+	cg_t *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+	cmd->damageKick[0] = (short)(int)(cgameGlob->damageKickAngles.x * 182.04445f);
+	cmd->damageKick[1] = (short)(int)(cgameGlob->damageKickAngles.y * 182.04445f);
 }

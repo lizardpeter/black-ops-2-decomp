@@ -19,6 +19,13 @@ public:
 		return (array[pos / BITS_PER_WORD] & (0x80000000 >> (pos & (BITS_PER_WORD - 1)))) != 0;
 	}
 
+	// line 120's assert: the only one between testBit's and resetBit's in the server (10 inlined copies)
+	void setBit(unsigned int pos)
+	{
+		assert_in(BITARRAY_H, 120, pos < BIT_COUNT);
+		array[pos / BITS_PER_WORD] |= 0x80000000 >> (pos & (BITS_PER_WORD - 1));
+	}
+
 	void resetBit(unsigned int pos)
 	{
 		assert_in(BITARRAY_H, 136, pos < BIT_COUNT);

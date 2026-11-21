@@ -20,6 +20,10 @@ CLIENT_UI = 0x01237050
 CL_MAX_LOCAL_CLIENTS = 0x01237580
 CLIENTS_PTR = 0x01237588  # clientActive_t *clients, allocated at startup
 CLIENTS = OBJECTS
+CG_ARRAY_PTR = 0x011AC548  # cg_t *cgArray, allocated when the cgame starts
+CG = OBJECTS + 0x100000
+CLS_FRAMETIME = 0x012376EC
+MOUSE_IN = 0x011C1B18
 COM_FRAMETIME = 0x01E29A28
 FRAME_MSEC = 0x01237034
 G_LEANED = 0x011C1B2C
@@ -28,11 +32,22 @@ LATCH = 0x011C1B31
 DVAR_HANDLES = {0x011C16DC: 0x7101,  # cl_leanCountMin
                 0x0798718C: 0x7102,  # cl_dblTapMaxHoldTime
                 0x0798767C: 0x7103,  # cl_dblTapMaxDelayTime
-                0x082324F0: 0x7104}  # player_standingViewHeight
+                0x082324F0: 0x7104,  # player_standingViewHeight
+                0x07987260: 0x7105,  # cl_stanceHoldTime
+                0x079874A4: 0x7106,  # cl_dtpHoldTime
+                0x079EF388: 0x7107,  # cl_anglespeedkey
+                0x07987340: 0x7108,  # cl_yawspeed
+                0x079EF194: 0x7109,  # cl_pitchspeed
+                0x012374B0: 0x710A}  # m_filter
 LEAN_MIN, HOLD, DELAY, STANDING = 0x7101, 0x7102, 0x7103, 0x7104
+STANCE_HOLD, DTP_HOLD, ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, M_FILTER = 0x7105, 0x7106, 0x7107, 0x7108, 0x7109, 0x710A
 
 # clientActive_t fields
 USING_ADS, SNAP_VALID, PS = 0x44, 0x50, 0x70
+SWITCHING_TO_INVENTORY, MAX_PITCH_SPEED, MAX_YAW_SPEED, WAS_IN_VEHICLE = 0x2BE4, 0x2BF8, 0x2BFC, 0x8A7C4
+PS_INVENTORY_WEAPON = 0x570
+# cg_t fields
+CG_DAMAGE_KICK, CG_WEAPON_SELECT = 0x64A74, 0x69674
 PS_PM_FLAGS, PS_DELTA_ANGLES, PS_EFLAGS, PS_WEAPON, PS_VIEWHEIGHT = 0xC, 0x98, 0xFC, 0x1B8, 0x208
 STANCE_HELD, STANCE, STANCE_POSITION, STANCE_TIME = 0x2BCC, 0x2BD0, 0x2BD4, 0x2BD8
 WEAPNEXT_HELD, WEAPNEXT_TIME, VIEWANGLES = 0x2BDC, 0x2BE0, 0x2C8C
@@ -67,7 +82,7 @@ def kb_va(button, lc=0):
 
 
 def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dvars=None, ps=None, globals_=None,
-          **state):
+          cg=None, cg_null=False, frametime=16, **state):
     """kb: {button index: kbutton bytes}; client: {field offset: bytes or int}; ps: predicted playerState fields."""
     def run(w):
         STATE.clear()
@@ -76,6 +91,10 @@ def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dv
         w.u32(CLIENT_UI + 8, ui_state)
         w.u32(CL_MAX_LOCAL_CLIENTS, 1)
         w.u32(CLIENTS_PTR, CLIENTS)
+        w.u32(CG_ARRAY_PTR, 0 if cg_null else CG)
+        w.u32(CLS_FRAMETIME, frametime)
+        for off, v in (cg or {}).items():
+            w.write(CG + off, v if isinstance(v, bytes) else struct.pack("<i", v))
         w.u32(COM_FRAMETIME, frame_time)
         w.u32(FRAME_MSEC, frame_msec)
         for va, handle in DVAR_HANDLES.items():
@@ -102,6 +121,17 @@ def cmd_argv(mu):
 
 FAKES = {
     "?Dvar_GetInt@@YAHPBUdvar_t@@@Z": lambda mu: STATE["dvars"].get(arg(mu, 0), 0),
+    "?Dvar_GetFloat@@YAMPBUdvar_t@@@Z": lambda mu: float(STATE["dvars"].get(arg(mu, 0), 0.0)),
+    "?Dvar_GetBool@@YA_NPBUdvar_t@@@Z": lambda mu: int(bool(STATE["dvars"].get(arg(mu, 0), 0))),
+    "CG_AirburstLazeCancelledByMovement": lambda mu: STATE.get("cancelled", 0),
+    "CG_GetAirburstMarkDistance": lambda mu: airburst(mu),
+    "DevGui_IsActive": lambda mu: STATE.get("devgui", 0),
+    "DevGui_MouseEvent": lambda mu: None,
+    "UI_UpdateMouseScreenPosition": lambda mu: None,
+    "UI_KeysBypassMenu": lambda mu: STATE.get("bypass", 0),
+    "UI_MouseEvent": lambda mu: None,
+    "IN_ShowSystemCursor": lambda mu: None,
+    "IN_SetCursorPos": lambda mu: None,
     "CG_GetPredictedPlayerState": lambda mu: PREDICTED_PS,
     "Cmd_Argv": cmd_argv,
     "Com_Printf": lambda mu: None,
@@ -113,10 +143,21 @@ FAKES = {
     "Assert_MyHandler": lambda mu: 1,
 }
 SEEN = {
-    "?Dvar_GetInt@@YAHPBUdvar_t@@@Z": "q", "CG_GetPredictedPlayerState": "i", "Cmd_Argv": "i",
+    "?Dvar_GetInt@@YAHPBUdvar_t@@@Z": "q", "?Dvar_GetFloat@@YAMPBUdvar_t@@@Z": "q", "?Dvar_GetBool@@YA_NPBUdvar_t@@@Z": "q",
+    "ClampChar": "i", "CG_AirburstLazeCancelledByMovement": "fffff", "CG_GetAirburstMarkDistance": "iqqxi",
+    "DevGui_IsActive": "", "DevGui_MouseEvent": "ii", "UI_UpdateMouseScreenPosition": "iii", "UI_KeysBypassMenu": "i",
+    "UI_IsFocusedMenuUi3dWindow": "i", "UI_MouseEvent": "iii", "IN_ShowSystemCursor": "i", "IN_SetCursorPos": "ii", "CG_GetPredictedPlayerState": "i", "Cmd_Argv": "i",
     "Com_Printf": "is", "BG_GetWeaponDef": "i", "BG_GetFireType": "i", "BG_WeaponBlocksProne": "i",
     "CG_CycleWeapon": "ii", "Assert_MyHandler": "siiss", "CL_GetLocalClientGlobals": "i",
 }
+
+
+def airburst(mu):
+    """CG_GetAirburstMarkDistance's fake: writes STATE['mark'] through its pointer when it reports a mark."""
+    if STATE.get("mark") is None:
+        return 0
+    mu.mem_write(arg(mu, 3), struct.pack("<I", STATE["mark"]))  # the caller's local
+    return 1
 
 
 def stances():
@@ -289,8 +330,74 @@ CASES = [
      "inputs": [[0], [1]]},
     {"name": "CL_GetLocalClientConnectionState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(ui_state=u)} for lc in (0, 1) for u in (0, 5, 10)]},
+    {"name": "CG_GetLocalClientGlobals", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [lc], "setup": setup(cg_null=n)} for lc in (0, 1) for n in (False, True)]},
     {"name": "IN_IsTalkKeyHeld", "ret": "bool", "builds": SERVER,
      "inputs": [{"args": [], "setup": setup(kb={KB["TALK"]: kbutton(active=a)})} for a in (0, 1)]},
+    {"name": "CL_UpdateAirburstMarkDistance", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0, PREDICTED_PS, struct.pack("<II", 0, 0) * 0x11, ("f", 1.0), ("f", -0.5), ("f", 0.0),
+                          ("f", 2.0), ("f", 0.25)],
+                 "setup": setup(mark=m, cancelled=c)}
+                for m in (None, 0, 1234, 0xFFFF, 0x10000) for c in (0, 1)]},
+    {"name": "CL_AdjustAngles", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0],
+                 "setup": setup(kb={b: random_kbutton() for b in (KB["LEFT"], KB["RIGHT"], KB["LOOKUP"], KB["LOOKDOWN"],
+                                                                  KB["STRAFE"], KB["SPEED"])},
+                                client={PS + PS_PM_FLAGS: rng.choice([0, 0, 0x800, 0x801]),
+                                        MAX_PITCH_SPEED: struct.pack("<f", rng.choice([0.0, -1.0, 90.0, 140.5])),
+                                        MAX_YAW_SPEED: struct.pack("<f", rng.choice([0.0, 120.0, 33.3])),
+                                        VIEWANGLES: struct.pack("<ff", rng.uniform(-90, 90), rng.uniform(-360, 360))},
+                                frame_time=10000, frame_msec=rng.choice([7, 16, 33]), frametime=rng.choice([7, 16, 33, 100]),
+                                dvars={ANGLESPEEDKEY: rng.choice([1.5, 2.0, 0.3]), YAWSPEED: 140.0, PITCHSPEED: 140.0})}
+                for _ in range(150)]},
+    {"name": "CL_StanceButtonUpdate", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0],
+                 "setup": setup(kb={KB["PRONE"]: kbutton(active=tp), KB["DOWN"]: kbutton()},
+                                client={STANCE_HELD: h, STANCE: rng.randrange(4), STANCE_POSITION: sp,
+                                        STANCE_TIME: t},
+                                ps={PS_VIEWHEIGHT: struct.pack("<f", 61.0), PS_PM_FLAGS: f},
+                                dvars={STANDING: 60, STANCE_HOLD: 300, DTP_HOLD: 150})}
+                for h in (0, 1) for sp in range(4) for t in (9600, 9700, 9800, 9900) for f in (0, 0x8000)
+                for tp in (0, 1) if tp == 0 or (sp == 0 and t == 9600)]},
+    {"name": "CL_AddCurrentStanceToCmd", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0, struct.pack("<III", 0, b0, b1) + bytes(0x38)], "setup": setup(client={STANCE: st})}
+                for st in range(5) for b0, b1 in ((0, 0), (0xFFFFFFFF, 0xFFFFFFFF), (0x12345678, 0x9ABCDEF0))]},
+    {"name": "CL_WeapNextButtonUpdate", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0, bytes(0x44)],
+                 "setup": setup(client={SWITCHING_TO_INVENTORY: bytes([sw]), PS + PS_INVENTORY_WEAPON: inv,
+                                        PS + PS_WEAPON: cur},
+                                cg={CG_WEAPON_SELECT: sel})}
+                for sw in (0, 1) for inv in (5, 7) for cur in (5, 9) for sel in (5, 7)]},
+    {"name": "CL_KeyMove", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0, struct.pack("<III", 0, rng.getrandbits(32), rng.getrandbits(32)) + bytes(0x38)],
+                 "setup": setup(kb={b: random_kbutton() for b in range(NUM_BUTTONS)},
+                                client={PS + PS_EFLAGS: rng.choice([0, 0x4000]), WAS_IN_VEHICLE: rng.randrange(2),
+                                        USING_ADS: bytes([rng.randrange(2)]), USE_COUNT: rng.choice([0, 1, 2, 2]),
+                                        USE_TIME: 9000, STANCE_HELD: rng.randrange(2), STANCE: rng.randrange(4),
+                                        STANCE_POSITION: rng.randrange(4), STANCE_TIME: 9500,
+                                        SWITCHING_TO_INVENTORY: bytes([rng.randrange(2)])},
+                                ps={PS_VIEWHEIGHT: struct.pack("<f", 61.0), PS_PM_FLAGS: rng.choice([0, 0x8000])},
+                                frame_time=10000, frame_msec=rng.choice([7, 16, 33, 127]),
+                                dvars={STANDING: 60, STANCE_HOLD: 300, DTP_HOLD: 150})}
+                for _ in range(200)]},
+    {"name": "CL_MouseEvent", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0, 320, 240, dx, dy],
+                 "setup": setup(devgui=d, bypass=b, globals_={CLIENT_UI + 4: kc, MOUSE_IN: struct.pack("<5i", 3, -4, 5, 6, i)})}
+                for d in (0, 1) for b in (0, 1) for kc in (0, 0x8, 0x40, 0x11) for dx, dy in ((0, 0), (3, 0), (0, -2))
+                for i in (0, 1)]},
+    {"name": "CL_GetMouseMovement", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [CLIENTS, bytes(4), bytes(4)],
+                 "setup": setup(dvars={M_FILTER: f}, globals_={MOUSE_IN: struct.pack("<5i", *mv, i)})}
+                for f in (0, 1) for i in (0, 1) for mv in ((3, -4, 5, 6), (1, 2, -7, 0), (0x7FFFFFF, 3, 0, -1))]},
+    {"name": "SetMeleeChargeCmd", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [[struct.pack("<fffHB", 1.0, 2.0, 3.0, e, d) + b"\0", bytes(0x44)] for e, d in ((0, 0), (1023, 200))]},
+    {"name": "CL_SetCursorPos", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [[10, 20], [-1, 0]]},
+    {"name": "CL_ShowSystemCursor", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [[0], [1]]},
+    {"name": "CL_CopyDamageKickAngles", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0, bytes(0x44)], "setup": setup(cg={CG_DAMAGE_KICK: struct.pack("<ff", x, y)})}
+                for x, y in ((0.0, 0.0), (1.5, -2.25), (179.9, -180.0), (0.0055, -0.0055), (200.0, 359.0))]},
     {"name": "resetBit@?$bitarray@$0EA", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [[struct.pack("<II", 0xFFFFFFFF, 0x12345678), b] for b in list(range(64)) + [64, 100]]},
     {"name": "testBit@?$bitarray@$0EA", "ret": "bool", "builds": SERVER, "fakes": FAKES,

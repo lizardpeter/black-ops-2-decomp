@@ -49,10 +49,12 @@ TEB, TEB_SIZE = 0x00040000, 0x00010000   # below every image: x86 images start a
 TLS_BLOCK, TLS_SIZE = 0x00050000, 0x00040000
 GDT = 0x00090000
 STUBS, STUBS_SIZE = 0x000A0000, 0x00010000
+# x86: a fake returning a float leaves it in ST0 through `fld dword ptr [FLOAT_RESULT]; ret`
+FLOAT_RESULT_STUB, FLOAT_RESULT = STUBS + STUBS_SIZE - 0x20, STUBS + STUBS_SIZE - 0x10
 SCRATCH, SCRATCH_SIZE = 0x30000000, 0x00100000  # clear of every image (x86 exes span 0x00400000 up)
 # Program data the setup places outside the images (what a global pointer points to): writes here are compared, as
 # writes to the images' globals are
-OBJECTS, OBJECTS_SIZE = 0x31000000, 0x00100000
+OBJECTS, OBJECTS_SIZE = 0x31000000, 0x00200000
 INSTRUCTION_LIMIT = 20_000_000  # a runaway guard; -O0 reconstructions take several times the original's instructions
 MASK64 = (1 << 64) - 1
 INT_REGS64 = (X.UC_X86_REG_RCX, X.UC_X86_REG_RDX, X.UC_X86_REG_R8, X.UC_X86_REG_R9)
@@ -216,6 +218,7 @@ class Machine:
                 self._stub_names[stub + 2] = name
                 mu.mem_write(stub, b"\x31\xc0\xc3")
                 mu.mem_write(slot, struct.pack("<Q" if self.x64 else "<I", stub))
+        mu.mem_write(FLOAT_RESULT_STUB, b"\xd9\x05" + struct.pack("<I", FLOAT_RESULT & 0xFFFFFFFF) + b"\xc3")
         mu.hook_add(UC_HOOK_CODE, self._on_stub, begin=STUBS, end=STUBS + STUBS_SIZE - 1)
         self.imports_called = []
         self._ranges = [(img.base, img.base + img.size) for img in images]
@@ -371,6 +374,15 @@ class Machine:
         fn = self._fakes.get(address) or self._standing.get(address)
         if fn:
             value = fn(mu)
+            if isinstance(value, float):
+                # a float result: ST0 on x86 (the stub loads it and returns), XMM0 on x64
+                if self.x64:
+                    mu.reg_write(X.UC_X86_REG_XMM0, struct.unpack("<I", struct.pack("<f", value))[0])
+                else:
+                    mu.mem_write(FLOAT_RESULT, struct.pack("<f", value))
+                    mu.reg_write(self._ip, FLOAT_RESULT_STUB)
+                    return
+                value = None
             sp = mu.reg_read(self._sp)
             ret = self._ptr(sp)
             if value is not None:

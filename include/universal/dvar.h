@@ -11,3 +11,4 @@ const dvar_t *_Dvar_RegisterFloat(const char *dvarName, float value, float min, 
                                   const char *description);
 bool Dvar_GetBool(const dvar_t *dvar);
 int Dvar_GetInt(const dvar_t *dvar);
+float Dvar_GetFloat(const dvar_t *dvar);

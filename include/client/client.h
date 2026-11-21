@@ -101,19 +101,61 @@ struct clientActive_t
 	bool weapNextHeld;
 	int weapNextTime;
 	bool switchingToInventory;
-	unsigned char unknown2BE8[0x2C8C - 0x2BE8];
+	Weapon cgameUserCmdWeapon;
+	Weapon cgameUserCmdOffHandWeapon;
+	Weapon cgameUserCmdLastWeaponForAlt;
+	float cgameFOVSensitivityScale;
+	float cgameMaxPitchSpeed;
+	float cgameMaxYawSpeed;
+	unsigned char unknown2C00[0x2C8C - 0x2C00];
 	vec3_t viewangles;
 	unsigned char unknown2C98[0x8A7B4 - 0x2C98];
 	int lastFireTime;
 	bool useHeld;
 	int useTime;
 	int useCount;
-	// the rest follows (0x8A7E0 bytes in all)
+	int wasInVehicle;
+	unsigned char unknown8A7C8[0x8A7E0 - 0x8A7C8];
 };
+static_assert(sizeof(clientActive_t) == 0x8A7E0, "clientActive_t");
+static_assert(__builtin_offsetof(clientActive_t, cgameMaxYawSpeed) == 0x2BFC, "clientActive_t.cgameMaxYawSpeed");
+static_assert(__builtin_offsetof(clientActive_t, wasInVehicle) == 0x8A7C4, "clientActive_t.wasInVehicle");
 static_assert(__builtin_offsetof(clientActive_t, snap) == 0x50, "clientActive_t.snap");
 static_assert(__builtin_offsetof(clientActive_t, stance) == 0x2BD0, "clientActive_t.stance");
 static_assert(__builtin_offsetof(clientActive_t, viewangles) == 0x2C8C, "clientActive_t.viewangles");
 static_assert(__builtin_offsetof(clientActive_t, lastFireTime) == 0x8A7B4, "clientActive_t.lastFireTime");
+
+struct clientMouse_t
+{
+	int mouseDx[2];
+	int mouseDy[2];
+	int mouseIndex;
+};
+
+// usercmd_s.button_bits (bitarray<64>, bit 0 the first word's top bit). Names are descriptive, from what cl_input.cpp
+// does with them.
+enum
+{
+	BUTTON_SPRINT = 1,
+	BUTTON_PRONE = 8,
+	BUTTON_CROUCH = 9,
+	BUTTON_ADS = 11,
+	BUTTON_STANCE_KEY = 12,             // a hold-to-crouch or hold-to-prone key is down
+	BUTTON_DIVE_TO_PRONE = 44,
+	BUTTON_USE_DOUBLE_TAP = 50,
+	BUTTON_AIRBURST_MARK = 51,          // usercmd_s.airburstMarkDistance holds a distance
+	BUTTON_SWITCH_TO_INVENTORY = 53,
+};
+
+struct clientStatic_t
+{
+	unsigned char unknown0[0x154];
+	int frametime;  // milliseconds this frame
+	unsigned char unknown158[0x5EF88 - 0x158];
+};
+static_assert(sizeof(clientStatic_t) == 0x5EF88, "clientStatic_t");
+
+extern clientStatic_t cls;  // cl_main.cpp
 
 // cl_main.cpp
 extern unsigned int frame_msec;

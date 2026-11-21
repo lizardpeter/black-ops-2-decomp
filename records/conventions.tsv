@@ -26,3 +26,9 @@ CoDMPServer_PC	004EB930	IN_ToggleADS	esi	as IN_WeapNextInventoryDown
 CoDMPServer_PC	004EB9B0	IN_CenterView	esi	as IN_WeapNextInventoryDown
 CoDMPServer_PC	004ED7C0	resetBit@?$bitarray@$0EA	ecx,stack	__thiscall: this in ECX, pos at [ESP+4]
 CoDMPServer_PC	00407EE0	testBit@?$bitarray@$0EA	ecx,stack	__thiscall: this in ECX, pos at [ESP+4]
+CoDMPServer_PC	004EBB20	CL_AdjustAngles	eax	localClientNum in EAX (scaled by sizeof playersKb[0], pushed for CL_GetLocalClientGlobals)
+CoDMPServer_PC	004EBC70	CL_StanceButtonUpdate	eax	localClientNum in EAX (CL_KeyMove loads it before the call)
+CoDMPServer_PC	004ED8E0	CL_AddCurrentStanceToCmd	eax,esi	localClientNum in EAX (pushed), cmd in ESI ([ESI+4] is button_bits)
+CoDMPServer_PC	004ED970	CL_WeapNextButtonUpdate	esi,stack	localClientNum in ESI (pushed, then tested for the assert), cmd at [EBP+8]
+CoDMPServer_PC	004EBE80	SetMeleeChargeCmd	esi,edi	aimOutput in ESI, cmd in EDI (both asserted non-null)
+CoDMPServer_PC	004ED810	CL_UpdateAirburstMarkDistance	stack,stack,edi,stack,stack,stack,stack,stack	cmd in EDI (asserted, [EDI+0x40] the mark distance); localClientNum, ps and the five floats at [EBP+8] up

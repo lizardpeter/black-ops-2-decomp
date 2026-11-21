@@ -19,15 +19,19 @@ struct playerState_s
 	Weapon weapon;
 	unsigned char unknown1BC[0x208 - 0x1BC];
 	float viewHeightCurrent;
-	unsigned char unknown20C[0x2A08 - 0x20C];
+	unsigned char unknown20C[0x570 - 0x20C];
+	Weapon inventoryWeapon;
+	unsigned char unknown574[0x2A08 - 0x574];
 };
 static_assert(sizeof(playerState_s) == 0x2A08, "playerState_s");
 static_assert(__builtin_offsetof(playerState_s, eFlags) == 0xFC, "playerState_s.eFlags");
 static_assert(__builtin_offsetof(playerState_s, weapon) == 0x1B8, "playerState_s.weapon");
 static_assert(__builtin_offsetof(playerState_s, viewHeightCurrent) == 0x208, "playerState_s.viewHeightCurrent");
+static_assert(__builtin_offsetof(playerState_s, inventoryWeapon) == 0x570, "playerState_s.inventoryWeapon");
 
 enum
 {
+	PMF_FROZEN = 0x800,       // playerState_s.pm_flags: no view control (CoD4's name; CL_AdjustAngles tests it)
 	PMF_SPRINTING = 0x8000,   // playerState_s.pm_flags (as cl_input.cpp tests it)
 	EF_VEHICLE_DRIVER = 0x4000,  // playerState_s.eFlags: the stance key works the vehicle (as cl_input.cpp tests it)
 };
