@@ -32,3 +32,8 @@ CoDMPServer_PC	004ED8E0	CL_AddCurrentStanceToCmd	eax,esi	localClientNum in EAX (
 CoDMPServer_PC	004ED970	CL_WeapNextButtonUpdate	esi,stack	localClientNum in ESI (pushed, then tested for the assert), cmd at [EBP+8]
 CoDMPServer_PC	004EBE80	SetMeleeChargeCmd	esi,edi	aimOutput in ESI, cmd in EDI (both asserted non-null)
 CoDMPServer_PC	004ED810	CL_UpdateAirburstMarkDistance	stack,stack,edi,stack,stack,stack,stack,stack	cmd in EDI (asserted, [EDI+0x40] the mark distance); localClientNum, ps and the five floats at [EBP+8] up
+CoDMPServer_PC	004EDE50	CL_CmdButtons	stack,eax	localClientNum at [EBP+8], cmd in EAX ([EAX+4] is button_bits)
+CoDMPServer_PC	004EE1F0	CG_HandleLocationSelectionInput	stack,ecx	localClientNum at [EBP+8], cmd in ECX (moved to ESI)
+CoDMPServer_PC	004EEB30	CL_GamepadMove	stack,ecx,stack	localClientNum at [EBP+8], cmd in ECX (moved to EDI), frametime_base at [EBP+0xC]
+CoDMPServer_PC	004EF530	CL_CreateCmd	ecx,edi	returns usercmd_s through the hidden pointer in ECX (also returned in EAX); localClientNum in EDI
+CoDMPServer_PC	004EF7A0	CL_CreateNewCommands	eax	localClientNum in EAX (moved to EDI; CL_Input jumps here with it)

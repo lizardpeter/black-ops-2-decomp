@@ -42,12 +42,23 @@ enum connstate_t
 	CA_SENDINGSTATS, CA_LOADING, CA_PRIMED, CA_ACTIVE
 };
 
+enum clientMigState_t
+{
+	CMSTATE_INACTIVE = 0,
+	CMSTATE_OLDHOSTLEAVING = 1,
+	CMSTATE_LIMBO = 2,
+	CMSTATE_NEWHOSTCONNECT = 3,
+	CMSTATE_COUNT = 4,
+};
+
 struct clientUIActive_t
 {
 	int flags;
 	int keyCatchers;
 	connstate_t connectionState;
-	unsigned char unknownC[0x458 - 0xC];
+	int unknownC;
+	clientMigState_t migrationState;
+	unsigned char unknown14[0x458 - 0x14];
 };
 static_assert(sizeof(clientUIActive_t) == 0x458, "clientUIActive_t");
 
@@ -70,6 +81,14 @@ inline connstate_t CL_GetLocalClientConnectionState(LocalClientNum_t localClient
 	assertf_in("c:\\t6\\code\\src\\client_mp\\../client/client.h", 701, (localClientNum == 0),
 	           "(localClientNum) = %i", localClientNum);
 	return clientUIActives[0].connectionState;
+}
+
+// 00426AD0  client/client.h:753
+inline clientMigState_t CL_GetLocalClientMigrationState(LocalClientNum_t localClientNum)
+{
+	assertf_in("c:\\t6\\code\\src\\client_mp\\../client/client.h", 758, (localClientNum == 0),
+	           "(localClientNum) = %i", localClientNum);
+	return clientUIActives[0].migrationState;
 }
 
 struct alignas(8) clSnapshot_t  // playerState_s holds 8-byte members
@@ -109,7 +128,10 @@ struct clientActive_t
 	float cgameMaxYawSpeed;
 	unsigned char unknown2C00[0x2C8C - 0x2C00];
 	vec3_t viewangles;
-	unsigned char unknown2C98[0x8A7B4 - 0x2C98];
+	unsigned char unknown2C98[0x42CA8 - 0x2C98];
+	usercmd_s cmds[128];  // a ring: cmdNumber & 0x7F
+	int cmdNumber;
+	unsigned char unknown44EAC[0x8A7B4 - 0x44EAC];
 	int lastFireTime;
 	bool useHeld;
 	int useTime;
@@ -120,6 +142,7 @@ struct clientActive_t
 static_assert(sizeof(clientActive_t) == 0x8A7E0, "clientActive_t");
 static_assert(__builtin_offsetof(clientActive_t, cgameMaxYawSpeed) == 0x2BFC, "clientActive_t.cgameMaxYawSpeed");
 static_assert(__builtin_offsetof(clientActive_t, wasInVehicle) == 0x8A7C4, "clientActive_t.wasInVehicle");
+static_assert(__builtin_offsetof(clientActive_t, cmdNumber) == 0x44EA8, "clientActive_t.cmdNumber");
 static_assert(__builtin_offsetof(clientActive_t, snap) == 0x50, "clientActive_t.snap");
 static_assert(__builtin_offsetof(clientActive_t, stance) == 0x2BD0, "clientActive_t.stance");
 static_assert(__builtin_offsetof(clientActive_t, viewangles) == 0x2C8C, "clientActive_t.viewangles");
@@ -151,7 +174,10 @@ struct clientStatic_t
 {
 	unsigned char unknown0[0x154];
 	int frametime;  // milliseconds this frame
-	unsigned char unknown158[0x5EF88 - 0x158];
+	float frametime_base;
+	unsigned char unknown15C[0x164 - 0x15C];
+	bool inputUpdatedPrevFrame;
+	unsigned char unknown165[0x5EF88 - 0x165];
 };
 static_assert(sizeof(clientStatic_t) == 0x5EF88, "clientStatic_t");
 

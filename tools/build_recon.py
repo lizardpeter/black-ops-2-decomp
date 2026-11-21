@@ -234,6 +234,8 @@ def main():
 
     # Only functions the original has are exported (and tested); anything else is a header helper. A stray name
     # whose scoped plain name an original function has is a wrong prototype: it would silently drop out of testing.
+    # Constructors are the exception: overloads share the class's name (bitarray's inline default constructor beside
+    # its out-of-line variadic one).
     in_orig = {e for e in exports if where(e)}
     stray = [e for e in exports if e not in in_orig and e not in enhanced_defs and e.lstrip("_") != "fltused"]
     if reference:
@@ -241,7 +243,7 @@ def main():
         for o in symbols.table(build):
             scoped.setdefault(symbols.scoped_name(o), []).append(o)
         mismatched = [f"{e}  (original: {', '.join(scoped[symbols.scoped_name(e)])})"
-                      for e in stray if symbols.scoped_name(e) in scoped]
+                      for e in stray if symbols.scoped_name(e) in scoped and not e.startswith("??0")]
         if mismatched:
             sys.exit("prototype differs from the original's decorated name:\n  " + "\n  ".join(mismatched))
         if stray:

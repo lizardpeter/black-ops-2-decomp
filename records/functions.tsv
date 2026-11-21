@@ -2,6 +2,7 @@ build	va	status	src	note
 CoDMPServer_PC	00404400	matches	include/cgame_mp/cg_local_mp.h	CG_GetLocalClientGlobals; tests/differential/test_cl_input.py
 CoDMPServer_PC	00407EE0	matches	include/qcommon/bitarray.h	bitarray<64>::testBit (__thiscall); tests/differential/test_cl_input.py
 CoDMPServer_PC	0041D9A0	matches	include/client/client.h	CL_GetLocalClientConnectionState; tests/differential/test_cl_input.py
+CoDMPServer_PC	00426AD0	matches	include/client/client.h	CL_GetLocalClientMigrationState; tests/differential/test_cl_input.py
 CoDMPServer_PC	00464890	matches	src/client/cl_input.cpp	CL_GetLocalClientUIGlobals; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA830	matches	src/client/cl_input.cpp	CL_LeanCount_Reset; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA840	matches	src/client/cl_input.cpp	CL_LeanCount_Increment; tests/differential/test_cl_input.py
@@ -50,12 +51,15 @@ CoDMPServer_PC	004EBE80	matches	src/client/cl_input.cpp	SetMeleeChargeCmd; tests
 CoDMPServer_PC	004EBEE0	matches	src/client/cl_input.cpp	CL_SetCursorPos; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EBEF0	matches	src/client/cl_input.cpp	CL_ShowSystemCursor; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EBF00	matches	src/client/cl_input.cpp	CL_CopyDamageKickAngles; tests/differential/test_cl_input.py
-CoDMPServer_PC	004ED7C0	matches	src/client/cl_input.cpp	resetBit@?$bitarray@$0EA; tests/differential/test_cl_input.py
+CoDMPServer_PC	004ED7C0	matches	include/qcommon/bitarray.h	bitarray<64>::resetBit (__thiscall); tests/differential/test_cl_input.py
 CoDMPServer_PC	004ED810	matches	src/client/cl_input.cpp	CL_UpdateAirburstMarkDistance; tests/differential/test_cl_input.py
 CoDMPServer_PC	004ED8E0	matches	src/client/cl_input.cpp	CL_AddCurrentStanceToCmd; tests/differential/test_cl_input.py
 CoDMPServer_PC	004ED970	matches	src/client/cl_input.cpp	CL_WeapNextButtonUpdate; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EDA00	matches	src/client/cl_input.cpp	CL_KeyMove; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EDC60	matches	src/client/cl_input.cpp	CL_MouseEvent; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EF530	matches	src/client/cl_input.cpp	CL_CreateCmd; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EF7A0	matches	src/client/cl_input.cpp	CL_CreateNewCommands; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EF8C0	matches	src/client/cl_input.cpp	CL_Input; tests/differential/test_cl_input.py
 CoDMPServer_PC	0055DF60	matches	src/win32/win_voice.cpp	Voice_GetLocalVoiceData; tests/differential/test_win_voice.py
 CoDMPServer_PC	00761340	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
 CoDMPServer_PC	00761360	matches	src/universal/com_math.cpp	ClampShort; tests/differential/test_universal.py

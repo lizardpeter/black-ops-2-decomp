@@ -13,6 +13,13 @@ public:
 
 	int array[WORD_COUNT];
 
+	// inlined: CL_CreateCmd clears its command's buttons this way before it memsets the whole command
+	bitarray()
+	{
+		for (int i = 0; i < WORD_COUNT; ++i)
+			array[i] = 0;
+	}
+
 	bool testBit(unsigned int pos) const
 	{
 		assertexpr_in(BITARRAY_H, 109, pos < BIT_COUNT);

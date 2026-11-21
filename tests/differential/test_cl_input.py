@@ -38,12 +38,16 @@ DVAR_HANDLES = {0x011C16DC: 0x7101,  # cl_leanCountMin
                 0x079EF388: 0x7107,  # cl_anglespeedkey
                 0x07987340: 0x7108,  # cl_yawspeed
                 0x079EF194: 0x7109,  # cl_pitchspeed
-                0x012374B0: 0x710A}  # m_filter
+                0x012374B0: 0x710A,  # m_filter
+                0x08232590: 0x710B,  # bg_useClientDamageKick
+                0x01DA7F64: 0x710C}  # cl_paused
 LEAN_MIN, HOLD, DELAY, STANDING = 0x7101, 0x7102, 0x7103, 0x7104
 STANCE_HOLD, DTP_HOLD, ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, M_FILTER = 0x7105, 0x7106, 0x7107, 0x7108, 0x7109, 0x710A
+DAMAGE_KICK, PAUSED = 0x710B, 0x710C
 
 # clientActive_t fields
 USING_ADS, SNAP_VALID, PS = 0x44, 0x50, 0x70
+CMDS, CMD_NUMBER, CMD_SIZE = 0x42CA8, 0x44EA8, 0x44
 SWITCHING_TO_INVENTORY, MAX_PITCH_SPEED, MAX_YAW_SPEED, WAS_IN_VEHICLE = 0x2BE4, 0x2BF8, 0x2BFC, 0x8A7C4
 PS_INVENTORY_WEAPON = 0x570
 # cg_t fields
@@ -88,6 +92,7 @@ def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dv
         STATE.clear()
         STATE.update(state)
         STATE["dvars"] = dvars or {}
+        STATE["machine"] = w.m
         w.u32(CLIENT_UI + 8, ui_state)
         w.u32(CL_MAX_LOCAL_CLIENTS, 1)
         w.u32(CLIENTS_PTR, CLIENTS)
@@ -132,6 +137,27 @@ FAKES = {
     "UI_MouseEvent": lambda mu: None,
     "IN_ShowSystemCursor": lambda mu: None,
     "IN_SetCursorPos": lambda mu: None,
+    "Live_IsSystemUiActive": lambda mu: STATE.get("system_ui", 0),
+    "Key_ClearStates": lambda mu: None,
+    "Key_IsCatcherActive": lambda mu: STATE.get("catcher", 0),
+    "CG_HandleLocationSelectionInput": lambda mu: STATE.get("location", 0),
+    "CL_CmdButtons": lambda mu: None,
+    "CL_MouseMove": lambda mu: mouse_move(mu),
+    "CL_GamepadMove": lambda mu: None,
+    "CL_HandleSpecialStateInput": lambda mu: None,
+    "CL_FinishMove": lambda mu: finish_move(mu),
+    "Com_ViewScaleMsec": lambda mu: 16.0,
+    "Com_LocalClient_GetControllerIndex": lambda mu: 0,
+    "GPad_IsActive": lambda mu: STATE.get("gpad", 0),
+    "Demo_IsThirdPersonCamera": lambda mu: STATE.get("third", 0),
+    "Demo_IsAnyFreeMoveCamera": lambda mu: STATE.get("free", 0),
+    "Demo_IsFreeCameraLockedOnEntity": lambda mu: STATE.get("locked", 0),
+    "Demo_ClampViewAngleForLockedOnEntity": lambda mu: None,
+    "CL_ClampViewAngle": lambda mu: None,
+    "MSG_SetDefaultUserCmd": lambda mu: None,
+    "CL_IsFirstActiveLocalClient": lambda mu: STATE.get("first", 1),
+    "IN_Frame": lambda mu: None,
+    "Com_SessionMode_IsZombiesGame": lambda mu: STATE.get("zombies", 0),
     "CG_GetPredictedPlayerState": lambda mu: PREDICTED_PS,
     "Cmd_Argv": cmd_argv,
     "Com_Printf": lambda mu: None,
@@ -146,7 +172,16 @@ SEEN = {
     "?Dvar_GetInt@@YAHPBUdvar_t@@@Z": "q", "?Dvar_GetFloat@@YAMPBUdvar_t@@@Z": "q", "?Dvar_GetBool@@YA_NPBUdvar_t@@@Z": "q",
     "ClampChar": "i", "CG_AirburstLazeCancelledByMovement": "fffff", "CG_GetAirburstMarkDistance": "iqqxi",
     "DevGui_IsActive": "", "DevGui_MouseEvent": "ii", "UI_UpdateMouseScreenPosition": "iii", "UI_KeysBypassMenu": "i",
-    "UI_IsFocusedMenuUi3dWindow": "i", "UI_MouseEvent": "iii", "IN_ShowSystemCursor": "i", "IN_SetCursorPos": "ii", "CG_GetPredictedPlayerState": "i", "Cmd_Argv": "i",
+    "UI_IsFocusedMenuUi3dWindow": "i",
+    "Live_IsSystemUiActive": "", "Key_ClearStates": "i", "Key_IsCatcherActive": "ii",
+    "CG_HandleLocationSelectionInput": "i", "CL_CmdButtons": "i", "CL_MouseMove": "ixf", "CL_GamepadMove": "if",
+    # the command is on the caller's stack when CL_CreateNewCommands makes it: its address isn't compared (x), the
+    # fakes mark it instead
+    "CL_HandleSpecialStateInput": "ix", "CL_FinishMove": "ix", "Com_ViewScaleMsec": "f",
+    "Com_LocalClient_GetControllerIndex": "i", "GPad_IsActive": "i", "Demo_IsThirdPersonCamera": "",
+    "Demo_IsAnyFreeMoveCamera": "", "Demo_IsFreeCameraLockedOnEntity": "", "Demo_ClampViewAngleForLockedOnEntity": "i",
+    "CL_ClampViewAngle": "iiff", "MSG_SetDefaultUserCmd": "qq", "CL_IsFirstActiveLocalClient": "i", "IN_Frame": "",
+    "Com_SessionMode_IsZombiesGame": "", "CL_SplitscreenEnabled": "", "UI_MouseEvent": "iii", "IN_ShowSystemCursor": "i", "IN_SetCursorPos": "ii", "CG_GetPredictedPlayerState": "i", "Cmd_Argv": "i",
     "Com_Printf": "is", "BG_GetWeaponDef": "i", "BG_GetFireType": "i", "BG_WeaponBlocksProne": "i",
     "CG_CycleWeapon": "ii", "Assert_MyHandler": "siiss", "CL_GetLocalClientGlobals": "i",
 }
@@ -158,6 +193,21 @@ def airburst(mu):
         return 0
     mu.mem_write(arg(mu, 3), struct.pack("<I", STATE["mark"]))  # the caller's local
     return 1
+
+
+def mouse_move(mu):
+    """CL_MouseMove's fake: turns the view's pitch by STATE['dpitch'] (to exercise CL_CreateCmd's 90-degree limit)
+    and marks the command."""
+    va = CLIENTS + VIEWANGLES
+    pitch = struct.unpack("<f", bytes(mu.mem_read(va, 4)))[0]
+    STATE["machine"].program_write(va, struct.pack("<f", pitch + STATE.get("dpitch", 0.0)))
+    cmd = arg(mu, 1)
+    STATE["machine"].program_write(cmd + 0x2A, struct.pack("<h", 0x1234))  # gunPitch, as a marker
+
+
+def finish_move(mu):
+    cmd = arg(mu, 1)
+    STATE["machine"].program_write(cmd, struct.pack("<I", STATE.get("server_time", 4321) & 0xFFFFFFFF))
 
 
 def stances():
@@ -330,6 +380,8 @@ CASES = [
      "inputs": [[0], [1]]},
     {"name": "CL_GetLocalClientConnectionState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(ui_state=u)} for lc in (0, 1) for u in (0, 5, 10)]},
+    {"name": "CL_GetLocalClientMigrationState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [lc], "setup": setup(globals_={CLIENT_UI + 0x10: m})} for lc in (0, 1) for m in range(4)]},
     {"name": "CG_GetLocalClientGlobals", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(cg_null=n)} for lc in (0, 1) for n in (False, True)]},
     {"name": "IN_IsTalkKeyHeld", "ret": "bool", "builds": SERVER,
@@ -398,6 +450,27 @@ CASES = [
     {"name": "CL_CopyDamageKickAngles", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [0, bytes(0x44)], "setup": setup(cg={CG_DAMAGE_KICK: struct.pack("<ff", x, y)})}
                 for x, y in ((0.0, 0.0), (1.5, -2.25), (179.9, -180.0), (0.0055, -0.0055), (200.0, 359.0))]},
+    {"name": "CL_CreateCmd", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [bytes([0xCC]) * CMD_SIZE, 0],
+                 "setup": setup(client={VIEWANGLES: struct.pack("<f", pitch), STANCE: 1},
+                                dvars={DAMAGE_KICK: kick, STANDING: 60},
+                                cg={CG_DAMAGE_KICK: struct.pack("<ff", 2.5, -1.0)},
+                                system_ui=sysui, catcher=cat, location=loc, gpad=rng.randrange(2),
+                                third=third, free=free, locked=rng.randrange(2), dpitch=dp)}
+                for sysui, cat, loc in ((1, 0, 0), (0, 0, 0), (0, 1, 0), (0, 1, 1))
+                for pitch, dp in ((10.0, 5.0), (10.0, 95.0), (10.0, -95.0), (350.0, 100.0), (0.0, 90.0),
+                                  (200.0, 0.0), (-170.0, -30.0))
+                for third, free in ((0, 0), (1, 0), (0, 1))
+                for kick in (0, 1)]},
+    {"name": "CL_CreateNewCommands", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0],
+                 "setup": setup(ui_state=u, client={CMD_NUMBER: n, VIEWANGLES: struct.pack("<f", 10.0)},
+                                globals_={CLIENT_UI + 0x10: mig}, server_time=n * 7)}
+                for u in (8, 9, 10) for n in (0, 126, 127, 0x7FFFFFFF) for mig in range(4)]},
+    {"name": "CL_Input", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [0],
+                 "setup": setup(ui_state=u, client={CMD_NUMBER: 5}, dvars={PAUSED: pz}, zombies=z, first=f)}
+                for u in (9, 10) for pz in (0, 1) for z in (0, 1) for f in (0, 1)]},
     {"name": "resetBit@?$bitarray@$0EA", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [[struct.pack("<II", 0xFFFFFFFF, 0x12345678), b] for b in list(range(64)) + [64, 100]]},
     {"name": "testBit@?$bitarray@$0EA", "ret": "bool", "builds": SERVER, "fakes": FAKES,

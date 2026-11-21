@@ -13,6 +13,7 @@
 #include "client/client.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "bgame/bg_public.h"
 #include "cgame_mp/cg_local_mp.h"
@@ -31,6 +32,36 @@ int CG_AirburstLazeCancelledByMovement(float forwardMove, float rightMove, float
                                        float moveScale);
 int CG_GetAirburstMarkDistance(LocalClientNum_t localClientNum, playerState_s *ps, bitarray<64> &buttons,
                                unsigned int *markDistance, int cancelled);
+
+// cl_main.cpp, cl_keys.cpp, splitscreen.cpp
+void CL_FinishMove(LocalClientNum_t localClientNum, usercmd_s *cmd);
+void CL_ClampViewAngle(LocalClientNum_t localClientNum, int index, float min, float max);
+void Key_ClearStates(LocalClientNum_t localClientNum);
+bool Key_IsCatcherActive(LocalClientNum_t localClientNum, int mask);
+bool CL_SplitscreenEnabled();
+bool CL_IsFirstActiveLocalClient(LocalClientNum_t localClientNum);
+
+// not reconstructed yet in this file
+bool CG_HandleLocationSelectionInput(LocalClientNum_t localClientNum, usercmd_s *cmd);
+void CL_CmdButtons(LocalClientNum_t localClientNum, usercmd_s *cmd);
+void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base);
+void CL_GamepadMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base);
+void CL_HandleSpecialStateInput(LocalClientNum_t localClientNum, bitarray<64> *buttons);
+
+// qcommon, live, demo, gamepad
+float Com_ViewScaleMsec(float msec);
+ControllerIndex_t Com_LocalClient_GetControllerIndex(LocalClientNum_t localClientNum);
+bool Com_SessionMode_IsZombiesGame();
+void MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd);
+bool Live_IsSystemUiActive();
+bool Demo_IsThirdPersonCamera();
+bool Demo_IsAnyFreeMoveCamera();
+bool Demo_IsFreeCameraLockedOnEntity();
+void Demo_ClampViewAngleForLockedOnEntity(LocalClientNum_t localClientNum);
+bool GPad_IsActive(ControllerIndex_t portIndex);
+void IN_Frame();
+float AngleDelta(float a1, float a2);
+float AngleNormalize360(float angle);
 
 // ui, devgui, win32
 void UI_UpdateMouseScreenPosition(LocalClientNum_t localClientNum, int x, int y);
@@ -59,6 +90,8 @@ extern const dvar_t *cl_anglespeedkey;       // universal/dvar.cpp
 extern const dvar_t *cl_yawspeed;            // universal/dvar.cpp
 extern const dvar_t *cl_pitchspeed;          // universal/dvar.cpp
 extern const dvar_t *m_filter;               // cl_main.cpp
+extern const dvar_t *cl_paused;              // qcommon/common.cpp
+extern const dvar_t *bg_useClientDamageKick; // bgame
 
 T6_GLOBAL const dvar_t *cl_leanCountMin;
 T6_GLOBAL int g_leaned;
@@ -895,4 +928,91 @@ void CL_CopyDamageKickAngles(LocalClientNum_t localClientNum, usercmd_s *cmd)
 	cg_t *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
 	cmd->damageKick[0] = (short)(int)(cgameGlob->damageKickAngles.x * 182.04445f);
 	cmd->damageKick[1] = (short)(int)(cgameGlob->damageKickAngles.y * 182.04445f);
+}
+
+// 004EF530  client/cl_input.cpp:2794
+// One frame's command. The view's pitch may not move more than 90 degrees in a frame. X87_MATH: AngleDelta's result
+// is compared unrounded, as in the original.
+X87_MATH usercmd_s CL_CreateCmd(LocalClientNum_t localClientNum)
+{
+	usercmd_s cmd;
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	float oldPitch = cl->viewangles.x;
+	CL_AdjustAngles(localClientNum);
+	memset(&cmd, 0, sizeof(cmd));
+	if (Live_IsSystemUiActive())
+	{
+		Key_ClearStates(localClientNum);
+		CL_AddCurrentStanceToCmd(localClientNum, &cmd);
+		CL_FinishMove(localClientNum, &cmd);
+		return cmd;
+	}
+	if (!Key_IsCatcherActive(localClientNum, 4) || !CG_HandleLocationSelectionInput(localClientNum, &cmd))
+	{
+		CL_CmdButtons(localClientNum, &cmd);
+		CL_KeyMove(localClientNum, &cmd);
+		float frametime_base = Com_ViewScaleMsec(cls.frametime_base);
+		CL_MouseMove(localClientNum, &cmd, frametime_base);
+		if (GPad_IsActive(Com_LocalClient_GetControllerIndex(localClientNum)))
+			CL_GamepadMove(localClientNum, &cmd, frametime_base);
+		CL_HandleSpecialStateInput(localClientNum, &cmd.button_bits);
+		if (AngleDelta(cl->viewangles.x, oldPitch) > 90.0f)
+			cl->viewangles.x = AngleNormalize360(oldPitch + 90.0f);
+		else if (AngleDelta(oldPitch, cl->viewangles.x) > 90.0f)
+			cl->viewangles.x = AngleNormalize360(oldPitch - 90.0f);
+		if (Demo_IsThirdPersonCamera())
+			CL_ClampViewAngle(localClientNum, 0, -90.0f, 90.0f);
+		if (Demo_IsAnyFreeMoveCamera())
+		{
+			if (Demo_IsFreeCameraLockedOnEntity())
+			{
+				Demo_ClampViewAngleForLockedOnEntity(localClientNum);
+			}
+			else
+			{
+				if (cl->viewangles.x > 180.0f)
+					cl->viewangles.x -= 360.0f;
+				CL_ClampViewAngle(localClientNum, 0, -88.0f, 88.0f);
+			}
+		}
+		if (Dvar_GetBool(bg_useClientDamageKick))
+			CL_CopyDamageKickAngles(localClientNum, &cmd);
+	}
+	CL_FinishMove(localClientNum, &cmd);
+	return cmd;
+}
+
+// 004EF7A0  client/cl_input.cpp:2905
+// One new command per call (CL_Input calls it once a client frame) into the 128-command ring. B0001: the "connection
+// interrupted" warning counts these, so it depends on the frame rate.
+void CL_CreateNewCommands(LocalClientNum_t localClientNum)
+{
+	if (CL_GetLocalClientConnectionState(localClientNum) < CA_PRIMED)
+		return;
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	++cl->cmdNumber;
+	int cmdNum = cl->cmdNumber & 0x7F;
+	if (CL_GetLocalClientMigrationState(localClientNum) != CMSTATE_INACTIVE &&
+	    CL_GetLocalClientMigrationState(localClientNum) != CMSTATE_NEWHOSTCONNECT)
+	{
+		// the host is migrating: send a neutral command
+		MSG_SetDefaultUserCmd(&cl->snap.ps, &cl->cmds[cmdNum]);
+		return;
+	}
+	cl->cmds[cmdNum] = CL_CreateCmd(localClientNum);
+}
+
+// 004EF8C0  client/cl_input.cpp:3318
+void CL_Input(LocalClientNum_t localClientNum)
+{
+	if (CL_GetLocalClientConnectionState(localClientNum) != CA_ACTIVE)
+		return;
+	if (Dvar_GetInt(cl_paused) == 1 && CL_SplitscreenEnabled() && Com_SessionMode_IsZombiesGame())
+		return;
+	if (CL_IsFirstActiveLocalClient(localClientNum))
+	{
+		cls.inputUpdatedPrevFrame = true;
+		IN_Frame();
+	}
+	CL_CreateNewCommands(localClientNum);
 }
