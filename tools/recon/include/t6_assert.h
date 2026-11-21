@@ -65,6 +65,15 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #define assertexpr_in(file, line, expr) \
 	do { if (!(expr) && !Assert_MyHandler(file, line, 0, "(" #expr ")", "%s", #expr)) __debugbreak(); } while (0)
 
+// Assert_MyHandler(file, line, 0, "(unsigned)(index) < (unsigned)(count)", "index doesn't index COUNT\n\t%i not in [0, %i)",
+// index, count): the bounds check. The expression text has the bound expanded ("(unsigned)(1)"), the message names it
+// ("MAX_LOCAL_CLIENTS"), so the message is made one macro level up, before the bound expands.
+#define bcassert_at(line, index, count) bcassert_at_(line, index, count, #index " doesn't index " #count)
+#define bcassert_at_(line, index, count, msg) \
+	do { if (!((unsigned)(index) < (unsigned)(count)) && !Assert_MyHandler(T6_ASSERT_FILE, line, 0, \
+		"(unsigned)(" #index ") < (unsigned)(" #count ")", msg "\n\t%i not in [0, %i)", index, count)) __debugbreak(); } \
+	while (0)
+
 #ifdef T6_NO_ASSERTS
 #undef iassert_at
 #undef iassertmsg_at
@@ -78,6 +87,7 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #undef assert_in
 #undef assertf_in
 #undef assertt_at
+#undef bcassert_at
 #define iassert_at(...) ((void)0)
 #define iassertmsg_at(...) ((void)0)
 #define vassert_at(...) ((void)0)
@@ -90,4 +100,5 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #define assert_in(...) ((void)0)
 #define assertf_in(...) ((void)0)
 #define assertt_at(...) ((void)0)
+#define bcassert_at(...) ((void)0)
 #endif

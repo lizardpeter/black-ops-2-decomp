@@ -43,6 +43,7 @@ sys.path.insert(0, str(ROOT / "tools"))
 import symbols  # noqa: E402
 
 STACK, STACK_SIZE = 0x00100000, 0x00100000
+STACK_FILL = 0x10000  # the top of the stack, refilled before each call
 SENTINEL = 0x00200000
 HEAP, HEAP_SIZE = 0x00300000, 0x00100000
 TEB, TEB_SIZE = 0x00040000, 0x00010000   # below every image: x86 images start at 0x00400000
@@ -403,6 +404,10 @@ class Machine:
         mu.mem_write(HEAP, b"\0" * HEAP_SIZE)
         mu.mem_write(SCRATCH, b"\0" * SCRATCH_SIZE)
         mu.mem_write(OBJECTS, b"\0" * OBJECTS_SIZE)
+        # the stack the frames use starts from the same bytes for every call, so a local the code reads before writing
+        # (an original bug: AimOutput's melee fields in CL_MouseMove) reads the same in both runs, not what the
+        # previous call left
+        mu.mem_write(STACK + STACK_SIZE - STACK_FILL, b"\xCC" * STACK_FILL)
         mu.mem_write(TLS_BLOCK, self._tls_template + b"\0" * (TLS_SIZE - len(self._tls_template)))
         self._setup_journal, self.imports_called, self._stub_fault = {}, [], None
         self.tsc = 0x100000000

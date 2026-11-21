@@ -33,7 +33,46 @@ enum ClientNum_t
 };
 
 // com_clients.cpp
+#define MAX_LOCAL_CLIENTS 1  // a macro: the bounds asserts' text shows it expanded
+
+enum UIContextIndex_t
+{
+	INVALID_UI_CONTEXT = -1,
+	UI_CONTEXT_0 = 0,
+};
+
+enum netsrc_t
+{
+	NS_NULL = -1,
+	NS_CLIENT1 = 0,
+};
+
+enum LastInput_t
+{
+	LAST_INPUT_GAMEPAD = 0,
+	LAST_INPUT_MOUSEMOVE = 1,
+	LAST_INPUT_MOUSECLICK = 2,
+	LAST_INPUT_KEYBOARD = 3,
+};
+
+struct ClientGameState
+{
+	int flags;
+	LocalClientNum_t localClientNum;
+	ControllerIndex_t controllerIndex;
+	UIContextIndex_t uiContextIndex;
+	netsrc_t networkID;
+	LastInput_t lastInput;
+};
+static_assert(sizeof(ClientGameState) == 0x18, "ClientGameState");
+
+extern ClientGameState clientGameStates[MAX_LOCAL_CLIENTS];
+
+LocalClientNum_t Com_LocalClients_GetPrimary();
 LocalClientNum_t Com_ControllerIndex_GetLocalClientNum(ControllerIndex_t controllerIndex);
+ControllerIndex_t Com_LocalClient_GetControllerIndex(LocalClientNum_t localClientNum);
+void Com_LocalClient_LastInput_Set(LocalClientNum_t localClientNum, LastInput_t lastInput);
+LastInput_t Com_LocalClient_LastInput_Get(LocalClientNum_t localClientNum);
 
 // common.cpp
 extern int com_frameTime;

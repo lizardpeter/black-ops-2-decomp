@@ -192,3 +192,11 @@ t6mp_msstore	140471F70	matches	src/universal/q_shared.cpp	I_itoa; tests/differen
 t6mp_msstore	1404723A0	matches	src/universal/q_shared.cpp	Info_RemoveKey_Big; tests/differential/test_q_shared.py
 t6mp_msstore	1404732C0	matches	src/universal/q_shared.cpp	Com_IsLegacyXModelName; tests/differential/test_q_shared.py
 t6mp_msstore	1407B51D0	matches	src/universal/q_shared.cpp	LongSwap; tests/differential/test_q_shared.py
+CoDMPServer_PC	006B5D10	matches	src/qcommon/com_clients.cpp	Com_LocalClient_GetControllerIndex; tests/differential/test_com_clients.py
+CoDMPServer_PC	006B6300	matches	src/qcommon/com_clients.cpp	Com_LocalClient_LastInput_Set; tests/differential/test_com_clients.py
+CoDMPServer_PC	006B6380	matches	src/qcommon/com_clients.cpp	Com_LocalClient_LastInput_Get; tests/differential/test_com_clients.py
+CoDMPServer_PC	007972B0	matches	src/win32/win_gamepad.cpp	GPad_InUse; tests/differential/test_win_gamepad.py
+CoDMPServer_PC	00909430	matches	src/demo/demo_common.cpp	Demo_IsPlaying; tests/differential/test_demo_common.py
+CoDMPServer_PC	004096C0	matches	src/aim_assist/aim_assist.cpp	AimAssist_UpdateMouseInput; tests/differential/test_aim_assist.py
+CoDMPServer_PC	00675010	matches	src/game/gamerprofile.cpp	GamerProfile_GetFloat; tests/differential/test_gamerprofile.py
+t6mp_msstore	1401930F0	matches	src/client/cl_input.cpp	CL_MouseMove (Store branches: acceleration order, floorf rounding, /fp:fast NaN comparisons; its inlined helpers verified with it); tests/differential/test_cl_input.py

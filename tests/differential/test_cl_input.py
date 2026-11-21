@@ -56,7 +56,9 @@ MOUSE_ACCEL, SHOW_RATE, M_SIDE, M_YAW, M_PITCH, M_FORWARD, FREELOOK = range(0x71
 
 FLOAT_DVARS = {ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, MOUSE_ACCEL, M_SIDE, M_YAW, M_PITCH, M_FORWARD}
 BOOL_DVARS = {M_FILTER, DAMAGE_KICK, SHOW_RATE, FREELOOK}
-DVAR_STORE = {STANDING: 0x14265A860}  # the Store's dvar pointers identified so far (records/names.tsv)
+DVAR_STORE = {STANDING: 0x14265A860,   # the Store's dvar pointers identified so far (records/names.tsv)
+              M_FILTER: 0x140E60788, MOUSE_ACCEL: 0x140E61BF0, M_SIDE: 0x140E61BE8, M_YAW: 0x140E5D238,
+              FREELOOK: 0x140E5D108, M_PITCH: 0x140E5CDB8, M_FORWARD: 0x140E5CCD8}
 DVAR_OBJECTS = OBJECTS + 0x1C0000      # one dvar_t per handle, 0x80 apart, in the build's layout
 
 
@@ -384,9 +386,124 @@ def mouse_inputs(n=400):
     return out
 
 
+# The Store build inlines CL_GetMouseMovement, Com_LocalClient_GetControllerIndex, GPad_InUse, Demo_IsPlaying,
+# AimAssist_UpdateMouseInput and SetMeleeChargeCmd into CL_MouseMove: its case sets their state (Store addresses,
+# records/names.tsv) and fakes only what both builds still call.
+S_MOUSE_IN, S_CLIENT_GAME_STATES, S_DEMO_STATE = 0x140E5C7F0, 0x141EF91E0, 0x1425A3308
+S_AA_GLOB = 0x142C64990  # aaGlobArray[0]: ps.weaponstate +0x48, initialized +0x6C, prev_button_bits +0x12B0
+S_PS, S_FOV_SCALE, S_MAX_PITCH_SPEED, S_MAX_YAW_SPEED, S_VIEWANGLES = 0x88, 0x2C0C, 0x2C10, 0x2C14, 0x2CA4
+
+
+def argq(mu, i):
+    """Argument i of an x64 call, at the callee's entry (RCX, RDX, R8, R9)."""
+    return mu.reg_read((x86.UC_X86_REG_RCX, x86.UC_X86_REG_RDX, x86.UC_X86_REG_R8, x86.UC_X86_REG_R9)[i])
+
+
+def apply_auto_melee(mu):
+    """AimAssist_ApplyAutoMelee's fake (x64): turns the output and sets the melee charge from every AimInput field the
+    caller sets, so a wrong input shows."""
+    dt, pitch, pa, pm, yaw, ya, ym, fa, ra, b0, b1, lc = struct.unpack("<9fIIi", bytes(mu.mem_read(argq(mu, 0), 0x30)))
+    out = argq(mu, 1)
+    p0, y0 = struct.unpack("<ff", bytes(mu.mem_read(out, 8)))
+    mu.mem_write(out, struct.pack("<fffHB", p0 + pitch * 0.25 + dt + pa + pm, y0 - 0.5 + yaw + ya + ym + fa + ra, 0.0,
+                                  (b0 ^ b1 ^ lc) & 0xFFFF, 9))
+
+
+def floorf_import(m, mu):
+    import math
+    x = struct.unpack("<f", struct.pack("<I", mu.reg_read(x86.UC_X86_REG_XMM0) & 0xFFFFFFFF))[0]
+    r = x if math.isnan(x) or math.isinf(x) else float(math.floor(x))
+    mu.reg_write(x86.UC_X86_REG_XMM0, struct.unpack("<I", struct.pack("<f", r))[0])
+
+
+STORE_MOUSE = {
+    # GamerProfile_GetFloat is inlined: GamerProfile_GetInt's bits are the sensitivity
+    "fakes": {"GamerProfile_GetInt": lambda mu: struct.unpack("<i", struct.pack("<f", STATE.get("sens", 5.0)))[0],
+              "CG_ShouldUpdateViewAngles": lambda mu: STATE.get("update_view", 1),
+              "AimAssist_UpdateTweakables": lambda mu: None, "AimAssist_UpdateAdsLerp": lambda mu: None,
+              "AimAssist_ApplyAutoMelee": apply_auto_melee, "CL_UpdateAirburstMarkDistance": lambda mu: None},
+    # the AimInput is the caller's local (x); the Store's CL_UpdateAirburstMarkDistance ignores its local client, so
+    # the original leaves rcx as it happens to be (x)
+    "observe": {"GamerProfile_GetInt": "ii", "CG_ShouldUpdateViewAngles": "i", "AimAssist_UpdateTweakables": "xi",
+                "AimAssist_UpdateAdsLerp": "x", "AimAssist_ApplyAutoMelee": "xx",
+                "CL_UpdateAirburstMarkDistance": "xqqfffff"},
+    # the recon calls floorf; the Store inlines it
+    "imports": {"api-ms-win-crt-math-l1-1-0.dll!floorf": (floorf_import, 0)},
+}
+
+
+def store_mouse_inputs(n=400):
+    out = []
+    nan = float("nan")
+    for _ in range(n):
+        kb = {KB["STRAFE"]: kbutton(active=rng.random() < 0.25), KB["MLOOK"]: kbutton(active=rng.random() < 0.5)}
+        client = {S_PS + PS_PM_FLAGS: rng.choice([0, 0, 0, 0x800]),
+                  S_PS + PS_WEAPONSTATE: rng.choice([0, 0, 0, 0x2C]),
+                  S_PS + PS_OTHER_FLAGS: rng.choice([0, 0, 0, 0x400]),
+                  S_PS + PS_EFLAGS2: rng.choice([0, 0, 0, 0x40000]),
+                  S_PS + PS_PM_TYPE: rng.choice([0, 1, 1]), S_PS + PS_LINK_FLAGS: rng.choice([0, 1]),
+                  # a NaN scale or cap: what /fp:fast changed (cl_input.cpp, MOUSE_CAP_OUT_OF_RANGE)
+                  S_FOV_SCALE: struct.pack("<f", rng.choice([1.0, rng.uniform(0.3, 1.5), 1.0, nan if rng.random() < 0.03 else 1.0])),
+                  S_MAX_YAW_SPEED: struct.pack("<f", rng.choice([0.0, -5.0, 90.0, 400.0, 1e-3, nan, rng.uniform(1, 500)])),
+                  S_MAX_PITCH_SPEED: struct.pack("<f", rng.choice([0.0, 60.0, 720.0, nan, rng.uniform(1, 500)])),
+                  S_VIEWANGLES: struct.pack("<ff", rng.uniform(-80, 80), rng.uniform(-180, 180))}
+        mouse = struct.pack("<5i", rng.choice([0, 3, -40, 1000, rng.randrange(-500, 500)]), rng.choice([0, -2, 15]),
+                            rng.choice([0, 9, -300, rng.randrange(-500, 500)]), rng.choice([0, 4]), rng.randrange(2))
+        cmd = struct.pack("<III", 0, rng.getrandbits(32), rng.getrandbits(32)) + bytes(0x18) + \
+            bytes([rng.randrange(256) for _ in range(5)]) + bytes(0x3C - 0x29)
+        controller_lc = rng.choice([0, 0, 0, 1])  # a record for another local client: no controller
+        last_input = rng.choice([1, 1, 2, 3, 0])  # 0: the gamepad, no aim assist from the mouse
+        globals_ = {S_MOUSE_IN: mouse,
+                    S_CLIENT_GAME_STATES: struct.pack("<6i", 0, controller_lc, rng.choice([0, 2]), 0, 0, last_input),
+                    S_DEMO_STATE: rng.choice([0, 0, 0, 1, 2]),
+                    # AimOutput's melee fields are only set by AimAssist_ApplyAutoMelee: skipping it (aim assist not
+                    # initialized, or weapon states 0x38-0x3A) leaves them uninitialized (records/bugs.tsv B0016)
+                    S_AA_GLOB + 0x48: rng.choice([0, 0, 0x2C, 0x37, 0x38, 0x3A, 0x3B]),
+                    S_AA_GLOB + 0x6C: struct.pack("<B", rng.random() < 0.85),
+                    S_AA_GLOB + 0x12B0: b"\xAA" * 8}
+        out.append({"args": [0, cmd, ("f", rng.choice([16.0, 6.9, 33.3]))],
+                    "setup": setup(kb=kb, client=client, globals_=globals_,
+                                   frame_msec=rng.choice([0, 1, 7, 16, 33, rng.randrange(2, 60)]),
+                                   dvars={M_FILTER: rng.randrange(2), MOUSE_ACCEL: rng.choice([0.0, 0.5, rng.uniform(0, 3)]),
+                                          M_SIDE: rng.choice([0.25, rng.uniform(0.01, 1)]), M_YAW: rng.choice([0.022, rng.uniform(0.5, 5)]),
+                                          M_PITCH: rng.choice([0.022, -0.022, 0.0, rng.uniform(-5, 5)]),
+                                          M_FORWARD: rng.choice([0.25, rng.uniform(0.01, 1)]),
+                                          FREELOOK: rng.choice([1, 1, 0])},
+                                   sens=rng.choice([5.0, rng.uniform(0.5, 20)]),
+                                   update_view=rng.random() < 0.8)})
+    return out
+
+
+def store_mouse_edges():
+    """What the random inputs rarely reach: a strafe or forward move just below a half (floorf(x + 0.5f) rounds the
+    sum up where the server's rounding doesn't) and NaN movement (from the FOV scale), which /fp:fast treats as none
+    when both axes are NaN and turns by differently when one is."""
+    out = []
+    nan = float("nan")
+    for sens in (0.49999997, -0.50000006, 1.4999999, -2.5, 2.5, 0.5, -0.49999997, 126.49999):
+        for strafe, mlook in ((1, 0), (0, 0)):
+            for fov, mouse in ((1.0, (1, 0, 1, 0)), (nan, (1, 0, 1, 0)), (float("inf"), (0, 0, 1, 0)),
+                               (float("inf"), (1, 0, 0, 0))):
+                kb = {KB["STRAFE"]: kbutton(active=strafe), KB["MLOOK"]: kbutton(active=mlook)}
+                client = {S_FOV_SCALE: struct.pack("<f", fov), S_MAX_YAW_SPEED: struct.pack("<f", 90.0),
+                          S_MAX_PITCH_SPEED: struct.pack("<f", 90.0), S_VIEWANGLES: struct.pack("<ff", 10.0, 20.0)}
+                cmd = struct.pack("<III", 0, 1, 2) + bytes(0x18) + bytes([5, 250, 0, 3, 4]) + bytes(0x3C - 0x29)
+                # an infinite scale on a zero axis makes that axis NaN and the other infinite: the move goes ahead
+                # with a NaN turn (MOUSE_MIN_127)
+                globals_ = {S_MOUSE_IN: struct.pack("<5i", *mouse, 0),
+                            S_CLIENT_GAME_STATES: struct.pack("<6i", 0, 0, 0, 0, 0, 1),
+                            S_AA_GLOB + 0x6C: struct.pack("<B", 1)}
+                out.append({"args": [0, cmd, ("f", 16.0)],
+                            "setup": setup(kb=kb, client=client, globals_=globals_, frame_msec=16,
+                                           dvars={M_SIDE: 1.0, M_FORWARD: 1.0, M_YAW: 0.022, M_PITCH: 0.022,
+                                                  FREELOOK: 0},
+                                           sens=sens, update_view=1)})
+    return out
+
+
 CASES = [
-    {"name": "CL_MouseMove", "ret": "void", "builds": SERVER, "fakes": MOUSE_FAKES, "observe": MOUSE_SEEN,
-     "inputs": mouse_inputs()},
+    {"name": "CL_MouseMove", "ret": "void", "builds": BOTH, "fakes": MOUSE_FAKES, "observe": MOUSE_SEEN,
+     "inputs": mouse_inputs(), "by_build": {"t6mp_msstore": dict(STORE_MOUSE, inputs=store_mouse_inputs() + store_mouse_edges())}},
     {"name": "I_fmin", "ret": "float", "builds": SERVER,
      "inputs": [[("f", a), ("f", b)] for a in (0.0, -0.0, 1.5, -2.0, float("nan"), float("inf")) for b in (0.0, 1.5, float("nan"), -float("inf"))]},
     {"name": "I_fmax", "ret": "float", "builds": SERVER,

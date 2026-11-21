@@ -231,7 +231,9 @@ def main():
                 diff = sorted(a for a in set(ww) | set(gw) if ww.get(a) != gw.get(a))[:6]
                 verdict = (f"FAIL args={args!r}\n       original={want[0]!r} recon={got[0]!r} "
                            f"buffers_equal={want[1] == got[1]} writes_equal={ww == gw} calls_equal={want[3] == got_calls}"
-                           + (f"\n       writes differ at {[hex(a) for a in diff]}" if diff else ""))
+                           + (f"\n       writes differ at {[hex(a) for a in diff]}" if diff else "")
+                           + (f"\n       calls: original {want[3][:4]!r}\n              recon    {got_calls[:4]!r}"
+                              if want[3] != got_calls else ""))
                 break
         if verdict == "pass" and not used:
             verdict = f"untestable: the original faults on all {len(case['inputs'])} inputs"

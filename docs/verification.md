@@ -83,7 +83,9 @@ Harness specifics:
 - **x86:** cdecl stack arguments (`('q', v)` for a 64-bit integer), FS on a TEB through a GDT descriptor, x87
   control word 0x27F.
 - **x64:** Win64 registers and shadow space, GS on a TEB with a PEB.
-- **Both:** `rdtsc` is deterministic.
+- **Both:** `rdtsc` is deterministic. The top 64 KB of the stack is filled with `0xCC` before every call, so a local
+  read before it is written (an original bug, e.g. B0016) gives the same bytes in both runs instead of whatever the
+  previous call left. A failing case prints the first differing observed calls of both runs.
 - **Imports:** on x64 an unhooked import returns 0. On x86 one faults, naming the import, until a test registers it
   with `Machine.on_import(name, fn, nargs)`: Win32 imports are stdcall, and a stub that doesn't pop their
   arguments would silently corrupt the stack.

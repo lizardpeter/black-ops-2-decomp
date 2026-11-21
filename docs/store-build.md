@@ -63,9 +63,22 @@ the source handles them:
   `predictedPlayerState` and `damageKickAngles`).
 - **Arithmetic.** The Store build is SSE throughout, in float. Where the server kept a chain on the x87 stack, the
   source uses `x87_t` (double on x86, float on x64) and `X87_MATH` (x86 only): `t6_compiler.h`.
-- **NaN comparisons.** The Store's compiler sometimes swaps a comparison's operands in a way only NaN can tell
-  apart (`a >= b` as `!(b > a)`: `CG_IsSprinting`), as fast floating-point modes allow. Where the Store's code does,
-  its branch writes the comparison the way the Store evaluates it.
+- **Fast floating point.** The Store was compiled with a fast floating-point mode (`/fp:fast`): it reassociates
+  and rewrites comparisons, so the same source line can round differently or treat NaN differently.
+  - *Reassociation.* `CL_MouseMove`'s acceleration is `(accel / frame_msec) * speed` on the Store and
+    `accel * (speed / frame_msec)` on the server.
+  - *Comparisons.* A comparison can be swapped or folded in a way only NaN tells apart: `a >= b` as `!(b > a)`
+    (`CG_IsSprinting`); `I_fmin(x, 127.0f)` as `x > 127 ? 127 : x` (a NaN stays NaN); `x != 0` as
+    `x < 0 || x > 0` (a NaN is zero); `cap <= 0 || 360 - cap < 0` as `!(cap > 0 && cap <= 360)`.
+  - The Store's branch writes each such expression the way the Store evaluates it, per site (the compiler didn't
+    rewrite every use of a helper the same way), and its test includes the NaN and rounding inputs that tell the two
+    apart: a test that passes with the server's form reverted in is missing them.
+- **Revision changes in code.** `CL_MouseMove` rounds the mouse's walk and strafe moves with `floorf(x + 0.5f)`
+  (the server rounds to nearest after adding 2^-30) and no longer prints `cl_showMouseRate`.
+- **Inlined wrappers change the callee.** Where the Store inlined a thin wrapper, its callers call what the wrapper
+  called: `CL_MouseMove` calls `GamerProfile_GetInt` and uses the bits as a float (the server's
+  `GamerProfile_GetFloat`), so the returned value is in EAX, not XMM0. A Store function whose result is used
+  unlike its server twin's is a wrapper's callee, not the twin.
 - **Inlining.** Link-time code generation inlined most small functions (`CL_GetLocalClientGlobals`, `Dvar_GetInt`,
   `ClampChar`, `CL_AdjustAngles`, ...) and removed unused arguments (`CG_IsSprinting` takes none). A function the
   Store doesn't have is verified there through its caller; header functions are inline in `include/` as they were
@@ -73,3 +86,6 @@ the source handles them:
 - **Identification.** `records/names.tsv` rows for the Store come from `tools/match/match.py`, behaviour, or the
   structure of the code (the call order and field accesses of a function whose server twin is reconstructed),
   with the evidence written out.
+- **Stack contents.** A local the original reads before writing (`CL_MouseMove`'s `AimOutput` melee fields when aim
+  assist skips auto-melee: B0016) reads what's on the stack. The harness fills the top of the stack with a fixed
+  pattern before every call, so the original and the reconstruction read the same bytes when neither wrote them.

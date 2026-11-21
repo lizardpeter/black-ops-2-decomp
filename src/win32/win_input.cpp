@@ -18,6 +18,7 @@
 #include "t6_compiler.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
+#include "win32/win_gamepad.h"
 #include "win32/win_shared.h"
 
 struct WinMouseVars_t
@@ -64,17 +65,8 @@ struct ButtonToCodeMap_t
 	int code;  // the key code the button sends
 };
 
-enum LastInput_t
-{
-	LAST_INPUT_GAMEPAD = 0,
-	LAST_INPUT_MOUSEMOVE = 1,
-	LAST_INPUT_MOUSECLICK = 2,
-	LAST_INPUT_KEYBOARD = 3,
-};
-
 // win_gamepad.cpp
 void GPad_UpdateAll();
-bool GPad_IsActive(ControllerIndex_t portIndex);
 float GPad_GetStick(ControllerIndex_t portIndex, GamePadStick stick);
 float GPad_GetButton(ControllerIndex_t portIndex, GamePadButton button);
 bool GPad_IsButtonPressed(ControllerIndex_t portIndex, GamePadButton button);
@@ -86,10 +78,6 @@ void CL_GamepadEvent(ControllerIndex_t portIndex, int gamePadEvent, int value, i
 void CL_GamepadButtonEventForPort(ControllerIndex_t portIndex, int key, int buttonEvent, unsigned int time,
                                   int button);
 int CL_MouseEvent(LocalClientNum_t localClientNum, int x, int y, int dx, int dy);
-
-// qcommon/com_clients.cpp
-LocalClientNum_t Com_LocalClients_GetPrimary();
-void Com_LocalClient_LastInput_Set(LocalClientNum_t localClientNum, LastInput_t lastInput);
 
 extern const dvar_t *r_fullscreen;     // gfx_d3d/r_dvars.cpp
 extern const dvar_t *ClickToContinue;  // qcommon/common.cpp

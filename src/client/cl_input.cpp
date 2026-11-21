@@ -12,17 +12,22 @@
 
 #include "client/client.h"
 
+#include <math.h>
 #include <stdlib.h>
 #include <string.h>
 
+#include "aim_assist/aim_assist.h"
 #include "bgame/bg_public.h"
 #include "cgame_mp/cg_local_mp.h"
+#include "demo/demo.h"
+#include "game/gamerprofile.h"
 #include "qcommon/qcommon.h"
 #include "t6_assert.h"
 #include "universal/com_math.h"
 #include "t6_compiler.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
+#include "win32/win_gamepad.h"
 #include "win32/win_shared.h"
 
 // cgame
@@ -49,7 +54,6 @@ void CL_HandleSpecialStateInput(LocalClientNum_t localClientNum, bitarray<64> *b
 
 // qcommon, live, demo, gamepad
 float Com_ViewScaleMsec(float msec);
-ControllerIndex_t Com_LocalClient_GetControllerIndex(LocalClientNum_t localClientNum);
 bool Com_SessionMode_IsZombiesGame();
 void MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd);
 bool Live_IsSystemUiActive();
@@ -57,20 +61,12 @@ bool Demo_IsThirdPersonCamera();
 bool Demo_IsAnyFreeMoveCamera();
 bool Demo_IsFreeCameraLockedOnEntity();
 void Demo_ClampViewAngleForLockedOnEntity(LocalClientNum_t localClientNum);
-bool GPad_IsActive(ControllerIndex_t portIndex);
 void IN_Frame();
 float AngleDelta(float a1, float a2);
 float AngleNormalize360(float angle);
 
 // game, aim assist, cgame
-struct AimInput;
-struct AimOutput;
-enum profile_setting { PROFILE_MOUSE_SENSITIVITY = 0x29 };
-float GamerProfile_GetFloat(profile_setting setting, ControllerIndex_t controllerIndex);
-void AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output);
 bool CG_ShouldUpdateViewAngles(LocalClientNum_t localClientNum);
-bool GPad_InUse(LocalClientNum_t localClientNum);
-bool Demo_IsPlaying();
 
 // ui, devgui, win32
 void UI_UpdateMouseScreenPosition(LocalClientNum_t localClientNum, int x, int y);
@@ -81,33 +77,6 @@ bool DevGui_IsActive();
 void DevGui_MouseEvent(int dx, int dy);
 void IN_SetCursorPos(int x, int y);
 void IN_ShowSystemCursor(int show);
-
-struct AimInput
-{
-	float deltaTime;
-	float pitch;
-	float pitchAxis;
-	float pitchMax;
-	float yaw;
-	float yawAxis;
-	float yawMax;
-	float forwardAxis;
-	float rightAxis;
-	bitarray<64> button_bits;
-	LocalClientNum_t localClientNum;
-	const playerState_s *ps;
-	float adsFrac;
-};
-static_assert(sizeof(void *) != 4 || sizeof(AimInput) == 0x38, "AimInput (the server's x86 layout)");
-
-struct AimOutput
-{
-	float pitch;
-	float yaw;
-	float meleeChargeYaw;
-	unsigned short meleeChargeEnt;
-	unsigned char meleeChargeDist;
-};
 
 extern const dvar_t *cl_dblTapMaxHoldTime;   // universal/dvar.cpp
 extern const dvar_t *cl_dblTapMaxDelayTime;  // universal/dvar.cpp
@@ -977,6 +946,16 @@ static inline int CL_MouseMoveToInt(float move)
 	return __builtin_ia32_cvtsd2si(v);
 }
 
+// The Store build's compiler (/fp:fast) rewrote two of CL_MouseMove's comparisons, which only changes what a NaN
+// does: the linked view's turn cap (a NaN cap becomes 360) and the 127 limit on the move keys (a NaN stays NaN).
+#ifdef T6_STORE
+#define MOUSE_CAP_OUT_OF_RANGE(cap) (!((cap) > 0.0f && (cap) <= 360.0f))
+#define MOUSE_MIN_127(v) ((v) > 127.0f ? 127.0f : (v))
+#else
+#define MOUSE_CAP_OUT_OF_RANGE(cap) ((cap) <= 0.0f || 360.0f - (cap) < 0.0f)
+#define MOUSE_MIN_127(v) I_fmin((v), 127.0f)
+#endif
+
 // 004EEF00  client/cl_input.cpp:1710
 // Mouse look. The movement (CL_GetMouseMovement) is scaled by the profile's sensitivity plus cl_mouseAccel times the
 // mouse rate (counts per millisecond), and by the cgame's FOV scale. Turning with m_yaw/m_pitch degrees per count,
@@ -992,6 +971,15 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 	CL_GetMouseMovement(cl, &mx, &my);
 	if (!frame_msec)
 		return;
+#ifdef T6_STORE
+	// The Store revision prints no mouse rate, and its compiler (/fp:fast) divides the acceleration by the frame
+	// time before multiplying by the speed: (accel / frame_msec) * speed
+	float speed = sqrt_x87((x87_t)mx * mx + (x87_t)my * my);
+	float sensitivity = GamerProfile_GetFloat(PROFILE_MOUSE_SENSITIVITY,
+	                                          Com_LocalClient_GetControllerIndex(localClientNum));
+	float accelSensitivity =
+		(Dvar_GetFloat(cl_mouseAccel) / (float)frame_msec * speed + sensitivity) * cl->cgameFOVSensitivityScale;
+#else
 	float rate = (float)(sqrt_x87((x87_t)mx * mx + (x87_t)my * my) / frame_msec);
 	float sensitivity = GamerProfile_GetFloat(PROFILE_MOUSE_SENSITIVITY,
 	                                          Com_LocalClient_GetControllerIndex(localClientNum));
@@ -999,6 +987,7 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 		(float)(((x87_t)Dvar_GetFloat(cl_mouseAccel) * rate + sensitivity) * cl->cgameFOVSensitivityScale);
 	if (rate != 0.0f && Dvar_GetBool(cl_showMouseRate))
 		Com_Printf(25, "%f : %f\n", (double)rate, (double)accelSensitivity);
+#endif
 	if (cl->snap.ps.pm_flags & PMF_FROZEN)
 		return;
 	if (cl->snap.ps.weaponstate == WEAPON_DEPLOYED)
@@ -1014,7 +1003,12 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 	}
 	else
 	{
+#ifdef T6_STORE
+		// /fp:fast: a NaN counts as no movement
+		if (mx < 0.0f || mx > 0.0f || my < 0.0f || my > 0.0f)
+#else
 		if (mx != 0.0f || my != 0.0f)
+#endif
 		{
 			kbutton_t *kb = playersKb[localClientNum];
 			int yawMove = 0;
@@ -1024,13 +1018,17 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 			if (kb[KB_STRAFE].active)
 			{
 				float side = Dvar_GetFloat(m_side) * mx;
+#ifdef T6_STORE
+				cmd->rightmove = ClampChar(cmd->rightmove + (int)floorf(side + 0.5f));
+#else
 				cmd->rightmove = ClampChar(cmd->rightmove + CL_MouseMoveToInt(side));
+#endif
 			}
 			else
 			{
 				float yaw = Dvar_GetFloat(m_yaw) * mx;
 				float cap = cl->cgameMaxYawSpeed;
-				if (bLinkedView && (cap <= 0.0f || 360.0f - cap < 0.0f))
+				if (bLinkedView && MOUSE_CAP_OUT_OF_RANGE(cap))
 					cap = 360.0f;
 				if (cap > 0.0f)
 				{
@@ -1038,18 +1036,22 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 					yaw = I_fmax(-cap, I_fmin(cap, yaw));
 				}
 				cl->viewangles.y -= yaw;
-				yawMove = -(int)I_fmin(mx, 127.0f);
+				yawMove = -(int)MOUSE_MIN_127(mx);
 			}
 			if ((!kb[KB_MLOOK].active && !Dvar_GetBool(cl_freelook)) || kb[KB_STRAFE].active)
 			{
 				my = Dvar_GetFloat(m_forward) * my;
+#ifdef T6_STORE
+				cmd->forwardmove = ClampChar(cmd->forwardmove - (int)floorf(my + 0.5f));
+#else
 				cmd->forwardmove = ClampChar(cmd->forwardmove - CL_MouseMoveToInt(my));
+#endif
 			}
 			else
 			{
 				float pitch = Dvar_GetFloat(m_pitch) * my;
 				float cap = cl->cgameMaxPitchSpeed;
-				if (bLinkedView && (cap <= 0.0f || 360.0f - cap < 0.0f))
+				if (bLinkedView && MOUSE_CAP_OUT_OF_RANGE(cap))
 					cap = 360.0f;
 				if (cap > 0.0f)
 				{
@@ -1058,7 +1060,7 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 				}
 				cl->viewangles.x += pitch;
 				int sign = Dvar_GetFloat(m_pitch) > 0.0f ? 1 : -1;
-				pitchMove = (int)(I_fmin(my, 127.0f) * sign);
+				pitchMove = (int)(MOUSE_MIN_127(my) * sign);
 			}
 			cmd->pitchmove = ClampChar(cmd->pitchmove + pitchMove);
 			cmd->yawmove = ClampChar(cmd->yawmove + yawMove);

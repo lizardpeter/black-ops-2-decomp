@@ -171,11 +171,14 @@ struct clientActive_t
 	int serverKbpsCount[2];
 };
 #ifdef T6_STORE
-// t6mp_msstore, from its code: CL_KeyMove 140192D50, CL_CreateNewCommands 1401954D0
+// t6mp_msstore, from its code: CL_KeyMove 140192D50, CL_MouseMove 1401930F0, CL_CreateNewCommands 1401954D0
 static_assert(__builtin_offsetof(clientActive_t, usingAds) == 0x5C, "clientActive_t.usingAds");
 static_assert(__builtin_offsetof(clientActive_t, snap) == 0x68, "clientActive_t.snap");
 static_assert(__builtin_offsetof(clientActive_t, stanceHeld) == 0x2BE4, "clientActive_t.stanceHeld");
 static_assert(__builtin_offsetof(clientActive_t, switchingToInventory) == 0x2BFC, "clientActive_t.switchingToInventory");
+static_assert(__builtin_offsetof(clientActive_t, cgameFOVSensitivityScale) == 0x2C0C, "clientActive_t.cgameFOVSensitivityScale");
+static_assert(__builtin_offsetof(clientActive_t, cgameMaxYawSpeed) == 0x2C14, "clientActive_t.cgameMaxYawSpeed");
+static_assert(__builtin_offsetof(clientActive_t, viewangles) == 0x2CA4, "clientActive_t.viewangles");
 static_assert(__builtin_offsetof(clientActive_t, cmds) == 0x42CC4, "clientActive_t.cmds");
 static_assert(__builtin_offsetof(clientActive_t, cmdNumber) == 0x44AC4, "clientActive_t.cmdNumber");
 static_assert(__builtin_offsetof(clientActive_t, useTime) == 0x8A3D8, "clientActive_t.useTime");
