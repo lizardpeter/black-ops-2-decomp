@@ -72,9 +72,18 @@ jobs:
       - name: Install llvm-pdbutil and resymc
         if: steps.has.outputs.pdb == 'yes'
         run: |
-          sudo apt-get install -y -q llvm >/dev/null
-          command -v llvm-pdbutil || sudo ln -s "$(ls /usr/bin/llvm-pdbutil-* | sort -V | tail -1)" /usr/local/bin/llvm-pdbutil
-          test -x ~/.cargo/bin/resymc || cargo install --locked --git https://github.com/ergrelet/resym --rev 5be09381 resymc
+          sudo apt-get update -q >/dev/null && sudo apt-get install -y -q llvm >/dev/null
+          command -v llvm-pdbutil || sudo ln -s "$(ls /usr/lib/llvm-*/bin/llvm-pdbutil | sort -V | tail -1)" /usr/local/bin/llvm-pdbutil
+          llvm-pdbutil --version | head -2
+          if [ ! -x ~/.cargo/bin/resymc ]; then
+            # the toolchain resymc 5be09381 is known to build with
+            rustup toolchain install 1.97.0 --profile minimal
+            if ! cargo +1.97.0 install --locked --git https://github.com/ergrelet/resym --rev 5be09381 resymc > /tmp/resymc.log 2>&1; then
+              tail -40 /tmp/resymc.log
+              echo "::error::resymc build failed: $(grep -m3 -E '^error' /tmp/resymc.log | tr '\n' ' ' | cut -c1-900)"
+              exit 1
+            fi
+          fi
       - name: Extract
         if: steps.has.outputs.pdb == 'yes'
         run: |
@@ -92,7 +101,8 @@ jobs:
 
   analyze:
     needs: [setup, symbols]
-    if: ${{ needs.setup.outputs.builds != '[]' }}
+    # one build's symbol failure must not hold back the others; a PDB build then runs without its locals
+    if: ${{ !cancelled() && needs.setup.outputs.builds != '[]' }}
     runs-on: ubuntu-latest
     timeout-minutes: 350
     strategy:
