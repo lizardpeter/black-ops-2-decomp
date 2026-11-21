@@ -126,7 +126,16 @@ jobs:
         continue-on-error: true  # builds without a PDB have none
         with: { name: "symbols-${{ matrix.build }}", path: "analysis/${{ matrix.build }}" }
       - name: Fetch originals
-        run: python3 tools/fetch_originals.py ${{ matrix.build }} /tmp/in
+        # a blind build (ghidra_pdb = false) gets its exe only: Ghidra's PDB analyzer searches the import folder by
+        # the CodeView name on its own, so a PDB fetched beside the exe would be loaded anyway
+        run: |
+          usepdb=$(python3 -c "import tomllib; b=[b for b in tomllib.load(open('target.toml','rb'))['build'] if b['id']=='${{ matrix.build }}'][0]; print(b.get('ghidra_pdb', True))")
+          if [ "$usepdb" = "True" ]; then
+            python3 tools/fetch_originals.py ${{ matrix.build }} /tmp/in
+          else
+            python3 tools/fetch_originals.py ${{ matrix.build }} /tmp/in --only exe
+          fi
+          ls -l /tmp/in
       - name: Analyze (with the original PDB when the build has one) and export
         timeout-minutes: 330  # a Ghidra that hit an error can hang instead of exiting; a full server PDB takes hours of type rebuilding
         run: |
