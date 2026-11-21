@@ -8,7 +8,10 @@ Generated output only. Re-running on the same PDB/MAP reproduces identical files
 Pass `-` for a file the build doesn't have (e.g. a server build with an EXE and MAP but no PDB).
 
 Needs llvm-pdbutil (apt install llvm) and resymc
-(cargo install --locked --git https://github.com/ergrelet/resym --rev 5be09381 resymc).
+built from resym 5be09381 with tools/pdb/resym-depth-map.patch applied (upstream's type depth pass is exponential on
+large PDBs and never finishes on the T6 servers):
+    git clone https://github.com/ergrelet/resym && git -C resym checkout 5be09381
+    git -C resym apply tools/pdb/resym-depth-map.patch && cargo install --locked --path resym/resymc
 
 Writes:
   analysis/<build>/pdb/sections.tsv    section index, name, virtual address, virtual size

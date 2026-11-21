@@ -34,6 +34,18 @@ Results are recorded here once the Ghidra pipeline has published both builds. Th
 architecture, so it measures the method, not the harder x86-to-x64 case; the Store matches also get the call-graph
 consistency estimate and a manual review, as in Ghosts.
 
+### CoDMPServer_PC → t6mp_msstore (x86 → x64)
+
+First run, on the Ghidra analyses published at 5d2be62: **2,973 of 18,495 target functions matched (16.1%)** in six
+propagation rounds. By method: string 1,566, named 440, callee 498, caller 461, constant 8. A random sample of each
+method reviewed by hand was consistent: unique error strings (`GScr_SetEMPJammed`, `Demo_ReadFooter`), registrations
+(`UI_ChangeMenuOpenSlideDirection_f` under `changeMenuOpenSlideDirection`), OpenSSL's SHA-512 block function by its
+round constants. Few constant matches is expected: x64 code builds many values differently and the 2024 build
+changed data layouts.
+
+These are generated identifications, not records: they become `records/names.tsv` rows (and `named` in STATUS.md)
+once reviewed, starting with the subsystems being reconstructed.
+
 ## tools/match/behaviour.py: small leaves by behaviour
 
 Short leaf functions often have no string, constant or call edge to anchor them. For those already reconstructed,

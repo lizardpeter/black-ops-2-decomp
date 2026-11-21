@@ -1,0 +1,47 @@
+# resym 5be09381: compute_type_depth_map revisits a type on every path through the by-value dependency graph,
+# exponential in time and memory on large PDBs (the T6 server PDBs never finish). Revisit only when a path makes
+# a type deeper; same depths, linear in practice. Applied when building resymc (.github/workflows/ghidra.yml, tools/pdb/extract.py).
+diff --git a/resym_core/src/pdb_file.rs b/resym_core/src/pdb_file.rs
+index 23675d3..033783c 100644
+--- a/resym_core/src/pdb_file.rs
++++ b/resym_core/src/pdb_file.rs
+@@ -1253,6 +1253,7 @@ fn compute_type_depth_map(
+ 
+     let mut type_depth_map: HashMap<TypeIndex, usize> =
+         HashMap::from_iter(root_types.iter().map(|elem| (*elem, 0)));
++    let max_depth = type_dependency_map.len() + root_types.len();
+     // Perform depth-first search to determine the "depth" of each type
+     let mut types_to_visit: VecDeque<(usize, TypeIndex)> =
+         VecDeque::from_iter(root_types.iter().map(|elem| (0, *elem)));
+@@ -1262,12 +1263,26 @@ fn compute_type_depth_map(
+                 // Visit child only if it's directly referenced, to avoid infinite loops
+                 if !child_is_pointer && *child_type_index != current_type_index {
+                     let current_child_depth = current_type_depth + 1;
+-                    if let Some(child_type_depth) = type_depth_map.get_mut(child_type_index) {
+-                        *child_type_depth = std::cmp::max(*child_type_depth, current_child_depth);
+-                    } else {
+-                        type_depth_map.insert(*child_type_index, current_child_depth);
++                    // Revisit a child only when this path makes it deeper. Pushing it on every visit enumerates
++                    // every path through the by-value dependency graph, which is exponential for large PDBs with
++                    // shared members. A depth beyond the number of types can only come from a cycle: stop there.
++                    if current_child_depth > max_depth {
++                        continue;
++                    }
++                    let deeper = match type_depth_map.get_mut(child_type_index) {
++                        Some(child_type_depth) if *child_type_depth >= current_child_depth => false,
++                        Some(child_type_depth) => {
++                            *child_type_depth = current_child_depth;
++                            true
++                        }
++                        None => {
++                            type_depth_map.insert(*child_type_index, current_child_depth);
++                            true
++                        }
++                    };
++                    if deeper {
++                        types_to_visit.push_back((current_child_depth, *child_type_index));
+                     }
+-                    types_to_visit.push_back((current_child_depth, *child_type_index));
+                 }
+             }
+         }

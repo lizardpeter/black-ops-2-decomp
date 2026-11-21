@@ -68,7 +68,7 @@ jobs:
         if: steps.has.outputs.pdb == 'yes'
         with:
           path: ~/.cargo/bin/resymc
-          key: resymc-5be09381-${{ runner.os }}
+          key: resymc-5be09381-${{ runner.os }}-${{ hashFiles('tools/pdb/resym-depth-map.patch') }}
       - name: Install llvm-pdbutil and resymc
         if: steps.has.outputs.pdb == 'yes'
         run: |
@@ -79,7 +79,10 @@ jobs:
             # the toolchain resymc 5be09381 is known to build with
             rustup toolchain install 1.97.0 --profile minimal
             # onig_sys (Oniguruma, C) typedefs bool, which C23-default compilers reject: build it as C17
-            if ! CFLAGS="-std=gnu17" cargo +1.97.0 install --locked --git https://github.com/ergrelet/resym --rev 5be09381 resymc > /tmp/resymc.log 2>&1; then
+            # with tools/pdb/resym-depth-map.patch: upstream's type depth pass is exponential on large PDBs
+            git clone -q https://github.com/ergrelet/resym /tmp/resym && git -C /tmp/resym checkout -q 5be09381
+            git -C /tmp/resym apply "$GITHUB_WORKSPACE/tools/pdb/resym-depth-map.patch"
+            if ! CFLAGS="-std=gnu17" cargo +1.97.0 install --locked --path /tmp/resym/resymc > /tmp/resymc.log 2>&1; then
               tail -40 /tmp/resymc.log
               echo "::error::resymc build failed: $(grep -m3 -E '^error' /tmp/resymc.log | tr '\n' ' ' | cut -c1-900)"
               exit 1
