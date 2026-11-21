@@ -129,6 +129,17 @@ def resolve_hooks(spec, build, m, recon, missing=None):
     return out
 
 
+def trap_at(fault):
+    """The faulting instruction is a hybrid-link trap (ud2) for a symbol the build doesn't identify yet."""
+    m = re.search(r"at ([0-9A-Fa-f]+)", fault)
+    if not m:
+        return False
+    try:
+        return bytes(MACHINE.mu.mem_read(int(m.group(1), 16), 2)) == b"\x0f\x0b"
+    except Exception:
+        return False
+
+
 def recon_convention(symbol, nargs):
     """The reconstruction's own convention: standard, except a __thiscall member (this in ECX)."""
     if re.search(r"@@[QAIEMU][AB]E", symbol):
@@ -152,6 +163,8 @@ def main():
     out = ROOT / "build" / build / ("enhanced" if enhanced else "")
     recon = Image(out / "recon.dll")
     m = Machine(Image(original_exe(build)), recon)
+    global MACHINE
+    MACHINE = m
     rows = symbols.read_tsv(out / "recon.symbols.tsv")
     # what the reconstruction calls in the original: a fake for a function it doesn't call in this build (code
     # compiled out for it, e.g. the server's warnings in the Store revision) can't block a case
@@ -205,6 +218,9 @@ def main():
                 continue  # the original itself crashes on this input: not a usable case
             got = m.call(target, args, case["ret"], setup, fakes, observe,
                          convention=recon_convention(r["symbol"], len(args)))
+            if isinstance(got[0], str) and "UC_ERR_INSN_INVALID" in got[0] and trap_at(got[0]):
+                verdict = "blocked: reaches a function not identified in this build yet (a trap)"
+                break
             # the hooked function, and pointer-sized arguments (q), may be reconstructed code: map them back to the
             # original's. Integers (i) are values, even when they happen to fall inside the DLL's address range.
             got_calls = [(canon.code(c[0]),) + tuple(canon.code(x) if k == "q" and isinstance(x, int) else x
@@ -219,9 +235,10 @@ def main():
                 break
         if verdict == "pass" and not used:
             verdict = f"untestable: the original faults on all {len(case['inputs'])} inputs"
-        failed += verdict != "pass"
+        failed += verdict != "pass" and not verdict.startswith("blocked")
         results.append([build, r["va"], r["symbol"], used, verdict.split("\n")[0]])
-        tag = "ok  " if verdict == "pass" else ("UNTESTABLE" if verdict.startswith("untestable") else "FAIL")
+        tag = "ok  " if verdict == "pass" else ("UNTESTABLE" if verdict.startswith("untestable") else
+                                                "blocked   " if verdict.startswith("blocked") else "FAIL")
         print(f"{tag} {r['va']} {name}  ({used} cases)" + ("" if verdict == "pass" else f"\n     {verdict}"))
 
     (out / "test-results.tsv").write_text("build\tva\tsymbol\tcases\tresult\n" +

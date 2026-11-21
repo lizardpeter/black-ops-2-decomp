@@ -69,6 +69,12 @@ revision without the servers' development output (`CL_MouseMove`'s `cl_showMouse
 `Com_Printf` calls that anchor many server functions aren't there). Hand-identified Store functions go to
 `records/names.tsv` with their evidence (structure, behaviour).
 
+The hybrid link uses a generated pair only when its method rests on the function's own content (string, named,
+constant, global: `tools/symbols.py` `ANCHORED`). Propagated pairs (callee, caller, order, votes) reach it through
+`records/names.tsv` after review: in the Store build an inlined callee leaves another function in its place, and
+propagation took `CG_AirburstLazeCancelledByMovement`'s only remaining callee for `Dvar_GetFloat`, which the Store
+inlines everywhere.
+
 These are generated identifications, not records: they become `records/names.tsv` rows (and `named` in STATUS.md)
 once reviewed, starting with the subsystems being reconstructed.
 

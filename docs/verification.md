@@ -74,7 +74,8 @@ passes when every input gives the same:
   to string literals compared as strings;
 - observed calls.
 
-Inputs on which the original itself faults are skipped. Writes are journaled and rolled back, so calls never see each
+Inputs on which the original itself faults are skipped. A reconstruction that runs into a hybrid-link trap (a
+function the build doesn't identify yet) is reported `blocked`, not failed. Writes are journaled and rolled back, so calls never see each
 other's state. A case that fakes a function the build doesn't identify yet is reported `blocked` instead of run (the
 original would call the real one); hooks on `Assert_MyHandler` are dropped for builds without asserts.
 

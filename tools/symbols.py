@@ -79,6 +79,13 @@ def resolve(build: str, sym: str):
     return hits.pop() if len(hits) == 1 else None
 
 
+# match.py methods trusted without review for linking: each rests on the function's own content (its strings,
+# registrations, constants, named globals). Call-graph propagation (callee, caller, order, votes) can't tell an
+# inlined callee from the one left in its place in a build with link-time code generation, so its pairs reach the
+# link only through records/names.tsv.
+ANCHORED = {"string", "named", "constant", "global"}
+
+
 @lru_cache(maxsize=None)
 def table(build: str) -> dict:
     """{symbol: (va, kind)} with kind 'function' or 'data'."""
@@ -103,6 +110,8 @@ def table(build: str) -> dict:
         for r in matched:
             if r["ref_build"] != ref or len(names_at.get(r["ref_va"], [])) != 1:
                 continue
+            if r["method"] not in ANCHORED:
+                continue  # a propagated pair is used once reviewed (records/names.tsv): inlining misleads it
             targets.setdefault(names_at[r["ref_va"]][0], set()).add(int(r["target_va"], 16))
         for name, vas in targets.items():
             if len(vas) == 1:
