@@ -13,6 +13,9 @@ tests/differential/test_*.py as CASES, keyed by a function's scoped plain name (
      "fakes": {"Name": fn(mu)}, "observe": {"Name": "is"}, "builds": ["CoDMPServer_PC"],
      "imports": {"winmm.dll!mixerOpen": (fn(machine, mu), nargs)}}
 
+An original with a custom calling convention (records/conventions.tsv) is called with it; the reconstruction always
+takes the standard one.
+
 A case whose `fakes` name a function the build doesn't identify yet is reported as blocked, not run. A case passes
 when, for every input, both runs return the same value (floats compared bit for bit), leave the same
 bytes in every buffer passed by pointer, write the same bytes to the images' globals, and make the same observed
@@ -26,6 +29,7 @@ did not pass. Results go to build/<build>/test-results.tsv.
 """
 import importlib.util
 import math
+import re
 import struct
 import sys
 from pathlib import Path
@@ -125,6 +129,13 @@ def resolve_hooks(spec, build, m, recon, missing=None):
     return out
 
 
+def recon_convention(symbol, nargs):
+    """The reconstruction's own convention: standard, except a __thiscall member (this in ECX)."""
+    if re.search(r"@@[QAIEMU][AB]E", symbol):
+        return ["ecx"] + ["stack"] * (nargs - 1)
+    return None
+
+
 def without_asserts(spec):
     """Hooks on Assert_MyHandler mean nothing in a build that compiled its asserts out (target.toml `asserts`)."""
     if ASSERTS or not spec:
@@ -149,12 +160,13 @@ def main():
     if not recon.x64 and all(crt):
         m.crt_thread_data([crt[0][0], crt[1][0]], crt[2][0], crt[3][0])
     canon = Canon(m, recon, recon_to_orig)
+    conventions = symbols.conventions(build)
     cases = load_cases()
 
     results, failed = [], 0
     for r in sorted(rows, key=lambda r: r["va"]):
         name = symbols.scoped_name(r["symbol"])
-        if only and only not in name:
+        if only and only not in name and only not in r["source"]:
             continue
         if r["source"].startswith("enhanced/"):
             results.append([build, r["va"], r["symbol"], 0, "patched: tests/enhanced"])
@@ -179,10 +191,11 @@ def main():
         verdict, used = "pass", 0
         for inp in case["inputs"]:
             args, setup = (inp["args"], inp.get("setup")) if isinstance(inp, dict) else (inp, None)
-            want = m.call(va, args, case["ret"], setup, fakes, observe)
+            want = m.call(va, args, case["ret"], setup, fakes, observe, convention=conventions.get(va))
             if isinstance(want[0], str) and want[0].startswith("fault"):
                 continue  # the original itself crashes on this input: not a usable case
-            got = m.call(target, args, case["ret"], setup, fakes, observe)
+            got = m.call(target, args, case["ret"], setup, fakes, observe,
+                         convention=recon_convention(r["symbol"], len(args)))
             got_calls = [tuple(canon.code(x) if isinstance(x, int) else x for x in c) for c in got[3]]
             used += 1
             ww, gw = canon.writes(want[2]), canon.writes(got[2])

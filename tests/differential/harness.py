@@ -50,6 +50,9 @@ TLS_BLOCK, TLS_SIZE = 0x00050000, 0x00040000
 GDT = 0x00090000
 STUBS, STUBS_SIZE = 0x000A0000, 0x00010000
 SCRATCH, SCRATCH_SIZE = 0x30000000, 0x00100000  # clear of every image (x86 exes span 0x00400000 up)
+# Program data the setup places outside the images (what a global pointer points to): writes here are compared, as
+# writes to the images' globals are
+OBJECTS, OBJECTS_SIZE = 0x31000000, 0x00100000
 INSTRUCTION_LIMIT = 20_000_000  # a runaway guard; -O0 reconstructions take several times the original's instructions
 MASK64 = (1 << 64) - 1
 INT_REGS64 = (X.UC_X86_REG_RCX, X.UC_X86_REG_RDX, X.UC_X86_REG_R8, X.UC_X86_REG_R9)
@@ -167,7 +170,8 @@ class Machine:
             mu.mem_map(img.base, img.size)
             mu.mem_write(img.base, img.data[:img.size])
         for va, size in ((STACK, STACK_SIZE), (HEAP, HEAP_SIZE), (SENTINEL, 0x1000), (TEB, TEB_SIZE),
-                         (TLS_BLOCK, TLS_SIZE), (STUBS, STUBS_SIZE), (SCRATCH, SCRATCH_SIZE)):
+                         (TLS_BLOCK, TLS_SIZE), (STUBS, STUBS_SIZE), (SCRATCH, SCRATCH_SIZE),
+                         (OBJECTS, OBJECTS_SIZE)):
             mu.mem_map(va, size)
         exe = images[0]
         self._tls_template = exe.tls[0] if exe.tls else b""
@@ -214,7 +218,8 @@ class Machine:
                 mu.mem_write(slot, struct.pack("<Q" if self.x64 else "<I", stub))
         mu.hook_add(UC_HOOK_CODE, self._on_stub, begin=STUBS, end=STUBS + STUBS_SIZE - 1)
         self.imports_called = []
-        self._ranges = [(img.base, img.base + img.size) for img in images] + [(TLS_BLOCK, TLS_BLOCK + TLS_SIZE)]
+        self._ranges = [(img.base, img.base + img.size) for img in images]
+        self._ranges += [(TLS_BLOCK, TLS_BLOCK + TLS_SIZE), (OBJECTS, OBJECTS + OBJECTS_SIZE)]
         self._journal, self._setup_journal = {}, {}
         mu.hook_add(UC_HOOK_MEM_WRITE, self._on_write)
         self.tsc = 0
@@ -373,14 +378,19 @@ class Machine:
             mu.reg_write(self._sp, sp + (8 if self.x64 else 4))  # cdecl / Win64: the caller pops arguments
             mu.reg_write(self._ip, ret)
 
-    def call(self, va, args, ret="int", setup=None, fakes=None, observe=None, at=None, limit=INSTRUCTION_LIMIT):
+    def call(self, va, args, ret="int", setup=None, fakes=None, observe=None, at=None, limit=INSTRUCTION_LIMIT,
+             convention=None):
         """Call the function at va. ret: int, uint, int64, uint64, bool, char, uchar, short, ushort, float, double,
         void, or cstr (a returned char pointer, compared as its string).
+        convention (x86): one entry per argument, "stack" or the register the function takes it in ("eax", "ecx",
+        "edx", "ebx", "esi", "edi", "xmm0".."xmm3"): link-time code generation gives static-looking functions custom
+        conventions. Register arguments are set after the reset; the rest are pushed as usual.
         Returns (value, [buffer contents after the call], {address: byte} written in mapped images, [observed]).
         A crash returns ("fault: ...", [], writes, observed)."""
         mu = self.mu
         mu.mem_write(HEAP, b"\0" * HEAP_SIZE)
         mu.mem_write(SCRATCH, b"\0" * SCRATCH_SIZE)
+        mu.mem_write(OBJECTS, b"\0" * OBJECTS_SIZE)
         mu.mem_write(TLS_BLOCK, self._tls_template + b"\0" * (TLS_SIZE - len(self._tls_template)))
         self._setup_journal, self.imports_called, self._stub_fault = {}, [], None
         self.tsc = 0x100000000
@@ -401,6 +411,11 @@ class Machine:
             else:
                 slots.append(("int", a))
         self._journal = {}
+        in_regs = []
+        if convention:
+            assert not self.x64 and len(convention) == len(slots), "convention: one entry per argument (x86)"
+            in_regs = [(where, slot) for where, slot in zip(convention, slots) if where != "stack"]
+            slots = [slot for where, slot in zip(convention, slots) if where == "stack"]
         if self.x64:
             for r in RESET64:
                 mu.reg_write(r, 0)
@@ -442,6 +457,12 @@ class Machine:
             mu.reg_write(X.UC_X86_REG_FPCW, 0x27F)
             mu.reg_write(X.UC_X86_REG_FPSW, 0)
             mu.reg_write(X.UC_X86_REG_FPTAG, 0xFFFF)
+            for where, (k, v) in in_regs:
+                if where.startswith("xmm"):
+                    bits = struct.unpack("<I", struct.pack("<f", v))[0] if k == "f" else v & 0xFFFFFFFF
+                    mu.reg_write(getattr(X, f"UC_X86_REG_{where.upper()}"), bits)
+                else:
+                    mu.reg_write(getattr(X, f"UC_X86_REG_{where.upper()}"), v & 0xFFFFFFFF)
         mu.reg_write(X.UC_X86_REG_MXCSR, 0x1F80)
         try:
             mu.emu_start(va, SENTINEL, count=limit)

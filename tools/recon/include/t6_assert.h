@@ -52,6 +52,15 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #define assertfail_at(line, msg) \
 	do { if (!Assert_MyHandler(T6_ASSERT_FILE, line, 0, "", msg)) __debugbreak(); } while (0)
 
+// Assert_MyHandler(file, line, 0, "(expr)", "") and Assert_MyHandler(file, line, 0, "(expr)", fmt, args...), and
+// assert_at with an assert type, naming the file explicitly or not
+#define assert_in(file, line, expr) \
+	do { if (!(expr) && !Assert_MyHandler(file, line, 0, "(" #expr ")", "")) __debugbreak(); } while (0)
+#define assertf_in(file, line, expr, fmt, ...) \
+	do { if (!(expr) && !Assert_MyHandler(file, line, 0, "(" #expr ")", fmt, __VA_ARGS__)) __debugbreak(); } while (0)
+#define assertt_at(line, type, expr) \
+	do { if (!(expr) && !Assert_MyHandler(T6_ASSERT_FILE, line, type, "(" #expr ")", "")) __debugbreak(); } while (0)
+
 // Assert_MyHandler(file, line, 0, "(expr)", "%s", "expr"), naming the file explicitly: headers (qcommon/bitarray.h)
 #define assertexpr_in(file, line, expr) \
 	do { if (!(expr) && !Assert_MyHandler(file, line, 0, "(" #expr ")", "%s", #expr)) __debugbreak(); } while (0)
@@ -66,6 +75,9 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #undef assertf_at
 #undef assertfail_at
 #undef assertexpr_in
+#undef assert_in
+#undef assertf_in
+#undef assertt_at
 #define iassert_at(...) ((void)0)
 #define iassertmsg_at(...) ((void)0)
 #define vassert_at(...) ((void)0)
@@ -75,4 +87,7 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #define assertf_at(...) ((void)0)
 #define assertfail_at(...) ((void)0)
 #define assertexpr_in(...) ((void)0)
+#define assert_in(...) ((void)0)
+#define assertf_in(...) ((void)0)
+#define assertt_at(...) ((void)0)
 #endif

@@ -1,5 +1,46 @@
 build	va	status	src	note
-CoDMPServer_PC	00407EE0	compiles	include/qcommon/bitarray.h	bitarray<64>::testBit; __thiscall, which the harness doesn't call yet: covered through CMD_GetAnalogButtonValue
+CoDMPServer_PC	00407EE0	matches	include/qcommon/bitarray.h	bitarray<64>::testBit (__thiscall); tests/differential/test_cl_input.py
+CoDMPServer_PC	0041D9A0	matches	include/client/client.h	CL_GetLocalClientConnectionState; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA830	matches	src/client/cl_input.cpp	CL_LeanCount_Reset; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA840	matches	src/client/cl_input.cpp	CL_LeanCount_Increment; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA860	matches	src/client/cl_input.cpp	CL_LeanCount_ShouldIncrementStat; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA8A0	matches	src/client/cl_input.cpp	CG_IsSprinting; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA8E0	matches	src/client/cl_input.cpp	IN_KeyDown; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA930	matches	src/client/cl_input.cpp	IN_KeyUp; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EA990	matches	src/client/cl_input.cpp	IN_KeyDownCheat; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAA30	matches	src/client/cl_input.cpp	IN_KeyUpCheat; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAAB0	matches	src/client/cl_input.cpp	CL_KeyState; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAB50	matches	src/client/cl_input.cpp	CL_SetStance; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAB90	matches	src/client/cl_input.cpp	CL_ToggleStance; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAC10	matches	src/client/cl_input.cpp	IN_UpDown; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAC90	matches	src/client/cl_input.cpp	IN_UpUp; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EACB0	matches	src/client/cl_input.cpp	IN_SpeedDown; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EACD0	matches	src/client/cl_input.cpp	IN_SpeedUp; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EACF0	matches	src/client/cl_input.cpp	IN_UpdateUseCount; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAD80	matches	src/client/cl_input.cpp	IN_UpdateUseHeld; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAE10	matches	src/client/cl_input.cpp	IN_Activate_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAE80	matches	src/client/cl_input.cpp	IN_Activate_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAF00	matches	src/client/cl_input.cpp	IN_Reload_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAF70	matches	src/client/cl_input.cpp	IN_Reload_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EAFF0	matches	src/client/cl_input.cpp	IN_UseReload_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB060	matches	src/client/cl_input.cpp	IN_UseReload_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB0E0	matches	src/client/cl_input.cpp	IN_Attack_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB280	matches	src/client/cl_input.cpp	IN_Attack_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB370	matches	src/client/cl_input.cpp	IN_Melee_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB3D0	matches	src/client/cl_input.cpp	IN_Melee_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB440	matches	src/client/cl_input.cpp	IN_Frag_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB4A0	matches	src/client/cl_input.cpp	IN_Frag_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB510	matches	src/client/cl_input.cpp	IN_Smoke_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB570	matches	src/client/cl_input.cpp	IN_Smoke_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB5E0	matches	src/client/cl_input.cpp	IN_Stance_Down; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB730	matches	src/client/cl_input.cpp	IN_Stance_Up; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB880	matches	src/client/cl_input.cpp	IN_WeapNextInventoryDown; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB8D0	matches	src/client/cl_input.cpp	IN_WeapNextInventoryUp; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB930	matches	src/client/cl_input.cpp	IN_ToggleADS; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EB9B0	matches	src/client/cl_input.cpp	IN_CenterView; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EBA10	matches	src/client/cl_input.cpp	IN_LowerStance; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EBA90	matches	src/client/cl_input.cpp	IN_RaiseStance; tests/differential/test_cl_input.py
+CoDMPServer_PC	004EBB10	matches	src/client/cl_input.cpp	IN_IsTalkKeyHeld; tests/differential/test_cl_input.py
 CoDMPServer_PC	0055DF60	matches	src/win32/win_voice.cpp	Voice_GetLocalVoiceData; tests/differential/test_win_voice.py
 CoDMPServer_PC	00761340	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
 CoDMPServer_PC	00761360	matches	src/universal/com_math.cpp	ClampShort; tests/differential/test_universal.py

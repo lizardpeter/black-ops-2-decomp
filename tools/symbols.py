@@ -111,3 +111,15 @@ def table(build: str) -> dict:
         if r["build"] == build:
             out[r["symbol"] or r["name"]] = (int(r["va"], 16), r["kind"])
     return out
+
+
+@lru_cache(maxsize=None)
+def conventions(build: str) -> dict:
+    """{va: [location per argument]} for the build's functions with a custom calling convention
+    (records/conventions.tsv): link-time code generation passes some arguments of functions it sees all callers of in
+    registers. A location is "stack" or a register ("eax", "ecx", "edx", "ebx", "esi", "edi", "xmm0".."xmm3")."""
+    path = ROOT / "records" / "conventions.tsv"
+    if not path.exists():
+        return {}
+    return {int(r["va"], 16): [a.strip() for a in r["args"].split(",")] if r["args"] else []
+            for r in read_tsv(path) if r["build"] == build}

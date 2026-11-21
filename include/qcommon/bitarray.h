@@ -3,6 +3,8 @@
 
 #include "t6_assert.h"
 
+#define BITARRAY_H "c:\\t6\\code\\src\\universal\\../qcommon/bitarray.h"  // as universal/q_shared.h includes it
+
 template <int BIT_COUNT>
 class bitarray
 {
@@ -13,7 +15,13 @@ public:
 
 	bool testBit(unsigned int pos) const
 	{
-		assertexpr_in(T6_ASSERT_DIR "../qcommon/bitarray.h", 109, pos < BIT_COUNT);
+		assertexpr_in(BITARRAY_H, 109, pos < BIT_COUNT);
 		return (array[pos / BITS_PER_WORD] & (0x80000000 >> (pos & (BITS_PER_WORD - 1)))) != 0;
+	}
+
+	void resetBit(unsigned int pos)
+	{
+		assert_in(BITARRAY_H, 136, pos < BIT_COUNT);
+		array[pos / BITS_PER_WORD] &= ~(0x80000000 >> (pos & (BITS_PER_WORD - 1)));
 	}
 };

@@ -128,6 +128,26 @@ def exe_relative_asm(asm_path, exe_data):
     return n
 
 
+def adapter(q, va, locations):
+    """x86 thunk into an original with a custom calling convention (records/conventions.tsv): the reconstruction calls
+    it with cdecl, so copy each argument from the caller's frame into its register or onto a new frame. EBX, ESI and
+    EDI are saved around the call (they may carry arguments, and the callee's convention may not preserve them).
+    Arguments are 32-bit."""
+    asm = [f"\t.globl {q}", f"{q}:", "\tpushl %ebp", "\tmovl %esp, %ebp", "\tpushl %ebx", "\tpushl %esi",
+           "\tpushl %edi"]
+    for i in reversed([i for i, loc in enumerate(locations) if loc == "stack"]):
+        asm.append(f"\tpushl {8 + 4 * i}(%ebp)")
+    for i, loc in enumerate(locations):
+        if loc.startswith("xmm"):
+            asm.append(f"\tmovss {8 + 4 * i}(%ebp), %{loc}")
+        elif loc != "stack":
+            asm.append(f"\tmovl {8 + 4 * i}(%ebp), %{loc}")
+    label = f"t6_adapter_ret_{va:08X}"
+    asm += [f"\tpushl ${label}", f"\tpushl ${va:#x}", "\tretl", f"{label}:", "\tleal -12(%ebp), %esp",
+            "\tpopl %edi", "\tpopl %esi", "\tpopl %ebx", "\tpopl %ebp", "\tretl"]
+    return asm
+
+
 def import_slots(pe):
     """{import name: IAT slot va} of the exe: the Store build links the CRT dynamically."""
     import pefile
@@ -234,6 +254,7 @@ def main():
     asm = ["\t.text"]
     rewritten, slots_used = 0, 0
     if arch == "x86":
+        conventions = symbols.conventions(build)
         missing = [u for u in undefined if not where(u)]
         if missing and reference:
             sys.exit(f"reconstruction uses symbols {build} does not have:\n  " + "\n  ".join(missing))
@@ -244,7 +265,9 @@ def main():
                 hybrid.append(f"{u}\tunresolved\t")
                 continue
             va, kind = where(u)
-            if kind == "function":
+            if kind == "function" and va in conventions:
+                asm += adapter(q, va, conventions[va])
+            elif kind == "function":
                 asm += [f"\t.globl {q}", f"{q}:", f"\tpushl ${va:#x}", "\tretl"]
             else:
                 asm += [f"\t.globl {q}", f"\t.set {q}, {va:#x}"]

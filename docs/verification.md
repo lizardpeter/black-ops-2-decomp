@@ -41,8 +41,8 @@ Build environment (`tools/recon/`), not game source:
 - `t6_assert.h`: one macro per argument shape the original's asserts take (the line is the original's). Only builds
   with `asserts = true` in `target.toml` keep them (CoDMPServer_PC, the only one whose exe holds the assert source
   paths); for the others `build_recon.py` defines `T6_NO_ASSERTS` and they compile away, expression and all, as in
-  the retail and ship builds. A header's asserts name it as the including file saw it, so each `.cpp` defines
-  `T6_ASSERT_DIR` before its includes.
+  the retail and ship builds. A header's asserts name it as the including file saw it (`client_mp\../client/client.h`),
+  which is the same for every copy of a header function, so headers write that path out (`assert_in`, `assertf_in`).
 - `t6_compiler.h`: `X87_MATH` for a function VC100 kept on the x87 stack (excess precision), `T6_X87_COPY`.
 - Minimal `string.h` (`strcpy` / `strcat` as VC100's inline forward-copy expansions: the servers have no
   out-of-line copy), `stdio.h`, `stdlib.h`, `ctype.h`, `setjmp.h`, `windows.h`.
@@ -53,9 +53,16 @@ unrounded in ST0, so an `X87_MATH` function computes its result in the block tha
 `UnGetLeanFraction`, `CMD_GetAnalogButtonValue`). Likewise a store the original's optimiser removed is left out when
 keeping it would change behaviour (q_shared.cpp `Info_RemoveKey_Big`: the dead value copy would overflow the stack).
 
+Custom calling conventions: the server's link-time code generation passed many functions' arguments in registers
+(EAX, ECX, EDX, ESI, EDI, XMM0) instead of on the stack. `records/conventions.tsv` (authored) lists them per build:
+each argument's register or `stack`, with the evidence from the disassembly. `tools/conventions.py` helps find them:
+it computes each function's live-in registers into `analysis/<build>/conventions.tsv`. The reconstruction keeps the
+standard convention, so `build_recon.py` reaches such an original through an adapter thunk (saves EBX/ESI/EDI, loads
+the register arguments, pushes the stack ones, calls, restores), and the tests call the original with its convention.
+
 ## matches: differential tests
 
-`tests/differential/run.py --build <id> [--check-records] [-k name]` maps the original exe and the build's
+`tests/differential/run.py --build <id> [--check-records] [-k text]` (text in the function's name or source file) maps the original exe and the build's
 `recon.dll` into one Unicorn machine (`harness.py`) and runs each exported function and its original on the same
 inputs. Cases live in `test_*.py` as `CASES`, keyed by scoped plain name, so one case serves every build. A case
 passes when every input gives the same:
@@ -80,6 +87,10 @@ Harness specifics:
 - **CRT per-thread data (x86 with a MAP):** VC100's CRT builds it on first use through FLS/TLS imports the harness
   doesn't model, so `_getptd` and `_getptd_noexit` return one ready `_tiddata` with the process's default locale
   (`Machine.crt_thread_data`). `_vsnprintf` needs it to format numbers.
+- **Program objects:** data a global pointer points to (the heap-allocated `clients` array) goes in the `OBJECTS`
+  region, whose writes are compared like the images' globals.
+- **Conventions:** originals in `records/conventions.tsv` are called with their registers; reconstructed `__thiscall`
+  members get `this` in ECX.
 - **Standing fakes:** `Machine.provide(va, fn)` replaces a function in every call; a case's `fakes` apply to it alone.
 - **Instruction cap:** 20 million per call. It's a runaway guard, and `-O0` reconstructions take several times the
   original's instructions.

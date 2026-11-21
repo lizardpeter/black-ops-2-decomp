@@ -36,6 +36,7 @@ enum ClientNum_t
 LocalClientNum_t Com_ControllerIndex_GetLocalClientNum(ControllerIndex_t controllerIndex);
 
 // common.cpp
+extern int com_frameTime;
 void Com_Error(errorParm_t code, const char *fmt, ...);
 void Com_Printf(int channel, const char *fmt, ...);
 void Com_PrintError(int channel, const char *fmt, ...);
@@ -44,6 +45,7 @@ void Com_PrintError(int channel, const char *fmt, ...);
 bool Com_IsClientConsole();
 
 // cmd.cpp
+const char *Cmd_Argv(int argIndex);
 struct itemDef_s;
 
 struct CmdArgs

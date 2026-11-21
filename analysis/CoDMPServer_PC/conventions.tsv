@@ -1,0 +1,72 @@
+va	name	live_in	stack_bytes
+004EA830	CL_LeanCount_Reset		0
+004EA840	CL_LeanCount_Increment		0
+004EA860	CL_LeanCount_ShouldIncrementStat		0
+004EA8A0	CG_IsSprinting	eax	0
+004EA8E0	IN_KeyDown	eax,ecx,xmm0	4
+004EA930	IN_KeyUp	eax,edx	4
+004EA990	IN_KeyDownCheat	edi,esi	0
+004EAA30	IN_KeyUpCheat	esi	0
+004EAAB0	CL_KeyState	eax,ecx	0
+004EAB50	CL_SetStance		8
+004EAB90	CL_ToggleStance	eax,esi	0
+004EAC10	IN_UpDown		0
+004EAC90	IN_UpUp		0
+004EACB0	IN_SpeedDown		0
+004EACD0	IN_SpeedUp		0
+004EACF0	IN_UpdateUseCount		4
+004EAD80	IN_UpdateUseHeld		4
+004EAE10	IN_Activate_Down	eax,edi	8
+004EAE80	IN_Activate_Up	eax,edi	4
+004EAF00	IN_Reload_Down	eax,edi	8
+004EAF70	IN_Reload_Up	eax,edi	4
+004EAFF0	IN_UseReload_Down	eax,edi	8
+004EB060	IN_UseReload_Up	eax,edi	4
+004EB0E0	IN_Attack_Down	eax,ecx	12
+004EB280	IN_Attack_Up	eax,edx	4
+004EB370	IN_Melee_Down	eax,edx,xmm0	4
+004EB3D0	IN_Melee_Up	eax,edx	4
+004EB440	IN_Frag_Down	eax,edx,xmm0	4
+004EB4A0	IN_Frag_Up	eax,edx	4
+004EB510	IN_Smoke_Down	eax,edx,xmm0	4
+004EB570	IN_Smoke_Up	eax,edx	4
+004EB5E0	IN_Stance_Down		16
+004EB730	IN_Stance_Up		12
+004EB880	IN_WeapNextInventoryDown	esi	0
+004EB8D0	IN_WeapNextInventoryUp	esi	0
+004EB930	IN_ToggleADS	esi	0
+004EB9B0	IN_CenterView	esi	0
+004EBA10	IN_LowerStance		0
+004EBA90	IN_RaiseStance		0
+004EBB10	IN_IsTalkKeyHeld		0
+004EBB20	CL_AdjustAngles	eax	0
+004EBC70	CL_StanceButtonUpdate	eax	0
+004EBD70	CL_GetMouseMovement		12
+004EBE80	SetMeleeChargeCmd	edi,esi	0
+004EBEE0	CL_SetCursorPos		0
+004EBEF0	CL_ShowSystemCursor		0
+004EBF00	CL_CopyDamageKickAngles		8
+004EBF80	CL_ReadyToSendPacket	edi	0
+004EC0A0	CL_SendCmd		4
+004EC0C0	CL_InitInput		0
+004EC1A0	CL_ShutdownInput		0
+004EC580	CL_ClearKeys		4
+004EC5B0	CL_ExecBinding		16
+004ED4F0	CL_SpectatorInput	eax,ecx,esi	0
+004ED6F0	CL_TranslateSpecialStateButton	ecx	8
+004ED7C0	bitarray<64>::resetBit	ecx	4
+004ED810	CL_UpdateAirburstMarkDistance	ecx,edi	28
+004ED8E0	CL_AddCurrentStanceToCmd	eax,esi	0
+004ED970	CL_WeapNextButtonUpdate	esi	4
+004EDA00	CL_KeyMove		8
+004EDC60	CL_MouseEvent		20
+004EDD40	CL_UpdateCmdButton		20
+004EDE50	CL_CmdButtons	eax	4
+004EE1F0	CG_HandleLocationSelectionInput	ecx	4
+004EE750	CL_HandleSpectatorInput	edi	4
+004EEAC0	CL_HandleSpecialStateInput		8
+004EEB30	CL_GamepadMove	ecx	8
+004EEF00	CL_MouseMove		12
+004EF530	CL_CreateCmd	ecx,edi	0
+004EF7A0	CL_CreateNewCommands	eax	0
+004EF8C0	CL_Input		4

@@ -1,0 +1,28 @@
+build	va	function	args	evidence
+CoDMPServer_PC	004EA8A0	CG_IsSprinting	eax	live-in eax (tools/conventions.py); pushed as CG_GetPredictedPlayerState's argument
+CoDMPServer_PC	004EA8E0	IN_KeyDown	eax,ecx,stack,xmm0	b in EAX, k in ECX ([EAX], compared with ECX), time at [EBP+8], value stored from XMM0 to b->val
+CoDMPServer_PC	004EA930	IN_KeyUp	eax,edx,stack	b in EAX, k compared in EDX, time at [EBP+8]
+CoDMPServer_PC	004EA990	IN_KeyDownCheat	esi	b in ESI (IN_UpDown loads it before the call)
+CoDMPServer_PC	004EAA30	IN_KeyUpCheat	esi	b in ESI (IN_UpUp loads it before each call)
+CoDMPServer_PC	004EAAB0	CL_KeyState	eax	key in EAX
+CoDMPServer_PC	004EAB90	CL_ToggleStance	esi,eax	localClientNum in ESI (scaled by sizeof playersKb[0]), stance in EAX (moved to EDI)
+CoDMPServer_PC	004EAE10	IN_Activate_Down	eax,edi,stack,stack	localClientNum in EAX, key in EDI, time at [EBP+8], value at [EBP+0xC]
+CoDMPServer_PC	004EAE80	IN_Activate_Up	eax,edi,stack	as IN_Activate_Down
+CoDMPServer_PC	004EAF00	IN_Reload_Down	eax,edi,stack,stack	as IN_Activate_Down
+CoDMPServer_PC	004EAF70	IN_Reload_Up	eax,edi,stack	as IN_Activate_Up
+CoDMPServer_PC	004EAFF0	IN_UseReload_Down	eax,edi,stack,stack	as IN_Activate_Down
+CoDMPServer_PC	004EB060	IN_UseReload_Up	eax,edi,stack	as IN_Activate_Up
+CoDMPServer_PC	004EB0E0	IN_Attack_Down	eax,stack,stack,stack	localClientNum in EAX (moved to ESI); key, time, value at [EBP+8], [EBP+0xC], [EBP+0x10]
+CoDMPServer_PC	004EB280	IN_Attack_Up	eax,edx,stack	localClientNum in EAX, key compared in EDX, time at [EBP+8]
+CoDMPServer_PC	004EB370	IN_Melee_Down	eax,edx,stack,xmm0	IN_KeyDown inlined: localClientNum in EAX, key in EDX, time at [EBP+8], value in XMM0
+CoDMPServer_PC	004EB3D0	IN_Melee_Up	eax,edx,stack	IN_KeyUp inlined: localClientNum in EAX, key in EDX, time at [EBP+8]
+CoDMPServer_PC	004EB440	IN_Frag_Down	eax,edx,stack,xmm0	as IN_Melee_Down
+CoDMPServer_PC	004EB4A0	IN_Frag_Up	eax,edx,stack	as IN_Melee_Up
+CoDMPServer_PC	004EB510	IN_Smoke_Down	eax,edx,stack,xmm0	as IN_Melee_Down
+CoDMPServer_PC	004EB570	IN_Smoke_Up	eax,edx,stack	as IN_Melee_Up
+CoDMPServer_PC	004EB880	IN_WeapNextInventoryDown	esi	localClientNum in ESI (TEST ESI,ESI before the assert)
+CoDMPServer_PC	004EB8D0	IN_WeapNextInventoryUp	esi	as IN_WeapNextInventoryDown
+CoDMPServer_PC	004EB930	IN_ToggleADS	esi	as IN_WeapNextInventoryDown
+CoDMPServer_PC	004EB9B0	IN_CenterView	esi	as IN_WeapNextInventoryDown
+CoDMPServer_PC	004ED7C0	resetBit@?$bitarray@$0EA	ecx,stack	__thiscall: this in ECX, pos at [ESP+4]
+CoDMPServer_PC	00407EE0	testBit@?$bitarray@$0EA	ecx,stack	__thiscall: this in ECX, pos at [ESP+4]
