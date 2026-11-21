@@ -11,6 +11,11 @@ decompiled first. Items marked **open** still need a decision. Fixes to original
   cursor centering or `ClipCursor` box. The original moves the Windows cursor and reads it back
   (win32 input: `IN_MouseMove` and friends), which loses, clamps and accelerates counts. The menus keep an absolute
   cursor.
+- **No acceleration, no smoothing.** Rotation is exactly counts × degrees per count, nothing else. Raw input already
+  bypasses Windows' pointer acceleration ("Enhance pointer precision"), which the original's cursor reading picks
+  up. In the game, `CL_MouseMove`'s `cl_mouseAccel` term (sensitivity + accel × counts per millisecond) and
+  `CL_GetMouseMovement`'s `m_filter` (averaging this frame with the last, half a frame of delay on average) are
+  removed from the enhanced code paths, not just defaulted to off.
 - **High polling rates, mice and keyboards.** Drain the whole raw-input buffer every frame (8 kHz mice deliver
   several events per millisecond). Keyboard events come through raw input too, so short presses between frames
   aren't lost.
