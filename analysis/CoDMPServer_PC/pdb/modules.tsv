@@ -1053,7 +1053,7 @@ module	obj	lib	source
 1051	obj/t6/codmpRelease DedicatedServer - PC/aim_assist.obj		aim_assist/aim_assist.cpp
 1052	obj/t6/codmpRelease DedicatedServer - PC/md5.obj		<external>/t6/code/common/md5.cpp
 1053	<external>/t6/sdk/nvidia/txaa/txaa.win32.lib		
-1054	<external>/_out/Windows/NDA-developer/x86/nvlink_gen.obj	<external>/t6/sdk/nvidia/nvsdk/lib/nvapi.lib	aim_assist/aim_assist.cpp
+1054	<external>/_out/Windows/NDA-developer/x86/nvlink_gen.obj	<external>/t6/sdk/nvidia/nvsdk/lib/nvapi.lib	<external>/dvs/p4/build/sw/rel/gpu_drv/r304/r304_00/drivers/nvapi/sdk/_out/windows/nda-developer/x86/nvlink_gen.cpp
 1055	<external>/Import:steam_api.dll	<external>/t6/sdk/Steamworks/sdk-1.20/redistributable_bin/steam_api.lib	
 1056	<external>/steam_api.dll	<external>/t6/sdk/Steamworks/sdk-1.20/redistributable_bin/steam_api.lib	
 1057	<external>/Import:WINMM.dll	<external>/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/winmm.lib	

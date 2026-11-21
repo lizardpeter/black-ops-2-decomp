@@ -974,12 +974,12 @@ void __cdecl VEH_SetPosition(gentity_t *ent,vec3_t *origin,vec3_t *vel,vec3_t *a
 
 // 00646350  VEH_DObjHasRequiredTags  (game/g_vehicle.cpp:723)
 
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 bool __cdecl VEH_DObjHasRequiredTags(gentity_t *ent,int param_2)
 
@@ -4337,8 +4337,8 @@ LAB_0064aed3:
 /* WARNING: Removing unreachable block (ram,0x00653a4d) */
 /* WARNING: Removing unreachable block (ram,0x00653a6f) */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
-/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
@@ -5714,8 +5714,8 @@ VEH_UpdateAvoidance(vec3_t *goal,vec3_t *radius,float height,float param_4,vec3_
 // 00655780  VEH_UpdatePathPosition  (game/g_vehicle.cpp:4077)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
+/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
@@ -11492,12 +11492,12 @@ LAB_00650410:
 // 00650440  VEH_GetSeatToEnter  (game/g_vehicle.cpp:8047)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 int __cdecl VEH_GetSeatToEnter(gentity_t *ent,gentity_t *player,bool scriptUse,int *entryPoint)
 
@@ -13246,12 +13246,12 @@ Scr_Vehicle_Pain(gentity_t *pSelf,gentity_t *pAttacker,int damage,vec3_t *point,
 // 006511B0  Scr_Vehicle_Touch  (game/g_vehicle.cpp:9648)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "team_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 void __cdecl Scr_Vehicle_Touch(gentity_t *pSelf,gentity_t *pOther,int bTouched)
 

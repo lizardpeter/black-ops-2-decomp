@@ -306,8 +306,8 @@ void __cdecl CG_InitRangeFinderParameters(LocalClientNum_t localClientNum)
 // 004CB7C0  CG_DrawFhj18HUD  (cgame/cg_weapon_attachments.cpp:251)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */

@@ -1802,10 +1802,10 @@ void __cdecl CG_Player(LocalClientNum_t localClientNum,centity_t *cent)
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
-/* WARNING: Enum "eAttachment": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
+/* WARNING: Enum "eAttachment": Some values do not have unique names */
 
 void __cdecl CG_Corpse(LocalClientNum_t localClientNum,centity_t *cent)
 

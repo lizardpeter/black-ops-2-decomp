@@ -963,8 +963,8 @@ ActiveRumble * __cdecl NextAvailableRumble(cg_t *cgameGlob,ActiveRumble *arArray
 
 // 00486670  PlayRumbleInternal  (cgame/cg_rumble.cpp:741)
 
-/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */

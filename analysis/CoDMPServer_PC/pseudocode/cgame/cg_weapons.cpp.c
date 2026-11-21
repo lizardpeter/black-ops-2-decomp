@@ -969,8 +969,8 @@ EnsureValidLeftAnim(LocalClientNum_t localClientNum,DObj *obj,ViewModelInfo *vie
 
 // 004D1CE0  WeaponRunXModelAnims  (cgame/cg_weapons.cpp:940)
 
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
@@ -7494,13 +7494,13 @@ CG_SetSonarAttachmentShaderConstants(LocalClientNum_t param_1,ShaderConstantSet 
 // 004E0540  CG_AddPlayerWeapon  (cgame/cg_weapons.cpp:5727)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "eAttachment": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "eAttachment": Some values do not have unique names */
 /* WARNING: Enum "eAttachmentPoint": Some values do not have unique names */
 
 void __cdecl
@@ -9323,8 +9323,8 @@ void __cdecl CG_SwitchToLastValidPrimary(LocalClientNum_t localClientNum)
 
 // 004E11E0  CycleWeapPrimary  (cgame/cg_weapons.cpp:7662)
 
-/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */

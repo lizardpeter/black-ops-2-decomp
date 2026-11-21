@@ -1066,8 +1066,8 @@ void __cdecl CL_CM_LoadAddOnMapEnts(char *addon_mapname)
 
 // 004F06A0  CL_ShutdownAllClientsCGame  (client_mp/cl_cgame_mp.cpp:864)
 
-/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */

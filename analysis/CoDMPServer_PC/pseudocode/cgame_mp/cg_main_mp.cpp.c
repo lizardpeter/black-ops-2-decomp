@@ -1605,9 +1605,9 @@ LAB_00468234:
 // 00468250  CG_RestartSmokeGrenades  (cgame_mp/cg_main_mp.cpp:1640)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
@@ -4484,8 +4484,8 @@ LAB_0046bc09:
 
 // 0046C600  CG_Shutdown  (cgame_mp/cg_main_mp.cpp:3788)
 
-/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */

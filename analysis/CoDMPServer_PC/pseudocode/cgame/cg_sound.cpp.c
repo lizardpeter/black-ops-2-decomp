@@ -1197,11 +1197,11 @@ CG_GetLoopingSoundPosition(LocalClientNum_t localClientNum,centity_t *cent,vec3_
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
+/* WARNING: Enum "eAttachment": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
-/* WARNING: Enum "eAttachment": Some values do not have unique names */
 
 void __cdecl
 CG_UpdateLoopingFireSounds(LocalClientNum_t localClientNum,cg_t *cgameGlob,centity_t *cent)

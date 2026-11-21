@@ -3662,12 +3662,12 @@ void __cdecl GScr_GameHistoryStartMatch(scr_entref_t entref)
 
 // 00610530  GScr_GameHistoryFinishMatch  (game/g_scr_main.cpp:4389)
 
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 void __cdecl GScr_GameHistoryFinishMatch(scr_entref_t entref)
 
@@ -5964,12 +5964,12 @@ void __cdecl GScr_AddBonusCardStat(scr_entref_t entref)
 // 00610FF0  GScr_AddWeaponStat  (game/g_scr_main.cpp:6110)
 
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
-/* WARNING: Enum "loadoutClass_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
+/* WARNING: Enum "loadoutClass_t": Some values do not have unique names */
 /* WARNING: Enum "itemGroup_t": Some values do not have unique names */
 
 void __cdecl GScr_AddWeaponStat(scr_entref_t entref)
@@ -10527,12 +10527,12 @@ void __cdecl CheckTimes(float *accelTime,float decelTime,float param_3)
 // 0060DAD0  ScrCmd_PlayerLinkToBlend  (game/g_scr_main.cpp:10640)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 void __cdecl ScrCmd_PlayerLinkToBlend(scr_entref_t entref)
 

@@ -4422,9 +4422,9 @@ Con_DrawMessageWindowNewToOld
 // 004F7DD0  Con_DrawMessageWindowOldToNew  (client/cl_console.cpp:2935)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 void __cdecl
 Con_DrawMessageWindowOldToNew

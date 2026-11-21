@@ -1,26 +1,26 @@
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> JVM max heap: 13312 MB, processors: 4  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: Stack.Max Threads = 2  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Min absolute reference = 4  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Function parameter/return Pointer analysis = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Create Data from pointer = false  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: Stack.Create Local Variables = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: Decompiler Switch Analysis.Analysis Decompiler Timeout (sec) = 60  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Trust values read from writable memory = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Require pointer param data type = false  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Stored Value Pointer analysis = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: Stack = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Speculative reference max = 256  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Max Threads = 2  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> set x86 Constant Reference Analyzer.Max Threads = 1  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: Decompiler Switch Analysis = true  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Speculative reference min = 1024  
-2026-11-21 10:46:43 INFO  PrepAnalysis.java> option: Stack.Create Param Variables = false  
-2026-11-21 10:46:43 INFO  PrepPdb.java> PDB set: /tmp/in/CoDMPServer_PC.pdb  
-2026-11-21 10:52:56 INFO  ApplyPdbNames.java> PDB names: 19774 functions (0 not found), 66176 renamed, 751 locals created, 12730 locals typed, 1100 skipped  
-2026-11-21 10:53:00 INFO  ExportAll.java> exported 5000 functions  
-2026-11-21 10:53:03 INFO  ExportAll.java> exported 10000 functions  
-2026-11-21 10:53:07 INFO  ExportAll.java> exported 15000 functions  
-2026-11-21 10:53:10 INFO  ExportAll.java> exported 20000 functions  
-2026-11-21 10:53:14 INFO  ExportAll.java> exported 25000 functions  
-2026-11-21 10:53:15 INFO  ExportAll.java> functions: 27747  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> JVM max heap: 13312 MB, processors: 4  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: Stack.Max Threads = 2  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Min absolute reference = 4  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Function parameter/return Pointer analysis = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Create Data from pointer = false  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: Stack.Create Local Variables = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: Decompiler Switch Analysis.Analysis Decompiler Timeout (sec) = 60  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Trust values read from writable memory = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Require pointer param data type = false  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Stored Value Pointer analysis = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: Stack = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Speculative reference max = 256  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Max Threads = 2  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> set x86 Constant Reference Analyzer.Max Threads = 1  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: Decompiler Switch Analysis = true  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: x86 Constant Reference Analyzer.Speculative reference min = 1024  
+2026-11-21 11:07:46 INFO  PrepAnalysis.java> option: Stack.Create Param Variables = false  
+2026-11-21 11:07:46 INFO  PrepPdb.java> PDB set: /tmp/in/CoDMPServer_PC.pdb  
+2026-11-21 11:16:13 INFO  ApplyPdbNames.java> PDB names: 19774 functions (0 not found), 66176 renamed, 751 locals created, 12730 locals typed, 1100 skipped  
+2026-11-21 11:16:19 INFO  ExportAll.java> exported 5000 functions  
+2026-11-21 11:16:23 INFO  ExportAll.java> exported 10000 functions  
+2026-11-21 11:16:28 INFO  ExportAll.java> exported 15000 functions  
+2026-11-21 11:16:32 INFO  ExportAll.java> exported 20000 functions  
+2026-11-21 11:16:37 INFO  ExportAll.java> exported 25000 functions  
+2026-11-21 11:16:38 INFO  ExportAll.java> functions: 27747  

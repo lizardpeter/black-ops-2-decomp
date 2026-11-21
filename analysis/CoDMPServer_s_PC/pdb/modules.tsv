@@ -1200,7 +1200,7 @@ module	obj	lib	source
 1198	obj/t6/codmpReleaseShip DedicatedServer - PC/resource_mp.res		
 1199	<external>/t6/game/pc/CoDMPServer_s_PC.exp		
 1200	<external>/t6/sdk/nvidia/txaa/txaa.win32.lib		
-1201	<external>/_out/Windows/NDA-developer/x86/nvlink_gen.obj	<external>/t6/sdk/nvidia/nvsdk/lib/nvapi.lib	gfx_d3d/r_draw_shadowablelight.cpp
+1201	<external>/_out/Windows/NDA-developer/x86/nvlink_gen.obj	<external>/t6/sdk/nvidia/nvsdk/lib/nvapi.lib	<external>/dvs/p4/build/sw/rel/gpu_drv/r304/r304_00/drivers/nvapi/sdk/_out/windows/nda-developer/x86/nvlink_gen.cpp
 1202	<external>/Import:steam_api.dll	<external>/t6/sdk/Steamworks/sdk-1.20/redistributable_bin/steam_api.lib	
 1203	<external>/steam_api.dll	<external>/t6/sdk/Steamworks/sdk-1.20/redistributable_bin/steam_api.lib	
 1204	<external>/Import:WINMM.dll	<external>/Program Files (x86)/Microsoft SDKs/Windows/v7.0A/lib/winmm.lib	

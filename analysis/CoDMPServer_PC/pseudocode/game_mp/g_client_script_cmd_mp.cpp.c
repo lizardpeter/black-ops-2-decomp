@@ -9975,8 +9975,8 @@ void __cdecl PlayerCmd_GetVehicleOccupied(scr_entref_t entref)
 
 // 005C9EC0  PlayerCmd_GetFriendlies  (game_mp/g_client_script_cmd_mp.cpp:4759)
 
-/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */

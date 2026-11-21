@@ -47,13 +47,13 @@ void __cdecl CG_ActorProcessSnapshot(LocalClientNum_t localClientNum,centity_t *
 // 004169D0  CG_UpdateActorDObj  (cgame_mp/cg_actors_mp.cpp:117)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "eAttachment": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 
 void __cdecl CG_UpdateActorDObj(LocalClientNum_t localClientNum,centity_t *cent,actorInfo_t *ai)
 

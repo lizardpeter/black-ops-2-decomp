@@ -17576,12 +17576,12 @@ void __cdecl CScrCmd_UnderWater(scr_entref_t entref)
 // 0049B9A0  CScrCmd_LinkTo  (cgame/cg_scr_main.cpp:13671)
 
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "eAttachment": Some values do not have unique names */
 
 void __cdecl CScrCmd_LinkTo(scr_entref_t entref)
@@ -19145,12 +19145,12 @@ int __cdecl CG_GetMixerLightSide(int param_1)
 // 0049D330  CScr_SetMixerLightModels  (cgame/cg_scr_main.cpp:14566)
 
 /* WARNING: Type propagation algorithm not settling */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "eAttachment": Some values do not have unique names */
 
 void __cdecl CScr_SetMixerLightModels(scr_entref_t entref)

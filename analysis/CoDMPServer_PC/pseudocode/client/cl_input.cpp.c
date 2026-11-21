@@ -2222,8 +2222,8 @@ LAB_004ef065:
 /* WARNING: Function: __security_check_cookie replaced with injection: security_check_cookie */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
-/* WARNING: Enum "ControllerIndex_t": Some values do not have unique names */
 /* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "ControllerIndex_t": Some values do not have unique names */
 /* WARNING: Enum "profile_setting.conflict4": Some values do not have unique names */
 
 void __cdecl CL_GamepadMove(LocalClientNum_t localClientNum,usercmd_s *frametime_base,float param_3)

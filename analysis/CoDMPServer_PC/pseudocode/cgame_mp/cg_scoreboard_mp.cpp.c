@@ -262,13 +262,13 @@ void __cdecl CG_ResetScoreboard(LocalClientNum_t localClientNum)
 
 // 004876B0  CG_UpdateMatchScoreboard  (cgame_mp/cg_scoreboard_mp.cpp:542)
 
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "eAttachment": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "GameTypeSettingsType": Some values do not have unique names */
 /* WARNING: Enum "ControllerIndex_t": Some values do not have unique names */
 

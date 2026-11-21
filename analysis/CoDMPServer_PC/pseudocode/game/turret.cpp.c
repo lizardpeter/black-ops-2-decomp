@@ -2914,8 +2914,8 @@ int __cdecl turret_isTargetVisible(gentity_t *distSqr,gentity_t *param_2,float *
 
 // 00683580  turret_findBestKillstreakTarget  (game/turret.cpp:2134)
 
-/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "team_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */

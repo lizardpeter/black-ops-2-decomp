@@ -2165,9 +2165,9 @@ void __cdecl Demo_ResetSequenceNumbers(LocalClientNum_t localClientNum,int seque
 
 // 00910BE0  Demo_ResetWorldInformation  (demo/demo_playback.cpp:2126)
 
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
@@ -5037,14 +5037,14 @@ void __cdecl Demo_InitClipRecord(LocalClientNum_t newClip,bool param_2)
 
 // 00916A30  Demo_WriteClipCommandsInternal  (demo/demo_playback.cpp:4816)
 
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
+/* WARNING: Enum "netsrc_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "nodeType": Some values do not have unique names */
 /* WARNING: Enum "AISpecies": Some values do not have unique names */
 /* WARNING: Enum "ai_state_t": Some values do not have unique names */
 /* WARNING: Enum "eAttachment": Some values do not have unique names */
-/* WARNING: Enum "netsrc_t": Some values do not have unique names */
 /* WARNING: Enum "demoFreeCameraMode": Some values do not have unique names */
 /* WARNING: Enum "demoClipTransition": Some values do not have unique names */
 /* WARNING: Enum "demoHighlightReelInformationType": Some values do not have unique names */
@@ -7551,9 +7551,9 @@ Demo_ReadPacketEntities(LocalClientNum_t localClientNum,msg_t *msg,int time,int 
 
 // 009149A0  Demo_ReadPacketClients  (demo/demo_playback.cpp:6975)
 
-/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "ClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "team_t": Some values do not have unique names */
+/* WARNING: Enum "LocalClientNum_t": Some values do not have unique names */
 /* WARNING: Enum "netsrc_t": Some values do not have unique names */
 /* WARNING: Enum "demoFreeCameraMode": Some values do not have unique names */
 /* WARNING: Enum "demoClipTransition": Some values do not have unique names */
