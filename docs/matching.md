@@ -30,28 +30,44 @@ strings and functions, so the x86 servers match the x64 Store build directly. Ta
     python tools/match/match.py CoDMPServer_PC CoDMPServer_s_PC --same-compiler
     python tools/match/validate.py CoDMPServer_PC CoDMPServer_s_PC
 
-On the blind analysis published at 69fed58: **6,933 of 18,659 ship-build functions matched (37.2%)** in ten
-propagation rounds, **98.3% precision** (6,757 correct, 118 wrong, 58 unverifiable):
+On the blind analysis published at 69fed58, with the inlining-aware string votes, named globals, call order and
+hub votes (below): **7,808 of 18,659 ship-build functions matched (41.8%)** in nine propagation rounds, **98.2%
+precision** (7,607 correct, 137 wrong, 64 unverifiable; before those stages, 6,933 at 98.3%):
 
 | method | correct | wrong | unverifiable | precision |
 |---|---:|---:|---:|---:|
-| string | 2,631 | 45 | 2 | 98.3% |
-| named | 115 | 2 | 0 | 98.3% |
-| constant | 36 | 0 | 1 | 100.0% |
-| callee | 2,175 | 41 | 28 | 98.1% |
-| caller | 1,800 | 30 | 27 | 98.4% |
+| string | 2,662 | 48 | 2 | 98.2% |
+| named | 132 | 2 | 0 | 98.5% |
+| global | 247 | 5 | 0 | 98.0% |
+| constant | 40 | 0 | 1 | 100.0% |
+| callee | 1,927 | 43 | 19 | 97.8% |
+| caller | 1,915 | 32 | 20 | 98.4% |
+| order | 630 | 5 | 22 | 99.2% |
+| votes | 54 | 2 | 0 | 96.4% |
+
+Stages added for the Store build's link-time code generation:
+- **Inlined strings.** One target function holding the unique strings of several reference functions is the one
+  among them that calls the others (within three calls): it inlined them.
+- **Named globals.** A global the return value of a call is stored into, with the call's one identifier-like string
+  (`g = Dvar_RegisterBool("name", ..., "description")`), is the same variable in both builds. A function that is the
+  only one referencing such a global, or the only one with a given set of two or more, is the same function.
+- **Call order.** Within a matched pair, the calls between two calls to matched functions are the same calls in the
+  same order, except what the target inlined: one unmatched callee on each side in a short gap pairs up when the two
+  look alike (size, callee count; an inlined reference callee leaves its own callee in its place).
+- **Hub votes.** Functions called from everywhere (never alone in a gap) pair when gaps of equal length across at
+  least three callers pair them the same way, and most of each side's votes agree.
 
 That pair shares compiler and architecture, so it measures the method, not the harder x86-to-x64 case: Store matches
 are reviewed before they become records.
 
 ### CoDMPServer_PC → t6mp_msstore (x86 → x64)
 
-First run, on the Ghidra analyses published at 5d2be62: **2,973 of 18,495 target functions matched (16.1%)** in six
-propagation rounds. By method: string 1,566, named 440, callee 498, caller 461, constant 8. A random sample of each
-method reviewed by hand was consistent: unique error strings (`GScr_SetEMPJammed`, `Demo_ReadFooter`), registrations
-(`UI_ChangeMenuOpenSlideDirection_f` under `changeMenuOpenSlideDirection`), OpenSSL's SHA-512 block function by its
-round constants. Few constant matches is expected: x64 code builds many values differently and the 2024 build
-changed data layouts.
+First run, on the Ghidra analyses published at 5d2be62: 2,973 of 18,495 target functions (16.1%). With the stages
+above: **3,391 (18.3%)**: string 1,647, named 453, callee 488, caller 486, order 151, global 129, votes 29, constant
+8. The Store build is harder than the ship build: most small functions are inlined, and it is a later source
+revision without the servers' development output (`CL_MouseMove`'s `cl_showMouseRate` print is gone, so the
+`Com_Printf` calls that anchor many server functions aren't there). Hand-identified Store functions go to
+`records/names.tsv` with their evidence (structure, behaviour).
 
 These are generated identifications, not records: they become `records/names.tsv` rows (and `named` in STATUS.md)
 once reviewed, starting with the subsystems being reconstructed.

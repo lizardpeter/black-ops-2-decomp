@@ -16,14 +16,20 @@ Writes analysis/<target>/match/functions.tsv (generated; never hand-edit):
 
 Methods, in the order they run:
   string     the pair are the only functions in their builds referencing a given string
-             (several such strings strengthen the match; conflicting candidates are dropped)
+             (several such strings strengthen the match). When one target function holds the strings of
+             several reference functions, the one that calls the others is the match: the target inlined them
   constant   the same with distinctive numeric immediates (at least two shared, each unique on both sides)
   named      a string registered or tabled together with exactly one function on each side: a string and a
              function address loaded for the same call (Cmd_AddCommand("name", Func)), or a {name, ..., function}
              entry in a data table (script built-ins, callbacks)
+  global     a global stored from a registration call under the same name string in both builds (a dvar
+             pointer) referenced by exactly one function on each side
   callee     propagation: a matched pair's unmatched callees pair up when each side has exactly one
              candidate with the same matched-callee signature, or exactly one unmatched callee
   caller     the same, upwards through callers
+  votes      the same pairing from many callers' gaps of equal length (hubs called from everywhere)
+  order      within a matched pair, the one unmatched callee on each side between the same two matched calls
+             (link-time code generation inlines calls but keeps the order of the rest)
 Propagated pairs must also pass structural checks (shared strings when both reference any, size
 ratio, callee count). Every match records its evidence. Nothing is matched on position: the retail build is linked with
 whole-program optimization and reordered (docs/retail-builds.md).
@@ -62,11 +68,15 @@ class Build:
         self.starts = sorted(self.fn)
         self.callees = collections.defaultdict(set)
         self.callers = collections.defaultdict(set)
+        self.calls = collections.defaultdict(list)  # caller -> [(site, callee)], in address order
         for e in read_tsv(a / "ghidra" / "callgraph.tsv"):
             c, d = int(e["caller"], 16), int(e["callee"], 16)
             if c in self.fn and d in self.fn and c != d:
                 self.callees[c].add(d)
                 self.callers[d].add(c)
+                self.calls[c].append((int(e["site"], 16), d))
+        for c in self.calls:
+            self.calls[c].sort()
         self._scan(exe)
 
     def owner(self, addr):
@@ -108,14 +118,34 @@ class Build:
         self.const_refs = collections.defaultdict(set)  # immediate -> {function}
         self.fn_consts = collections.defaultdict(set)
         self.named = collections.defaultdict(set)      # string -> {function it names}: registrations, tables
+        self.fn_globals = collections.defaultdict(set)  # function -> {data address it reads or writes}
+        self.global_refs = collections.defaultdict(set)
+        self.named_data = collections.defaultdict(set)  # string -> {global}: g = Register("name", ...)
+        ret_regs = {X86.X86_REG_EAX, X86.X86_REG_RAX}
+        code_lo, code_hi = tva, tva + len(tdata)
         for va, f in self.fn.items():
             off = va - tva
             if off < 0 or off >= len(tdata) or f["size"] <= 0:
                 continue
             recent = []  # last few address operands: ("s", string) or ("f", function)
+            call_strings = None  # the strings loaded for the last call, until its result is stored
             for ins in md.disasm(tdata[off:off + f["size"]], va):
+                if ins.mnemonic.startswith("call"):
+                    call_strings = [x for k, x in recent if k == "s"]
                 if ins.mnemonic.startswith("call") or ins.mnemonic.startswith("j"):
                     recent = []  # a registration's arguments are loaded between two calls
+                if ins.mnemonic == "mov" and len(ins.operands) == 2 and call_strings is not None:
+                    dst, src = ins.operands
+                    if src.type == X86.X86_OP_REG and src.reg in ret_regs and dst.type == X86.X86_OP_MEM \
+                            and dst.mem.index == 0 and ((x64 and dst.mem.base == rip) or (not x64 and dst.mem.base == 0)):
+                        g = (ins.address + ins.size + dst.mem.disp) if x64 else dst.mem.disp & mask
+                        # the registered name: the call's only string, or its only identifier-like one
+                        # (Dvar_Register*("name", ..., "description"))
+                        names = call_strings if len(call_strings) == 1 else \
+                            [x for x in call_strings if re.fullmatch(rb"[A-Za-z_][A-Za-z0-9_]{2,}", x)]
+                        if len(names) == 1 and g not in strs:
+                            self.named_data[names[0]].add(g)
+                        call_strings = None
                 for op in ins.operands:
                     target = None
                     if op.type == X86.X86_OP_MEM and op.mem.index == 0:
@@ -140,6 +170,9 @@ class Build:
                             continue
                     if target is None:
                         continue
+                    if base <= target < base + size and not code_lo <= target < code_hi and target not in strs:
+                        self.fn_globals[va].add(target)
+                        self.global_refs[target].add(va)
                     s = strs.get(target)
                     if s is not None:
                         self.str_refs[s].add(va)
@@ -185,14 +218,21 @@ def main():
     matched_ref = {}  # ref va -> tgt va
 
     size_lo, size_hi = (0.5, 2.0) if "--same-compiler" in sys.argv else (0.15, 6.0)
+    same_compiler = "--same-compiler" in sys.argv
+    order_lo, order_hi = (0.8, 1.25) if "--same-compiler" in sys.argv else (0.6, 2.5)
 
     def compatible(t, r):
         """Cheap structural checks a propagated pair must pass."""
         ts, rs = tgt.fn_strs.get(t, set()), ref.fn_strs.get(r, set())
-        if ts and rs and not (ts & rs):
-            return False  # both reference strings, none in common
-        if ts and not rs:
-            return False  # target has strings the reference function never references
+        if ts and not (ts & rs):
+            # the target's strings may all come from callees it inlined (link-time code generation)
+            reach = set(rs)
+            frontier = {r}
+            for _ in range(2):
+                frontier = {c for x in frontier for c in ref.callees[x]}
+                reach |= {st for c in frontier for st in ref.fn_strs.get(c, ())}
+            if not ts <= reach:
+                return False
         tz, rz = tgt.fn[t]["size"], ref.fn[r]["size"]
         if tz and rz and not (size_lo <= tz / rz <= size_hi):
             return False
@@ -220,9 +260,31 @@ def main():
     for t, cands in votes.items():
         for r in cands:
             by_ref[r].add(t)
+    def reaches(r, others, depth=3):
+        """r calls every function in others within depth steps (it could have inlined them)."""
+        frontier, seen = {r}, set()
+        for _ in range(depth):
+            frontier = {c for x in frontier for c in ref.callees[x]} - seen
+            seen |= frontier
+        return others <= seen
+
+    inlined = 0
     for t, cands in votes.items():
         if len(cands) != 1:
-            continue  # target function pulled toward several reference functions: inlining, skip
+            # several reference functions' strings in one target function: link-time code generation inlined
+            # all but one of them into it, so the one that calls the others is the match
+            roots = [r for r in cands if reaches(r, set(cands) - {r})]
+            if len(roots) != 1:
+                continue
+            r = roots[0]
+            if len(by_ref[r]) != 1:
+                continue
+            ss = [x for v in cands.values() for x in v]
+            if accept(t, r, "string", min(0.95, 0.75 + 0.05 * len(cands[r])),
+                      f"{len(cands[r])} unique string(s) of its own and {len(ss) - len(cands[r])} of "
+                      f"{len(cands) - 1} callee(s) it inlined: " + repr(cands[r][0][:60].decode("latin1"))):
+                inlined += 1
+            continue
         r, ss = next(iter(cands.items()))
         if len(by_ref[r]) != 1:
             continue  # reference function's strings spread over several target functions
@@ -268,6 +330,59 @@ def main():
         accept(t, r, "named", min(0.97, 0.85 + 0.04 * len(ss)),
                f"registered/tabled under {len(ss)} name(s): " + repr(ss[0][:60].decode("latin1")))
 
+    # 1d. globals: a global stored from a registration call with the same name string in both builds
+    # (dvar_t pointers: g = Dvar_Register*("name", ...)) is the same variable. A function that is the only one
+    # referencing such a global on each side is the same function (as with strings); several shared globals make it
+    # stronger. Inlining is handled as for strings.
+    gmap = {}  # target global -> reference global
+    for st, tgs in tgt.named_data.items():
+        rgs = ref.named_data.get(st)
+        if len(tgs) == 1 and rgs and len(rgs) == 1:
+            gmap[next(iter(tgs))] = next(iter(rgs))
+    gvotes = collections.defaultdict(lambda: collections.defaultdict(list))
+    for tg, rg in gmap.items():
+        tfs, rfs = tgt.global_refs.get(tg, set()), ref.global_refs.get(rg, set())
+        if len(tfs) == 1 and len(rfs) == 1:
+            gvotes[next(iter(tfs))][next(iter(rfs))].append(rg)
+    gby_ref = collections.defaultdict(set)
+    for t, cands in gvotes.items():
+        for r in cands:
+            gby_ref[r].add(t)
+    n_global = 0
+    for t, cands in gvotes.items():
+        if len(cands) != 1:
+            roots = [r for r in cands if reaches(r, set(cands) - {r})]
+            if len(roots) != 1:
+                continue
+            r = roots[0]
+        else:
+            r = next(iter(cands))
+        if len(gby_ref[r]) != 1:
+            continue
+        if accept(t, r, "global", min(0.95, 0.80 + 0.05 * len(cands[r])),
+                  f"only function referencing {len(cands[r])} global(s) registered under the same name"):
+            n_global += 1
+
+    # 1e. the same set of named globals: functions whose references to globals paired in 1d are the same set (at
+    # least two), unique on both sides
+    rg_set = set(gmap.values())
+    tkeys = collections.defaultdict(list)
+    for t, gs in tgt.fn_globals.items():
+        k = frozenset(gmap[g] for g in gs if g in gmap)
+        if len(k) >= 2:
+            tkeys[k].append(t)
+    rkeys = collections.defaultdict(list)
+    for r, gs in ref.fn_globals.items():
+        k = frozenset(g for g in gs if g in rg_set)
+        if len(k) >= 2:
+            rkeys[k].append(r)
+    for k, ts in tkeys.items():
+        rs = rkeys.get(k, [])
+        if len(ts) == 1 and len(rs) == 1:
+            if accept(ts[0], rs[0], "global", min(0.95, 0.75 + 0.05 * len(k)),
+                      f"the only function on each side referencing the same {len(k)} named globals"):
+                n_global += 1
+
     # 2./3. call-graph propagation until nothing changes
     def signature(build, va, mapping):
         """Matched neighbours of a function, expressed in reference addresses."""
@@ -301,6 +416,69 @@ def main():
                                   f"{direction} of {ref.fn[r]['name']} with the same {len(sig[0])} matched callees "
                                   f"and {len(sig[1])} matched callers"):
                             added += 1
+        # call order: within a matched pair, the calls between two calls to already matched functions are the same
+        # calls in the same order, except those the target inlined. One unmatched callee on each side between the
+        # same two anchors pairs up.
+        votes_order = collections.defaultdict(collections.Counter)  # target callee -> Counter(reference callee)
+        for t, (r, *_rest) in list(match.items()):
+            tc = [d for _, d in tgt.calls.get(t, [])]
+            rc = [d for _, d in ref.calls.get(r, [])]
+            if not tc or not rc:
+                continue
+            ta = [(i, match[d][0]) for i, d in enumerate(tc) if d in match]
+            ra = {}
+            for i, d in enumerate(rc):
+                if d in matched_ref:
+                    ra.setdefault(d, []).append(i)
+            # anchors: matched callees called exactly once on each side, kept where both orders agree
+            once_t = collections.Counter(x for _, x in ta)
+            anchors = [(i, ra[x][0]) for i, x in ta if once_t[x] == 1 and len(ra.get(x, [])) == 1]
+            good, last = [], -1
+            for i, j in anchors:
+                if j > last:
+                    good.append((i, j))
+                    last = j
+            bounds = [(-1, -1)] + good + [(len(tc), len(rc))]
+            for (i0, j0), (i1, j1) in zip(bounds, bounds[1:]):
+                tslice, rslice = tc[i0 + 1:i1], rc[j0 + 1:j1]
+                tgap = {d for d in tslice if d not in match}
+                rgap = {d for d in rslice if d not in matched_ref}
+                # votes: gaps of the same length pair position by position (hubs such as Com_Printf are called
+                # from everywhere and never alone in a gap, but are paired consistently across many callers)
+                tun = [d for d in tslice if d not in match]
+                run = [d for d in rslice if d not in matched_ref]
+                if tun and len(tun) == len(run) <= 4 and (len(tslice) == len(rslice) or not same_compiler):
+                    for x, y in zip(tun, run):
+                        votes_order[x][y] += 1
+                # a short gap, and the same number of calls to the candidate on each side
+                if len(tgap) == 1 and len(rgap) == 1 and len(rslice) <= 3 and len(tslice) <= 3 \
+                        and tslice.count(next(iter(tgap))) == rslice.count(next(iter(rgap))):
+                    (x,), (y,) = tgap, rgap
+                    # an inlined reference callee leaves its own callee at its place: the pair must look alike
+                    tz, rz = tgt.fn[x]["size"], ref.fn[y]["size"]
+                    if not (tz and rz and order_lo <= tz / rz <= order_hi):
+                        continue
+                    tn, rn = len(tgt.callees[x]), len(ref.callees[y])
+                    if abs(tn - rn) > max(1, rn // 2):
+                        continue
+                    if accept(x, y, "order", 0.80, f"called by {ref.fn[r]['name']} between the same matched calls"):
+                        added += 1
+        # hubs by votes: at least three gaps pairing them, and most of each side's votes agreeing
+        back = collections.defaultdict(collections.Counter)
+        for x, c in votes_order.items():
+            for y, n in c.items():
+                back[y][x] += n
+        for x, c in votes_order.items():
+            if x in match:
+                continue
+            y, n = c.most_common(1)[0]
+            if y in matched_ref or n < 3 or n < 0.8 * sum(c.values()):
+                continue
+            if back[y].most_common(1)[0][0] != x or back[y][x] < 0.8 * sum(back[y].values()):
+                continue
+            if accept(x, y, "votes", min(0.95, 0.70 + 0.03 * n),
+                      f"paired with it at the same place among matched calls in {n} callers"):
+                added += 1
         if not added:
             break
 
