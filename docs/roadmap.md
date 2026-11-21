@@ -57,6 +57,36 @@ Before changing anything, confirm whether a wrapped buffer also costs real comma
 
 First: `cgame_mp/cg_draw_net_mp.cpp`, `client/cl_input.cpp`, `client_mp/cl_input_mp.cpp`.
 
+## Audio
+
+- **WASAPI, low latency.** The game mixes through XAudio2 (`XAudio2_9.dll`), which runs on WASAPI in shared mode
+  with the system's default buffer (typically 10 ms). Output through our own WASAPI path instead:
+  `IAudioClient3` low-latency shared mode (the smallest period the driver allows, often about 3 ms), with exclusive
+  mode as an option. Voice chat capture and playback (DirectSound and WINMM in the original) move to WASAPI too.
+- **Leave the system microphone alone (B0002).** The original sets every Windows recording device's level to 100%
+  and its mute state when voice starts, and only restores them on a clean exit. The enhanced build never touches
+  device settings; mic gain applies to the captured samples (`winvoice_mic_scaler`).
+
+First: `win32/win_voice.cpp`, the sound back end (`snd_*`, XAudio2 driver layer).
+
+## Threading
+
+BO2 already has threads: render back end, render and FX workers, database (fast file) loading, streaming, and a
+server thread. The game simulation, client, UI and most of the front end run on the main thread, and workers sync
+with waits each frame (`R_WaitWorkerCmds`, `FX_WaitFor*`).
+- Profile first (where the main thread spends a frame, where workers wait).
+- Then a job system sized to the CPU's cores, replacing fixed worker counts, and moving independent work off the main
+  thread (scene culling, animation, physics, sound updates, asset streaming).
+- Data races in the original become ledger rows as they're found.
+
+## Memory: 64-bit and limits
+
+The Store build is 64-bit and already large-address aware, so there's no 4 GB process limit like the 32-bit Steam
+build (which only gets 4 GB at all because it's large-address aware on 64-bit Windows). What still limits it are the
+engine's own fixed pools: the fast file memory, the image and streaming pools, and 32-bit sizes and offsets inside
+its data structures. Those get measured and raised as `limit` rows in the ledger, which also covers higher texture
+streaming budgets.
+
 ## Latency and presentation
 
 - **Hardware independent flip:** a DXGI flip-model swap chain (`FLIP_DISCARD`), tearing allowed and a waitable
@@ -79,6 +109,10 @@ First: `cgame_mp/cg_draw_net_mp.cpp`, `client/cl_input.cpp`, `client_mp/cl_input
 - **Native Vulkan,** with no translation layers (no DXVK), as decided for Ghosts and BO3. It needs the D3D11
   back end (`gfx_d3d/`) decompiled and its shaders converted. BO3's plan applies: DXBC to SPIR-V first, then
   decompiled shaders one at a time.
+- **Resizable BAR:** a hardware and driver feature, not something the game turns on. Under D3D11 the driver decides
+  (NVIDIA only enables it for games in its profile list). Under our Vulkan renderer we can use it directly: upload
+  dynamic buffers and streamed textures straight into memory that is both device-local and CPU-visible, instead of
+  copying through staging buffers.
 - **HDR:** scRGB or HDR10 swap chain, tone mapping in post, and UI composited at a set paper white.
 - **Optimisations** from profiling and the bug ledger's `performance` rows.
 
