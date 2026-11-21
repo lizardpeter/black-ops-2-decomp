@@ -78,5 +78,13 @@ t6mp	00645340	matches	src/universal/com_math.cpp	ClampShort; tests/differential/
 t6mp	006580F0	matches	src/universal/q_shared.cpp	I_isdigit; tests/differential/test_q_shared.py
 t6mp	006F5A40	matches	src/universal/com_shared.cpp	Com_HashKey; tests/differential/test_universal.py
 t6mp	007043C0	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
+t6mp_msstore	1403E9910	matches	src/universal/q_shared.cpp	I_DrawStrlen; tests/differential/test_q_shared.py
+t6mp_msstore	140471A90	matches	src/universal/q_shared.cpp	I_atoui; tests/differential/test_q_shared.py
+t6mp_msstore	140471B00	matches	src/universal/q_shared.cpp	I_strncpyz; tests/differential/test_q_shared.py
+t6mp_msstore	140471B50	matches	src/universal/q_shared.cpp	I_strnicmp; tests/differential/test_q_shared.py
 t6mp_msstore	140471C80	matches	src/universal/q_shared.cpp	I_stricmp; tests/differential/test_q_shared.py (its I_strnicmp is inlined in the Store build)
+t6mp_msstore	140471E50	matches	src/universal/q_shared.cpp	I_CleanStr; tests/differential/test_q_shared.py
+t6mp_msstore	140471F70	matches	src/universal/q_shared.cpp	I_itoa; tests/differential/test_q_shared.py
+t6mp_msstore	1404723A0	matches	src/universal/q_shared.cpp	Info_RemoveKey_Big; tests/differential/test_q_shared.py
+t6mp_msstore	1404732C0	matches	src/universal/q_shared.cpp	Com_IsLegacyXModelName; tests/differential/test_q_shared.py
 t6mp_msstore	1407B51D0	matches	src/universal/q_shared.cpp	LongSwap; tests/differential/test_q_shared.py

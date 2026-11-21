@@ -30,6 +30,8 @@ Build environment (`tools/recon/`), not game source:
 - `crt_sse2.s` (x86): VC100 compiles `sinf`, `cos`, ... into calls to the CRT's `___libm_sse2_*` routines
   (arguments and result in XMM registers). These shims forward the C entry points to the original's copies, so both
   sides run the same math library. Only the routines CoDMPServer_PC links are forwarded.
+- `crt_x64.s` (x64): `strlen` and `strcmp`, which VS2019 expands inline, so the Store code never calls the CRT's
+  (and the harness stubs imports), and `__chkstk`, the CRT's stack probe clang calls for frames over a page.
 - `include/math.h`: the float functions are real functions on x86 (the server calls `___libm_sse2_sinf` directly
   at 90 sites); `atan2f` is VC100's inline double wrapper. On x64 they're UCRT imports. `sqrtf` and `fabsf` are
   intrinsics (`sqrtss` / `andps`, or `fsqrt` / `fabs` in x87 code), and `-fno-math-errno` keeps them inline.

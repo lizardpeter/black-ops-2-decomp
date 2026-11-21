@@ -712,15 +712,19 @@ int CanKeepStringPointer(const char *string)
 }
 
 // 0078E810  universal/q_shared.cpp:1286
+// The size check and its "0" fallback exist only in builds with asserts: the Store build writes the digits whatever
+// bufsize says.
 char *I_itoa(int value, char *buf, int bufsize)
 {
-	assert_at(1289, bufsize >= 12);
+#ifndef T6_NO_ASSERTS
 	if (bufsize < 12)
 	{
+		assert_at(1289, bufsize >= 12);
 		buf[0] = '0';
 		buf[1] = 0;
 		return buf;
 	}
+#endif
 	unsigned int magnitude = value < 0 ? 0u - (unsigned int)value : (unsigned int)value;
 	char *end = buf;
 	do

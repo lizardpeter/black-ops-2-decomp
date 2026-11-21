@@ -193,9 +193,9 @@ def main():
     (BUILD / "fltused.c").write_text("int _fltused = 0;\n")
     run("clang", triple, "-c", BUILD / "fltused.c", "-o", BUILD / "fltused.obj")
     env_objs.append(BUILD / "fltused.obj")
-    if arch == "x86":
-        run("clang", triple, "-c", ROOT / "tools" / "recon" / "crt_sse2.s", "-o", BUILD / "crt_sse2.obj")
-        env_objs.append(BUILD / "crt_sse2.obj")
+    env_asm = {"x86": "crt_sse2", "x64": "crt_x64"}[arch]
+    run("clang", triple, "-c", ROOT / "tools" / "recon" / f"{env_asm}.s", "-o", BUILD / f"{env_asm}.obj")
+    env_objs.append(BUILD / f"{env_asm}.obj")
 
     defined, exports, rows = set(), [], {}
     for obj in sources:

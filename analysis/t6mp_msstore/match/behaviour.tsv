@@ -1,4 +1,18 @@
 name	va	size	candidates	survivors	verdict
+CMD_GetAnalogButtonValue		0	37499	0	none
+Com_IsLegacyXModelName	1404732C0	152	37499	1	unique
+I_CleanChat		0	37499	0	none
+I_CleanStr	140471E50	105	37499	1	unique
+I_DrawStrlen	1403E9910	195	37499	1	unique
+I_atoui	140471A90	100	37499	1	unique
+I_itoa	140471F70	144	37499	1	unique
+I_stricmpwild		0	37499	0	none
+I_stristr		0	37499	0	none
+I_strncmp		0	37499	0	none
+I_strncpyz	140471B00	77	37499	1	unique
+I_strnicmp	140471B50	123	37499	1	unique
+Info_RemoveKey	1404723A0	304	37499	1	unique
+Info_Validate		0	37499	0	none
 Long64NoSwap	1400DEAB0	4	37499	10	ambiguous
 Long64NoSwap	14048C960	1774	37499	10	ambiguous
 Long64NoSwap	1404D3480	202	37499	10	ambiguous
@@ -10,6 +24,8 @@ Long64NoSwap	14083A5C0	33	37499	10	ambiguous
 Long64NoSwap	14085CB50	33	37499	10	ambiguous
 Long64NoSwap	140884270	33	37499	10	ambiguous
 LongSwap	1407B51D0	36	37499	1	unique
+OrientationConcatenate		0	37499	0	none
+OrientationInvert		0	37499	0	none
 ShortNoSwap	1400DEAB0	4	37499	25	ambiguous
 ShortNoSwap	1400EAA20	507	37499	25	ambiguous
 ShortNoSwap	1403FF3C0	143	37499	25	ambiguous

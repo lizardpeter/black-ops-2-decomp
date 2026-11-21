@@ -68,8 +68,13 @@ Results on `t6mp_msstore`:
 | function | result |
 |---|---|
 | `LongSwap` | unique: `1407B51D0` (recorded, `matches`) |
+| `I_strnicmp`, `I_strncpyz`, `I_atoui`, `I_CleanStr`, `I_itoa`, `I_DrawStrlen`, `Com_IsLegacyXModelName` | unique (recorded, `matches`): `140471B50`, `140471B00`, `140471A90`, `140471E50`, `140471F70`, `1403E9910`, `1404732C0` |
+| `Info_RemoveKey` | unique, but wrong: `1404723A0` is `Info_RemoveKey_Big` (its oversize message and 8 KB key buffer say so), which behaves the same on every input short enough for both. Recorded under that name |
 | `ShortNoSwap`, `Long64NoSwap` | ambiguous: identity functions, folded (ICF) with every other body that returns its argument |
-| `ClampChar`, `ClampShort`, `Com_HashKey`, `ShortSwap`, `Long64Swap`, `ColorIndex`, `I_islower`, `I_isdigit` | no standalone body: inlined |
+| `ClampChar`, `ClampShort`, `Com_HashKey`, `ShortSwap`, `Long64Swap`, `ColorIndex`, `I_islower`, `I_isupper`, `I_isdigit`, `I_CleanChat`, `I_strncmp`, `I_stristr`, `I_stricmpwild`, `Info_Validate`, `OrientationConcatenate`, `OrientationInvert`, `CMD_GetAnalogButtonValue`, `Com_GetFilenameSubString`, `Com_GetExtensionSubString`, `Com_StripExtension` | none: inlined, or not leaves the search can run (`tolower` and `strchr` are imports, which the harness stubs) |
 
 Behaviour establishes equivalence, not original identity, so such names are recorded with `medium` confidence unless
-other evidence (a caller matched by match.py) confirms them.
+other evidence (a caller matched by match.py) confirms them. Sibling functions are the trap: a match only says the
+target agrees on the inputs the case has, so a case should include inputs that tell a function from its siblings
+(`Info_RemoveKey` and `_Big` differ only past 1,023 characters, where the oracle needs a faked `Com_Error`, which
+behaviour.py doesn't install).
