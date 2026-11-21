@@ -248,11 +248,28 @@ jobs:
         run: |
           git config user.name "ghidra-pipeline"
           git config user.email "ghidra-pipeline@users.noreply.github.com"
-          # STATUS.md and the graph import set are derived from analysis/: keep them current with it
-          python3 tools/status.py >/dev/null
-          python3 tools/graph/sync.py >/dev/null
-          git add analysis STATUS.md
+          git add analysis
           builds=$(echo '${{ needs.setup.outputs.builds }}' | python3 -c 'import json,sys; print(" ".join(json.load(sys.stdin)))')
-          git commit -q -m "Ghidra ${GHIDRA_TAG#Ghidra_} analysis of ${builds} (${{ github.sha }})" || { echo "nothing to commit"; exit 0; }
-          # analysis/ is generated: on a conflict with an older pipeline commit, this run's output wins
-          for i in 1 2 3; do git pull -q --rebase -X theirs && git push -q && exit 0; git rebase --abort || true; sleep 10; done; exit 1
+          msg="Ghidra ${GHIDRA_TAG#Ghidra_} analysis of ${builds} (${{ github.sha }})"
+          git diff --cached --quiet && { echo "nothing to commit"; exit 0; }
+          # This run's files, by path: what it added or changed, and what it deleted. analysis/ is generated, so they
+          # win over anything main gained meanwhile at the same paths, and everything else main gained is kept.
+          # (A rebase can't do this: -X theirs resolves content conflicts, not modify/delete ones.)
+          git diff --cached --name-only --no-renames --diff-filter=d -z > /tmp/changed
+          git diff --cached --name-only --no-renames --diff-filter=D -z > /tmp/deleted
+          tar -cf /tmp/changes.tar --null -T /tmp/changed
+          for i in 1 2 3 4 5; do
+            git fetch -q --no-tags --depth=1 origin "$GITHUB_REF_NAME"
+            git reset -q --hard FETCH_HEAD
+            tar -xf /tmp/changes.tar
+            if [ -s /tmp/deleted ]; then xargs -0 git rm -q --ignore-unmatch -- < /tmp/deleted; fi
+            # STATUS.md and the graph import set are derived from analysis/: regenerate on what is being pushed
+            python3 tools/status.py >/dev/null
+            python3 tools/graph/sync.py >/dev/null
+            git add analysis STATUS.md
+            git diff --cached --quiet && { echo "main already has this output"; exit 0; }
+            git commit -q -m "$msg"
+            git push -q origin "HEAD:$GITHUB_REF_NAME" && exit 0
+            sleep $((10 * i))
+          done
+          exit 1
