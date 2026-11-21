@@ -244,11 +244,56 @@ def main():
     def accept(t, r, method, conf, ev):
         if t in match or r in matched_ref:
             return False
-        if method != "string" and not compatible(t, r):
+        if not method.startswith("string") and not compatible(t, r):
             return False
         match[t] = (r, method, conf, ev)
         matched_ref[r] = t
         return True
+
+    def inlined_into_caller(t, r):
+        """Whether the target function t, holding r's anchoring content, is r or r's only caller with r inlined.
+
+        Link-time code generation inlines a function with one caller into it, so the content that anchors r (its
+        strings, constants, globals) can end up in the caller's target function, and a caller with no anchors of its
+        own then looks like r. Sizes tell the two apart only sometimes, because r itself grows by inlining its own
+        callees. Returns ("r", None) when t can only be r, ("caller", rc) when t can only be rc with r inside (too
+        large for r even with its callees inlined, the right size for rc and r), ("either", rc) when both fit."""
+        callers = ref.callers[r]
+        if len(callers) != 1:
+            return "r", None
+        rc = next(iter(callers))
+        if rc in matched_ref or rc == r:
+            return "r", None
+        tz, rz, cz = tgt.fn[t]["size"], ref.fn[r]["size"], ref.fn[rc]["size"]
+        if not (tz and rz and cz):
+            return "r", None
+        grown = rz + sum(ref.fn[c]["size"] or 0 for c in ref.callees[r] if c != r)
+        as_r = order_lo <= tz / rz <= order_hi or (grown > rz and order_lo <= tz / grown <= order_hi) \
+            or rz < tz < grown
+        as_caller = order_lo <= tz / (rz + cz) <= order_hi
+        if as_caller and not as_r:
+            return "caller", rc
+        if as_caller:
+            return "either", rc
+        return "r", None
+
+    inline_stats = collections.Counter()
+
+    def accept_anchored(t, r, method, conf, ev):
+        """accept() for a pair resting on r's own content: the target may be r's caller with r inlined."""
+        kind, rc = inlined_into_caller(t, r)
+        inline_stats[kind] += 1
+        # Either way the pair rests on content the target only might own: its method says so, and the hybrid link
+        # leaves it out until it is reviewed into records/names.tsv (tools/symbols.py ANCHORED)
+        if kind == "caller":
+            return accept(t, rc, f"{method}-via-callee", max(0.70, conf - 0.10),
+                          f"{ev}, which belong(s) to {ref.fn[r]['name']}, inlined into its only caller: "
+                          f"{tgt.fn[t]['size']} bytes against {ref.fn[r]['size']} alone and "
+                          f"{ref.fn[r]['size'] + ref.fn[rc]['size']} with it")
+        if kind == "either":
+            return accept(t, r, f"{method}-or-caller", conf,
+                          f"{ev}; or its only caller {ref.fn[rc]['name']} with it inlined")
+        return accept(t, r, method, conf, ev)
 
     # 1. unique strings
     votes = collections.defaultdict(lambda: collections.defaultdict(list))  # tgt -> ref -> [strings]
@@ -289,7 +334,7 @@ def main():
         if len(by_ref[r]) != 1:
             continue  # reference function's strings spread over several target functions
         conf = min(0.99, 0.80 + 0.05 * len(ss))
-        accept(t, r, "string", conf, f"{len(ss)} unique string(s): " + repr(ss[0][:60].decode("latin1")))
+        accept_anchored(t, r, "string", conf, f"{len(ss)} unique string(s): " + repr(ss[0][:60].decode("latin1")))
     n_string = len(match)
 
     # 1b. unique numeric constants: same rules as strings, but a pair needs two constants (one is too weak)
@@ -308,7 +353,7 @@ def main():
         r, vs = next(iter(cands.items()))
         if len(cby_ref[r]) != 1 or len(vs) < 2:
             continue
-        accept(t, r, "constant", min(0.95, 0.75 + 0.05 * len(vs)),
+        accept_anchored(t, r, "constant", min(0.95, 0.75 + 0.05 * len(vs)),
                f"{len(vs)} unique constant(s): " + ", ".join(f"{v:#x}" for v in vs[:4]))
 
     # 1c. names attached to functions by registrations (Cmd_AddCommand("name", Func)) and data tables
@@ -359,7 +404,7 @@ def main():
             r = next(iter(cands))
         if len(gby_ref[r]) != 1:
             continue
-        if accept(t, r, "global", min(0.95, 0.80 + 0.05 * len(cands[r])),
+        if accept_anchored(t, r, "global", min(0.95, 0.80 + 0.05 * len(cands[r])),
                   f"only function referencing {len(cands[r])} global(s) registered under the same name"):
             n_global += 1
 
@@ -379,7 +424,7 @@ def main():
     for k, ts in tkeys.items():
         rs = rkeys.get(k, [])
         if len(ts) == 1 and len(rs) == 1:
-            if accept(ts[0], rs[0], "global", min(0.95, 0.75 + 0.05 * len(k)),
+            if accept_anchored(ts[0], rs[0], "global", min(0.95, 0.75 + 0.05 * len(k)),
                       f"the only function on each side referencing the same {len(k)} named globals"):
                 n_global += 1
 
@@ -492,6 +537,7 @@ def main():
             f.write(f"{t:08X}\t{ref_id}\t{r:08X}\t{rf['name']}\t{rf['source']}\t{method}\t{conf:.2f}\t"
                     f"{ev.replace(chr(9), ' ').replace(chr(10), ' ')}\n")
     methods = collections.Counter(m[1] for m in match.values())
+    print(f"anchored pairs whose function has one caller: {dict(inline_stats)}")
     print(f"{tgt_id} <- {ref_id}: {len(match):,} of {len(tgt.fn):,} target functions matched "
           f"({100 * len(match) / len(tgt.fn):.1f}%); by method {dict(methods)}; propagation rounds {rounds}")
 

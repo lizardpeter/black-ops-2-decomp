@@ -82,7 +82,10 @@ def resolve(build: str, sym: str):
 # match.py methods trusted without review for linking: each rests on the function's own content (its strings,
 # registrations, constants, named globals). Call-graph propagation (callee, caller, order, votes) can't tell an
 # inlined callee from the one left in its place in a build with link-time code generation, so its pairs reach the
-# link only through records/names.tsv.
+# link only through records/names.tsv. Neither do anchored pairs whose function has a single caller the target could
+# be instead, with the function inlined into it (methods "<method>-or-caller" and "<method>-via-callee",
+# tools/match/match.py inlined_into_caller): CG_AirburstLazeCancelledByMovement's globals anchored the Store's
+# CL_UpdateAirburstMarkDistance, which inlines it.
 ANCHORED = {"string", "named", "constant", "global"}
 
 

@@ -30,19 +30,24 @@ strings and functions, so the x86 servers match the x64 Store build directly. Ta
     python tools/match/match.py CoDMPServer_PC CoDMPServer_s_PC --same-compiler
     python tools/match/validate.py CoDMPServer_PC CoDMPServer_s_PC
 
-On the blind analysis published at 69fed58, with the inlining-aware string votes, named globals, call order and
-hub votes (below): **7,808 of 18,659 ship-build functions matched (41.8%)** in nine propagation rounds, **98.2%
-precision** (7,607 correct, 137 wrong, 64 unverifiable; before those stages, 6,933 at 98.3%):
+On the blind analysis published at 69fed58, with the stages below: **7,817 of 18,659 ship-build functions matched
+(41.9%)** in nine propagation rounds, **98.3% precision** (7,620 correct, 133 wrong, 64 unverifiable; before the
+single-caller check, 7,607 at 98.2%; before the inlining-aware stages, 6,933 at 98.3%). The `-or-caller` and
+`-via-callee` rows are the single-caller pairs the hybrid link leaves out (below):
 
 | method | correct | wrong | unverifiable | precision |
 |---|---:|---:|---:|---:|
-| string | 2,662 | 48 | 2 | 98.2% |
+| string | 2,531 | 39 | 2 | 98.5% |
+| string-or-caller | 129 | 6 | 0 | 95.6% |
+| string-via-callee | 3 | 1 | 0 | 75.0% |
 | named | 132 | 2 | 0 | 98.5% |
-| global | 247 | 5 | 0 | 98.0% |
-| constant | 40 | 0 | 1 | 100.0% |
-| callee | 1,927 | 43 | 19 | 97.8% |
-| caller | 1,915 | 32 | 20 | 98.4% |
-| order | 630 | 5 | 22 | 99.2% |
+| global | 220 | 5 | 0 | 97.8% |
+| global-or-caller | 27 | 0 | 0 | 100.0% |
+| constant | 34 | 0 | 0 | 100.0% |
+| constant-or-caller | 6 | 0 | 1 | 100.0% |
+| callee | 1,933 | 43 | 19 | 97.8% |
+| caller | 1,920 | 30 | 20 | 98.5% |
+| order | 631 | 5 | 22 | 99.2% |
 | votes | 54 | 2 | 0 | 96.4% |
 
 Stages added for the Store build's link-time code generation:
@@ -56,6 +61,19 @@ Stages added for the Store build's link-time code generation:
   look alike (size, callee count; an inlined reference callee leaves its own callee in its place).
 - **Hub votes.** Functions called from everywhere (never alone in a gap) pair when gaps of equal length across at
   least three callers pair them the same way, and most of each side's votes agree.
+- **Single-caller anchors.** A function with one caller can be inlined into it whole, and then its strings,
+  constants or globals anchor the caller's target function, which looks like it when the caller has no anchors of
+  its own. The Store's `CL_UpdateAirburstMarkDistance` (346 bytes, inlining `CG_AirburstLazeCancelledByMovement`)
+  was taken for the 140-byte laze check through the check's two globals. Sizes can't settle it, because the
+  function itself grows by inlining its own callees (in the ship build the laze check is 340 bytes, with
+  `Dvar_GetFloat` inlined twice). So an anchored pair whose reference function has one unmatched caller is labelled
+  for what the anchor shows:
+  - `<method>-or-caller` when the target fits both readings (the size of the function, of it with its callees, or
+    of its caller with it);
+  - `<method>-via-callee`, paired with the caller, when it is too large for the function even with its callees
+    inlined and the right size for the caller with it.
+
+  Neither is used by the hybrid link until reviewed into `records/names.tsv`.
 
 That pair shares compiler and architecture, so it measures the method, not the harder x86-to-x64 case: Store matches
 are reviewed before they become records.
@@ -63,8 +81,9 @@ are reviewed before they become records.
 ### CoDMPServer_PC → t6mp_msstore (x86 → x64)
 
 First run, on the Ghidra analyses published at 5d2be62: 2,973 of 18,495 target functions (16.1%). With the stages
-above: **3,391 (18.3%)**: string 1,647, named 453, callee 488, caller 486, order 151, global 129, votes 29, constant
-8. The Store build is harder than the ship build: most small functions are inlined, and it is a later source
+above: **3,408 (18.4%)**: string 1,342, named 453, callee 496, caller 492, order 153, global 95, votes 29, constant
+6; and 342 single-caller anchors left for review (string-or-caller 295, global-or-caller 34, string-via-callee 10,
+constant-or-caller 2, global-via-callee 1). The Store build is harder than the ship build: most small functions are inlined, and it is a later source
 revision without the servers' development output (`CL_MouseMove`'s `cl_showMouseRate` print is gone, so the
 `Com_Printf` calls that anchor many server functions aren't there). Hand-identified Store functions go to
 `records/names.tsv` with their evidence (structure, behaviour).
@@ -72,8 +91,9 @@ revision without the servers' development output (`CL_MouseMove`'s `cl_showMouse
 The hybrid link uses a generated pair only when its method rests on the function's own content (string, named,
 constant, global: `tools/symbols.py` `ANCHORED`). Propagated pairs (callee, caller, order, votes) reach it through
 `records/names.tsv` after review: in the Store build an inlined callee leaves another function in its place, and
-propagation took `CG_AirburstLazeCancelledByMovement`'s only remaining callee for `Dvar_GetFloat`, which the Store
-inlines everywhere.
+propagation took the only remaining callee of the function it had taken for `CG_AirburstLazeCancelledByMovement`
+(really `CL_UpdateAirburstMarkDistance`, above) for `Dvar_GetFloat`, which the Store inlines everywhere; that callee
+is `CG_GetAirburstMarkDistance`.
 
 These are generated identifications, not records: they become `records/names.tsv` rows (and `named` in STATUS.md)
 once reviewed, starting with the subsystems being reconstructed.
