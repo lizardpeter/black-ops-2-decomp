@@ -56,6 +56,11 @@ the source handles them:
   `cl_stanceHoldTime` and `cl_dtpHoldTime`). Code that differs is written for each revision under `T6_STORE`.
 - **Layouts.** Structures keep the PDB's field types, so pointers widen on x64 and the Store offsets follow; each
   structure has `static_assert`s for both builds, the Store's taken from its code (the function named beside them).
+  `tools/pdb/layout64.py` predicts every PDB type's x64 layout (`analysis/CoDMPServer_PC/pdb/layout_x64/`): it lays
+  each type out with MSVC's rules for x86 first, inferring `#pragma pack` and `__declspec(align)` until the PDB's
+  offsets come out (4,844 of 4,944 types), then for x64. Where the Store's code disagrees with the prediction, the
+  Store revision changed the type: `usercmd_s` (8 bytes shorter), `cg_t` (0x20 bytes more between
+  `predictedPlayerState` and `damageKickAngles`).
 - **Arithmetic.** The Store build is SSE throughout, in float. Where the server kept a chain on the x87 stack, the
   source uses `x87_t` (double on x86, float on x64) and `X87_MATH` (x86 only): `t6_compiler.h`.
 - **NaN comparisons.** The Store's compiler sometimes swaps a comparison's operands in a way only NaN can tell
