@@ -101,7 +101,15 @@ streaming budgets.
   2. Reflex: it sleeps the CPU so the queue stays empty without losing GPU throughput.
   3. Run the back end on the main thread: lowest latency, highest frame time.
 
-  Recommendation: 1 + 2 by default, with 3 as an option to measure.
+  Recommendation: 1 + 2 by default, with 3 as an option to measure. Pace the pipeline like Forge (Rust-test
+  `docs/PERFORMANCE_TELEMETRY.md`, "Frame overlap"): start the main thread's frame just in time to be ready when
+  the render thread and GPU free up (their expected finish less the main thread's recent frame time), instead of
+  letting it run ahead, so a finished frame never waits at the handoff and its input is no older. Still to discuss
+  when we get there.
+- **Fixed-rate simulation must not stall frames.** When simulation moves to a fixed tick (frame rate independence,
+  above), the tick runs on its own schedule with rendering interpolating between ticks, not inside one render frame
+  every tick: CS2's 64 Hz client tick on the main thread makes a periodic frame-time spike (Blur Busters analysis,
+  Sept 2026).
 - **Refresh rates above 240 Hz** and uncapped frame rates without frame-rate coupling (see above).
 
 ## Rendering
