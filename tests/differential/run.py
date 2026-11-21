@@ -124,7 +124,7 @@ def resolve_hooks(spec, build, m, recon, missing=None):
         elif missing is not None:
             missing.append(key)
         for e, va in recon.exports.items():
-            if symbols.scoped_name(e) == key:
+            if symbols.scoped_name(e) == symbols.scoped_name(key):  # a decorated key hooks the reconstruction too
                 out[va] = x
     return out
 
@@ -153,6 +153,9 @@ def main():
     recon = Image(out / "recon.dll")
     m = Machine(Image(original_exe(build)), recon)
     rows = symbols.read_tsv(out / "recon.symbols.tsv")
+    # what the reconstruction calls in the original: a fake for a function it doesn't call in this build (code
+    # compiled out for it, e.g. the server's warnings in the Store revision) can't block a case
+    referenced = {symbols.scoped_name(r["symbol"]) for r in symbols.read_tsv(out / "hybrid.tsv")}
     export_name = (lambda s: s) if recon.x64 else (lambda s: s[1:] if s.startswith("_") else s)
     recon_to_orig = {recon.exports[export_name(r["symbol"])]: int(r["va"], 16) for r in rows
                      if r["va"] and export_name(r["symbol"]) in recon.exports}
@@ -173,6 +176,9 @@ def main():
             print(f"patched    {r['va']} {name}  ({r['source']}: tests/enhanced)")
             continue
         case = cases.get(name)
+        if case and build in case.get("by_build", {}):
+            # per-build overrides: what a build inlined can't be faked or observed there
+            case = dict(case, **case["by_build"][build])
         va, target = int(r["va"], 16), recon.exports.get(export_name(r["symbol"]))
         if case is None or (case.get("builds") and build not in case["builds"]):
             results.append([build, r["va"], r["symbol"], 0, "untested: no case"])
@@ -180,6 +186,7 @@ def main():
             continue
         missing = []
         fakes = resolve_hooks(without_asserts(case.get("fakes")), build, m, recon, missing)
+        missing = [k for k in missing if symbols.scoped_name(k) in referenced or k in referenced]
         observe = resolve_hooks(without_asserts(case.get("observe")), build, m, recon)
         if missing:
             # the case replaces a function this build doesn't identify yet: the original would run the real one
@@ -190,6 +197,8 @@ def main():
             m.on_import(name_, (lambda f: lambda mu: f(m, mu))(fn), nargs)
         verdict, used = "pass", 0
         for inp in case["inputs"]:
+            if isinstance(inp, dict) and inp.get("builds") and build not in inp["builds"]:
+                continue  # an input one build can't be compared on (the input's comment says why)
             args, setup = (inp["args"], inp.get("setup")) if isinstance(inp, dict) else (inp, None)
             want = m.call(va, args, case["ret"], setup, fakes, observe, convention=conventions.get(va))
             if isinstance(want[0], str) and want[0].startswith("fault"):

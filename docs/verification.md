@@ -50,7 +50,8 @@ Build environment (`tools/recon/`), not game source:
 Writing for the reconstruction's compiler: at `-O0` clang returns through a stack slot when a function has several
 `return`s, and spills any x87 value that crosses a branch, both as float. Either rounds a result VC100 returned
 unrounded in ST0, so an `X87_MATH` function computes its result in the block that returns it (q_shared.cpp
-`UnGetLeanFraction`, `CMD_GetAnalogButtonValue`). A value the original kept on the x87 stack across a call has to be
+`UnGetLeanFraction`, `CMD_GetAnalogButtonValue`). It can't return an int converted on the x87 stack (`fild`)
+unrounded from a function with several returns (`Dvar_GetFloat`); such inputs are compared on the Store only. A value the original kept on the x87 stack across a call has to be
 computed after the call: clang spills it as a float otherwise (cl_input.cpp `CL_AdjustAngles` reads the dvar first). Likewise a store the original's optimiser removed is left out when
 keeping it would change behaviour (q_shared.cpp `Info_RemoveKey_Big`: the dead value copy would overflow the stack).
 
@@ -96,6 +97,9 @@ Harness specifics:
   members get `this` in ECX.
 - **Float results:** a fake returning a Python float leaves it in ST0 on x86 (through a `fld; ret` stub), XMM0 on
   x64.
+- **Per-build cases:** a case's `by_build` replaces its fakes or observed calls for one build (what the Store
+  inlined can't be faked or observed there); an input with `builds` runs only on those builds, with a comment saying
+  why. A fake blocks a case only when the reconstruction calls the faked function in that build (`hybrid.tsv`).
 - **Standing fakes:** `Machine.provide(va, fn)` replaces a function in every call; a case's `fakes` apply to it alone.
 - **Instruction cap:** 20 million per call. It's a runaway guard, and `-O0` reconstructions take several times the
   original's instructions.

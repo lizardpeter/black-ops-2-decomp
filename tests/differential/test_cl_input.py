@@ -54,6 +54,25 @@ STANCE_HOLD, DTP_HOLD, ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, M_FILTER = 0x7105, 0
 DAMAGE_KICK, PAUSED = 0x710B, 0x710C
 MOUSE_ACCEL, SHOW_RATE, M_SIDE, M_YAW, M_PITCH, M_FORWARD, FREELOOK = range(0x710D, 0x7114)
 
+FLOAT_DVARS = {ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, MOUSE_ACCEL, M_SIDE, M_YAW, M_PITCH, M_FORWARD}
+BOOL_DVARS = {M_FILTER, DAMAGE_KICK, SHOW_RATE, FREELOOK}
+DVAR_STORE = {STANDING: 0x14265A860}  # the Store's dvar pointers identified so far (records/names.tsv)
+DVAR_OBJECTS = OBJECTS + 0x1C0000      # one dvar_t per handle, 0x80 apart, in the build's layout
+
+
+def write_dvars(w, values):
+    """Point every dvar global at a dvar_t of the right type holding values.get(handle, 0)."""
+    x64 = w.m.x64
+    globals_ = {h: va for h, va in DVAR_STORE.items()} if x64 else {h: va for va, h in DVAR_HANDLES.items()}
+    for handle, va in globals_.items():
+        obj = DVAR_OBJECTS + (handle - 0x7100) * 0x80
+        type_ = 2 if handle in FLOAT_DVARS else 1 if handle in BOOL_DVARS else 6
+        v = values.get(handle, 0)
+        w.write(obj + (0x18 if x64 else 0x10), struct.pack("<i", type_))
+        w.write(obj + (0x20 if x64 else 0x18), struct.pack("<f", v) if type_ == 2 else struct.pack("<i", int(v)))
+        (w.u64 if x64 else w.u32)(va, obj)
+
+
 # clientActive_t fields
 USING_ADS, SNAP_VALID, PS = 0x44, 0x50, 0x70
 CMDS, CMD_NUMBER, CMD_SIZE = 0x42CA8, 0x44EA8, 0x44
@@ -74,7 +93,7 @@ KB = {n: i for i, n in enumerate(
     "CROUCH THROW STANCE SPRINT NIGHTVISION GAS REVERSE HANDBRAKE SWITCHSEAT VEHICLEATTACK VEHICLEATTACKSECOND "
     "VEHICLEMOVEUP VEHICLEMOVEDOWN VEHICLEBOOST JAM TALK".split())}
 
-PREDICTED_PS = SCRATCH + 0x40000   # what the CG_GetPredictedPlayerState fake returns
+PREDICTED_PS = OBJECTS + 0x100000 + 0x480A8  # cg_t.predictedPlayerState (CG, below)
 WEAPON_DEF = SCRATCH + 0x50000     # what the BG_GetWeaponDef fake returns (or 0)
 ARGV = SCRATCH + 0x60000           # Cmd_Argv's strings
 
@@ -110,9 +129,20 @@ ADDR = {
 
 # clientActive_t fields by name, per architecture (client.h's static_asserts)
 FIELDS = {"x86": {"stance": STANCE, "stance_held": STANCE_HELD, "stance_position": STANCE_POSITION,
-                  "stance_time": STANCE_TIME, "using_ads": USING_ADS},
+                  "stance_time": STANCE_TIME, "using_ads": USING_ADS, "ps": PS, "was_in_vehicle": WAS_IN_VEHICLE,
+                  "use_count": USE_COUNT, "use_time": USE_TIME, "switching_to_inventory": SWITCHING_TO_INVENTORY},
           "x64": {"stance": 0x2BE8, "stance_held": 0x2BE4, "stance_position": 0x2BEC, "stance_time": 0x2BF0,
-                  "using_ads": 0x5C}}
+                  "using_ads": 0x5C, "ps": 0x88, "was_in_vehicle": 0x8A3E0, "use_count": 0x8A3DC,
+                  "use_time": 0x8A3D8, "switching_to_inventory": 0x2BFC}}
+CG_FIELDS = {"x86": {"weapon_select": CG_WEAPON_SELECT}, "x64": {"weapon_select": 0x6B554}}
+
+
+def field(x64, key):
+    """A clientActive_t field: a name, ("ps", offset in playerState_s), or a server offset."""
+    f = FIELDS["x64" if x64 else "x86"]
+    if isinstance(key, tuple):
+        return f[key[0]] + key[1]
+    return f[key] if isinstance(key, str) else key
 
 
 def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dvars=None, ps=None, globals_=None,
@@ -132,17 +162,15 @@ def setup(kb=None, client=None, ui_state=10, frame_time=10000, frame_msec=16, dv
         if "cls_frametime" in a:
             w.u32(a["cls_frametime"], frametime)
         for off, v in (cg or {}).items():
+            off = CG_FIELDS["x64" if x64 else "x86"][off] if isinstance(off, str) else off
             w.write(CG + off, v if isinstance(v, bytes) else struct.pack("<i", v))
         w.u32(a["com_frametime"], frame_time)
         w.u32(a["frame_msec"], frame_msec)
-        if not x64:
-            for va, handle in DVAR_HANDLES.items():
-                w.u32(va, handle)
+        write_dvars(w, STATE["dvars"])
         for button, data in (kb or {}).items():
             w.write(a["players_kb"] + button * KB_SIZE, data)
         for off, v in (client or {}).items():
-            off = FIELDS["x64" if x64 else "x86"][off] if isinstance(off, str) else off
-            w.write(CLIENTS + off, v if isinstance(v, bytes) else struct.pack("<i", v))
+            w.write(CLIENTS + field(x64, off), v if isinstance(v, bytes) else struct.pack("<i", v))
         for off, v in (ps or {}).items():
             w.write(PREDICTED_PS + off, v if isinstance(v, bytes) else struct.pack("<i", v))
         for va, v in (globals_ or {}).items():
@@ -160,9 +188,6 @@ def cmd_argv(mu):
 
 
 FAKES = {
-    "?Dvar_GetInt@@YAHPBUdvar_t@@@Z": lambda mu: STATE["dvars"].get(arg(mu, 0), 0),
-    "?Dvar_GetFloat@@YAMPBUdvar_t@@@Z": lambda mu: float(STATE["dvars"].get(arg(mu, 0), 0.0)),
-    "?Dvar_GetBool@@YA_NPBUdvar_t@@@Z": lambda mu: int(bool(STATE["dvars"].get(arg(mu, 0), 0))),
     "CG_AirburstLazeCancelledByMovement": lambda mu: STATE.get("cancelled", 0),
     "CG_GetAirburstMarkDistance": lambda mu: airburst(mu),
     "DevGui_IsActive": lambda mu: STATE.get("devgui", 0),
@@ -193,7 +218,6 @@ FAKES = {
     "CL_IsFirstActiveLocalClient": lambda mu: STATE.get("first", 1),
     "IN_Frame": lambda mu: None,
     "Com_SessionMode_IsZombiesGame": lambda mu: STATE.get("zombies", 0),
-    "CG_GetPredictedPlayerState": lambda mu: PREDICTED_PS,
     "Cmd_Argv": cmd_argv,
     "Com_Printf": lambda mu: None,
     "Sys_Milliseconds": lambda mu: STATE.get("now", 0),
@@ -374,7 +398,9 @@ CASES = [
     {"name": "CL_LeanCount_ShouldIncrementStat", "ret": "bool", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [], "setup": setup(globals_={G_LEANED: n}, dvars={LEAN_MIN: m})}
                 for n in (0, 2, 3, 4) for m in (0, 3)]},
-    {"name": "CG_IsSprinting", "ret": "bool", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CG_IsSprinting", "ret": "bool", "builds": BOTH, "fakes": FAKES, "observe": SEEN,
+     # the Store build inlines CG_GetPredictedPlayerState and Dvar_GetInt, and takes no argument (ignores rcx)
+     "by_build": {"t6mp_msstore": {"fakes": {}, "observe": {}}},
      "inputs": [{"args": [0], "setup": setup(ps={PS_VIEWHEIGHT: struct.pack("<f", h), PS_PM_FLAGS: f}, dvars={STANDING: 60})}
                 for h in (59.9, 60.0, 61.0, float("nan")) for f in (0, 0x8000, 0x8001)]},
     {"name": "IN_KeyDown", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
@@ -480,6 +506,8 @@ CASES = [
                 for lc in (0, 1, 2) for m in (0, 1, 2) for c in (0, CLIENTS)]},
     {"name": "CL_GetLocalClientMigrationState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(globals_={CLIENT_UI + 0x10: m})} for lc in (0, 1) for m in range(4)]},
+    {"name": "CG_GetPredictedPlayerState", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+     "inputs": [{"args": [lc], "setup": setup(cg_null=n)} for lc in (0, 1) for n in (False, True)]},
     {"name": "CG_GetLocalClientGlobals", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [lc], "setup": setup(cg_null=n)} for lc in (0, 1) for n in (False, True)]},
     {"name": "IN_IsTalkKeyHeld", "ret": "bool", "builds": SERVER,
@@ -519,18 +547,26 @@ CASES = [
                                         PS + PS_WEAPON: cur},
                                 cg={CG_WEAPON_SELECT: sel})}
                 for sw in (0, 1) for inv in (5, 7) for cur in (5, 9) for sel in (5, 7)]},
-    {"name": "CL_KeyMove", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CL_KeyMove", "ret": "void", "builds": BOTH, "fakes": FAKES, "observe": SEEN,
+     # the Store inlines everything CL_KeyMove calls but CL_KeyState and CG_IsSprinting
+     "by_build": {"t6mp_msstore": {"fakes": {}, "observe": {}}},
      "inputs": [{"args": [0, struct.pack("<III", 0, rng.getrandbits(32), rng.getrandbits(32)) + bytes(0x38)],
                  "setup": setup(kb={b: random_kbutton() for b in range(NUM_BUTTONS)},
-                                client={PS + PS_EFLAGS: rng.choice([0, 0x4000]), WAS_IN_VEHICLE: rng.randrange(2),
-                                        USING_ADS: bytes([rng.randrange(2)]), USE_COUNT: rng.choice([0, 1, 2, 2]),
-                                        USE_TIME: 9000, STANCE_HELD: rng.randrange(2), STANCE: rng.randrange(4),
-                                        STANCE_POSITION: rng.randrange(4), STANCE_TIME: 9500,
-                                        SWITCHING_TO_INVENTORY: bytes([rng.randrange(2)])},
+                                client={("ps", PS_EFLAGS): rng.choice([0, 0x4000]),
+                                        "was_in_vehicle": rng.randrange(2), "using_ads": bytes([rng.randrange(2)]),
+                                        "use_count": rng.choice([0, 1, 2, 2]), "use_time": 9000,
+                                        "stance_held": rng.randrange(2), "stance": rng.randrange(4),
+                                        "stance_position": rng.randrange(4),
+                                        # either side of the 200 and 300 ms holds
+                                        "stance_time": rng.choice([9500, 9750, 9801, 9850, 9700, 9701]),
+                                        "switching_to_inventory": bytes([rng.randrange(2)]),
+                                        ("ps", PS_WEAPON): rng.choice([5, 7]),
+                                        ("ps", PS_INVENTORY_WEAPON): rng.choice([5, 7])},
+                                cg={"weapon_select": rng.choice([5, 7])},
                                 ps={PS_VIEWHEIGHT: struct.pack("<f", 61.0), PS_PM_FLAGS: rng.choice([0, 0x8000])},
                                 frame_time=10000, frame_msec=rng.choice([7, 16, 33, 127]),
-                                dvars={STANDING: 60, STANCE_HOLD: 300, DTP_HOLD: 150})}
-                for _ in range(200)]},
+                                dvars={STANDING: 60, STANCE_HOLD: 300, DTP_HOLD: 200})}
+                for _ in range(300)]},
     {"name": "CL_MouseEvent", "ret": "int", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [0, 320, 240, dx, dy],
                  "setup": setup(devgui=d, bypass=b, globals_={CLIENT_UI + 4: kc, MOUSE_IN: struct.pack("<5i", 3, -4, 5, 6, i)})}

@@ -39,6 +39,7 @@ LocalClientNum_t Com_ControllerIndex_GetLocalClientNum(ControllerIndex_t control
 extern int com_frameTime;
 void Com_Error(errorParm_t code, const char *fmt, ...);
 void Com_Printf(int channel, const char *fmt, ...);
+void Com_PrintWarning(int channel, const char *fmt, ...);
 void Com_PrintError(int channel, const char *fmt, ...);
 
 // sv_main_pc_mp.cpp (the dedicated server's answer)

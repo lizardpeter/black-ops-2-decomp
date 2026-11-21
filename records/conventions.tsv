@@ -38,3 +38,6 @@ CoDMPServer_PC	004EEB30	CL_GamepadMove	stack,ecx,stack	localClientNum at [EBP+8]
 CoDMPServer_PC	004EF530	CL_CreateCmd	ecx,edi	returns usercmd_s through the hidden pointer in ECX (also returned in EAX); localClientNum in EDI
 CoDMPServer_PC	004EF7A0	CL_CreateNewCommands	eax	localClientNum in EAX (moved to EDI; CL_Input jumps here with it)
 CoDMPServer_PC	00797D50	IN_ClampMouseMove	esi	curPos in ESI (IN_MouseMove loads LEA ESI,[EBP-8] before the call)
+CoDMPServer_PC	007725F0	Dvar_StringToBool	esi	string in ESI (Dvar_GetBool inlines it; tested ESI)
+CoDMPServer_PC	00772630	Dvar_StringToInt	esi	string in ESI (Dvar_GetInt: MOV ESI,[ESI+0x18] before the call)
+CoDMPServer_PC	00772690	Dvar_StringToFloat	esi	string in ESI (Dvar_GetFloat: MOV ESI,[ESI+0x18] before the call)

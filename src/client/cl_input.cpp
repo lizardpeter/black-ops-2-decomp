@@ -26,7 +26,7 @@
 #include "win32/win_shared.h"
 
 // cgame
-const playerState_s *CG_GetPredictedPlayerState(LocalClientNum_t localClientNum);
+
 void CG_CycleWeapon(LocalClientNum_t localClientNum, int cycleForward);
 int CG_AirburstLazeCancelledByMovement(float forwardMove, float rightMove, float pitchMove, float yawMove,
                                        float moveScale);
@@ -157,7 +157,13 @@ bool CL_LeanCount_ShouldIncrementStat()
 bool CG_IsSprinting(LocalClientNum_t localClientNum)
 {
 	const playerState_s *ps = CG_GetPredictedPlayerState(localClientNum);
+#ifdef T6_STORE
+	// t6mp_msstore 140192650 tests "not below" (comiss standing, height; ja), so a NaN height counts as standing
+	// height there: its compiler reordered the comparison (docs/store-build.md, NaN comparisons)
+	return !((float)Dvar_GetInt(player_standingViewHeight) > ps->viewHeightCurrent) && (ps->pm_flags & PMF_SPRINTING);
+#else
 	return ps->viewHeightCurrent >= (float)Dvar_GetInt(player_standingViewHeight) && (ps->pm_flags & PMF_SPRINTING);
+#endif
 }
 
 // 004EA8E0  client/cl_input.cpp:164
@@ -740,8 +746,15 @@ void CL_StanceButtonUpdate(LocalClientNum_t localClientNum)
 	if (!cl->stanceHeld)
 		return;
 	bool sprinting = CG_IsSprinting(localClientNum);
+#ifdef T6_STORE
+	// the Store revision holds for fixed times (t6mp_msstore CL_KeyMove 140192D50, this function inlined: 300 and
+	// 200 ms) where the server reads cl_stanceHoldTime and cl_dtpHoldTime
+	if (com_frameTime - cl->stanceTime < (sprinting ? 200 : 300))
+		return;
+#else
 	if (com_frameTime - cl->stanceTime < Dvar_GetInt(sprinting ? cl_dtpHoldTime : cl_stanceHoldTime))
 		return;
+#endif
 	if (sprinting)
 	{
 		cl->stance = CL_STANCE_DIVE_TO_PRONE;

@@ -7,6 +7,7 @@ CoDMPServer_PC	0041D9A0	matches	include/client/client.h	CL_GetLocalClientConnect
 CoDMPServer_PC	00426AD0	matches	include/client/client.h	CL_GetLocalClientMigrationState; tests/differential/test_cl_input.py
 CoDMPServer_PC	0042E740	matches	include/client/client.h	CL_GetLocalClientGlobals; tests/differential/test_cl_input.py
 CoDMPServer_PC	00464890	matches	src/client/cl_input.cpp	CL_GetLocalClientUIGlobals; tests/differential/test_cl_input.py
+CoDMPServer_PC	00466D70	matches	src/cgame_mp/cg_main_mp.cpp	CG_GetPredictedPlayerState; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA830	matches	src/client/cl_input.cpp	CL_LeanCount_Reset; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA840	matches	src/client/cl_input.cpp	CL_LeanCount_Increment; tests/differential/test_cl_input.py
 CoDMPServer_PC	004EA860	matches	src/client/cl_input.cpp	CL_LeanCount_ShouldIncrementStat; tests/differential/test_cl_input.py
@@ -68,6 +69,12 @@ CoDMPServer_PC	0055DF60	matches	src/win32/win_voice.cpp	Voice_GetLocalVoiceData;
 CoDMPServer_PC	00761340	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
 CoDMPServer_PC	00761360	matches	src/universal/com_math.cpp	ClampShort; tests/differential/test_universal.py
 CoDMPServer_PC	0076B690	matches	src/universal/com_shared.cpp	Com_HashKey; tests/differential/test_universal.py
+CoDMPServer_PC	007725F0	matches	src/universal/dvar.cpp	Dvar_StringToBool; tests/differential/test_dvar.py
+CoDMPServer_PC	00772630	matches	src/universal/dvar.cpp	Dvar_StringToInt; tests/differential/test_dvar.py
+CoDMPServer_PC	00772690	matches	src/universal/dvar.cpp	Dvar_StringToFloat; tests/differential/test_dvar.py
+CoDMPServer_PC	007767A0	matches	src/universal/dvar.cpp	Dvar_GetBool; tests/differential/test_dvar.py
+CoDMPServer_PC	00776850	matches	src/universal/dvar.cpp	Dvar_GetInt; tests/differential/test_dvar.py
+CoDMPServer_PC	007769E0	matches	src/universal/dvar.cpp	Dvar_GetFloat (an int dvar above 2^24 is compared on the Store only: the server returns it unrounded in ST0, which clang -O0 cannot); tests/differential/test_dvar.py
 CoDMPServer_PC	0078DB00	matches	src/universal/q_shared.cpp	TRACK_q_shared; tests/differential/test_q_shared.py
 CoDMPServer_PC	0078DB60	matches	src/universal/q_shared.cpp	ColorIndex; tests/differential/test_q_shared.py
 CoDMPServer_PC	0078DB80	matches	src/universal/q_shared.cpp	Com_GetFilenameSubString; tests/differential/test_q_shared.py
@@ -169,9 +176,13 @@ t6mp	00645340	matches	src/universal/com_math.cpp	ClampShort; tests/differential/
 t6mp	006580F0	matches	src/universal/q_shared.cpp	I_isdigit; tests/differential/test_q_shared.py
 t6mp	006F5A40	matches	src/universal/com_shared.cpp	Com_HashKey; tests/differential/test_universal.py
 t6mp	007043C0	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
+t6mp_msstore	140192650	matches	src/client/cl_input.cpp	CG_IsSprinting; tests/differential/test_cl_input.py
 t6mp_msstore	1401926D0	matches	src/client/cl_input.cpp	CL_KeyState (the Store divides in float, SSE); tests/differential/test_cl_input.py
 t6mp_msstore	140192CD0	matches	src/client/cl_input.cpp	CL_AddCurrentStanceToCmd; tests/differential/test_cl_input.py
+t6mp_msstore	140192D50	matches	src/client/cl_input.cpp	CL_KeyMove; tests/differential/test_cl_input.py
 t6mp_msstore	1403E9910	matches	src/universal/q_shared.cpp	I_DrawStrlen; tests/differential/test_q_shared.py
+t6mp_msstore	14046B910	matches	src/universal/dvar.cpp	Dvar_GetBool; tests/differential/test_dvar.py
+t6mp_msstore	14046B950	matches	src/universal/dvar.cpp	Dvar_GetInt; tests/differential/test_dvar.py
 t6mp_msstore	140471A90	matches	src/universal/q_shared.cpp	I_atoui; tests/differential/test_q_shared.py
 t6mp_msstore	140471B00	matches	src/universal/q_shared.cpp	I_strncpyz; tests/differential/test_q_shared.py
 t6mp_msstore	140471B50	matches	src/universal/q_shared.cpp	I_strnicmp; tests/differential/test_q_shared.py

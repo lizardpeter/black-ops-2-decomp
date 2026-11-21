@@ -58,6 +58,9 @@ the source handles them:
   structure has `static_assert`s for both builds, the Store's taken from its code (the function named beside them).
 - **Arithmetic.** The Store build is SSE throughout, in float. Where the server kept a chain on the x87 stack, the
   source uses `x87_t` (double on x86, float on x64) and `X87_MATH` (x86 only): `t6_compiler.h`.
+- **NaN comparisons.** The Store's compiler sometimes swaps a comparison's operands in a way only NaN can tell
+  apart (`a >= b` as `!(b > a)`: `CG_IsSprinting`), as fast floating-point modes allow. Where the Store's code does,
+  its branch writes the comparison the way the Store evaluates it.
 - **Inlining.** Link-time code generation inlined most small functions (`CL_GetLocalClientGlobals`, `Dvar_GetInt`,
   `ClampChar`, `CL_AdjustAngles`, ...) and removed unused arguments (`CG_IsSprinting` takes none). A function the
   Store doesn't have is verified there through its caller; header functions are inline in `include/` as they were
