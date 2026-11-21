@@ -36,6 +36,11 @@ jobs:
       - name: Differential tests
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tests/differential/run.py --build $b --check-records; done
+      - name: Enhanced build
+        run: |
+          python tools/build_recon.py --build CoDMPServer_PC --enhanced
+          python tests/differential/run.py --build CoDMPServer_PC --enhanced
+          python tests/enhanced/run.py --build CoDMPServer_PC
       - name: Generated files are current
         run: |
           python tools/inventory/retail_calls.py originals/t6mp.exe

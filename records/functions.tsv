@@ -1,5 +1,6 @@
 build	va	status	src	note
 CoDMPServer_PC	00407EE0	compiles	include/qcommon/bitarray.h	bitarray<64>::testBit; __thiscall, which the harness doesn't call yet: covered through CMD_GetAnalogButtonValue
+CoDMPServer_PC	0055DF60	matches	src/win32/win_voice.cpp	Voice_GetLocalVoiceData; tests/differential/test_win_voice.py
 CoDMPServer_PC	00761340	matches	src/universal/com_math.cpp	ClampChar; tests/differential/test_universal.py
 CoDMPServer_PC	00761360	matches	src/universal/com_math.cpp	ClampShort; tests/differential/test_universal.py
 CoDMPServer_PC	0076B690	matches	src/universal/com_shared.cpp	Com_HashKey; tests/differential/test_universal.py
@@ -70,6 +71,22 @@ CoDMPServer_PC	00790180	matches	src/universal/q_shared.cpp	OrientationInvert; te
 CoDMPServer_PC	00790280	matches	src/universal/q_shared.cpp	Com_IsLegacyXModelName; tests/differential/test_q_shared.py
 CoDMPServer_PC	007902C0	matches	src/universal/q_shared.cpp	Com_DefaultExtension; tests/differential/test_q_shared.py
 CoDMPServer_PC	00790340	matches	src/universal/q_shared.cpp	CMD_GetAnalogButtonValue; tests/differential/test_q_shared.py
+CoDMPServer_PC	0079DF60	matches	src/win32/win_voice.cpp	Voice_StopClientSamples; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079DF90	matches	src/win32/win_voice.cpp	Voice_IncomingVoiceData_Platform; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E0F0	matches	src/win32/win_voice.cpp	Voice_IsClientTalking; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E140	matches	src/win32/win_voice.cpp	Mixer_GetRecordLevel; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E2A0	matches	src/win32/win_voice.cpp	Mixer_GetMuteState; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E400	matches	src/win32/win_voice.cpp	Voice_IsLocalClientTalking; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E430	matches	src/win32/win_voice.cpp	Voice_IsHeadsetPresent; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E440	matches	src/win32/win_voice.cpp	Voice_IsXuidTalking; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E4D0	matches	src/win32/win_voice.cpp	Mixer_InitWaveInLineInfo; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E610	matches	src/win32/win_voice.cpp	Mixer_SetWaveInRecordLevels; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E780	matches	src/win32/win_voice.cpp	Mixer_RestoreWaveInRecordLevels; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079E8F0	matches	src/win32/win_voice.cpp	Mixer_SetWaveInMuteStates; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079EA60	matches	src/win32/win_voice.cpp	Mixer_RestoreWaveInMuteStates; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079EBD0	matches	src/win32/win_voice.cpp	Voice_Init; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079ED80	matches	src/win32/win_voice.cpp	Voice_Shutdown; tests/differential/test_win_voice.py
+CoDMPServer_PC	0079EE20	matches	src/win32/win_voice.cpp	Voice_Playback; tests/differential/test_win_voice.py
 CoDMPServer_PC	00834010	matches	src/universal/q_shared.cpp	FloatWriteNoSwap; tests/differential/test_q_shared.py
 CoDMPServer_PC	00834010	matches	src/universal/q_shared.cpp	LongNoSwap; tests/differential/test_q_shared.py
 t6mp	004017C0	matches	src/universal/q_shared.cpp	ColorIndex; tests/differential/test_q_shared.py

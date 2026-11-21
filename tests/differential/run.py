@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Differential tests: every exported reconstructed function against the original, on the same inputs.
 
-    python3 tests/differential/run.py [--build <id>] [--check-records] [-k <name>]
+    python3 tests/differential/run.py [--build <id>] [--enhanced] [--check-records] [-k <name>]
 
 Builds the comparison for one build (default: the reference build, CoDMPServer_PC): its original exe and
 build/<build>/recon.dll (tools/build_recon.py), mapped into one emulator (harness.py). Cases live in
@@ -10,12 +10,16 @@ tests/differential/test_*.py as CASES, keyed by a function's scoped plain name (
 
     {"name": "ClampChar", "ret": "char", "inputs": [[-129], [0], ...]}
     {"name": "Com_HashKey", "ret": "int", "inputs": [{"args": [b"abc\\0", 3], "setup": fn(writer)}, ...],
-     "fakes": {"Name": fn(mu)}, "observe": {"Name": "is"}, "builds": ["CoDMPServer_PC"]}
+     "fakes": {"Name": fn(mu)}, "observe": {"Name": "is"}, "builds": ["CoDMPServer_PC"],
+     "imports": {"winmm.dll!mixerOpen": (fn(machine, mu), nargs)}}
 
 A case whose `fakes` name a function the build doesn't identify yet is reported as blocked, not run. A case passes
 when, for every input, both runs return the same value (floats compared bit for bit), leave the same
 bytes in every buffer passed by pointer, write the same bytes to the images' globals, and make the same observed
 calls. An input on which the original itself faults is skipped; a case with no usable input is untestable.
+
+--enhanced tests build/<build>/enhanced/recon.dll instead: every function must still match the original except the
+ones enhanced/ overrides, which tests/enhanced/ checks against their patches (records/patches.tsv).
 
 --check-records fails if records/functions.tsv claims `matches` (or `integrated`) for a function of this build that
 did not pass. Results go to build/<build>/test-results.tsv.
@@ -133,7 +137,8 @@ def main():
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
     global ASSERTS
     ASSERTS = bool(symbols.build_spec(build).get("asserts"))
-    out = ROOT / "build" / build
+    enhanced = "--enhanced" in sys.argv
+    out = ROOT / "build" / build / ("enhanced" if enhanced else "")
     recon = Image(out / "recon.dll")
     m = Machine(Image(original_exe(build)), recon)
     rows = symbols.read_tsv(out / "recon.symbols.tsv")
@@ -151,6 +156,10 @@ def main():
         name = symbols.scoped_name(r["symbol"])
         if only and only not in name:
             continue
+        if r["source"].startswith("enhanced/"):
+            results.append([build, r["va"], r["symbol"], 0, "patched: tests/enhanced"])
+            print(f"patched    {r['va']} {name}  ({r['source']}: tests/enhanced)")
+            continue
         case = cases.get(name)
         va, target = int(r["va"], 16), recon.exports.get(export_name(r["symbol"]))
         if case is None or (case.get("builds") and build not in case["builds"]):
@@ -165,6 +174,8 @@ def main():
             results.append([build, r["va"], r["symbol"], 0, f"blocked: needs {', '.join(missing)} identified"])
             print(f"blocked    {r['va']} {name}  (fakes {', '.join(missing)}: not identified in {build} yet)")
             continue
+        for name_, (fn, nargs) in (case.get("imports") or {}).items():
+            m.on_import(name_, (lambda f: lambda mu: f(m, mu))(fn), nargs)
         verdict, used = "pass", 0
         for inp in case["inputs"]:
             args, setup = (inp["args"], inp.get("setup")) if isinstance(inp, dict) else (inp, None)

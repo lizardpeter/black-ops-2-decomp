@@ -25,6 +25,16 @@ enum ControllerIndex_t
 	CONTROLLER_INDEX_0 = 0,
 };
 
+enum ClientNum_t
+{
+	INVALID_CLIENT_INDEX = -1,
+	CLIENT_INDEX_0 = 0,
+	CLIENT_INDEX_COUNT = 18,
+};
+
+// com_clients.cpp
+LocalClientNum_t Com_ControllerIndex_GetLocalClientNum(ControllerIndex_t controllerIndex);
+
 // common.cpp
 void Com_Error(errorParm_t code, const char *fmt, ...);
 void Com_Printf(int channel, const char *fmt, ...);

@@ -13,7 +13,12 @@ typedef __SIZE_TYPE__ size_t;
 extern "C" {
 #endif
 
+typedef struct _iobuf FILE;
+
 int _vsnprintf(char *buffer, size_t count, const char *format, va_list argptr);
+FILE *fopen(const char *filename, const char *mode);
+size_t fwrite(const void *buffer, size_t size, size_t count, FILE *stream);
+int fclose(FILE *stream);
 
 #ifdef __cplusplus
 }

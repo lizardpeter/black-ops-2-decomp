@@ -352,11 +352,13 @@ class Machine:
         spec = self._observe.get(address)
         if spec is not None:
             # one letter per argument: b = bool/char (low byte), i = 32-bit integer, q = pointer-sized, f = float
-            # (its 32-bit pattern), s = C string pointer
+            # (its 32-bit pattern), s = C string pointer, x = not compared (e.g. a pointer into the caller's stack)
             got = []
             for i, kind in enumerate(spec):
                 raw = self._arg(mu, i, kind)
-                if kind == "s":
+                if kind == "x":
+                    got.append(None)
+                elif kind == "s":
                     got.append(self.read_cstr(raw))
                 else:
                     got.append(raw & {"q": MASK64 if self.x64 else 0xFFFFFFFF, "b": 0xFF}.get(kind, 0xFFFFFFFF))

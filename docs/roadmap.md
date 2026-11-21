@@ -63,11 +63,12 @@ First: `cgame_mp/cg_draw_net_mp.cpp`, `client/cl_input.cpp`, `client_mp/cl_input
   with the system's default buffer (typically 10 ms). Output through our own WASAPI path instead:
   `IAudioClient3` low-latency shared mode (the smallest period the driver allows, often about 3 ms), with exclusive
   mode as an option. Voice chat capture and playback (DirectSound and WINMM in the original) move to WASAPI too.
-- **Leave the system microphone alone (B0002).** The original sets every Windows recording device's level to 100%
-  and its mute state when voice starts, and only restores them on a clean exit. The enhanced build never touches
-  device settings; mic gain applies to the captured samples (`winvoice_mic_scaler`).
+- **Leave the system microphone alone (B0002): done, P0001.** The original sets every Windows recording device's level
+  to 100% and its mute state when voice starts, and only restores them on a clean exit. The enhanced build never
+  touches device settings; `winvoice_mic_mute` mutes the game's own capture. Still to do: map
+  `winvoice_mic_reclevel` onto the capture gain once `groupvoice/record.cpp` is reconstructed.
 
-First: `win32/win_voice.cpp`, the sound back end (`snd_*`, XAudio2 driver layer).
+First: the sound back end (`snd_*`, XAudio2 driver layer).
 
 ## Threading
 

@@ -87,6 +87,20 @@ Harness specifics:
 `--check-records` fails when `records/functions.tsv` claims `matches` for a function of that build that didn't pass.
 CI (`.github/workflows/check.yml`) builds and tests `CoDMPServer_PC`, `t6mp` and `t6mp_msstore` on every push.
 
+## The enhanced build
+
+`tools/build_recon.py --enhanced` compiles `enhanced/` ahead of `src/`; a function defined in `enhanced/` replaces
+the faithful one (`/force:multiple` keeps the first definition). Each override belongs to a patch in
+`records/patches.tsv`, and the patch's tests say what it promises:
+- `tests/differential/run.py --enhanced` runs the faithful cases on the enhanced DLL: every function it doesn't
+  override must still match the original (overrides are reported `patched`).
+- `tests/enhanced/run.py` runs each patch's `CHECKS` (`tests/enhanced/test_*.py`): usually the original and the
+  enhanced function on the same inputs, compared on everything except what the patch changes, plus the change
+  itself. P0001 (`test_voice.py`) reuses `test_win_voice.py`'s Windows mixer model: no winmm call, no mixer change,
+  everything else as the original.
+
+CI builds and checks the enhanced build for CoDMPServer_PC.
+
 ## Byte matching
 
 Not attempted: it would need the original compilers (VS2010 for the servers, VS2019 16.11 with LTCG for the Store
