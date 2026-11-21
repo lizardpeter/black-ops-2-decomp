@@ -12,7 +12,8 @@ tests/differential/test_*.py as CASES, keyed by a function's scoped plain name (
     {"name": "Com_HashKey", "ret": "int", "inputs": [{"args": [b"abc\\0", 3], "setup": fn(writer)}, ...],
      "fakes": {"Name": fn(mu)}, "observe": {"Name": "is"}, "builds": ["CoDMPServer_PC"]}
 
-A case passes when, for every input, both runs return the same value (floats compared bit for bit), leave the same
+A case whose `fakes` name a function the build doesn't identify yet is reported as blocked, not run. A case passes
+when, for every input, both runs return the same value (floats compared bit for bit), leave the same
 bytes in every buffer passed by pointer, write the same bytes to the images' globals, and make the same observed
 calls. An input on which the original itself faults is skipped; a case with no usable input is untestable.
 
@@ -32,6 +33,7 @@ import symbols  # noqa: E402
 from harness import Image, Machine, original_exe  # noqa: E402
 
 MATCHED = {"matches", "integrated"}
+ASSERTS = True
 
 
 def same(a, b):
@@ -96,8 +98,9 @@ class Canon:
         return out
 
 
-def resolve_hooks(spec, build, m, recon):
-    """{name or address: x} -> {address: x}, hooking both copies when the reconstruction defines one."""
+def resolve_hooks(spec, build, m, recon, missing=None):
+    """{name or address: x} -> {address: x}, hooking both copies when the reconstruction defines one. Names the
+    original build doesn't identify go into `missing`."""
     out = {}
     for key, x in (spec or {}).items():
         if isinstance(key, int):
@@ -110,15 +113,26 @@ def resolve_hooks(spec, build, m, recon):
             ((va, k) for s, (va, k) in symbols.table(build).items() if symbols.scoped_name(s) == key), None)
         if hit:
             out[hit[0]] = x
+        elif missing is not None:
+            missing.append(key)
         for e, va in recon.exports.items():
             if symbols.scoped_name(e) == key:
                 out[va] = x
     return out
 
 
+def without_asserts(spec):
+    """Hooks on Assert_MyHandler mean nothing in a build that compiled its asserts out (target.toml `asserts`)."""
+    if ASSERTS or not spec:
+        return spec
+    return {k: v for k, v in spec.items() if k != "Assert_MyHandler"}
+
+
 def main():
     build = sys.argv[sys.argv.index("--build") + 1] if "--build" in sys.argv else symbols.reference_build()
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
+    global ASSERTS
+    ASSERTS = bool(symbols.build_spec(build).get("asserts"))
     out = ROOT / "build" / build
     recon = Image(out / "recon.dll")
     m = Machine(Image(original_exe(build)), recon)
@@ -126,6 +140,9 @@ def main():
     export_name = (lambda s: s) if recon.x64 else (lambda s: s[1:] if s.startswith("_") else s)
     recon_to_orig = {recon.exports[export_name(r["symbol"])]: int(r["va"], 16) for r in rows
                      if r["va"] and export_name(r["symbol"]) in recon.exports}
+    crt = [symbols.resolve(build, n) for n in ("__getptd", "__getptd_noexit", "___ptmbcinfo", "___ptlocinfo")]
+    if not recon.x64 and all(crt):
+        m.crt_thread_data([crt[0][0], crt[1][0]], crt[2][0], crt[3][0])
     canon = Canon(m, recon, recon_to_orig)
     cases = load_cases()
 
@@ -140,8 +157,14 @@ def main():
             results.append([build, r["va"], r["symbol"], 0, "untested: no case"])
             print(f"untested   {r['va']} {name}")
             continue
-        fakes = resolve_hooks(case.get("fakes"), build, m, recon)
-        observe = resolve_hooks(case.get("observe"), build, m, recon)
+        missing = []
+        fakes = resolve_hooks(without_asserts(case.get("fakes")), build, m, recon, missing)
+        observe = resolve_hooks(without_asserts(case.get("observe")), build, m, recon)
+        if missing:
+            # the case replaces a function this build doesn't identify yet: the original would run the real one
+            results.append([build, r["va"], r["symbol"], 0, f"blocked: needs {', '.join(missing)} identified"])
+            print(f"blocked    {r['va']} {name}  (fakes {', '.join(missing)}: not identified in {build} yet)")
+            continue
         verdict, used = "pass", 0
         for inp in case["inputs"]:
             args, setup = (inp["args"], inp.get("setup")) if isinstance(inp, dict) else (inp, None)
@@ -176,7 +199,8 @@ def main():
                 print(f"FAIL records claim {rec['status']} for {build}:{rec['va']} without a passing test")
                 failed += 1
     print(f"{build}: {len(passed)} passed, {failed} failed, "
-          f"{sum(1 for x in results if x[4].startswith('untested'))} without a case")
+          f"{sum(1 for x in results if x[4].startswith('untested'))} without a case, "
+          f"{sum(1 for x in results if x[4].startswith('blocked'))} blocked")
     sys.exit(1 if failed else 0)
 
 

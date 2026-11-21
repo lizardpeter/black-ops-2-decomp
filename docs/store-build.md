@@ -28,6 +28,9 @@ Store build (`d:\workspace\outrun\iw6-depot`), so the two Store ports share thei
   `VCRUNTIME140`, `VCRUNTIME140_1`, UCRT). LTCG: much inlining, split (chained) functions. Small leaves from
   `universal/` such as `ClampChar`, `Com_HashKey`, `ColorIndex` and `I_isdigit` have no standalone body in
   `t6mp.exe` (tools/match/behaviour.py finds none); they are inlined into their callers.
+- **No asserts.** Like the Steam exe and the ship server, the Store exe holds none of the assert source paths
+  (`c:\t6\code\src\...`); its `I_stricmp` (140471C80) handles a null pointer the way the
+  server's does after an ignored assert. The reconstruction compiles asserts out for it (`asserts` in `target.toml`).
 - **Platform:** a `.xbld` section records the GDK editions (June 2022 GRDK Update 4 and March 2024 GRDK Update 2);
   `xgameruntime` is loaded at runtime. Imports include `XCurl.dll` and `WINHTTP` (HTTP), `bcrypt`/`CRYPT32`,
   `XAudio2_9`, `XINPUT1_4`, `d3d11`/`dxgi`, `binkw64` and `api-ms-win-core-psm-appnotify` (process lifetime).

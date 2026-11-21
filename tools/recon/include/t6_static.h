@@ -23,3 +23,10 @@
 #define T6_STATIC extern
 #define T6_AT(scope, name) __asm__("t6s@" T6_SOURCE "@" scope "@" name)
 #define T6_INIT(...)
+
+// A global (public) variable the reconstructed file defines in the original. While the build is hybrid-linked its
+// storage stays in the original binary, found by its decorated name in the MAP; T6_INIT keeps the initializer in the
+// source:
+//
+//     T6_GLOBAL const vec4_t colorBlack T6_INIT(= { 0.0f, 0.0f, 0.0f, 1.0f });
+#define T6_GLOBAL extern

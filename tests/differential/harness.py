@@ -219,6 +219,7 @@ class Machine:
         mu.hook_add(UC_HOOK_MEM_WRITE, self._on_write)
         self.tsc = 0
         self._hooked, self._fakes, self._observe, self._at, self.observed = set(), {}, {}, {}, []
+        self._standing = {}  # fakes for every call (provide)
         self._rdtsc_cb = uccallback(mu, HOOK_INSN_CPUID_CFUNC)(self._on_rdtsc)
         for insn in (X.UC_X86_INS_RDTSC, X.UC_X86_INS_RDTSCP):
             mu._Uc__do_hook_add(UC_HOOK_INSN, self._rdtsc_cb, 1, 0, insn)
@@ -310,6 +311,26 @@ class Machine:
             mu.reg_write(X.UC_X86_REG_ESP, esp + 4 + 4 * nargs)
             mu.reg_write(X.UC_X86_REG_EIP, ret)
 
+    def provide(self, va, fn):
+        """Replace the function at va with fn(mu) -> return value in every call (as `fakes` does for one)."""
+        self._standing[va] = fn
+        self._hook_at(va)
+
+    def crt_thread_data(self, getptd_vas, ptmbcinfo_va, ptlocinfo_va):
+        """x86 VC100 CRT: give the emulated thread its per-thread data. The CRT finds it through TlsGetValue and
+        FlsGetValue and builds it on first use (FlsAlloc, calloc), none of which the harness models, so
+        _getptd and _getptd_noexit return one _tiddata block instead. Its locale pointers are the process
+        defaults, as for a thread that never called _configthreadlocale. Used by number formatting
+        (_vsnprintf's %d)."""
+        ptd = TEB + 0x8000
+        block = bytearray(0x214)
+        block[0x14:0x18] = struct.pack("<I", 1)                               # _holdrand
+        block[0x68:0x6C] = bytes(self.mu.mem_read(ptmbcinfo_va, 4))           # ptmbcinfo
+        block[0x6C:0x70] = bytes(self.mu.mem_read(ptlocinfo_va, 4))           # ptlocinfo
+        self.mu.mem_write(ptd, bytes(block))
+        for va in getptd_vas:
+            self.provide(va, lambda mu: ptd)
+
     def _hook_at(self, va):
         if va not in self._hooked:
             self._hooked.add(va)
@@ -340,7 +361,7 @@ class Machine:
                 else:
                     got.append(raw & {"q": MASK64 if self.x64 else 0xFFFFFFFF, "b": 0xFF}.get(kind, 0xFFFFFFFF))
             self.observed.append((address, *got))
-        fn = self._fakes.get(address)
+        fn = self._fakes.get(address) or self._standing.get(address)
         if fn:
             value = fn(mu)
             sp = mu.reg_read(self._sp)

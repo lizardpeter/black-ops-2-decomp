@@ -31,8 +31,25 @@ Build environment (`tools/recon/`), not game source:
   (arguments and result in XMM registers). These shims forward the C entry points to the original's copies, so both
   sides run the same math library. Only the routines CoDMPServer_PC links are forwarded.
 - `include/math.h`: the float functions are real functions on x86 (the server calls `___libm_sse2_sinf` directly
-  at 90 sites); `atan2f` is VC100's inline double wrapper. On x64 they're UCRT imports.
-- `t6_static.h`, `t6_assert.h`, `t6_compiler.h`, and minimal `string.h` / `windows.h`.
+  at 90 sites); `atan2f` is VC100's inline double wrapper. On x64 they're UCRT imports. `sqrtf` and `fabsf` are
+  intrinsics (`sqrtss` / `andps`, or `fsqrt` / `fabs` in x87 code), and `-fno-math-errno` keeps them inline.
+- `t6_static.h`: `T6_STATIC` for a static variable (`T6_AT(scope, name)` finds it in the PDB's statics) and
+  `T6_GLOBAL` for a global the file defines; both stay in the original binary while hybrid-linked, with `T6_INIT`
+  keeping the initializer in the source.
+- `t6_assert.h`: one macro per argument shape the original's asserts take (the line is the original's). Only builds
+  with `asserts = true` in `target.toml` keep them (CoDMPServer_PC, the only one whose exe holds the assert source
+  paths); for the others `build_recon.py` defines `T6_NO_ASSERTS` and they compile away, expression and all, as in
+  the retail and ship builds. A header's asserts name it as the including file saw it, so each `.cpp` defines
+  `T6_ASSERT_DIR` before its includes.
+- `t6_compiler.h`: `X87_MATH` for a function VC100 kept on the x87 stack (excess precision), `T6_X87_COPY`.
+- Minimal `string.h` (`strcpy` / `strcat` as VC100's inline forward-copy expansions: the servers have no
+  out-of-line copy), `stdio.h`, `stdlib.h`, `ctype.h`, `setjmp.h`, `windows.h`.
+
+Writing for the reconstruction's compiler: at `-O0` clang returns through a stack slot when a function has several
+`return`s, and spills any x87 value that crosses a branch, both as float. Either rounds a result VC100 returned
+unrounded in ST0, so an `X87_MATH` function computes its result in the block that returns it (q_shared.cpp
+`UnGetLeanFraction`, `CMD_GetAnalogButtonValue`). Likewise a store the original's optimiser removed is left out when
+keeping it would change behaviour (q_shared.cpp `Info_RemoveKey_Big`: the dead value copy would overflow the stack).
 
 ## matches: differential tests
 
@@ -47,7 +64,8 @@ passes when every input gives the same:
 - observed calls.
 
 Inputs on which the original itself faults are skipped. Writes are journaled and rolled back, so calls never see each
-other's state.
+other's state. A case that fakes a function the build doesn't identify yet is reported `blocked` instead of run (the
+original would call the real one); hooks on `Assert_MyHandler` are dropped for builds without asserts.
 
 Harness specifics:
 - **x86:** cdecl stack arguments (`('q', v)` for a 64-bit integer), FS on a TEB through a GDT descriptor, x87
@@ -57,6 +75,10 @@ Harness specifics:
 - **Imports:** on x64 an unhooked import returns 0. On x86 one faults, naming the import, until a test registers it
   with `Machine.on_import(name, fn, nargs)`: Win32 imports are stdcall, and a stub that doesn't pop their
   arguments would silently corrupt the stack.
+- **CRT per-thread data (x86 with a MAP):** VC100's CRT builds it on first use through FLS/TLS imports the harness
+  doesn't model, so `_getptd` and `_getptd_noexit` return one ready `_tiddata` with the process's default locale
+  (`Machine.crt_thread_data`). `_vsnprintf` needs it to format numbers.
+- **Standing fakes:** `Machine.provide(va, fn)` replaces a function in every call; a case's `fakes` apply to it alone.
 - **Instruction cap:** 20 million per call. It's a runaway guard, and `-O0` reconstructions take several times the
   original's instructions.
 

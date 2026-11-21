@@ -39,7 +39,8 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT / "tools"))
 import symbols  # noqa: E402
 
-COMMON = ["-O0", "-ffp-contract=off", "-fno-exceptions", "-fms-extensions", "-fno-stack-protector", "-ffreestanding",
+# -fno-math-errno: VC100 and VS2019 expand sqrt and friends as intrinsics that never set errno
+COMMON = ["-O0", "-ffp-contract=off", "-fno-math-errno", "-fno-exceptions", "-fms-extensions", "-fno-stack-protector", "-ffreestanding",
           "-fno-builtin", "-Wall", "-Werror", "-Wno-unused-function", "-Wno-unused-variable",
           f"-I{ROOT / 'include'}", f"-isystem{ROOT / 'tools' / 'recon' / 'include'}"]
 ARCH = {
@@ -177,7 +178,10 @@ def main():
         rel = src.relative_to(ROOT / tree)
         obj = BUILD / "obj" / (tree if tree == "enhanced" else "") / rel.with_suffix(".obj")
         obj.parent.mkdir(parents=True, exist_ok=True)
-        compile_unit(src, obj, arch, [f"-I{ROOT / 'enhanced' / 'include'}"] if enhanced else [])
+        flags = [f"-I{ROOT / 'enhanced' / 'include'}"] if enhanced else []
+        if not symbols.build_spec(build).get("asserts"):
+            flags.append("-DT6_NO_ASSERTS")  # retail and ship builds compiled their asserts out
+        compile_unit(src, obj, arch, flags)
         objs.append(obj)
         sources.append(obj)
         if tree == "enhanced":

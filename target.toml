@@ -63,6 +63,7 @@ id = "CoDMPServer_PC"
 kind = "reference"
 architecture = "x86"
 image_base = 0x00400000
+asserts = true  # the only build here that calls Assert_MyHandler (its exe holds the source paths the asserts name)
 analyze = false  # analysed (analysis/CoDMPServer_PC)
 timestamp = "2013-03-11T23:15:45Z"
 pdb_path = 'c:\t6\game\pc\CoDMPServer_PC.pdb'

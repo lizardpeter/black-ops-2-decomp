@@ -74,7 +74,8 @@ outright bugs) and fix it in `enhanced/`.
 architecture, hybrid-linked against its original exe: anything not reconstructed yet resolves to the original
 (`tools/symbols.py`). `tests/differential/run.py --build <id>` runs each exported function and the original on the
 same inputs in one emulator. Write source as C++ with the original prototypes: the server MAP's decorated names
-check them. See `docs/verification.md`.
+check them. Asserts use `t6_assert.h` with the original line numbers; they compile in only for builds with
+`asserts = true` (CoDMPServer_PC). See `docs/verification.md`.
 
 ## Originals
 
