@@ -1,13 +1,21 @@
-// enhanced/client/cl_input.cpp: mouse look without acceleration or smoothing (P0002; B0017, B0018).
+// enhanced/client/cl_input.cpp: mouse look without acceleration or smoothing (P0002; B0017, B0018), in MW2019's
+// units (P0003).
 //
-// CL_MouseMove as in the Store build (src/client/cl_input.cpp, its T6_STORE branches), with four changes:
-// - no acceleration: the movement is scaled by the profile's sensitivity and the cgame's FOV scale (aiming down
-//   sights) only; cl_mouseAccel has no effect;
-// - no smoothing: CL_GetMouseMovement takes this frame's movement only; m_filter has no effect;
-// - a frame of 0 ms (possible at 1000 FPS and above) keeps the movement for the next frame, where the original took
-//   it and dropped it (B0017);
-// - the yaw is brought back within [-180, 180) at the end, so its float precision doesn't wear down after many turns
-//   the same way (B0018); the commands' angles are the same, since a short angle wraps at 360.
+// CL_MouseMove as in the Store build (src/client/cl_input.cpp, its T6_STORE branches), with these changes:
+// - MW2019 sensitivity (P0003): one count turns the view by m_sens * 0.0066 degrees, at any field of view, hip fire
+//   and aiming down sights alike. The profile's sensitivity (the menu's slider), the cgame's FOV scale, m_yaw and
+//   m_pitch's size have no effect; m_pitch's sign still inverts the pitch (the menu's option), and 0 still stops it.
+//   The moves the mouse makes with +strafe or without free look, and the commands' pitchmove and yawmove, use the
+//   counts scaled as the original's at m_yaw 0.022 (m_sens * 0.3).
+// - The view angles are kept in double precision between calls (P0003), so the same movement over more frames
+//   (higher polling rates and frame rates) gives the same angle. Anything else that changes them (spawning, the
+//   cgame's limits, aim assist) is picked up the next time.
+// - No acceleration (P0002): cl_mouseAccel has no effect.
+// - No smoothing (P0002): CL_GetMouseMovement takes this frame's movement only; m_filter has no effect.
+// - A frame of 0 ms (possible at 1000 FPS and above) keeps the movement for the next frame, where the original took
+//   it and dropped it (B0017).
+// - The yaw is brought back within [-180, 180) at the end, so its precision doesn't wear down after many turns the
+//   same way (B0018); the commands' angles are the same, since a short angle wraps at 360.
 // The rest (turn caps, strafing with +strafe, aim assist's auto-melee, the airburst sight) is as the original.
 // Store build only.
 #ifdef T6_STORE
@@ -34,8 +42,8 @@ void CL_UpdateAirburstMarkDistance(LocalClientNum_t localClientNum, playerState_
                                    float moveScale);
 
 extern const dvar_t *cl_freelook;
+const dvar_t *m_sens;  // MW2019 units: registered on first use (CL_MouseSensitivity)
 extern const dvar_t *m_pitch;
-extern const dvar_t *m_yaw;
 extern const dvar_t *m_forward;
 extern const dvar_t *m_side;
 
@@ -52,19 +60,54 @@ void CL_GetMouseMovement(clientActive_t *cl, float *mx, float *my)
 	mouseIn.mouseDy[mouseIn.mouseIndex] = 0;
 }
 
-// The view's yaw back into [-180, 180) by whole turns (B0018): exact in float, and the commands' short angles
-// don't change, since they wrap at 360.
+// MW2019's mouse scale: degrees per count per unit of m_sens
+#define MOUSE_DEGREES_PER_COUNT 0.0066
+// The original's turn per scaled count at its default m_yaw: the moves and commands take the counts scaled to it
+#define MOUSE_ORIGINAL_YAW 0.022
+
+// m_sens, registered the first time the mouse moves the view (the dvar system is up by then). A value the config
+// set before that (seta m_sens ...) is kept: registering a dvar that already exists takes its value.
+static float CL_MouseSensitivity()
+{
+	if (!m_sens)
+		m_sens = _Dvar_RegisterFloat("m_sens", 1.5f, 0.01f, 100.0f, 1,
+		                             "Mouse sensitivity in MW2019 units: 0.0066 degrees per count each, at any "
+		                             "field of view");
+	return Dvar_GetFloat(m_sens);
+}
+
+// The view angles (pitch, yaw) as this file last wrote them, in double precision. A float that differs from the
+// one written was changed elsewhere: it is taken as it is.
+static double s_viewAngles[2];
+static float s_viewAnglesWritten[2];
+
+static double CL_ViewAngle(clientActive_t *cl, int axis)
+{
+	if (!(cl->viewangles[axis] == s_viewAnglesWritten[axis]))
+		s_viewAngles[axis] = cl->viewangles[axis];
+	return s_viewAngles[axis];
+}
+
+static void CL_SetViewAngle(clientActive_t *cl, int axis, double angle)
+{
+	s_viewAngles[axis] = angle;
+	s_viewAnglesWritten[axis] = (float)angle;
+	cl->viewangles[axis] = s_viewAnglesWritten[axis];
+}
+
+// The view's yaw back into [-180, 180) by whole turns (B0018): exact, and the commands' short angles don't change,
+// since they wrap at 360.
 static void CL_WrapViewYaw(clientActive_t *cl)
 {
-	float yaw = cl->viewangles.y;
-	if (yaw >= 180.0f || yaw < -180.0f)
+	double yaw = CL_ViewAngle(cl, 1);
+	if (yaw >= 180.0 || yaw < -180.0)
 	{
-		yaw = fmodf(yaw, 360.0f);  // exact: the remainder of two floats is representable
-		if (yaw >= 180.0f)
-			yaw -= 360.0f;
-		else if (yaw < -180.0f)
-			yaw += 360.0f;
-		cl->viewangles.y = yaw;
+		yaw = fmod(yaw, 360.0);  // exact: the remainder of two doubles is representable
+		if (yaw >= 180.0)
+			yaw -= 360.0;
+		else if (yaw < -180.0)
+			yaw += 360.0;
+		CL_SetViewAngle(cl, 1, yaw);
 	}
 }
 
@@ -79,18 +122,18 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 	float oldPitch = cl->viewangles.x;
 	if (!frame_msec)
 		return;  // the movement waits for the next frame (B0017)
-	float mx;
-	float my;
-	CL_GetMouseMovement(cl, &mx, &my);
-	float sensitivity = GamerProfile_GetFloat(PROFILE_MOUSE_SENSITIVITY,
-	                                          Com_LocalClient_GetControllerIndex(localClientNum));
-	float scale = sensitivity * cl->cgameFOVSensitivityScale;
+	float countsX;
+	float countsY;
+	CL_GetMouseMovement(cl, &countsX, &countsY);
+	float sensitivity = CL_MouseSensitivity();
 	if (cl->snap.ps.pm_flags & PMF_FROZEN)
 		return;
 	if (cl->snap.ps.weaponstate == WEAPON_DEPLOYED)
 		return;
-	mx *= scale;
-	my *= scale;
+	double degreesPerCount = (double)sensitivity * MOUSE_DEGREES_PER_COUNT;
+	float scale = sensitivity * (float)(MOUSE_DEGREES_PER_COUNT / MOUSE_ORIGINAL_YAW);
+	float mx = countsX * scale;
+	float my = countsY * scale;
 	if ((cl->snap.ps.otherFlags & POF_NO_MOVE_INPUT) && !Demo_IsPlaying())
 	{
 		cmd->forwardmove = 0;
@@ -113,16 +156,16 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 			}
 			else
 			{
-				float yaw = Dvar_GetFloat(m_yaw) * mx;
+				double yaw = countsX * degreesPerCount;
 				float cap = cl->cgameMaxYawSpeed;
 				if (bLinkedView && MOUSE_CAP_OUT_OF_RANGE(cap))
 					cap = 360.0f;
 				if (cap > 0.0f)
 				{
-					cap = (float)frame_msec * cap * 0.001f;
-					yaw = I_fmax(-cap, I_fmin(cap, yaw));
+					double limit = (double)frame_msec * cap * 0.001;  // a limit the game sets (vehicles, turrets)
+					yaw = yaw > limit ? limit : yaw < -limit ? -limit : yaw;
 				}
-				cl->viewangles.y -= yaw;
+				CL_SetViewAngle(cl, 1, CL_ViewAngle(cl, 1) - yaw);
 				yawMove = -(int)MOUSE_MIN_127(mx);
 			}
 			if ((!kb[KB_MLOOK].active && !Dvar_GetBool(cl_freelook)) || kb[KB_STRAFE].active)
@@ -132,17 +175,18 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 			}
 			else
 			{
-				float pitch = Dvar_GetFloat(m_pitch) * my;
+				float pitchScale = Dvar_GetFloat(m_pitch);  // its sign: inverted (the menu's option), or 0: no pitch
+				double pitch = countsY * degreesPerCount * (pitchScale > 0.0f ? 1.0 : pitchScale < 0.0f ? -1.0 : 0.0);
 				float cap = cl->cgameMaxPitchSpeed;
 				if (bLinkedView && MOUSE_CAP_OUT_OF_RANGE(cap))
 					cap = 360.0f;
 				if (cap > 0.0f)
 				{
-					cap = (float)frame_msec * cap * 0.001f;
-					pitch = I_fmax(-cap, I_fmin(cap, pitch));
+					double limit = (double)frame_msec * cap * 0.001;
+					pitch = pitch > limit ? limit : pitch < -limit ? -limit : pitch;
 				}
-				cl->viewangles.x += pitch;
-				int sign = Dvar_GetFloat(m_pitch) > 0.0f ? 1 : -1;
+				CL_SetViewAngle(cl, 0, CL_ViewAngle(cl, 0) + pitch);
+				int sign = pitchScale > 0.0f ? 1 : -1;
 				pitchMove = (int)(MOUSE_MIN_127(my) * sign);
 			}
 			cmd->pitchmove = ClampChar(cmd->pitchmove + pitchMove);

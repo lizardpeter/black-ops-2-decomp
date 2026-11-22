@@ -1,7 +1,12 @@
-"""P0002 (B0015, B0017, B0018): raw mouse input, no acceleration, no smoothing (Store build).
+"""P0002 (B0015, B0017, B0018): raw mouse input, no acceleration, no smoothing; P0003: MW2019 sensitivity (Store
+build).
 
-- CL_MouseMove with cl_mouseAccel 0 and m_filter off is the original Store function exactly, apart from the yaw,
-  which may differ by whole turns (the enhanced yaw stays within [-180, 180)).
+- CL_MouseMove is the original Store function with cl_mouseAccel 0, m_filter off, the FOV scale 1, m_yaw 0.022 and
+  the profile's sensitivity at m_sens * 0.3: the same commands, calls and writes, the view angles within rounding.
+- One count turns the view by exactly m_sens * 0.0066 degrees (rounded once, to float, from double), whatever the
+  FOV scale and the profile's sensitivity; m_pitch's sign inverts the pitch; the yaw stays within [-180, 180).
+- The same movement over two frames gives the same angles as in one (the angles are kept in double between calls).
+- m_sens is registered on first use: 1.5, 0.01 to 100, archived.
 - cl_mouseAccel and m_filter change nothing: the same inputs with them set give the same results.
 - A 0 ms frame leaves the movement where it is (the original takes it and drops it).
 - IN_MouseMove: where the raw counts equal the cursor's movement, it is the original Store function exactly; where
@@ -16,7 +21,7 @@ import struct
 import test_cl_input as tc
 import test_win_input as tw
 
-PATCH = "P0002"
+PATCH = "P0002"  # and P0003 (records/patches.tsv)
 BUILDS = ["t6mp_msstore"]
 
 YAW = tc.CLIENTS + tc.S_VIEWANGLES + 4
@@ -49,11 +54,34 @@ def fmodf_import(m, mu):
     mu.reg_write(x86.UC_X86_REG_XMM0, struct.unpack("<I", struct.pack("<f", r))[0])
 
 
+def fmod_import(m, mu):
+    """The CRT's fmod (the enhanced yaw wrap, in double): exact."""
+    import math
+    from unicorn import x86_const as x86
+    x, y = (struct.unpack("<d", struct.pack("<Q", mu.reg_read(r) & ((1 << 64) - 1)))[0]
+            for r in (x86.UC_X86_REG_XMM0, x86.UC_X86_REG_XMM1))
+    r = math.fmod(x, y) if math.isfinite(x) and y else float("nan")
+    mu.reg_write(x86.UC_X86_REG_XMM0, struct.unpack("<Q", struct.pack("<d", r))[0])
+
+
+SENS_DVAR = tc.DVAR_OBJECTS + 0xF00  # the m_sens dvar_t the registration fake returns (a float dvar)
+SENS = {"value": 1.5}
+
+
+def register_sens(mu):
+    """_Dvar_RegisterFloat's fake: the m_sens dvar, holding SENS['value']."""
+    tc.STATE["machine"].program_write(SENS_DVAR + 0x18, struct.pack("<i", 2))
+    tc.STATE["machine"].program_write(SENS_DVAR + 0x20, struct.pack("<f", SENS["value"]))
+    return SENS_DVAR
+
+
 def mouse_hooks(ctx):
-    imports = dict(tc.STORE_MOUSE["imports"], **{"api-ms-win-crt-math-l1-1-0.dll!fmodf": (fmodf_import, 0)})
+    imports = dict(tc.STORE_MOUSE["imports"], **{"api-ms-win-crt-math-l1-1-0.dll!fmodf": (fmodf_import, 0),
+                                                 "api-ms-win-crt-math-l1-1-0.dll!fmod": (fmod_import, 0)})
     for name, (fn, n) in imports.items():
         ctx.m.on_import(name, (lambda f: lambda mu: f(ctx.m, mu))(fn), n)
-    return ctx.hooks(tc.STORE_MOUSE["fakes"]), ctx.hooks(tc.STORE_MOUSE["observe"])
+    return (ctx.hooks(dict(tc.STORE_MOUSE["fakes"], _Dvar_RegisterFloat=register_sens)),
+            ctx.hooks(tc.STORE_MOUSE["observe"]))
 
 
 def read(writes, va, n, default=b"\0"):
@@ -67,31 +95,144 @@ def as_float(writes, va):
     return struct.unpack("<f", read(writes, va, 4))[0]
 
 
-def same_but_yaw(ctx, i, want, got):
-    """Everything equal; the yaw equal up to whole turns."""
-    assert not isinstance(got[0], str), f"input {i}: {got[0]}"
-    assert got[1] == want[1], f"input {i}: the command differs\n  original {want[1]}\n  enhanced {got[1]}"
-    w3, g3 = canon(ctx, want[3], tc.STORE_MOUSE["observe"]), canon(ctx, got[3], tc.STORE_MOUSE["observe"])
-    assert g3 == w3, f"input {i}: calls differ\n  original {w3}\n  enhanced {g3}"
-    yaw = range(YAW, YAW + 4)
-    diff = sorted(a for a in set(got[2]) | set(want[2]) if a not in yaw and got[2].get(a) != want[2].get(a))
-    assert not diff, f"input {i}: writes differ at {[hex(a) for a in diff[:6]]}"
-    w, g = as_float(want[2], YAW), as_float(got[2], YAW)
-    if any(a in want[2] for a in yaw):
-        turns = (w - g) / 360.0
-        assert w == w and abs(turns - round(turns)) < 1e-6, f"input {i}: yaw {g} isn't the original's {w} wrapped"
-        assert -180.0 <= g < 180.0, f"input {i}: yaw {g} outside [-180, 180)"
+PITCH = tc.CLIENTS + tc.S_VIEWANGLES
+ANGLES = range(PITCH, PITCH + 8)
+F32 = lambda v: struct.unpack("<f", struct.pack("<f", v))[0]
+SCALE = F32(0.0066 / 0.022)  # the moves' scale per unit of m_sens, as the enhanced code rounds it
 
 
-def check_mouse_move_is_the_original_without_accel_and_filter(ctx):
+def angle_diff(a, b):
+    d = (a - b) % 360.0
+    return min(d, 360.0 - d)
+
+
+def equivalent(base, sens):
+    """The original's settings that move like m_sens = sens: the profile's sensitivity sens * 0.3 (as a float), the FOV
+    scale 1 and m_yaw 0.022; m_pitch keeps its sign at 0.022."""
+    def run(w):
+        base(w)
+        tc.STATE["sens"] = F32(F32(sens) * SCALE)
+        w.write(tc.CLIENTS + tc.S_FOV_SCALE, struct.pack("<f", 1.0))
+        pitch = tc.STATE["dvars"].get(tc.M_PITCH, 0.0)
+        for handle, v in ((tc.M_YAW, 0.022), (tc.M_PITCH, 0.022 if pitch > 0 else -0.022 if pitch < 0 else 0.0)):
+            w.write(tc.DVAR_OBJECTS + (handle - 0x7100) * 0x80 + 0x20, struct.pack("<f", v))
+    return run
+
+
+def check_mouse_move_is_the_original_at_equivalent_settings(ctx):
     fk, ob = mouse_hooks(ctx)
+    spec = {k: v for k, v in tc.STORE_MOUSE["observe"].items() if k != "GamerProfile_GetInt"}
+    rng = random.Random(77)
+    turned = 0
     for frame in (16, 1, 33):
         inputs = tc.store_mouse_inputs(150, rng=random.Random(frame), frame_msec=frame, finite=True,
                                        dvars_override={tc.M_FILTER: 0, tc.MOUSE_ACCEL: 0.0})
         for i, inp in enumerate(inputs):
-            want = ctx.m.call(ctx.original("CL_MouseMove"), inp["args"], "void", inp["setup"], fk, ob)
+            SENS["value"] = F32(rng.choice([1.5, 0.75, 4.0, rng.uniform(0.05, 10)]))
+            want = ctx.m.call(ctx.original("CL_MouseMove"), inp["args"], "void", equivalent(inp["setup"], SENS["value"]),
+                              fk, ob)
             got = ctx.m.call(ctx.enhanced("CL_MouseMove"), inp["args"], "void", inp["setup"], fk, ob)
-            same_but_yaw(ctx, i, want, got)
+            assert not isinstance(got[0], str), f"input {i}: {got[0]}"
+            assert got[1] == want[1], f"input {i}: the command differs\n  original {want[1]}\n  enhanced {got[1]}"
+            w3 = [c for c in canon(ctx, want[3], tc.STORE_MOUSE["observe"]) if c[0] != "GamerProfile_GetInt"]
+            g3 = canon(ctx, got[3], spec)
+            assert g3 == w3, f"input {i}: calls differ\n  original {w3}\n  enhanced {g3}"
+            # not compared: the angles (above), the enhanced DLL's own data (m_sens, the double angles) and the dvar
+            # its registration returns
+            diff = sorted(a for a in set(got[2]) | set(want[2])
+                          if a not in ANGLES and not ctx.recon.base <= a < ctx.recon.base + ctx.recon.size
+                          and not SENS_DVAR <= a < SENS_DVAR + 0x30 and got[2].get(a) != want[2].get(a))
+            assert not diff, f"input {i}: writes differ at {[hex(a) for a in diff[:6]]}"
+            for va in (PITCH, PITCH + 4):
+                if any(a in want[2] or a in got[2] for a in range(va, va + 4)):
+                    w, g = as_float(want[2] if va in want[2] else {}, va), as_float(got[2] if va in got[2] else {}, va)
+                    turned += 1
+                    assert angle_diff(w, g) < 2e-3, f"input {i}: angle {g} vs the original's {w}"
+    assert turned > 200, f"only {turned} angles changed: the check proves little"
+
+
+def turn_setup(counts, start, sens, pitch_scale=0.022, cap=0.0, fov=1.0, profile=5.0, carry=None):
+    """One frame of mouse look: counts (x, y) from (pitch, yaw) start, no aim assist; carry: an earlier frame's
+    writes, applied first (its double angles)."""
+    kb = {tc.KB["STRAFE"]: tc.kbutton(active=0), tc.KB["MLOOK"]: tc.kbutton(active=1)}
+    client = {tc.S_FOV_SCALE: struct.pack("<f", fov), tc.S_MAX_YAW_SPEED: struct.pack("<f", cap),
+              tc.S_MAX_PITCH_SPEED: struct.pack("<f", cap), tc.S_VIEWANGLES: struct.pack("<ff", *start)}
+    globals_ = {tc.S_MOUSE_IN: struct.pack("<5i", counts[0], 0, counts[1], 0, 0),
+                tc.S_CLIENT_GAME_STATES: struct.pack("<6i", 0, 0, 0, 0, 0, 1),
+                tc.S_AA_GLOB + 0x6C: struct.pack("<B", 0)}
+    base = tc.setup(kb=kb, client=client, globals_=globals_, frame_msec=16,
+                    dvars={tc.M_YAW: 0.5, tc.M_PITCH: pitch_scale, tc.FREELOOK: 1}, sens=profile, update_view=0)
+
+    def run(w):
+        SENS["value"] = sens
+        for a, v in (carry or {}).items():
+            w.write(a, v)
+        base(w)
+    return run
+
+
+def expected(start, counts, sens, sign=1.0):
+    """MW2019: start (pitch, yaw) turned by counts * sens * 0.0066 degrees, in double, rounded once to float; the yaw
+    wrapped into [-180, 180)."""
+    import math
+    d = F32(sens) * 0.0066
+    pitch = F32(start[0]) + counts[1] * d * sign
+    yaw = F32(start[1]) - counts[0] * d
+    if yaw >= 180.0 or yaw < -180.0:
+        yaw = math.fmod(yaw, 360.0)
+        yaw += -360.0 if yaw >= 180.0 else 360.0 if yaw < -180.0 else 0.0
+    return F32(pitch), F32(yaw)
+
+
+def run_turn(ctx, setup):
+    fk, ob = mouse_hooks(ctx)
+    r = ctx.m.call(ctx.enhanced("CL_MouseMove"), [0, bytes(0x3C), ("f", 16.0)], "void", setup, fk, ob)
+    assert not isinstance(r[0], str), r[0]
+    return r, (as_float(r[2], PITCH) if PITCH in r[2] else None, as_float(r[2], PITCH + 4) if PITCH + 4 in r[2] else None)
+
+
+def check_turn_is_mw2019_units(ctx):
+    """Exactly m_sens * 0.0066 degrees per count, whatever the FOV scale, the profile's sensitivity and m_yaw; the
+    pitch inverted by a negative m_pitch; the yaw within [-180, 180)."""
+    for sens in (1.5, 0.5, 3.0, 0.01, 7.25):
+        for counts in ((1, 1), (-1, 3), (400, -250), (12345, 0), (0, -7), (100000, 100000)):
+            for start in ((0.0, 0.0), (10.0, 179.9), (-45.0, -179.9), (0.0, 539.5)):
+                for fov, profile, sign in ((1.0, 5.0, 1.0), (0.4, 0.3, 1.0), (1.3, 20.0, -1.0)):
+                    _, got = run_turn(ctx, turn_setup(counts, start, sens, 0.022 * sign, fov=fov, profile=profile))
+                    want = expected(start, counts, sens, sign)
+                    got = tuple(g if g is not None else F32(s) for g, s in zip(got, start))
+                    assert got == want, f"sens {sens}, counts {counts}, start {start}, fov {fov}, " \
+                                        f"profile {profile}, sign {sign}: {got}, expected {want}"
+                    assert -180.0 <= got[1] < 180.0
+
+
+def check_split_frames_turn_the_same(ctx):
+    """Two frames of a and b counts end at the same angles as one frame of a + b: the double angles carry over."""
+    rng = random.Random(3)
+    for _ in range(40):
+        sens = F32(rng.choice([1.5, 0.8, rng.uniform(0.1, 5)]))
+        a = (rng.randrange(-3000, 3000), rng.randrange(-200, 200))
+        b = (rng.randrange(-3000, 3000), rng.randrange(-200, 200))
+        start = (F32(rng.uniform(-30, 30)), F32(rng.uniform(-179, 179)))
+        first, mid = run_turn(ctx, turn_setup(a, start, sens))
+        mid = tuple(m if m is not None else s for m, s in zip(mid, start))
+        _, two = run_turn(ctx, turn_setup(b, mid, sens, carry=first[2]))
+        _, one = run_turn(ctx, turn_setup((a[0] + b[0], a[1] + b[1]), start, sens))
+        two = tuple(t if t is not None else m for t, m in zip(two, mid))
+        one = tuple(o if o is not None else s for o, s in zip(one, start))
+        assert two == one, f"sens {sens}, {a} then {b} from {start}: {two}, in one frame {one}"
+
+
+def check_sens_is_registered_on_first_use(ctx):
+    fk, ob = mouse_hooks(ctx)
+    ob = {**ob, **ctx.hooks({"_Dvar_RegisterFloat": "sfffis"})}
+    r = ctx.m.call(ctx.enhanced("CL_MouseMove"), [0, bytes(0x3C), ("f", 16.0)], "void",
+                   turn_setup((5, 5), (0.0, 0.0), 1.5), fk, ob)
+    calls = [c for c in canon(ctx, r[3], {"_Dvar_RegisterFloat": "sfffis"}) if c[0] == "_Dvar_RegisterFloat"]
+    f = lambda v: struct.unpack("<I", struct.pack("<f", v))[0]
+    assert len(calls) == 1 and calls[0][1] == b"m_sens" and calls[0][2:6] == (f(1.5), f(0.01), f(100.0), 1), calls
+    slot = next(a for n, a in _map(ctx).items() if n.startswith("?m_sens@@"))
+    assert struct.unpack("<Q", read(r[2], slot, 8))[0] == SENS_DVAR, "m_sens doesn't hold the registered dvar"
 
 
 def check_accel_and_filter_do_nothing(ctx):
@@ -120,29 +261,6 @@ def check_zero_ms_frame_keeps_the_movement(ctx):
         assert got[1][0] == inp["args"][1], f"input {i}: the command changed in a 0 ms frame"
         assert got[3] == [], f"input {i}: calls in a 0 ms frame: {got[3]}"
         assert any(a in want[2] for a in MOUSE_IN), f"input {i}: the original didn't take it either (no test)"
-
-
-def check_yaw_stays_in_range(ctx):
-    fk, ob = mouse_hooks(ctx)
-    kb = {tc.KB["STRAFE"]: tc.kbutton(active=0), tc.KB["MLOOK"]: tc.kbutton(active=1)}
-    for start in (179.9, -179.9, 0.0, 539.5, -900.25, 170000.0, -1e6):
-        for dx in (1000, -1000, 1, -1):
-            client = {tc.S_FOV_SCALE: struct.pack("<f", 1.0), tc.S_MAX_YAW_SPEED: struct.pack("<f", 0.0),
-                      tc.S_VIEWANGLES: struct.pack("<ff", 0.0, start)}
-            globals_ = {tc.S_MOUSE_IN: struct.pack("<5i", dx, 0, 0, 0, 0),
-                        tc.S_CLIENT_GAME_STATES: struct.pack("<6i", 0, 0, 0, 0, 0, 1),
-                        tc.S_AA_GLOB + 0x6C: struct.pack("<B", 0)}
-            s = tc.setup(kb=kb, client=client, globals_=globals_, frame_msec=16,
-                         dvars={tc.M_YAW: 0.022, tc.M_PITCH: 0.022, tc.FREELOOK: 1}, sens=1.0, update_view=0)
-            cmd = bytes(0x3C)
-            got = ctx.m.call(ctx.enhanced("CL_MouseMove"), [0, cmd, ("f", 16.0)], "void", s, fk, ob)
-            want = ctx.m.call(ctx.original("CL_MouseMove"), [0, cmd, ("f", 16.0)], "void", s, fk, ob)
-            g, w = as_float(got[2], YAW), as_float(want[2], YAW)
-            assert -180.0 <= g < 180.0, f"start {start}, dx {dx}: yaw {g}"
-            if abs(start) < 1000:
-                turns = (w - g) / 360.0
-                assert abs(turns - round(turns)) < 1e-6, f"start {start}, dx {dx}: {g} vs the original's {w}"
-            assert got[1] == want[1], f"start {start}, dx {dx}: the command differs"
 
 
 def raw_fakes(ctx, counts):
@@ -309,6 +427,7 @@ def check_loader_redirects_reach_the_replacements(ctx):
             ctx.m.mu.ctl_remove_cache(va, va + 14)
 
 
-CHECKS = [check_mouse_move_is_the_original_without_accel_and_filter, check_accel_and_filter_do_nothing,
-          check_zero_ms_frame_keeps_the_movement, check_yaw_stays_in_range, check_in_mouse_move_turns_by_raw_counts,
+CHECKS = [check_mouse_move_is_the_original_at_equivalent_settings, check_turn_is_mw2019_units,
+          check_split_frames_turn_the_same, check_sens_is_registered_on_first_use, check_accel_and_filter_do_nothing,
+          check_zero_ms_frame_keeps_the_movement, check_in_mouse_move_turns_by_raw_counts,
           check_raw_counters, check_window_procedure, check_loader_redirects_reach_the_replacements]

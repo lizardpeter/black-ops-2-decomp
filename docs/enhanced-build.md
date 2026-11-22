@@ -9,8 +9,7 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Raw input.** The view turns by the mouse's own counts, read on a thread of their own from Windows' raw input.
   The original turned by how far the Windows cursor moved, so Windows' pointer speed and "Enhance pointer
   precision" acceleration applied, and a fast flick could be cut short at the screen's edge (B0015).
-- **No acceleration, no smoothing.** `cl_mouseAccel` and `m_filter` do nothing. Turning is counts × the game's
-  sensitivity × the aim-down-sights scale, nothing else.
+- **No acceleration, no smoothing.** `cl_mouseAccel` and `m_filter` do nothing.
 - **High DPI and polling rates.** Counts are added up in 64-bit counters, never rounded, and each report is handled
   on the input thread, not the game's, so an 8 kHz mouse costs the game nothing. Nothing is lost between frames.
 - **High frame rates.** A frame the engine counts as 0 ms keeps the mouse's movement for the next frame; the original
@@ -18,8 +17,21 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Long sessions.** The yaw is kept within ±180°, so small movements stay exact however much you've turned
   (B0018).
 
-Menus keep the normal cursor. The sensitivity setting, ADS sensitivity, turn limits in vehicles and on turrets,
-aim assist's melee lunge and everything else are the original's.
+**P0003, MW2019 sensitivity:**
+- **`m_sens`, in MW2019's units.** One count turns the view by `m_sens` × 0.0066 degrees: the same number gives the
+  same cm/360 as in Modern Warfare (2019). The default is 1.5 (about 29 cm per 360° at 3200 DPI); the range is 0.01
+  to 100, and it's saved in the config like any archived setting (`seta m_sens 1.5`, or `/m_sens 1.5` in the
+  console).
+- **The same at any field of view.** Hip fire and aiming down sights turn alike; the FOV and ADS scales don't apply.
+  The menu's sensitivity slider no longer does anything for the mouse (it still sets the gamepad's).
+- **Inverted look** follows the menu's option (`m_pitch`'s sign), as before.
+- **Exact over many frames.** The view angles are kept in double precision between frames, so a movement split over
+  more frames (higher polling and frame rates) ends at the same angle.
+- The moves the mouse still makes (with +strafe, or with free look off) and the commands' mouse fields use the counts
+  scaled as the original's would be at `m_sens` × 0.3 profile sensitivity.
+
+Menus keep the normal cursor. Turn limits in vehicles and on turrets, aim assist's melee lunge and everything else
+are the original's.
 
 Limits:
 - Absolute-position devices (pen tablets, and mice inside remote desktop or some virtual machines) send positions,

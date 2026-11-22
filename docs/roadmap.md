@@ -16,8 +16,9 @@ decompiled first. Items marked **open** still need a decision. Fixes to original
   are never rounded, and a 0 ms frame no longer drops the frame's movement (B0017). The yaw is kept within ±180° so
   its precision doesn't wear down (B0018). Still to do: keyboard events through raw input, so short presses between
   frames aren't lost.
-- **MW2019 sensitivity scale.** Degrees per count = MW2019's yaw (0.0066°) × sensitivity, independent of FOV unless
-  a scale option asks for it. Same setup as Ghosts and BO3.
+- **MW2019 sensitivity scale: done (P0003).** `m_sens`: degrees per count = MW2019's yaw (0.0066°) × `m_sens`,
+  default 1.5, independent of FOV and ADS; angles kept in double precision. Same setup as Ghosts. Still possible: an
+  option to scale ADS by the zoom (MW2019's "monitor distance" coefficient), if wanted.
 
 The enhanced build reaches the game through `runtime/loader` (docs/enhanced-build.md).
 
