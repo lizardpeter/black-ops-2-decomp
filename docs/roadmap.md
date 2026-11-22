@@ -53,6 +53,11 @@ Fix in two parts:
 - **Decouple command generation from frame rate:** a fixed command rate with input sampled at the latest moment
   (late latch). Then the 128-command buffer covers a fixed span of time, and the server doesn't receive one command
   per rendered frame.
+- **Tick length: 5 ms (200 Hz), decided.** As in Ghosts (its docs/fps.md, 6.1): with gravity 800, 5 ms is a step at
+  which gravity changes speed by a whole number per step, so jumps come out at the designed height; 128 commands cover
+  640 ms. One constant (`CMD_MSEC`), used by everything stepped per tick (commands, prediction, view kick, the
+  viewmodel's movement), so it can be changed in one place. To confirm with BO2's own Pmove (slide, dolphin dive,
+  mantle) once it runs in the emulator.
 
 Before changing anything, confirm whether a wrapped buffer also costs real command redundancy in `CL_WritePacket`
 (the "interrupted" state may not be purely cosmetic).
