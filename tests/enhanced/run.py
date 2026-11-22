@@ -29,6 +29,12 @@ class Context:
         crt = [symbols.resolve(build, n) for n in ("__getptd", "__getptd_noexit", "___ptmbcinfo", "___ptlocinfo")]
         if not self.recon.x64 and all(crt):
             self.m.crt_thread_data([crt[0][0], crt[1][0]], crt[2][0], crt[3][0])
+        # the enhanced DLL's addresses made comparable with the original's (as tests/differential/run.py does):
+        # its copies of original functions, its thunks into the exe, its string literals
+        rows = symbols.read_tsv(ROOT / "build" / build / "enhanced" / "recon.symbols.tsv")
+        recon_to_orig = {self.recon.exports[r["symbol"]]: int(r["va"], 16) for r in rows
+                         if r["va"] and r["symbol"] in self.recon.exports}
+        self.canon = differential.Canon(self.m, self.recon, recon_to_orig)
 
     def original(self, name):
         """Address of the original function `name` (scoped plain name)."""

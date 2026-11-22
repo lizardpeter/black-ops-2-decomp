@@ -410,3 +410,18 @@ typedef struct _XINPUT_VIBRATION
 	unsigned short wRightMotorSpeed;
 } XINPUT_VIBRATION;
 extern "C" __declspec(dllimport) DWORD WINAPI XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION *pVibration);
+
+// The precise frame wait (enhanced/qcommon/common.cpp): the performance counter and a high-resolution waitable timer
+// (CreateWaitableTimerExW and SetWaitableTimer are real imports of the enhanced DLL: tools/recon/lib/kernel32.def)
+typedef union _LARGE_INTEGER
+{
+	long long QuadPart;
+} LARGE_INTEGER;
+WINBASEAPI BOOL WINAPI QueryPerformanceCounter(LARGE_INTEGER *lpPerformanceCount);
+WINBASEAPI BOOL WINAPI QueryPerformanceFrequency(LARGE_INTEGER *lpFrequency);
+#define CREATE_WAITABLE_TIMER_HIGH_RESOLUTION 0x00000002
+#define TIMER_ALL_ACCESS 0x1F0003
+WINBASEAPI HANDLE WINAPI CreateWaitableTimerExW(void *lpTimerAttributes, const wchar_t *lpTimerName, DWORD dwFlags,
+                                               DWORD dwDesiredAccess);
+WINBASEAPI BOOL WINAPI SetWaitableTimer(HANDLE hTimer, const LARGE_INTEGER *lpDueTime, LONG lPeriod,
+                                        void *pfnCompletionRoutine, void *lpArgToCompletionRoutine, BOOL fResume);

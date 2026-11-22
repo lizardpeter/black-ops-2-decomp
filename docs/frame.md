@@ -151,7 +151,8 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
 5. **`Com_Frame_Try_Block_Function`** (1403A4010): the central rebuild, done for the Store's client frame
    (`src/qcommon/common.cpp`, `tests/differential/test_com_frame.py`: every callee faked and observed, the clock
    scripted; the dedicated server's body is different and not rebuilt). Its frame cap is whole milliseconds (B0026)
-   and its msec a three-frame average (B0027). The frame-latency wait goes right before the
+   and its msec a three-frame average (B0027). P0006 replaces only the wait (`Com_FrameWait`, split out of the
+   faithful function for that): the cap to the microsecond on a cadence, a high-resolution waitable timer. The frame-latency wait goes right before the
    second `Com_EventLoop` (1403A470B), so keys (that event loop) and the mouse (`CL_Input`, at draw time) are both
    taken after it, by the original's own code in its own order (BO3's P0020 arrangement; no mid-frame filter needed).
    The same rebuild gives the microsecond frame clock, the waitable-timer cap, and later the 5 ms tick loop.

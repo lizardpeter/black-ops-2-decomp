@@ -2,3 +2,5 @@
 LIBRARY kernel32.dll
 EXPORTS
 SetProcessInformation
+CreateWaitableTimerExW
+SetWaitableTimer

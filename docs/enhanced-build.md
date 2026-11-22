@@ -53,6 +53,17 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Resizing keeps working.** The render thread resizes the buffers with the swap chain's own flags (B0025).
 - A system that can't create the flip-model swap chain gets the original one.
 
+**P0006, frame rate cap:**
+- **Exact caps.** The original capped the frame rate in whole milliseconds (1000 / `com_maxfps`, rounded down): 144
+  ran at 166 fps, 165 at 166, 240 at 250, 360 at 333 (B0026). Now frames start exactly 1 / `com_maxfps` seconds
+  apart on the performance counter, so the cap is the number you set. A server's `sv_clientFpsLimit` still caps it.
+- **Precise, cheap waiting.** The wait sleeps on a high-resolution timer and spins only the last half millisecond, so
+  a frame starts within microseconds of its time; the original polled with `Sleep(1)` and woke up to a millisecond or
+  more late.
+- **No catch-up bursts.** A frame that runs more than a frame late starts the cadence again from now.
+- Still at most 1000 fps: the engine counts game time in whole milliseconds (the 5 ms simulation tick will lift
+  that, docs/roadmap.md).
+
 Menus keep the normal cursor. Turn limits in vehicles and on turrets, aim assist's melee lunge and everything else
 are the original's.
 

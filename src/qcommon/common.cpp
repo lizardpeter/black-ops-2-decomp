@@ -138,33 +138,22 @@ void sub_1400C7720(int msec);
 void sub_140498A50(ControllerIndex_t controllerIndex);
 void sub_1403B6FA0(int arg, int msec, const char *name);
 
-// 1403A4010 (Store; the server's is qcommon/common.cpp:6460)
-// One frame. Waits (Com_EventLoop, then Sleep(1), up to 50 times) until 1000 / com_maxfps milliseconds have passed
-// since the last frame (the server's sv_clientFpsLimit caps it too); the frame's msec is then averaged over the last
-// three frames (up to 40 ms each) and clamped. Then the Store's queued calls and online tasks, the command buffer,
-// time scaling, demo and local server frames, and the client: its input (IN_Frame), the second event loop, the
-// command buffer again, the client frame and the screen (SCR_UpdateScreen, where the commands are built). A dedicated
-// server stops after the server frame.
-void Com_Frame_Try_Block_Function()
+// The frame's frame-rate cap: com_maxfps, lowered to the server's sv_clientFpsLimit when that is lower; 0 is none.
+// (This and the two pieces below are Com_Frame_Try_Block_Function's own code, split out so the enhanced build can
+// replace only the wait: enhanced/qcommon/common.cpp. They are not functions of the original.)
+int Com_FrameMaxFps()
 {
-	LocalClientNum_t localClientNum = Com_LocalClients_GetPrimary();
-	sub_1403A2FF0(localClientNum);
-	store_14226A120 = 0;
-	int minMsec = 1;
 	int maxFps = Dvar_GetInt(com_maxfps);
 	int clientFpsLimit = store_140E53B70->clientFpsLimit;
 	if (clientFpsLimit > 0 && (maxFps == 0 || maxFps > clientFpsLimit))
 		maxFps = clientFpsLimit;
-	if (maxFps > 0)
-	{
-		minMsec = 1000u / (unsigned int)maxFps;
-		if (!minMsec)
-			minMsec = 1;
-	}
-	int index = com_lastFrameIndex % 3;
-	com_lastFrameIndex++;
+	return maxFps;
+}
 
-	// the frame wait: whole milliseconds, Sleep(1) between event loops
+// The frame wait: whole milliseconds, Sleep(1) between event loops, at most 50 times. Sets com_frameTime; returns the
+// frame's msec (at least 1).
+int Com_FrameWait(int minMsec)
+{
 	int now;
 	int msec;
 	for (int spin = 0; spin < 50; spin++)
@@ -181,6 +170,12 @@ void Com_Frame_Try_Block_Function()
 	com_frameTime = now;
 	if (msec < 1)
 		msec = 1;
+	return msec;
+}
+
+// Everything after the wait.
+void Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index, int msec)
+{
 	unsigned int maxMsec = !Com_IsDedicatedServer() && Dvar_GetBool(sv_running) ? 100 : 5000;
 	if ((unsigned int)msec > maxMsec)
 		msec = maxMsec;
@@ -365,5 +360,31 @@ void Com_Frame_Try_Block_Function()
 	}
 	while (Sys_Milliseconds() - store_1427F1B58 < 0)
 		Sleep(1);
+}
+
+// 1403A4010 (Store; the server's is qcommon/common.cpp:6460)
+// One frame. Waits (Com_EventLoop, then Sleep(1), up to 50 times) until 1000 / com_maxfps milliseconds have passed
+// since the last frame (the server's sv_clientFpsLimit caps it too); the frame's msec is then averaged over the last
+// three frames (up to 40 ms each) and clamped. Then the Store's queued calls and online tasks, the command buffer,
+// time scaling, demo and local server frames, and the client: its input (IN_Frame), the second event loop, the
+// command buffer again, the client frame and the screen (SCR_UpdateScreen, where the commands are built). A dedicated
+// server stops after the server frame.
+void Com_Frame_Try_Block_Function()
+{
+	LocalClientNum_t localClientNum = Com_LocalClients_GetPrimary();
+	sub_1403A2FF0(localClientNum);
+	store_14226A120 = 0;
+	int minMsec = 1;
+	int maxFps = Com_FrameMaxFps();
+	if (maxFps > 0)
+	{
+		minMsec = 1000u / (unsigned int)maxFps;
+		if (!minMsec)
+			minMsec = 1;
+	}
+	int index = com_lastFrameIndex % 3;
+	com_lastFrameIndex++;
+	int msec = Com_FrameWait(minMsec);
+	Com_FrameAfterWait(localClientNum, minMsec, index, msec);
 }
 #endif
