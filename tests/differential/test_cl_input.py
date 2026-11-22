@@ -48,17 +48,22 @@ DVAR_HANDLES = {0x011C16DC: 0x7101,  # cl_leanCountMin
                 0x01232E4C: 0x7110,  # m_yaw
                 0x01232E50: 0x7111,  # m_pitch
                 0x01237038: 0x7112,  # m_forward
-                0x01237578: 0x7113}  # cl_freelook
+                0x01237578: 0x7113,  # cl_freelook
+                0x01118754: 0x7114,  # cg_airburstStrafeRestriction
+                0x011AC530: 0x7115}  # cg_airburstCameraRestriction
 LEAN_MIN, HOLD, DELAY, STANDING = 0x7101, 0x7102, 0x7103, 0x7104
 STANCE_HOLD, DTP_HOLD, ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, M_FILTER = 0x7105, 0x7106, 0x7107, 0x7108, 0x7109, 0x710A
 DAMAGE_KICK, PAUSED = 0x710B, 0x710C
 MOUSE_ACCEL, SHOW_RATE, M_SIDE, M_YAW, M_PITCH, M_FORWARD, FREELOOK = range(0x710D, 0x7114)
+STRAFE_RESTRICTION, CAMERA_RESTRICTION = 0x7114, 0x7115
 
-FLOAT_DVARS = {ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, MOUSE_ACCEL, M_SIDE, M_YAW, M_PITCH, M_FORWARD}
+FLOAT_DVARS = {ANGLESPEEDKEY, YAWSPEED, PITCHSPEED, MOUSE_ACCEL, M_SIDE, M_YAW, M_PITCH, M_FORWARD,
+               STRAFE_RESTRICTION, CAMERA_RESTRICTION}
 BOOL_DVARS = {M_FILTER, DAMAGE_KICK, SHOW_RATE, FREELOOK}
 DVAR_STORE = {STANDING: 0x14265A860,   # the Store's dvar pointers identified so far (records/names.tsv)
               M_FILTER: 0x140E60788, MOUSE_ACCEL: 0x140E61BF0, M_SIDE: 0x140E61BE8, M_YAW: 0x140E5D238,
-              FREELOOK: 0x140E5D108, M_PITCH: 0x140E5CDB8, M_FORWARD: 0x140E5CCD8}
+              FREELOOK: 0x140E5D108, M_PITCH: 0x140E5CDB8, M_FORWARD: 0x140E5CCD8,
+              STRAFE_RESTRICTION: 0x140E4F870, CAMERA_RESTRICTION: 0x140E4F860}
 DVAR_OBJECTS = OBJECTS + 0x1C0000      # one dvar_t per handle, 0x80 apart, in the build's layout
 
 
@@ -254,6 +259,24 @@ def airburst(mu):
         return 0
     mu.mem_write(arg(mu, 3), struct.pack("<I", STATE["mark"]))  # the caller's local
     return 1
+
+
+def laze_values():
+    """Moves and restrictions for the airburst laze check: each limit just under, at and over, a 0 restriction, and
+    NaN and infinite moves."""
+    out = []
+    nan, inf = float("nan"), float("inf")
+    for moves in ((0.0, 0.0, 0.0, 0.0, 127.0), (127.0, 0.0, 0.0, 0.0, 127.0), (30.0, 40.0, 0.0, 0.0, 127.0),
+                  (0.0, 0.0, 3.0, -4.0, 1.0), (-127.0, 127.0, 127.0, -127.0, 127.0), (1.0, 1.0, 1.0, 1.0, 0.0),
+                  (nan, 0.0, 0.0, 0.0, 127.0), (0.0, 0.0, inf, 0.0, 127.0), (12.5, -7.25, 0.5, 99.0, 63.5)):
+        for sr, cr in ((0.5, 0.5), (0.39370078, 5.0), (0.3937008, 0.0), (0.0, 0.0), (5.0, 5.0), (1.4142135, 0.03937)):
+            out.append((moves, sr, cr))
+    return out
+
+
+def laze_inputs():
+    return [{"args": [("f", v) for v in moves], "setup": setup(dvars={STRAFE_RESTRICTION: sr, CAMERA_RESTRICTION: cr})}
+            for moves, sr, cr in laze_values()]
 
 
 def mouse_move(mu):
@@ -632,7 +655,16 @@ CASES = [
      "inputs": [{"args": [lc], "setup": setup(cg_null=n)} for lc in (0, 1) for n in (False, True)]},
     {"name": "IN_IsTalkKeyHeld", "ret": "bool", "builds": SERVER,
      "inputs": [{"args": [], "setup": setup(kb={KB["TALK"]: kbutton(active=a)})} for a in (0, 1)]},
-    {"name": "CL_UpdateAirburstMarkDistance", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CG_AirburstLazeCancelledByMovement", "ret": "int", "builds": SERVER, "inputs": laze_inputs()},
+    {"name": "CL_UpdateAirburstMarkDistance", "ret": "void", "builds": BOTH, "fakes": FAKES, "observe": SEEN,
+     "by_build": {"t6mp_msstore": {
+         # the Store inlines the laze check: its dvars are set, and only CG_GetAirburstMarkDistance is faked (its
+         # local client isn't passed: x)
+         "fakes": {"CG_GetAirburstMarkDistance": lambda mu: airburst(mu)},
+         "observe": {"CG_GetAirburstMarkDistance": "xqqxi"},
+         "inputs": [{"args": [0, CLIENTS + 0x88, bytes(0x3C)] + [("f", v) for v in moves],
+                     "setup": setup(mark=m, dvars={STRAFE_RESTRICTION: sr, CAMERA_RESTRICTION: cr})}
+                    for moves, sr, cr in laze_values() for m in (None, 1234)]}},
      "inputs": [{"args": [0, PREDICTED_PS, struct.pack("<II", 0, 0) * 0x11, ("f", 1.0), ("f", -0.5), ("f", 0.0),
                           ("f", 2.0), ("f", 0.25)],
                  "setup": setup(mark=m, cancelled=c)}
