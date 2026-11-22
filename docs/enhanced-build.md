@@ -23,7 +23,7 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
   to 100, and it's saved in the config like any archived setting (`seta m_sens 1.5`, or `/m_sens 1.5` in the
   console).
 - **The same at any field of view.** Hip fire and aiming down sights turn alike; the FOV and ADS scales don't apply.
-  The menu's sensitivity slider no longer does anything for the mouse (it still sets the gamepad's).
+  The menu's mouse sensitivity slider no longer does anything; set `m_sens` instead.
 - **Inverted look** follows the menu's option (`m_pitch`'s sign), as before.
 - **Exact over many frames.** The view angles are kept in double precision between frames, so a movement split over
   more frames (higher polling and frame rates) ends at the same angle.
