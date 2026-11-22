@@ -255,7 +255,7 @@ def inputs(build, n=300, seed=7158):
              "flag_b": r.randrange(2)}
         if k == 0:
             p.update(target=5)  # out of range: the server's assert
-        out.append({"args": [], "setup": make_setup(build, p)})
+        out.append({"args": [], "setup": make_setup(build, p), "params": p})
     return out
 
 
@@ -409,7 +409,7 @@ def rt_inputs(n=250, seed=0x6CD0):
              "size": r.choice([(1920, 1080), (2560, 1440), (1920, 1200)]),
              "messages": [(r.choice([0x100, 0x0F]), r.randrange(1 << 31)) for _ in range(r.choice([0, 0, 2]))]
              + ([(WM_QUIT, 5)] if r.random() < 0.1 else [])}
-        out.append({"args": [0], "setup": rt_setup(p)})
+        out.append({"args": [0], "setup": rt_setup(p), "params": p})
     return out
 
 

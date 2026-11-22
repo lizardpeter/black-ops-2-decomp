@@ -39,9 +39,29 @@ def check_targets(build, pe, redirects):
     base = pe.OPTIONAL_HEADER.ImageBase
     sizes = {base + e.struct.BeginAddress: e.struct.EndAddress - e.struct.BeginAddress
              for e in getattr(pe, "DIRECTORY_ENTRY_EXCEPTION", [])}
+    # A function whose prologue was split off (shrink-wrapping) has a short first .pdata entry followed directly by the
+    # entries chained to it: the function's code runs on through them (analysis/<build>/pdata.tsv's part_of column).
+    part_of = {}
+    pdata = ROOT / "analysis" / build / "pdata.tsv"
+    if pdata.exists():
+        for line in pdata.read_text().splitlines()[1:]:
+            va_, size_, parent = (line.split("\t") + ["", ""])[:3]
+            if parent:
+                part_of[int(va_, 16)] = int(parent, 16)
+
+    def root(a):
+        while a in part_of:
+            a = part_of[a]
+        return a
+
+    def extent(va):
+        end = va + sizes.get(va, 0)
+        while end in sizes and root(end) == va:
+            end += sizes[end]
+        return end - va
     problems = []
     for va, sym in redirects:
-        if sizes.get(va, 0) < PATCH_SIZE:
+        if extent(va) < PATCH_SIZE:
             problems.append(f"{sym} {va:X}: not a function entry of at least {PATCH_SIZE} bytes in .pdata")
         inside = "|".join(f"0x{a:x}" for a in range(va + 1, va + PATCH_SIZE))
         hits = subprocess.run(["grep", "-rhiE", rf"(J[A-Z]*|CALL)\s+({inside})\b", str(ROOT / "analysis" / build / "disasm")],

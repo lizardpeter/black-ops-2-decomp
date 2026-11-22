@@ -117,6 +117,10 @@ screen.
 
 ## What the enhanced build changes, and what has to be rebuilt first
 
+Steps 1 to 4 are done: P0005 (`enhanced/gfx_d3d/r_init.cpp`, `rb_backend.cpp`) makes the swap chain flip model with
+tearing allowed and at most one frame queued, keeps the render targets bound across the present, and resizes with
+the swap chain's flags. The waitable object comes with step 5.
+
 The order the work goes in (each step rebuilt and verified faithful first, then changed in `enhanced/`):
 
 1. **The swap chain description** (14071E360, no server counterpart: the server's renderer has no device code).

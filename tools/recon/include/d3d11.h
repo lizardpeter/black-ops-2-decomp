@@ -139,6 +139,38 @@ inline void ID3D11DeviceContext_Unmap(ID3D11DeviceContext *context, void *resour
 	T6_COM_CALL(context, 15, void(WINAPI *)(ID3D11DeviceContext *, void *, UINT), resource, subresource);
 }
 
+// ID3D11DeviceContext: OMSetRenderTargets (slot 33), OMGetRenderTargets (slot 89)
+struct ID3D11RenderTargetView;
+struct ID3D11DepthStencilView;
+inline void ID3D11DeviceContext_OMSetRenderTargets(ID3D11DeviceContext *context, UINT numViews,
+                                                   ID3D11RenderTargetView *const *renderTargets,
+                                                   ID3D11DepthStencilView *depthStencil)
+{
+	T6_COM_CALL(context, 33, void(WINAPI *)(ID3D11DeviceContext *, UINT, ID3D11RenderTargetView *const *,
+	                                        ID3D11DepthStencilView *), numViews, renderTargets, depthStencil);
+}
+inline void ID3D11DeviceContext_OMGetRenderTargets(ID3D11DeviceContext *context, UINT numViews,
+                                                   ID3D11RenderTargetView **renderTargets,
+                                                   ID3D11DepthStencilView **depthStencil)
+{
+	T6_COM_CALL(context, 89, void(WINAPI *)(ID3D11DeviceContext *, UINT, ID3D11RenderTargetView **,
+	                                        ID3D11DepthStencilView **), numViews, renderTargets, depthStencil);
+}
+
+// IDXGIDevice1::SetMaximumFrameLatency (slot 12)
+inline HRESULT IDXGIDevice1_SetMaximumFrameLatency(IDXGIDevice1 *device, UINT maxLatency)
+{
+	return T6_COM_CALL(device, 12, HRESULT(WINAPI *)(IDXGIDevice1 *, UINT), maxLatency);
+}
+
+// IDXGIFactory5::CheckFeatureSupport (slot 28: IDXGIFactory1 ends at 13, IDXGIFactory2 adds 14-24, 3 25, 4 26-27)
+#define DXGI_FEATURE_PRESENT_ALLOW_TEARING 0
+inline HRESULT IDXGIFactory5_CheckFeatureSupport(void *factory5, UINT feature, void *data, UINT size)
+{
+	return T6_COM_CALL(factory5, 28, HRESULT(WINAPI *)(void *, UINT, void *, UINT), feature, data, size);
+}
+#define DXGI_PRESENT_ALLOW_TEARING 0x200
+
 // IDXGISwapChain::ResizeBuffers (slot 13)
 inline HRESULT IDXGISwapChain_ResizeBuffers(IDXGISwapChain *swapChain, UINT bufferCount, UINT width, UINT height,
                                             DXGI_FORMAT format, UINT flags)

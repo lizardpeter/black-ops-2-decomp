@@ -40,6 +40,19 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Precise timer kept.** The game asks Windows for a 1 ms timer; Windows 11 drops that for windows that are
   minimized or covered unless the game opts out. It does now.
 
+**P0005, presentation:**
+- **Flip model.** The swap chain is `DXGI_SWAP_EFFECT_FLIP_DISCARD` instead of the original's blit model: in
+  fullscreen, and in a borderless window covering the monitor, Windows hands the game's frames straight to the
+  display (independent flip) instead of copying them through the desktop compositor.
+- **At most one frame queued.** The original let the game run up to three frames ahead of the display (DXGI's
+  default queue) plus the one on the render thread. Now Present waits once one frame is queued
+  (`IDXGIDevice1::SetMaximumFrameLatency(1)`), so input reaches the screen sooner when the GPU is the limit.
+- **Tearing without v-sync.** With `r_vsync 0`, a windowed game presents with tearing allowed (where Windows supports
+  it), so the frame rate isn't held to the display's and variable refresh rate works in a window too. Exclusive
+  fullscreen already tears without v-sync.
+- **Resizing keeps working.** The render thread resizes the buffers with the swap chain's own flags (B0025).
+- A system that can't create the flip-model swap chain gets the original one.
+
 Menus keep the normal cursor. Turn limits in vehicles and on turrets, aim assist's melee lunge and everything else
 are the original's.
 
