@@ -122,7 +122,28 @@ the faithful one (`/force:multiple` keeps the first definition). Each override b
   itself. P0001 (`test_voice.py`) reuses `test_win_voice.py`'s Windows mixer model: no winmm call, no mixer change,
   everything else as the original.
 
-CI builds and checks the enhanced build for CoDMPServer_PC.
+CI builds and checks the enhanced build for CoDMPServer_PC and t6mp_msstore, and packages the Store one for the
+game (docs/enhanced-build.md).
+
+The enhanced Store DLL is the one loaded into the game, so its link differs (tools/runtime_link.py):
+- **Exe first.** A function `src/` defines that the Store build identifies becomes a thunk into the exe's copy,
+  linked ahead of `src/` (`/force:multiple` keeps the first). The enhanced build compiles one section per function,
+  so the losing copies are dropped.
+- **Redirect table.** The replacements are exported as `t6_redirects`.
+- **Two checks.** No exe branch lands in a replaced function's first 14 bytes, and no trap is reachable from a
+  replacement.
+- **Uncovered patches stay off the Store.** An enhanced file whose Store side isn't verified stays server-only
+  (`#ifndef T6_STORE`: P0001's voice changes reach Store globals not identified yet).
+- **Win32 imports.** Win32 calls the Store exe doesn't import (raw input) are real imports of the DLL, from
+  `tools/recon/lib/*.def`; the harness stubs them like the exe's.
+- **Testing the result.** `tests/differential/run.py --enhanced` on the Store DLL compares the exe with itself for
+  every thunked function. The patch's own checks (`tests/enhanced/test_mouse.py`) compare the replacements with the
+  original Store functions, and run the exe's entry points with the loader's jumps applied. Unicorn keeps code it
+  has translated, so the check drops its cache for the patched bytes (`ctl_remove_cache`).
+
+x64 Win32 calls: `windows.h` declares Win32 functions `dllimport`, so code calls through `__imp_Name`. The x64 link
+resolves each `__imp_Name` to the exe's import address table entry, as exe data reached through its slot. Before
+this, `__imp_` names linked to traps, and no Store test had reached a Win32 call.
 
 ## Byte matching
 

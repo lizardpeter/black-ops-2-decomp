@@ -99,7 +99,9 @@ def compile_unit(src, obj, arch, extra=()):
     run("clang", ARCH[arch]["triple"], "-c", asm, "-o", obj)
 
 
-_TOKEN = re.compile(r'"([^"]+)"|([A-Za-z_.?$@][\w.?$@]*)')
+# a symbol in a line of assembly: quoted (C++ names), or bare (C names), which can't start with `$` (an immediate's
+# prefix: `movabsq $__imp_X` names __imp_X)
+_TOKEN = re.compile(r'"([^"]+)"|([A-Za-z_.?@][\w.?$@]*)')
 _MOVABS = re.compile(r'^(\s*)movabsq\s+\$("[^"]+"|[A-Za-z_.?$@][\w.?$@]*)([+-](?:0x[0-9a-fA-F]+|\d+))?\s*,\s*(%r\w+)\s*(#.*)?$')
 
 
@@ -190,7 +192,8 @@ def main():
     BUILD = out_dir(build, enhanced)
     BUILD.mkdir(parents=True, exist_ok=True)
 
-    objs, sources, enhanced_defs = [], [], set()
+    objs, sources, enhanced_defs, src_defs = [], [], set(), set()
+    src_objs = []
     units = [("src", p) for p in sorted((ROOT / "src").rglob("*.cpp"))]
     if enhanced:
         units = [("enhanced", p) for p in sorted((ROOT / "enhanced").rglob("*.cpp"))] + units
@@ -203,11 +206,18 @@ def main():
             flags.append("-DT6_NO_ASSERTS")  # retail and ship builds compiled their asserts out
         if symbols.build_spec(build).get("store"):
             flags.append("-DT6_STORE")  # the Store builds' source revision: its own structure layouts and changes
+        if enhanced and arch == "x64":
+            # one section per function: the src/ copies an exe-first thunk replaces are dropped from the DLL
+            # (tools/runtime_link.py), not left as unnamed code
+            flags.append("-ffunction-sections")
         compile_unit(src, obj, arch, flags)
         objs.append(obj)
         sources.append(obj)
         if tree == "enhanced":
             enhanced_defs |= {p[2] for p in nm(obj, "--defined-only", "--extern-only") if len(p) == 3 and p[1] in "Tt"}
+        else:
+            src_objs.append(obj)
+            src_defs |= {p[2] for p in nm(obj, "--defined-only", "--extern-only") if len(p) == 3 and p[1] in "Tt"}
     if not objs:
         sys.exit("no sources")
 
@@ -230,6 +240,19 @@ def main():
     for obj in env_objs:
         defined |= {p[2] for p in nm(obj, "--defined-only", "--extern-only") if len(p) == 3}
     undefined = sorted({p[-1] for o in objs + env_objs for p in nm(o, "--undefined-only")} - defined)
+    # The enhanced Store build may call Win32 functions the original exe doesn't import: real imports of the DLL,
+    # from tools/recon/lib/*.def (the harness stubs recon.dll's imports like the original's). x64 only: the servers'
+    # enhanced code uses none.
+    import_libs = []
+    if enhanced and arch == "x64":
+        dll_imports = set()
+        for d in sorted((ROOT / "tools" / "recon" / "lib").glob("*.def")):
+            lib = BUILD / f"{d.stem}.lib"
+            run("llvm-dlltool", "-m", "i386:x86-64", "-d", d, "-l", lib)
+            import_libs.append(lib)
+            names_ = [l.strip() for l in d.read_text().splitlines()]
+            dll_imports |= {n for n in names_[names_.index("EXPORTS") + 1:] if n and not n.startswith(";")}
+        undefined = [u for u in undefined if u not in dll_imports and not (u.startswith("__imp_") and u[6:] in dll_imports)]
 
     def where(sym):
         return symbols.resolve(build, sym)
@@ -294,6 +317,13 @@ def main():
                 asm += [f"\t.globl {q}", f"{q}:", f"\tmovq {slot(iat[u])}(%rip), %rax", "\tjmpq *(%rax)"]
                 hybrid.append(f"{u}\timport\t{iat[u]:08X}")
                 continue
+            if u.startswith("__imp_") and u[6:] in iat:
+                # a dllimport call (windows.h): __imp_X is the import address table entry itself, exe data whose
+                # address comes from its slot like any other, so the call reads the exe's resolved pointer
+                exe_data.add(u)
+                slot(iat[u[6:]], f'"{SLOT_PREFIX}{u}"')
+                hybrid.append(f"{u}\timport-entry\t{iat[u[6:]]:08X}")
+                continue
             hit = where(u)
             if not hit:
                 ref = symbols.resolve(symbols.reference_build(), u) or next(
@@ -313,6 +343,20 @@ def main():
                 exe_data.add(u)
                 slot(va, f'"{SLOT_PREFIX}{u}"')
             hybrid.append(f"{u}\t{kind}\t{va:08X}")
+        runtime = enhanced  # the enhanced Store DLL is the one loaded into the game (tools/runtime_link.py)
+        redirects = []
+        if runtime:
+            import runtime_link
+            for u in sorted(src_defs - enhanced_defs):
+                hit = where(u)
+                if hit and hit[1] == "function":  # exe first: the exe's own copy, ahead of src/'s
+                    q = '"' + u + '"'
+                    asm += [f"\t.globl {q}", f"{q}:", f"\tjmpq *{slot(hit[0])}(%rip)"]
+                    hybrid.append(f"{u}\texe-first\t{hit[0]:08X}")
+            redirects = [(where(u)[0], u) for u in sorted(enhanced_defs) if where(u) and where(u)[1] == "function"]
+            runtime_link.check_targets(build, pe, redirects)
+            asm += runtime_link.redirect_asm(pe, redirects)
+            asm += ["\t.text"]
         asm += hybrid_entry(exe_base)
         asm += ["\t.data", "\t.p2align 3", "\t.globl t6_exe_slots_start", "t6_exe_slots_start:"]
         for label, va in exe_slots:
@@ -339,11 +383,21 @@ def main():
     else:
         link = ["/entry:t6_hybrid_entry", "/base:0x180000000", "/dynamicbase"]
         names = exports
+    exe_first = enhanced and arch == "x64"
+    # exe first: hybrid.obj's thunks come before src/'s definitions (/force:multiple keeps the first)
+    ordered = ([o for o in objs if o not in src_objs] + [BUILD / "hybrid.obj"] + src_objs if exe_first
+               else objs + [BUILD / "hybrid.obj"])
     run("lld-link", "/dll", "/nodefaultlib", *link, f"/out:{dll}", *[f"/export:{e}" for e in names],
+        *(["/export:t6_redirects,DATA"] if exe_first else []),
         *(["/force:multiple"] if enhanced else []), f"/map:{BUILD / 'recon.map'}",
-        *objs, *env_objs, BUILD / "hybrid.obj", quiet_duplicates=enhanced)
+        *ordered, *env_objs, *import_libs, quiet_duplicates=enhanced)
     if arch == "x64":
         check_no_exe_addresses(dll, exe_base, exe_size)
+    if exe_first:
+        import runtime_link
+        n = runtime_link.check_reachable(dll, BUILD / "recon.map", hybrid[1:], [u for _, u in redirects])
+        print(f"runtime: {len(redirects)} exe functions replaced ({', '.join(u for _, u in redirects)}); "
+              f"{n} functions reachable from them, no trap")
     (BUILD / "recon.symbols.tsv").write_text(
         "symbol\tsource\tva\n" + "".join(f"{e}\t{rows[e]}\t{where(e)[0]:08X}\n" if where(e) else f"{e}\t{rows[e]}\t\n"
                                          for e in exports))

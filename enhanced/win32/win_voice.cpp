@@ -7,6 +7,9 @@
 // - winvoice_mic_reclevel no longer reaches the device; the game's capture gain is winvoice_mic_scaler. Mapping the
 //   level onto that gain waits for the capture path (groupvoice/record.cpp) to be reconstructed.
 // Everything else is the faithful code.
+// Server build only for now: the Store build doesn't identify the voice globals and dvars yet, so in the game these
+// would reach traps (tools/runtime_link.py). It comes to the Store once win_voice.cpp is verified there.
+#ifndef T6_STORE
 #define T6_ASSERT_DIR "c:\\t6\\code\\src\\win32\\"
 #define T6_ASSERT_FILE T6_ASSERT_DIR "win_voice.cpp"
 #define T6_SOURCE "win32/win_voice.cpp"
@@ -95,3 +98,4 @@ void Voice_Playback()
 		Sound_SampleFrame(s_clientSamples[i]);
 	Sound_Frame();
 }
+#endif

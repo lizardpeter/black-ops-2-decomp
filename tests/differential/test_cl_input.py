@@ -432,9 +432,11 @@ STORE_MOUSE = {
 }
 
 
-def store_mouse_inputs(n=400):
+def store_mouse_inputs(n=400, rng=rng, dvars_override=None, frame_msec=None, finite=False):
+    """The Store's CL_MouseMove inputs. The enhanced build's checks (tests/enhanced/test_mouse.py) pass their own rng,
+    dvars that override the drawn ones, a fixed frame_msec, and finite (no NaN scales or caps)."""
     out = []
-    nan = float("nan")
+    nan = 1.0 if finite else float("nan")
     for _ in range(n):
         kb = {KB["STRAFE"]: kbutton(active=rng.random() < 0.25), KB["MLOOK"]: kbutton(active=rng.random() < 0.5)}
         client = {S_PS + PS_PM_FLAGS: rng.choice([0, 0, 0, 0x800]),
@@ -463,12 +465,13 @@ def store_mouse_inputs(n=400):
                     S_AA_GLOB + 0x12B0: b"\xAA" * 8}
         out.append({"args": [0, cmd, ("f", rng.choice([16.0, 6.9, 33.3]))],
                     "setup": setup(kb=kb, client=client, globals_=globals_,
-                                   frame_msec=rng.choice([0, 1, 7, 16, 33, rng.randrange(2, 60)]),
+                                   frame_msec=frame_msec if frame_msec is not None else
+                                   rng.choice([0, 1, 7, 16, 33, rng.randrange(2, 60)]),
                                    dvars={M_FILTER: rng.randrange(2), MOUSE_ACCEL: rng.choice([0.0, 0.5, rng.uniform(0, 3)]),
                                           M_SIDE: rng.choice([0.25, rng.uniform(0.01, 1)]), M_YAW: rng.choice([0.022, rng.uniform(0.5, 5)]),
                                           M_PITCH: rng.choice([0.022, -0.022, 0.0, rng.uniform(-5, 5)]),
                                           M_FORWARD: rng.choice([0.25, rng.uniform(0.01, 1)]),
-                                          FREELOOK: rng.choice([1, 1, 0])},
+                                          FREELOOK: rng.choice([1, 1, 0]), **(dvars_override or {})},
                                    sens=rng.choice([5.0, rng.uniform(0.5, 20)]),
                                    update_view=rng.random() < 0.8)})
     return out

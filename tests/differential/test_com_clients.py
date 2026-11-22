@@ -10,6 +10,7 @@ STATE = {}
 SERVER = ["CoDMPServer_PC"]
 CLIENT_GAME_STATES = 0x01D77360  # ClientGameState[1]: localClientNum +4, controllerIndex +8, lastInput +0x14
 RESET_TIME = 0x00DA1A18          # Com_LocalClient_LastInput_Set's static
+PRIMARY = 0x00DA1A14             # primaryLocalClient
 
 
 def client(lc=0, controller=0, last=0, reset=None):
@@ -18,6 +19,14 @@ def client(lc=0, controller=0, last=0, reset=None):
         if reset is not None:
             w.u32(RESET_TIME, reset & 0xFFFFFFFF)
     return run
+
+
+def ui(lc, context):
+    return lambda w: w.write(CLIENT_GAME_STATES, struct.pack("<iiiiii", 0x11, lc, 2, context, 3, 1))
+
+
+def primary(v):
+    return lambda w: w.write(PRIMARY, struct.pack("<i", v))
 
 
 def now(t, **kw):
@@ -40,6 +49,13 @@ CASES = [
                 {"args": [0], "setup": client(2, 3)},
                 # past MAX_LOCAL_CLIENTS: the bounds assert, then the next record (which names local client 0)
                 {"args": [1], "setup": client(0, 5)}]},
+    {"name": "Com_LocalClient_GetUIContextIndex", "ret": "int", "builds": SERVER, "fakes": ASSERT,
+     "observe": {"Assert_MyHandler": "siiss"},
+     "inputs": [{"args": [0], "setup": ui(0, c)} for c in (0, 1, -1)] + [{"args": [0], "setup": ui(2, 0)},
+                                                                             {"args": [1], "setup": ui(0, 0)}]},
+    {"name": "Com_LocalClients_GetPrimary", "ret": "int", "builds": SERVER, "fakes": ASSERT,
+     "observe": {"Assert_MyHandler": "siisss"},
+     "inputs": [{"args": [], "setup": primary(v)} for v in (0, 1, -1, 3)]},
     {"name": "Com_LocalClient_LastInput_Get", "ret": "int", "builds": SERVER,
      "inputs": [{"args": [0], "setup": client(last=v)} for v in range(4)]},
     {"name": "Com_LocalClient_LastInput_Set", "ret": "void", "builds": SERVER,

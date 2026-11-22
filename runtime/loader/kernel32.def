@@ -1,0 +1,15 @@
+; runtime/loader/kernel32.def: what the loader imports
+LIBRARY kernel32.dll
+EXPORTS
+LoadLibraryW
+GetProcAddress
+GetModuleHandleW
+GetModuleFileNameW
+GetSystemDirectoryW
+VirtualProtect
+GetCurrentProcess
+FlushInstructionCache
+DisableThreadLibraryCalls
+CreateFileW
+WriteFile
+CloseHandle

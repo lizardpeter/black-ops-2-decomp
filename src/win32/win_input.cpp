@@ -21,14 +21,6 @@
 #include "win32/win_gamepad.h"
 #include "win32/win_shared.h"
 
-struct WinMouseVars_t
-{
-	int oldButtonState;
-	POINT oldPos;          // the cursor's screen position at the last read
-	bool mouseActive;      // the game window has the mouse
-	bool mouseInitialized;
-};
-
 enum GamePadStick
 {
 	GPAD_INVALID = 0,

@@ -200,3 +200,11 @@ CoDMPServer_PC	00909430	matches	src/demo/demo_common.cpp	Demo_IsPlaying; tests/d
 CoDMPServer_PC	004096C0	matches	src/aim_assist/aim_assist.cpp	AimAssist_UpdateMouseInput; tests/differential/test_aim_assist.py
 CoDMPServer_PC	00675010	matches	src/game/gamerprofile.cpp	GamerProfile_GetFloat; tests/differential/test_gamerprofile.py
 t6mp_msstore	1401930F0	matches	src/client/cl_input.cpp	CL_MouseMove (Store branches: acceleration order, floorf rounding, /fp:fast NaN comparisons; its inlined helpers verified with it); tests/differential/test_cl_input.py
+CoDMPServer_PC	006B5C90	matches	src/qcommon/com_clients.cpp	Com_LocalClient_GetUIContextIndex; tests/differential/test_com_clients.py
+CoDMPServer_PC	006B5EC0	matches	src/qcommon/com_clients.cpp	Com_LocalClients_GetPrimary; tests/differential/test_com_clients.py
+CoDMPServer_PC	0070E930	matches	src/ui/ui_main.cpp	UI_GetInfo; tests/differential/test_ui_main.py
+CoDMPServer_PC	00713290	matches	src/ui/ui_main.cpp	UI_KeysBypassMenu; tests/differential/test_ui_main.py
+CoDMPServer_PC	00711150	matches	src/ui/ui_main.cpp	UI_UpdateMouseScreenPosition; tests/differential/test_ui_main.py
+CoDMPServer_PC	007111F0	matches	src/ui/ui_main.cpp	UI_MouseEvent; tests/differential/test_ui_main.py
+CoDMPServer_PC	00534070	matches	src/client/screen_placement.cpp	ScrPlace_HiResGetScaleX; tests/differential/test_screen_placement.py
+t6mp_msstore	140499A10	matches	src/win32/win_input.cpp	IN_MouseMove (with the Store revision of CL_MouseEvent and the UI cursor functions it inlines); tests/differential/test_win_input.py

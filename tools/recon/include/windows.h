@@ -50,6 +50,120 @@ WINUSERAPI BOOL WINAPI ClientToScreen(HWND hWnd, LPPOINT lpPoint);
 WINUSERAPI int WINAPI ShowCursor(BOOL bShow);
 WINUSERAPI BOOL WINAPI PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
+// Threads, message windows and raw input, as the enhanced build's raw mouse thread uses them
+// (enhanced/win32/win_rawinput.cpp). RegisterRawInputDevices and GetRawInputData aren't imported by the Store exe:
+// they're real imports of the enhanced DLL (tools/recon/lib/user32.def).
+typedef void *HANDLE;
+typedef unsigned short USHORT;
+typedef unsigned long ULONG;
+typedef __INTPTR_TYPE__ LRESULT;  // LONG_PTR
+typedef void *HRAWINPUT;
+typedef LRESULT(WINAPI *WNDPROC)(HWND, UINT, WPARAM, LPARAM);
+typedef DWORD(WINAPI *LPTHREAD_START_ROUTINE)(void *lpThreadParameter);
+
+typedef struct tagWNDCLASSA
+{
+	UINT style;
+	WNDPROC lpfnWndProc;
+	int cbClsExtra;
+	int cbWndExtra;
+	HINSTANCE hInstance;
+	HANDLE hIcon;
+	HANDLE hCursor;
+	HANDLE hbrBackground;
+	const char *lpszMenuName;
+	const char *lpszClassName;
+} WNDCLASSA;
+
+typedef struct tagMSG
+{
+	HWND hwnd;
+	UINT message;
+	WPARAM wParam;
+	LPARAM lParam;
+	DWORD time;
+	POINT pt;
+	DWORD lPrivate;
+} MSG;
+
+typedef struct tagRAWINPUTDEVICE
+{
+	USHORT usUsagePage;
+	USHORT usUsage;
+	DWORD dwFlags;
+	HWND hwndTarget;
+} RAWINPUTDEVICE;
+
+typedef struct tagRAWINPUTHEADER
+{
+	DWORD dwType;
+	DWORD dwSize;
+	HANDLE hDevice;
+	WPARAM wParam;
+} RAWINPUTHEADER;
+
+typedef struct tagRAWMOUSE
+{
+	USHORT usFlags;
+	union
+	{
+		ULONG ulButtons;
+		struct
+		{
+			USHORT usButtonFlags;
+			USHORT usButtonData;
+		};
+	};
+	ULONG ulRawButtons;
+	LONG lLastX;
+	LONG lLastY;
+	ULONG ulExtraInformation;
+} RAWMOUSE;
+
+typedef struct tagRAWINPUT
+{
+	RAWINPUTHEADER header;
+	union
+	{
+		RAWMOUSE mouse;
+		unsigned char other[24];  // RAWKEYBOARD, RAWHID: not used
+	} data;
+} RAWINPUT;
+
+#define WM_INPUT 0x00FF
+#define RID_INPUT 0x10000003
+#define RIM_TYPEMOUSE 0
+#define RIDEV_INPUTSINK 0x00000100
+#define MOUSE_MOVE_ABSOLUTE 0x01
+#define HID_USAGE_PAGE_GENERIC ((USHORT)0x01)
+#define HID_USAGE_GENERIC_MOUSE ((USHORT)0x02)
+#define HWND_MESSAGE ((HWND)(__INTPTR_TYPE__)-3)
+#define INFINITE 0xFFFFFFFF
+#define THREAD_PRIORITY_HIGHEST 2
+#define WINBASEAPI extern "C" __declspec(dllimport)
+
+WINUSERAPI USHORT WINAPI RegisterClassA(const WNDCLASSA *lpWndClass);
+WINUSERAPI HWND WINAPI CreateWindowExA(DWORD dwExStyle, const char *lpClassName, const char *lpWindowName,
+                                       DWORD dwStyle, int X, int Y, int nWidth, int nHeight, HWND hWndParent,
+                                       HANDLE hMenu, HINSTANCE hInstance, void *lpParam);
+WINUSERAPI LRESULT WINAPI DefWindowProcA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+WINUSERAPI BOOL WINAPI GetMessageA(MSG *lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
+WINUSERAPI LRESULT WINAPI DispatchMessageA(const MSG *lpMsg);
+WINUSERAPI BOOL WINAPI RegisterRawInputDevices(const RAWINPUTDEVICE *pRawInputDevices, UINT uiNumDevices,
+                                               UINT cbSize);
+WINUSERAPI UINT WINAPI GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, void *pData, UINT *pcbSize,
+                                       UINT cbSizeHeader);
+WINBASEAPI HINSTANCE WINAPI GetModuleHandleA(const char *lpModuleName);
+WINBASEAPI HANDLE WINAPI CreateThread(void *lpThreadAttributes, __SIZE_TYPE__ dwStackSize,
+                                      LPTHREAD_START_ROUTINE lpStartAddress, void *lpParameter,
+                                      DWORD dwCreationFlags, DWORD *lpThreadId);
+WINBASEAPI HANDLE WINAPI CreateEventA(void *lpEventAttributes, BOOL bManualReset, BOOL bInitialState,
+                                      const char *lpName);
+WINBASEAPI BOOL WINAPI SetEvent(HANDLE hEvent);
+WINBASEAPI DWORD WINAPI WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
+WINBASEAPI BOOL WINAPI CloseHandle(HANDLE hObject);
+WINBASEAPI BOOL WINAPI SetThreadPriority(HANDLE hThread, int nPriority);
+
 // <mmeapi.h>: the audio mixer API (winmm.dll), as win32/win_voice.cpp uses it. The SDK packs these structures to
 // one byte (pshpack1.h).
 typedef UINT MMRESULT;

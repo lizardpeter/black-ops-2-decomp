@@ -7,24 +7,19 @@ decompiled first. Items marked **open** still need a decision. Fixes to original
 
 ## Input
 
-- **True raw input.** Read mouse movement from `WM_INPUT` / `GetRawInputBuffer` as relative counts, with no
-  cursor centering or `ClipCursor` box. The original moves the Windows cursor and reads it back
-  (win32 input: `IN_MouseMove` and friends), which loses, clamps and accelerates counts. The menus keep an absolute
-  cursor.
-- **No acceleration, no smoothing.** Rotation is exactly counts × degrees per count, nothing else. Raw input already
-  bypasses Windows' pointer acceleration ("Enhance pointer precision"), which the original's cursor reading picks
-  up. In the game, `CL_MouseMove`'s `cl_mouseAccel` term (sensitivity + accel × counts per millisecond) and
-  `CL_GetMouseMovement`'s `m_filter` (averaging this frame with the last, half a frame of delay on average) are
-  removed from the enhanced code paths, not just defaulted to off.
-- **High polling rates, mice and keyboards.** Drain the whole raw-input buffer every frame (8 kHz mice deliver
-  several events per millisecond). Keyboard events come through raw input too, so short presses between frames
-  aren't lost.
-- **Full DPI support.** Accumulate counts unrounded, in double, and apply them once per command. No integer
-  truncation of small movements.
+- **True raw input: done (P0002).** The mouse's raw input is read on a thread of its own: `WM_INPUT`, device
+  counts, 64-bit counters. The game turns by the counts; menus keep the cursor. Absolute devices (tablets, remote
+  desktop) are ignored.
+- **No acceleration, no smoothing: done (P0002).** `cl_mouseAccel` and `m_filter` are removed from the enhanced
+  `CL_MouseMove`, not defaulted off. Raw input bypasses Windows' pointer acceleration.
+- **High polling rates and DPI: done for the mouse (P0002).** Each report is handled on the input thread, counts
+  are never rounded, and a 0 ms frame no longer drops the frame's movement (B0017). The yaw is kept within ±180° so
+  its precision doesn't wear down (B0018). Still to do: keyboard events through raw input, so short presses between
+  frames aren't lost.
 - **MW2019 sensitivity scale.** Degrees per count = MW2019's yaw (0.0066°) × sensitivity, independent of FOV unless
   a scale option asks for it. Same setup as Ghosts and BO3.
 
-First: `client/cl_input.cpp` (`CL_MouseMove`, `CL_CreateNewCommands`), `win32` input, `cgame` view angles.
+The enhanced build reaches the game through `runtime/loader` (docs/enhanced-build.md).
 
 ## View
 

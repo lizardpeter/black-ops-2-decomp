@@ -38,9 +38,19 @@ jobs:
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tests/differential/run.py --build $b --check-records; done
       - name: Enhanced build
         run: |
-          python tools/build_recon.py --build CoDMPServer_PC --enhanced
-          python tests/differential/run.py --build CoDMPServer_PC --enhanced
-          python tests/enhanced/run.py --build CoDMPServer_PC
+          for b in CoDMPServer_PC t6mp_msstore; do
+            python tools/build_recon.py --build $b --enhanced
+            python tests/differential/run.py --build $b --enhanced
+            python tests/enhanced/run.py --build $b
+          done
+      - name: Enhanced runtime package
+        run: python tools/build_runtime.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: enhanced-runtime
+          path: |
+            build/t6mp_msstore/runtime/XINPUT1_4.dll
+            build/t6mp_msstore/runtime/t6_enhanced.dll
       - name: Generated files are current
         run: |
           python tools/inventory/retail_calls.py originals/t6mp.exe

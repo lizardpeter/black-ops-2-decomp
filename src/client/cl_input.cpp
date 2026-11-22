@@ -21,6 +21,7 @@
 #include "cgame_mp/cg_local_mp.h"
 #include "demo/demo.h"
 #include "game/gamerprofile.h"
+#include "ui/ui.h"
 #include "qcommon/qcommon.h"
 #include "t6_assert.h"
 #include "universal/com_math.h"
@@ -69,10 +70,7 @@ float AngleNormalize360(float angle);
 bool CG_ShouldUpdateViewAngles(LocalClientNum_t localClientNum);
 
 // ui, devgui, win32
-void UI_UpdateMouseScreenPosition(LocalClientNum_t localClientNum, int x, int y);
-bool UI_KeysBypassMenu(LocalClientNum_t localClientNum);
 bool UI_IsFocusedMenuUi3dWindow(LocalClientNum_t localClientNum);
-void UI_MouseEvent(LocalClientNum_t localClientNum, int x, int y);
 bool DevGui_IsActive();
 void DevGui_MouseEvent(int dx, int dy);
 void IN_SetCursorPos(int x, int y);
@@ -871,11 +869,44 @@ X87_MATH void CL_KeyMove(LocalClientNum_t localClientNum, usercmd_s *cmd)
 	}
 }
 
+#ifdef T6_STORE
+// Store only, no name in any symbol file (records/names.tsv): a flag that drops mouse movement where the server checks
+// the dev GUI, and that aim assist and the extra-camera draw also read; and the handler that gets the movement while
+// key catcher 0x10 is set (LUI, by its strings).
+extern int store_1427F1B60;
+void Store_LUIMouseEvent(LocalClientNum_t localClientNum, int x, int y);
+#endif
+
 // 004EDC60  client/cl_input.cpp:1554
 // Mouse motion: to the dev GUI, to a menu that takes the mouse, or accumulated for CL_MouseMove. Returns false when a
 // menu took it.
 int CL_MouseEvent(LocalClientNum_t localClientNum, int x, int y, int dx, int dy)
 {
+#ifdef T6_STORE
+	// The Store revision: an unnamed flag takes the dev GUI's place (no dev GUI mouse; the movement is dropped), the
+	// 3D-window check is gone, and a key catcher 0x10 sends the movement to a LUI handler. IN_MouseMove 140499A10
+	// inlines this.
+	if (store_1427F1B60)
+		return 1;
+	clientUIActive_t *clientUIActive = CL_GetLocalClientUIGlobals(localClientNum);
+	UI_UpdateMouseScreenPosition(localClientNum, x, y);
+	if (dx || dy)
+	{
+		bool tookIt = false;
+		if ((clientUIActive->keyCatchers & 0x48) && !UI_KeysBypassMenu(localClientNum))
+		{
+			UI_MouseEvent(localClientNum, x, y);
+			tookIt = true;
+		}
+		if (clientUIActive->keyCatchers & 0x10)
+		{
+			Store_LUIMouseEvent(localClientNum, x, y);
+			return 0;
+		}
+		if (tookIt)
+			return 0;
+	}
+#else
 	if (DevGui_IsActive())
 	{
 		DevGui_MouseEvent(dx, dy);
@@ -889,6 +920,7 @@ int CL_MouseEvent(LocalClientNum_t localClientNum, int x, int y, int dx, int dy)
 		UI_MouseEvent(localClientNum, x, y);
 		return 0;
 	}
+#endif
 	IN_ShowSystemCursor(0);
 	mouseIn.mouseDx[mouseIn.mouseIndex] += dx;
 	mouseIn.mouseDy[mouseIn.mouseIndex] += dy;

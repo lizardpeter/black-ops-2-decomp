@@ -75,6 +75,13 @@ the source handles them:
     apart: a test that passes with the server's form reverted in is missing them.
 - **Revision changes in code.** `CL_MouseMove` rounds the mouse's walk and strafe moves with `floorf(x + 0.5f)`
   (the server rounds to nearest after adding 2^-30) and no longer prints `cl_showMouseRate`.
+- **The mouse reader.** The Store's `IN_MouseMove` (140499A10) inlines a later revision of `CL_MouseEvent`:
+  - a Store-only flag (1427F1B60, name unknown) takes the dev GUI check's place;
+  - the 3D-window check is gone;
+  - key catcher 0x10 sends the movement to a LUI handler (1406AC5D0).
+
+  The UI cursor functions it inlines (`UI_GetInfo`, `UI_UpdateMouseScreenPosition`, `UI_MouseEvent`) are the
+  server's.
 - **Inlined wrappers change the callee.** Where the Store inlined a thin wrapper, its callers call what the wrapper
   called: `CL_MouseMove` calls `GamerProfile_GetInt` and uses the bits as a float (the server's
   `GamerProfile_GetFloat`), so the returned value is in EAX, not XMM0. A Store function whose result is used

@@ -19,6 +19,15 @@ static_assert(sizeof(void *) != 4 || sizeof(WinVars_t) == 0x24, "WinVars_t (the 
 
 extern WinVars_t g_wv;  // win_wndproc.cpp
 
+// win_input.cpp's mouse state (a file static there)
+struct WinMouseVars_t
+{
+	int oldButtonState;
+	POINT oldPos;          // the cursor's screen position at the last read
+	bool mouseActive;      // the game window has the mouse
+	bool mouseInitialized;
+};
+
 // win_input.cpp
 void IN_Frame();
 void IN_Shutdown();
@@ -29,3 +38,4 @@ void IN_MouseMove();
 void IN_GamepadsMove();
 void IN_SetCursorPos(int x, int y);
 void IN_ShowSystemCursor(int show);
+void IN_ClampMouseMove(POINT *curPos);

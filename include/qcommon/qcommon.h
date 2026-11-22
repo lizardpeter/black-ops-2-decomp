@@ -67,10 +67,12 @@ struct ClientGameState
 static_assert(sizeof(ClientGameState) == 0x18, "ClientGameState");
 
 extern ClientGameState clientGameStates[MAX_LOCAL_CLIENTS];
+extern LocalClientNum_t primaryLocalClient;
 
 LocalClientNum_t Com_LocalClients_GetPrimary();
 LocalClientNum_t Com_ControllerIndex_GetLocalClientNum(ControllerIndex_t controllerIndex);
 ControllerIndex_t Com_LocalClient_GetControllerIndex(LocalClientNum_t localClientNum);
+UIContextIndex_t Com_LocalClient_GetUIContextIndex(LocalClientNum_t localClientNum);
 void Com_LocalClient_LastInput_Set(LocalClientNum_t localClientNum, LastInput_t lastInput);
 LastInput_t Com_LocalClient_LastInput_Get(LocalClientNum_t localClientNum);
 

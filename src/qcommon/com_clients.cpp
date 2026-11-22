@@ -14,6 +14,17 @@
 void CG_UpdateVehicleBindings(LocalClientNum_t localClientNum);  // cgame/cg_camera.cpp
 
 T6_GLOBAL ClientGameState clientGameStates[MAX_LOCAL_CLIENTS];
+T6_GLOBAL LocalClientNum_t primaryLocalClient;
+
+// 006B5C90  qcommon/com_clients.cpp:190
+UIContextIndex_t Com_LocalClient_GetUIContextIndex(LocalClientNum_t localClientNum)
+{
+	bcassert_at(191, localClientNum, MAX_LOCAL_CLIENTS);
+	assert_at(192, clientGameStates[localClientNum].localClientNum == localClientNum);
+	if (clientGameStates[localClientNum].localClientNum != localClientNum)
+		return INVALID_UI_CONTEXT;
+	return clientGameStates[localClientNum].uiContextIndex;
+}
 
 // 006B5D10  qcommon/com_clients.cpp:201
 ControllerIndex_t Com_LocalClient_GetControllerIndex(LocalClientNum_t localClientNum)
@@ -23,6 +34,14 @@ ControllerIndex_t Com_LocalClient_GetControllerIndex(LocalClientNum_t localClien
 	if (clientGameStates[localClientNum].localClientNum != localClientNum)
 		return INVALID_CONTROLLER_PORT;
 	return clientGameStates[localClientNum].controllerIndex;
+}
+
+// 006B5EC0  qcommon/com_clients.cpp:265
+LocalClientNum_t Com_LocalClients_GetPrimary()
+{
+	assertf_at(267, primaryLocalClient != INVALID_LOCAL_CLIENT, "%s",
+	           "Someone asked for the primary client and it was not set\n");
+	return primaryLocalClient;
 }
 
 // 006B6300  qcommon/com_clients.cpp:615

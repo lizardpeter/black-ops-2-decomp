@@ -20,6 +20,7 @@ If a generated file is wrong, fix the script that wrote it and re-run. Don't pat
 | `analysis/<build>/` | PE inventory (`pe.json`, x64 `pdata.tsv`), PDB/MAP tables (`pdb/`, `map/`), Ghidra exports (`ghidra/`, saved project split under 100 MB), `functions.tsv`, `pseudocode/`, `disasm/`, `match/`, `logs/` |
 | `src/`, `include/` | Faithful behaviour, including original quirks |
 | `enhanced/` | Overrides for intentional improvements, same layout as `src/`; a function defined there replaces the faithful one in the enhanced build |
+| `runtime/` | What puts the enhanced build into the game: the loader (`runtime/loader`, `XINPUT1_4.dll`); built with `tools/build_runtime.py` (docs/enhanced-build.md) |
 | `records/` | `functions.tsv` (status), `names.tsv` (identifications in builds without symbols), `bugs.tsv`, `patches.tsv` |
 | `tests/differential/` | Reconstructions against the original code under Unicorn, x86 or x64 (`harness.py`, `run.py`, cases in `test_*.py`) |
 | `tools/` | Fetching, inventory, PDB extraction, Ghidra scripts, matching, the hybrid-link build (`build_recon.py`, `symbols.py`, `recon/`), status and graph generation |

@@ -36,15 +36,18 @@ def s32(mu, va):
 
 
 def arg(mu, i):
+    """Argument i at the callee's entry: cdecl/stdcall on x86, Win64 registers on x64."""
+    if STATE.get("x64"):
+        return mu.reg_read((x86.UC_X86_REG_RCX, x86.UC_X86_REG_RDX, x86.UC_X86_REG_R8, x86.UC_X86_REG_R9)[i])
     return u32(mu, mu.reg_read(x86.UC_X86_REG_ESP) + 4 + 4 * i)
 
 
 def sarg(mu, i):
-    return struct.unpack("<i", struct.pack("<I", arg(mu, i)))[0]
+    return struct.unpack("<i", struct.pack("<I", arg(mu, i) & 0xFFFFFFFF))[0]
 
 
 def result(mu, value):
-    mu.reg_write(x86.UC_X86_REG_EAX, value & 0xFFFFFFFF)
+    mu.reg_write(x86.UC_X86_REG_RAX if STATE.get("x64") else x86.UC_X86_REG_EAX, value & 0xFFFFFFFF)
 
 
 # -- user32, modelled
@@ -87,7 +90,7 @@ def ClientToScreen(m, mu):
 
 
 def ShowCursor(m, mu):
-    count = s32(mu, SHOW_COUNT) + (1 if arg(mu, 0) else -1)
+    count = s32(mu, SHOW_COUNT) + (1 if arg(mu, 0) & 0xFFFFFFFF else -1)
     m.program_write(SHOW_COUNT, struct.pack("<i", count))
     result(mu, count)
 
@@ -109,6 +112,8 @@ def setup(cursor=(500, 400), rect=(100, 50, 1380, 770), foreground=HWND, show_co
         STATE.clear()
         STATE.update(state)
         STATE["dvars"] = dvars or {}
+        if w.m.x64:
+            return store_setup(w, cursor, rect, foreground, show_count, old, active, initialized, appactive, state)
         w.write(CURSOR, struct.pack("<ii", *cursor))
         w.write(RECT, struct.pack("<iiii", *rect))
         w.u32(FOREGROUND, foreground)
@@ -119,6 +124,74 @@ def setup(cursor=(500, 400), rect=(100, 50, 1380, 770), foreground=HWND, show_co
         for va, handle in DVAR_PTRS.items():
             w.u32(va, handle)
     return run
+
+
+# The Store build (records/names.tsv). Its IN_MouseMove inlines CL_MouseEvent (Store revision), UI_GetInfo,
+# UI_UpdateMouseScreenPosition, UI_MouseEvent, IN_ShowSystemCursor, IN_ClampMouseMove and IN_RecenterMouse, so their
+# state is set rather than faked.
+S_G_WV = 0x1421E4510               # WinVars_t (x64): hWnd +0x10, recenterMouse +0x28
+S_S_WMV = 0x14420E658              # WinMouseVars_t: oldPos +4, mouseActive +0xC, mouseInitialized +0xD
+S_CENTER_X, S_CENTER_Y, S_SHOW_CURSOR = 0x14420E668, 0x14420D59C, 0x1421E2460
+S_R_FULLSCREEN, S_PRIMARY, S_FLAG = 0x1427E7230, 0x140A53D88, 0x1427F1B60
+S_UI = 0x1421214C0                 # uiInfoArray[0]: cursor +0x10, isCursorVisible +0x18, menuCount +0x27B8,
+                                   # currentMenuType +0x414C
+S_SCR_PLACE = 0x140E63300          # scrPlaceFull: scaleVirtualToFull at +8
+S_KEY_CATCHERS = 0x140E61794       # clientUIActives[0].keyCatchers
+S_MOUSE_IN = 0x140E5C7F0           # mouseIn: dx[2], dy[2], index
+S_CLIENT_GAME_STATES = 0x141EF91E0
+S_DVAR = OBJECTS + 0x1E0000        # r_fullscreen's dvar_t (x64: type +0x18, value +0x20)
+
+
+def store_setup(w, cursor, rect, foreground, show_count, old, active, initialized, appactive, state):
+    STATE["x64"] = True
+    w.write(CURSOR, struct.pack("<ii", *cursor))
+    w.write(RECT, struct.pack("<iiii", *rect))
+    w.u32(FOREGROUND, foreground)
+    w.write(SHOW_COUNT, struct.pack("<i", show_count))
+    w.u64(S_G_WV + 0x10, HWND)
+    w.u32(S_G_WV + 0x28, 7)
+    w.write(S_S_WMV + 4, struct.pack("<iiBB", old[0], old[1], active, initialized))
+    fullscreen = STATE["dvars"].get(R_FULLSCREEN)
+    if fullscreen is None:
+        w.u64(S_R_FULLSCREEN, 0)  # no dvar: the inlined Dvar_GetInt reads 0
+    else:
+        w.write(S_DVAR + 0x18, struct.pack("<i", 6))  # DVAR_TYPE_INT
+        w.write(S_DVAR + 0x20, struct.pack("<i", fullscreen))
+        w.u64(S_R_FULLSCREEN, S_DVAR)
+    w.u32(S_PRIMARY, 0)
+    w.u32(S_FLAG, state.get("flag", 0))
+    w.write(S_CLIENT_GAME_STATES, struct.pack("<6i", 0, 0, 0, 0, 0, 1))
+    w.write(S_SCR_PLACE + 8, struct.pack("<ff", *state.get("scale", (2.0, 1.5))))
+    w.write(S_UI + 0x10, struct.pack("<ffi", 1.0, 2.0, 5))
+    w.write(S_UI + 0x27B8, struct.pack("<i", state.get("menus", 0)))
+    w.write(S_UI + 0x414C, struct.pack("<i", state.get("menu_type", 0)))
+    w.u32(S_KEY_CATCHERS, state.get("catchers", 0))
+    w.write(S_MOUSE_IN, struct.pack("<5i", 3, -4, 5, 6, state.get("index", 0)))
+
+
+STORE_FAKES = {"Com_LocalClient_LastInput_Set": lambda mu: None, "Display_MouseMove": lambda mu: 0,
+               "Store_LUIMouseEvent": lambda mu: None}
+STORE_SEEN = {"Com_LocalClient_LastInput_Set": "ii", "Display_MouseMove": "iq", "Store_LUIMouseEvent": "iii"}
+
+
+def store_mouse_inputs(n=300):
+    out = []
+    for _ in range(n):
+        rect = rng.choice([(100, 50, 1380, 770), (0, 0, 1920, 1080), (-1920, 0, 0, 1080)])
+        cursor = rng.choice([(rect[0] + 640, rect[1] + 360), (rect[0] - 5, rect[1] + 3), (rect[2], rect[3]),
+                             (rect[2] + 40, rect[1] - 1), (rect[0] + rng.randrange(-50, 1400), rect[1] + rng.randrange(-50, 800))])
+        old = rng.choice([cursor, cursor, (rect[0] + 640, rect[1] + 360), (cursor[0] - 3, cursor[1] + 7)])
+        index = rng.randrange(2)
+        fullscreen = rng.choice([0, 1, 1, 2, None])
+        out.append({"args": [], "cursor": cursor, "old": old, "index": index, "rect": rect, "fullscreen": fullscreen,
+                    "setup": setup(
+            cursor=cursor, rect=rect, old=old, foreground=rng.choice([HWND, HWND, HWND, 0x9999]),
+            show_count=rng.choice([-1, 0, -2, 1]),
+            dvars={R_FULLSCREEN: fullscreen},
+            flag=rng.choice([0, 0, 0, 0, 1]), scale=rng.choice([(2.0, 1.5), (1.0, 1.0), (3.0, 2.25), (0.5, 0.75)]),
+            menus=rng.choice([0, 0, 2]), menu_type=rng.choice([0, 0, 8, 3]),
+            catchers=rng.choice([0, 0, 0x8, 0x40, 0x10, 0x18, 0x1, 0x48]), index=index)})
+    return out
 
 
 def gpad_float(name):
@@ -207,8 +280,9 @@ FRAME_FAKES = dict(FAKES, IN_GamepadsMove=lambda mu: None, IN_MouseMove=lambda m
                    IN_ActivateMouse=lambda mu: None)
 
 CASES = [
-    {"name": "IN_MouseMove", "ret": "void", "builds": SERVER, "imports": IMPORTS, "fakes": FAKES, "observe": SEEN,
-     "inputs": mouse_inputs()},
+    {"name": "IN_MouseMove", "ret": "void", "builds": ["CoDMPServer_PC", "t6mp_msstore"], "imports": IMPORTS,
+     "fakes": FAKES, "observe": SEEN, "inputs": mouse_inputs(),
+     "by_build": {"t6mp_msstore": {"fakes": STORE_FAKES, "observe": STORE_SEEN, "inputs": store_mouse_inputs()}}},
     {"name": "IN_ClampMouseMove", "ret": "void", "builds": SERVER, "imports": IMPORTS, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [struct.pack("<ii", x, y)], "setup": setup(rect=(100, 50, 1380, 770))}
                 for x in (99, 100, 101, 1379, 1380, 5000) for y in (49, 50, 400, 769, 770, -9)]},

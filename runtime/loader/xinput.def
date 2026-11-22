@@ -1,0 +1,10 @@
+; runtime/loader/xinput.def: the exports of the system xinput1_4.dll, at its ordinals
+LIBRARY XINPUT1_4.dll
+EXPORTS
+XInputGetState @2
+XInputSetState @3
+XInputGetCapabilities @4
+XInputEnable @5
+XInputGetBatteryInformation @7
+XInputGetKeystroke @8
+XInputGetAudioDeviceIds @10
