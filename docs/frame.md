@@ -88,6 +88,30 @@ Store's call graph:
   a frame-latency waitable object on a flip-model swap chain with maximum latency 1, waited on by the main thread
   before it reads input and builds the frame (Ghosts P0004 waits at the same point, its `R_SyncGpu`).
 
+## The swap chain
+
+Built by 14071E360 for the device creation 14071FEA0 (called from the renderer's init 1407203B0):
+
+| `DXGI_SWAP_CHAIN_DESC` field | Value |
+|---|---|
+| `BufferDesc.Width`, `Height` | the window's size (from the caller's parameters) |
+| `BufferDesc.RefreshRate` | 0/0 (no refresh rate asked for) |
+| `BufferDesc.Format` | 0x1C, `DXGI_FORMAT_R8G8B8A8_UNORM` |
+| `SampleDesc` | 1, 0 (multisampling is done on its own targets: `r_aaSamples`-style value kept at 14282E538) |
+| `BufferUsage` | 0x20, `DXGI_USAGE_RENDER_TARGET_OUTPUT` |
+| `BufferCount` | 2 |
+| `Windowed` | TRUE: exclusive fullscreen is entered afterwards with `SetFullscreenState` (vtable +0x50, 140720EB0 and others) |
+| `SwapEffect` | 0, `DXGI_SWAP_EFFECT_DISCARD`: the old blt model |
+| `Flags` | 2, `DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH` |
+
+`r_fullscreen` 2 (1407204D3) is the borderless window: 1407206E0 restyles the window (`SetWindowLongA`,
+`AdjustWindowRectEx`, `SetWindowPos`). With the blt model, a borderless window goes through the desktop compositor:
+an extra frame of latency and no tearing, so it never shows more than one frame a refresh. Exclusive fullscreen avoids
+the compositor but has slow alt-tab and mode switches. The enhanced build's flip model
+(`DXGI_SWAP_EFFECT_FLIP_DISCARD`, `ALLOW_TEARING`, `FRAME_LATENCY_WAITABLE_OBJECT`, at least 2 buffers) makes the
+borderless window as fast as exclusive fullscreen; Windows' independent flip takes over when the window covers the
+screen.
+
 ## Still to map
 
 - The client frame, `SCR_UpdateScreen` (server 00511320) and `CG_DrawActiveFrame` (server 004C7550) on the Store.
