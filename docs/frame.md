@@ -58,7 +58,13 @@ Store's call graph:
   `Com_EventLoop`, at draw time, as in BO3. (On the server `CL_SendCmd` is called from `CG_PredictPlayerState`; the
   Store's 140124580 is that function.)
 - **Present:** `RB_SwapBuffers` 140735BC0 is reached from 14071BAC0, which `SCR_UpdateFrame`'s place 1401BDA90 calls.
-  Whether that runs on the main thread or hands the frame to a render thread is the next question.
+- **Two ways to the present.** The game starts a render thread at 1403A1715: entry 140736CD0, through the thread
+  helper 1403C2BD0 (its handles at 14406FC48 and 144070008, events created just before). On that thread 140736950
+  runs the back end and calls `RB_SwapBuffers`: the server's `RB_RenderThread` / `RB_ExecuteRenderCommandsLoop`
+  shape. 14071BAC0 (called from the frame update; the server's `R_EndFrame` / `R_IssueRenderCommands` place) can
+  also run the back end in line when the flag at 1427E7338 is set: `RB_BeginFrame` (140735910), `RB_Draw3D`
+  (140736120), 1407366F0, then `RB_SwapBuffers` under the critical section at 1441FB970. Which path a normal frame
+  takes, and how the main thread waits for the render thread (the frame queue the latency work changes), is next.
 
 ## Still to map
 
