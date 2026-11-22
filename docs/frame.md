@@ -70,8 +70,23 @@ Store's call graph:
   the events at 14406FC58 and 144070008. A frame arrives as a pointer swapped out of 14406FAF0 (`XCHG`); under the
   critical section 1441FB970 it uploads the frame's dynamic vertex data (Map/Unmap on the device context 1427F1D90,
   looping while 142155DFC is set) and finishes three command lists (140736BA0 at +0x122C10, +0x122C00, +0x122C50 of
-  the frame), then runs the back end and presents (140736950). How the main thread hands over and waits (the
-  events, 14406FAF0) is the frame queue to read next.
+  the frame), then runs the back end and presents (140736950). 
+- **The hand-off** (14071B880, the server's `R_IssueRenderCommands` place, called from the end-of-frame 14071BAC0):
+  1. 1403C2C50 (the server's `R_SyncRenderThread` / `Sys_WaitRenderer` place): on the main thread (thread id
+     14406FBF0), `WaitForSingleObject(14406FBE0, 1)` in a loop until the render thread has signalled that it is done
+     with the previous frame. 1 ms waits: the main thread wakes late by up to about 1 ms.
+  2. A spin: while any of 15 job queues (140D3A5A8 ... 143043BC8, tested by 14078C880) still has work,
+     `Sleep(0)` and start again from 1. That is a busy wait on the main thread.
+  3. Under the critical section 1441FB970: finish the frame's data (14071BFA0), `ResetEvent(14406FBE0)`, publish the
+     frame (`14406FAF0` = the frame's back-end data, 1427E7320), `SetEvent(14406FC58)` (work for the render thread),
+     `SetEvent(14406FC50)`.
+- **The render thread signals done before it presents** (140736950): `SetEvent(14406FBE0)` and `SetEvent(14406FC50)`
+  at 140736AC5, then `RB_SwapBuffers` (`Present`) at 140736AEB. So the main thread builds frame N+1 while the render
+  thread presents frame N, and the render thread blocks in `Present` when DXGI's queue is full (by default up to 3
+  frames). **The frame queue is therefore one frame on the render thread plus DXGI's queue:** the main thread can run
+  up to about four frames ahead of the screen when the GPU is the bottleneck. This is what the latency work changes:
+  a frame-latency waitable object on a flip-model swap chain with maximum latency 1, waited on by the main thread
+  before it reads input and builds the frame (Ghosts P0004 waits at the same point, its `R_SyncGpu`).
 
 ## Still to map
 
