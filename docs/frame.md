@@ -63,8 +63,15 @@ Store's call graph:
   runs the back end and calls `RB_SwapBuffers`: the server's `RB_RenderThread` / `RB_ExecuteRenderCommandsLoop`
   shape. 14071BAC0 (called from the frame update; the server's `R_EndFrame` / `R_IssueRenderCommands` place) can
   also run the back end in line when the flag at 1427E7338 is set: `RB_BeginFrame` (140735910), `RB_Draw3D`
-  (140736120), 1407366F0, then `RB_SwapBuffers` under the critical section at 1441FB970. Which path a normal frame
-  takes, and how the main thread waits for the render thread (the frame queue the latency work changes), is next.
+  (140736120), 1407366F0, then `RB_SwapBuffers` under the critical section at 1441FB970. The flag at 1427E7338 is set only
+  while the render thread itself runs the screen update (1401BE780) in a loop, as long as 1427E7340 is set
+  (1407370A0): the loading-screen mode. **A normal frame takes the render thread.**
+- **The render thread's loop** (140736CD0): an error-recovery point (140870ACC, setjmp), then it waits for work on
+  the events at 14406FC58 and 144070008. A frame arrives as a pointer swapped out of 14406FAF0 (`XCHG`); under the
+  critical section 1441FB970 it uploads the frame's dynamic vertex data (Map/Unmap on the device context 1427F1D90,
+  looping while 142155DFC is set) and finishes three command lists (140736BA0 at +0x122C10, +0x122C00, +0x122C50 of
+  the frame), then runs the back end and presents (140736950). How the main thread hands over and waits (the
+  events, 14406FAF0) is the frame queue to read next.
 
 ## Still to map
 
