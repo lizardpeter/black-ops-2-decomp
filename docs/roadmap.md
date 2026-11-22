@@ -117,9 +117,15 @@ streaming budgets.
 - **Hardware independent flip:** done in P0005 (`FLIP_DISCARD`, tearing allowed, at most one frame queued) and P0007
   (the frame-latency waitable object, waited on before the frame's input is read). P0008 stops the render
   thread's busy wait (B0024). Still to do: the main thread's job-queue spin before the hand-off (B0028, docs/frame.md step 7).
-- **Full late latch (decided):** minimum latency, not just aim. CPU late latch first, under D3D11: on the render
-  thread, just before submit, read the newest mouse input, recompute the view angles and rewrite the frame's camera
-  constants. GPU late latch later, with the native Vulkan renderer: the CPU keeps writing the newest camera into a
+- **Full late latch (decided):** rotation first, done fully: every view the frame draws (world, gun, the camera data
+  post-processing reads) turned by the mouse movement since the game frame, as Forge (Rust-test, `peek_motion()`:
+  read without consuming, so the next game frame still applies it) and BO3's P0021 do. Position later, only if it
+  turns out very easy: a key pressed ~2 ms before submit has moved the camera ~0.003 units by then (acceleration
+  ~1700 units/s²), while latching it means re-running movement prediction and its traces on the render thread every
+  frame (added frame time with one frame on the CPU), a copy of the prediction state, and a visibility re-check when
+  the camera crosses into another area. If tried, behind a switch with the stage timing measuring benefit and cost.
+  CPU late latch first, under D3D11: on the render thread, just before submit, read the newest mouse input,
+  recompute the view angles and rewrite the frame's camera constants. GPU late latch later, with the native Vulkan renderer: the CPU keeps writing the newest camera into a
   persistently mapped buffer the GPU reads when it starts the frame (D3D11 can't do that reliably: dynamic buffers
   are renamed at submit, and writing one the GPU is using is undefined). Details to get right: widen the main
   thread's culling slightly so a late turn can't reveal culled edges; the shot fires on the command's angles, so
