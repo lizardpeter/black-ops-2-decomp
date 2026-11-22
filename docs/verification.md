@@ -85,10 +85,14 @@ Harness specifics:
 - **x64:** Win64 registers and shadow space, GS on a TEB with a PEB.
 - **Both:** `rdtsc` is deterministic. The top 64 KB of the stack is filled with `0xCC` before every call, so a local
   read before it is written (an original bug, e.g. B0016) gives the same bytes in both runs instead of whatever the
-  previous call left. A failing case prints the first differing observed calls of both runs.
-- **Imports:** on x64 an unhooked import returns 0. On x86 one faults, naming the import, until a test registers it
-  with `Machine.on_import(name, fn, nargs)`: Win32 imports are stdcall, and a stub that doesn't pop their
-  arguments would silently corrupt the stack.
+  previous call left. A failing case prints the failing input's index, the differing writes and buffers with both
+  runs' bytes, and the first differing observed calls.
+- **Imports:** an import with no model faults, naming it, until a test registers one with
+  `Machine.on_import(name, fn, nargs)`. On x86, Win32 imports are stdcall, and a stub that doesn't pop their
+  arguments would silently corrupt the stack. On x64 the harness models the CRT calls the Store build makes
+  (`CRT_MODELS_X64`: `memset`, `memcpy`, `memmove`, `strchr`, `strlen`, `atoi`), since the reconstruction calls
+  what the Store inlines (CL_CreateCmd's `memset`) and some Store code calls them itself (Info_RemoveKey_Big's
+  `strchr`). Before, an unmodelled x64 import returned 0 in both runs, which hid both.
 - **CRT per-thread data (x86 with a MAP):** VC100's CRT builds it on first use through FLS/TLS imports the harness
   doesn't model, so `_getptd` and `_getptd_noexit` return one ready `_tiddata` with the process's default locale
   (`Machine.crt_thread_data`). `_vsnprintf` needs it to format numbers.

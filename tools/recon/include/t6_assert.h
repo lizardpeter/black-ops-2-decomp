@@ -74,6 +74,13 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 		"(unsigned)(" #index ") < (unsigned)(" #count ")", msg "\n\t%i not in [0, %i)", index, count)) __debugbreak(); } \
 	while (0)
 
+// bcassert_at naming the file explicitly: headers (cgame/cg_local.h)
+#define bcassert_in(file, line, index, count) bcassert_in_(file, line, index, count, #index " doesn't index " #count)
+#define bcassert_in_(file, line, index, count, msg) \
+	do { if (!((unsigned)(index) < (unsigned)(count)) && !Assert_MyHandler(file, line, 0, \
+		"(unsigned)(" #index ") < (unsigned)(" #count ")", msg "\n\t%i not in [0, %i)", index, count)) __debugbreak(); } \
+	while (0)
+
 #ifdef T6_NO_ASSERTS
 #undef iassert_at
 #undef iassertmsg_at
@@ -88,6 +95,7 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #undef assertf_in
 #undef assertt_at
 #undef bcassert_at
+#undef bcassert_in
 #define iassert_at(...) ((void)0)
 #define iassertmsg_at(...) ((void)0)
 #define vassert_at(...) ((void)0)
@@ -101,4 +109,5 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #define assertf_in(...) ((void)0)
 #define assertt_at(...) ((void)0)
 #define bcassert_at(...) ((void)0)
+#define bcassert_in(...) ((void)0)
 #endif

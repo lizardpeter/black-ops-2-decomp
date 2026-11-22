@@ -1,11 +1,23 @@
 // win32/win_gamepad.cpp (CoDMPServer_PC: win_gamepad.obj)
 //
-// The gamepad. So far the check the client's mouse code uses.
+// The gamepad. So far the checks the client's input code uses.
 #define T6_ASSERT_DIR "c:\\t6\\code\\src\\win32\\"
 #define T6_ASSERT_FILE T6_ASSERT_DIR "win_gamepad.cpp"
 #define T6_SOURCE "win32/win_gamepad.cpp"
 
+#include "t6_assert.h"
+#include "t6_static.h"
 #include "win32/win_gamepad.h"
+
+T6_STATIC GamePad s_gamePads[1] T6_AT("", "s_gamePads");
+
+// 007972D0  win32/win_gamepad.cpp:472 (inlined in the Store build). The bound is MAX_GPAD_COUNT, expanded in the
+// assert's text.
+bool GPad_IsActive(ControllerIndex_t portIndex)
+{
+	assert_at(475, (portIndex >= 0) && (portIndex < 1));
+	return s_gamePads[portIndex].enabled;
+}
 
 // 007972B0  win32/win_gamepad.cpp:349 (inlined in the Store build)
 bool GPad_InUse(LocalClientNum_t localClientNum)

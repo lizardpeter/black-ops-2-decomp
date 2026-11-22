@@ -15,6 +15,8 @@ inline float I_fmin(float a, float b)
 }
 
 signed char ClampChar(int i);
+float AngleNormalize360(float angle);
+float AngleDelta(float a1, float a2);
 short ClampShort(int i);
 
 // com_math_anglevectors.cpp

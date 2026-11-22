@@ -79,6 +79,40 @@ LastInput_t Com_LocalClient_LastInput_Get(LocalClientNum_t localClientNum);
 // common.cpp
 extern int com_frameTime;
 void Com_Error(errorParm_t code, const char *fmt, ...);
+
+// The dedicated server's build has no local client: code that needs one fails there unconditionally (its
+// CG_GetEntity 00404450 calls Com_Error with no test). The Store build tests the dedicated dvar (1400A9960).
+#ifdef T6_STORE
+bool Com_IsDedicatedServer();
+#else
+inline bool Com_IsDedicatedServer()
+{
+	return true;
+}
+#endif
+
+// common.cpp: slow motion (0x38 bytes in both builds)
+struct SlowMotionCommon
+{
+	bool enable;
+	int type;
+	int delayMsec;
+	float startTimescale;
+	float endTimescale;
+	int startMsec;
+	int endMsec;
+	float viewTimescale;
+	bool viewEnable;
+	int viewType;
+	float viewStartTimescale;
+	float viewEndTimescale;
+	int viewStartMsec;
+	int viewEndMsec;
+};
+static_assert(sizeof(SlowMotionCommon) == 0x38, "SlowMotionCommon");
+
+extern SlowMotionCommon g_slowmoCommon;
+float Com_ViewScaleMsec(float sec);
 void Com_Printf(int channel, const char *fmt, ...);
 void Com_PrintWarning(int channel, const char *fmt, ...);
 void Com_PrintError(int channel, const char *fmt, ...);

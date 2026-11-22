@@ -63,7 +63,7 @@ BOOL_DVARS = {M_FILTER, DAMAGE_KICK, SHOW_RATE, FREELOOK}
 DVAR_STORE = {STANDING: 0x14265A860,   # the Store's dvar pointers identified so far (records/names.tsv)
               M_FILTER: 0x140E60788, MOUSE_ACCEL: 0x140E61BF0, M_SIDE: 0x140E61BE8, M_YAW: 0x140E5D238,
               FREELOOK: 0x140E5D108, M_PITCH: 0x140E5CDB8, M_FORWARD: 0x140E5CCD8,
-              STRAFE_RESTRICTION: 0x140E4F870, CAMERA_RESTRICTION: 0x140E4F860}
+              STRAFE_RESTRICTION: 0x140E4F870, CAMERA_RESTRICTION: 0x140E4F860, DAMAGE_KICK: 0x14265CDC0}
 DVAR_OBJECTS = OBJECTS + 0x1C0000      # one dvar_t per handle, 0x80 apart, in the build's layout
 
 
@@ -130,7 +130,7 @@ ADDR = {
             "frame_msec": FRAME_MSEC, "players_kb": PLAYERS_KB},
     "x64": {"client_ui": 0x140E61790, "max_local_clients": 0x140E5CA9C, "clients_ptr": 0x140E61BF8,
             "cg_array_ptr": 0x140E53A20, "com_frametime": 0x141F04894, "frame_msec": 0x140E5C804,
-            "players_kb": 0x143C0C790},
+            "players_kb": 0x143C0C790, "cls_frametime": 0x142CB7DD0},
 }
 
 
@@ -295,6 +295,13 @@ def aim_assist(mu):
     dt, pitch, pa, pm, yaw, ya, ym, fa, ra, b0, b1, lc = struct.unpack("<9fIIi", inp)
     out = struct.pack("<fffHB", pitch * 0.5 + dt + pa + pm, yaw - 1.0 + ya + ym + fa + ra, 0.0, (b0 ^ b1 ^ lc) & 0xFFFF, 7)
     mu.mem_write(arg(mu, 1), out)  # the caller's local
+
+
+def spectator_input(mu):
+    """CL_HandleSpectatorInput's fake (the client in EDI, the buttons on the stack): marks the buttons with the client,
+    so the call and its arguments show in the buffer."""
+    bits = arg(mu, 0)
+    STATE["machine"].program_write(bits, struct.pack("<I", 0xC0DE0000 | mu.reg_read(x86.UC_X86_REG_EDI) & 0xFFFF))
 
 
 def finish_move(mu):
@@ -527,6 +534,136 @@ def store_mouse_edges():
     return out
 
 
+# CL_CreateCmd on the Store (140194E20): CL_AdjustAngles, Com_ViewScaleMsec, GPad_IsActive, the catcher tests,
+# CL_HandleSpecialStateInput, AngleDelta, the demo camera's clamps (Demo_ClampViewAngleForLockedOnEntity with
+# CG_GetEntity and the AI lock-on lookup) and CL_CopyDamageKickAngles are inlined, so the case sets their state.
+S_CLS = 0x142CB7C80              # frametime +0x150, frametime_base +0x154
+S_SLOWMO = 0x141F02F10           # g_slowmoCommon
+S_GAMEPADS = 0x14420D5A0         # GamePad[], 0x7C apart: enabled
+S_SYSTEM_UI = 0x1443C54F8        # 0x24 bytes per controller: active
+S_DEMO = 0x1425A3280             # state +0x88, playback +0xB0680, playbackInited +0xB0688
+S_CG_ENTITIES = 0x140E4F8E0      # cg_entitiesArray[0]
+S_AI_TYPES = 0x140E59268         # cg_level.aiTypes
+S_CG_DAMAGE_KICK, S_CG_PM_TYPE, S_CG_OTHER_FLAGS = 0x64B54, 0x480AC, 0x480C0
+S_CAMERA_MODE = OBJECTS + 0x188000          # demoPlayback (0x26A980 bytes) placed so its fields land in the
+S_PLAYBACK = S_CAMERA_MODE - 0xD4C00        # objects region: cameraMode, then the lock at +0xEBD34
+S_ENTITIES, S_ENTITY = OBJECTS + 0x1A0000, 0x3D8
+S_AI_OBJECTS = OBJECTS + 0x1B0000           # AITypeScript objects (demoLockOn at +0x48), 0x80 apart
+NAN = float("nan")
+
+
+def keystate(mu):
+    """CL_KeyState's fake: each button's fraction from STATE (by its index in playersKb)."""
+    i = (argq(mu, 0) - 0x143C0C790) // KB_SIZE
+    return STATE.get("keys", {}).get(i, 0.0)
+
+
+def store_mouse_move(mu):
+    """CL_MouseMove's fake (x64): turns the pitch by STATE['dpitch'] and marks the command (rightmove)."""
+    va = CLIENTS + S_VIEWANGLES
+    pitch = struct.unpack("<f", bytes(mu.mem_read(va, 4)))[0]
+    STATE["machine"].program_write(va, struct.pack("<f", pitch + STATE.get("dpitch", 0.0)))
+    STATE["machine"].program_write(argq(mu, 1) + 0x25, b"\x55")
+
+
+def store_mark(offset, value):
+    """A fake that writes value at offset in the command (its second argument), to show it ran on this command."""
+    return lambda mu: STATE["machine"].program_write(argq(mu, 1) + offset, value)
+
+
+def angle_normalize(mu):
+    import math
+    x = struct.unpack("<f", struct.pack("<I", mu.reg_read(x86.UC_X86_REG_XMM0) & 0xFFFFFFFF))[0]
+    return x if math.isnan(x) or math.isinf(x) else math.fmod(x, 360.0) + 0.25
+
+
+STORE_CREATE_CMD = {
+    "fakes": {"CL_KeyState": keystate, "CG_HandleLocationSelectionInput": lambda mu: STATE.get("location", 0),
+              "CL_CmdButtons": store_mark(0x24, b"\x11"), "CL_KeyMove": store_mark(0x26, b"\x22"),
+              "CL_MouseMove": store_mouse_move, "CL_GamepadMove": store_mark(0x27, b"\x33"),
+              "CL_HandleSpectatorInput": store_mark(0, b"\x44\x44"),
+              "AngleNormalize360": angle_normalize, "CL_AddCurrentStanceToCmd": store_mark(0x28, b"\x66"),
+              "CL_FinishMove": store_mark(0, b"\x21\x43\x00\x00"),
+              "Com_IsDedicatedServer": lambda mu: STATE.get("dedicated", 0), "Com_Error": lambda mu: None},
+    # the command may be the caller's buffer or a local copied into it (x)
+    "observe": {"CL_KeyState": "q", "CG_HandleLocationSelectionInput": "ix", "CL_CmdButtons": "ix",
+                "CL_KeyMove": "ix", "CL_MouseMove": "ixf", "CL_GamepadMove": "ixf", "CL_HandleSpectatorInput": "ix",
+                "AngleNormalize360": "f", "CL_AddCurrentStanceToCmd": "ix", "CL_FinishMove": "ix",
+                "Com_IsDedicatedServer": "", "Com_Error": "is"},
+    "imports": STORE_MOUSE["imports"],  # the recon's AngleDelta calls floorf; the Store inlines it
+}
+
+
+def store_world(w, ents, ai_views):
+    w.u64(S_CG_ENTITIES, S_ENTITIES)
+    for index, views in ai_views.items():
+        obj = S_AI_OBJECTS + index * 0x80
+        w.write(obj + 0x48, struct.pack("<f", 300.0) + b"".join(struct.pack("<iff", 5, lo, hi) for lo, hi in views))
+        w.u64(S_AI_TYPES + 8 * index, obj)
+    for i, (etype, valid, ai) in enumerate(ents):
+        base = S_ENTITIES + i * S_ENTITY
+        w.write(base + 0x25E, struct.pack("<H", ai))
+        w.write(base + 0x2CC, struct.pack("<h", etype))
+        w.write(base + 0x3CC, struct.pack("<I", 0x2 if valid else 0x1))
+
+
+# entity 0-6: an actor with lock-on views, one whose AI type is unset, one with no type, a helicopter, another
+# kind, an invalid actor, an actor whose type's low byte is set (0x103)
+STORE_ENTITIES = ((16, 1, 3), (16, 1, 7), (16, 1, 0), (12, 1, 0), (1, 1, 3), (16, 0, 3), (16, 1, 0x103))
+STORE_AI_VIEWS = {3: ((-20.0, 45.0), (-5.0, 10.0))}
+
+
+def store_create_cmd_setup(r, pitch, dpitch, demo_state, inited, mode, locked, active, finite):
+    nan = 1.0 if finite else NAN
+    client = {S_PS + PS_PM_FLAGS: r.choice([0, 0, 0, 0x800]),
+              S_MAX_YAW_SPEED: struct.pack("<f", r.choice([0.0, -3.0, 90.0, r.uniform(1, 400), nan])),
+              S_MAX_PITCH_SPEED: struct.pack("<f", r.choice([0.0, 60.0, r.uniform(1, 400), nan])),
+              S_VIEWANGLES: struct.pack("<ff", pitch, r.uniform(-180, 180))}
+    kb = {KB["SPEED"]: kbutton(active=r.random() < 0.3), KB["STRAFE"]: kbutton(active=r.random() < 0.3)}
+    keys = {KB[k]: r.choice([0.0, 0.0, 1.0, 0.5, r.random()]) for k in ("LEFT", "RIGHT", "LOOKUP", "LOOKDOWN")}
+    start, end = r.choice([(1.0, 0.25), (0.25, 1.0), (0.5, 0.5), (r.uniform(0, 2), r.uniform(0, 2)), (nan, 1.0)])
+    slowmo = struct.pack("<fB3xiffii", r.choice([1.0, r.uniform(0, 2), 0.24, 1.01, nan]), r.randrange(2), 0, start,
+                         end, 0, r.choice([0, 300, 0, -5]))
+    ctrl_lc = r.choice([0, 0, 0, 1])  # another client's record: no controller (index -1)
+    globals_ = {S_CLS + 0x150: struct.pack("<if", r.choice([16, 33, 0, r.randrange(1, 100)]),
+                                           r.choice([0.016, 0.033, 0.0, 1e-4, r.uniform(0, 0.1)])),
+                S_SLOWMO + 0x1C: slowmo,
+                S_CLIENT_GAME_STATES: struct.pack("<6i", 0, ctrl_lc, 0, 0, 0, 1),
+                S_GAMEPADS: struct.pack("<B", r.random() < 0.3),
+                S_SYSTEM_UI: struct.pack("<B", r.random() < 0.1),
+                0x140E61794: struct.pack("<i", r.choice([0, 0, 0, 4, 0x10, 0x14, 0x40])),  # keyCatchers
+                S_DEMO + 0x88: struct.pack("<i", demo_state), S_DEMO + 0xB0680: struct.pack("<Q", S_PLAYBACK),
+                S_DEMO + 0xB0688: struct.pack("<B", inited), S_CAMERA_MODE: struct.pack("<i", mode),
+                S_PLAYBACK + 0xEBD34: struct.pack("<iB", locked, active)}
+    cg = {S_CG_DAMAGE_KICK: struct.pack("<ff", r.choice([2.5, 0.0, -179.9]), r.choice([-1.0, 0.0055, 200.0])),
+          S_CG_PM_TYPE: r.choice([0, 1, 5]), S_CG_OTHER_FLAGS: r.choice([0, 0, 2, 3])}
+    base = setup(kb=kb, client=client, globals_=globals_, cg=cg, dvars={DAMAGE_KICK: r.randrange(2)},
+                 keys=keys, location=r.random() < 0.5, dpitch=dpitch, dedicated=r.random() < 0.2)
+
+    def run(w):
+        base(w)
+        store_world(w, STORE_ENTITIES, STORE_AI_VIEWS)
+    return run
+
+
+def store_create_cmd_inputs(n=600, finite=False):
+    r = random.Random(2794)
+    out = []
+    pitches = ((10.0, 5.0), (10.0, 95.0), (10.0, -95.0), (350.0, 100.0), (0.0, 90.0), (200.0, 0.0),
+               (-170.0, -30.0), (89.0, 2.0), (-89.0, -2.0), (179.0, 3.0), (60.0, -200.0))
+    for _ in range(n):
+        pitch, dpitch = r.choice(pitches) if r.random() < 0.6 else (r.uniform(-400, 400), r.uniform(-200, 200))
+        if not finite and r.random() < 0.03:
+            pitch = NAN
+        demo_state = r.choice([2, 2, 2, 0, 1])
+        inited, mode = r.choice([1, 1, 1, 0]), r.choice([0, 1, 2, 2])
+        locked, active = r.choice([(-1, 1), (0, 1), (0, 0)] + [(i, 1) for i in range(1, len(STORE_ENTITIES))])
+        out.append({"args": [bytes([0xCC]) * 0x3C, 0],
+                    "setup": store_create_cmd_setup(r, pitch, dpitch, demo_state, inited, mode, locked, active,
+                                                    finite)})
+    return out
+
+
 CASES = [
     {"name": "CL_MouseMove", "ret": "void", "builds": BOTH, "fakes": MOUSE_FAKES, "observe": MOUSE_SEEN,
      "inputs": mouse_inputs(), "by_build": {"t6mp_msstore": dict(STORE_MOUSE, inputs=store_mouse_inputs() + store_mouse_edges())}},
@@ -734,10 +871,14 @@ CASES = [
      "inputs": [[10, 20], [-1, 0]]},
     {"name": "CL_ShowSystemCursor", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [[0], [1]]},
+    {"name": "CL_HandleSpecialStateInput", "ret": "void", "builds": SERVER,
+     "fakes": dict(FAKES, CL_HandleSpectatorInput=spectator_input), "observe": SEEN,
+     "inputs": [{"args": [0, bytes(range(8))], "setup": setup(ps={PS_PM_TYPE: t, PS_OTHER_FLAGS: f}, cg_null=null)}
+                for t in (0, 1, 4, 5, 6) for f in (0, 1, 2, 3, 0x400) for null in (False,)]},
     {"name": "CL_CopyDamageKickAngles", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [0, bytes(0x44)], "setup": setup(cg={CG_DAMAGE_KICK: struct.pack("<ff", x, y)})}
                 for x, y in ((0.0, 0.0), (1.5, -2.25), (179.9, -180.0), (0.0055, -0.0055), (200.0, 359.0))]},
-    {"name": "CL_CreateCmd", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CL_CreateCmd", "ret": "void", "builds": BOTH, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [bytes([0xCC]) * CMD_SIZE, 0],
                  "setup": setup(client={VIEWANGLES: struct.pack("<f", pitch), STANCE: 1},
                                 dvars={DAMAGE_KICK: kick, STANDING: 60},
@@ -748,7 +889,8 @@ CASES = [
                 for pitch, dp in ((10.0, 5.0), (10.0, 95.0), (10.0, -95.0), (350.0, 100.0), (0.0, 90.0),
                                   (200.0, 0.0), (-170.0, -30.0))
                 for third, free in ((0, 0), (1, 0), (0, 1))
-                for kick in (0, 1)]},
+                for kick in (0, 1)],
+     "by_build": {"t6mp_msstore": dict(STORE_CREATE_CMD, inputs=store_create_cmd_inputs())}},
     {"name": "CL_CreateNewCommands", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [{"args": [0],
                  "setup": setup(ui_state=u, client={CMD_NUMBER: n, VIEWANGLES: struct.pack("<f", 10.0)},

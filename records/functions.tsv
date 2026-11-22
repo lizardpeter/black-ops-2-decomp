@@ -210,3 +210,18 @@ CoDMPServer_PC	00534070	matches	src/client/screen_placement.cpp	ScrPlace_HiResGe
 t6mp_msstore	140499A10	matches	src/win32/win_input.cpp	IN_MouseMove (with the Store revision of CL_MouseEvent and the UI cursor functions it inlines); tests/differential/test_win_input.py
 CoDMPServer_PC	004DDCC0	matches	src/cgame/cg_weapons.cpp	CG_AirburstLazeCancelledByMovement; tests/differential/test_cl_input.py
 t6mp_msstore	140192B70	matches	src/client/cl_input.cpp	CL_UpdateAirburstMarkDistance (with CG_AirburstLazeCancelledByMovement inlined); tests/differential/test_cl_input.py
+CoDMPServer_PC	007972D0	matches	src/win32/win_gamepad.cpp	GPad_IsActive; tests/differential/test_win_gamepad.py
+CoDMPServer_PC	004FEB60	matches	src/client/cl_keys.cpp	Key_IsCatcherActive; tests/differential/test_cl_keys.py
+CoDMPServer_PC	008EEE10	matches	src/live/live_win.cpp	Live_IsSystemUiActive; tests/differential/test_live_win.py
+CoDMPServer_PC	006BF470	matches	src/qcommon/common.cpp	Com_ViewScaleMsec; tests/differential/test_common.py
+CoDMPServer_PC	00910420	matches	src/demo/demo_playback.cpp	Demo_IsPlaybackInited; tests/differential/test_demo_camera.py
+CoDMPServer_PC	009037C0	matches	src/demo/demo_camera.cpp	Demo_IsThirdPersonCamera; tests/differential/test_demo_camera.py
+CoDMPServer_PC	00903800	matches	src/demo/demo_camera.cpp	Demo_IsAnyFreeMoveCamera; tests/differential/test_demo_camera.py
+CoDMPServer_PC	00906580	matches	src/demo/demo_camera.cpp	Demo_IsFreeCameraLockedOnEntity; tests/differential/test_demo_camera.py
+CoDMPServer_PC	009034B0	matches	src/demo/demo_camera.cpp	Demo_GetAILockOnValues (cent in ESI); tests/differential/test_demo_camera.py
+CoDMPServer_PC	00903510	matches	src/demo/demo_camera.cpp	Demo_GetAILockOnViewIndex (cent in EAX); tests/differential/test_demo_camera.py
+CoDMPServer_PC	009072F0	matches	src/demo/demo_camera.cpp	Demo_ClampViewAngleForLockedOnEntity; tests/differential/test_demo_camera.py
+CoDMPServer_PC	00404450	matches	include/cgame/cg_local.h	CG_GetEntity (the dedicated build's Com_Error always called); tests/differential/test_demo_camera.py
+CoDMPServer_PC	004F1250	matches	src/client_mp/cl_cgame_mp.cpp	CL_ClampViewAngle; tests/differential/test_cl_cgame_mp.py
+CoDMPServer_PC	004EEAC0	matches	src/client/cl_input.cpp	CL_HandleSpecialStateInput; tests/differential/test_cl_input.py
+t6mp_msstore	140194E20	matches	src/client/cl_input.cpp	CL_CreateCmd (Store branches: CL_AdjustAngles' fixed 1.5 and 140 values, the location/system-UI/LUI order, /fp:fast NaN forms of Com_ViewScaleMsec and the constant pitch clamps, AngleDelta in floats; the helpers it inlines verified with it); tests/differential/test_cl_input.py

@@ -209,7 +209,7 @@ def main():
         for name_, (fn, nargs) in (case.get("imports") or {}).items():
             m.on_import(name_, (lambda f: lambda mu: f(m, mu))(fn), nargs)
         verdict, used = "pass", 0
-        for inp in case["inputs"]:
+        for index, inp in enumerate(case["inputs"]):
             if isinstance(inp, dict) and inp.get("builds") and build not in inp["builds"]:
                 continue  # an input one build can't be compared on (the input's comment says why)
             args, setup = (inp["args"], inp.get("setup")) if isinstance(inp, dict) else (inp, None)
@@ -229,9 +229,12 @@ def main():
             ww, gw = canon.writes(want[2]), canon.writes(got[2])
             if not (same(want[0], got[0]) and want[1] == got[1] and ww == gw and want[3] == got_calls):
                 diff = sorted(a for a in set(ww) | set(gw) if ww.get(a) != gw.get(a))[:6]
-                verdict = (f"FAIL args={args!r}\n       original={want[0]!r} recon={got[0]!r} "
+                verdict = (f"FAIL input {index} args={args!r}\n       original={want[0]!r} recon={got[0]!r} "
                            f"buffers_equal={want[1] == got[1]} writes_equal={ww == gw} calls_equal={want[3] == got_calls}"
-                           + (f"\n       writes differ at {[hex(a) for a in diff]}" if diff else "")
+                           + (f"\n       writes differ at {[(hex(a), ww.get(a), gw.get(a)) for a in diff]} "
+                              "(address, original, recon)" if diff else "")
+                           + "".join(f"\n       buffer {i}: original {a.hex()} recon {b.hex()}"
+                                     for i, (a, b) in enumerate(zip(want[1], got[1])) if a != b)
                            + (f"\n       calls: original {want[3][:4]!r}\n              recon    {got_calls[:4]!r}"
                               if want[3] != got_calls else ""))
                 break

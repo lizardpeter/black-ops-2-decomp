@@ -43,3 +43,6 @@ CoDMPServer_PC	00772630	Dvar_StringToInt	esi	string in ESI (Dvar_GetInt: MOV ESI
 CoDMPServer_PC	00772690	Dvar_StringToFloat	esi	string in ESI (Dvar_GetFloat: MOV ESI,[ESI+0x18] before the call)
 CoDMPServer_PC	00407F40	AimAssist_UpdateTweakables	stack,eax	input at [EBP+8], localClientNum in EAX (checked against MAX_LOCAL_CLIENTS); AimAssist_UpdateMouseInput loads EAX from input->localClientNum before the call
 CoDMPServer_PC	004082B0	AimAssist_UpdateAdsLerp	edi	no frame: input tested in EDI and asserted as (input); the caller holds input in EDI
+CoDMPServer_PC	004EE750	CL_HandleSpectatorInput	edi,stack	the caller CL_HandleSpecialStateInput 004EEAC0 keeps the client in EDI and pushes only button_bits; the callee pushes EDI for Com_LocalClient_GetControllerIndex at entry
+CoDMPServer_PC	009034B0	Demo_GetAILockOnValues	esi	tests ESI at entry (the "(cent)" assert) and reads the entity through it; Demo_ClampViewAngleForLockedOnEntity 009072F0 calls it with the entity in ESI
+CoDMPServer_PC	00903510	Demo_GetAILockOnViewIndex	eax	moves EAX to EDI at entry and asserts it; Demo_ClampViewAngleForLockedOnEntity 009072F0 loads the entity into EAX before the call

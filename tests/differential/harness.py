@@ -164,6 +164,59 @@ class Writer:
         return self.alloc((s.encode("latin1") if isinstance(s, str) else s) + b"\0")
 
 
+def _crt_args(mu, n):
+    return [mu.reg_read(r) for r in INT_REGS64[:n]]
+
+
+def _crt_cstr(mu, va):
+    out = bytearray()
+    while True:
+        chunk = bytes(mu.mem_read(va + len(out), 64))
+        if b"\0" in chunk:
+            return bytes(out + chunk[:chunk.index(b"\0")])
+        out += chunk
+
+
+def _crt_memset(mu):
+    dst, c, n = _crt_args(mu, 3)
+    mu.mem_write(dst, bytes([c & 0xFF]) * n)
+    mu.reg_write(X.UC_X86_REG_RAX, dst)
+
+
+def _crt_memmove(mu):
+    dst, src, n = _crt_args(mu, 3)
+    mu.mem_write(dst, bytes(mu.mem_read(src, n)))
+    mu.reg_write(X.UC_X86_REG_RAX, dst)
+
+
+def _crt_strlen(mu):
+    mu.reg_write(X.UC_X86_REG_RAX, len(_crt_cstr(mu, _crt_args(mu, 1)[0])))
+
+
+def _crt_strchr(mu):
+    s, c = _crt_args(mu, 2)
+    text, c = _crt_cstr(mu, s) + b"\0", c & 0xFF
+    i = text.find(bytes([c]))
+    mu.reg_write(X.UC_X86_REG_RAX, s + i if i >= 0 else 0)
+
+
+def _crt_atoi(mu):
+    """UCRT atoi: strtol's parse (leading whitespace, a sign, decimal digits), saturating at the int range."""
+    text = _crt_cstr(mu, _crt_args(mu, 1)[0]).lstrip(b" \t\n\v\f\r")
+    sign = -1 if text[:1] == b"-" else 1
+    if text[:1] in (b"-", b"+"):
+        text = text[1:]
+    digits = len(text) - len(text.lstrip(b"0123456789"))
+    v = sign * int(text[:digits] or b"0")
+    mu.reg_write(X.UC_X86_REG_RAX, max(-2**31, min(2**31 - 1, v)) & 0xFFFFFFFF)
+
+
+CRT_MODELS_X64 = {"vcruntime140.dll!memset": _crt_memset, "vcruntime140.dll!memcpy": _crt_memmove,
+                  "vcruntime140.dll!memmove": _crt_memmove, "vcruntime140.dll!strchr": _crt_strchr,
+                  "api-ms-win-crt-string-l1-1-0.dll!strlen": _crt_strlen,
+                  "api-ms-win-crt-convert-l1-1-0.dll!atoi": _crt_atoi}
+
+
 class Machine:
     def __init__(self, *images: Image):
         self.images = images
@@ -213,6 +266,11 @@ class Machine:
             mu.reg_write(X.UC_X86_REG_FS, 3 << 3)
         # import stubs: `xor eax, eax; ret`, with Python hooked on the ret
         self._stub_names, self._import_fns = {}, {}
+        if self.x64:
+            # the Store build links the CRT dynamically: its own code inlines most of these, the reconstruction
+            # (and some original code) calls them
+            for name, fn in CRT_MODELS_X64.items():
+                self.on_import(name, fn)
         for img in images:
             for slot, name in img.iat.items():
                 stub = STUBS + 0x10 * len(self._stub_names)
@@ -308,9 +366,8 @@ class Machine:
         self.imports_called.append(name)
         hooked = self._import_fns.get(name.lower())
         if hooked is None:
-            if not self.x64:
-                self._stub_fault = f"fault: x86 import {name} called with no stub (Machine.on_import)"
-                mu.emu_stop()
+            self._stub_fault = f"fault: import {name} called with no model (Machine.on_import)"
+            mu.emu_stop()
             return
         fn, nargs = hooked
         fn(mu)

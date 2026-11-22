@@ -22,7 +22,13 @@ union vec3_t
 		float z;
 	};
 	float v[3];
+
+	float &operator[](int i) { return v[i]; }
+	const float &operator[](int i) const { return v[i]; }
 };
+
+// The original's element count, as its bounds asserts spell it out (CL_ClampViewAngle)
+#define ARRAY_COUNT(array) (sizeof( array ) / (sizeof( array[0] ) * (sizeof( array ) != 4 || sizeof( array[0] ) <= 4)))
 
 union vec4_t
 {

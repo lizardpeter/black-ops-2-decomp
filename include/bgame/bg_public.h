@@ -11,6 +11,7 @@ enum pmtype_t
 	PM_NOCLIP = 2,
 	PM_UFO = 3,
 	PM_MPVIEWER = 4,
+	PM_SPECTATOR = 5,
 };
 
 struct playerState_s

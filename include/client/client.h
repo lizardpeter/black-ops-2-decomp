@@ -216,16 +216,31 @@ enum
 	BUTTON_SWITCH_TO_INVENTORY = 53,
 };
 
+// The Store revision has one int fewer before frametime (its cls is at 142CB7C80: hunkUsersStarted set to 1 at
+// 1401A9E49, servername at +4; CL_CreateCmd 140194E20 reads frametime at +0x150, CL_Input 1401974A0 writes
+// inputUpdatedPrevFrame at +0x160). Its size isn't known.
 struct clientStatic_t
 {
+#ifdef T6_STORE
+	unsigned char unknown0[0x150];
+#else
 	unsigned char unknown0[0x154];
+#endif
 	int frametime;  // milliseconds this frame
 	float frametime_base;
-	unsigned char unknown15C[0x164 - 0x15C];
+	int realtime;
+	int realFrametime;
 	bool inputUpdatedPrevFrame;
+#ifndef T6_STORE
 	unsigned char unknown165[0x5EF88 - 0x165];
+#endif
 };
+#ifdef T6_STORE
+static_assert(__builtin_offsetof(clientStatic_t, inputUpdatedPrevFrame) == 0x160, "clientStatic_t (Store)");
+#else
 static_assert(sizeof(clientStatic_t) == 0x5EF88, "clientStatic_t");
+static_assert(__builtin_offsetof(clientStatic_t, inputUpdatedPrevFrame) == 0x164, "clientStatic_t");
+#endif
 
 extern clientStatic_t cls;  // cl_main.cpp
 

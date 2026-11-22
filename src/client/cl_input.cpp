@@ -20,6 +20,7 @@
 #include "bgame/bg_public.h"
 #include "cgame_mp/cg_local_mp.h"
 #include "demo/demo.h"
+#include "live/live.h"
 #include "game/gamerprofile.h"
 #include "ui/ui.h"
 #include "qcommon/qcommon.h"
@@ -51,20 +52,12 @@ bool CL_IsFirstActiveLocalClient(LocalClientNum_t localClientNum);
 bool CG_HandleLocationSelectionInput(LocalClientNum_t localClientNum, usercmd_s *cmd);
 void CL_CmdButtons(LocalClientNum_t localClientNum, usercmd_s *cmd);
 void CL_GamepadMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frametime_base);
-void CL_HandleSpecialStateInput(LocalClientNum_t localClientNum, bitarray<64> *buttons);
+void CL_HandleSpectatorInput(LocalClientNum_t localClientNum, bitarray<64> *button_bits);  // localClientNum in EDI
 
 // qcommon, live, demo, gamepad
-float Com_ViewScaleMsec(float msec);
 bool Com_SessionMode_IsZombiesGame();
 void MSG_SetDefaultUserCmd(playerState_s *ps, usercmd_s *cmd);
-bool Live_IsSystemUiActive();
-bool Demo_IsThirdPersonCamera();
-bool Demo_IsAnyFreeMoveCamera();
-bool Demo_IsFreeCameraLockedOnEntity();
-void Demo_ClampViewAngleForLockedOnEntity(LocalClientNum_t localClientNum);
 void IN_Frame();
-float AngleDelta(float a1, float a2);
-float AngleNormalize360(float angle);
 
 // game, aim assist, cgame
 bool CG_ShouldUpdateViewAngles(LocalClientNum_t localClientNum);
@@ -676,6 +669,14 @@ X87_MATH void CL_AdjustAngles(LocalClientNum_t localClientNum)
 	if (cl->snap.ps.pm_flags & PMF_FROZEN)
 		return;
 	float speed;
+#ifdef T6_STORE
+	// the Store revision (its CL_CreateCmd 140194E20, this function inlined) has fixed values where the server reads
+	// dvars: the speed key turns 1.5 times as fast (cl_anglespeedkey) and the default turn speed is 140 degrees a
+	// second (cl_yawspeed, cl_pitchspeed)
+	speed = cls.frametime * 0.001f;
+	if (kb[KB_SPEED].active)
+		speed *= 1.5f;
+#else
 	if (kb[KB_SPEED].active)
 	{
 		float scale = Dvar_GetFloat(cl_anglespeedkey);  // first: the product below stays on the x87 stack
@@ -685,20 +686,29 @@ X87_MATH void CL_AdjustAngles(LocalClientNum_t localClientNum)
 	{
 		speed = cls.frametime * 0.001f;
 	}
+#endif
 	float angleSpeed;
 	if (!kb[KB_STRAFE].active)
 	{
 		if (cl->cgameMaxYawSpeed > 0.0f)
 			angleSpeed = cl->cgameMaxYawSpeed * speed;
 		else
+#ifdef T6_STORE
+			angleSpeed = 140.0f * speed;
+#else
 			angleSpeed = Dvar_GetFloat(cl_yawspeed) * speed;
+#endif
 		cl->viewangles.y -= CL_KeyState(&kb[KB_RIGHT]) * angleSpeed;
 		cl->viewangles.y += CL_KeyState(&kb[KB_LEFT]) * angleSpeed;
 	}
 	if (cl->cgameMaxPitchSpeed > 0.0f)
 		angleSpeed = cl->cgameMaxPitchSpeed * speed;
 	else
+#ifdef T6_STORE
+		angleSpeed = 140.0f * speed;
+#else
 		angleSpeed = Dvar_GetFloat(cl_pitchspeed) * speed;
+#endif
 	cl->viewangles.x -= CL_KeyState(&kb[KB_LOOKUP]) * angleSpeed;
 	cl->viewangles.x += CL_KeyState(&kb[KB_LOOKDOWN]) * angleSpeed;
 }
@@ -1130,6 +1140,15 @@ void CL_MouseMove(LocalClientNum_t localClientNum, usercmd_s *cmd, float frameti
 	                              cmd->pitchmove, cmd->yawmove, 127.0f);
 }
 
+// 004EEAC0  client/cl_input.cpp:2773 (inlined in the Store build)
+// A spectator, or a player in a special state (otherFlags bit 1), steers with the spectator's controls.
+void CL_HandleSpecialStateInput(LocalClientNum_t localClientNum, bitarray<64> *button_bits)
+{
+	cg_t *cgameGlob = CG_GetLocalClientGlobals(localClientNum);
+	if (cgameGlob->predictedPlayerState.pm_type == PM_SPECTATOR || (cgameGlob->predictedPlayerState.otherFlags & (1 << 1)))
+		CL_HandleSpectatorInput(localClientNum, button_bits);
+}
+
 // 004EBF00  client/cl_input.cpp:2783
 // The damage kick, as short angles (truncated, not wrapped as ANGLE2SHORT would).
 void CL_CopyDamageKickAngles(LocalClientNum_t localClientNum, usercmd_s *cmd)
@@ -1138,6 +1157,20 @@ void CL_CopyDamageKickAngles(LocalClientNum_t localClientNum, usercmd_s *cmd)
 	cmd->damageKick[0] = (short)(int)(cgameGlob->damageKickAngles.x * 182.04445f);
 	cmd->damageKick[1] = (short)(int)(cgameGlob->damageKickAngles.y * 182.04445f);
 }
+
+#ifdef T6_STORE
+// The Store's /fp:fast copies of CL_ClampViewAngle with constant limits compare the angle with them directly: a NaN
+// pitch becomes min (the function's own form keeps it NaN).
+static void CL_ClampPitchConstant(LocalClientNum_t localClientNum, float min, float max)
+{
+	clientActive_t *cl = CL_GetLocalClientGlobals(localClientNum);
+	float pitch = cl->viewangles.x;
+	cl->viewangles.x = pitch >= max ? max : (pitch > min ? pitch : min);
+}
+#define CL_CLAMP_PITCH(localClientNum, min, max) CL_ClampPitchConstant(localClientNum, min, max)
+#else
+#define CL_CLAMP_PITCH(localClientNum, min, max) CL_ClampViewAngle(localClientNum, 0, min, max)
+#endif
 
 // 004EF530  client/cl_input.cpp:2794
 // One frame's command. The view's pitch may not move more than 90 degrees in a frame. X87_MATH: AngleDelta's result
@@ -1149,6 +1182,23 @@ X87_MATH usercmd_s CL_CreateCmd(LocalClientNum_t localClientNum)
 	float oldPitch = cl->viewangles.x;
 	CL_AdjustAngles(localClientNum);
 	memset(&cmd, 0, sizeof(cmd));
+#ifdef T6_STORE
+	// the Store revision picks a location first, then holds still while the controller's system UI or the LUI
+	// catcher (0x10) has the keys, without clearing the key states
+	if (Key_IsCatcherActive(localClientNum, 4) && CG_HandleLocationSelectionInput(localClientNum, &cmd))
+	{
+		CL_FinishMove(localClientNum, &cmd);
+		return cmd;
+	}
+	if (Live_IsSystemUiActive(Com_LocalClient_GetControllerIndex(localClientNum)) ||
+	    (CL_GetLocalClientUIGlobals(localClientNum)->keyCatchers & 0x10))
+	{
+		CL_AddCurrentStanceToCmd(localClientNum, &cmd);
+		CL_FinishMove(localClientNum, &cmd);
+		return cmd;
+	}
+	{
+#else
 	if (Live_IsSystemUiActive())
 	{
 		Key_ClearStates(localClientNum);
@@ -1158,6 +1208,7 @@ X87_MATH usercmd_s CL_CreateCmd(LocalClientNum_t localClientNum)
 	}
 	if (!Key_IsCatcherActive(localClientNum, 4) || !CG_HandleLocationSelectionInput(localClientNum, &cmd))
 	{
+#endif
 		CL_CmdButtons(localClientNum, &cmd);
 		CL_KeyMove(localClientNum, &cmd);
 		float frametime_base = Com_ViewScaleMsec(cls.frametime_base);
@@ -1170,7 +1221,7 @@ X87_MATH usercmd_s CL_CreateCmd(LocalClientNum_t localClientNum)
 		else if (AngleDelta(oldPitch, cl->viewangles.x) > 90.0f)
 			cl->viewangles.x = AngleNormalize360(oldPitch - 90.0f);
 		if (Demo_IsThirdPersonCamera())
-			CL_ClampViewAngle(localClientNum, 0, -90.0f, 90.0f);
+			CL_CLAMP_PITCH(localClientNum, -90.0f, 90.0f);
 		if (Demo_IsAnyFreeMoveCamera())
 		{
 			if (Demo_IsFreeCameraLockedOnEntity())
@@ -1181,7 +1232,7 @@ X87_MATH usercmd_s CL_CreateCmd(LocalClientNum_t localClientNum)
 			{
 				if (cl->viewangles.x > 180.0f)
 					cl->viewangles.x -= 360.0f;
-				CL_ClampViewAngle(localClientNum, 0, -88.0f, 88.0f);
+				CL_CLAMP_PITCH(localClientNum, -88.0f, 88.0f);
 			}
 		}
 		if (Dvar_GetBool(bg_useClientDamageKick))
