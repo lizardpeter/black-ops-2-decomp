@@ -230,3 +230,4 @@ CoDMPServer_PC	0080BBD0	matches	src/client/splitscreen.cpp	CL_SplitscreenEnabled
 CoDMPServer_PC	009831B0	matches	src/client/splitscreen.cpp	CL_IsFirstActiveLocalClient; tests/differential/test_splitscreen.py
 t6mp_msstore	1401954D0	matches	src/client/cl_input.cpp	CL_CreateNewCommands; tests/differential/test_cl_input.py
 t6mp_msstore	1401974A0	matches	src/client/cl_input.cpp	CL_Input (CL_SplitscreenEnabled false and CL_IsFirstActiveLocalClient inlined); tests/differential/test_cl_input.py
+t6mp_msstore	14071E360	matches	src/gfx_d3d/r_init.cpp	sub_14071E360: the swap chain description (Store only); tests/differential/test_r_init.py
