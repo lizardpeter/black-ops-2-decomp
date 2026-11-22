@@ -63,7 +63,8 @@ BOOL_DVARS = {M_FILTER, DAMAGE_KICK, SHOW_RATE, FREELOOK}
 DVAR_STORE = {STANDING: 0x14265A860,   # the Store's dvar pointers identified so far (records/names.tsv)
               M_FILTER: 0x140E60788, MOUSE_ACCEL: 0x140E61BF0, M_SIDE: 0x140E61BE8, M_YAW: 0x140E5D238,
               FREELOOK: 0x140E5D108, M_PITCH: 0x140E5CDB8, M_FORWARD: 0x140E5CCD8,
-              STRAFE_RESTRICTION: 0x140E4F870, CAMERA_RESTRICTION: 0x140E4F860, DAMAGE_KICK: 0x14265CDC0}
+              STRAFE_RESTRICTION: 0x140E4F870, CAMERA_RESTRICTION: 0x140E4F860, DAMAGE_KICK: 0x14265CDC0,
+              PAUSED: 0x141F04888}
 DVAR_OBJECTS = OBJECTS + 0x1C0000      # one dvar_t per handle, 0x80 apart, in the build's layout
 
 
@@ -664,6 +665,33 @@ def store_create_cmd_inputs(n=600, finite=False):
     return out
 
 
+def store_create_cmd(mu):
+    """CL_CreateCmd's fake (x64): a command made from the client's cmdNumber and STATE, in the hidden result buffer."""
+    out = argq(mu, 0)
+    n = struct.unpack("<i", bytes(mu.mem_read(CLIENTS + 0x44AC4, 4)))[0]
+    STATE["machine"].program_write(out, struct.pack("<IiI", STATE.get("server_time", 4321) & 0xFFFFFFFF, n, 0xA5A5A5A5) +
+                                   bytes(range(0x30)))
+    return out
+
+
+STORE_NEW_COMMANDS = {
+    "fakes": {"CL_CreateCmd": store_create_cmd, "MSG_SetDefaultUserCmd": lambda mu: None},
+    "observe": {"CL_CreateCmd": "xi", "MSG_SetDefaultUserCmd": "qq"},
+    "inputs": [{"args": [0], "setup": setup(ui_state=u, client={0x44AC4: n}, globals_={0x140E617A0: mig},
+                                            server_time=n * 7)}
+               for u in (8, 9, 10) for n in (0, 126, 127, 0x7FFFFFFF) for mig in range(4)],
+}
+
+
+STORE_INPUT = {
+    # CL_SplitscreenEnabled is false and CL_IsFirstActiveLocalClient inlined: cl_paused is still read
+    "fakes": {"IN_Frame": lambda mu: None, "CL_CreateNewCommands": lambda mu: None},
+    "observe": {"IN_Frame": "", "CL_CreateNewCommands": "i"},
+    "inputs": [{"args": [0], "setup": setup(ui_state=u, dvars={PAUSED: pz}, globals_={0x140E61790: fl})}
+               for u in (9, 10, 11) for pz in (0, 1) for fl in (0, 1)],
+}
+
+
 CASES = [
     {"name": "CL_MouseMove", "ret": "void", "builds": BOTH, "fakes": MOUSE_FAKES, "observe": MOUSE_SEEN,
      "inputs": mouse_inputs(), "by_build": {"t6mp_msstore": dict(STORE_MOUSE, inputs=store_mouse_inputs() + store_mouse_edges())}},
@@ -891,12 +919,14 @@ CASES = [
                 for third, free in ((0, 0), (1, 0), (0, 1))
                 for kick in (0, 1)],
      "by_build": {"t6mp_msstore": dict(STORE_CREATE_CMD, inputs=store_create_cmd_inputs())}},
-    {"name": "CL_CreateNewCommands", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CL_CreateNewCommands", "ret": "void", "builds": BOTH, "fakes": FAKES, "observe": SEEN,
+     "by_build": {"t6mp_msstore": STORE_NEW_COMMANDS},
      "inputs": [{"args": [0],
                  "setup": setup(ui_state=u, client={CMD_NUMBER: n, VIEWANGLES: struct.pack("<f", 10.0)},
                                 globals_={CLIENT_UI + 0x10: mig}, server_time=n * 7)}
                 for u in (8, 9, 10) for n in (0, 126, 127, 0x7FFFFFFF) for mig in range(4)]},
-    {"name": "CL_Input", "ret": "void", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
+    {"name": "CL_Input", "ret": "void", "builds": BOTH, "fakes": FAKES, "observe": SEEN,
+     "by_build": {"t6mp_msstore": STORE_INPUT},
      "inputs": [{"args": [0],
                  "setup": setup(ui_state=u, client={CMD_NUMBER: 5}, dvars={PAUSED: pz}, zombies=z, first=f)}
                 for u in (9, 10) for pz in (0, 1) for z in (0, 1) for f in (0, 1)]},

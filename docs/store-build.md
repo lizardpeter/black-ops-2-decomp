@@ -60,7 +60,9 @@ the source handles them:
   each type out with MSVC's rules for x86 first, inferring `#pragma pack` and `__declspec(align)` until the PDB's
   offsets come out (4,844 of 4,944 types), then for x64. Where the Store's code disagrees with the prediction, the
   Store revision changed the type: `usercmd_s` (8 bytes shorter), `cg_t` (0x20 bytes more between
-  `predictedPlayerState` and `damageKickAngles`).
+  `predictedPlayerState` and `damageKickAngles`), `clientStatic_t` (one int fewer before `frametime`), `demoMain`
+  (4 bytes more before `state`), `demoPlayback` (0x80 bytes more before the free camera's lock), `centity_t` (0x3D8
+  bytes; `nextState` 0x18 further on) and `AITypeScript` (`demoLockOn` at +0x48).
 - **Arithmetic.** The Store build is SSE throughout, in float. Where the server kept a chain on the x87 stack, the
   source uses `x87_t` (double on x86, float on x64) and `X87_MATH` (x86 only): `t6_compiler.h`.
 - **Fast floating point.** The Store was compiled with a fast floating-point mode (`/fp:fast`): it reassociates
@@ -74,7 +76,12 @@ the source handles them:
     rewrite every use of a helper the same way), and its test includes the NaN and rounding inputs that tell the two
     apart: a test that passes with the server's form reverted in is missing them.
 - **Revision changes in code.** `CL_MouseMove` rounds the mouse's walk and strafe moves with `floorf(x + 0.5f)`
-  (the server rounds to nearest after adding 2^-30) and no longer prints `cl_showMouseRate`.
+  (the server rounds to nearest after adding 2^-30) and no longer prints `cl_showMouseRate`. `CL_AdjustAngles` has
+  fixed values where the server reads dvars (the speed key's 1.5, a default turn speed of 140 degrees a second).
+  `CL_CreateCmd` lets the location selector run first, then holds still while the controller's system UI (per
+  controller on the Store) or the LUI catcher (0x10) has the keys, without clearing the key states. The demo
+  camera's AI lock-on always takes the first view. `Com_LocalClient_LastInput_Set` (1403946A0) also sends LUI an
+  event when the input device changes; it isn't reconstructed for the Store yet.
 - **The mouse reader.** The Store's `IN_MouseMove` (140499A10) inlines a later revision of `CL_MouseEvent`:
   - a Store-only flag (1427F1B60, name unknown) takes the dev GUI check's place;
   - the 3D-window check is gone;
