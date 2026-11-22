@@ -125,7 +125,11 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
 3. **The resize and fullscreen paths** (`ResizeBuffers`, vtable +0x68, at 14072F5A7, 1407EDEBB, 1407F4B9B;
    `SetFullscreenState` at 140720EB0 and others): the flags must match the swap chain's.
 4. **`RB_SwapBuffers`** (140735BC0): `DXGI_PRESENT_ALLOW_TEARING` when v-sync is off in a window; the flip model
-   unbinds the back buffer at `Present`, so it is bound again after it.
+   unbinds the back buffer at `Present`, so it is bound again after it. Rebuilt and verified on both builds
+   (`src/gfx_d3d/rb_backend.cpp`, `tests/differential/test_rb_backend.py`: every COM call, message, cursor step and
+   event compared). The Store revision adds a capture path before the present: while `store_1427F1B60` is set the
+   back buffer is resolved and copied into two textures under `CRITSECT_DXCONTEXT` and an event is set, and the
+   frame is not presented; it also stamps `g_wv.sysMsgTime` from each message it pumps.
 5. **`Com_Frame_Try_Block_Function`** (1403A4010): the central rebuild. The frame-latency wait goes right before the
    second `Com_EventLoop` (1403A470B), so keys (that event loop) and the mouse (`CL_Input`, at draw time) are both
    taken after it, by the original's own code in its own order (BO3's P0020 arrangement; no mid-frame filter needed).
@@ -137,6 +141,5 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
 
 - The client frame, `SCR_UpdateScreen` (server 00511320) and `CG_DrawActiveFrame` (server 004C7550) on the Store.
 - Where the commands are built and sent (`CL_SendCmd`, server 004EC0A0) relative to the draw.
-- `R_EndFrame` / `R_IssueRenderCommands` (server 00A2E4A0, 00A2F1E0), the render thread, `RB_SwapBuffers`
-  (server 00A5A510) and the Present call; the swap chain's creation (`D3D11CreateDeviceAndSwapChain` and
+- `R_EndFrame` / `R_IssueRenderCommands` (server 00A2E4A0, 00A2F1E0), the render thread; the swap chain's creation (`D3D11CreateDeviceAndSwapChain` and
   `CreateDXGIFactory1` are imported: 1408A8450, 1408A8460).

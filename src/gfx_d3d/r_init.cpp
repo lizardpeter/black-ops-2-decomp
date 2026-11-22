@@ -18,12 +18,12 @@ extern const dvar_t *r_aaSamples;
 // fullscreen is entered afterwards), DXGI_SWAP_EFFECT_DISCARD (the blt model), allowing mode switches.
 void sub_14071E360(DXGI_SWAP_CHAIN_DESC *swapChainDesc, const GfxWindowParms *wndParms)
 {
-	dx.multiSampleType = Dvar_GetInt(r_aaSamples);
-	dx.multiSampleQuality = 0;
-	if (dx.multiSampleType == 16)
+	DX(multiSampleType) = Dvar_GetInt(r_aaSamples);
+	DX(multiSampleQuality) = 0;
+	if (DX(multiSampleType) == 16)
 	{
-		dx.multiSampleType = 4;
-		dx.multiSampleQuality = 16;
+		DX(multiSampleType) = 4;
+		DX(multiSampleQuality) = 16;
 	}
 	memset(swapChainDesc, 0, sizeof(*swapChainDesc));
 	swapChainDesc->BufferDesc.Width = wndParms->displayWidth;

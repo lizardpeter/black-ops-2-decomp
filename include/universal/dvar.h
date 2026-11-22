@@ -89,7 +89,19 @@ enum
 	DVAR_EXTERNAL = 1 << 14,  // a string dvar a mod or the UI set, read through the typed getters (descriptive name)
 };
 
+enum DvarSetSource
+{
+	DVAR_SOURCE_INTERNAL = 0,
+	DVAR_SOURCE_EXTERNAL = 1,
+	DVAR_SOURCE_SCRIPT = 2,
+	DVAR_SOURCE_DEVGUI = 3,
+};
+
 // dvar.cpp
+int Dvar_ValuesEqual(dvarType_t type, DvarValue val0, DvarValue val1);
+void Dvar_SetVariant(dvar_t *dvar, DvarValue value, DvarSetSource source);
+bool Dvar_HasLatchedValue(const dvar_t *dvar);
+void Dvar_MakeLatchedValueCurrent(const dvar_t *dvar);
 bool Dvar_StringToBool(const char *string);
 int Dvar_StringToInt(const char *string);
 float Dvar_StringToFloat(const char *string);

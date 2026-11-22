@@ -48,6 +48,9 @@ WINUSERAPI HWND WINAPI GetForegroundWindow(void);
 WINUSERAPI BOOL WINAPI ScreenToClient(HWND hWnd, LPPOINT lpPoint);
 WINUSERAPI BOOL WINAPI ClientToScreen(HWND hWnd, LPPOINT lpPoint);
 WINUSERAPI int WINAPI ShowCursor(BOOL bShow);
+WINUSERAPI BOOL WINAPI ShowWindow(HWND hWnd, int nCmdShow);
+#define SW_MINIMIZE 6
+#define PM_NOREMOVE 0x0000
 WINUSERAPI BOOL WINAPI PostMessageA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 // Threads, message windows and raw input, as the enhanced build's raw mouse thread uses them
@@ -177,6 +180,21 @@ WINUSERAPI HWND WINAPI CreateWindowExA(DWORD dwExStyle, const char *lpClassName,
 WINUSERAPI LRESULT WINAPI DefWindowProcA(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 WINUSERAPI BOOL WINAPI GetMessageA(MSG *lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax);
 WINUSERAPI LRESULT WINAPI DispatchMessageA(const MSG *lpMsg);
+WINUSERAPI BOOL WINAPI PeekMessageA(MSG *lpMsg, HWND hWnd, UINT wMsgFilterMin, UINT wMsgFilterMax, UINT wRemoveMsg);
+WINUSERAPI BOOL WINAPI TranslateMessage(const MSG *lpMsg);
+
+// Critical sections (universal/win_common.cpp): the SDK's layout (0x18 bytes on x86, 0x28 on x64)
+typedef struct _RTL_CRITICAL_SECTION
+{
+	void *DebugInfo;
+	LONG LockCount;
+	LONG RecursionCount;
+	HANDLE OwningThread;
+	HANDLE LockSemaphore;
+	__UINTPTR_TYPE__ SpinCount;
+} CRITICAL_SECTION, *LPCRITICAL_SECTION;
+WINBASEAPI void WINAPI EnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
+WINBASEAPI void WINAPI LeaveCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
 WINUSERAPI BOOL WINAPI RegisterRawInputDevices(const RAWINPUTDEVICE *pRawInputDevices, UINT uiNumDevices,
                                                UINT cbSize);
 WINUSERAPI UINT WINAPI GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, void *pData, UINT *pcbSize,

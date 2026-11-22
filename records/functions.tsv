@@ -231,3 +231,11 @@ CoDMPServer_PC	009831B0	matches	src/client/splitscreen.cpp	CL_IsFirstActiveLocal
 t6mp_msstore	1401954D0	matches	src/client/cl_input.cpp	CL_CreateNewCommands; tests/differential/test_cl_input.py
 t6mp_msstore	1401974A0	matches	src/client/cl_input.cpp	CL_Input (CL_SplitscreenEnabled false and CL_IsFirstActiveLocalClient inlined); tests/differential/test_cl_input.py
 t6mp_msstore	14071E360	matches	src/gfx_d3d/r_init.cpp	sub_14071E360: the swap chain description (Store only); tests/differential/test_r_init.py
+CoDMPServer_PC	00A5A510	matches	src/gfx_d3d/rb_backend.cpp	RB_SwapBuffers; tests/differential/test_rb_backend.py
+t6mp_msstore	140735BC0	matches	src/gfx_d3d/rb_backend.cpp	RB_SwapBuffers (inlines Sys_Enter/LeaveCriticalSection, Sys_SetWin32QuitEvent, Dvar_HasLatchedValue, Dvar_MakeLatchedValueCurrent, R_DX11_ReleaseSamplerStates); tests/differential/test_rb_backend.py
+CoDMPServer_PC	00792320	matches	src/universal/win_common.cpp	Sys_EnterCriticalSection; tests/differential/test_win_common.py
+CoDMPServer_PC	007923C0	matches	src/universal/win_common.cpp	Sys_LeaveCriticalSection; tests/differential/test_win_common.py
+CoDMPServer_PC	006DFD60	matches	src/qcommon/threads.cpp	Sys_SetWin32QuitEvent; tests/differential/test_win_common.py
+CoDMPServer_PC	00A8E080	matches	src/gfx_d3d/r_state.cpp	R_DX11_ReleaseSamplerStates; tests/differential/test_r_state.py
+CoDMPServer_PC	00773C10	matches	src/universal/dvar.cpp	Dvar_HasLatchedValue; tests/differential/test_dvar.py
+CoDMPServer_PC	00776A70	matches	src/universal/dvar.cpp	Dvar_MakeLatchedValueCurrent; tests/differential/test_dvar.py

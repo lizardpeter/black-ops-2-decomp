@@ -89,3 +89,10 @@ Game files are never committed. They live in R2 under the keys in `target.toml`,
 `analyze = true` (or the builds named in a manual run). It extracts PDB/MAP tables (`tools/pdb/extract.py`), imports
 each build (with its PDB unless `ghidra_pdb = false`), exports, decompiles in shards and commits `analysis/<build>/`.
 Set `analyze` back to `false` once a build's analysis is committed.
+
+`pdb/types.h` holds one definition per type name, but the PDBs define some structs more than once with different
+layouts (translation units built with different limits: 75 in CoDMPServer_PC, e.g. `DxGlobals` at 115584 and
+228224 bytes, `r_globals_t` five ways). `pdb/type-variants.txt` lists every variant's members and the globals
+declared with each; for those types take offsets from the variant the global uses (`dx` uses the 228224-byte one),
+and check them against the exe's own accesses. `pdb/layout_x64/` predicts from types.h, so it inherits the same
+choice (its `DxGlobals` is the small one).

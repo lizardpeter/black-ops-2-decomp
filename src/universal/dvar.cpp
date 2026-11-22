@@ -39,6 +39,12 @@ X87_MATH float Dvar_StringToFloat(const char *string)
 	return atof(string);
 }
 
+// 00773C10  universal/dvar.cpp:1209 (inlined in the Store build)
+bool Dvar_HasLatchedValue(const dvar_t *dvar)
+{
+	return !Dvar_ValuesEqual(dvar->type, dvar->current, dvar->latched);
+}
+
 // 007767A0  universal/dvar.cpp:1568
 bool Dvar_GetBool(const dvar_t *dvar)
 {
@@ -91,4 +97,10 @@ X87_MATH float Dvar_GetFloat(const dvar_t *dvar)
 	if (dvar->type == DVAR_TYPE_INT)
 		return dvar->current.integer;  // fild: unrounded on the x86 server
 	return Dvar_StringToFloat(dvar->current.string);
+}
+
+// 00776A70  universal/dvar.cpp:2628 (inlined in the Store build)
+void Dvar_MakeLatchedValueCurrent(const dvar_t *dvar)
+{
+	Dvar_SetVariant((dvar_t *)dvar, dvar->latched, DVAR_SOURCE_INTERNAL);
 }

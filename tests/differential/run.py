@@ -74,7 +74,7 @@ class Canon:
 
     def code(self, v):
         r = self.recon
-        if not r.base <= v < r.base + r.size:
+        if not isinstance(v, int) or not r.base <= v < r.base + r.size:  # e.g. com.py's ("com", ...) entries
             return v
         if v in self.recon_to_orig:
             return self.recon_to_orig[v]
@@ -223,7 +223,7 @@ def main():
                 break
             # the hooked function, and pointer-sized arguments (q), may be reconstructed code: map them back to the
             # original's. Integers (i) are values, even when they happen to fall inside the DLL's address range.
-            got_calls = [(canon.code(c[0]),) + tuple(canon.code(x) if k == "q" and isinstance(x, int) else x
+            got_calls = [c if not isinstance(c[0], int) else (canon.code(c[0]),) + tuple(canon.code(x) if k == "q" and isinstance(x, int) else x
                                                     for k, x in zip(observe.get(c[0], ""), c[1:])) for c in got[3]]
             used += 1
             ww, gw = canon.writes(want[2]), canon.writes(got[2])

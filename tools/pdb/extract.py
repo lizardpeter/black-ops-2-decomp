@@ -23,6 +23,10 @@ Writes:
   analysis/<build>/pdb/types.h         every PDB type as C++ with offsets and sizes (resymc), independent of Ghidra;
                                        negative enumerators corrected from llvm-pdbutil (resymc prints -1 as 0xff)
   analysis/<build>/pdb/types-errors.txt  types resymc could not rebuild
+  analysis/<build>/pdb/type-variants.txt  structs the PDB defines more than once with different layouts (translation
+                                       units built with different limits, e.g. DxGlobals' display-mode table):
+                                       types.h holds one of them, maybe not the one the exe's globals use; this
+                                       lists every variant's members and which globals are declared with it
   analysis/<build>/pdb/raw/*.txt       llvm-pdbutil dumps the tables were parsed from
   analysis/<build>/map/publics.tsv     linker MAP publics: va, name, flags, lib, obj
 """
@@ -396,10 +400,105 @@ def extract_types(out, pdb):
     return len(errors)
 
 
+LEAF = re.compile(r"\s*(0x[0-9A-F]+) \| (LF_\w+) \[size = \d+\](?: `([^`]*)`)?")
+
+
+def parse_type_records(types_dump: str) -> dict:
+    """{type index: (leaf, name, [detail lines])} from `llvm-pdbutil dump -types`."""
+    recs, cur = {}, None
+    for line in types_dump.splitlines():
+        m = LEAF.match(line)
+        if m:
+            cur = [m.group(2), m.group(3), []]
+            recs[int(m.group(1), 16)] = cur
+        elif cur is not None:
+            cur[2].append(line.strip())
+    return recs
+
+
+def type_name(recs, ti, depth=0):
+    """A readable name for type index `ti`, enough to tell variants' members apart."""
+    if ti < 0x1000:
+        return {0x0003: "void"}.get(ti, f"base 0x{ti:04X}")
+    rec = recs.get(ti)
+    if rec is None or depth > 8:
+        return f"0x{ti:X}"
+    leaf, name, detail = rec
+    text = " ".join(detail)
+    ref = lambda key: int(re.search(key + r" ?[:=] ?(0x[0-9A-F]+)", text).group(1), 16)
+    if name:
+        return name
+    if leaf == "LF_POINTER":
+        return type_name(recs, ref("referent"), depth + 1) + "*"
+    if leaf == "LF_MODIFIER":
+        return type_name(recs, ref("referent"), depth + 1)
+    if leaf == "LF_ARRAY":
+        size = re.search(r"size: (\d+)", text).group(1)
+        return f"{type_name(recs, ref('element type'), depth + 1)}[{size} bytes]"
+    if leaf in ("LF_PROCEDURE", "LF_MFUNCTION"):
+        return "function"
+    return f"{leaf} 0x{ti:X}"
+
+
+def type_variants(types_dump: str, globals_dump: str) -> str:
+    """Every struct, class or union the PDB defines with more than one size: each variant's members, and the
+    globals declared with it."""
+    recs = parse_type_records(types_dump)
+    base = re.compile(r"0x([0-9A-F]+)(?: \(([^)]*)\))?")
+
+    def member_type(text):
+        m = base.match(text)
+        ti = int(m.group(1), 16)
+        return m.group(2) if ti < 0x1000 and m.group(2) else type_name(recs, ti)
+
+    variants = {}
+    for ti, (leaf, name, detail) in recs.items():
+        if leaf not in ("LF_STRUCTURE", "LF_CLASS", "LF_UNION") or not name or name.startswith("<"):
+            continue
+        text = " ".join(detail)
+        m = re.search(r"field list: (0x[0-9A-F]+).*sizeof (\d+)", text)
+        if not m or "forward ref" in text:
+            continue
+        variants.setdefault(name, {}).setdefault(int(m.group(2)), (ti, int(m.group(1), 16)))
+    def element(ti):
+        """An array's or modifier's underlying type (a global `cg_t cgArray[1]` is declared with cg_t)."""
+        for _ in range(8):
+            rec = recs.get(ti)
+            if rec is None or rec[0] not in ("LF_ARRAY", "LF_MODIFIER"):
+                return ti
+            ti = int(re.search(r"(?:element type|referent) ?[:=] ?(0x[0-9A-F]+)", " ".join(rec[2])).group(1), 16)
+        return ti
+
+    users = {}
+    for m in re.finditer(r"S_[GL]DATA32 \[size = \d+\] `([^`]*)`\s+type = 0x([0-9A-F]+)", globals_dump):
+        users.setdefault(element(int(m.group(2), 16)), set()).add(m.group(1))
+    out = []
+    for name in sorted(variants):
+        by_size = variants[name]
+        if len(by_size) < 2:
+            continue
+        out.append(f"{name}: {len(by_size)} layouts, sizeof {', '.join(str(k) for k in sorted(by_size))}")
+        for size in sorted(by_size):
+            # every type index with this name and size counts (a struct is often emitted more than once)
+            same = [t for t, (lf, nm, dt) in recs.items() if nm == name and lf in ("LF_STRUCTURE", "LF_CLASS", "LF_UNION")
+                    and f"sizeof {size}" in " ".join(dt) and "forward ref" not in " ".join(dt)]
+            declared = sorted({g for t in same for g in users.get(t, ())})
+            out.append(f"  sizeof {size} (0x{size:X})" + (f": globals {', '.join(declared)}" if declared else ""))
+            for line in recs[by_size[size][1]][2]:
+                mm = re.match(r"- LF_MEMBER \[name = `([^`]*)`, Type = (.*), offset = (\d+), attrs", line)
+                if mm:
+                    out.append(f"    0x{int(mm.group(3)):05X}  {mm.group(1)}: {member_type(mm.group(2))}")
+        out.append("")
+    return "\n".join(out) + "\n"
+
+
 def extract_pdb(out, pdb, base):
     raw = out / "pdb" / "raw"
     raw.mkdir(parents=True, exist_ok=True)
     print(f"{out.name}: types.h written, {extract_types(out, pdb)} type(s) resymc could not rebuild")
+    variants = type_variants(pdbutil("dump", "-types", str(pdb)), pdbutil("dump", "-globals", "-symbols", str(pdb)))
+    (out / "pdb" / "type-variants.txt").write_text(variants)
+    print(f"{out.name}: {variants.count(' layouts, sizeof ')} type(s) with more than one layout")
 
     dumps = {
         "summary": pdbutil("dump", "-summary", str(pdb)),

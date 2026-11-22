@@ -105,3 +105,28 @@ CASES = [
     {"name": "Dvar_StringToFloat", "ret": "float", "builds": SERVER, "fakes": FAKES, "observe": SEEN,
      "inputs": [[s.encode() + b"\0"] for s in STRINGS]},
 ]
+
+
+# -- the latched value (server: the Store build inlines both into RB_SwapBuffers). Dvar_ValuesEqual runs for real
+# (its type comes in ECX: records/conventions.tsv), Dvar_SetVariant is observed: the dvar, the latched value's four
+# dwords and the source.
+def write_latched(type_, current, latched):
+    def run(w):
+        w.write(NAME, b"cl_test\0")
+        w.write(DVAR, struct.pack("<I", NAME))
+        w.write(DVAR + 0x10, struct.pack("<i", type_))
+        for off, v in ((0x18, current), (0x28, latched)):
+            w.write(DVAR + off, (struct.pack("<f", v) if isinstance(v, float) else struct.pack("<i", v)) + bytes(12))
+    return run
+
+
+LATCHED = [(BOOL, 0, 0), (BOOL, 0, 1), (BOOL, 1, 1), (INT, 5, 5), (INT, 5, -5), (INT, 0, 1 << 20),
+           (ENUM, 2, 2), (ENUM, 2, 3), (FLOAT, 1.5, 1.5), (FLOAT, 1.5, 1.25), (FLOAT, 0.0, -0.0)]
+
+CASES += [
+    {"name": "Dvar_HasLatchedValue", "ret": "bool", "builds": SERVER,
+     "inputs": [{"args": [DVAR], "setup": write_latched(*t)} for t in LATCHED]},
+    {"name": "Dvar_MakeLatchedValueCurrent", "ret": "void", "builds": SERVER,
+     "fakes": {"Dvar_SetVariant": lambda mu: None}, "observe": {"Dvar_SetVariant": "qiiiii"},
+     "inputs": [{"args": [DVAR], "setup": write_latched(*t)} for t in LATCHED]},
+]

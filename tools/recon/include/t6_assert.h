@@ -47,6 +47,12 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 	do { if (!(expr) && !Assert_MyHandler(T6_ASSERT_FILE, line, 0, "(" #expr ")", fmt, __VA_ARGS__)) \
 		__debugbreak(); } while (0)
 
+// assertf_at with the expression's original text given explicitly, where the reconstruction can't spell the
+// expression the same way (gfx_d3d's DX(field) accessor for the original's dx.field)
+#define assertftext_at(line, expr, text, fmt, ...) \
+	do { if (!(expr) && !Assert_MyHandler(T6_ASSERT_FILE, line, 0, "(" text ")", fmt, __VA_ARGS__)) \
+		__debugbreak(); } while (0)
+
 // Assert_MyHandler(file, line, 0, "", msg): a failure with only a message, where the code has already decided it
 // failed (q_shared.cpp: the caller tests, asserts, then prints and returns)
 #define assertfail_at(line, msg) \
@@ -103,6 +109,7 @@ extern "C" bool Assert_MyHandler(const char *filename, int line, int type, const
 #define vassertpt_at(...) ((void)0)
 #define assert_at(...) ((void)0)
 #define assertf_at(...) ((void)0)
+#define assertftext_at(...) ((void)0)
 #define assertfail_at(...) ((void)0)
 #define assertexpr_in(...) ((void)0)
 #define assert_in(...) ((void)0)

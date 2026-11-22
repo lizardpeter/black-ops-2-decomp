@@ -6,3 +6,4 @@ void Sys_SetValue(int valueIndex, void *data);
 bool Sys_IsMainThread();
 bool Sys_IsServerThread();
 bool Sys_IsRenderThread();
+void Sys_SetWin32QuitEvent();

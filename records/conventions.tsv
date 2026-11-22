@@ -46,3 +46,4 @@ CoDMPServer_PC	004082B0	AimAssist_UpdateAdsLerp	edi	no frame: input tested in ED
 CoDMPServer_PC	004EE750	CL_HandleSpectatorInput	edi,stack	the caller CL_HandleSpecialStateInput 004EEAC0 keeps the client in EDI and pushes only button_bits; the callee pushes EDI for Com_LocalClient_GetControllerIndex at entry
 CoDMPServer_PC	009034B0	Demo_GetAILockOnValues	esi	tests ESI at entry (the "(cent)" assert) and reads the entity through it; Demo_ClampViewAngleForLockedOnEntity 009072F0 calls it with the entity in ESI
 CoDMPServer_PC	00903510	Demo_GetAILockOnViewIndex	eax	moves EAX to EDI at entry and asserts it; Demo_ClampViewAngleForLockedOnEntity 009072F0 loads the entity into EAX before the call
+CoDMPServer_PC	00773810	Dvar_ValuesEqual	ecx,stack,stack,stack,stack,stack,stack,stack,stack	type in ECX (Dvar_HasLatchedValue loads it from dvar->type), val0 and val1 (DvarValue, 16 bytes each) by value on the stack: one stack entry per dword
