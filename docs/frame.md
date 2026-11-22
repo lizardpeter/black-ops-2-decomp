@@ -5,10 +5,10 @@ Work in progress: the map the decoupled tick loop, the render-queue fix and the 
 `Com_Frame` is the dedicated server's (the client half is compiled out), so the Store's client half has no
 reference build and is read from its own disassembly. Nothing here is verified by a test yet.
 
-## Com_Frame (1403A4010)
+## Com_Frame_Try_Block_Function (1403A4010)
 
-Found from `com_maxfps` (registered at 14039E43D, pointer 141F03820: its only reader is this function). The start
-matches the server's `Com_Frame_Try_Block_Function` (006BF540, qcommon/common.cpp:6460) step for step:
+Found from `com_maxfps` (registered at 14039E43D, pointer 141F03820: its only reader is this function); the
+matcher names its caller `Com_Frame` (1403A5960, method `caller`). The start matches the server's `Com_Frame_Try_Block_Function` (006BF540, qcommon/common.cpp:6460) step for step:
 
 1. `minMsec` = 1000 / `com_maxfps`, at least 1 (no cap when `com_maxfps` is 0). A second cap, `[140E53B70]+0x1C54`,
    applies when it is positive and lower (not yet identified; the server has `com_timescaleValue < 1` here instead).
@@ -44,6 +44,21 @@ Later in the same function (client half, Store only; to be read in full):
   (1427E70C8) or the dvar at 1427E6FB8 (registered next to `r_loadingScreen`) is set, else 0. No
   `DXGI_PRESENT_ALLOW_TEARING`. The device and swap chain come from `D3D11CreateDeviceAndSwapChain` (140720192), or
   NVAPI on NVIDIA hardware (vendor 0x10DE, 14072002D); the swap chain description comes from the caller (not yet read).
+
+## The call chain to the draw and the present
+
+From the matcher's candidates (analysis/t6mp_msstore/match/functions.tsv; not yet in records/names.tsv) and the
+Store's call graph:
+
+- `Com_Frame` 1403A5960 → `Com_Frame_Try_Block_Function` 1403A4010 → **1401BE780**, which the server's callers of
+  `SCR_UpdateScreen` (00511320) point to: it is also called from `CL_DownloadsComplete` (1401AA200), as on the
+  server. → **1401BDA90** (`SCR_UpdateFrame`'s place) → 1401BC300 → `CG_DrawActiveFrame` 14016F770.
+- **Commands are built during the draw:** `CG_DrawActiveFrame` calls `CL_Input` (1401974A0, verified), which runs
+  `IN_Frame` (the mouse) and `CL_CreateNewCommands`. So the mouse is read after the frame wait and the second
+  `Com_EventLoop`, at draw time, as in BO3. (On the server `CL_SendCmd` is called from `CG_PredictPlayerState`; the
+  Store's 140124580 is that function.)
+- **Present:** `RB_SwapBuffers` 140735BC0 is reached from 14071BAC0, which `SCR_UpdateFrame`'s place 1401BDA90 calls.
+  Whether that runs on the main thread or hands the frame to a render thread is the next question.
 
 ## Still to map
 
