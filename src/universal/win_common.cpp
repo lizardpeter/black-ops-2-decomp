@@ -20,6 +20,13 @@ void Sys_EnterCriticalSection(CriticalSection critSect)
 	EnterCriticalSection(&s_criticalSection[critSect]);
 }
 
+// 00792370  universal/win_common.cpp:495 (inlined in the Store build)
+bool Sys_TryEnterCriticalSection(CriticalSection critSect)
+{
+	bcassert_at(496, critSect, CRITSECT_COUNT);
+	return TryEnterCriticalSection(&s_criticalSection[critSect]) != 0;
+}
+
 // 007923C0  universal/win_common.cpp:501 (inlined in the Store build)
 void Sys_LeaveCriticalSection(CriticalSection critSect)
 {

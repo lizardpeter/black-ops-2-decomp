@@ -246,3 +246,7 @@ CoDMPServer_PC	00778350	matches	src/universal/dvar.cpp	Dvar_SetInt; tests/differ
 CoDMPServer_PC	006DFD10	matches	src/qcommon/threads.cpp	Sys_SetValue; tests/differential/test_win_common.py
 CoDMPServer_PC	006DFD40	matches	src/qcommon/threads.cpp	Sys_GetValue; tests/differential/test_win_common.py
 t6mp_msstore	140736CD0	matches	src/gfx_d3d/rb_backend.cpp	RB_RenderThread (Store only; inlines Sys_GetValue, Sys_Enter/LeaveCriticalSection, Sys_SetWin32QuitEvent and the hand-off's render-thread side); tests/differential/test_rb_backend.py
+t6mp_msstore	1403A4010	matches	src/qcommon/common.cpp	Com_Frame_Try_Block_Function, the Store's client frame (inlines Sys_Milliseconds, Sys_TryEnterCriticalSection, GPad_StopRumbles, Com_LocalClient_GetControllerIndex); tests/differential/test_com_frame.py. The server's (dedicated) 006BF540 is a different body, not reconstructed yet
+CoDMPServer_PC	0079D5D0	matches	src/win32/win_shared.cpp	Sys_Milliseconds; tests/differential/test_win_common.py
+CoDMPServer_PC	00792370	matches	src/universal/win_common.cpp	Sys_TryEnterCriticalSection; tests/differential/test_win_common.py
+CoDMPServer_PC	00797250	matches	src/win32/win_gamepad.cpp	GPad_StopRumbles; tests/differential/test_win_gamepad.py

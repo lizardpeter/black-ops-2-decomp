@@ -183,8 +183,18 @@ def import_slots(pe):
     """{import name: IAT slot va} of the exe: the Store build links the CRT dynamically."""
     import pefile
     pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_IMPORT"]])
-    return {imp.name.decode(): imp.address for d in getattr(pe, "DIRECTORY_ENTRY_IMPORT", [])
-            for imp in d.imports if imp.name}
+    out = {}
+    for d in getattr(pe, "DIRECTORY_ENTRY_IMPORT", []):
+        for imp in d.imports:
+            name = imp.name.decode() if imp.name else BY_ORDINAL.get((d.dll.decode().lower(), imp.ordinal))
+            if name:
+                out[name] = imp.address
+    return out
+
+
+# imports by ordinal, named (the exes import XInput by ordinal only)
+BY_ORDINAL = {(dll, ordinal): name for dll in ("xinput1_3.dll", "xinput1_4.dll")
+              for ordinal, name in ((2, "XInputGetState"), (3, "XInputSetState"), (4, "XInputGetCapabilities"))}
 
 
 def hybrid_entry(exe_base):

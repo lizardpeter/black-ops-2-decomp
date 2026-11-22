@@ -65,3 +65,46 @@ CASES += [
     {"name": "Sys_SetValue", "ret": "void", "builds": SERVER,
      "inputs": [{"args": [i, v], "setup": values(TABLE)} for i in range(len(TABLE)) for v in (0, 0xABCDEF01)]},
 ]
+
+
+# -- Sys_TryEnterCriticalSection: TryEnterCriticalSection logs its argument and returns the scripted result
+TRY = {}
+
+
+def try_enter(m, mu):
+    logged(0x7E)(m, mu)
+    mu.reg_write(x86.UC_X86_REG_EAX, TRY["result"])
+
+
+def try_result(v):
+    def run(w):
+        TRY["result"] = v
+    return run
+
+
+# -- Sys_Milliseconds: timeGetTime returns a scripted clock that steps by 3 each call
+CLOCK = {}
+
+
+def time_get_time(m, mu):
+    CLOCK["now"] = (CLOCK["now"] + 3) & 0xFFFFFFFF
+    mu.reg_write(x86.UC_X86_REG_EAX, CLOCK["now"])
+
+
+def clock(now, base, initialized):
+    def run(w):
+        CLOCK["now"] = now
+        w.write(0x07ACCFC0, struct.pack("<i", base))         # sys_timeBase
+        w.write(0x07ACCFC8, struct.pack("<i", initialized))  # Sys_Milliseconds' initialized
+    return run
+
+
+CASES += [
+    {"name": "Sys_TryEnterCriticalSection", "ret": "bool", "builds": SERVER,
+     "imports": dict(IMPORTS, **{"kernel32.dll!TryEnterCriticalSection": (try_enter, 1)}), **ASSERT,
+     "inputs": [{"args": [s], "setup": try_result(r)} for s in SECTIONS for r in (0, 1, 2)]},
+    {"name": "Sys_Milliseconds", "ret": "int", "builds": SERVER,
+     "imports": {"winmm.dll!timeGetTime": (time_get_time, 0)},
+     "inputs": [{"args": [], "setup": clock(now, base, init)} for now in (0, 100, 0xFFFFFFF0, 0x7FFFFFFF)
+                for base in (0, 50, -10, 0x7FFFFFFF) for init in (0, 1)]},
+]

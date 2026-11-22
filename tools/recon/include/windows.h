@@ -195,6 +195,11 @@ typedef struct _RTL_CRITICAL_SECTION
 } CRITICAL_SECTION, *LPCRITICAL_SECTION;
 WINBASEAPI void WINAPI EnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
 WINBASEAPI void WINAPI LeaveCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
+WINBASEAPI BOOL WINAPI TryEnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
+extern "C" long _InterlockedIncrement(long volatile *addend);
+extern "C" long _InterlockedDecrement(long volatile *addend);
+#define InterlockedIncrement _InterlockedIncrement
+#define InterlockedDecrement _InterlockedDecrement
 WINUSERAPI BOOL WINAPI RegisterRawInputDevices(const RAWINPUTDEVICE *pRawInputDevices, UINT uiNumDevices,
                                                UINT cbSize);
 WINUSERAPI UINT WINAPI GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, void *pData, UINT *pcbSize,
@@ -396,3 +401,12 @@ typedef struct _GUID
 	unsigned short Data3;
 	unsigned char Data4[8];
 } GUID, IID;
+
+// XInput (XINPUT1_3 on the server, XINPUT1_4 in the Store build; both import it by ordinal: 2 XInputGetState,
+// 3 XInputSetState, 4 XInputGetCapabilities, which tools/build_recon.py maps to the names)
+typedef struct _XINPUT_VIBRATION
+{
+	unsigned short wLeftMotorSpeed;
+	unsigned short wRightMotorSpeed;
+} XINPUT_VIBRATION;
+extern "C" __declspec(dllimport) DWORD WINAPI XInputSetState(DWORD dwUserIndex, XINPUT_VIBRATION *pVibration);
