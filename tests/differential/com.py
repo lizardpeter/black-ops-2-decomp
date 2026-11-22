@@ -54,11 +54,13 @@ class Call:
         """Create an object of `kind` and store its pointer through pointer argument i."""
         va = self.model.new(kind, self.mu)
         if self.args[i]:
-            self.mu.mem_write(self.args[i], struct.pack("<Q" if self.model.machine.x64 else "<I", va))
+            self.write(self.args[i], struct.pack("<Q" if self.model.machine.x64 else "<I", va))
         return va
 
     def write(self, va, data):
-        self.mu.mem_write(va, data)
+        """A write through an out parameter: the method's effect on the program, journaled and compared (the
+        parameter is often a global, e.g. &dx.device)."""
+        self.model.machine.program_write(va, data)
 
 
 class ComModel:

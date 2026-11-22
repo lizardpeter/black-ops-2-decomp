@@ -30,10 +30,12 @@ struct GfxWindowTarget
 
 // The D3D globals (0x37B80 bytes on the server: the PDB's larger DxGlobals, with the 512-entry display-mode tables;
 // pdb/types.h has the smaller one, see pdb/type-variants.txt); only what reconstructed code reads, at the server's
-// offsets (x86) and the Store revision's (x64). The Store's dx is at 1427F1D80: device, context, vendorId and the
-// NVIDIA stereo fields where an x64 layout puts them; needsShaderWarming at +0x488, and the block from
-// resolutionCallback to swapChain at +0x3C7B0 ..., with the server's spacing inside it.
+// offsets (x86) and the Store revision's (x64). The Store's dx is at 1427F1D80: the fields up to nvStereoHandle where an
+// x64 layout puts them; txaaCtx at +0x80 (64-byte aligned there), so adapterIndex at +0x480 and needsShaderWarming
+// at +0x488; the block from resolutionCallback to swapChain at +0x3C7B0 ..., with the server's spacing inside it.
 typedef GfxWindowTarget GfxWindowTargets[1];
+typedef ID3D11Buffer *GfxConstBuffers[4];
+struct TxaaCtxDX { unsigned char opaque[0x400]; };  // NVIDIA TXAA's context (TxaaOpenDX fills it)
 typedef void (*GfxResolutionCallback)(bool);
 #define T6_DX_FIELD(type, name, x86, x64) \
 	struct { unsigned char pad[sizeof(void *) == 8 ? (x64) : (x86)]; type value; } name
@@ -41,9 +43,20 @@ struct DxGlobals
 {
 	union
 	{
+	T6_DX_FIELD(ID3D11Device *, device, 0x4, 0x8);
 	T6_DX_FIELD(ID3D11DeviceContext *, context, 0x8, 0x10);
+	T6_DX_FIELD(GfxConstBuffers, constBuffer, 0xC, 0x18);
+	T6_DX_FIELD(unsigned long, vendorId, 0x1C, 0x38);
+	T6_DX_FIELD(bool, adapterNativeIsValid, 0x20, 0x3C);
+	T6_DX_FIELD(int, adapterNativeWidth, 0x24, 0x40);
+	T6_DX_FIELD(int, adapterNativeHeight, 0x28, 0x44);
+	T6_DX_FIELD(int, adapterFullscreenWidth, 0x2C, 0x48);
+	T6_DX_FIELD(int, adapterFullscreenHeight, 0x30, 0x4C);
+	T6_DX_FIELD(bool, nvInitialized, 0x34, 0x50);
 	T6_DX_FIELD(bool, nvStereoActivated, 0x35, 0x51);
 	T6_DX_FIELD(void *, nvStereoHandle, 0x38, 0x58);
+	T6_DX_FIELD(TxaaCtxDX, txaaCtx, 0x40, 0x80);
+	T6_DX_FIELD(int, adapterIndex, 0x440, 0x480);
 	T6_DX_FIELD(bool, needsShaderWarming, 0x448, 0x488);
 	T6_DX_FIELD(GfxResolutionCallback, resolutionCallback, 0x37AF4, 0x3C7B0);
 	T6_DX_FIELD(unsigned int, multiSampleType, 0x37AF8, 0x3C7B8);

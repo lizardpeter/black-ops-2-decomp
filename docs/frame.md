@@ -119,9 +119,16 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
 1. **The swap chain description** (14071E360, no server counterpart: the server's renderer has no device code).
    Enhanced: `DXGI_SWAP_EFFECT_FLIP_DISCARD`, `DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING` when supported,
    `DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT`. One description serves both device paths (D3D11 and NVAPI).
-2. **Device creation** (14071FEA0): after creation, `SetMaximumFrameLatency(1)` and the swap chain's waitable object
+2. **Device creation** (`R_CreateDeviceInternal` 14071FEA0, called by 1407203B0 with the window, the description
+   and the window parms): after creation, `SetMaximumFrameLatency(1)` and the swap chain's waitable object
    (IDXGISwapChain2); falling back to the original swap chain where the system refuses the flip model, as Ghosts
-   P0003 does.
+   P0003 does. Rebuilt and verified (`src/gfx_d3d/r_init.cpp`, `tests/differential/test_r_init.py`). It creates
+   the device and swap chain in one call: NVAPI's `NvAPI_D3D11_CreateDeviceAndSwapChain` on NVIDIA (which also opens
+   stereo and TXAA), `D3D11CreateDeviceAndSwapChain` otherwise, both on the default adapter (B0021) with feature
+   levels 11_0, 10_1, 10_0; then `MakeWindowAssociation(hwnd, 7)` (DXGI handles neither Alt+Enter nor the window),
+   the native resolution from the swap chain's output, exclusive fullscreen through `R_SetFullscreenOutput`
+   (140720E00) when asked, and four constant buffers. The enhanced swap chain has to come out of both creation
+   paths.
 3. **The resize and fullscreen paths** (`ResizeBuffers`, vtable +0x68, at 14072F5A7, 1407EDEBB, 1407F4B9B;
    `SetFullscreenState` at 140720EB0 and others): the flags must match the swap chain's.
 4. **`RB_SwapBuffers`** (140735BC0): `DXGI_PRESENT_ALLOW_TEARING` when v-sync is off in a window; the flip model

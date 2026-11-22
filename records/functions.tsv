@@ -239,3 +239,7 @@ CoDMPServer_PC	006DFD60	matches	src/qcommon/threads.cpp	Sys_SetWin32QuitEvent; t
 CoDMPServer_PC	00A8E080	matches	src/gfx_d3d/r_state.cpp	R_DX11_ReleaseSamplerStates; tests/differential/test_r_state.py
 CoDMPServer_PC	00773C10	matches	src/universal/dvar.cpp	Dvar_HasLatchedValue; tests/differential/test_dvar.py
 CoDMPServer_PC	00776A70	matches	src/universal/dvar.cpp	Dvar_MakeLatchedValueCurrent; tests/differential/test_dvar.py
+t6mp_msstore	14071FEA0	matches	src/gfx_d3d/r_init.cpp	R_CreateDeviceInternal: the device, context and swap chain (Store only; inlines Dvar_SetBool / Dvar_SetBoolFromSource and Dvar_SetInt); tests/differential/test_r_init.py
+CoDMPServer_PC	007776B0	matches	src/universal/dvar.cpp	Dvar_SetBoolFromSource; tests/differential/test_dvar.py
+CoDMPServer_PC	00778330	matches	src/universal/dvar.cpp	Dvar_SetBool; tests/differential/test_dvar.py
+CoDMPServer_PC	00778350	matches	src/universal/dvar.cpp	Dvar_SetInt; tests/differential/test_dvar.py

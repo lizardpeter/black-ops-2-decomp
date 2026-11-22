@@ -154,6 +154,11 @@ def without_asserts(spec):
     return {k: v for k, v in spec.items() if k != "Assert_MyHandler"}
 
 
+def first_diff(a, b):
+    """The index of the first call where two call lists differ (the shorter one's length if one is a prefix)."""
+    return next((i for i, (x, y) in enumerate(zip(a, b)) if x != y), min(len(a), len(b)))
+
+
 def main():
     build = sys.argv[sys.argv.index("--build") + 1] if "--build" in sys.argv else symbols.reference_build()
     only = sys.argv[sys.argv.index("-k") + 1] if "-k" in sys.argv else None
@@ -235,8 +240,9 @@ def main():
                               "(address, original, recon)" if diff else "")
                            + "".join(f"\n       buffer {i}: original {a.hex()} recon {b.hex()}"
                                      for i, (a, b) in enumerate(zip(want[1], got[1])) if a != b)
-                           + (f"\n       calls: original {want[3][:4]!r}\n              recon    {got_calls[:4]!r}"
-                              if want[3] != got_calls else ""))
+                           + (f"\n       calls from #{first_diff(want[3], got_calls)}: original "
+                              f"{want[3][first_diff(want[3], got_calls):][:4]!r}\n              recon    "
+                              f"{got_calls[first_diff(want[3], got_calls):][:4]!r}" if want[3] != got_calls else ""))
                 break
         if verdict == "pass" and not used:
             verdict = f"untestable: the original faults on all {len(case['inputs'])} inputs"

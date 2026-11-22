@@ -1,4 +1,4 @@
-// <dxgi.h>: the parts the reconstruction uses (swap chain description), as the Windows SDK lays them out.
+// <dxgi.h>: the parts the reconstruction uses (swap chain and output descriptions), as the Windows SDK lays them out.
 #pragma once
 
 #include <windows.h>
@@ -51,7 +51,19 @@ typedef struct DXGI_SWAP_CHAIN_DESC
 	UINT Flags;
 } DXGI_SWAP_CHAIN_DESC;
 
+typedef struct DXGI_OUTPUT_DESC
+{
+	wchar_t DeviceName[32];
+	RECT DesktopCoordinates;
+	BOOL AttachedToDesktop;
+	UINT Rotation;  // DXGI_MODE_ROTATION
+	HMONITOR Monitor;
+} DXGI_OUTPUT_DESC;
+
 #define DXGI_USAGE_RENDER_TARGET_OUTPUT 0x00000020UL
+#define DXGI_MWA_NO_WINDOW_CHANGES 1
+#define DXGI_MWA_NO_ALT_ENTER 2
+#define DXGI_MWA_NO_PRINT_SCREEN 4
 #define DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH 2
 #define DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT 64
 #define DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING 2048

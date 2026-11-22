@@ -101,6 +101,10 @@ enum DvarSetSource
 int Dvar_ValuesEqual(dvarType_t type, DvarValue val0, DvarValue val1);
 void Dvar_SetVariant(dvar_t *dvar, DvarValue value, DvarSetSource source);
 bool Dvar_HasLatchedValue(const dvar_t *dvar);
+void Dvar_SetBoolFromSource(const dvar_t *dvar, bool value, DvarSetSource source);
+void Dvar_SetIntFromSource(const dvar_t *dvar, int value, DvarSetSource source);
+void Dvar_SetBool(const dvar_t *dvar, bool value);
+void Dvar_SetInt(const dvar_t *dvar, int value);
 void Dvar_MakeLatchedValueCurrent(const dvar_t *dvar);
 bool Dvar_StringToBool(const char *string);
 int Dvar_StringToInt(const char *string);

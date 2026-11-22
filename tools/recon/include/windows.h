@@ -367,3 +367,26 @@ WINMMAPI MMRESULT WINAPI mixerGetControlDetailsA(HMIXEROBJ hmxobj, LPMIXERCONTRO
 WINMMAPI MMRESULT WINAPI mixerSetControlDetails(HMIXEROBJ hmxobj, LPMIXERCONTROLDETAILS pmxcd, DWORD fdwDetails);
 
 WINUSERAPI HWND WINAPI GetDesktopWindow(void);
+
+// Monitors (gfx_d3d/r_init.cpp: the native resolution)
+struct HMONITOR__ { int unused; };
+typedef struct HMONITOR__ *HMONITOR;
+typedef struct tagMONITORINFO
+{
+	DWORD cbSize;
+	RECT rcMonitor;
+	RECT rcWork;
+	DWORD dwFlags;
+} MONITORINFO, *LPMONITORINFO;
+#define SM_CXSCREEN 0
+#define SM_CYSCREEN 1
+WINUSERAPI int WINAPI GetSystemMetrics(int nIndex);
+WINUSERAPI BOOL WINAPI GetMonitorInfoA(HMONITOR hMonitor, LPMONITORINFO lpmi);
+
+typedef struct _GUID
+{
+	unsigned long Data1;
+	unsigned short Data2;
+	unsigned short Data3;
+	unsigned char Data4[8];
+} GUID, IID;

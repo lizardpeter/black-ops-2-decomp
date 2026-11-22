@@ -5,14 +5,14 @@ BackgroundsResultCache: 2 layouts, sizeof 1044, 1120
     0x00008  use: unsigned
     0x0000C  include: unsigned short
     0x00010  count: int
-    0x00014  ids: base 0x0011[1024 bytes]
+    0x00014  ids: short[1024 bytes]
   sizeof 1120 (0x460)
     0x00000  controllerIndex: ControllerIndex_t
     0x00004  flush: unsigned
     0x00008  use: unsigned
     0x0000C  include: unsigned short
     0x00010  count: int
-    0x00014  ids: base 0x0011[1100 bytes]
+    0x00014  ids: short[1100 bytes]
 
 ConnectionLog: 2 layouts, sizeof 14360, 14368
   sizeof 14360 (0x3818)
@@ -34,18 +34,18 @@ ConnectionLog: 2 layouts, sizeof 14360, 14368
 ContentPackList: 2 layouts, sizeof 276, 280
   sizeof 276 (0x114)
     0x00000  contentPack: int
-    0x00004  filename: base 0x0070[256 bytes]
-    0x00104  drivename: base 0x0070[12 bytes]
+    0x00004  filename: char[256 bytes]
+    0x00104  drivename: char[12 bytes]
     0x00110  mounted: bool
-    0x00111  controllers: base 0x0030[1 bytes]
+    0x00111  controllers: bool[1 bytes]
   sizeof 280 (0x118)
     0x00000  contentPack: int
-    0x00004  filename: base 0x0070[256 bytes]
-    0x00104  drivename: base 0x0070[12 bytes]
+    0x00004  filename: char[256 bytes]
+    0x00104  drivename: char[12 bytes]
     0x00110  licenseBits: unsigned
     0x00114  mounted: bool
     0x00115  isAuthorizedToUse: bool
-    0x00116  controllers: base 0x0030[1 bytes]
+    0x00116  controllers: bool[1 bytes]
 
 DxGlobals: 2 layouts, sizeof 115584, 228224
   sizeof 115584 (0x1C380)
@@ -73,12 +73,12 @@ DxGlobals: 2 layouts, sizeof 115584, 228224
     0x00450  depthStencilFormat: DXGI_FORMAT
     0x00454  cmdBuf: DxCmdBuf[1584 bytes]
     0x00A84  monitorCount: unsigned
-    0x00A88  displayModeCount: base 0x0075[32 bytes]
+    0x00A88  displayModeCount: unsigned[32 bytes]
     0x00AA8  displayModes: DXGI_MODE_DESC[7168 bytes][57344 bytes]
-    0x0EAA8  resolutionNameTable: base 0x0070*[1028 bytes]
-    0x0EEAC  modeText: base 0x0070[5120 bytes]
-    0x102AC  monitorResolutionNameTable: base 0x0070*[1028 bytes][8224 bytes]
-    0x122CC  monitorModeText: base 0x0070[40960 bytes]
+    0x0EAA8  resolutionNameTable: char*[1028 bytes]
+    0x0EEAC  modeText: char[5120 bytes]
+    0x102AC  monitorResolutionNameTable: char*[1028 bytes][8224 bytes]
+    0x122CC  monitorModeText: char[40960 bytes]
     0x1C2CC  fencePool: ID3D11Query*[32 bytes]
     0x1C2EC  nextFence: unsigned
     0x1C2F0  gpuCount: int
@@ -124,12 +124,12 @@ DxGlobals: 2 layouts, sizeof 115584, 228224
     0x00450  depthStencilFormat: DXGI_FORMAT
     0x00454  cmdBuf: DxCmdBuf[1584 bytes]
     0x00A84  monitorCount: unsigned
-    0x00A88  displayModeCount: base 0x0075[32 bytes]
+    0x00A88  displayModeCount: unsigned[32 bytes]
     0x00AA8  displayModes: DXGI_MODE_DESC[14336 bytes][114688 bytes]
-    0x1CAA8  resolutionNameTable: base 0x0070*[2052 bytes]
-    0x1D2AC  modeText: base 0x0070[10240 bytes]
-    0x1FAAC  monitorResolutionNameTable: base 0x0070*[2052 bytes][16416 bytes]
-    0x23ACC  monitorModeText: base 0x0070[81920 bytes]
+    0x1CAA8  resolutionNameTable: char*[2052 bytes]
+    0x1D2AC  modeText: char[10240 bytes]
+    0x1FAAC  monitorResolutionNameTable: char*[2052 bytes][16416 bytes]
+    0x23ACC  monitorModeText: char[81920 bytes]
     0x37ACC  fencePool: ID3D11Query*[32 bytes]
     0x37AEC  nextFence: unsigned
     0x37AF0  gpuCount: int
@@ -154,7 +154,7 @@ DxGlobals: 2 layouts, sizeof 115584, 228224
 EmblemBackground: 2 layouts, sizeof 32, 36
   sizeof 32 (0x20)
     0x00000  material: Material*
-    0x00004  description: base 0x0070*
+    0x00004  description: char*
     0x00008  cost: int
     0x0000C  unlockLevel: int
     0x00010  unlockPLevel: int
@@ -163,7 +163,7 @@ EmblemBackground: 2 layouts, sizeof 32, 36
     0x0001C  bgCategory: unsigned short
   sizeof 36 (0x24)
     0x00000  material: Material*
-    0x00004  description: base 0x0070*
+    0x00004  description: char*
     0x00008  cost: int
     0x0000C  unlockLevel: int
     0x00010  unlockPLevel: int
@@ -212,7 +212,7 @@ EmblemSet: 3 layouts, sizeof 60, 55072, 58564
     0x09318  backgroundCount: int
     0x0931C  backgrounds: EmblemBackground[16384 bytes]
     0x0D31C  backgroundLookupCount: int
-    0x0D320  backgroundLookup: base 0x0011[1024 bytes]
+    0x0D320  backgroundLookup: short[1024 bytes]
   sizeof 58564 (0xE4C4): globals emblemData
     0x00000  colorCount: int
     0x00004  layerCount: int
@@ -228,7 +228,7 @@ EmblemSet: 3 layouts, sizeof 60, 55072, 58564
     0x09318  backgroundCount: int
     0x0931C  backgrounds: EmblemBackground[19800 bytes]
     0x0E074  backgroundLookupCount: int
-    0x0E078  backgroundLookup: base 0x0011[1100 bytes]
+    0x0E078  backgroundLookup: short[1100 bytes]
 
 FriendsGlob: 2 layouts, sizeof 23208, 69608
   sizeof 23208 (0x5AA8)
@@ -261,28 +261,28 @@ IPakWorkData: 3 layouts, sizeof 140736, 141152, 141280
     0x00004  indexReadOffset: int
     0x00008  activeBuffer: int
     0x0000C  currentEntry: unsigned
-    0x00010  imageParts: base 0x0021[9632 bytes]
+    0x00010  imageParts: unsigned short[9632 bytes]
     0x025B0  indexBuffer: IPakIndexEntry[65536 bytes][131072 bytes]
-    0x225B0  indexBufferOffset: base 0x0074[8 bytes]
-    0x225B8  indexBufferState: base 0x0074[8 bytes]
+    0x225B0  indexBufferOffset: int[8 bytes]
+    0x225B8  indexBufferState: int[8 bytes]
   sizeof 141152 (0x22760)
     0x00000  pak: IPakLoadedPackfile*
     0x00004  indexReadOffset: int
     0x00008  activeBuffer: int
     0x0000C  currentEntry: unsigned
-    0x00010  imageParts: base 0x0021[10048 bytes]
+    0x00010  imageParts: unsigned short[10048 bytes]
     0x02750  indexBuffer: IPakIndexEntry[65536 bytes][131072 bytes]
-    0x22750  indexBufferOffset: base 0x0074[8 bytes]
-    0x22758  indexBufferState: base 0x0074[8 bytes]
+    0x22750  indexBufferOffset: int[8 bytes]
+    0x22758  indexBufferState: int[8 bytes]
   sizeof 141280 (0x227E0)
     0x00000  pak: IPakLoadedPackfile*
     0x00004  indexReadOffset: int
     0x00008  activeBuffer: int
     0x0000C  currentEntry: unsigned
-    0x00010  imageParts: base 0x0021[10176 bytes]
+    0x00010  imageParts: unsigned short[10176 bytes]
     0x027D0  indexBuffer: IPakIndexEntry[65536 bytes][131072 bytes]
-    0x227D0  indexBufferOffset: base 0x0074[8 bytes]
-    0x227D8  indexBufferState: base 0x0074[8 bytes]
+    0x227D0  indexBufferOffset: int[8 bytes]
+    0x227D8  indexBufferState: int[8 bytes]
 
 ImageList: 3 layouts, sizeof 19268, 20100, 20356
   sizeof 19268 (0x4B44)
@@ -300,13 +300,13 @@ LbGlob: 2 layouts, sizeof 57040, 89040
     0x00000  writeLeaderboards: LeaderboardDef*[128 bytes]
     0x00080  writeCount: int
     0x00088  leaderboard: Leaderboard
-    0x0DEA8  feederText: base 0x0070[32 bytes]
+    0x0DEA8  feederText: char[32 bytes]
     0x0DEC8  isWritingInUse: bool
   sizeof 89040 (0x15BD0)
     0x00000  writeLeaderboards: LeaderboardDef*[128 bytes]
     0x00080  writeCount: int
     0x00088  leaderboard: Leaderboard
-    0x15BA8  feederText: base 0x0070[32 bytes]
+    0x15BA8  feederText: char[32 bytes]
     0x15BC8  isWritingInUse: bool
 
 Leaderboard: 2 layouts, sizeof 56864, 88864
@@ -342,10 +342,10 @@ Leaderboard: 2 layouts, sizeof 56864, 88864
 League: 2 layouts, sizeof 408, 412
   sizeof 408 (0x198)
     0x00000  id: int
-    0x00004  name: base 0x0070*
-    0x00008  description: base 0x0070*
-    0x0000C  icon: base 0x0070*
-    0x00010  news: base 0x0070*
+    0x00004  name: char*
+    0x00008  description: char*
+    0x0000C  icon: char*
+    0x00010  news: char*
     0x00014  teamsAllowed: bool
     0x00015  randomsAllowed: bool
     0x00018  teamSize: int
@@ -359,15 +359,15 @@ League: 2 layouts, sizeof 408, 412
     0x00038  eloScale: float
     0x0003C  eloK: float
     0x00040  eloN: float
-    0x00044  eloAwards: base 0x0074[80 bytes]
+    0x00044  eloAwards: int[80 bytes]
     0x00094  numSeasons: int
     0x00098  seasons: LeagueSeason[256 bytes]
   sizeof 412 (0x19C)
     0x00000  id: int
-    0x00004  name: base 0x0070*
-    0x00008  description: base 0x0070*
-    0x0000C  icon: base 0x0070*
-    0x00010  news: base 0x0070*
+    0x00004  name: char*
+    0x00008  description: char*
+    0x0000C  icon: char*
+    0x00010  news: char*
     0x00014  teamsAllowed: bool
     0x00015  randomsAllowed: bool
     0x00018  teamSize: int
@@ -382,7 +382,7 @@ League: 2 layouts, sizeof 408, 412
     0x0003C  eloScale: float
     0x00040  eloK: float
     0x00044  eloN: float
-    0x00048  eloAwards: base 0x0074[80 bytes]
+    0x00048  eloAwards: int[80 bytes]
     0x00098  numSeasons: int
     0x0009C  seasons: LeagueSeason[256 bytes]
 
@@ -471,8 +471,8 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x047A0  qosPercent: float
     0x047A4  qosSuccesses: int
     0x047A8  qosTotal: int
-    0x047AC  localPlayerFlags: base 0x0074[4 bytes]
-    0x047B0  lastMemberUpdateTime: base 0x0074[4 bytes]
+    0x047AC  localPlayerFlags: int[4 bytes]
+    0x047B0  lastMemberUpdateTime: int[4 bytes]
     0x047B4  areWeHost: int
     0x047B8  joiningAnotherParty: int
     0x047BC  inParty: int
@@ -494,7 +494,7 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x047F8  mapPackSearchFlags: int
     0x047FC  mapPackFlags: int
     0x04800  leagueTeamID: unsigned __int64
-    0x04808  leagueTeamName: base 0x0070[32 bytes]
+    0x04808  leagueTeamName: char[32 bytes]
     0x04828  lastPartyStateTime: int
     0x0482C  gameStartTime: int
     0x04830  interEndTime: int
@@ -506,9 +506,9 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x04848  partyToNotify: PartyData_s*
     0x0484C  registeredWithArbitration: bool
     0x0484D  rejoining: bool
-    0x0484E  stateMsgBuf: base 0x0020[7200 bytes]
+    0x0484E  stateMsgBuf: unsigned char[7200 bytes]
     0x06470  partyStatePackets: PartyStatePacket_s[96 bytes]
-    0x064D0  lastEntries: base 0x0020[8 bytes]
+    0x064D0  lastEntries: unsigned char[8 bytes]
     0x064D8  currentEntry: int
     0x064DC  lastQosEntry: int
     0x064E0  qosDataReady: bool
@@ -538,9 +538,9 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x047A4  qosPercent: float
     0x047A8  qosSuccesses: int
     0x047AC  qosTotal: int
-    0x047B0  localPlayerFlags: base 0x0074[4 bytes]
-    0x047B4  lastMemberUpdateTime: base 0x0074[4 bytes]
-    0x047B8  memberUpdateInterval: base 0x0074[4 bytes]
+    0x047B0  localPlayerFlags: int[4 bytes]
+    0x047B4  lastMemberUpdateTime: int[4 bytes]
+    0x047B8  memberUpdateInterval: int[4 bytes]
     0x047BC  areWeHost: int
     0x047C0  joiningAnotherParty: int
     0x047C4  inParty: int
@@ -562,7 +562,7 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x04800  mapPackSearchFlags: int
     0x04804  mapPackFlags: int
     0x04808  leagueTeamID: unsigned __int64
-    0x04810  leagueTeamName: base 0x0070[32 bytes]
+    0x04810  leagueTeamName: char[32 bytes]
     0x04830  lastPartyStateTime: int
     0x04834  gameStartTime: int
     0x04838  interEndTime: int
@@ -574,9 +574,9 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x04850  partyToNotify: PartyData_s*
     0x04854  registeredWithArbitration: bool
     0x04855  rejoining: bool
-    0x04856  stateMsgBuf: base 0x0020[7200 bytes]
+    0x04856  stateMsgBuf: unsigned char[7200 bytes]
     0x06478  partyStatePackets: PartyStatePacket_s[96 bytes]
-    0x064D8  lastEntries: base 0x0020[8 bytes]
+    0x064D8  lastEntries: unsigned char[8 bytes]
     0x064E0  currentEntry: int
     0x064E4  lastQosEntry: int
     0x064E8  qosDataReady: bool
@@ -607,9 +607,9 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x094D4  qosPercent: float
     0x094D8  qosSuccesses: int
     0x094DC  qosTotal: int
-    0x094E0  localPlayerFlags: base 0x0074[4 bytes]
-    0x094E4  lastMemberUpdateTime: base 0x0074[4 bytes]
-    0x094E8  memberUpdateInterval: base 0x0074[4 bytes]
+    0x094E0  localPlayerFlags: int[4 bytes]
+    0x094E4  lastMemberUpdateTime: int[4 bytes]
+    0x094E8  memberUpdateInterval: int[4 bytes]
     0x094EC  areWeHost: int
     0x094F0  joiningAnotherParty: int
     0x094F4  inParty: int
@@ -631,7 +631,7 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x09530  mapPackSearchFlags: int
     0x09534  mapPackFlags: int
     0x09538  leagueTeamID: unsigned __int64
-    0x09540  leagueTeamName: base 0x0070[32 bytes]
+    0x09540  leagueTeamName: char[32 bytes]
     0x09560  lastPartyStateTime: int
     0x09564  gameStartTime: int
     0x09568  interEndTime: int
@@ -643,9 +643,9 @@ PartyData_s: 3 layouts, sizeof 25856, 25864, 45624
     0x09580  partyToNotify: PartyData_s*
     0x09584  registeredWithArbitration: bool
     0x09585  rejoining: bool
-    0x09586  stateMsgBuf: base 0x0020[7200 bytes]
+    0x09586  stateMsgBuf: unsigned char[7200 bytes]
     0x0B1A8  partyStatePackets: PartyStatePacket_s[96 bytes]
-    0x0B208  lastEntries: base 0x0020[8 bytes]
+    0x0B208  lastEntries: unsigned char[8 bytes]
     0x0B210  currentEntry: int
     0x0B214  lastQosEntry: int
     0x0B218  qosDataReady: bool
@@ -755,8 +755,8 @@ PartyProber: 3 layouts, sizeof 6240, 7464, 8280
     0x0161C  echoChallenge: int
     0x01620  echoHost: PartyInfo
     0x01690  echoHostNum: int
-    0x01694  clientDisagreeTime: base 0x0074[72 bytes]
-    0x016DC  clientAgreeTime: base 0x0074[72 bytes]
+    0x01694  clientDisagreeTime: int[72 bytes]
+    0x016DC  clientAgreeTime: int[72 bytes]
     0x01724  clientPacketTime: int
     0x01728  clientWaitStart: int
     0x0172C  hostIndex: int
@@ -768,7 +768,7 @@ PartyProber: 3 layouts, sizeof 6240, 7464, 8280
     0x01754  packetRecvTime: int
     0x01758  packetSendTime: int
     0x0175C  retryCount: int
-    0x01760  errorMessage: base 0x0070[256 bytes]
+    0x01760  errorMessage: char[256 bytes]
   sizeof 7464 (0x1D28)
     0x00000  hosts: PartyInfo[6800 bytes]
     0x01A90  hostCount: int
@@ -785,8 +785,8 @@ PartyProber: 3 layouts, sizeof 6240, 7464, 8280
     0x01ACC  echoChallenge: int
     0x01AD0  echoHost: PartyInfo
     0x01B58  echoHostNum: int
-    0x01B5C  clientDisagreeTime: base 0x0074[72 bytes]
-    0x01BA4  clientAgreeTime: base 0x0074[72 bytes]
+    0x01B5C  clientDisagreeTime: int[72 bytes]
+    0x01BA4  clientAgreeTime: int[72 bytes]
     0x01BEC  clientPacketTime: int
     0x01BF0  clientWaitStart: int
     0x01BF4  hostIndex: int
@@ -798,7 +798,7 @@ PartyProber: 3 layouts, sizeof 6240, 7464, 8280
     0x01C1C  packetRecvTime: int
     0x01C20  packetSendTime: int
     0x01C24  retryCount: int
-    0x01C28  errorMessage: base 0x0070[256 bytes]
+    0x01C28  errorMessage: char[256 bytes]
   sizeof 8280 (0x2058): globals s_partyProber
     0x00000  hosts: PartyInfo[7600 bytes]
     0x01DB0  hostCount: int
@@ -815,8 +815,8 @@ PartyProber: 3 layouts, sizeof 6240, 7464, 8280
     0x01DEC  echoChallenge: int
     0x01DF0  echoHost: PartyInfo
     0x01E88  echoHostNum: int
-    0x01E8C  clientDisagreeTime: base 0x0074[72 bytes]
-    0x01ED4  clientAgreeTime: base 0x0074[72 bytes]
+    0x01E8C  clientDisagreeTime: int[72 bytes]
+    0x01ED4  clientAgreeTime: int[72 bytes]
     0x01F1C  clientPacketTime: int
     0x01F20  clientWaitStart: int
     0x01F24  hostIndex: int
@@ -828,11 +828,11 @@ PartyProber: 3 layouts, sizeof 6240, 7464, 8280
     0x01F4C  packetRecvTime: int
     0x01F50  packetSendTime: int
     0x01F54  retryCount: int
-    0x01F58  errorMessage: base 0x0070[256 bytes]
+    0x01F58  errorMessage: char[256 bytes]
 
 SpawnInfluencerPreset: 2 layouts, sizeof 60, 64
   sizeof 60 (0x3C)
-    0x00000  description: base 0x0070[32 bytes]
+    0x00000  description: char[32 bytes]
     0x00020  index: int
     0x00024  type: eInfluencerType
     0x00028  shape: eInfluencerShape
@@ -841,7 +841,7 @@ SpawnInfluencerPreset: 2 layouts, sizeof 60, 64
     0x00034  score: float
     0x00038  score_curve: eInfluencerScoreCurve
   sizeof 64 (0x40)
-    0x00000  description: base 0x0070[32 bytes]
+    0x00000  description: char[32 bytes]
     0x00020  index: int
     0x00024  type: eInfluencerType
     0x00028  shape: eInfluencerShape
@@ -869,8 +869,8 @@ SpawnSystem_t: 2 layouts, sizeof 287804, 288828
     0x18348  influencerInstanceCount: int
     0x1834C  clientData: SpawnClientData[792 bytes]
     0x18664  clientsPosArchive: SpawnClientPosData[432 bytes][7776 bytes]
-    0x1A4C4  demoClientBuffer: base 0x0020[10000 bytes][180000 bytes]
-    0x463E4  demoClientBufferPos: base 0x0074[72 bytes]
+    0x1A4C4  demoClientBuffer: unsigned char[10000 bytes][180000 bytes]
+    0x463E4  demoClientBufferPos: int[72 bytes]
     0x4642C  demoRecordingEnabled: bool
     0x46430  demoBytesWritten: int
     0x46434  lastSpawnPointId: int
@@ -892,8 +892,8 @@ SpawnSystem_t: 2 layouts, sizeof 287804, 288828
     0x18748  influencerInstanceCount: int
     0x1874C  clientData: SpawnClientData[792 bytes]
     0x18A64  clientsPosArchive: SpawnClientPosData[432 bytes][7776 bytes]
-    0x1A8C4  demoClientBuffer: base 0x0020[10000 bytes][180000 bytes]
-    0x467E4  demoClientBufferPos: base 0x0074[72 bytes]
+    0x1A8C4  demoClientBuffer: unsigned char[10000 bytes][180000 bytes]
+    0x467E4  demoClientBufferPos: int[72 bytes]
     0x4682C  demoRecordingEnabled: bool
     0x46830  demoBytesWritten: int
     0x46834  lastSpawnPointId: int
@@ -911,7 +911,7 @@ StatsLookup: 3 layouts, sizeof 51952, 51984, 69480
     0x00020  nameID: int
     0x00028  teamID: unsigned __int64
     0x00030  memberCount: int
-    0x00034  teamName: base 0x0070[65 bytes]
+    0x00034  teamName: char[65 bytes]
     0x00075  isPreSeason: bool
     0x00078  subdivision: bdLeagueSubdivisionResult
     0x000E0  stats: bdLeagueStatsInfo
@@ -935,7 +935,7 @@ StatsLookup: 3 layouts, sizeof 51952, 51984, 69480
     0x00020  nameID: int
     0x00028  teamID: unsigned __int64
     0x00030  memberCount: int
-    0x00034  teamName: base 0x0070[65 bytes]
+    0x00034  teamName: char[65 bytes]
     0x00075  isPreSeason: bool
     0x00078  subdivision: bdLeagueSubdivisionResult
     0x000E0  stats: bdLeagueStatsInfo
@@ -959,7 +959,7 @@ StatsLookup: 3 layouts, sizeof 51952, 51984, 69480
     0x00020  nameID: int
     0x00028  teamID: unsigned __int64
     0x00030  memberCount: int
-    0x00034  teamName: base 0x0070[65 bytes]
+    0x00034  teamName: char[65 bytes]
     0x00075  isPreSeason: bool
     0x00078  subdivision: bdLeagueSubdivisionResult
     0x000E0  stats: bdLeagueStatsInfo
@@ -986,18 +986,18 @@ UnifiedFriends: 2 layouts, sizeof 408, 1208
 
 XAnim_s: 2 layouts, sizeof 36, 40
   sizeof 36 (0x24)
-    0x00000  debugName: base 0x0070*
+    0x00000  debugName: char*
     0x00004  size: unsigned
     0x00008  paramSize: unsigned
     0x0000C  params: XAnimParam*
-    0x00010  debugAnimNames: base 0x0070**
+    0x00010  debugAnimNames: char**
     0x00014  entries: XAnimEntry[16 bytes]
   sizeof 40 (0x28)
-    0x00000  debugName: base 0x0070*
+    0x00000  debugName: char*
     0x00004  size: unsigned
     0x00008  paramSize: unsigned
     0x0000C  params: XAnimParam*
-    0x00010  debugAnimNames: base 0x0070**
+    0x00010  debugAnimNames: char**
     0x00014  wasLoggedIfMissing: bool*
     0x00018  entries: XAnimEntry[16 bytes]
 
@@ -1011,7 +1011,7 @@ bgs_t: 2 layouts, sizeof 77768, 77776
     0x00014  latestSnapshotTime: int
     0x00018  frametime: int
     0x0001C  anim_user: int
-    0x00020  proneTime: base 0x0074[72 bytes]
+    0x00020  proneTime: int[72 bytes]
     0x00068  GetXModel: function*
     0x0006C  CreateDObj: function*
     0x00070  AttachWeapon: function*
@@ -1039,7 +1039,7 @@ bgs_t: 2 layouts, sizeof 77768, 77776
     0x00014  latestSnapshotTime: int
     0x00018  frametime: int
     0x0001C  anim_user: int
-    0x00020  proneTime: base 0x0074[72 bytes]
+    0x00020  proneTime: int[72 bytes]
     0x00068  GetXModel: function*
     0x0006C  CreateDObj: function*
     0x00070  AttachWeapon: function*
@@ -1063,34 +1063,34 @@ bgs_t: 2 layouts, sizeof 77768, 77776
 
 categoryInfo: 2 layouts, sizeof 60, 64
   sizeof 60 (0x3C)
-    0x00000  internalName: base 0x0070*
-    0x00004  filter: base 0x0070*
-    0x00008  localizedName: base 0x0070*
-    0x0000C  description: base 0x0070*
-    0x00010  lockdescription: base 0x0070*
-    0x00014  iconName: base 0x0070*
+    0x00000  internalName: char*
+    0x00004  filter: char*
+    0x00008  localizedName: char*
+    0x0000C  description: char*
+    0x00010  lockdescription: char*
+    0x00014  iconName: char*
     0x00018  unlockXp: int
     0x0001C  unlockPLevel: int
     0x00020  finishedSoloRequired: bool
     0x00024  playlistCount: int
-    0x00028  rules: base 0x0070*
+    0x00028  rules: char*
     0x0002C  hideifmissingdlc: bool
     0x0002D  visible_profilevar: bool
     0x00030  visProfileVar: profile_setting
     0x00034  supercategory: int
     0x00038  requiredDLCMask: unsigned
   sizeof 64 (0x40)
-    0x00000  internalName: base 0x0070*
-    0x00004  filter: base 0x0070*
-    0x00008  localizedName: base 0x0070*
-    0x0000C  description: base 0x0070*
-    0x00010  lockdescription: base 0x0070*
-    0x00014  iconName: base 0x0070*
+    0x00000  internalName: char*
+    0x00004  filter: char*
+    0x00008  localizedName: char*
+    0x0000C  description: char*
+    0x00010  lockdescription: char*
+    0x00014  iconName: char*
     0x00018  unlockXp: int
     0x0001C  unlockPLevel: int
     0x00020  finishedSoloRequired: bool
     0x00024  playlistCount: int
-    0x00028  rules: base 0x0070*
+    0x00028  rules: char*
     0x0002C  hideifmissingdlc: bool
     0x0002D  directtostoreifmissingdlc: bool
     0x0002E  visible_profilevar: bool
@@ -1134,43 +1134,43 @@ cgMedia_t: 2 layouts, sizeof 5840, 5844
     0x004A4  bigDevFont: Font_s*
     0x004A8  extraBigDevFont: Font_s*
     0x004AC  inspectorFont: Font_s*
-    0x004B0  grenadeExplodeSound: base 0x0075[128 bytes]
-    0x00530  rifleGrenadeSound: base 0x0075[128 bytes]
-    0x005B0  rocketExplodeSound: base 0x0075[128 bytes]
-    0x00630  rocketExplodeXtremeSound: base 0x0075[128 bytes]
-    0x006B0  mortarShellExplodeSound: base 0x0075[128 bytes]
-    0x00730  tankShellExplodeSound: base 0x0075[128 bytes]
-    0x007B0  weaponImpactsTankArmorSound: base 0x0075[64 bytes]
-    0x007F0  weaponImpactsTankTreadSound: base 0x0075[64 bytes]
-    0x00830  bulletHitSmallSound: base 0x0075[128 bytes]
-    0x008B0  bulletHitLargeSound: base 0x0075[128 bytes]
-    0x00930  bulletHitAPSound: base 0x0075[128 bytes]
-    0x009B0  bulletHitXTremeSound: base 0x0075[128 bytes]
-    0x00A30  shotgunHitSound: base 0x0075[128 bytes]
-    0x00AB0  boltHitSound: base 0x0075[128 bytes]
-    0x00B30  bladeHitSound: base 0x0075[128 bytes]
-    0x00BB0  bulletExitSmallSound: base 0x0075[128 bytes]
-    0x00C30  bulletExitLargeSound: base 0x0075[128 bytes]
-    0x00CB0  bulletExitAPSound: base 0x0075[128 bytes]
-    0x00D30  bulletExitXTremeSound: base 0x0075[128 bytes]
-    0x00DB0  shotgunExitSound: base 0x0075[128 bytes]
-    0x00E30  boltExitSound: base 0x0075[128 bytes]
+    0x004B0  grenadeExplodeSound: unsigned[128 bytes]
+    0x00530  rifleGrenadeSound: unsigned[128 bytes]
+    0x005B0  rocketExplodeSound: unsigned[128 bytes]
+    0x00630  rocketExplodeXtremeSound: unsigned[128 bytes]
+    0x006B0  mortarShellExplodeSound: unsigned[128 bytes]
+    0x00730  tankShellExplodeSound: unsigned[128 bytes]
+    0x007B0  weaponImpactsTankArmorSound: unsigned[64 bytes]
+    0x007F0  weaponImpactsTankTreadSound: unsigned[64 bytes]
+    0x00830  bulletHitSmallSound: unsigned[128 bytes]
+    0x008B0  bulletHitLargeSound: unsigned[128 bytes]
+    0x00930  bulletHitAPSound: unsigned[128 bytes]
+    0x009B0  bulletHitXTremeSound: unsigned[128 bytes]
+    0x00A30  shotgunHitSound: unsigned[128 bytes]
+    0x00AB0  boltHitSound: unsigned[128 bytes]
+    0x00B30  bladeHitSound: unsigned[128 bytes]
+    0x00BB0  bulletExitSmallSound: unsigned[128 bytes]
+    0x00C30  bulletExitLargeSound: unsigned[128 bytes]
+    0x00CB0  bulletExitAPSound: unsigned[128 bytes]
+    0x00D30  bulletExitXTremeSound: unsigned[128 bytes]
+    0x00DB0  shotgunExitSound: unsigned[128 bytes]
+    0x00E30  boltExitSound: unsigned[128 bytes]
     0x00EB0  mantleSound: unsigned
     0x00EB4  mantleSoundPlayer: unsigned
     0x00EB8  dtpLaunchSound: unsigned
     0x00EBC  dtpLaunchSoundPlayer: unsigned
-    0x00EC0  dtpLandSound: base 0x0075[36 bytes]
-    0x00EE4  dtpLandSoundPlayer: base 0x0075[36 bytes]
-    0x00F08  dtpSlideLoopSound: base 0x0070[64 bytes][576 bytes]
-    0x01148  dtpSlideLoopSoundPlayer: base 0x0070[64 bytes][576 bytes]
-    0x01388  dtpSlideStopSound: base 0x0075[36 bytes]
-    0x013AC  dtpSlideStopSoundPlayer: base 0x0075[36 bytes]
+    0x00EC0  dtpLandSound: unsigned[36 bytes]
+    0x00EE4  dtpLandSoundPlayer: unsigned[36 bytes]
+    0x00F08  dtpSlideLoopSound: char[64 bytes][576 bytes]
+    0x01148  dtpSlideLoopSoundPlayer: char[64 bytes][576 bytes]
+    0x01388  dtpSlideStopSound: unsigned[36 bytes]
+    0x013AC  dtpSlideStopSoundPlayer: unsigned[36 bytes]
     0x013D0  dtpCollideSound: unsigned
     0x013D4  dtpCollideSoundPlayer: unsigned
-    0x013D8  playerSlidingStart_1p: base 0x0075[36 bytes]
-    0x013FC  playerSlidingStart_3p: base 0x0075[36 bytes]
-    0x01420  playerSlidingStop_1p: base 0x0075[36 bytes]
-    0x01444  playerSlidingStop_3p: base 0x0075[36 bytes]
+    0x013D8  playerSlidingStart_1p: unsigned[36 bytes]
+    0x013FC  playerSlidingStart_3p: unsigned[36 bytes]
+    0x01420  playerSlidingStop_1p: unsigned[36 bytes]
+    0x01444  playerSlidingStop_3p: unsigned[36 bytes]
     0x01468  bulletWhizby: unsigned
     0x0146C  bulletCrack: unsigned
     0x01470  underwaterWhizby: unsigned
@@ -1195,7 +1195,7 @@ cgMedia_t: 2 layouts, sizeof 5840, 5844
     0x014BC  sonarAttachmentPingSound: unsigned
     0x014C0  chargeShotWeaponChargingSound: unsigned
     0x014C4  chargeShotWeaponDischargeSound: unsigned
-    0x014C8  chargeShotWeaponBulletQueueSound: base 0x0075[20 bytes]
+    0x014C8  chargeShotWeaponBulletQueueSound: unsigned[20 bytes]
     0x014DC  radarSweepSound: unsigned
     0x014E0  radarPingSound: unsigned
     0x014E4  compassping_player: Material*
@@ -1339,43 +1339,43 @@ cgMedia_t: 2 layouts, sizeof 5840, 5844
     0x004A4  bigDevFont: Font_s*
     0x004A8  extraBigDevFont: Font_s*
     0x004AC  inspectorFont: Font_s*
-    0x004B0  grenadeExplodeSound: base 0x0075[128 bytes]
-    0x00530  rifleGrenadeSound: base 0x0075[128 bytes]
-    0x005B0  rocketExplodeSound: base 0x0075[128 bytes]
-    0x00630  rocketExplodeXtremeSound: base 0x0075[128 bytes]
-    0x006B0  mortarShellExplodeSound: base 0x0075[128 bytes]
-    0x00730  tankShellExplodeSound: base 0x0075[128 bytes]
-    0x007B0  weaponImpactsTankArmorSound: base 0x0075[64 bytes]
-    0x007F0  weaponImpactsTankTreadSound: base 0x0075[64 bytes]
-    0x00830  bulletHitSmallSound: base 0x0075[128 bytes]
-    0x008B0  bulletHitLargeSound: base 0x0075[128 bytes]
-    0x00930  bulletHitAPSound: base 0x0075[128 bytes]
-    0x009B0  bulletHitXTremeSound: base 0x0075[128 bytes]
-    0x00A30  shotgunHitSound: base 0x0075[128 bytes]
-    0x00AB0  boltHitSound: base 0x0075[128 bytes]
-    0x00B30  bladeHitSound: base 0x0075[128 bytes]
-    0x00BB0  bulletExitSmallSound: base 0x0075[128 bytes]
-    0x00C30  bulletExitLargeSound: base 0x0075[128 bytes]
-    0x00CB0  bulletExitAPSound: base 0x0075[128 bytes]
-    0x00D30  bulletExitXTremeSound: base 0x0075[128 bytes]
-    0x00DB0  shotgunExitSound: base 0x0075[128 bytes]
-    0x00E30  boltExitSound: base 0x0075[128 bytes]
+    0x004B0  grenadeExplodeSound: unsigned[128 bytes]
+    0x00530  rifleGrenadeSound: unsigned[128 bytes]
+    0x005B0  rocketExplodeSound: unsigned[128 bytes]
+    0x00630  rocketExplodeXtremeSound: unsigned[128 bytes]
+    0x006B0  mortarShellExplodeSound: unsigned[128 bytes]
+    0x00730  tankShellExplodeSound: unsigned[128 bytes]
+    0x007B0  weaponImpactsTankArmorSound: unsigned[64 bytes]
+    0x007F0  weaponImpactsTankTreadSound: unsigned[64 bytes]
+    0x00830  bulletHitSmallSound: unsigned[128 bytes]
+    0x008B0  bulletHitLargeSound: unsigned[128 bytes]
+    0x00930  bulletHitAPSound: unsigned[128 bytes]
+    0x009B0  bulletHitXTremeSound: unsigned[128 bytes]
+    0x00A30  shotgunHitSound: unsigned[128 bytes]
+    0x00AB0  boltHitSound: unsigned[128 bytes]
+    0x00B30  bladeHitSound: unsigned[128 bytes]
+    0x00BB0  bulletExitSmallSound: unsigned[128 bytes]
+    0x00C30  bulletExitLargeSound: unsigned[128 bytes]
+    0x00CB0  bulletExitAPSound: unsigned[128 bytes]
+    0x00D30  bulletExitXTremeSound: unsigned[128 bytes]
+    0x00DB0  shotgunExitSound: unsigned[128 bytes]
+    0x00E30  boltExitSound: unsigned[128 bytes]
     0x00EB0  mantleSound: unsigned
     0x00EB4  mantleSoundPlayer: unsigned
     0x00EB8  dtpLaunchSound: unsigned
     0x00EBC  dtpLaunchSoundPlayer: unsigned
-    0x00EC0  dtpLandSound: base 0x0075[36 bytes]
-    0x00EE4  dtpLandSoundPlayer: base 0x0075[36 bytes]
-    0x00F08  dtpSlideLoopSound: base 0x0070[64 bytes][576 bytes]
-    0x01148  dtpSlideLoopSoundPlayer: base 0x0070[64 bytes][576 bytes]
-    0x01388  dtpSlideStopSound: base 0x0075[36 bytes]
-    0x013AC  dtpSlideStopSoundPlayer: base 0x0075[36 bytes]
+    0x00EC0  dtpLandSound: unsigned[36 bytes]
+    0x00EE4  dtpLandSoundPlayer: unsigned[36 bytes]
+    0x00F08  dtpSlideLoopSound: char[64 bytes][576 bytes]
+    0x01148  dtpSlideLoopSoundPlayer: char[64 bytes][576 bytes]
+    0x01388  dtpSlideStopSound: unsigned[36 bytes]
+    0x013AC  dtpSlideStopSoundPlayer: unsigned[36 bytes]
     0x013D0  dtpCollideSound: unsigned
     0x013D4  dtpCollideSoundPlayer: unsigned
-    0x013D8  playerSlidingStart_1p: base 0x0075[36 bytes]
-    0x013FC  playerSlidingStart_3p: base 0x0075[36 bytes]
-    0x01420  playerSlidingStop_1p: base 0x0075[36 bytes]
-    0x01444  playerSlidingStop_3p: base 0x0075[36 bytes]
+    0x013D8  playerSlidingStart_1p: unsigned[36 bytes]
+    0x013FC  playerSlidingStart_3p: unsigned[36 bytes]
+    0x01420  playerSlidingStop_1p: unsigned[36 bytes]
+    0x01444  playerSlidingStop_3p: unsigned[36 bytes]
     0x01468  bulletWhizby: unsigned
     0x0146C  bulletCrack: unsigned
     0x01470  underwaterWhizby: unsigned
@@ -1400,7 +1400,7 @@ cgMedia_t: 2 layouts, sizeof 5840, 5844
     0x014BC  sonarAttachmentPingSound: unsigned
     0x014C0  chargeShotWeaponChargingSound: unsigned
     0x014C4  chargeShotWeaponDischargeSound: unsigned
-    0x014C8  chargeShotWeaponBulletQueueSound: base 0x0075[20 bytes]
+    0x014C8  chargeShotWeaponBulletQueueSound: unsigned[20 bytes]
     0x014DC  radarSweepSound: unsigned
     0x014E0  radarPingSound: unsigned
     0x014E4  headshotSound: unsigned
@@ -1563,14 +1563,14 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x64AA0  radiantCameraOrigin: vec3_t
     0x64AAC  radiantCameraAngles: vec3_t
     0x64AB8  radiantCamInUse: int
-    0x64ABC  iEntityLastType: base 0x0074[7168 bytes]
+    0x64ABC  iEntityLastType: int[7168 bytes]
     0x666BC  pEntityLastXModel: XModel*[7168 bytes]
     0x682BC  zoomSensitivity: float
     0x682C0  isLoading: bool
-    0x682C1  objectiveText: base 0x0070[1024 bytes]
+    0x682C1  objectiveText: char[1024 bytes]
     0x686C4  teamIndicator: team_indicator
     0x686C8  colorBlindAssist: bool
-    0x686CC  teamPlayerMask: base 0x0074[4 bytes][40 bytes]
+    0x686CC  teamPlayerMask: int[4 bytes][40 bytes]
     0x686F4  vehicleInitView: int
     0x686F8  prevVehicleInvAxis: vec3_t[36 bytes]
     0x6871C  vehicleViewLocked: bool
@@ -1578,28 +1578,28 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x6872C  missileInitView: int
     0x68730  storedRemoteCameraAngles: vec3_t
     0x6873C  storedRemoteCameraOrigin: vec3_t
-    0x68748  scriptMainMenu: base 0x0070[256 bytes]
+    0x68748  scriptMainMenu: char[256 bytes]
     0x68848  initialPlayersConnected: bool
     0x68849  initialPlayersConnectedRespondedTo: bool
     0x6884C  numScores: int
-    0x68850  teamScores: base 0x0074[40 bytes]
-    0x68878  teamHasMeat: base 0x0075[40 bytes]
-    0x688A0  teamPings: base 0x0074[40 bytes]
-    0x688C8  teamPlayers: base 0x0074[40 bytes]
+    0x68850  teamScores: int[40 bytes]
+    0x68878  teamHasMeat: unsigned[40 bytes]
+    0x688A0  teamPings: int[40 bytes]
+    0x688C8  teamPlayers: int[40 bytes]
     0x688F0  scoreOrder: ClientNum_t[72 bytes]
     0x68938  scoreboardColumnTypes: scoreboardColumnType_t[20 bytes]
     0x6894C  matchUIVisibilityFlags: int
     0x68950  talkFlags: unsigned
     0x68954  objectiveMapInfo: objectiveMapInfo_t[24 bytes][1536 bytes]
     0x68F54  clientObjectives: objective_t[1536 bytes]
-    0x69554  bombTimer: base 0x0074[8 bytes]
+    0x69554  bombTimer: int[8 bytes]
     0x6955C  showScores: int
     0x69560  scoreFadeTime: int
     0x69564  scoresTop: int
     0x69568  scoresOffBottom: int
     0x6956C  scoresBottom: int
     0x69570  selectedGamerIndex: int
-    0x69574  bannerLines: base 0x0074[40 bytes]
+    0x69574  bannerLines: int[40 bytes]
     0x695A0  selectedGamerXuid: unsigned __int64
     0x695A8  selectedGamerClientNum: int
     0x695AC  drawHud: int
@@ -1751,18 +1751,18 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x699C0  bgs: bgs_t
     0x7C988  viewModelPose: cpose_t
     0x7CAE8  visionSetPreLoaded: visionSetVars_t[4352 bytes]
-    0x7DBE8  visionSetPreLoadedName: base 0x0070[64 bytes][512 bytes]
+    0x7DBE8  visionSetPreLoadedName: char[64 bytes][512 bytes]
     0x7DDE8  visionSetFrom: visionSetVars_t[4352 bytes]
     0x7EEE8  visionSetTo: visionSetVars_t[4352 bytes]
     0x7FFE8  visionSetCurrent: visionSetVars_t[4352 bytes]
     0x810E8  visionSetLerpData: visionSetLerpData_t[128 bytes]
-    0x81168  visionNameNaked: base 0x0070[64 bytes]
-    0x811A8  visionNameNight: base 0x0070[64 bytes]
-    0x811E8  visionNameLastStand: base 0x0070[64 bytes]
-    0x81228  visionNameFlare: base 0x0070[64 bytes]
-    0x81268  visionNameInfrared: base 0x0070[64 bytes]
-    0x812A8  visionNameTvguided: base 0x0070[64 bytes]
-    0x812E8  visionNameExtraCam: base 0x0070[64 bytes]
+    0x81168  visionNameNaked: char[64 bytes]
+    0x811A8  visionNameNight: char[64 bytes]
+    0x811E8  visionNameLastStand: char[64 bytes]
+    0x81228  visionNameFlare: char[64 bytes]
+    0x81268  visionNameInfrared: char[64 bytes]
+    0x812A8  visionNameTvguided: char[64 bytes]
+    0x812E8  visionNameExtraCam: char[64 bytes]
     0x81328  drewReticle: bool
     0x8132C  extraButton_bits: bitarray<64>
     0x81334  breathPressedLastFrame: bool
@@ -1779,35 +1779,35 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x8139C  hudElemSound: hudElemSoundInfo_t[128 bytes]
     0x8141C  nextRippleTime: int
     0x81420  impactEffectsNext: unsigned
-    0x81424  impactEffects: base 0x0075[1024 bytes]
+    0x81424  impactEffects: unsigned[1024 bytes]
     0x81824  warDesiredMomentumProgress: float
     0x81828  warCurrentMomentumProgress: float
     0x8182C  warMomentumMultiplier: int
     0x81830  warMomentumBlitzkriegTime: int
     0x81834  warMomentumFlashTime: int
     0x81838  gunnerPitchOffset: float
-    0x8183C  centInNextSnapshot: base 0x0075[128 bytes]
+    0x8183C  centInNextSnapshot: unsigned[128 bytes]
     0x818BC  slideFakeEnt: centity_t*
     0x818C0  cameraLinkedEntitiesCount: int
-    0x818C4  cameraLinkedEntities: base 0x0074[16 bytes]
+    0x818C4  cameraLinkedEntities: int[16 bytes]
     0x818D4  cameraLinkedEntitiesType: link_type_e[16 bytes]
     0x818E4  cameraLinkedEntitiesOffset: vec3_t[48 bytes]
     0x81914  groundTiltEntNum: int
     0x81918  poisoned: int
     0x8191C  genericMaterialMap: Material*[256 bytes]
-    0x81A1C  genericFilterPassEnabled: base 0x0030[4 bytes][32 bytes]
+    0x81A1C  genericFilterPassEnabled: bool[4 bytes][32 bytes]
     0x81A3C  genericFilterPassMaterial: Material*[16 bytes][128 bytes]
-    0x81ABC  genericFilterPassTarget: base 0x0074[16 bytes][128 bytes]
-    0x81B3C  genericFilterPassSampler0: base 0x0074[16 bytes][128 bytes]
-    0x81BBC  genericFilterPassSampler1: base 0x0074[16 bytes][128 bytes]
-    0x81C3C  genericFilterPassParam: base 0x0040[64 bytes][256 bytes][2048 bytes]
-    0x8243C  genericFilterPassQuads: base 0x0074[16 bytes][128 bytes]
-    0x824BC  genericFilterBitFlag: base 0x0074[32 bytes]
-    0x824DC  genericOverlayEnabled: base 0x0030[3 bytes]
+    0x81ABC  genericFilterPassTarget: int[16 bytes][128 bytes]
+    0x81B3C  genericFilterPassSampler0: int[16 bytes][128 bytes]
+    0x81BBC  genericFilterPassSampler1: int[16 bytes][128 bytes]
+    0x81C3C  genericFilterPassParam: float[64 bytes][256 bytes][2048 bytes]
+    0x8243C  genericFilterPassQuads: int[16 bytes][128 bytes]
+    0x824BC  genericFilterBitFlag: int[32 bytes]
+    0x824DC  genericOverlayEnabled: bool[3 bytes]
     0x824E0  genericOverlayMaterial: Material*[12 bytes]
-    0x824EC  genericOverlayParam: base 0x0040[64 bytes][192 bytes]
-    0x825AC  genericOverlaySortIndex: base 0x0074[12 bytes]
-    0x825B8  genericOverlayParamADS: base 0x0040[32 bytes]
+    0x824EC  genericOverlayParam: float[64 bytes][192 bytes]
+    0x825AC  genericOverlaySortIndex: int[12 bytes]
+    0x825B8  genericOverlayParamADS: float[32 bytes]
     0x825D8  genericOverlayEnableADS: bool
     0x825DC  swimming: int
     0x825E0  swimmingStartTime: int
@@ -1840,8 +1840,8 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x8276C  delayedShieldHitEvents: ShieldHitDelayedEvent[8 bytes]
     0x82774  recentKilledByClientNum: int
     0x82778  recentKilledByTime: int
-    0x8277C  recentVictimClientNums: base 0x0074[32 bytes]
-    0x8279C  recentVictimTimes: base 0x0074[32 bytes]
+    0x8277C  recentVictimClientNums: int[32 bytes]
+    0x8279C  recentVictimTimes: int[32 bytes]
     0x827BC  recentVictimIndex: int
     0x827C0  talkingToEnemy: bool
     0x827C4  serverFogSettings: cg_t::FogSettings
@@ -1866,7 +1866,7 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x84C40  lastEmpTime: int
     0x84C44  footstepEvents: footstepEvent_t[256 bytes]
     0x84D44  numFootstepEvents: unsigned
-    0x84D48  movers: base 0x0074[256 bytes]
+    0x84D48  movers: int[256 bytes]
     0x84E48  moversCount: int
     0x84E4C  hit_infos: bullet_hit_info_t[480 bytes]
     0x8502C  num_hit_infos: int
@@ -1945,14 +1945,14 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x64AAC  radiantCameraOrigin: vec3_t
     0x64AB8  radiantCameraAngles: vec3_t
     0x64AC4  radiantCamInUse: int
-    0x64AC8  iEntityLastType: base 0x0074[7168 bytes]
+    0x64AC8  iEntityLastType: int[7168 bytes]
     0x666C8  pEntityLastXModel: XModel*[7168 bytes]
     0x682C8  zoomSensitivity: float
     0x682CC  isLoading: bool
-    0x682CD  objectiveText: base 0x0070[1024 bytes]
+    0x682CD  objectiveText: char[1024 bytes]
     0x686D0  teamIndicator: team_indicator
     0x686D4  colorBlindAssist: bool
-    0x686D8  teamPlayerMask: base 0x0074[4 bytes][40 bytes]
+    0x686D8  teamPlayerMask: int[4 bytes][40 bytes]
     0x68700  vehicleInitView: int
     0x68704  prevVehicleInvAxis: vec3_t[36 bytes]
     0x68728  vehicleViewLocked: bool
@@ -1960,28 +1960,28 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x68738  missileInitView: int
     0x6873C  storedRemoteCameraAngles: vec3_t
     0x68748  storedRemoteCameraOrigin: vec3_t
-    0x68754  scriptMainMenu: base 0x0070[256 bytes]
+    0x68754  scriptMainMenu: char[256 bytes]
     0x68854  initialPlayersConnected: bool
     0x68855  initialPlayersConnectedRespondedTo: bool
     0x68858  numScores: int
-    0x6885C  teamScores: base 0x0074[40 bytes]
-    0x68884  teamHasMeat: base 0x0075[40 bytes]
-    0x688AC  teamPings: base 0x0074[40 bytes]
-    0x688D4  teamPlayers: base 0x0074[40 bytes]
+    0x6885C  teamScores: int[40 bytes]
+    0x68884  teamHasMeat: unsigned[40 bytes]
+    0x688AC  teamPings: int[40 bytes]
+    0x688D4  teamPlayers: int[40 bytes]
     0x688FC  scoreOrder: ClientNum_t[72 bytes]
     0x68944  scoreboardColumnTypes: scoreboardColumnType_t[20 bytes]
     0x68958  matchUIVisibilityFlags: int
     0x6895C  talkFlags: unsigned
     0x68960  objectiveMapInfo: objectiveMapInfo_t[24 bytes][1536 bytes]
     0x68F60  clientObjectives: objective_t[1536 bytes]
-    0x69560  bombTimer: base 0x0074[8 bytes]
+    0x69560  bombTimer: int[8 bytes]
     0x69568  showScores: int
     0x6956C  scoreFadeTime: int
     0x69570  scoresTop: int
     0x69574  scoresOffBottom: int
     0x69578  scoresBottom: int
     0x6957C  selectedGamerIndex: int
-    0x69580  bannerLines: base 0x0074[40 bytes]
+    0x69580  bannerLines: int[40 bytes]
     0x695A8  selectedGamerXuid: unsigned __int64
     0x695B0  selectedGamerClientNum: int
     0x695B4  drawHud: int
@@ -2133,18 +2133,18 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x699C8  bgs: bgs_t
     0x7C990  viewModelPose: cpose_t
     0x7CAF0  visionSetPreLoaded: visionSetVars_t[4352 bytes]
-    0x7DBF0  visionSetPreLoadedName: base 0x0070[64 bytes][512 bytes]
+    0x7DBF0  visionSetPreLoadedName: char[64 bytes][512 bytes]
     0x7DDF0  visionSetFrom: visionSetVars_t[4352 bytes]
     0x7EEF0  visionSetTo: visionSetVars_t[4352 bytes]
     0x7FFF0  visionSetCurrent: visionSetVars_t[4352 bytes]
     0x810F0  visionSetLerpData: visionSetLerpData_t[128 bytes]
-    0x81170  visionNameNaked: base 0x0070[64 bytes]
-    0x811B0  visionNameNight: base 0x0070[64 bytes]
-    0x811F0  visionNameLastStand: base 0x0070[64 bytes]
-    0x81230  visionNameFlare: base 0x0070[64 bytes]
-    0x81270  visionNameInfrared: base 0x0070[64 bytes]
-    0x812B0  visionNameTvguided: base 0x0070[64 bytes]
-    0x812F0  visionNameExtraCam: base 0x0070[64 bytes]
+    0x81170  visionNameNaked: char[64 bytes]
+    0x811B0  visionNameNight: char[64 bytes]
+    0x811F0  visionNameLastStand: char[64 bytes]
+    0x81230  visionNameFlare: char[64 bytes]
+    0x81270  visionNameInfrared: char[64 bytes]
+    0x812B0  visionNameTvguided: char[64 bytes]
+    0x812F0  visionNameExtraCam: char[64 bytes]
     0x81330  drewReticle: bool
     0x81334  extraButton_bits: bitarray<64>
     0x8133C  breathPressedLastFrame: bool
@@ -2161,35 +2161,35 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x813A4  hudElemSound: hudElemSoundInfo_t[128 bytes]
     0x81424  nextRippleTime: int
     0x81428  impactEffectsNext: unsigned
-    0x8142C  impactEffects: base 0x0075[1024 bytes]
+    0x8142C  impactEffects: unsigned[1024 bytes]
     0x8182C  warDesiredMomentumProgress: float
     0x81830  warCurrentMomentumProgress: float
     0x81834  warMomentumMultiplier: int
     0x81838  warMomentumBlitzkriegTime: int
     0x8183C  warMomentumFlashTime: int
     0x81840  gunnerPitchOffset: float
-    0x81844  centInNextSnapshot: base 0x0075[128 bytes]
+    0x81844  centInNextSnapshot: unsigned[128 bytes]
     0x818C4  slideFakeEnt: centity_t*
     0x818C8  cameraLinkedEntitiesCount: int
-    0x818CC  cameraLinkedEntities: base 0x0074[16 bytes]
+    0x818CC  cameraLinkedEntities: int[16 bytes]
     0x818DC  cameraLinkedEntitiesType: link_type_e[16 bytes]
     0x818EC  cameraLinkedEntitiesOffset: vec3_t[48 bytes]
     0x8191C  groundTiltEntNum: int
     0x81920  poisoned: int
     0x81924  genericMaterialMap: Material*[256 bytes]
-    0x81A24  genericFilterPassEnabled: base 0x0030[4 bytes][32 bytes]
+    0x81A24  genericFilterPassEnabled: bool[4 bytes][32 bytes]
     0x81A44  genericFilterPassMaterial: Material*[16 bytes][128 bytes]
-    0x81AC4  genericFilterPassTarget: base 0x0074[16 bytes][128 bytes]
-    0x81B44  genericFilterPassSampler0: base 0x0074[16 bytes][128 bytes]
-    0x81BC4  genericFilterPassSampler1: base 0x0074[16 bytes][128 bytes]
-    0x81C44  genericFilterPassParam: base 0x0040[64 bytes][256 bytes][2048 bytes]
-    0x82444  genericFilterPassQuads: base 0x0074[16 bytes][128 bytes]
-    0x824C4  genericFilterBitFlag: base 0x0074[32 bytes]
-    0x824E4  genericOverlayEnabled: base 0x0030[3 bytes]
+    0x81AC4  genericFilterPassTarget: int[16 bytes][128 bytes]
+    0x81B44  genericFilterPassSampler0: int[16 bytes][128 bytes]
+    0x81BC4  genericFilterPassSampler1: int[16 bytes][128 bytes]
+    0x81C44  genericFilterPassParam: float[64 bytes][256 bytes][2048 bytes]
+    0x82444  genericFilterPassQuads: int[16 bytes][128 bytes]
+    0x824C4  genericFilterBitFlag: int[32 bytes]
+    0x824E4  genericOverlayEnabled: bool[3 bytes]
     0x824E8  genericOverlayMaterial: Material*[12 bytes]
-    0x824F4  genericOverlayParam: base 0x0040[64 bytes][192 bytes]
-    0x825B4  genericOverlaySortIndex: base 0x0074[12 bytes]
-    0x825C0  genericOverlayParamADS: base 0x0040[32 bytes]
+    0x824F4  genericOverlayParam: float[64 bytes][192 bytes]
+    0x825B4  genericOverlaySortIndex: int[12 bytes]
+    0x825C0  genericOverlayParamADS: float[32 bytes]
     0x825E0  genericOverlayEnableADS: bool
     0x825E4  swimming: int
     0x825E8  swimmingStartTime: int
@@ -2222,8 +2222,8 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x82774  delayedShieldHitEvents: ShieldHitDelayedEvent[8 bytes]
     0x8277C  recentKilledByClientNum: int
     0x82780  recentKilledByTime: int
-    0x82784  recentVictimClientNums: base 0x0074[32 bytes]
-    0x827A4  recentVictimTimes: base 0x0074[32 bytes]
+    0x82784  recentVictimClientNums: int[32 bytes]
+    0x827A4  recentVictimTimes: int[32 bytes]
     0x827C4  recentVictimIndex: int
     0x827C8  talkingToEnemy: bool
     0x827CC  serverFogSettings: cg_t::FogSettings
@@ -2248,7 +2248,7 @@ cg_t: 2 layouts, sizeof 556288, 556800
     0x84C48  lastEmpTime: int
     0x84C4C  footstepEvents: footstepEvent_t[256 bytes]
     0x84D4C  numFootstepEvents: unsigned
-    0x84D50  movers: base 0x0074[256 bytes]
+    0x84D50  movers: int[256 bytes]
     0x84E50  moversCount: int
     0x84E54  hit_infos: bullet_hit_info_t[480 bytes]
     0x85034  num_hit_infos: int
@@ -2280,11 +2280,11 @@ cg_t: 2 layouts, sizeof 556288, 556800
 
 classSets_t: 2 layouts, sizeof 11266, 14338
   sizeof 11266 (0x2C02)
-    0x00000  classSetsBuffer: base 0x0020[11264 bytes]
+    0x00000  classSetsBuffer: unsigned char[11264 bytes]
     0x02C00  classSetsFetched: bool
     0x02C01  classSetsWriteNeeded: bool
   sizeof 14338 (0x3802)
-    0x00000  classSetsBuffer: base 0x0020[14336 bytes]
+    0x00000  classSetsBuffer: unsigned char[14336 bytes]
     0x03800  classSetsFetched: bool
     0x03801  classSetsWriteNeeded: bool
 
@@ -2327,9 +2327,9 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x02AD0  serverTimeErrorCumul: int
     0x02AD4  serverTimeErrorAvg: int
     0x02AD8  serverTimeErrorPrev: int
-    0x02ADC  serverTimeError: base 0x0074[80 bytes]
-    0x02B2C  serverTimeError2: base 0x0074[80 bytes]
-    0x02B7C  mapname: base 0x0070[64 bytes]
+    0x02ADC  serverTimeError: int[80 bytes]
+    0x02B2C  serverTimeError2: int[80 bytes]
+    0x02B7C  mapname: char[64 bytes]
     0x02BBC  parseMatchStateIndex: int
     0x02BC0  parseEntitiesIndex: int
     0x02BC4  parseClientsIndex: int
@@ -2357,8 +2357,8 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x02C88  cgamePredictedDataServerTime: int
     0x02C8C  viewangles: vec3_t
     0x02C98  skelTimeStamp: int
-    0x02C9C  skelMemPos: base 0x0012
-    0x02CA0  skelMemory: base 0x0070[262144 bytes]
+    0x02C9C  skelMemPos: long
+    0x02CA0  skelMemory: char[262144 bytes]
     0x42CA0  skelMemoryStart: char*
     0x42CA4  allowedAllocSkel: bool
     0x42CA8  cmds: usercmd_s[8704 bytes]
@@ -2367,7 +2367,7 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x4C6AC  clientArchiveIndex: int
     0x4C6B0  entityBaselines: entityState_s[253952 bytes]
     0x8A6B0  corruptedTranslationFile: int
-    0x8A6B4  translationVersion: base 0x0070[256 bytes]
+    0x8A6B4  translationVersion: char[256 bytes]
     0x8A7B4  lastFireTime: int
     0x8A7B8  useHeld: bool
     0x8A7BC  useTime: int
@@ -2412,9 +2412,9 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x02AD0  serverTimeErrorCumul: int
     0x02AD4  serverTimeErrorAvg: int
     0x02AD8  serverTimeErrorPrev: int
-    0x02ADC  serverTimeError: base 0x0074[80 bytes]
-    0x02B2C  serverTimeError2: base 0x0074[80 bytes]
-    0x02B7C  mapname: base 0x0070[64 bytes]
+    0x02ADC  serverTimeError: int[80 bytes]
+    0x02B2C  serverTimeError2: int[80 bytes]
+    0x02B7C  mapname: char[64 bytes]
     0x02BBC  parseMatchStateIndex: int
     0x02BC0  parseEntitiesIndex: int
     0x02BC4  parseClientsIndex: int
@@ -2442,8 +2442,8 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x02C88  cgamePredictedDataServerTime: int
     0x02C8C  viewangles: vec3_t
     0x02C98  skelTimeStamp: int
-    0x02C9C  skelMemPos: base 0x0012
-    0x02CA0  skelMemory: base 0x0070[262144 bytes]
+    0x02C9C  skelMemPos: long
+    0x02CA0  skelMemory: char[262144 bytes]
     0x42CA0  skelMemoryStart: char*
     0x42CA4  allowedAllocSkel: bool
     0x42CA8  cmds: usercmd_s[8704 bytes]
@@ -2452,7 +2452,7 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x4C6AC  clientArchiveIndex: int
     0x4C6B0  entityBaselines: entityState_s[253952 bytes]
     0x8A6B0  corruptedTranslationFile: int
-    0x8A6B4  translationVersion: base 0x0070[256 bytes]
+    0x8A6B4  translationVersion: char[256 bytes]
     0x8A7B4  lastFireTime: int
     0x8A7B8  useHeld: bool
     0x8A7BC  useTime: int
@@ -2460,29 +2460,29 @@ clientActive_t: 2 layouts, sizeof 567248, 567264
     0x8A7C4  wasInVehicle: int
     0x8A7C8  serverFrameMS: int
     0x8A7CC  serverKbps: int
-    0x8A7D0  serverKbpsAvg: base 0x0074[8 bytes]
-    0x8A7D8  serverKbpsCount: base 0x0074[8 bytes]
+    0x8A7D0  serverKbpsAvg: int[8 bytes]
+    0x8A7D8  serverKbpsCount: int[8 bytes]
 
 codtvFolder_t: 2 layouts, sizeof 292, 304
   sizeof 292 (0x124)
     0x00000  index: int
     0x00004  parentIndex: int
-    0x00008  ref: base 0x0070[16 bytes]
-    0x00018  name: base 0x0070[64 bytes]
-    0x00058  customAction: base 0x0070[32 bytes]
+    0x00008  ref: char[16 bytes]
+    0x00018  name: char[64 bytes]
+    0x00058  customAction: char[32 bytes]
     0x00078  type: codtvType_e
-    0x0007C  imageName: base 0x0070[32 bytes]
+    0x0007C  imageName: char[32 bytes]
     0x0009C  imageCategory: codtvImageCategory_e
     0x000A0  content: codtvContent_u[128 bytes]
     0x00120  contentCount: int
   sizeof 304 (0x130)
     0x00000  index: int
     0x00004  parentIndex: int
-    0x00008  ref: base 0x0070[16 bytes]
-    0x00018  name: base 0x0070[64 bytes]
-    0x00058  customAction: base 0x0070[32 bytes]
+    0x00008  ref: char[16 bytes]
+    0x00018  name: char[64 bytes]
+    0x00058  customAction: char[32 bytes]
     0x00078  type: codtvType_e
-    0x0007C  imageName: base 0x0070[32 bytes]
+    0x0007C  imageName: char[32 bytes]
     0x0009C  imageCategory: codtvImageCategory_e
     0x000A0  content: codtvContent_u[128 bytes]
     0x00120  contentCount: int
@@ -2589,16 +2589,16 @@ cscr_data_t: 2 layouts, sizeof 140, 144
 
 demoTheaterFileInfo: 2 layouts, sizeof 176, 184
   sizeof 176 (0xB0)
-    0x00000  name: base 0x0070[64 bytes]
-    0x00040  description: base 0x0070[64 bytes]
-    0x00080  category: base 0x0070[32 bytes]
+    0x00000  name: char[64 bytes]
+    0x00040  description: char[64 bytes]
+    0x00080  category: char[32 bytes]
     0x000A0  duration: int
     0x000A4  isPooled: bool
     0x000A8  matchID: __int64
   sizeof 184 (0xB8): globals s_theaterFileInfo
-    0x00000  name: base 0x0070[64 bytes]
-    0x00040  description: base 0x0070[64 bytes]
-    0x00080  category: base 0x0070[32 bytes]
+    0x00000  name: char[64 bytes]
+    0x00040  description: char[64 bytes]
+    0x00080  category: char[32 bytes]
     0x000A0  duration: int
     0x000A4  isPooled: bool
     0x000A8  matchID: unsigned __int64
@@ -2606,8 +2606,8 @@ demoTheaterFileInfo: 2 layouts, sizeof 176, 184
 
 dvar_t: 2 layouts, sizeof 96, 112
   sizeof 96 (0x60)
-    0x00000  name: base 0x0070*
-    0x00004  description: base 0x0070*
+    0x00000  name: char*
+    0x00004  description: char*
     0x00008  hash: long
     0x0000C  flags: unsigned
     0x00010  type: dvarType_t
@@ -2618,8 +2618,8 @@ dvar_t: 2 layouts, sizeof 96, 112
     0x00048  domain: DvarLimits
     0x00058  hashNext: dvar_t*
   sizeof 112 (0x70)
-    0x00000  name: base 0x0070*
-    0x00004  description: base 0x0070*
+    0x00000  name: char*
+    0x00004  description: char*
     0x00008  hash: long
     0x0000C  flags: unsigned
     0x00010  type: dvarType_t
@@ -2711,8 +2711,8 @@ inflate_state: 2 layouts, sizeof 9520, 43784
     0x00064  ndist: unsigned
     0x00068  have: unsigned
     0x0006C  next: code*
-    0x00070  lens: base 0x0021[640 bytes]
-    0x002F0  work: base 0x0021[576 bytes]
+    0x00070  lens: unsigned short[640 bytes]
+    0x002F0  work: unsigned short[576 bytes]
     0x00530  codes: code[8192 bytes]
   sizeof 43784 (0xAB08)
     0x00000  m_decomp: tinfl_decompressor_tag
@@ -2721,19 +2721,19 @@ inflate_state: 2 layouts, sizeof 9520, 43784
     0x02AF8  m_first_call: unsigned
     0x02AFC  m_has_flushed: unsigned
     0x02B00  m_window_bits: int
-    0x02B04  m_dict: base 0x0020[32768 bytes]
+    0x02B04  m_dict: unsigned char[32768 bytes]
     0x0AB04  m_last_status: tinfl_status
 
 listColumnInfo_t: 2 layouts, sizeof 16, 20
   sizeof 16 (0x10)
     0x00000  type: listColumnTypes_t
     0x00004  fWidth: float
-    0x00008  pszName: base 0x0070*
+    0x00008  pszName: char*
     0x0000C  iAlignment: int
   sizeof 20 (0x14)
     0x00000  type: listColumnTypes_t
     0x00004  fWidth: float
-    0x00008  pszName: base 0x0070*
+    0x00008  pszName: char*
     0x0000C  iAlignment: int
     0x00010  sbColumnType: scoreboardColumnType_t
 
@@ -2745,12 +2745,12 @@ matchScoreBoardData_t: 2 layouts, sizeof 3376, 3384
     0x00BB4  numClients: int
     0x00BB8  numAllies: int
     0x00BBC  numInGameScoreboardColumns: int
-    0x00BC0  leagueTeamIDs: base 0x0023[80 bytes]
-    0x00C10  teamScores: base 0x0074[40 bytes]
-    0x00C38  sortByNameIndexes: base 0x0074[72 bytes]
-    0x00C80  sortByClientNumIndexes: base 0x0074[72 bytes]
-    0x00CC8  mapName: base 0x0070[64 bytes]
-    0x00D08  gameType: base 0x0070[32 bytes]
+    0x00BC0  leagueTeamIDs: unsigned __int64[80 bytes]
+    0x00C10  teamScores: int[40 bytes]
+    0x00C38  sortByNameIndexes: int[72 bytes]
+    0x00C80  sortByClientNumIndexes: int[72 bytes]
+    0x00CC8  mapName: char[64 bytes]
+    0x00D08  gameType: char[32 bytes]
     0x00D28  isPlayerlistDirty: bool
   sizeof 3384 (0xD38)
     0x00000  matchClientScoreData: matchClientScoreData_t[2736 bytes]
@@ -2759,12 +2759,12 @@ matchScoreBoardData_t: 2 layouts, sizeof 3376, 3384
     0x00BB4  numClients: int
     0x00BB8  numAllies: int
     0x00BBC  numInGameScoreboardColumns: int
-    0x00BC0  leagueTeamIDs: base 0x0023[80 bytes]
-    0x00C10  teamScores: base 0x0074[40 bytes]
-    0x00C38  sortByNameIndexes: base 0x0074[72 bytes]
-    0x00C80  sortByClientNumIndexes: base 0x0074[72 bytes]
-    0x00CC8  mapName: base 0x0070[64 bytes]
-    0x00D08  gameType: base 0x0070[32 bytes]
+    0x00BC0  leagueTeamIDs: unsigned __int64[80 bytes]
+    0x00C10  teamScores: int[40 bytes]
+    0x00C38  sortByNameIndexes: int[72 bytes]
+    0x00C80  sortByClientNumIndexes: int[72 bytes]
+    0x00CC8  mapName: char[64 bytes]
+    0x00D08  gameType: char[32 bytes]
     0x00D28  isPlayerlistDirty: bool
     0x00D2C  numTeams: int
     0x00D30  xpScale: float
@@ -2775,54 +2775,54 @@ motd_t: 3 layouts, sizeof 1376, 1628, 1756
     0x00004  singleView: bool
     0x00008  expiration: int
     0x0000C  imageCategory: unsigned short
-    0x0000E  title: base 0x0070[33 bytes]
-    0x0002F  message: base 0x0070[1025 bytes]
-    0x00430  image: base 0x0070[33 bytes]
-    0x00451  action: base 0x0070[8 bytes]
-    0x00459  actionContext: base 0x0070[65 bytes]
-    0x0049A  bannerTitle: base 0x0070[33 bytes]
-    0x004BB  bannerMessage: base 0x0070[65 bytes]
-    0x004FC  bannerImage: base 0x0070[33 bytes]
-    0x0051D  eliteImage: base 0x0070[33 bytes]
-    0x0053E  founderImage: base 0x0070[33 bytes]
+    0x0000E  title: char[33 bytes]
+    0x0002F  message: char[1025 bytes]
+    0x00430  image: char[33 bytes]
+    0x00451  action: char[8 bytes]
+    0x00459  actionContext: char[65 bytes]
+    0x0049A  bannerTitle: char[33 bytes]
+    0x004BB  bannerMessage: char[65 bytes]
+    0x004FC  bannerImage: char[33 bytes]
+    0x0051D  eliteImage: char[33 bytes]
+    0x0053E  founderImage: char[33 bytes]
     0x0055F  isValid: bool
   sizeof 1628 (0x65C)
     0x00000  version: int
     0x00004  singleView: bool
     0x00008  expiration: int
     0x0000C  imageCategory: unsigned short
-    0x0000E  title: base 0x0070[65 bytes]
-    0x0004F  message: base 0x0070[1025 bytes]
-    0x00450  image: base 0x0070[33 bytes]
-    0x00471  action: base 0x0070[32 bytes]
-    0x00491  actionContext: base 0x0070[65 bytes]
-    0x004D2  bannerTitle: base 0x0070[65 bytes]
-    0x00513  bannerMessage: base 0x0070[129 bytes]
-    0x00594  bannerImage: base 0x0070[33 bytes]
-    0x005B5  bannerAction: base 0x0070[32 bytes]
-    0x005D5  bannerActionContext: base 0x0070[65 bytes]
-    0x00616  eliteImage: base 0x0070[33 bytes]
-    0x00637  founderImage: base 0x0070[33 bytes]
+    0x0000E  title: char[65 bytes]
+    0x0004F  message: char[1025 bytes]
+    0x00450  image: char[33 bytes]
+    0x00471  action: char[32 bytes]
+    0x00491  actionContext: char[65 bytes]
+    0x004D2  bannerTitle: char[65 bytes]
+    0x00513  bannerMessage: char[129 bytes]
+    0x00594  bannerImage: char[33 bytes]
+    0x005B5  bannerAction: char[32 bytes]
+    0x005D5  bannerActionContext: char[65 bytes]
+    0x00616  eliteImage: char[33 bytes]
+    0x00637  founderImage: char[33 bytes]
     0x00658  isValid: bool
   sizeof 1756 (0x6DC): globals s_motd
     0x00000  version: int
     0x00004  singleView: bool
     0x00008  expiration: int
     0x0000C  imageCategory: unsigned short
-    0x0000E  title: base 0x0070[65 bytes]
-    0x0004F  message: base 0x0070[1025 bytes]
-    0x00450  image: base 0x0070[33 bytes]
-    0x00471  action: base 0x0070[32 bytes]
-    0x00491  actionContext: base 0x0070[65 bytes]
-    0x004D2  actionString: base 0x0070[65 bytes]
-    0x00513  bannerTitle: base 0x0070[65 bytes]
-    0x00554  bannerMessage: base 0x0070[129 bytes]
-    0x005D5  bannerImage: base 0x0070[33 bytes]
-    0x005F6  bannerAction: base 0x0070[32 bytes]
-    0x00616  bannerActionContext: base 0x0070[65 bytes]
-    0x00657  bannerActionString: base 0x0070[65 bytes]
-    0x00698  eliteImage: base 0x0070[33 bytes]
-    0x006B9  founderImage: base 0x0070[33 bytes]
+    0x0000E  title: char[65 bytes]
+    0x0004F  message: char[1025 bytes]
+    0x00450  image: char[33 bytes]
+    0x00471  action: char[32 bytes]
+    0x00491  actionContext: char[65 bytes]
+    0x004D2  actionString: char[65 bytes]
+    0x00513  bannerTitle: char[65 bytes]
+    0x00554  bannerMessage: char[129 bytes]
+    0x005D5  bannerImage: char[33 bytes]
+    0x005F6  bannerAction: char[32 bytes]
+    0x00616  bannerActionContext: char[65 bytes]
+    0x00657  bannerActionString: char[65 bytes]
+    0x00698  eliteImage: char[33 bytes]
+    0x006B9  founderImage: char[33 bytes]
     0x006DA  isValid: bool
 
 my_coef_controller: 2 layouts, sizeof 104, 116
@@ -2832,37 +2832,37 @@ my_coef_controller: 2 layouts, sizeof 104, 116
     0x0000C  mcu_ctr: unsigned
     0x00010  MCU_vert_offset: int
     0x00014  MCU_rows_per_iMCU_row: int
-    0x00018  MCU_buffer: base 0x0011[128 bytes]*[40 bytes]
+    0x00018  MCU_buffer: short[128 bytes]*[40 bytes]
     0x00040  whole_image: jvirt_barray_control*[40 bytes]
   sizeof 116 (0x74)
     0x00000  pub: jpeg_d_coef_controller
     0x00014  MCU_ctr: unsigned
     0x00018  MCU_vert_offset: int
     0x0001C  MCU_rows_per_iMCU_row: int
-    0x00020  MCU_buffer: base 0x0011[128 bytes]*[40 bytes]
+    0x00020  MCU_buffer: short[128 bytes]*[40 bytes]
     0x00048  whole_image: jvirt_barray_control*[40 bytes]
     0x00070  coef_bits_latch: int*
 
 my_cquantizer: 2 layouts, sizeof 44, 88
   sizeof 44 (0x2C)
     0x00000  pub: jpeg_color_quantizer
-    0x00010  sv_colormap: base 0x0420*
+    0x00010  sv_colormap: unsigned char**
     0x00014  desired: int
-    0x00018  histogram: base 0x0021[64 bytes]**
+    0x00018  histogram: unsigned short[64 bytes]**
     0x0001C  needs_zeroed: unsigned char
     0x00020  fserrors: short*
     0x00024  on_odd_row: unsigned char
     0x00028  error_limiter: int*
   sizeof 88 (0x58)
     0x00000  pub: jpeg_color_quantizer
-    0x00010  sv_colormap: base 0x0420*
+    0x00010  sv_colormap: unsigned char**
     0x00014  sv_actual: int
-    0x00018  colorindex: base 0x0420*
+    0x00018  colorindex: unsigned char**
     0x0001C  is_padded: unsigned char
-    0x00020  Ncolors: base 0x0074[16 bytes]
+    0x00020  Ncolors: int[16 bytes]
     0x00030  row_index: int
-    0x00034  odither: base 0x0074[64 bytes]*[16 bytes]
-    0x00044  fserrors: base 0x0411[16 bytes]
+    0x00034  odither: int[64 bytes]*[16 bytes]
+    0x00044  fserrors: short*[16 bytes]
     0x00054  on_odd_row: unsigned char
 
 my_main_controller: 2 layouts, sizeof 64, 80
@@ -2872,13 +2872,13 @@ my_main_controller: 2 layouts, sizeof 64, 80
     0x0000C  rowgroup_ctr: unsigned
     0x00010  suspended: unsigned char
     0x00014  pass_mode: J_BUF_MODE
-    0x00018  buffer: base 0x0420*[40 bytes]
+    0x00018  buffer: unsigned char**[40 bytes]
   sizeof 80 (0x50)
     0x00000  pub: jpeg_d_main_controller
-    0x00008  buffer: base 0x0420*[40 bytes]
+    0x00008  buffer: unsigned char**[40 bytes]
     0x00030  buffer_full: unsigned char
     0x00034  rowgroup_ctr: unsigned
-    0x00038  xbuffer: base 0x0420**[8 bytes]
+    0x00038  xbuffer: unsigned char***[8 bytes]
     0x00040  whichptr: int
     0x00044  context_state: int
     0x00048  rowgroups_avail: unsigned
@@ -2898,13 +2898,13 @@ my_upsampler: 2 layouts, sizeof 48, 160
     0x0002C  rows_to_go: unsigned
   sizeof 160 (0xA0)
     0x00000  pub: jpeg_upsampler
-    0x0000C  color_buf: base 0x0420*[40 bytes]
+    0x0000C  color_buf: unsigned char**[40 bytes]
     0x00034  methods: function*[40 bytes]
     0x0005C  next_row_out: int
     0x00060  rows_to_go: unsigned
-    0x00064  rowgroup_height: base 0x0074[40 bytes]
-    0x0008C  h_expand: base 0x0020[10 bytes]
-    0x00096  v_expand: base 0x0020[10 bytes]
+    0x00064  rowgroup_height: int[40 bytes]
+    0x0008C  h_expand: unsigned char[10 bytes]
+    0x00096  v_expand: unsigned char[10 bytes]
 
 node_field_t: 2 layouts, sizeof 16, 28
   sizeof 16 (0x10)
@@ -2913,10 +2913,10 @@ node_field_t: 2 layouts, sizeof 16, 28
     0x00008  type: fieldtype_t
     0x0000C  whichbits: unsigned
   sizeof 28 (0x1C)
-    0x00000  name: base 0x0070*
+    0x00000  name: char*
     0x00004  constId: unsigned
     0x00008  ofs: int
-    0x0000C  size: base 0x0074[4 bytes]
+    0x0000C  size: int[4 bytes]
     0x00010  type: fieldtype_t
     0x00014  whichbits: unsigned
     0x00018  getter: function*
@@ -2986,7 +2986,7 @@ playerNetworkData: 3 layouts, sizeof 150748, 162016, 165088
     0x1880A  stableStatsBuffer: persistentStats
     0x24C0F  fileShareFetched: bool
     0x24C10  fileOps: playerFileOperations*
-    0x24C14  DWEmailAddress: base 0x0020[200 bytes]
+    0x24C14  DWEmailAddress: unsigned char[200 bytes]
   sizeof 162016 (0x278E0)
     0x00000  playerStats: persistentStats
     0x0C405  playerStatsBackup: persistentStats
@@ -2994,7 +2994,7 @@ playerNetworkData: 3 layouts, sizeof 150748, 162016, 165088
     0x24C0F  classSets: classSets_t
     0x27811  fileShareFetched: bool
     0x27814  fileOps: playerFileOperations*
-    0x27818  DWEmailAddress: base 0x0020[200 bytes]
+    0x27818  DWEmailAddress: unsigned char[200 bytes]
   sizeof 165088 (0x284E0)
     0x00000  playerStats: persistentStats
     0x0C405  playerStatsBackup: persistentStats
@@ -3002,7 +3002,7 @@ playerNetworkData: 3 layouts, sizeof 150748, 162016, 165088
     0x24C0F  classSets: classSets_t
     0x28411  fileShareFetched: bool
     0x28414  fileOps: playerFileOperations*
-    0x28418  DWEmailAddress: base 0x0020[200 bytes]
+    0x28418  DWEmailAddress: unsigned char[200 bytes]
 
 r_global_permanent_t: 4 layouts, sizeof 18304, 18816, 19328, 19840
   sizeof 18304 (0x4780)
@@ -3090,7 +3090,7 @@ r_global_permanent_t: 4 layouts, sizeof 18304, 18816, 19328, 19840
     0x04600  shellShockFlashedMaterial: Material*
     0x04604  ropeMaterial: Material*
     0x04608  logoMaterial: Material*
-    0x0460C  savedScreenTimes: base 0x0074[16 bytes]
+    0x0460C  savedScreenTimes: int[16 bytes]
     0x0461C  savedScreenParams: SavedScreenParams[80 bytes]
     0x0466C  resampleFinal: Material*
     0x04670  resampleHDR: Material*
@@ -3210,7 +3210,7 @@ r_global_permanent_t: 4 layouts, sizeof 18304, 18816, 19328, 19840
     0x04800  shellShockFlashedMaterial: Material*
     0x04804  ropeMaterial: Material*
     0x04808  logoMaterial: Material*
-    0x0480C  savedScreenTimes: base 0x0074[16 bytes]
+    0x0480C  savedScreenTimes: int[16 bytes]
     0x0481C  savedScreenParams: SavedScreenParams[80 bytes]
     0x0486C  resampleFinal: Material*
     0x04870  resampleHDR: Material*
@@ -3330,7 +3330,7 @@ r_global_permanent_t: 4 layouts, sizeof 18304, 18816, 19328, 19840
     0x04A00  shellShockFlashedMaterial: Material*
     0x04A04  ropeMaterial: Material*
     0x04A08  logoMaterial: Material*
-    0x04A0C  savedScreenTimes: base 0x0074[16 bytes]
+    0x04A0C  savedScreenTimes: int[16 bytes]
     0x04A1C  savedScreenParams: SavedScreenParams[80 bytes]
     0x04A6C  resampleFinal: Material*
     0x04A70  resampleHDR: Material*
@@ -3450,7 +3450,7 @@ r_global_permanent_t: 4 layouts, sizeof 18304, 18816, 19328, 19840
     0x04C00  shellShockFlashedMaterial: Material*
     0x04C04  ropeMaterial: Material*
     0x04C08  logoMaterial: Material*
-    0x04C0C  savedScreenTimes: base 0x0074[16 bytes]
+    0x04C0C  savedScreenTimes: int[16 bytes]
     0x04C1C  savedScreenParams: SavedScreenParams[80 bytes]
     0x04C6C  resampleFinal: Material*
     0x04C70  resampleHDR: Material*
@@ -3523,7 +3523,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x12FF2  drawSModels: bool
     0x12FF3  drawXModels: bool
     0x12FF4  drawBModels: bool
-    0x12FF8  codeImageNames: base 0x0070*[220 bytes]
+    0x12FF8  codeImageNames: char*[220 bytes]
     0x130D4  viewInfoCount: unsigned
     0x130D8  sunShadowFull: int
     0x130DC  sunShadowmapScale: float
@@ -3572,7 +3572,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x12FF2  drawSModels: bool
     0x12FF3  drawXModels: bool
     0x12FF4  drawBModels: bool
-    0x12FF8  codeImageNames: base 0x0070*[220 bytes]
+    0x12FF8  codeImageNames: char*[220 bytes]
     0x130D4  viewInfoCount: unsigned
     0x130D8  sunShadowFull: int
     0x130DC  sunShadowmapScale: float
@@ -3584,7 +3584,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x130F1  enablePlayerShadowFlag: bool
     0x130F2  gammaModified: bool
     0x130F4  gamma: float
-    0x130F8  skinnedVertexCacheUsed: base 0x0040[16 bytes]
+    0x130F8  skinnedVertexCacheUsed: float[16 bytes]
   sizeof 80144 (0x13910)
     0x00000  identityViewParms: GfxViewParms
     0x00150  inFrame: bool
@@ -3621,7 +3621,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x137F2  drawSModels: bool
     0x137F3  drawXModels: bool
     0x137F4  drawBModels: bool
-    0x137F8  codeImageNames: base 0x0070*[220 bytes]
+    0x137F8  codeImageNames: char*[220 bytes]
     0x138D4  viewInfoCount: unsigned
     0x138D8  sunShadowFull: int
     0x138DC  sunShadowmapScale: float
@@ -3633,7 +3633,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x138F1  enablePlayerShadowFlag: bool
     0x138F2  gammaModified: bool
     0x138F4  gamma: float
-    0x138F8  skinnedVertexCacheUsed: base 0x0040[16 bytes]
+    0x138F8  skinnedVertexCacheUsed: float[16 bytes]
   sizeof 82192 (0x14110)
     0x00000  identityViewParms: GfxViewParms
     0x00150  inFrame: bool
@@ -3670,7 +3670,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x13FF2  drawSModels: bool
     0x13FF3  drawXModels: bool
     0x13FF4  drawBModels: bool
-    0x13FF8  codeImageNames: base 0x0070*[220 bytes]
+    0x13FF8  codeImageNames: char*[220 bytes]
     0x140D4  viewInfoCount: unsigned
     0x140D8  sunShadowFull: int
     0x140DC  sunShadowmapScale: float
@@ -3682,7 +3682,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x140F1  enablePlayerShadowFlag: bool
     0x140F2  gammaModified: bool
     0x140F4  gamma: float
-    0x140F8  skinnedVertexCacheUsed: base 0x0040[16 bytes]
+    0x140F8  skinnedVertexCacheUsed: float[16 bytes]
   sizeof 84240 (0x14910): globals rg
     0x00000  identityViewParms: GfxViewParms
     0x00150  inFrame: bool
@@ -3719,7 +3719,7 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x147F2  drawSModels: bool
     0x147F3  drawXModels: bool
     0x147F4  drawBModels: bool
-    0x147F8  codeImageNames: base 0x0070*[220 bytes]
+    0x147F8  codeImageNames: char*[220 bytes]
     0x148D4  viewInfoCount: unsigned
     0x148D8  sunShadowFull: int
     0x148DC  sunShadowmapScale: float
@@ -3731,18 +3731,18 @@ r_globals_t: 5 layouts, sizeof 78080, 78096, 80144, 82192, 84240
     0x148F1  enablePlayerShadowFlag: bool
     0x148F2  gammaModified: bool
     0x148F4  gamma: float
-    0x148F8  skinnedVertexCacheUsed: base 0x0040[16 bytes]
+    0x148F8  skinnedVertexCacheUsed: float[16 bytes]
 
 savable_state: 3 layouts, sizeof 16, 20, 24
   sizeof 16 (0x10)
-    0x00000  last_dc_val: base 0x0074[16 bytes]
+    0x00000  last_dc_val: int[16 bytes]
   sizeof 20 (0x14)
     0x00000  EOBRUN: unsigned
-    0x00004  last_dc_val: base 0x0074[16 bytes]
+    0x00004  last_dc_val: int[16 bytes]
   sizeof 24 (0x18)
     0x00000  put_buffer: long
     0x00004  put_bits: int
-    0x00008  last_dc_val: base 0x0074[16 bytes]
+    0x00008  last_dc_val: int[16 bytes]
 
 scr_const_t: 2 layouts, sizeof 1448, 1450
   sizeof 1448 (0x5A8)
@@ -4083,7 +4083,7 @@ scr_const_t: 2 layouts, sizeof 1448, 1450
     0x0029C  tag_gunner_turret2: unsigned short
     0x0029E  tag_gunner_turret3: unsigned short
     0x002A0  tag_gunner_turret4: unsigned short
-    0x002A2  tag_flash_gunner: base 0x0021[16 bytes]
+    0x002A2  tag_flash_gunner: unsigned short[16 bytes]
     0x002B2  tag_gunner_brass1: unsigned short
     0x002B4  tag_gunner_brass1a: unsigned short
     0x002B6  tag_gunner_brass2: unsigned short
@@ -4801,7 +4801,7 @@ scr_const_t: 2 layouts, sizeof 1448, 1450
     0x0029C  tag_gunner_turret2: unsigned short
     0x0029E  tag_gunner_turret3: unsigned short
     0x002A0  tag_gunner_turret4: unsigned short
-    0x002A2  tag_flash_gunner: base 0x0021[16 bytes]
+    0x002A2  tag_flash_gunner: unsigned short[16 bytes]
     0x002B2  tag_gunner_brass1: unsigned short
     0x002B4  tag_gunner_brass1a: unsigned short
     0x002B6  tag_gunner_brass2: unsigned short
@@ -5197,7 +5197,7 @@ serverStatus_s: 2 layouts, sizeof 82304, 82504
     0x00460  lastCount: int
     0x00464  refreshActive: int
     0x00468  currentServer: int
-    0x0046C  displayServers: base 0x0074[80000 bytes]
+    0x0046C  displayServers: int[80000 bytes]
     0x13CEC  numDisplayServers: int
     0x13CF0  serverCount: int
     0x13CF4  numPlayersOnServers: int
@@ -5210,8 +5210,8 @@ serverStatus_s: 2 layouts, sizeof 82304, 82504
     0x13D10  motdPaintX2: int
     0x13D14  motdOffset: int
     0x13D18  motdTime: int
-    0x13D1C  motd: base 0x0070[1024 bytes]
-    0x1411C  displayServersFriendNameInd: base 0x0020[100 bytes]
+    0x13D1C  motd: char[1024 bytes]
+    0x1411C  displayServersFriendNameInd: unsigned char[100 bytes]
   sizeof 82504 (0x14248)
     0x00000  pingList: pinglist_t[1088 bytes]
     0x00440  numqueriedservers: int
@@ -5225,7 +5225,7 @@ serverStatus_s: 2 layouts, sizeof 82304, 82504
     0x00460  lastCount: int
     0x00464  refreshActive: int
     0x00468  currentServer: int
-    0x0046C  displayServers: base 0x0074[80000 bytes]
+    0x0046C  displayServers: int[80000 bytes]
     0x13CEC  numDisplayServers: int
     0x13CF0  serverCount: int
     0x13CF4  numPlayersOnServers: int
@@ -5238,15 +5238,15 @@ serverStatus_s: 2 layouts, sizeof 82304, 82504
     0x13D10  motdPaintX2: int
     0x13D14  motdOffset: int
     0x13D18  motdTime: int
-    0x13D1C  motd: base 0x0070[1024 bytes]
-    0x1411C  displayServersFriendNameInd: base 0x0020[300 bytes]
+    0x13D1C  motd: char[1024 bytes]
+    0x1411C  displayServersFriendNameInd: unsigned char[300 bytes]
 
 sharedUiInfo_t: 2 layouts, sizeof 159352, 159552
   sizeof 159352 (0x26E78)
     0x00000  assets: CachedAssets_t
     0x00060  playerCount: int
-    0x00064  playerNames: base 0x0070[32 bytes][576 bytes]
-    0x002A4  teamNames: base 0x0070[32 bytes][576 bytes]
+    0x00064  playerNames: char[32 bytes][576 bytes]
+    0x002A4  teamNames: char[32 bytes][576 bytes]
     0x004E4  playerClientNums: ClientNum_t[72 bytes]
     0x0052C  numGameTypes: int
     0x00530  gameTypes: gameTypeInfo[3584 bytes]
@@ -5254,7 +5254,7 @@ sharedUiInfo_t: 2 layouts, sizeof 159352, 159552
     0x01334  customGameTypes: customGameTypeInfo[7680 bytes]
     0x03134  numCustomMatchGameTypes: int
     0x03138  customMatchGameTypes: gameTypeInfo[3584 bytes]
-    0x03F38  gameTypeMapCount: base 0x0074[128 bytes]
+    0x03F38  gameTypeMapCount: int[128 bytes]
     0x03FB8  numMapStartLocsZombie: int
     0x03FBC  mapStartLocsZombie: mapStartLocInfo[29824 bytes]
     0x0B43C  numJoinGameTypes: int
@@ -5266,20 +5266,20 @@ sharedUiInfo_t: 2 layouts, sizeof 159352, 159552
     0x0FAC8  partyMemberXuid: unsigned __int64
     0x0FAD0  talkingIcons: Material*[12 bytes]
     0x0FADC  serverStatus: serverStatus_s
-    0x23C5C  serverStatusAddress: base 0x0070[64 bytes]
+    0x23C5C  serverStatusAddress: char[64 bytes]
     0x23C9C  serverStatusInfo: serverStatusInfo_s
     0x25118  serverStatusInfoScoreBoard: serverStatusInfo_s
     0x26594  nextServerStatusRefresh: int
     0x26598  nextServerStatusScoreBoardRefresh: int
     0x2659C  pendingServerStatus: pendingServerStatus_t
-    0x26E60  visibilityBits: base 0x0023[8 bytes]
-    0x26E68  localVisibilityBits: base 0x0023[8 bytes]
+    0x26E60  visibilityBits: unsigned __int64[8 bytes]
+    0x26E68  localVisibilityBits: unsigned __int64[8 bytes]
     0x26E70  loadingScreen: Material*
   sizeof 159552 (0x26F40): globals sharedUiInfo
     0x00000  assets: CachedAssets_t
     0x00060  playerCount: int
-    0x00064  playerNames: base 0x0070[32 bytes][576 bytes]
-    0x002A4  teamNames: base 0x0070[32 bytes][576 bytes]
+    0x00064  playerNames: char[32 bytes][576 bytes]
+    0x002A4  teamNames: char[32 bytes][576 bytes]
     0x004E4  playerClientNums: ClientNum_t[72 bytes]
     0x0052C  numGameTypes: int
     0x00530  gameTypes: gameTypeInfo[3584 bytes]
@@ -5287,7 +5287,7 @@ sharedUiInfo_t: 2 layouts, sizeof 159352, 159552
     0x01334  customGameTypes: customGameTypeInfo[7680 bytes]
     0x03134  numCustomMatchGameTypes: int
     0x03138  customMatchGameTypes: gameTypeInfo[3584 bytes]
-    0x03F38  gameTypeMapCount: base 0x0074[128 bytes]
+    0x03F38  gameTypeMapCount: int[128 bytes]
     0x03FB8  numMapStartLocsZombie: int
     0x03FBC  mapStartLocsZombie: mapStartLocInfo[29824 bytes]
     0x0B43C  numJoinGameTypes: int
@@ -5299,14 +5299,14 @@ sharedUiInfo_t: 2 layouts, sizeof 159352, 159552
     0x0FAC8  partyMemberXuid: unsigned __int64
     0x0FAD0  talkingIcons: Material*[12 bytes]
     0x0FADC  serverStatus: serverStatus_s
-    0x23D24  serverStatusAddress: base 0x0070[64 bytes]
+    0x23D24  serverStatusAddress: char[64 bytes]
     0x23D64  serverStatusInfo: serverStatusInfo_s
     0x251E0  serverStatusInfoScoreBoard: serverStatusInfo_s
     0x2665C  nextServerStatusRefresh: int
     0x26660  nextServerStatusScoreBoardRefresh: int
     0x26664  pendingServerStatus: pendingServerStatus_t
-    0x26F28  visibilityBits: base 0x0023[8 bytes]
-    0x26F30  localVisibilityBits: base 0x0023[8 bytes]
+    0x26F28  visibilityBits: unsigned __int64[8 bytes]
+    0x26F30  localVisibilityBits: unsigned __int64[8 bytes]
     0x26F38  loadingScreen: Material*
 
 snd_ambient_collider: 2 layouts, sizeof 36, 44
@@ -5342,7 +5342,7 @@ static_tree_desc_s: 2 layouts, sizeof 4, 20
     0x00000  dummy: int
   sizeof 20 (0x14): globals static_bl_desc, static_d_desc, static_l_desc
     0x00000  static_tree: ct_data_s*
-    0x00004  extra_bits: base 0x0074*
+    0x00004  extra_bits: int*
     0x00008  extra_base: int
     0x0000C  elems: int
     0x00010  max_length: int
@@ -5404,13 +5404,13 @@ unlockableItemsData: 2 layouts, sizeof 43892, 47988
     0x00000  maxItem: int
     0x00004  numItems: int
     0x00008  itemTable: itemInfo_t[35840 bytes]
-    0x08C08  defaultClassLoadouts: base 0x0011[88 bytes][1320 bytes]
+    0x08C08  defaultClassLoadouts: short[88 bytes][1320 bytes]
     0x09130  itemsInSlot: itemInfo_t*[1024 bytes]
     0x09530  numItemsInSlot: int
     0x09534  numPurchasedItemsInSlot: int
-    0x09538  defaultItems: base 0x0011[88 bytes]
-    0x09590  actualDefaultItems: base 0x0011[88 bytes]
-    0x095E8  clanTagFeatureRows: base 0x0074[1024 bytes]
+    0x09538  defaultItems: short[88 bytes]
+    0x09590  actualDefaultItems: short[88 bytes]
+    0x095E8  clanTagFeatureRows: int[1024 bytes]
     0x099E8  numClanTagFeatures: int
     0x099EC  gunLevelRows: gunLevelRow_t[4096 bytes]
     0x0A9EC  numGunLevelRows: short
@@ -5420,13 +5420,13 @@ unlockableItemsData: 2 layouts, sizeof 43892, 47988
     0x00000  maxItem: int
     0x00004  numItems: int
     0x00008  itemTable: itemInfo_t[35840 bytes]
-    0x08C08  defaultClassLoadouts: base 0x0011[88 bytes][1320 bytes]
+    0x08C08  defaultClassLoadouts: short[88 bytes][1320 bytes]
     0x09130  itemsInSlot: itemInfo_t*[1024 bytes]
     0x09530  numItemsInSlot: int
     0x09534  numPurchasedItemsInSlot: int
-    0x09538  defaultItems: base 0x0011[88 bytes]
-    0x09590  actualDefaultItems: base 0x0011[88 bytes]
-    0x095E8  clanTagFeatureRows: base 0x0074[1024 bytes]
+    0x09538  defaultItems: short[88 bytes]
+    0x09590  actualDefaultItems: short[88 bytes]
+    0x095E8  clanTagFeatureRows: int[1024 bytes]
     0x099E8  numClanTagFeatures: int
     0x099EC  gunLevelRows: gunLevelRow_t[8192 bytes]
     0x0B9EC  numGunLevelRows: short

@@ -130,3 +130,44 @@ CASES += [
      "fakes": {"Dvar_SetVariant": lambda mu: None}, "observe": {"Dvar_SetVariant": "qiiiii"},
      "inputs": [{"args": [DVAR], "setup": write_latched(*t)} for t in LATCHED]},
 ]
+
+
+# -- the setters (server; inlined in the Store build, where R_CreateDeviceInternal's test covers them). The new
+# value Dvar_SetVariant gets is logged as the dvar's type reads it: a bool's byte (the other bytes are whatever was
+# on the stack) or a string's text ("1" / "0", at different addresses in the two images).
+SETTER = {}
+
+
+def write_setter(type_, flags=0, named=True):
+    def run(w):
+        SETTER["m"] = w.m
+        w.write(NAME, b"cl_test\0")
+        w.write(DVAR, struct.pack("<I", NAME if named else 0))
+        w.write(DVAR + 0xC, struct.pack("<I", flags))
+        w.write(DVAR + 0x10, struct.pack("<i", type_))
+    return run
+
+
+def set_variant(mu):
+    m = SETTER["m"]
+    sp = mu.reg_read(x86.UC_X86_REG_ESP)
+    dvar, value, *_, source = struct.unpack("<6I", bytes(mu.mem_read(sp + 4, 24)))
+    type_ = struct.unpack("<i", bytes(mu.mem_read(dvar + 0x10, 4)))[0]
+    m.observed.append(("Dvar_SetVariant", dvar, value & 0xFF if type_ == BOOL else m.read_cstr(value), source))
+
+
+SETTERS = [(BOOL, 0, True), (STRING_T, 1 << 14, True), (STRING_T, 0, True), (INT, 0, True), (BOOL, 0, False)]
+ASSERTS = {"Assert_MyHandler": lambda mu: 1}
+
+CASES += [
+    {"name": "Dvar_SetBoolFromSource", "ret": "void", "builds": SERVER,
+     "fakes": dict(ASSERTS, Dvar_SetVariant=set_variant), "observe": {"Assert_MyHandler": "siiss"},
+     "inputs": [{"args": [DVAR, v, src], "setup": write_setter(*t)} for t in SETTERS for v in (0, 1)
+                for src in (0, 2)]},
+    {"name": "Dvar_SetBool", "ret": "void", "builds": SERVER,
+     "fakes": dict(ASSERTS, Dvar_SetVariant=set_variant), "observe": {"Assert_MyHandler": "siiss"},
+     "inputs": [{"args": [DVAR, v], "setup": write_setter(*t)} for t in SETTERS for v in (0, 1)]},
+    {"name": "Dvar_SetInt", "ret": "void", "builds": SERVER,
+     "fakes": {"Dvar_SetIntFromSource": lambda mu: None}, "observe": {"Dvar_SetIntFromSource": "qii"},
+     "inputs": [{"args": [DVAR, v], "setup": write_setter(INT)} for v in (0, 1, -1, 16, 1 << 30)]},
+]

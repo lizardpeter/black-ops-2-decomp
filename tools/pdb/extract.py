@@ -418,8 +418,12 @@ def parse_type_records(types_dump: str) -> dict:
 
 def type_name(recs, ti, depth=0):
     """A readable name for type index `ti`, enough to tell variants' members apart."""
-    if ti < 0x1000:
-        return {0x0003: "void"}.get(ti, f"base 0x{ti:04X}")
+    if ti < 0x1000:  # a simple type; 0x4xx and 0x6xx are 32- and 64-bit pointers to one
+        base = {0x03: "void", 0x10: "signed char", 0x11: "short", 0x12: "long", 0x13: "__int64", 0x20: "unsigned char",
+                0x21: "unsigned short", 0x22: "unsigned long", 0x23: "unsigned __int64", 0x30: "bool", 0x40: "float",
+                0x41: "double", 0x70: "char", 0x71: "wchar_t", 0x74: "int", 0x75: "unsigned"}.get(ti & 0xFF,
+                                                                                               f"base 0x{ti & 0xFF:02X}")
+        return base + ("*" if ti & 0xF00 else "")
     rec = recs.get(ti)
     if rec is None or depth > 8:
         return f"0x{ti:X}"

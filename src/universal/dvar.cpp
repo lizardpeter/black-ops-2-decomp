@@ -104,3 +104,38 @@ void Dvar_MakeLatchedValueCurrent(const dvar_t *dvar)
 {
 	Dvar_SetVariant((dvar_t *)dvar, dvar->latched, DVAR_SOURCE_INTERNAL);
 }
+
+// 007776B0  universal/dvar.cpp:2971 (inlined in the Store build)
+// A string dvar the UI set is given "1" or "0". The Store revision also does nothing for a null dvar (every inlined
+// copy tests it, where the server only asserts).
+void Dvar_SetBoolFromSource(const dvar_t *dvar, bool value, DvarSetSource source)
+{
+#ifdef T6_STORE
+	if (!dvar)
+		return;
+#endif
+	assert_at(2974, dvar);
+	assert_at(2975, dvar->name);
+	assertf_at(2976, (dvar->type == DVAR_TYPE_BOOL || (dvar->type == DVAR_TYPE_STRING && (dvar->flags & (1 << 14)))),
+	           "(dvar->name) = %s", dvar->name);
+	if (!dvar->name)
+		return;
+	DvarValue newValue;
+	if (dvar->type == DVAR_TYPE_BOOL)
+		newValue.enabled = value;
+	else
+		newValue.string = value ? "1" : "0";
+	Dvar_SetVariant((dvar_t *)dvar, newValue, source);
+}
+
+// 00778330  universal/dvar.cpp:3223 (inlined in the Store build)
+void Dvar_SetBool(const dvar_t *dvar, bool value)
+{
+	Dvar_SetBoolFromSource(dvar, value, DVAR_SOURCE_INTERNAL);
+}
+
+// 00778350  universal/dvar.cpp:3229 (inlined in the Store build)
+void Dvar_SetInt(const dvar_t *dvar, int value)
+{
+	Dvar_SetIntFromSource(dvar, value, DVAR_SOURCE_INTERNAL);
+}
