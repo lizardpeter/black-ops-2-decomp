@@ -14,14 +14,19 @@
 // P0007: before the client's second event loop (keys) and its screen (mouse, commands), the frame waits until the
 // display has room for it (R_WaitForFrameLatency, enhanced/gfx_d3d/r_init.cpp), so its input is read as late as the
 // queue allows rather than up to a frame early.
+// P0009: before that, unless r_renderOverlap is set, the frame waits until the render thread has finished the last
+// frame (Sys_WaitRenderer, the wait the original makes only when it hands the next frame over), so only one frame is
+// on the CPU at a time (enhanced/qcommon/frame_timing.cpp); the frame's stages are timed for com_frameTiming.
 // Everything else is the original's (src/qcommon/common.cpp: Com_FrameAfterWait, Com_FrameClient). Store build only.
 #ifdef T6_STORE
 #define T6_SOURCE "qcommon/common.cpp"
 
 #include "enhanced/dxgi_flip.h"
+#include "enhanced/frame_timing.h"
 
 #include "client/client.h"
 #include "qcommon/qcommon.h"
+#include "qcommon/threads.h"
 #include "t6_static.h"
 #include "win32/win_shared.h"
 
@@ -110,8 +115,8 @@ int Com_FrameWaitPrecise(int maxFps)
 	}
 }
 
-// src: Store 1403A4010 Com_Frame_Try_Block_Function. Enhanced: the wait (Com_FrameWaitPrecise), and the frame-latency
-// wait before the client reads its input (P0007).
+// src: Store 1403A4010 Com_Frame_Try_Block_Function. Enhanced: the wait (Com_FrameWaitPrecise), and before the client
+// reads its input the wait for the render thread (P0009) and the frame-latency wait (P0007); the stage timing.
 void Com_Frame_Try_Block_Function()
 {
 	LocalClientNum_t localClientNum = Com_LocalClients_GetPrimary();
@@ -128,11 +133,22 @@ void Com_Frame_Try_Block_Function()
 	int index = com_lastFrameIndex % 3;
 	com_lastFrameIndex++;
 	int msec = Com_FrameWaitPrecise(maxFps);
+	long long frameStart = FrameTiming_Now();
 	int clientMsec;
 	if (Com_FrameAfterWait(localClientNum, minMsec, index, msec, &clientMsec))
 	{
+		if (!R_RenderOverlap())  // P0009
+		{
+			long long start = FrameTiming_Now();
+			Sys_WaitRenderer();
+			FrameTiming_Add(FRAME_TIMING_WAIT_RENDERER, start);
+		}
+		long long start = FrameTiming_Now();
 		R_WaitForFrameLatency();  // P0007
+		FrameTiming_Add(FRAME_TIMING_WAIT_DISPLAY, start);
 		Com_FrameClient(clientMsec);
 	}
+	FrameTiming_Add(FRAME_TIMING_MAIN_FRAME, frameStart);
+	FrameTiming_EndFrame();
 }
 #endif

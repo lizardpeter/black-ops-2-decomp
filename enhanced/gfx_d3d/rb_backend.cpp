@@ -9,11 +9,13 @@
 //   created with ALLOW_TEARING can't be resized without it.
 // P0008 (B0024): with nothing to do, RB_RenderThread waits for its events (up to a millisecond) instead of spinning on
 // Sleep(0) and zero-timeout polls.
+// P0009: the render thread's frame and its idle waits are timed for com_frameTiming (enhanced/qcommon/frame_timing.cpp).
 // Store build only. Everything else is the original's (src/gfx_d3d/rb_backend.cpp).
 #ifdef T6_STORE
 #define T6_SOURCE "gfx_d3d/rb_backend.cpp"
 
 #include "enhanced/dxgi_flip.h"
+#include "enhanced/frame_timing.h"
 
 #include "gfx_d3d/r_dx.h"
 #include "gfx_d3d/r_rendercmds.h"
@@ -275,7 +277,11 @@ void RB_RenderThread(unsigned int threadContext)
 				s_frameSignalled = false;
 				s_renderThreadBackEndData = Sys_TakeRendererData();
 				if (s_renderThreadBackEndData)
+				{
+					long long start = FrameTiming_Now();
 					RB_RenderThreadDrawFrame();
+					FrameTiming_Add(FRAME_TIMING_RENDER_FRAME, start);
+				}
 				s_renderThreadBackEndData = 0;
 			}
 			else if (WaitForSingleObject(store_144070008, 0) == WAIT_OBJECT_0)
@@ -291,7 +297,9 @@ void RB_RenderThread(unsigned int threadContext)
 			}
 			else if (!DX(doResizeBuffers))
 			{
+				long long start = FrameTiming_Now();
 				s_frameSignalled = Sys_RendererWaitForWork(store_144070008, store_144070048);  // P0008
+				FrameTiming_Add(FRAME_TIMING_RENDER_IDLE, start);
 			}
 			else if (DX(windows)[0].hwnd && DX(swapChain))
 			{

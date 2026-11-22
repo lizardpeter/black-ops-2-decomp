@@ -163,7 +163,10 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
 6. **The render thread's idle wait** (B0024): done in P0008. With nothing to do it blocks in `WaitForMultipleObjects`
    on `backendEvent[1]`, 144070008 and 144070048 (1 ms timeout, since the resize and the remote screen updates are
    flags it polls); a frame signal taken by the wait is drawn on the next pass.
-7. **The hand-off's job wait** (B0028): `R_ToggleSmpFrameCmd` polls the front end's job groups with `Sleep(0)` in
+7. **One frame on the CPU** (P0009): the frame waits for the render thread (`Sys_WaitRenderer`) right before the
+   display wait (P0007), so input is read only once the render thread has finished the last frame; `r_renderOverlap
+   1` keeps the original's overlap. Measured with `com_frameTiming 1` (`t6_frame_timing.log`).
+8. **The hand-off's job wait** (B0028): `R_ToggleSmpFrameCmd` polls the front end's job groups with `Sleep(0)` in
    between; block on the job queue instead (or help run its jobs, as the server's `R_WaitFrontendWorkerCmds` does with
    `jqFlush`). The renderer wait before it (1 ms timeouts) needs no change: it returns as soon as its event is set.
 

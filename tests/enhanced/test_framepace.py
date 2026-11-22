@@ -90,7 +90,41 @@ def after_wait(mu):
         T["end"] = T["us"]
 
 
-FAKES = dict(cf.FAKES, Com_EventLoop=event_loop, TaskManager2_ProcessTasks=after_wait)
+# The enhanced frame's own dvars (P0009), registered on first use: the registration is faked, returning a bool dvar
+# (type 1 at +0x18, the value at +0x20, as the Store's Dvar_GetBool 14046B910 reads them) with the value DVARS gives.
+# These checks keep the original's overlap of the main and render threads (r_renderOverlap 1) and no timing;
+# test_onecpu.py covers the rest. The DLL caches the pointers, so each setup clears them (reset_dvars).
+DVARS = {"r_renderOverlap": 1, "com_frameTiming": 0}
+DVAR_FAKES = 0x31000000 + 0x1F8000  # in the harness's OBJECTS region
+
+
+def _read_cstr(mu, va):
+    out = b""
+    while len(out) < 64:
+        c = bytes(mu.mem_read(va + len(out), 1))
+        if c == b"\0":
+            break
+        out += c
+    return out.decode()
+
+
+def dvar_register_bool(mu):
+    name = _read_cstr(mu, mu.reg_read(x86.UC_X86_REG_RCX))
+    ptr = DVAR_FAKES + 0x40 * sorted(DVARS).index(name)
+    mu.mem_write(ptr, b"\0" * 0x40)
+    mu.mem_write(ptr + 0x18, struct.pack("<I", 1))
+    mu.mem_write(ptr + 0x20, bytes([int(bool(DVARS[name]))]))
+    return ptr
+
+
+def reset_dvars(ctx, w):
+    dll = _map(ctx)
+    for name in DVARS:
+        w.write(dll[name], b"\0" * 8)
+
+
+FAKES = dict(cf.FAKES, Com_EventLoop=event_loop, TaskManager2_ProcessTasks=after_wait,
+             _Dvar_RegisterBool=dvar_register_bool)
 
 
 def setup_for(ctx, p, next_frame_us, frequency_known, timer):
@@ -98,6 +132,7 @@ def setup_for(ctx, p, next_frame_us, frequency_known, timer):
 
     def run(w):
         cf.frame_setup(p)(w)
+        reset_dvars(ctx, w)
         T.clear()
         T.update(us=p["us0"], log=[], sleeps=0, timer=timer)
         if frequency_known:
@@ -170,7 +205,7 @@ def check_rest_of_frame_is_the_original(ctx):
     """With the deadline passed and the millisecond clock minMsec ahead, both waits end on their first poll with the
     same msec; then everything matches the original."""
     ctx.imports(IMPORTS)
-    fk, ob = ctx.hooks(cf.FAKES), ctx.hooks(cf.SEEN_ALL)
+    fk, ob = ctx.hooks(dict(cf.FAKES, _Dvar_RegisterBool=dvar_register_bool)), ctx.hooks(cf.SEEN_ALL)
     dll = _map(ctx)
     own = set(range(dll["s_qpcFrequency"] & ~7, (dll["s_qpcFrequency"] + 8 + 7) & ~7)) | \
         set(range(dll["s_nextFrame"] & ~7, (dll["s_nextFrame"] + 8 + 7) & ~7)) | \
@@ -185,6 +220,7 @@ def check_rest_of_frame_is_the_original(ctx):
 
         def setup(w, p=p):
             cf.frame_setup(p)(w)
+            reset_dvars(ctx, w)
             T.update(us=(p["frameTime"] + 20) * 1000 + 500, log=[], sleeps=0, timer=1)
             w.write(dll["s_nextFrame"], struct.pack("<q", 0))
         want = ctx.m.call(ctx.original("Com_Frame_Try_Block_Function"), [], "void", setup, fk, ob)

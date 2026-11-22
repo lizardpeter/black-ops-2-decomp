@@ -116,7 +116,7 @@ streaming budgets.
 
 - **Hardware independent flip:** done in P0005 (`FLIP_DISCARD`, tearing allowed, at most one frame queued) and P0007
   (the frame-latency waitable object, waited on before the frame's input is read). P0008 stops the render
-  thread's busy wait (B0024). Still to do: the main thread's job-queue spin before the hand-off (B0028, docs/frame.md step 7).
+  thread's busy wait (B0024). Still to do: the main thread's job-queue spin before the hand-off (B0028, docs/frame.md step 8).
 - **Full late latch (decided):** rotation first, done fully: every view the frame draws (world, gun, the camera data
   post-processing reads) turned by the mouse movement since the game frame, as Forge (Rust-test, `peek_motion()`:
   read without consuming, so the next game frame still applies it) and BO3's P0021 do. Position later, only if it
@@ -142,7 +142,7 @@ streaming budgets.
   2. Reflex: it sleeps the CPU so the queue stays empty without losing GPU throughput.
   3. Run the back end on the main thread: lowest latency, highest frame time.
 
-  Decided direction: one frame on the CPU at a time, as in Forge (Rust-test). Next patch (P0009): the main thread
+  Decided direction: one frame on the CPU at a time, as in Forge (Rust-test). Done in P0009: the main thread
   waits for the render thread before reading input (the hand-off wait moved to the frame's start; on by default,
   the original overlap as an option), with stage timing (main frame, render submit, hand-off waits) printed by a
   dvar to measure it. The threads stay (the window, the loading screen and the device context belong to the render

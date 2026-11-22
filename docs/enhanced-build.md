@@ -53,6 +53,20 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Resizing keeps working.** The render thread resizes the buffers with the swap chain's own flags (B0025).
 - A system that can't create the flip-model swap chain gets the original one.
 
+**P0009, one frame on the CPU:**
+- **Input read after the render thread is done.** The original lets the main thread read input and build the next
+  frame while the render thread is still submitting the last one: two frames on the CPU, and when the render thread
+  is the slower of the two, input read up to a frame earlier than needed. Now each frame waits for the render
+  thread before it reads input, so a frame's input, simulation and submission run back to back, and only the GPU
+  overlaps them.
+- **`r_renderOverlap 1`** brings back the original's overlap: a higher frame-rate ceiling when the CPU is the limit,
+  at up to a frame more input latency. It's saved in the config.
+- **`com_frameTiming 1`** measures where each frame's time goes and writes it once a second to
+  `t6_frame_timing.log` next to `t6_enhanced.dll` (the Store build has no console output): frames per second, and the
+  average and maximum in milliseconds of the main thread's own work, its waits (for the render thread, the display
+  and the worker jobs), and the render thread's frame (upload, back end, present) and idle time. `com_frameTiming 0`
+  stops it; it isn't saved, and off it costs nothing measurable.
+
 **P0008, an idle render thread:**
 - Between frames the render thread waits for its next piece of work instead of spinning on a core with `Sleep(0)`
   (B0024), leaving that CPU time to the main and worker threads that build the next frame. Work still starts within

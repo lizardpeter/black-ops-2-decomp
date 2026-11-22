@@ -200,11 +200,28 @@ extern "C" long _InterlockedIncrement(long volatile *addend);
 extern "C" long _InterlockedDecrement(long volatile *addend);
 #define InterlockedIncrement _InterlockedIncrement
 #define InterlockedDecrement _InterlockedDecrement
+extern "C" long long _InterlockedCompareExchange64(long long volatile *destination, long long exchange,
+                                                   long long comparand);
+extern "C" long long _InterlockedExchange64(long long volatile *target, long long value);
+#define InterlockedCompareExchange64 _InterlockedCompareExchange64
+#define InterlockedExchange64 _InterlockedExchange64
 WINUSERAPI BOOL WINAPI RegisterRawInputDevices(const RAWINPUTDEVICE *pRawInputDevices, UINT uiNumDevices,
                                                UINT cbSize);
 WINUSERAPI UINT WINAPI GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, void *pData, UINT *pcbSize,
                                        UINT cbSizeHeader);
 WINBASEAPI HINSTANCE WINAPI GetModuleHandleA(const char *lpModuleName);
+WINBASEAPI HINSTANCE WINAPI GetModuleHandleW(const wchar_t *lpModuleName);
+WINBASEAPI DWORD WINAPI GetModuleFileNameW(HINSTANCE hModule, wchar_t *lpFilename, DWORD nSize);
+#define GENERIC_WRITE 0x40000000
+#define FILE_SHARE_READ 0x1
+#define CREATE_ALWAYS 2
+#define FILE_ATTRIBUTE_NORMAL 0x80
+#define INVALID_HANDLE_VALUE ((HANDLE)(long long)-1)
+WINBASEAPI HANDLE WINAPI CreateFileW(const wchar_t *lpFileName, DWORD dwDesiredAccess, DWORD dwShareMode,
+                                     void *lpSecurityAttributes, DWORD dwCreationDisposition,
+                                     DWORD dwFlagsAndAttributes, HANDLE hTemplateFile);
+WINBASEAPI BOOL WINAPI WriteFile(HANDLE hFile, const void *lpBuffer, DWORD nNumberOfBytesToWrite,
+                                 DWORD *lpNumberOfBytesWritten, void *lpOverlapped);
 WINBASEAPI HANDLE WINAPI CreateThread(void *lpThreadAttributes, __SIZE_TYPE__ dwStackSize,
                                       LPTHREAD_START_ROUTINE lpStartAddress, void *lpParameter,
                                       DWORD dwCreationFlags, DWORD *lpThreadId);
