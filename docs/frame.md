@@ -69,7 +69,7 @@ Store's call graph:
 - **The render thread's loop** (`RB_RenderThread` 140736CD0, rebuilt): an error-recovery point (`_setjmp` 140870ACC
   on the thread's jump buffer, `Sys_GetValue(2)`), then every pass it sets `rendererRunningEvent` and polls, with
   zero timeouts, `backendEvent[1]` (14406FC58: a frame), 144070008 and 144070048, then `dx.doResizeBuffers`; with
-  nothing to do it calls `Sleep(0)` and polls again, so it spins on a core between frames (B0024). While
+  nothing to do it calls `Sleep(0)` and polls again, so it spins on a core between frames (B0024; P0008 waits on the three events instead, a millisecond at a time). While
   `r_glob.remoteScreenUpdateNesting` is set it runs `SCR_UpdateScreen` itself (the loading screen). A frame arrives as a pointer swapped out of 14406FAF0 (`XCHG`); under the
   critical section 1441FB970 it uploads the frame's dynamic vertex data (Map/Unmap on the device context 1427F1D90,
   looping while 142155DFC is set) and finishes three command lists (140736BA0 at +0x122C10, +0x122C00, +0x122C50 of
@@ -157,7 +157,10 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
    second `Com_EventLoop` (1403A470B), so keys (that event loop) and the mouse (`CL_Input`, at draw time) are both
    taken after it, by the original's own code in its own order (BO3's P0020 arrangement; no mid-frame filter needed).
    The same rebuild gives the microsecond frame clock, the waitable-timer cap, and later the 5 ms tick loop.
-6. **The hand-off wait** (1403C2C50, 1-ms `WaitForSingleObject` steps) and the job-queue spin with `Sleep(0)` in
+6. **The render thread's idle wait** (B0024): done in P0008. With nothing to do it blocks in `WaitForMultipleObjects`
+   on `backendEvent[1]`, 144070008 and 144070048 (1 ms timeout, since the resize and the remote screen updates are
+   flags it polls); a frame signal taken by the wait is drawn on the next pass.
+7. **The hand-off wait** (1403C2C50, 1-ms `WaitForSingleObject` steps) and the job-queue spin with `Sleep(0)` in
    14071B880: wait without polling.
 
 ## Still to map

@@ -7,6 +7,8 @@
 //   it are bound again after it (the renderer's state cache still believes they are);
 // - RB_RenderThread resizes the swap chain's buffers with the swap chain's own flags (B0025): a flip-model swap chain
 //   created with ALLOW_TEARING can't be resized without it.
+// P0008 (B0024): with nothing to do, RB_RenderThread waits for its events (up to a millisecond) instead of spinning on
+// Sleep(0) and zero-timeout polls.
 // Store build only. Everything else is the original's (src/gfx_d3d/rb_backend.cpp).
 #ifdef T6_STORE
 #define T6_SOURCE "gfx_d3d/rb_backend.cpp"
@@ -176,6 +178,11 @@ void SCR_UpdateScreen();
 void R_SetWndParms(GfxWindowParms *wndParms);
 void R_StoreWindowSettings(const GfxWindowParms *wndParms);
 void sub_14071E360(DXGI_SWAP_CHAIN_DESC *swapChainDesc, const GfxWindowParms *wndParms);
+bool Sys_RendererWaitForWork(HANDLE request1, HANDLE request2);  // enhanced/qcommon/threads.cpp
+
+// The frame's signal, taken by Sys_RendererWaitForWork: the next pass draws the frame without polling for it
+// (a static, so a longjmp back to the loop's recovery point keeps it)
+static bool s_frameSignalled;
 
 struct GfxDynamicUpload
 {
@@ -247,7 +254,8 @@ static void RB_ResizeBuffers()
 	DX(doResizeBuffers) = false;
 }
 
-// src: Store 140736CD0 RB_RenderThread. Enhanced: its resize (RB_ResizeBuffers above).
+// src: Store 140736CD0 RB_RenderThread. Enhanced: its resize (RB_ResizeBuffers above), and with nothing to do it
+// blocks in Sys_RendererWaitForWork (P0008) where the original yielded with Sleep(0) and polled again.
 void RB_RenderThread(unsigned int threadContext)
 {
 	for (;;)
@@ -269,8 +277,9 @@ void RB_RenderThread(unsigned int threadContext)
 		for (;;)
 		{
 			Sys_RendererRunning();
-			if (Sys_RendererWorkPending())
+			if (s_frameSignalled || Sys_RendererWorkPending())
 			{
+				s_frameSignalled = false;
 				s_renderThreadBackEndData = Sys_TakeRendererData();
 				if (s_renderThreadBackEndData)
 					RB_RenderThreadDrawFrame();
@@ -289,7 +298,7 @@ void RB_RenderThread(unsigned int threadContext)
 			}
 			else if (!DX(doResizeBuffers))
 			{
-				Sleep(0);
+				s_frameSignalled = Sys_RendererWaitForWork(store_144070008, store_144070048);  // P0008
 			}
 			else if (DX(windows)[0].hwnd && DX(swapChain))
 			{

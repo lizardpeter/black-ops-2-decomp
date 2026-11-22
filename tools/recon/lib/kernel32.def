@@ -4,3 +4,4 @@ EXPORTS
 SetProcessInformation
 CreateWaitableTimerExW
 SetWaitableTimer
+WaitForMultipleObjects

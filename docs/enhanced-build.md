@@ -53,6 +53,11 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Resizing keeps working.** The render thread resizes the buffers with the swap chain's own flags (B0025).
 - A system that can't create the flip-model swap chain gets the original one.
 
+**P0008, an idle render thread:**
+- Between frames the render thread waits for its next piece of work instead of spinning on a core with `Sleep(0)`
+  (B0024), leaving that CPU time to the main and worker threads that build the next frame. Work still starts within
+  a millisecond of when the original would have started it.
+
 **P0007, input read when the display has room:**
 - The frame waits on the swap chain's frame-latency object (maximum latency 1) after the server frame and before the
   client reads its keys (the second event loop) and mouse (at draw time). So when the GPU or the display is the

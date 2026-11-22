@@ -244,9 +244,16 @@ def check_present(ctx):
     assert checked > 50, checked
 
 
+def idle_wait_times_out(m, mu):
+    """P0008's idle wait, where the original calls Sleep(0): it times out and is logged as that Sleep, so both runs
+    see the same script (test_renderthread.py checks the wait itself)."""
+    rb.log(m, 0x51EE, 0)
+    mu.reg_write(x86.UC_X86_REG_RAX, 0x102)
+
+
 def check_resize_uses_swap_chain_flags(ctx):
     flip_va, tearing_va, checked_va = flags_of(ctx)
-    ctx.imports(rb.RT_IMPORTS)
+    ctx.imports(dict(rb.RT_IMPORTS, **{"kernel32.dll!WaitForMultipleObjects": (idle_wait_times_out, 4)}))
     fk, ob = ctx.hooks(rb.RT_FAKES), ctx.hooks(rb.RT_SEEN)
     ran = 0
     for k, inp in enumerate(rb.rt_inputs(120, seed=7)):
