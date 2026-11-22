@@ -39,7 +39,24 @@ effects timing, menus and HUD lerps, and command generation.
 - **Presentation:** interpolated from the simulation.
 - **Behaviour players rely on:** records it in `records/bugs.tsv` with `keep`, so it stays.
 
-Raise the `com_maxfps` ceiling (1000 in the original).
+**Uncapped frame rate.** What limits the Store build's frame rate today (docs/frame.md, "Frame-rate limits"):
+1. `com_maxfps`: 0 to 1000 (0 = no cap); the cap waits in `Sleep(1)` steps, so caps between a few hundred and 1000
+   are inexact.
+2. A hard 1000 FPS ceiling even at 0: every frame lasts at least one whole millisecond (`msec` >= 1), because all
+   frame time is whole milliseconds.
+3. The server's cap: `sv_clientFpsLimit`, sent in the server's info, lowers `com_maxfps` for its clients.
+4. Presentation: `Present(sync, 0)` with sync interval 1 when `r_vsync` (or, it seems, the loading screen) asks for
+   it, and no tearing flag, so in a window or borderless fullscreen Windows shows at most one frame a refresh.
+
+The plan, on the decoupled tick loop (commands at 5 ms whatever the frame rate):
+- Render frames timed in microseconds (QueryPerformanceCounter), not whole milliseconds: no 1000 FPS ceiling.
+  Simulation keeps whole-ms ticks, so nothing the server sees changes.
+- The cap waits on a high-resolution waitable timer (`CREATE_WAITABLE_TIMER_HIGH_RESOLUTION`), exact to well under a
+  millisecond, instead of `Sleep(1)`; `com_maxfps` up to any value.
+- Flip-model swap chain with `DXGI_PRESENT_ALLOW_TEARING` when v-sync is off, so borderless windows can go past the
+  refresh rate with fullscreen-like latency; frame latency 1 (as Ghosts P0003/P0004).
+- `sv_clientFpsLimit` stays honoured: it is the server's rule. With fixed 5 ms commands its reason (frame-rate
+  physics) no longer applies, so it can be applied to rendering only, or left for server owners to drop.
 
 ## The "connection interrupted" warning (B0001)
 

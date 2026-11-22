@@ -33,6 +33,18 @@ Later in the same function (client half, Store only; to be read in full):
   `com_lastFrameTime[index]` (1403A467C). It compares a time with a frame length, so it looks like it only waits in
   the first moments after start; to be confirmed.
 
+## Frame-rate limits
+
+- `com_maxfps` (141F03820, registered at 14039E43D): an int dvar, 0 to 1000; 0 is no cap.
+- `[140E53B70]+0x1C54`, the second cap in step 1, is `sv_clientFpsLimit` from the server's info string (stored at
+  140152095 with the other server settings): a server can lower its clients' frame rate.
+- Even with no cap, `minMsec` is 1 and every frame is a whole number of milliseconds of at least 1: at most 1000
+  frames a second.
+- Presentation (140735BC0, the Store's `RB_SwapBuffers`): `IDXGISwapChain::Present(sync, 0)`, sync 1 when `r_vsync`
+  (1427E70C8) or the dvar at 1427E6FB8 (registered next to `r_loadingScreen`) is set, else 0. No
+  `DXGI_PRESENT_ALLOW_TEARING`. The device and swap chain come from `D3D11CreateDeviceAndSwapChain` (140720192), or
+  NVAPI on NVIDIA hardware (vendor 0x10DE, 14072002D); the swap chain description comes from the caller (not yet read).
+
 ## Still to map
 
 - The client frame, `SCR_UpdateScreen` (server 00511320) and `CG_DrawActiveFrame` (server 004C7550) on the Store.
