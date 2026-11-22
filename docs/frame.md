@@ -112,6 +112,27 @@ the compositor but has slow alt-tab and mode switches. The enhanced build's flip
 borderless window as fast as exclusive fullscreen; Windows' independent flip takes over when the window covers the
 screen.
 
+## What the enhanced build changes, and what has to be rebuilt first
+
+The order the work goes in (each step rebuilt and verified faithful first, then changed in `enhanced/`):
+
+1. **The swap chain description** (14071E360, no server counterpart: the server's renderer has no device code).
+   Enhanced: `DXGI_SWAP_EFFECT_FLIP_DISCARD`, `DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING` when supported,
+   `DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT`. One description serves both device paths (D3D11 and NVAPI).
+2. **Device creation** (14071FEA0): after creation, `SetMaximumFrameLatency(1)` and the swap chain's waitable object
+   (IDXGISwapChain2); falling back to the original swap chain where the system refuses the flip model, as Ghosts
+   P0003 does.
+3. **The resize and fullscreen paths** (`ResizeBuffers`, vtable +0x68, at 14072F5A7, 1407EDEBB, 1407F4B9B;
+   `SetFullscreenState` at 140720EB0 and others): the flags must match the swap chain's.
+4. **`RB_SwapBuffers`** (140735BC0): `DXGI_PRESENT_ALLOW_TEARING` when v-sync is off in a window; the flip model
+   unbinds the back buffer at `Present`, so it is bound again after it.
+5. **`Com_Frame_Try_Block_Function`** (1403A4010): the central rebuild. The frame-latency wait goes right before the
+   second `Com_EventLoop` (1403A470B), so keys (that event loop) and the mouse (`CL_Input`, at draw time) are both
+   taken after it, by the original's own code in its own order (BO3's P0020 arrangement; no mid-frame filter needed).
+   The same rebuild gives the microsecond frame clock, the waitable-timer cap, and later the 5 ms tick loop.
+6. **The hand-off wait** (1403C2C50, 1-ms `WaitForSingleObject` steps) and the job-queue spin with `Sleep(0)` in
+   14071B880: wait without polling.
+
 ## Still to map
 
 - The client frame, `SCR_UpdateScreen` (server 00511320) and `CG_DrawActiveFrame` (server 004C7550) on the Store.
