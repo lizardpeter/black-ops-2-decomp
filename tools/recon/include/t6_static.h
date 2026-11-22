@@ -30,3 +30,12 @@
 //
 //     T6_GLOBAL const vec4_t colorBlack T6_INIT(= { 0.0f, 0.0f, 0.0f, 1.0f });
 #define T6_GLOBAL extern
+
+// A thread-local original variable (`__declspec(thread)`), declared with T6_STATIC / T6_GLOBAL:
+//
+//     T6_STATIC T6_THREAD void **g_dwTlsIndex T6_AT("", "g_dwTlsIndex");
+//
+// tools/build_recon.py places it in the DLL's .tls at its offset in the original's TLS block. The original's
+// variables are constant-initialized; saying so keeps clang (as MSVC 2019 for an extern thread_local) from guarding
+// each access with the on-demand dynamic TLS initialization (__tls_guard, __dyn_tls_on_demand_init).
+#define T6_THREAD __declspec(thread) __attribute__((require_constant_initialization))

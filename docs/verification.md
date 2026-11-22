@@ -96,6 +96,12 @@ Harness specifics:
 - **CRT per-thread data (x86 with a MAP):** VC100's CRT builds it on first use through FLS/TLS imports the harness
   doesn't model, so `_getptd` and `_getptd_noexit` return one ready `_tiddata` with the process's default locale
   (`Machine.crt_thread_data`). `_vsnprintf` needs it to format numbers.
+- **Thread-local storage:** the TEB's TLS array (fs:[0x2C], gs:[0x58]) leads to a copy of the original's TLS
+  template. Reconstructed code reaches the same block: `tools/build_recon.py` links the original's TLS index variable
+  and lays out the DLL's own `.tls` so each original TLS variable (`T6_THREAD`, e.g. threads.cpp's `g_dwTlsIndex`)
+  has its original offset. TLS writes are compared too.
+- **COM objects** (`tests/differential/com.py`, from ghosts-decomp, x86 and x64): fake Direct3D/DXGI objects whose
+  every method call is logged with its arguments and compared; writes through out parameters are journaled.
 - **Program objects:** data a global pointer points to (the heap-allocated `clients` array) goes in the `OBJECTS`
   region, whose writes are compared like the images' globals.
 - **Observed calls:** the hooked function and pointer-sized arguments (`q`) that point into the reconstruction are

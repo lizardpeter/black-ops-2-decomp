@@ -243,3 +243,5 @@ t6mp_msstore	14071FEA0	matches	src/gfx_d3d/r_init.cpp	R_CreateDeviceInternal: th
 CoDMPServer_PC	007776B0	matches	src/universal/dvar.cpp	Dvar_SetBoolFromSource; tests/differential/test_dvar.py
 CoDMPServer_PC	00778330	matches	src/universal/dvar.cpp	Dvar_SetBool; tests/differential/test_dvar.py
 CoDMPServer_PC	00778350	matches	src/universal/dvar.cpp	Dvar_SetInt; tests/differential/test_dvar.py
+CoDMPServer_PC	006DFD10	matches	src/qcommon/threads.cpp	Sys_SetValue; tests/differential/test_win_common.py
+CoDMPServer_PC	006DFD40	matches	src/qcommon/threads.cpp	Sys_GetValue; tests/differential/test_win_common.py

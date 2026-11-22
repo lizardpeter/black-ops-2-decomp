@@ -43,3 +43,25 @@ CASES = [
     {"name": "Sys_SetWin32QuitEvent", "ret": "void", "builds": SERVER, "imports": IMPORTS,
      "inputs": [{"args": [], "setup": quit_event(h)} for h in (0, 0x1234, 0xFFFFFFFF)]},
 ]
+
+
+# -- per-thread values (qcommon/threads.cpp): g_dwTlsIndex, the thread's value table, at TLS offset 0x50
+from harness import TLS_BLOCK  # noqa: E402
+
+VALUES = OBJECTS + 0x10000
+
+
+def values(table):
+    def run(w):
+        w.write(TLS_BLOCK + 0x50, struct.pack("<I", VALUES))
+        w.write(VALUES, struct.pack(f"<{len(table)}I", *table))
+    return run
+
+
+TABLE = [0x11111111, 0x22222222, 0x33333333, 0, 0x55555555, 0xFFFFFFFF]
+CASES += [
+    {"name": "Sys_GetValue", "ret": "int", "builds": SERVER,
+     "inputs": [{"args": [i], "setup": values(TABLE)} for i in range(len(TABLE))]},
+    {"name": "Sys_SetValue", "ret": "void", "builds": SERVER,
+     "inputs": [{"args": [i, v], "setup": values(TABLE)} for i in range(len(TABLE)) for v in (0, 0xABCDEF01)]},
+]

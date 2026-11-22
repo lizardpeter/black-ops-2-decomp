@@ -26,6 +26,12 @@ the exe's import table, and units compiled with -mcmodel=large have each `movabs
 a load from its slot. Anything not identified in the Store build yet links to a trap (ud2, or data at address 0).
 No code may hold an exe address directly; the link checks it. Ported from black-ops-3-decomp (docs/hybrid-link.md).
 
+Thread-local variables (`__declspec(thread)`, e.g. threads.cpp's g_dwTlsIndex) are reached through the TLS index
+and an offset into the TLS block, not an address. The original's TLS index variable (`__tls_index`, x64 `_tls_index`)
+is linked like any data, and each original TLS variable is placed in the DLL's own .tls section at the offset it has
+in the original's TLS template, so the offsets the compiler emits are the original's. Nothing else in the
+reconstruction may use TLS. Ported from ghosts-decomp.
+
 This is the `compiles` gate. It is not byte matching: that needs the original compilers.
 """
 import csv
@@ -87,6 +93,29 @@ def original_exe(build):
     if not path.exists():
         sys.exit(f"{path}: the hybrid link needs the original exe (tools/fetch_originals.py {build} originals --only exe)")
     return path
+
+
+def tls_template(build):
+    """[start, end) of the TLS template in a build's exe (its TLS directory): a TLS variable's offset in the block is
+    its address (PDB statics, MAP, identifications) minus the start."""
+    import pefile
+    pe = pefile.PE(str(original_exe(build)), fast_load=True)
+    pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_TLS"]])
+    if not hasattr(pe, "DIRECTORY_ENTRY_TLS"):
+        return 0, 0
+    t = pe.DIRECTORY_ENTRY_TLS.struct
+    return t.StartAddressOfRawData, t.EndAddressOfRawData + t.SizeOfZeroFill
+
+
+def tls_asm(tls, lo, hi):
+    """The DLL's .tls section: each original TLS variable at its offset in the original's template."""
+    if not tls:
+        return []
+    asm = ['\t.section .tls$, "dw"', "t6_tls_start:"]
+    for off, q in sorted(tls):
+        asm += [f"\t.skip {off} - (. - t6_tls_start)", f"\t.globl {q}", f"{q}:"]
+    size = max([hi - lo] + [off + 8 for off, _ in tls])
+    return asm + [f"\t.skip {size} - (. - t6_tls_start)"]
 
 
 def compile_unit(src, obj, arch, extra=()):
@@ -280,8 +309,21 @@ def main():
     hybrid = ["symbol\tkind\tva"]
     asm = ["\t.text"]
     rewritten, slots_used = 0, 0
+    tls_lo, tls_hi = tls_template(build)
+    tls = []
+
+    def tls_var(u, va):
+        """An original TLS variable: placed in the DLL's .tls at its offset (tls_asm)."""
+        if tls_lo <= va < tls_hi:
+            tls.append((va - tls_lo, '"' + u + '"'))
+            hybrid.append(f"{u}\ttls\t{va:08X}")
+            return True
+        return False
     if arch == "x86":
         conventions = symbols.conventions(build)
+        if "__tls_array" in undefined:  # clang's x86 TLS access reads fs:[__tls_array]: the TEB's TLS array, 0x2C
+            asm += ['\t.globl "__tls_array"', '\t.set "__tls_array", 0x2c']
+            undefined = [u for u in undefined if u != "__tls_array"]
         missing = [u for u in undefined if not where(u)]
         if missing and reference:
             sys.exit(f"reconstruction uses symbols {build} does not have:\n  " + "\n  ".join(missing))
@@ -292,6 +334,8 @@ def main():
                 hybrid.append(f"{u}\tunresolved\t")
                 continue
             va, kind = where(u)
+            if kind == "data" and tls_var(u, va):
+                continue
             if kind == "function" and va in conventions:
                 asm += adapter(q, va, conventions[va])
             elif kind == "function":
@@ -337,6 +381,8 @@ def main():
                     hybrid.append(f"{u}\tunresolved-function\t")
                 continue
             va, kind = hit
+            if kind == "data" and tls_var(u, va):
+                continue
             if kind == "function":
                 asm += [f"\t.globl {q}", f"{q}:", f"\tjmpq *{slot(va)}(%rip)"]
             else:
@@ -372,6 +418,7 @@ def main():
             if n:
                 run("clang", triple, "-c", obj.with_suffix(".s"), "-o", obj)
                 rewritten += n
+    asm += tls_asm(tls, tls_lo, tls_hi)
     (BUILD / "hybrid.s").write_text("\n".join(asm) + "\n")
     run("clang", triple, "-c", BUILD / "hybrid.s", "-o", BUILD / "hybrid.obj")
     (BUILD / "hybrid.tsv").write_text("\n".join(hybrid) + "\n")
