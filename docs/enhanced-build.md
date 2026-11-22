@@ -30,6 +30,16 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - The moves the mouse still makes (with +strafe, or with free look off) and the commands' mouse fields use the counts
   scaled as the original's would be at `m_sens` × 0.3 profile sensitivity.
 
+**P0004, key timing:**
+- **Keys on the game's clock.** The original timed key presses by the Windows message, on a clock counting from
+  when the PC booted, and measured them against the frame's clock counting from when the game started. So a
+  movement key's press frame counted for nothing and its release frame counted in full (B0019). Now each key
+  event carries the time the raw input thread saw the key change, on the game's own clock, to the millisecond
+  (Windows' message times only move in 15.6 ms steps, B0020). Key bindings, typing and menus work as before: the
+  keys still reach the game through its window; only their times change.
+- **Precise timer kept.** The game asks Windows for a 1 ms timer; Windows 11 drops that for windows that are
+  minimized or covered unless the game opts out. It does now.
+
 Menus keep the normal cursor. Turn limits in vehicles and on turrets, aim assist's melee lunge and everything else
 are the original's.
 

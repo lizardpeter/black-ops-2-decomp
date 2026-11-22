@@ -24,6 +24,7 @@ T6_STATIC int window_center_y T6_AT("", "window_center_y");
 void IN_MouseMove()
 {
 	IN_StartRawInput();
+	IN_TimeWindowMessages();
 	int rawDx, rawDy;
 	IN_TakeRawMouse(&rawDx, &rawDy);  // always: counts never wait for a later frame
 	if (GetForegroundWindow() != g_wv.hWnd)

@@ -46,8 +46,13 @@ LRESULT WINAPI IN_RawInputWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 		RAWINPUT raw;
 		UINT size = sizeof(raw);
 		if (GetRawInputData((HRAWINPUT)lParam, RID_INPUT, &raw, &size, sizeof(RAWINPUTHEADER)) != (UINT)-1 &&
-		    raw.header.dwType == RIM_TYPEMOUSE && g_wv.hWnd && GetForegroundWindow() == g_wv.hWnd)
-			IN_RawInputAdd(&raw.data.mouse);
+		    g_wv.hWnd && GetForegroundWindow() == g_wv.hWnd)
+		{
+			if (raw.header.dwType == RIM_TYPEMOUSE)
+				IN_RawInputAdd(&raw.data.mouse);
+			else if (raw.header.dwType == RIM_TYPEKEYBOARD)
+				IN_RawKeyAdd(&raw.data.keyboard);  // its time only: the key itself still reaches the game's window
+		}
 	}
 	return DefWindowProcA(hWnd, msg, wParam, lParam);  // also frees the WM_INPUT data
 }
@@ -67,6 +72,10 @@ static DWORD WINAPI IN_RawInputThread(void *)
 	device.dwFlags = RIDEV_INPUTSINK;
 	device.hwndTarget = hWnd;
 	s_rawInputActive = hWnd && RegisterRawInputDevices(&device, 1, sizeof(device));
+	// the keyboard too, for its changes' times (P0004); without it keys keep the messages' times, on the game's clock
+	device.usUsage = HID_USAGE_GENERIC_KEYBOARD;
+	if (s_rawInputActive)
+		RegisterRawInputDevices(&device, 1, sizeof(device));
 	SetEvent(s_rawInputReady);
 	if (!s_rawInputActive)
 		return 1;
@@ -82,6 +91,11 @@ bool IN_StartRawInput()
 	if (s_rawInputTried)
 		return s_rawInputActive;
 	s_rawInputTried = true;
+	// keep the game's 1 ms timer (timeBeginPeriod(1)) while its window is minimized or covered: Windows 11 drops it
+	// for such windows otherwise. Fails harmlessly before Windows 11.
+	PROCESS_POWER_THROTTLING_STATE throttling = {PROCESS_POWER_THROTTLING_CURRENT_VERSION,
+	                                             PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION, 0};
+	SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &throttling, sizeof(throttling));
 	s_rawInputReady = CreateEventA(nullptr, TRUE, FALSE, nullptr);
 	HANDLE thread = CreateThread(nullptr, 0, IN_RawInputThread, nullptr, 0, nullptr);
 	if (!thread)

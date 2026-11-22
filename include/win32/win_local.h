@@ -16,6 +16,8 @@ struct WinVars_t
 	unsigned int sysMsgTime;
 };
 static_assert(sizeof(void *) != 4 || sizeof(WinVars_t) == 0x24, "WinVars_t (the server's x86 layout)");
+static_assert(sizeof(void *) != 8 || __builtin_offsetof(WinVars_t, sysMsgTime) == 0x38,
+              "WinVars_t (the Store's: Win_GetEvent 14049BAE4 sets 1421E4548)");
 
 extern WinVars_t g_wv;  // win_wndproc.cpp
 

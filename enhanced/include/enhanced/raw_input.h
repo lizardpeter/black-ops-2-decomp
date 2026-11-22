@@ -1,4 +1,5 @@
-// enhanced/raw_input.h: raw mouse input (enhanced/win32/win_rawinput.cpp, P0002).
+// enhanced/raw_input.h: raw mouse input (enhanced/win32/win_rawinput.cpp, P0002) and key timing
+// (enhanced/win32/win_keytime.cpp, P0004).
 #pragma once
 
 #include <windows.h>
@@ -17,3 +18,15 @@ LRESULT WINAPI IN_RawInputWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lPa
 
 // The movement since the last call, in device counts; the counters restart at zero.
 void IN_TakeRawMouse(int *dx, int *dy);
+
+// The game's clock (Sys_Milliseconds, without starting it): false until the game has set it up.
+bool IN_GameMilliseconds(int *ms);
+
+// Records one raw key change (the raw input thread, while the game is the foreground window) with the game's time.
+void IN_RawKeyAdd(const RAWKEYBOARD *key);
+
+// Subclasses the game's window (once per window) so its messages' events carry times on the game's clock.
+void IN_TimeWindowMessages();
+
+// The subclassed window procedure.
+LRESULT WINAPI IN_KeyTimeWndProc(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);

@@ -120,19 +120,47 @@ typedef struct tagRAWMOUSE
 	ULONG ulExtraInformation;
 } RAWMOUSE;
 
+typedef struct tagRAWKEYBOARD
+{
+	USHORT MakeCode;
+	USHORT Flags;
+	USHORT Reserved;
+	USHORT VKey;
+	UINT Message;
+	ULONG ExtraInformation;
+} RAWKEYBOARD;
+
 typedef struct tagRAWINPUT
 {
 	RAWINPUTHEADER header;
 	union
 	{
 		RAWMOUSE mouse;
-		unsigned char other[24];  // RAWKEYBOARD, RAWHID: not used
+		RAWKEYBOARD keyboard;
+		unsigned char other[24];  // RAWHID: not used
 	} data;
 } RAWINPUT;
 
 #define WM_INPUT 0x00FF
 #define RID_INPUT 0x10000003
 #define RIM_TYPEMOUSE 0
+#define RIM_TYPEKEYBOARD 1
+#define RI_KEY_BREAK 0x01
+#define HID_USAGE_GENERIC_KEYBOARD ((USHORT)0x06)
+#define WM_KEYDOWN 0x0100
+#define WM_KEYUP 0x0101
+#define WM_SYSKEYDOWN 0x0104
+#define WM_SYSKEYUP 0x0105
+#define GWLP_WNDPROC (-4)
+#define ProcessPowerThrottling 4
+#define PROCESS_POWER_THROTTLING_CURRENT_VERSION 1
+#define PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION 0x4
+typedef struct _PROCESS_POWER_THROTTLING_STATE
+{
+	ULONG Version;
+	ULONG ControlMask;
+	ULONG StateMask;
+} PROCESS_POWER_THROTTLING_STATE;
 #define RIDEV_INPUTSINK 0x00000100
 #define MOUSE_MOVE_ABSOLUTE 0x01
 #define HID_USAGE_PAGE_GENERIC ((USHORT)0x01)
@@ -163,6 +191,16 @@ WINBASEAPI BOOL WINAPI SetEvent(HANDLE hEvent);
 WINBASEAPI DWORD WINAPI WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
 WINBASEAPI BOOL WINAPI CloseHandle(HANDLE hObject);
 WINBASEAPI BOOL WINAPI SetThreadPriority(HANDLE hThread, int nPriority);
+// key timing (enhanced/win32/win_keytime.cpp): SetWindowLongPtrA, GetMessageTime and SetProcessInformation are real
+// imports of the enhanced DLL (tools/recon/lib/user32.def, kernel32.def)
+WINUSERAPI __INTPTR_TYPE__ WINAPI SetWindowLongPtrA(HWND hWnd, int nIndex, __INTPTR_TYPE__ dwNewLong);
+WINUSERAPI LRESULT WINAPI CallWindowProcA(WNDPROC lpPrevWndFunc, HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
+WINUSERAPI LONG WINAPI GetMessageTime(void);
+WINBASEAPI DWORD WINAPI GetTickCount(void);
+WINBASEAPI HANDLE WINAPI GetCurrentProcess(void);
+WINBASEAPI BOOL WINAPI SetProcessInformation(HANDLE hProcess, int ProcessInformationClass,
+                                             void *ProcessInformation, DWORD ProcessInformationSize);
+extern "C" __declspec(dllimport) DWORD WINAPI timeGetTime(void);
 
 // <mmeapi.h>: the audio mixer API (winmm.dll), as win32/win_voice.cpp uses it. The SDK packs these structures to
 // one byte (pshpack1.h).

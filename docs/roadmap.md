@@ -14,14 +14,9 @@ decompiled first. Items marked **open** still need a decision. Fixes to original
   `CL_MouseMove`, not defaulted off. Raw input bypasses Windows' pointer acceleration.
 - **High polling rates and DPI: done for the mouse (P0002).** Each report is handled on the input thread, counts
   are never rounded, and a 0 ms frame no longer drops the frame's movement (B0017). The yaw is kept within ±180° so
-  its precision doesn't wear down (B0018). Still to do: key timing. Key events are timed on another clock than
-  the frame (B0019: a movement key's press frame counts nothing and its release frame counts in full) and only to
-  Windows' 15.6 ms tick (B0020). Fix: time key transitions on the raw input thread, on the game's clock, and give
-  those times to the key messages (falling back to MSG.time moved onto the game's clock). Needs the Store's
-  Win_GetEvent (around 14049BA72) reconstructed. Timer resolution: the game already calls timeBeginPeriod(1) at
-  startup (1403A26AC), so its own clock (timeGetTime) is 1 ms; MSG.time (GetTickCount) ignores it. The key times
-  will come from QueryPerformanceCounter. The enhanced build should also opt out of Windows 11 dropping the 1 ms
-  timer for windows that are minimized or covered (SetProcessInformation, PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION).
+  its precision doesn't wear down (B0018). Key timing: done (P0004). Key events are timed by the raw input thread on the
+  game's clock (B0019, B0020), and Windows 11 no longer drops the 1 ms timer for a covered window. Mouse buttons
+  keep their messages' times, moved onto the game's clock (to about 16 ms).
 - **MW2019 sensitivity scale: done (P0003).** `m_sens`: degrees per count = MW2019's yaw (0.0066°) × `m_sens`,
   default 1.5, independent of FOV and ADS; angles kept in double precision. Same setup as Ghosts. Still possible: an
   option to scale ADS by the zoom (MW2019's "monitor distance" coefficient), if wanted.

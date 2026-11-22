@@ -1,0 +1,4 @@
+; Imports the enhanced build makes that the Store exe doesn't (see user32.def). x64 only.
+LIBRARY kernel32.dll
+EXPORTS
+SetProcessInformation
