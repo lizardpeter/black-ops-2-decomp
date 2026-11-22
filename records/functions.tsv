@@ -250,3 +250,9 @@ t6mp_msstore	1403A4010	matches	src/qcommon/common.cpp	Com_Frame_Try_Block_Functi
 CoDMPServer_PC	0079D5D0	matches	src/win32/win_shared.cpp	Sys_Milliseconds; tests/differential/test_win_common.py
 CoDMPServer_PC	00792370	matches	src/universal/win_common.cpp	Sys_TryEnterCriticalSection; tests/differential/test_win_common.py
 CoDMPServer_PC	00797250	matches	src/win32/win_gamepad.cpp	GPad_StopRumbles; tests/differential/test_win_gamepad.py
+t6mp_msstore	1403C2C50	matches	src/qcommon/threads.cpp	Sys_WaitRenderer (Store only; inlines Sys_IsMainThread); tests/differential/test_threads.py
+t6mp_msstore	14071B880	matches	src/gfx_d3d/r_rendercmds.cpp	R_ToggleSmpFrameCmd (Store; inlines R_FinishedFrontendWorkerCmds, R_UpdateSkinCacheUsage, Sys_Enter/LeaveCriticalSection and Sys_WakeRenderer); tests/differential/test_threads.py. The server's 00A2F110 has its asserts and PIX events and isn't rebuilt yet
+CoDMPServer_PC	006DFA60	matches	src/qcommon/threads.cpp	Sys_IsServerThread; tests/differential/test_threads.py
+CoDMPServer_PC	006DFBD0	matches	src/qcommon/threads.cpp	Sys_IsRenderThread; tests/differential/test_threads.py
+CoDMPServer_PC	006DFC50	matches	src/qcommon/threads.cpp	Sys_IsMainThread; tests/differential/test_threads.py
+CoDMPServer_PC	0076FBA0	matches	src/universal/com_workercmds.cpp	R_FinishedFrontendWorkerCmds (inlined in the Store's R_ToggleSmpFrameCmd); tests/differential/test_threads.py

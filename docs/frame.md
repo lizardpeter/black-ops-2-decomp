@@ -74,15 +74,18 @@ Store's call graph:
   critical section 1441FB970 it uploads the frame's dynamic vertex data (Map/Unmap on the device context 1427F1D90,
   looping while 142155DFC is set) and finishes three command lists (140736BA0 at +0x122C10, +0x122C00, +0x122C50 of
   the frame), then runs the back end and presents (140736950). 
-- **The hand-off** (14071B880, the server's `R_IssueRenderCommands` place, called from the end-of-frame 14071BAC0):
-  1. 1403C2C50 (the server's `R_SyncRenderThread` / `Sys_WaitRenderer` place): on the main thread (thread id
-     14406FBF0), `WaitForSingleObject(14406FBE0, 1)` in a loop until the render thread has signalled that it is done
-     with the previous frame. 1 ms waits: the main thread wakes late by up to about 1 ms.
-  2. A spin: while any of 15 job queues (140D3A5A8 ... 143043BC8, tested by 14078C880) still has work,
-     `Sleep(0)` and start again from 1. That is a busy wait on the main thread.
-  3. Under the critical section 1441FB970: finish the frame's data (14071BFA0), `ResetEvent(14406FBE0)`, publish the
-     frame (`14406FAF0` = the frame's back-end data, 1427E7320), `SetEvent(14406FC58)` (work for the render thread),
-     `SetEvent(14406FC50)`.
+- **The hand-off** (`R_ToggleSmpFrameCmd` 14071B880, the server's 00A2F110; rebuilt in
+  `src/gfx_d3d/r_rendercmds.cpp`, `tests/differential/test_threads.py`), called from the end-of-frame 14071BAC0:
+  1. `Sys_WaitRenderer` (1403C2C50; the dedicated server's is `return 0`): on a client's main thread,
+     `WaitForSingleObject(renderCompletedEvent 14406FBE0, 1)` until it returns 0, i.e. until the render thread is done
+     with the previous frame. Each wait returns as soon as the event is set, so the 1 ms timeouts cost wake-ups, not
+     latency.
+  2. `R_FinishedFrontendWorkerCmds` (inlined): `jqPoll` on the front end's 20 job groups (fx_spawn ... r_add_draw_calls,
+     the server's order); while any is busy, `Sleep(0)` and poll them again (not step 1 again). That is a busy wait on
+     the main thread (B0028).
+  3. `R_UpdateSkinCacheUsage` (inlined), then under `CRITSECT_DXCONTEXT`: read `frontEndDataOut` (1427E7320),
+     `R_ToggleSmpFrame` (14071BFA0), and `Sys_WakeRenderer` (inlined): `ResetEvent(renderCompletedEvent)`, `smpData` =
+     the frame, `SetEvent(backendEvent[1])` (work for the render thread), `SetEvent(backendEvent[0])`.
 - **The render thread signals done before it presents** (140736950): `SetEvent(14406FBE0)` and `SetEvent(14406FC50)`
   at 140736AC5, then `RB_SwapBuffers` (`Present`) at 140736AEB. So the main thread builds frame N+1 while the render
   thread presents frame N, and the render thread blocks in `Present` when DXGI's queue is full (by default up to 3
@@ -160,8 +163,9 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
 6. **The render thread's idle wait** (B0024): done in P0008. With nothing to do it blocks in `WaitForMultipleObjects`
    on `backendEvent[1]`, 144070008 and 144070048 (1 ms timeout, since the resize and the remote screen updates are
    flags it polls); a frame signal taken by the wait is drawn on the next pass.
-7. **The hand-off wait** (1403C2C50, 1-ms `WaitForSingleObject` steps) and the job-queue spin with `Sleep(0)` in
-   14071B880: wait without polling.
+7. **The hand-off's job wait** (B0028): `R_ToggleSmpFrameCmd` polls the front end's job groups with `Sleep(0)` in
+   between; block on the job queue instead (or help run its jobs, as the server's `R_WaitFrontendWorkerCmds` does with
+   `jqFlush`). The renderer wait before it (1 ms timeouts) needs no change: it returns as soon as its event is set.
 
 ## Still to map
 

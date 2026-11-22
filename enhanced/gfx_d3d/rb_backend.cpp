@@ -16,6 +16,7 @@
 #include "enhanced/dxgi_flip.h"
 
 #include "gfx_d3d/r_dx.h"
+#include "gfx_d3d/r_rendercmds.h"
 #include "qcommon/threads.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
@@ -184,32 +185,24 @@ bool Sys_RendererWaitForWork(HANDLE request1, HANDLE request2);  // enhanced/qco
 // (a static, so a longjmp back to the loop's recovery point keeps it)
 static bool s_frameSignalled;
 
-struct GfxDynamicUpload
-{
-	int used;
-	int size;
-	ID3D11Buffer *buffer;
-	const void *data;
-};
-
 static void RB_RenderThreadDrawFrame()
 {
 	Sys_EnterCriticalSection(CRITSECT_DXCONTEXT);
 	char *data = (char *)s_renderThreadBackEndData;
-	GfxDynamicUpload *upload = *(GfxDynamicUpload **)(data + 0x4BE9C0);
-	if (upload->buffer)
+	GfxVertexBufferState *skinnedCacheVb = GfxBackEndData_skinnedCacheVb((GfxBackEndData *)data);
+	if (skinnedCacheVb->buffer)
 	{
-		int bytes = upload->size;
-		if (upload->used < bytes)
-			bytes = upload->used;
+		int bytes = skinnedCacheVb->total;
+		if (skinnedCacheVb->used < bytes)
+			bytes = skinnedCacheVb->used;
 		ID3D11DeviceContext *context = DX(context);
-		ID3D11Buffer *buffer = upload->buffer;
+		ID3D11Buffer *buffer = skinnedCacheVb->buffer;
 		D3D11_MAPPED_SUBRESOURCE mapped;
 		do
 			ID3D11DeviceContext_Map(context, buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
 		while (store_142155DFC);
-		memcpy(mapped.pData, (*(GfxDynamicUpload **)(data + 0x4BE9C0))->data, bytes);
-		ID3D11DeviceContext_Unmap(DX(context), (*(GfxDynamicUpload **)(data + 0x4BE9C0))->buffer, 0);
+		memcpy(mapped.pData, GfxBackEndData_skinnedCacheVb((GfxBackEndData *)data)->verts, bytes);
+		ID3D11DeviceContext_Unmap(DX(context), GfxBackEndData_skinnedCacheVb((GfxBackEndData *)data)->buffer, 0);
 	}
 	RB_UploadDynamicBuffers(data + 0x122C10);
 	RB_UploadDynamicBuffers(*(void **)(data + 0x122C00));

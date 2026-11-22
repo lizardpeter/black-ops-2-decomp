@@ -218,6 +218,7 @@ WINBASEAPI void WINAPI Sleep(DWORD dwMilliseconds);
 extern "C" void *_InterlockedExchangePointer(void *volatile *target, void *value);
 #define InterlockedExchangePointer _InterlockedExchangePointer
 WINBASEAPI DWORD WINAPI WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
+WINBASEAPI DWORD WINAPI GetCurrentThreadId(void);
 // a real import of the enhanced DLL (tools/recon/lib/kernel32.def): the render thread's wait (P0008)
 WINBASEAPI DWORD WINAPI WaitForMultipleObjects(DWORD nCount, const HANDLE *lpHandles, BOOL bWaitAll,
                                                DWORD dwMilliseconds);
