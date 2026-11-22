@@ -117,7 +117,16 @@ streaming budgets.
 - **Hardware independent flip:** done in P0005 (`FLIP_DISCARD`, tearing allowed, at most one frame queued) and P0007
   (the frame-latency waitable object, waited on before the frame's input is read). P0008 stops the render
   thread's busy wait (B0024). Still to do: the main thread's job-queue spin before the hand-off (B0028, docs/frame.md step 7).
-- **Late latch:** sample view angles as late as possible, at render submit, as in Ghosts and BO3.
+- **Full late latch (decided):** minimum latency, not just aim. CPU late latch first, under D3D11: on the render
+  thread, just before submit, read the newest mouse input, recompute the view angles and rewrite the frame's camera
+  constants. GPU late latch later, with the native Vulkan renderer: the CPU keeps writing the newest camera into a
+  persistently mapped buffer the GPU reads when it starts the frame (D3D11 can't do that reliably: dynamic buffers
+  are renamed at submit, and writing one the GPU is using is undefined). Details to get right: widen the main
+  thread's culling slightly so a late turn can't reveal culled edges; the shot fires on the command's angles, so
+  what's drawn and what's sent differ by at most the movement within one frame (the next command carries it).
+  Activision's published latency work ("Controller to Display Latency in Call of Duty", 2020) lists late input
+  sampling only as future work; its shipped techniques are a predictive throttle before the input sample, and
+  client/render overlap with the GPU wait moved after the input sample.
 - **NVIDIA Reflex:** latency markers plus the Reflex sleep, as a menu option.
 - **Frames in flight (open):** BO2 pipelines frames across threads. The main thread builds frame N+1 while the render
   thread submits frame N (`R_ToggleSmpFrame`, `Sys_WakeRenderer` / `Sys_WaitRenderer`), and the GPU may queue
@@ -127,7 +136,12 @@ streaming budgets.
   2. Reflex: it sleeps the CPU so the queue stays empty without losing GPU throughput.
   3. Run the back end on the main thread: lowest latency, highest frame time.
 
-  Recommendation: 1 + 2 by default, with 3 as an option to measure. Pace the pipeline like Forge (Rust-test
+  Decided direction: one frame on the CPU at a time, as in Forge (Rust-test). Next patch (P0009): the main thread
+  waits for the render thread before reading input (the hand-off wait moved to the frame's start; on by default,
+  the original overlap as an option), with stage timing (main frame, render submit, hand-off waits) printed by a
+  dvar to measure it. The threads stay (the window, the loading screen and the device context belong to the render
+  thread); taking turns costs a wake-up per hand-off, not a frame. Then full late latch (above), then Reflex.
+  Earlier recommendation, superseded: 1 + 2 by default, with 3 as an option to measure. Pace the pipeline like Forge (Rust-test
   `docs/PERFORMANCE_TELEMETRY.md`, "Frame overlap"): start the main thread's frame just in time to be ready when
   the render thread and GPU free up (their expected finish less the main thread's recent frame time), instead of
   letting it run ahead, so a finished frame never waits at the handoff and its input is no older. Still to discuss
