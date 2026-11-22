@@ -1,12 +1,13 @@
 // gfx_d3d/rb_backend.cpp (CoDMPServer_PC: rb_backend.obj)
 //
-// The render back end. So far the end of a frame: presenting it.
+// The render back end: presenting a frame, and (the Store build) the render thread.
 #define T6_ASSERT_DIR "c:\\t6\\code\\src\\gfx_d3d\\"
 #define T6_ASSERT_FILE T6_ASSERT_DIR "rb_backend.cpp"
 #define T6_SOURCE "gfx_d3d/rb_backend.cpp"
 
 #include "gfx_d3d/r_dx.h"
 #include "qcommon/threads.h"
+#include "t6_static.h"
 #include "t6_assert.h"
 #include "universal/dvar.h"
 #include "universal/win_common.h"
@@ -139,3 +140,169 @@ void RB_SwapBuffers()
 	}
 	DX(nvStereoActivated) = false;
 }
+
+#ifdef T6_STORE
+// ---- the render thread (Store only: the dedicated server has none; lineage: Black Ops' RB_RenderThread) -----------
+#include <setjmp.h>
+#include <string.h>
+
+extern HANDLE store_144070008;     // names made up: two more requests to the render thread (what they ask is not read
+extern HANDLE store_144070048;     // yet): 140721570 and 140721860 answer them
+extern void *s_renderThreadBackEndData;  // the frame the render thread is drawing (name made up)
+extern int store_142155DFC;        // Map is retried while this is set (name made up)
+void RB_RenderThreadFrame();       // 140736950 (name made up): the back end, then RB_SwapBuffers
+void RB_UploadDynamicBuffers(void *buffers);  // 140736BA0 (name made up)
+void sub_140721570();
+void sub_140721860();
+void sub_140753660();
+void sub_140752AA0();
+void sub_1407370D0();
+[[noreturn]] void sub_14039AE90();
+void SCR_UpdateScreen();
+void R_SetWndParms(GfxWindowParms *wndParms);              // 140720AE0
+void R_StoreWindowSettings(const GfxWindowParms *wndParms);  // 14071E440
+void sub_14071E360(DXGI_SWAP_CHAIN_DESC *swapChainDesc, const GfxWindowParms *wndParms);  // r_init.cpp
+
+// The frame's dynamic vertex data (at +0x4BE9C0 of the Store's back-end data: a pointer to it; names made up)
+struct GfxDynamicUpload
+{
+	int used;
+	int size;
+	ID3D11Buffer *buffer;
+	const void *data;
+};
+
+// Uploads the frame's dynamic data and draws it: under the device context's critical section, the vertex data is
+// copied into its buffer (Map with WRITE_DISCARD, the smaller of the used and the buffer's size), then the three
+// command buffers' index and vertex data; then the back end and the present.
+static void RB_RenderThreadDrawFrame()
+{
+	Sys_EnterCriticalSection(CRITSECT_DXCONTEXT);
+	char *data = (char *)s_renderThreadBackEndData;
+	GfxDynamicUpload *upload = *(GfxDynamicUpload **)(data + 0x4BE9C0);
+	if (upload->buffer)
+	{
+		int bytes = upload->size;
+		if (upload->used < bytes)
+			bytes = upload->used;
+		ID3D11DeviceContext *context = DX(context);
+		ID3D11Buffer *buffer = upload->buffer;
+		D3D11_MAPPED_SUBRESOURCE mapped;
+		do
+			ID3D11DeviceContext_Map(context, buffer, 0, D3D11_MAP_WRITE_DISCARD, 0, &mapped);
+		while (store_142155DFC);
+		memcpy(mapped.pData, (*(GfxDynamicUpload **)(data + 0x4BE9C0))->data, bytes);
+		ID3D11DeviceContext_Unmap(DX(context), (*(GfxDynamicUpload **)(data + 0x4BE9C0))->buffer, 0);
+	}
+	RB_UploadDynamicBuffers(data + 0x122C10);
+	RB_UploadDynamicBuffers(*(void **)(data + 0x122C00));
+	RB_UploadDynamicBuffers(data + 0x122C50);
+	Sys_LeaveCriticalSection(CRITSECT_DXCONTEXT);
+	RB_RenderThreadFrame();
+}
+
+// The swap chain's buffers after the window changed (dx.doResizeBuffers): the window parms again from the dvars, the
+// window's messages pumped, ResizeBuffers to the new size, and the resolution callback told whether the size changed.
+static void RB_ResizeBuffers()
+{
+	sub_140753660();
+	if (DX(backBuffer))
+	{
+		IUnknown_Release(DX(backBuffer));
+		DX(backBuffer) = 0;
+	}
+	GfxWindowParms wndParms;
+	R_SetWndParms(&wndParms);
+	wndParms.hwnd = DX(windows)[0].hwnd;
+	bool sizeChanged = !((unsigned int)wndParms.displayWidth == vidConfig.displayWidth
+	                     && (unsigned int)wndParms.displayHeight == vidConfig.displayHeight);
+	DXGI_SWAP_CHAIN_DESC swapChainDesc;
+	sub_14071E360(&swapChainDesc, &wndParms);
+	R_StoreWindowSettings(&wndParms);
+	MSG msg;
+	while (PeekMessageA(&msg, 0, 0, 0, PM_NOREMOVE))
+	{
+		if (!GetMessageA(&msg, 0, 0, 0))
+			Sys_SetWin32QuitEvent();
+		TranslateMessage(&msg);
+		DispatchMessageA(&msg);
+	}
+	// the swap chain's flags are not passed on: ALLOW_MODE_SWITCH, as it was created with
+	IDXGISwapChain_ResizeBuffers(DX(swapChain), swapChainDesc.BufferCount, swapChainDesc.BufferDesc.Width,
+	                             swapChainDesc.BufferDesc.Height, swapChainDesc.BufferDesc.Format,
+	                             DXGI_SWAP_CHAIN_FLAG_ALLOW_MODE_SWITCH);
+	sub_140752AA0();
+	sub_1407370D0();
+	if (DX(resolutionCallback))
+		DX(resolutionCallback)(sizeChanged);
+	DX(doResizeBuffers) = false;
+}
+
+// 140736CD0 (Store only; started at 1403A1715 through 1403C2BD0)
+// The render thread. Each pass: tells the main thread it runs, then takes the first of: a frame handed over in smpData
+// (drawn and presented), the requests on store_144070008 and store_144070048, a resize of the swap chain's buffers;
+// with nothing to do it yields (Sleep(0)) and goes round again: a busy wait (B0024). While another thread asks for
+// remote screen updates (r_glob.remoteScreenUpdateNesting: the loading screen) it runs the screen update itself. An
+// error (Com_Error's longjmp to the thread's jump buffer) during that screen update starts the loop again; during a
+// frame it is fatal.
+void RB_RenderThread(unsigned int threadContext)
+{
+	for (;;)
+	{
+		jmp_buf *abortframe = (jmp_buf *)Sys_GetValue(2);
+		if (setjmp(*abortframe))
+		{
+			if (r_glob.isRenderingRemoteUpdate)
+			{
+				r_glob.isRenderingRemoteUpdate = false;
+				r_glob.screenUpdateNotify = 1;
+				s_renderThreadBackEndData = 0;
+				continue;
+			}
+			if (s_renderThreadBackEndData)
+				sub_14039AE90();
+			continue;
+		}
+		for (;;)
+		{
+			Sys_RendererRunning();
+			if (Sys_RendererWorkPending())
+			{
+				s_renderThreadBackEndData = Sys_TakeRendererData();
+				if (s_renderThreadBackEndData)
+					RB_RenderThreadDrawFrame();
+				s_renderThreadBackEndData = 0;
+			}
+			else if (WaitForSingleObject(store_144070008, 0) == WAIT_OBJECT_0)
+			{
+				sub_140721570();
+				WaitForSingleObject(store_144070008, INFINITE);
+				ResetEvent(store_144070008);
+			}
+			else if (WaitForSingleObject(store_144070048, 0) == WAIT_OBJECT_0)
+			{
+				sub_140721860();
+				ResetEvent(store_144070048);
+			}
+			else if (!DX(doResizeBuffers))
+			{
+				Sleep(0);
+			}
+			else if (DX(windows)[0].hwnd && DX(swapChain))
+			{
+				RB_ResizeBuffers();
+			}
+			if (r_glob.remoteScreenUpdateNesting)
+			{
+				r_glob.screenUpdateNotify = 1;
+				r_glob.isRenderingRemoteUpdate = true;
+				do
+					SCR_UpdateScreen();
+				while (r_glob.remoteScreenUpdateNesting);
+				r_glob.isRenderingRemoteUpdate = false;
+				r_glob.screenUpdateNotify = 1;
+			}
+		}
+	}
+}
+#endif

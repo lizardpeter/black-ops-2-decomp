@@ -177,15 +177,17 @@ def _crt_cstr(mu, va):
         out += chunk
 
 
-def _crt_memset(mu):
+# The models that write memory write as the program would (Machine._emulated_write): journaled and compared, like
+# the writes of the original's own inlined copies. They take the machine as well as the emulator.
+def _crt_memset(m, mu):
     dst, c, n = _crt_args(mu, 3)
-    mu.mem_write(dst, bytes([c & 0xFF]) * n)
+    m._emulated_write(dst, bytes([c & 0xFF]) * n)
     mu.reg_write(X.UC_X86_REG_RAX, dst)
 
 
-def _crt_memmove(mu):
+def _crt_memmove(m, mu):
     dst, src, n = _crt_args(mu, 3)
-    mu.mem_write(dst, bytes(mu.mem_read(src, n)))
+    m._emulated_write(dst, bytes(mu.mem_read(src, n)))
     mu.reg_write(X.UC_X86_REG_RAX, dst)
 
 
@@ -211,6 +213,7 @@ def _crt_atoi(mu):
     mu.reg_write(X.UC_X86_REG_RAX, max(-2**31, min(2**31 - 1, v)) & 0xFFFFFFFF)
 
 
+CRT_WRITERS = (_crt_memset, _crt_memmove)
 CRT_MODELS_X64 = {"vcruntime140.dll!memset": _crt_memset, "vcruntime140.dll!memcpy": _crt_memmove,
                   "vcruntime140.dll!memmove": _crt_memmove, "vcruntime140.dll!strchr": _crt_strchr,
                   "api-ms-win-crt-string-l1-1-0.dll!strlen": _crt_strlen,
@@ -270,7 +273,7 @@ class Machine:
             # the Store build links the CRT dynamically: its own code inlines most of these, the reconstruction
             # (and some original code) calls them
             for name, fn in CRT_MODELS_X64.items():
-                self.on_import(name, fn)
+                self.on_import(name, (lambda f: lambda mu: f(self, mu))(fn) if fn in CRT_WRITERS else fn)
         for img in images:
             for slot, name in img.iat.items():
                 stub = STUBS + 0x10 * len(self._stub_names)
@@ -331,6 +334,12 @@ class Machine:
                 for i in range(a1 - a0):
                     self._journal.setdefault(a0 + i, old[i:i + 1])
         self.mu.mem_write(va, bytes(data))
+
+    def end_call(self):
+        """From a fake or an import model: stop the call here as if it had returned. For a function that never
+        returns (a thread's loop), the test decides how far both runs go; the return value is then not compared."""
+        self._ended = True
+        self.mu.emu_stop()
 
     def program_write(self, va, data):
         """For a fake standing in for a function: write on the program's behalf, journaled and compared."""
@@ -467,6 +476,7 @@ class Machine:
         mu.mem_write(STACK + STACK_SIZE - STACK_FILL, b"\xCC" * STACK_FILL)
         mu.mem_write(TLS_BLOCK, self._tls_template + b"\0" * (TLS_SIZE - len(self._tls_template)))
         self._setup_journal, self.imports_called, self._stub_fault = {}, [], None
+        self._ended = False
         self.tsc = 0x100000000
         self._fakes, self._observe, self._at, self.observed = dict(fakes or {}), dict(observe or {}), dict(at or {}), []
         for a in list(self._fakes) + list(self._observe) + list(self._at):
@@ -538,13 +548,22 @@ class Machine:
                 else:
                     mu.reg_write(getattr(X, f"UC_X86_REG_{where.upper()}"), v & 0xFFFFFFFF)
         mu.reg_write(X.UC_X86_REG_MXCSR, 0x1F80)
+        trace = None
+        if os.environ.get("T6_TRACE"):  # debugging aid: the last instructions before a fault
+            from collections import deque
+            trace = deque(maxlen=int(os.environ["T6_TRACE"]))
+            trace_hook = mu.hook_add(UC_HOOK_CODE, lambda mu_, a, n, u: trace.append(a))
         try:
             mu.emu_start(va, SENTINEL, count=limit)
-            fault = self._stub_fault or (None if mu.reg_read(self._ip) == SENTINEL else
+            fault = self._stub_fault or (None if mu.reg_read(self._ip) == SENTINEL or self._ended else
                                          f"fault: no return within {limit:,} instructions "
                                          f"(at {mu.reg_read(self._ip):08X})")
         except UcError as e:
             fault = f"fault: {e} at {mu.reg_read(self._ip):08X}"
+        if trace is not None:
+            mu.hook_del(trace_hook)
+            if fault:
+                print("trace:", " ".join(f"{a:X}" for a in trace), file=sys.stderr)
         # net changes only, as whole aligned qwords (run.py recognises stored pointers in them)
         changed = {a & ~7 for a in self._journal if bytes(mu.mem_read(a, 1)) != self._journal[a]}
         writes = {a + i: bytes(mu.mem_read(a + i, 1)) for a in sorted(changed) for i in range(8)}

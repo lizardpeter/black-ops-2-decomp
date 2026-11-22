@@ -206,6 +206,12 @@ WINBASEAPI HANDLE WINAPI CreateThread(void *lpThreadAttributes, __SIZE_TYPE__ dw
 WINBASEAPI HANDLE WINAPI CreateEventA(void *lpEventAttributes, BOOL bManualReset, BOOL bInitialState,
                                       const char *lpName);
 WINBASEAPI BOOL WINAPI SetEvent(HANDLE hEvent);
+WINBASEAPI BOOL WINAPI ResetEvent(HANDLE hEvent);
+WINBASEAPI void WINAPI Sleep(DWORD dwMilliseconds);
+#define WAIT_OBJECT_0 0
+// an intrinsic (a locked XCHG)
+extern "C" void *_InterlockedExchangePointer(void *volatile *target, void *value);
+#define InterlockedExchangePointer _InterlockedExchangePointer
 WINBASEAPI DWORD WINAPI WaitForSingleObject(HANDLE hHandle, DWORD dwMilliseconds);
 WINBASEAPI BOOL WINAPI CloseHandle(HANDLE hObject);
 WINBASEAPI BOOL WINAPI SetThreadPriority(HANDLE hThread, int nPriority);

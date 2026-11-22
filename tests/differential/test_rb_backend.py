@@ -265,3 +265,153 @@ CASES = [
      "by_build": {STORE: {"fakes": STORE_FAKES, "observe": STORE_SEEN, "imports": IMPORTS,
                           "inputs": inputs(STORE)[1:]}}},
 ]
+
+
+# ---- RB_RenderThread (Store 140736CD0) ------------------------------------------------------------------------------
+# The thread never returns: each input scripts what its waits see, and the run ends (Machine.end_call) when the script
+# runs out, at the noreturn error path, or after a fixed number of screen updates. Events, waits, Sleep, the message
+# pump and critical sections are logged to the compared region; the frame's buffers are COM objects.
+from harness import TLS_BLOCK  # noqa: E402
+
+RT = {}
+RT_DATA = 0x34000000                    # a back-end data block (its fields sit 0x122C00 and 0x4BE9C0 in)
+RT_VALUES, RT_JMPBUF = OBJECTS + 0x10000, OBJECTS + 0x10100
+RT_UPLOAD, RT_SOURCE, RT_MAPPED = OBJECTS + 0x10400, OBJECTS + 0x10500, OBJECTS + 0x11000
+EV = {"rendererRunning": 0x1406FC68, "renderPaused": 0x14070050, "backend1": 0x1406FC58, "e8": 0x14070008,
+      "e48": 0x14070048, "quit": 0xE0E0}
+RT_ADDR = {"smpData": 0x14406FAF0, "backendEvent": 0x14406FC50, "rendererRunningEvent": 0x14406FC68,
+           "renderPausedEvent": 0x144070050, "e8": 0x144070008, "e48": 0x144070048,
+           "backEndData": 0x14449ED18, "busy": 0x142155DFC, "r_glob": 0x1427E7330, "vidConfig": 0x14282E5C0,
+           "win32QuitEvent": 0x14406FBD8, "dx": 0x1427F1D80}
+
+
+def rt_wait(m, mu):
+    handle, timeout = arg(mu, 0), arg(mu, 1) & 0xFFFFFFFF
+    log(m, 0x3A17, handle)
+    script = RT["waits"]
+    if not script:
+        m.end_call()
+        return
+    result(mu, script.pop(0) if timeout == 0 else 0)
+
+
+def rt_event(tag):
+    def run(m, mu):
+        log(m, tag, arg(mu, 0))
+        result(mu, 1)
+    return run
+
+
+def rt_sleep(m, mu):
+    log(m, 0x51EE, arg(mu, 0) & 0xFFFFFFFF)
+
+
+RT_IMPORTS = dict(IMPORTS, **{"kernel32.dll!WaitForSingleObject": (rt_wait, 2),
+                              "kernel32.dll!ResetEvent": (rt_event(0xE5), 1), "kernel32.dll!SetEvent": (rt_event(0xE7), 1),
+                              "kernel32.dll!Sleep": (rt_sleep, 1)})
+
+
+def rt_setjmp(mu):
+    return RT["setjmp"].pop(0) if RT["setjmp"] else 0
+
+
+def rt_screen_update(mu):
+    RT["updates"] += 1
+    if RT["updates"] >= RT["p"]["updates"]:
+        RT["m"].program_write(RT_ADDR["r_glob"] + 0x10, struct.pack("<i", 0))
+
+
+def rt_wnd_parms(mu):
+    p = RT["p"]
+    mu.mem_write(arg(mu, 0), struct.pack("<QiB3xiiiiii", 0x7777, 60, p["fs"], 0, 0, 1280, 720, *p["size"]))  # 0x28
+
+
+def rt_fatal(mu):
+    RT["m"].end_call()
+
+
+RT_FAKES = {"_setjmp": rt_setjmp, "RB_UploadDynamicBuffers": lambda mu: None, "RB_RenderThreadFrame": lambda mu: None,
+            "sub_140721570": lambda mu: None, "sub_140721860": lambda mu: None, "sub_140753660": lambda mu: None,
+            "sub_140752AA0": lambda mu: None, "sub_1407370D0": lambda mu: None, "SCR_UpdateScreen": rt_screen_update,
+            "R_SetWndParms": rt_wnd_parms, "R_StoreWindowSettings": lambda mu: None, "sub_14039AE90": rt_fatal,
+            CALLBACK: lambda mu: None}
+RT_SEEN = {"_setjmp": "q", "RB_UploadDynamicBuffers": "q", "RB_RenderThreadFrame": "", "sub_140721570": "",
+           "sub_140721860": "", "sub_140753660": "", "sub_140752AA0": "", "sub_1407370D0": "", "SCR_UpdateScreen": "",
+           "R_SetWndParms": "x", "R_StoreWindowSettings": "x", "sub_14039AE90": "", CALLBACK: "b"}
+RT_SIGS = {("ID3D11DeviceContext", 14 * 8): "piiip", ("ID3D11DeviceContext", 15 * 8): "pi",
+           ("IDXGISwapChain", 13 * 8): "iiiii", ("ID3D11Resource", 2 * 8): ""}
+
+
+def rt_setup(p):
+    def run(w):
+        RT.clear()
+        RT.update(m=w.m, p=p, waits=list(p["waits"]), setjmp=list(p["setjmp"]), updates=0)
+        STATE.clear()
+        STATE.update(build=STORE, messages=list(p["messages"]))
+        try:
+            w.m.mu.mem_map(RT_DATA, 0x600000)
+        except Exception:
+            pass
+        model = ComModel(RT_SIGS)
+        model.install(w.m)
+
+        def map_(call):
+            # the busy flag stays up for p["busy"] Maps: the original retries while it is set
+            busy = struct.unpack("<i", bytes(call.mu.mem_read(RT_ADDR["busy"], 4)))[0]
+            call.write(RT_ADDR["busy"], struct.pack("<i", max(busy - 1, 0)))
+            call.write(call.arg(4), struct.pack("<QII", RT_MAPPED, 0, 0))
+            return 0
+        model.results[("ID3D11DeviceContext", 14 * 8)] = map_
+        a, dx = RT_ADDR, RT_ADDR["dx"]
+        # the thread's value table: [2] is its jump buffer
+        w.write(TLS_BLOCK + 0xB0, struct.pack("<Q", RT_VALUES))
+        w.write(RT_VALUES, struct.pack("<QQQ", 0, 0, RT_JMPBUF))
+        for name, event in (("rendererRunningEvent", "rendererRunning"), ("renderPausedEvent", "renderPaused"),
+                            ("e8", "e8"), ("e48", "e48")):
+            w.write(a[name], struct.pack("<Q", EV[event]))
+        w.write(a["backendEvent"], struct.pack("<QQ", 0x1406FC50, EV["backend1"]))
+        w.write(a["win32QuitEvent"], struct.pack("<Q", EV["quit"]))
+        w.write(a["smpData"], struct.pack("<Q", RT_DATA if p["frame"] else 0))
+        w.write(a["backEndData"], struct.pack("<Q", p["backEndData"]))
+        w.write(a["busy"], struct.pack("<i", p["busy"]))
+        w.write(a["r_glob"], struct.pack("<B7xBxxxiii", 1, p["renderingRemote"], 0, p["nesting"], 0))
+        w.write(a["vidConfig"], struct.pack("<IIII", 1280, 720, *p["vid"]))
+        # the frame: its dynamic vertex data and the three buffer sets
+        context = model.new("ID3D11DeviceContext")
+        w.write(dx + 0x10, struct.pack("<Q", context))
+        w.write(RT_DATA + 0x4BE9C0, struct.pack("<Q", RT_UPLOAD))
+        w.write(RT_DATA + 0x122C00, struct.pack("<Q", OBJECTS + 0x12000))
+        w.write(RT_UPLOAD, struct.pack("<iiQQ", p["used"], p["capacity"],
+                                       model.new("ID3D11Resource") if p["buffer"] else 0, RT_SOURCE))
+        w.write(RT_SOURCE, bytes(range(256)))
+        w.write(RT_MAPPED, bytes(0x100))
+        # resize state
+        w.write(dx + 0x486, bytes([p["resize"]]))
+        w.write(dx + 0x3C7D8, struct.pack("<Q", 0x5150 if p["hwnd"] else 0))
+        w.write(dx + 0x3C7F8, struct.pack("<QQ", model.new("IDXGISwapChain") if p["swap"] else 0,
+                                          model.new("ID3D11Resource") if p["backBuffer"] else 0))
+        w.write(dx + 0x3C7B0, struct.pack("<Q", function_va(STORE, CALLBACK) if p["callback"] else 0))
+        w.write(SHOW_COUNT, struct.pack("<iI", 0, 0))
+    return run
+
+
+def rt_inputs(n=250, seed=0x6CD0):
+    r = random.Random(seed)
+    out = []
+    for k in range(n):
+        timeouts = [r.choice([0, 0x102, 0x102, 0x102]) for _ in range(r.randrange(1, 12))]
+        p = {"waits": timeouts, "setjmp": r.choice([[], [], [], [1], [1, 1], [0]]), "frame": r.random() < 0.7,
+             "backEndData": r.choice([0, 0, RT_DATA]), "renderingRemote": r.randrange(2),
+             "nesting": r.choice([0, 0, 0, 1]), "updates": r.choice([1, 2, 3]), "used": r.choice([0, 16, 200, 256]),
+             "capacity": r.choice([0, 64, 256]), "buffer": r.random() < 0.8, "resize": r.randrange(2),
+             "hwnd": r.random() < 0.8, "swap": r.random() < 0.8, "backBuffer": r.randrange(2),
+             "callback": r.randrange(2), "fs": r.randrange(2), "busy": r.choice([0, 0, 1, 3]), "vid": r.choice([(1920, 1080), (2560, 1440)]),
+             "size": r.choice([(1920, 1080), (2560, 1440), (1920, 1200)]),
+             "messages": [(r.choice([0x100, 0x0F]), r.randrange(1 << 31)) for _ in range(r.choice([0, 0, 2]))]
+             + ([(WM_QUIT, 5)] if r.random() < 0.1 else [])}
+        out.append({"args": [0], "setup": rt_setup(p)})
+    return out
+
+
+CASES.append({"name": "RB_RenderThread", "ret": "void", "builds": [STORE], "fakes": RT_FAKES, "observe": RT_SEEN,
+              "imports": RT_IMPORTS, "inputs": rt_inputs()})

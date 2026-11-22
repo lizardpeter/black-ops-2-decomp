@@ -92,7 +92,12 @@ Harness specifics:
   arguments would silently corrupt the stack. On x64 the harness models the CRT calls the Store build makes
   (`CRT_MODELS_X64`: `memset`, `memcpy`, `memmove`, `strchr`, `strlen`, `atoi`), since the reconstruction calls
   what the Store inlines (CL_CreateCmd's `memset`) and some Store code calls them itself (Info_RemoveKey_Big's
-  `strchr`). Before, an unmodelled x64 import returned 0 in both runs, which hid both.
+  `strchr`). Before, an unmodelled x64 import returned 0 in both runs, which hid both. The models that write
+  (`memset`, `memcpy`, `memmove`) write as the program would, journaled and compared: before, a copy into compared
+  memory made through the import was invisible to the comparison (found by a missed mutation in `RB_RenderThread`).
+- **Functions that never return** (a thread's loop): a fake or an import model calls `Machine.end_call()` and the
+  run stops there as if it had returned; the test scripts how far both runs go (`RB_RenderThread`).
+- **`T6_TRACE=<n>`** prints the last n instruction addresses of a run that faults.
 - **CRT per-thread data (x86 with a MAP):** VC100's CRT builds it on first use through FLS/TLS imports the harness
   doesn't model, so `_getptd` and `_getptd_noexit` return one ready `_tiddata` with the process's default locale
   (`Machine.crt_thread_data`). `_vsnprintf` needs it to format numbers.

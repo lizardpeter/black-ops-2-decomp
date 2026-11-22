@@ -245,3 +245,4 @@ CoDMPServer_PC	00778330	matches	src/universal/dvar.cpp	Dvar_SetBool; tests/diffe
 CoDMPServer_PC	00778350	matches	src/universal/dvar.cpp	Dvar_SetInt; tests/differential/test_dvar.py
 CoDMPServer_PC	006DFD10	matches	src/qcommon/threads.cpp	Sys_SetValue; tests/differential/test_win_common.py
 CoDMPServer_PC	006DFD40	matches	src/qcommon/threads.cpp	Sys_GetValue; tests/differential/test_win_common.py
+t6mp_msstore	140736CD0	matches	src/gfx_d3d/rb_backend.cpp	RB_RenderThread (Store only; inlines Sys_GetValue, Sys_Enter/LeaveCriticalSection, Sys_SetWin32QuitEvent and the hand-off's render-thread side); tests/differential/test_rb_backend.py

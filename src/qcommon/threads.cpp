@@ -30,3 +30,31 @@ void Sys_SetWin32QuitEvent()
 {
 	SetEvent(win32QuitEvent);
 }
+
+#ifdef T6_STORE
+// ---- the render thread's side of the hand-off (Store only, inlined into RB_RenderThread; names made up) ----------
+T6_STATIC void *volatile smpData T6_AT("", "smpData");          // the frame the main thread hands over
+T6_STATIC HANDLE backendEvent[2] T6_AT("", "backendEvent");     // [1]: a frame is waiting
+T6_STATIC HANDLE rendererRunningEvent T6_AT("", "rendererRunningEvent");
+T6_STATIC HANDLE renderPausedEvent T6_AT("", "renderPausedEvent");
+
+// Each pass of the render thread: renderPausedEvent goes down and up again around setting rendererRunningEvent.
+void Sys_RendererRunning()
+{
+	ResetEvent(renderPausedEvent);
+	SetEvent(rendererRunningEvent);
+	SetEvent(renderPausedEvent);
+}
+
+// Whether the main thread has signalled a frame (backendEvent[1], auto-reset: the poll takes the signal).
+bool Sys_RendererWorkPending()
+{
+	return WaitForSingleObject(backendEvent[1], 0) == WAIT_OBJECT_0;
+}
+
+// The frame handed over, taken (smpData left 0).
+void *Sys_TakeRendererData()
+{
+	return InterlockedExchangePointer((void *volatile *)&smpData, 0);
+}
+#endif

@@ -119,6 +119,34 @@ inline void ID3D11DeviceContext_PSSetConstantBuffers(ID3D11DeviceContext *contex
 	            numBuffers, buffers);
 }
 
+// ID3D11DeviceContext: Map (slot 14), Unmap (slot 15)
+typedef struct D3D11_MAPPED_SUBRESOURCE
+{
+	void *pData;
+	UINT RowPitch;
+	UINT DepthPitch;
+} D3D11_MAPPED_SUBRESOURCE;
+#define D3D11_MAP_WRITE_DISCARD 4
+inline HRESULT ID3D11DeviceContext_Map(ID3D11DeviceContext *context, void *resource, UINT subresource, UINT mapType,
+                                       UINT mapFlags, D3D11_MAPPED_SUBRESOURCE *mapped)
+{
+	return T6_COM_CALL(context, 14, HRESULT(WINAPI *)(ID3D11DeviceContext *, void *, UINT, UINT, UINT,
+	                                                  D3D11_MAPPED_SUBRESOURCE *), resource, subresource, mapType,
+	                   mapFlags, mapped);
+}
+inline void ID3D11DeviceContext_Unmap(ID3D11DeviceContext *context, void *resource, UINT subresource)
+{
+	T6_COM_CALL(context, 15, void(WINAPI *)(ID3D11DeviceContext *, void *, UINT), resource, subresource);
+}
+
+// IDXGISwapChain::ResizeBuffers (slot 13)
+inline HRESULT IDXGISwapChain_ResizeBuffers(IDXGISwapChain *swapChain, UINT bufferCount, UINT width, UINT height,
+                                            DXGI_FORMAT format, UINT flags)
+{
+	return T6_COM_CALL(swapChain, 13, HRESULT(WINAPI *)(IDXGISwapChain *, UINT, UINT, UINT, DXGI_FORMAT, UINT),
+	                   bufferCount, width, height, format, flags);
+}
+
 // IDXGISwapChain: Present (slot 8), GetFullscreenState (slot 11), GetContainingOutput (slot 15)
 inline HRESULT IDXGISwapChain_GetContainingOutput(IDXGISwapChain *swapChain, IDXGIOutput **output)
 {

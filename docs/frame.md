@@ -66,8 +66,11 @@ Store's call graph:
   (140736120), 1407366F0, then `RB_SwapBuffers` under the critical section at 1441FB970. The flag at 1427E7338 is set only
   while the render thread itself runs the screen update (1401BE780) in a loop, as long as 1427E7340 is set
   (1407370A0): the loading-screen mode. **A normal frame takes the render thread.**
-- **The render thread's loop** (140736CD0): an error-recovery point (140870ACC, setjmp), then it waits for work on
-  the events at 14406FC58 and 144070008. A frame arrives as a pointer swapped out of 14406FAF0 (`XCHG`); under the
+- **The render thread's loop** (`RB_RenderThread` 140736CD0, rebuilt): an error-recovery point (`_setjmp` 140870ACC
+  on the thread's jump buffer, `Sys_GetValue(2)`), then every pass it sets `rendererRunningEvent` and polls, with
+  zero timeouts, `backendEvent[1]` (14406FC58: a frame), 144070008 and 144070048, then `dx.doResizeBuffers`; with
+  nothing to do it calls `Sleep(0)` and polls again, so it spins on a core between frames (B0024). While
+  `r_glob.remoteScreenUpdateNesting` is set it runs `SCR_UpdateScreen` itself (the loading screen). A frame arrives as a pointer swapped out of 14406FAF0 (`XCHG`); under the
   critical section 1441FB970 it uploads the frame's dynamic vertex data (Map/Unmap on the device context 1427F1D90,
   looping while 142155DFC is set) and finishes three command lists (140736BA0 at +0x122C10, +0x122C00, +0x122C50 of
   the frame), then runs the back end and presents (140736950). 
@@ -129,8 +132,12 @@ The order the work goes in (each step rebuilt and verified faithful first, then 
    the native resolution from the swap chain's output, exclusive fullscreen through `R_SetFullscreenOutput`
    (140720E00) when asked, and four constant buffers. The enhanced swap chain has to come out of both creation
    paths.
-3. **The resize and fullscreen paths** (`ResizeBuffers`, vtable +0x68, at 14072F5A7, 1407EDEBB, 1407F4B9B;
-   `SetFullscreenState` at 140720EB0 and others): the flags must match the swap chain's.
+3. **The resize and fullscreen paths.** The only `ResizeBuffers` is the render thread's (14073704A, in
+   `RB_RenderThread`, when `dx.doResizeBuffers` is set), with the flags fixed at `ALLOW_MODE_SWITCH` (B0025): the
+   enhanced swap chain's flags must be passed instead, or the resize fails. (The +0x68 calls at 14072F5A7, 1407EDEBB
+   and 1407F4B9B listed here before are `IDXGIOutput::GetGammaControlCapabilities` in the gamma ramp and DemonWare
+   code.) `SetFullscreenState` is called by `R_SetFullscreenOutput` (140720EB0), 140721060 (three calls) and the
+   window procedure's place 14049F960. `RB_RenderThread` is rebuilt and verified (`src/gfx_d3d/rb_backend.cpp`).
 4. **`RB_SwapBuffers`** (140735BC0): `DXGI_PRESENT_ALLOW_TEARING` when v-sync is off in a window; the flip model
    unbinds the back buffer at `Present`, so it is bound again after it. Rebuilt and verified on both builds
    (`src/gfx_d3d/rb_backend.cpp`, `tests/differential/test_rb_backend.py`: every COM call, message, cursor step and
