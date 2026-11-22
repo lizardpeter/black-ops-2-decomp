@@ -173,8 +173,11 @@ int Com_FrameWait(int minMsec)
 	return msec;
 }
 
-// Everything after the wait.
-void Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index, int msec)
+void Com_FrameClient(int msec);
+
+// Everything after the wait, up to the client's second event loop (Com_FrameClient). Returns false on a dedicated
+// server (the frame ends there); otherwise *clientMsec is the msec the client runs on.
+bool Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index, int msec, int *clientMsec)
 {
 	unsigned int maxMsec = !Com_IsDedicatedServer() && Dvar_GetBool(sv_running) ? 100 : 5000;
 	if ((unsigned int)msec > maxMsec)
@@ -281,7 +284,7 @@ void Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index,
 	{
 		if (Dvar_GetInt(com_dedicated))
 			Phys_RunToTime(store_142121190);
-		return;
+		return false;
 	}
 
 	// the client
@@ -309,6 +312,14 @@ void Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index,
 	else
 		store_140E5C804 = (unsigned int)sinceLast > 200 ? 200 : sinceLast;
 	store_140E5CB94 = com_frameTime;
+	*clientMsec = msec;
+	return true;
+}
+
+// The client's frame from its second event loop on: the keys that came in, the command buffer, the client frame, the
+// screen (where the mouse is read and the commands are built), the rumble, com_statmon, and the frame's end.
+void Com_FrameClient(int msec)
+{
 	Com_EventLoop();
 	Cbuf_Execute(LOCAL_CLIENT_0, Com_LocalClient_GetControllerIndex(LOCAL_CLIENT_0));
 	sub_140473AB0();
@@ -385,6 +396,8 @@ void Com_Frame_Try_Block_Function()
 	int index = com_lastFrameIndex % 3;
 	com_lastFrameIndex++;
 	int msec = Com_FrameWait(minMsec);
-	Com_FrameAfterWait(localClientNum, minMsec, index, msec);
+	int clientMsec;
+	if (Com_FrameAfterWait(localClientNum, minMsec, index, msec, &clientMsec))
+		Com_FrameClient(clientMsec);
 }
 #endif

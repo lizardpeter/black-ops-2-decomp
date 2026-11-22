@@ -53,6 +53,15 @@ are: two DLLs are added to the game folder, and deleting them puts the game back
 - **Resizing keeps working.** The render thread resizes the buffers with the swap chain's own flags (B0025).
 - A system that can't create the flip-model swap chain gets the original one.
 
+**P0007, input read when the display has room:**
+- The frame waits on the swap chain's frame-latency object (maximum latency 1) after the server frame and before the
+  client reads its keys (the second event loop) and mouse (at draw time). So when the GPU or the display is the
+  limit, the frame's input is read just before it can be shown, instead of up to a frame or more early while the
+  previous frames queue. The render thread counts its presents and the main thread waits once per present; frames
+  that aren't presented aren't waited for, and a wait that times out (two refresh periods, 50 ms to 1 s) is
+  recovered from on the next frame.
+- With v-sync off and no frame cap, the GPU's own pace now decides the frame rate instead of a queue of frames.
+
 **P0006, frame rate cap:**
 - **Exact caps.** The original capped the frame rate in whole milliseconds (1000 / `com_maxfps`, rounded down): 144
   ran at 166 fps, 165 at 166, 240 at 250, 360 at 333 (B0026). Now frames start exactly 1 / `com_maxfps` seconds

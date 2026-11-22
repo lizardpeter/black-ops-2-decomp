@@ -23,6 +23,7 @@ BUILDS = ["t6mp_msstore"]
 PATCH = "P0005"
 DESC_SWAP_EFFECT, DESC_FLAGS = 0x3C, 0x40
 FLIP_DISCARD, ALLOW_TEARING, ALLOW_MODE_SWITCH, PRESENT_ALLOW_TEARING = 4, 0x800, 2, 0x200
+WAITABLE = 0x40  # DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT (P0007)
 TEARING = {}
 
 
@@ -76,7 +77,7 @@ def check_description_is_flip_model(ctx):
             assert not isinstance(got[0], str), got[0]
             desc = bytearray(want[1][0])
             desc[DESC_SWAP_EFFECT:DESC_SWAP_EFFECT + 4] = struct.pack("<I", FLIP_DISCARD)
-            flags = struct.unpack_from("<I", desc, DESC_FLAGS)[0] | (ALLOW_TEARING if support else 0)
+            flags = struct.unpack_from("<I", desc, DESC_FLAGS)[0] | (ALLOW_TEARING if support else 0) | WAITABLE
             desc[DESC_FLAGS:DESC_FLAGS + 4] = struct.pack("<I", flags)
             assert got[1][0] == bytes(desc), f"tearing {factory5}/{support}, aa {t}: {got[1][0].hex()}"
             exe = {a: b for a, b in got[2].items() if a < 0x180000000}
@@ -116,7 +117,16 @@ def check_device_limits_frame_latency(ctx):
         assert got[0] == want[0] and got[1] == want[1], f"input {i}: result or buffers differ"
         exe = lambda w: {a: b for a, b in w.items() if a < 0x180000000}
         assert exe(got[2]) == exe(want[2]), f"input {i}: the exe's globals differ"
-    _device_compare(ctx, ri.CASES[-1]["inputs"], extra)
+    # the description without the waitable flag (0xCC bytes have it): this check is about the device's latency, P0007's
+    # acquisition of the waitable object is checked in test_latency.py
+    inputs = []
+    for inp in ri.CASES[-1]["inputs"]:
+        args = list(inp["args"])
+        desc = bytearray(args[2])
+        desc[DESC_FLAGS] &= ~WAITABLE
+        args[2] = bytes(desc)
+        inputs.append(dict(inp, args=args))
+    _device_compare(ctx, inputs, extra)
 
 
 def check_device_falls_back_to_blit_model(ctx):
@@ -145,10 +155,12 @@ def check_device_falls_back_to_blit_model(ctx):
     ctx.imports(dict(ri.DEVICE_IMPORTS, **{"d3d11.dll!D3D11CreateDeviceAndSwapChain": (d3d, 12)}))
     fk = ctx.hooks(dict(ri.DEVICE_FAKES, NvAPI_D3D11_CreateDeviceAndSwapChain=nv))
     ob = ctx.hooks(ri.DEVICE_SEEN)
-    desc = bytearray(0x48)
-    struct.pack_into("<II", desc, DESC_SWAP_EFFECT, FLIP_DISCARD, ALLOW_MODE_SWITCH | ALLOW_TEARING)
     ran = 0
     for i, p in enumerate(ri.device_inputs(60, seed=5)):
+        waitable = i % 2  # with the waitable flag the first fallback drops only that (P0007)
+        desc = bytearray(0x48)
+        struct.pack_into("<II", desc, DESC_SWAP_EFFECT, FLIP_DISCARD,
+                         ALLOW_MODE_SWITCH | ALLOW_TEARING | (WAITABLE if waitable else 0))
         if p["factory_hr"] < 0 or p["enum_hr"] < 0 or not p["create_ok"] or not p["swapchain"]:
             continue
         p = dict(p, nv_status=0, nv_level=1)
@@ -156,7 +168,9 @@ def check_device_falls_back_to_blit_model(ctx):
         args = [0x5150, 0, bytes(desc), ri.window_parms(0x5150, False)]
         got = ctx.m.call(ctx.enhanced("R_CreateDeviceInternal"), args, "int", ri.device_setup(p), fk, ob)
         assert not isinstance(got[0], str), f"input {i}: {got[0]}"
-        assert seen == [(FLIP_DISCARD, ALLOW_MODE_SWITCH | ALLOW_TEARING), (0, ALLOW_MODE_SWITCH)], f"input {i}: {seen}"
+        want = [(FLIP_DISCARD, ALLOW_MODE_SWITCH | ALLOW_TEARING | WAITABLE)] if waitable else []
+        want += [(FLIP_DISCARD, ALLOW_MODE_SWITCH | ALLOW_TEARING), (0, ALLOW_MODE_SWITCH)]
+        assert seen == want, f"input {i}: {seen}"
         assert struct.unpack_from("<II", got[1][0], DESC_SWAP_EFFECT) == (0, ALLOW_MODE_SWITCH), f"input {i}"
         assert read(got[2], flip_va, 1, 1) == b"\0" and read(got[2], tearing_va, 1) == b"\0", f"input {i}: flags"
         ran += 1
@@ -247,7 +261,7 @@ def check_resize_uses_swap_chain_flags(ctx):
             want = ctx.m.call(ctx.original("RB_RenderThread"), [0], "void", setup, fk, ob)
             got = ctx.m.call(ctx.enhanced("RB_RenderThread"), [0], "void", setup, fk, ob)
             assert not isinstance(got[0], str), got[0]
-            flags = ALLOW_MODE_SWITCH | (ALLOW_TEARING if tearing else 0)
+            flags = ALLOW_MODE_SWITCH | (ALLOW_TEARING if tearing else 0) | WAITABLE
             resize = lambda c: c[:3] == ("com", "IDXGISwapChain", 13 * 8)
             orig = [c[:8] + (flags,) if resize(c) else c for c in want[3]]
             assert got[3] == orig, f"input {k}: calls differ"

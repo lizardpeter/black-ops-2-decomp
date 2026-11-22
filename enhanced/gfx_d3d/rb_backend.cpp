@@ -67,6 +67,8 @@ HRESULT R_Present(IDXGISwapChain *swapChain, UINT syncInterval)
 		Sys_LeaveCriticalSection(CRITSECT_DXCONTEXT);
 	}
 	HRESULT hr = IDXGISwapChain_Present(swapChain, syncInterval, flags);
+	if (hr >= 0)
+		R_CountPresent();  // P0007
 	if (r_flipModel)
 	{
 		Sys_EnterCriticalSection(CRITSECT_DXCONTEXT);

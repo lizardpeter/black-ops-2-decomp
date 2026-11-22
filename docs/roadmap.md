@@ -114,9 +114,9 @@ streaming budgets.
 
 ## Latency and presentation
 
-- **Hardware independent flip:** done in P0005 (`FLIP_DISCARD`, tearing allowed, at most one frame queued). Still to
-  do: the frame-latency waitable object, waited on before the frame's input is read (docs/frame.md step 5), and the
-  render thread's busy wait (B0024).
+- **Hardware independent flip:** done in P0005 (`FLIP_DISCARD`, tearing allowed, at most one frame queued) and P0007
+  (the frame-latency waitable object, waited on before the frame's input is read). Still to do: the render thread's
+  busy wait (B0024) and the main thread's 1 ms hand-off waits (docs/frame.md step 6).
 - **Late latch:** sample view angles as late as possible, at render submit, as in Ghosts and BO3.
 - **NVIDIA Reflex:** latency markers plus the Reflex sleep, as a menu option.
 - **Frames in flight (open):** BO2 pipelines frames across threads. The main thread builds frame N+1 while the render

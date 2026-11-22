@@ -9,6 +9,8 @@
 // - the device queues at most one frame (IDXGIDevice1::SetMaximumFrameLatency(1)): Present waits instead of letting
 //   the game run up to three frames ahead of the display;
 // - a system that refuses the flip-model swap chain gets the original one.
+// P0007 adds the swap chain's frame-latency waitable object (IDXGISwapChain2, latency 1), which the main thread waits on
+// before its frame reads input (R_WaitForFrameLatency below; enhanced/qcommon/common.cpp).
 // Store build only. Everything else is the original's (src/gfx_d3d/r_init.cpp).
 #ifdef T6_STORE
 #define T6_SOURCE "gfx_d3d/r_init.cpp"
@@ -43,11 +45,13 @@ void R_SetFullscreenOutput();
 T6_STATIC const D3D_FEATURE_LEVEL s_featureLevels[3] T6_AT("", "s_featureLevels");
 T6_STATIC const UINT s_constBufferSizes[4] T6_AT("", "s_constBufferSizes");
 
-// DXGI 1.5's factory (not in the exe's dxguid)
+// DXGI 1.5's factory and DXGI 1.3's swap chain (not in the exe's dxguid)
+static const IID IID_IDXGISwapChain2_Enhanced = {0xA8BE2AC4, 0x199F, 0x4946, {0xB3, 0x31, 0x79, 0x59, 0x9F, 0xB9, 0x8D, 0xE7}};
 static const IID IID_IDXGIFactory5_Enhanced = {0x7632E1F5, 0xEE65, 0x4DCA, {0x87, 0xFD, 0x84, 0xCD, 0x75, 0xF8, 0x83, 0x8D}};
 
 bool r_flipModel = true;
 bool r_allowTearing;
+bool r_latencyWaitable = true;
 static bool s_tearingChecked;
 
 // Whether DXGI can present with tearing (IDXGIFactory5::CheckFeatureSupport(PRESENT_ALLOW_TEARING)); false with a
@@ -73,13 +77,27 @@ bool R_CheckTearingSupport()
 	return r_allowTearing = allowTearing != FALSE;
 }
 
+// The next description down, from now on, after the system refused this one: without the waitable object first (before
+// Windows 8.1), then the original blit model.
+static void R_FallBack(DXGI_SWAP_CHAIN_DESC *swapChainDesc)
+{
+	if (swapChainDesc->Flags & DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT)
+	{
+		r_latencyWaitable = false;
+		swapChainDesc->Flags &= ~(UINT)DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+		return;
+	}
+	R_UseBlitModel(swapChainDesc);
+}
+
 // The original blit-model description, from now on (the system refused the flip model).
 void R_UseBlitModel(DXGI_SWAP_CHAIN_DESC *swapChainDesc)
 {
 	r_flipModel = false;
 	r_allowTearing = false;
+	r_latencyWaitable = false;
 	swapChainDesc->SwapEffect = DXGI_SWAP_EFFECT_DISCARD;
-	swapChainDesc->Flags &= ~(UINT)DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+	swapChainDesc->Flags &= ~(UINT)(DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING | DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT);
 }
 
 // src: Store 14071E360. Enhanced: DXGI_SWAP_EFFECT_FLIP_DISCARD (two buffers, as before), and tearing allowed when DXGI
@@ -108,11 +126,93 @@ void sub_14071E360(DXGI_SWAP_CHAIN_DESC *swapChainDesc, const GfxWindowParms *wn
 		swapChainDesc->SwapEffect = DXGI_SWAP_EFFECT_FLIP_DISCARD;
 		if (R_CheckTearingSupport())
 			swapChainDesc->Flags |= DXGI_SWAP_CHAIN_FLAG_ALLOW_TEARING;
+		if (r_latencyWaitable)
+			swapChainDesc->Flags |= DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT;
+	}
+}
+
+// ---- P0007: the frame-latency waitable object ------------------------------------------------------------------------
+static HANDLE s_frameLatencyWaitable;        // the swap chain's waitable object, or 0 (no waits)
+static volatile long s_presentCount;         // presents on that swap chain (render thread)
+static long s_waitedPresentCount;            // presents waited for (main thread)
+static volatile bool s_resyncFrameLatency;   // a wait timed out: take every pending signal, then count again
+
+// The new swap chain's waitable object, with at most one frame queued (IDXGISwapChain2::SetMaximumFrameLatency;
+// IDXGIDevice1's doesn't apply to a waitable swap chain). The counts start again. Without one (a swap chain created
+// without the waitable flag, or no IDXGISwapChain2), the main thread doesn't wait.
+void R_AcquireFrameLatencyWaitable(bool waitableSwapChain)
+{
+	if (s_frameLatencyWaitable)
+		CloseHandle(s_frameLatencyWaitable);
+	s_frameLatencyWaitable = 0;
+	s_presentCount = 0;
+	s_waitedPresentCount = 0;
+	s_resyncFrameLatency = false;
+	if (!waitableSwapChain || !DX(swapChain))
+		return;
+	void *swapChain2 = 0;
+	if (IUnknown_QueryInterface(DX(swapChain), &IID_IDXGISwapChain2_Enhanced, &swapChain2) < 0 || !swapChain2)
+		return;
+	IDXGISwapChain2_SetMaximumFrameLatency(swapChain2, 1);
+	s_frameLatencyWaitable = IDXGISwapChain2_GetFrameLatencyWaitableObject(swapChain2);
+	IUnknown_Release(swapChain2);
+}
+
+void R_CountPresent()
+{
+	if (s_frameLatencyWaitable)
+		InterlockedIncrement(&s_presentCount);
+}
+
+// How long one wait may take before it counts as a missed signal: two refresh periods, at least 50 ms
+static DWORD R_FrameLatencyTimeout()
+{
+	DWORD timeout = 50;
+	if (vidConfig.displayFrequency)
+	{
+		DWORD periods = (2000 + vidConfig.displayFrequency - 1) / vidConfig.displayFrequency;
+		if (periods > timeout)
+			timeout = periods > 1000 ? 1000 : periods;
+	}
+	return timeout;
+}
+
+// Waits once for each present counted since the last wait (ghosts-decomp's P0004). With latency 1 the wait for present
+// p returns once present p-1 has been displayed, so one frame stays queued while this frame's input is read. Frames
+// that weren't presented are never waited for, and the presents of the render thread's loading screens are paired up
+// afterwards (their waits return at once). A wait that times out leaves its signal unaccounted for, which would let
+// one more frame queue up, so the next frame takes every pending signal instead of counting (that frame may wait up
+// to one refresh longer, once).
+void R_WaitForFrameLatency()
+{
+	HANDLE waitable = s_frameLatencyWaitable;
+	if (!waitable)
+		return;
+	long presented = s_presentCount;
+	if (s_resyncFrameLatency)
+	{
+		s_resyncFrameLatency = false;
+		while (WaitForSingleObject(waitable, 0) == WAIT_OBJECT_0)
+			;
+		s_waitedPresentCount = presented;
+		return;
+	}
+	DWORD timeout = R_FrameLatencyTimeout();
+	while (s_waitedPresentCount != presented)
+	{
+		++s_waitedPresentCount;
+		if (WaitForSingleObject(waitable, timeout) != WAIT_OBJECT_0)
+		{
+			s_waitedPresentCount = presented;
+			s_resyncFrameLatency = true;
+			return;
+		}
 	}
 }
 
 // src: Store 14071FEA0 R_CreateDeviceInternal. Enhanced: when the device and its flip-model swap chain can't be made,
-// they are made again with the original swap chain; and the device queues at most one frame.
+// they are made again with the next description down (without the waitable object, then the original swap chain);
+// the device queues at most one frame; and the waitable object is taken (P0007).
 HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DESC *swapChainDesc,
                                const GfxWindowParms *wndParms)
 {
@@ -145,9 +245,9 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 		int status = NvAPI_D3D11_CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
 		                                                  D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain),
 		                                                  &DX(device), &featureLevel, &DX(context), &supportedLevel);
-		if (status != 0 && swapChainDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
+		while (status != 0 && swapChainDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
 		{
-			R_UseBlitModel(swapChainDesc);
+			R_FallBack(swapChainDesc);
 			status = NvAPI_D3D11_CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
 			                                              D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain),
 			                                              &DX(device), &featureLevel, &DX(context),
@@ -176,11 +276,12 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 		HRESULT created = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
 		                                                D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain),
 		                                                &DX(device), &featureLevel, &DX(context));
-		if (created < 0 && swapChainDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
+		while (created < 0 && swapChainDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
 		{
-			R_UseBlitModel(swapChainDesc);
-			D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3, D3D11_SDK_VERSION,
-			                              swapChainDesc, &DX(swapChain), &DX(device), &featureLevel, &DX(context));
+			R_FallBack(swapChainDesc);
+			created = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
+			                                        D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain), &DX(device),
+			                                        &featureLevel, &DX(context));
 		}
 	}
 
@@ -194,6 +295,7 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 	IUnknown_Release(factory);
 	IUnknown_Release(adapter);
 	IUnknown_Release(dxgiDevice);
+	R_AcquireFrameLatencyWaitable((swapChainDesc->Flags & DXGI_SWAP_CHAIN_FLAG_FRAME_LATENCY_WAITABLE_OBJECT) != 0);
 
 	bool nativeIsValid = false;
 	bool haveMonitor = false;

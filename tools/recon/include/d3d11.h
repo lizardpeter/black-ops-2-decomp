@@ -171,6 +171,17 @@ inline HRESULT IDXGIFactory5_CheckFeatureSupport(void *factory5, UINT feature, v
 }
 #define DXGI_PRESENT_ALLOW_TEARING 0x200
 
+// IDXGISwapChain2 (IDXGISwapChain 0-17, IDXGISwapChain1 18-28): SetMaximumFrameLatency (31),
+// GetFrameLatencyWaitableObject (33)
+inline HRESULT IDXGISwapChain2_SetMaximumFrameLatency(void *swapChain2, UINT maxLatency)
+{
+	return T6_COM_CALL(swapChain2, 31, HRESULT(WINAPI *)(void *, UINT), maxLatency);
+}
+inline HANDLE IDXGISwapChain2_GetFrameLatencyWaitableObject(void *swapChain2)
+{
+	return T6_COM_CALL(swapChain2, 33, HANDLE(WINAPI *)(void *));
+}
+
 // IDXGISwapChain::ResizeBuffers (slot 13)
 inline HRESULT IDXGISwapChain_ResizeBuffers(IDXGISwapChain *swapChain, UINT bufferCount, UINT width, UINT height,
                                             DXGI_FORMAT format, UINT flags)

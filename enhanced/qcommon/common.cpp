@@ -11,9 +11,14 @@
 // - the event loop still runs at least once a millisecond while waiting, as before, and once more when it ends;
 // - a frame still lasts at least until the game's millisecond clock moves (the engine counts whole milliseconds), so
 //   the frame rate stays at most 1000.
-// Everything else is the original's (src/qcommon/common.cpp: Com_FrameAfterWait). Store build only.
+// P0007: before the client's second event loop (keys) and its screen (mouse, commands), the frame waits until the
+// display has room for it (R_WaitForFrameLatency, enhanced/gfx_d3d/r_init.cpp), so its input is read as late as the
+// queue allows rather than up to a frame early.
+// Everything else is the original's (src/qcommon/common.cpp: Com_FrameAfterWait, Com_FrameClient). Store build only.
 #ifdef T6_STORE
 #define T6_SOURCE "qcommon/common.cpp"
+
+#include "enhanced/dxgi_flip.h"
 
 #include "client/client.h"
 #include "qcommon/qcommon.h"
@@ -27,7 +32,8 @@ extern int store_14226A120;
 void sub_1403A2FF0(LocalClientNum_t localClientNum);
 void Com_EventLoop();
 int Com_FrameMaxFps();
-void Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index, int msec);
+bool Com_FrameAfterWait(LocalClientNum_t localClientNum, int minMsec, int index, int msec, int *clientMsec);
+void Com_FrameClient(int msec);
 
 static long long s_qpcFrequency;    // performance counter ticks per second (0 until the first frame)
 static long long s_nextFrame;       // the counter when the next frame may start
@@ -104,7 +110,8 @@ int Com_FrameWaitPrecise(int maxFps)
 	}
 }
 
-// src: Store 1403A4010 Com_Frame_Try_Block_Function. Enhanced: the wait (Com_FrameWaitPrecise).
+// src: Store 1403A4010 Com_Frame_Try_Block_Function. Enhanced: the wait (Com_FrameWaitPrecise), and the frame-latency
+// wait before the client reads its input (P0007).
 void Com_Frame_Try_Block_Function()
 {
 	LocalClientNum_t localClientNum = Com_LocalClients_GetPrimary();
@@ -121,6 +128,11 @@ void Com_Frame_Try_Block_Function()
 	int index = com_lastFrameIndex % 3;
 	com_lastFrameIndex++;
 	int msec = Com_FrameWaitPrecise(maxFps);
-	Com_FrameAfterWait(localClientNum, minMsec, index, msec);
+	int clientMsec;
+	if (Com_FrameAfterWait(localClientNum, minMsec, index, msec, &clientMsec))
+	{
+		R_WaitForFrameLatency();  // P0007
+		Com_FrameClient(clientMsec);
+	}
 }
 #endif

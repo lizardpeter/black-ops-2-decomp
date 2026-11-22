@@ -117,9 +117,10 @@ screen.
 
 ## What the enhanced build changes, and what has to be rebuilt first
 
-Steps 1 to 4 are done: P0005 (`enhanced/gfx_d3d/r_init.cpp`, `rb_backend.cpp`) makes the swap chain flip model with
+Steps 1 to 5 are done. P0007 adds the waitable object and the wait between the server frame and the client
+(`Com_FrameClient`, before the second event loop), with ghosts-decomp's pairing of waits and presents. P0005 (`enhanced/gfx_d3d/r_init.cpp`, `rb_backend.cpp`) makes the swap chain flip model with
 tearing allowed and at most one frame queued, keeps the render targets bound across the present, and resizes with
-the swap chain's flags. The waitable object comes with step 5.
+the swap chain's flags.
 
 The order the work goes in (each step rebuilt and verified faithful first, then changed in `enhanced/`):
 
