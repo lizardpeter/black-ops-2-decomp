@@ -57,6 +57,23 @@ def main():
     machine=Machine(img)
     captured=[]
     stage_index=[0]
+    delta_configs=[]
+    def delta16_entry(mu):
+        # Directly inspect the original 0x48-byte context at original
+        # FUN_180024FF0 entry. The count width can be confirmed here
+        # independently of Ghidra's inferred stack-local names.
+        row=(stage_index[0]//9)*8
+        ptr=mu.reg_read(X.UC_X86_REG_RCX)
+        context=bytes(mu.mem_read(ptr,0x48))
+        low_width,sign_mode=struct.unpack_from("<II",context,0x10)
+        count_bits,capacity=struct.unpack_from("<II",context,0x38)
+        delta_configs.append({
+            "row":row,"low_width":low_width,"sign_mode":sign_mode,
+            "count_bits":count_bits,"capacity":capacity,
+        })
+        if row<=8:
+            print(f"ORIG DELTA entry row={row} width={low_width} mode={sign_mode} "
+                  f"countbits={count_bits} capacity={capacity}")
     def hook(rva,stage):
         def trace(mu):
             # FUN_1800252C0's standard frame-stack RSP+0x48 bit reader.
@@ -76,6 +93,7 @@ def main():
         return trace
 
     hooks={img.base+rva:hook(rva,stage) for rva,stage in AFTER_RETURNS.items()}
+    hooks[img.base+0x24FF0]=delta16_entry
     scratch=[SCRATCH_FIRST+i*SCRATCH_SPACING for i in range(9)]
     def setup(w):
         w.write(PACKET,packet)
@@ -97,6 +115,7 @@ def main():
         "origin":"pinned-original Bink DLL under Unicorn; not native source",
         "fixture_sha256":PIN_VIDEO,"dll_sha256":PIN_DLL,
         "y_oracle_sha256":Y_SHA,"row_stages":captured,
+        "original_delta16_configs":delta_configs,
     }
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
