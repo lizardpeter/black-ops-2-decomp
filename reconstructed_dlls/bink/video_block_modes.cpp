@@ -61,3 +61,43 @@ extern "C" void bink_video_two_color8x8(std::uint8_t* out,
         std::memcpy(row+4,&right,4);
     }
 }
+
+
+// Mode 1 / submode 6: original 16x16 single-color pixels.
+extern "C" void bink_video_fill16x16(std::uint8_t* out,
+                                       std::int32_t stride,
+                                       std::uint8_t color) {
+    for (int y=0;y<16;++y)
+        std::memset(out+std::ptrdiff_t(y)*stride,color,16);
+}
+
+// Mode 1 / submode 8: original 16x16 2-color block. Each input pattern
+// byte encodes four 2-bit selectors for four consecutive 32-bit pixel
+// words. Each decoded 16-pixel row is duplicated vertically to two rows.
+// These masks are exact original BINKCONS entries (RVA 0x5A698/0x5A6A8).
+extern "C" void bink_video_two_color16x16(std::uint8_t* out,
+                                            std::int32_t stride,
+                                            std::uint8_t color0,
+                                            std::uint8_t color1,
+                                            const std::uint8_t* pattern) {
+    constexpr std::array<std::uint32_t,4> masks0{
+        0xffffffffU,0xffff0000U,0x0000ffffU,0U
+    };
+    constexpr std::array<std::uint32_t,4> masks1{
+        0U,0x0000ffffU,0xffff0000U,0xffffffffU
+    };
+    const std::uint32_t c0=repeated(color0);
+    const std::uint32_t c1=repeated(color1);
+    for (int y=0;y<8;++y) {
+        const std::uint8_t packed=pattern[y];
+        auto* top=out+std::ptrdiff_t(2*y)*stride;
+        auto* bottom=top+stride;
+        for (int group=0;group<4;++group) {
+            const std::uint32_t selection=(packed>>(2*group))&3U;
+            const std::uint32_t pixels=
+                (masks0[selection]&c0)|(masks1[selection]&c1);
+            std::memcpy(top+4*group,&pixels,4);
+            std::memcpy(bottom+4*group,&pixels,4);
+        }
+    }
+}
