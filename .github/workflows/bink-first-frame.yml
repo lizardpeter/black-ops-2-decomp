@@ -81,4 +81,5 @@ jobs:
             build/original-bink-probe.json
             build/original-bink-entropy-rows.json
             build/first-luma-source-diagnostic.txt
+            build/native-bink-first-luma-frame0.pgm
           if-no-files-found: warn
