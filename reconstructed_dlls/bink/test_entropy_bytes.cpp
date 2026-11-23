@@ -49,7 +49,6 @@ int main() {
     }
     std::array<std::uint32_t,16> words{};
     std::array<std::uint8_t, 64> storage{};
-    std::uint8_t table[16] = {};
     t6_bink::ByteEntropyState invalid{storage.data(), storage.data(), 0, {},
                                      4, 0, table, 6, 63, storage.data()};
     t6_bink::WordBitStream stream{0, 0, words.data(), 0, 0};
