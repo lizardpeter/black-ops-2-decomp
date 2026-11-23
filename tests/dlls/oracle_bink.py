@@ -94,6 +94,30 @@ def run(path):
     assert call("BinkGetTrackType", [bytes(h), 2], "uint", setup_tables)[0] == 3
     assert call("BinkGetTrackID", [0, 1], "uint")[0] == 0
     assert call("BinkGetTrackType", [0, 1], "uint")[0] == 0
+    # RVA 0x17870: metadata for one or two registered YUV frame buffers.
+    # This is an imported BO2 function. Test the original's full 216-byte
+    # descriptor, including the 96-byte copy for multi-frame files.
+    for frame_count in (1, 2):
+        handle = bytearray(0x200)
+        struct.pack_into("<I", handle, 0x08, frame_count)
+        struct.pack_into("<I", handle, 0x20, 0x00100000)
+        struct.pack_into("<I", handle, 0x1B8, 1921)
+        struct.pack_into("<I", handle, 0x1BC, 1081)
+        _, bufs, _ = call("BinkGetFrameBuffersInfo",
+                          [bytes(handle), b"\\xA5" * (54 * 4)])
+        words = struct.unpack("<54I", bufs[1])
+        assert words[0] == frame_count
+        assert words[1:7] == (1928, 1088, 968, 544, 0, 1)
+        assert words[12] == words[18] == words[24] == 1
+        for off in (8, 14, 20, 26):
+            assert words[off:off + 2] == (0, 0)
+        for off in (10, 16, 22, 28):
+            assert words[off] == 0
+        if frame_count == 1:
+            assert words[30] == 0xA5A5A5A5
+        else:
+            assert words[30:54] == words[6:30]
+
     print(f"Passed {checked} original-Bink oracle calls (not full DLL differential)")
 
 
