@@ -1,0 +1,86 @@
+name: External DLL Ghidra analysis
+
+# Manual and non-destructive. The original DLL binaries are fetched by SHA-256,
+# analyzed as DATA, and not committed to Git or shipped to users.
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bo2-original-dll-ghidra
+  cancel-in-progress: false
+
+jobs:
+  decompile:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    strategy:
+      fail-fast: false
+      matrix:
+        dll: [XCurl.dll, binkw64.dll]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "21"
+      - name: Fetch SHA-256 pinned original binaries
+        run: |
+          python3 tools/dlls/fetch.py /tmp/originals
+          ls -lh /tmp/originals
+      - name: Install Ghidra 12.1.4
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release download Ghidra_12.1.4_build \
+            --repo NationalSecurityAgency/ghidra \
+            --pattern 'ghidra_*_PUBLIC_*.zip' --dir /tmp
+          unzip -q /tmp/ghidra_*.zip -d /opt
+          mv /opt/ghidra_* /opt/ghidra
+      - name: Analyze original DLL and export disassembly/call graph
+        run: |
+          mkdir -p /tmp/dll-project /tmp/dll-analysis
+          /opt/ghidra/support/analyzeHeadless /tmp/dll-project t6-dll \
+            -import '/tmp/originals/${{ matrix.dll }}' \
+            -scriptPath tools/ghidra \
+            -postScript ExportAll.java /tmp/dll-analysis \
+            -analysisTimeoutPerFile 3600 \
+            -log /tmp/dll-analysis/analyze.log \
+            -scriptlog /tmp/dll-analysis/analyze-scripts.log
+          test -s /tmp/dll-analysis/functions.tsv
+          test -s /tmp/dll-analysis/callgraph.tsv
+      - name: Decompile discovered functions
+        run: |
+          /opt/ghidra/support/analyzeHeadless /tmp/dll-project t6-dll \
+            -process '${{ matrix.dll }}' -noanalysis -readOnly \
+            -scriptPath tools/ghidra \
+            -postScript Decompile.java /tmp/dll-analysis/decompile.jsonl 0 1 90 \
+            -log /tmp/dll-analysis/decompile.log \
+            -scriptlog /tmp/dll-analysis/decompile-scripts.log
+          test -s /tmp/dll-analysis/decompile.jsonl
+      - name: Check export completeness
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import csv, json
+          p = Path("/tmp/dll-analysis")
+          with (p / "functions.tsv").open() as f:
+              records = list(csv.DictReader(f, delimiter="\t"))
+          if not records:
+              raise SystemExit("Empty Ghidra function inventory")
+          decomp = [json.loads(s) for s in (p / "decompile.jsonl").read_text().splitlines()]
+          unique = {x["va"] for x in decomp}
+          print(f"Functions: {len(records)}, pseudocode outcomes: {len(decomp)} "
+                f"(unique entries: {len(unique)})")
+          if len(unique) != len(decomp):
+              raise SystemExit("Duplicate pseudocode entry")
+          PY
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: decomp-original-${{ matrix.dll }}
+          path: /tmp/dll-analysis
+          if-no-files-found: warn
+          retention-days: 7
