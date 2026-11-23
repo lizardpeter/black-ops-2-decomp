@@ -125,3 +125,35 @@ Key direct edges from the real decoder:
 - `reconstructed_dlls/xcurl/duplicate_string.cpp`: internal `FUN_180017450` scans NUL, allocates exactly length+1 with allocation tag 5, then copies the string. The original `0x28020` indirect duplication slot points to this function. Internal allocator `FUN_18000932C` and copy `FUN_180004AD0` remain unresolved; tests use declared test fixtures only.
 
 **Do not remove** either import yet: `XCurl.dll` request engine and Bink's audio/video decoding algorithms still require substantial reconstruction. The goal remains original machine-code-derived behavior, without FFmpeg/libcurl substitutes or silent no-op stubs.
+
+## Verified follow-on reconstruction pass (2026-11-23)
+
+The original binaries and full Ghidra outputs were used for this continuation. **No replacement libraries** or external decoder code were used.
+
+### Additional original-code functions
+
+| Module | Original RVA | New source | Coverage and limitations |
+|---|---|---|---|
+| Bink | `0x1B2B0` | [`bink_keyframe.cpp`](../reconstructed_dlls/bink/bink_keyframe.cpp) | Original `BinkGetKeyFrame`: backward/forward/nearest seeking, 1-based frames, skip-current flag. No callees; valid frame indexes only. |
+| XCurl | `0x17910` | [`easy_strerror.cpp`](../reconstructed_dlls/xcurl/easy_strerror.cpp) | **BO2-imported** `curl_easy_strerror`: all 87 original explicit string cases and the unknown-error fallback, copied from original decompiled branch/string data. No library dependencies. |
+| Bink | `0x2EF50` | [`transform_rotate.cpp`](../reconstructed_dlls/bink/transform_rotate.cpp) | Independent sibling to `0x2EE30`, used by `FUN_180028EC0` in Bink audio-transform path. |
+| Bink | `0x2E630` | [`transform_butterfly16.cpp`](../reconstructed_dlls/bink/transform_butterfly16.cpp) | Independent 16-float transform used by `FUN_1800293C0`, `FUN_1800295A0` and several decoder routines. |
+
+### Differential tests
+
+All four functions have pinned-original-vs-native-C++ tests in the normal CI workflow. The new tests use the same x64 emulator harness as the game's existing differential tests and do not load the vendor DLL into the native test process.
+
+- `tests/dlls/differential_keyframe.py`: **2,268** valid frame/flag seek cases plus a null-handle case, compared against the exact original export.
+- `tests/dlls/differential_xcurl_strerror.py`: **295** error codes, including unmapped and negative values; compare exact returned strings.
+- `tests/dlls/differential_rotate.py`: **384** test vectors per routine for both original coefficient-rotation kernels at `0x2EE30` and `0x2EF50`.
+- `tests/dlls/differential_butterfly16.py`: **1,036** 16-float vectors across four coefficient values, compared byte-for-byte.
+
+The GitHub Actions **DLL-specific steps** passed in [this run](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45234572991). Any later failure in broader reconstruction CI must still be investigated separately; a passing differential set is not whole-game playback verification.
+
+### Remaining dependency-removal gates
+
+1. Follow Bink decoding beyond `FUN_1800293C0`/`FUN_1800295A0` into the large video and audio pipelines, including entropy decoding, transforms, YUV frame output, timing and async behavior; prove full video playback on real `.bik` assets.
+2. Reconstruct XCurl `easy` and `multi` request handling, allocator callbacks, HTTP transport and TLS behavior; test actual BO2 callers.
+3. Verify all 16 XCurl and 19 Bink imported symbols for the three Store executables, including their *transitive* dependencies, before changing PE imports or linking replacements into the enhanced executable.
+
+**Not done:** either DLL elimination, original `BinkOpen` implementation, video decode, audio decode, or native-game end-to-end playback. Source reconstruction remains isolated from the working runtime.
