@@ -155,8 +155,14 @@ extern "C" int bink_research_decode_boi_first_luma(
                             msb_width(blocks+511),align16(blocks+527),5,16);
     stream[kDC]=make_stream(scratch[kDC].data(),
                             msb_width(blocks+511),align16(blocks*2+1039),11);
+    // Both original 16-bit delta contexts use a TEN-bit count width and
+    // 1,088-byte capacity on this 256px plane. Original Unicorn entry-hook
+    // at RVA 0x24FF0 confirms DC=(width11,mode0,count10,cap1088)
+    // and otherDC=(width11,mode1024,count10,cap1088). Confusing this
+    // with the separate RLE stream's 11-bit count consumes one extra bit
+    // on row 0 and corrupts all subsequent coefficient transforms.
     stream[kOtherDC]=make_stream(scratch[kOtherDC].data(),
-                            msb_width(blocks*48+511),(blocks*48)+512,11,1024);
+                            msb_width(blocks+511),align16(blocks*2+1039),11,1024);
     stream[kRLE]=make_stream(scratch[kRLE].data(),
                             msb_width(blocks*48+511),blocks*48+512,4);
 
