@@ -9,7 +9,8 @@ int main() {
     float coeff[33];
     for (auto& value : coeff) value = 0.25f;
     bink_transform_rotate_stage(8, samples, 32, coeff);
-    assert(samples[2] == 4.5f && samples[3] == 1.5f);
-    assert(samples[4] == 1.5f && samples[5] == 3.5f);
-    assert(samples[0] == 0.0f && samples[7] == 7.0f);
+    assert(samples[2] == 5.5f && samples[3] == 1.5f);
+    assert(samples[4] == 4.0f && samples[5] == 5.0f);
+    assert(samples[6] == 2.5f && samples[7] == 5.5f);
+    assert(samples[0] == 0.0f && samples[1] == 1.0f);
 }
