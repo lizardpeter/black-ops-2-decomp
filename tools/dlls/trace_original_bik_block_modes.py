@@ -72,7 +72,9 @@ def main():
             failures.append(f"Invalid dispatch mode {mode}")
             return
         target=mu.reg_read(X.UC_X86_REG_R15)
-        reference=mu.reg_read(X.UC_X86_REG_R9)
+        # The original reference-plane argument is the second 65536-byte
+        # Machine.call byte buffer, aligned to the next 0x11000 heap page.
+        reference=HEAP+0x11000+(target-HEAP)
         stride=mu.reg_read(X.UC_X86_REG_R13)&0xFFFFFFFF
         if stride!=PIXELS:
             failures.append(f"Unexpected stride {stride}")
