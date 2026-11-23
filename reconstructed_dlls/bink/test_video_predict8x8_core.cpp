@@ -5,6 +5,7 @@
 #include <cstdint>
 #include "video_inverse8x8.cpp"
 #include "video_predict8x8_core.cpp"
+#include "video_predict8x8.cpp"
 
 int main() {
     std::array<std::int16_t, 64> coefficients{};
@@ -37,4 +38,15 @@ int main() {
     bink_video_predict8x8_core(result.data(), 8, coefficients.data(), quant.data(),
                                 prediction.data(), 8);
     assert(result == expected);
+    // Complete original six-argument entry: for every original BINKCONS
+    // matrix, the indexed wrapper must equal our already verified core.
+    for (int idx=0;idx<16;++idx) {
+        const auto* matrix = t6_bink::original_tables::quant8x8.data()+64*idx;
+        std::array<std::uint8_t,64> via_index{}, via_matrix{};
+        bink_video_predict8x8(via_index.data(),8,coefficients.data(),
+                              idx,prediction.data(),8);
+        bink_video_predict8x8_core(via_matrix.data(),8,coefficients.data(),
+                                   matrix,prediction.data(),8);
+        assert(via_index == via_matrix);
+    }
 }
