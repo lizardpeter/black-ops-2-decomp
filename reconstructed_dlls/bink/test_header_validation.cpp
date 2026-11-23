@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstddef>
 #include <cstdint>
+#include <initializer_list>
 #include "header_validation.cpp"
 
 using Words = std::array<std::uint32_t, 11>;
