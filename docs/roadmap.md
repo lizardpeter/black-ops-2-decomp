@@ -175,9 +175,9 @@ streaming budgets.
 - **Official servers cut,** as for Ghosts and BO3: no Demonware, Xbox Live or Store traffic. The engine's own UDP
   networking stays, for peer/LAN play and our own server later.
 - **External DLLs:** replace or reimplement them natively where they tie the game to vendors.
-  - `XCurl.dll`: HTTP to vendor services, cut.
+  - `XCurl.dll`: **true source-level reconstruction** of the used entry points and their transitive internal graph, from the pinned Store DLL; explicitly remove any unnecessary vendor-service callers.
   - `xgameruntime.dll` (GDK): offline implementation, as BO3.
-  - `binkw64.dll`: Bink video, keep or replace.
+  - `binkw64.dll`: **true source-level reconstruction**, including proprietary Bink video/audio decoding and threaded playback, from the pinned Store DLL — no FFmpeg/third-party decoder wrapper. See [DLL reconstruction](dll-reconstruction.md).
   - XAudio2, XInput and D3D11 are Windows components.
 - **Discord integration:** rich presence over Discord's local IPC pipe (`\\.\pipe\discord-ipc-0`, JSON frames),
   implemented natively, with no Discord SDK DLL.
