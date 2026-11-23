@@ -26,7 +26,8 @@ bool validate_header_prefix(const std::uint8_t* data, std::size_t bytes,
                         words[5], words[6], words[7], words[8], words[9], words[10]};
 
     // Original accepts BIKf, BIKg, BIKh, BIKi (little-endian magic).
-    if (header.magic < 0x664B4942U || header.magic > 0x694B4942U) return false;
+    if (header.magic != 0x664B4942U && header.magic != 0x674B4942U &&
+        header.magic != 0x684B4942U && header.magic != 0x694B4942U) return false;
     if (!header.frame_count) return false;
     if (header.frame_count > header.frame_index_count ||
         header.frame_index_count >= 1000001U) return false;
