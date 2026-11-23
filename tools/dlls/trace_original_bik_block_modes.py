@@ -32,6 +32,7 @@ from unicorn import x86_const as X  # noqa: E402
 Y_SHA="347b7e90cad7c4cc5d0e3e9b0541813b3a49605827aa72ec59c662ff1f24edaf"
 MODE_RVA=0x25A32
 END_RVA=0x25B17
+MODE1_SUBMODE_RVA=0x25BD5  # MOVZX ECX,byte ptr [RAX]
 FRAME_RVA=0x252C0
 PIXELS=256
 SAMPLES_PER_MODE=4
@@ -60,6 +61,7 @@ def main():
     pending=[]
     samples={}
     mode_counts=Counter()
+    submode_counts=Counter()
     addresses=[]
     failures=[]
     unmatched_epilogues=[0]
@@ -95,6 +97,14 @@ def main():
         pending.append(event)
         mode_counts[str(mode)]+=1
 
+    def mode1_submode(mu):
+        if not pending or pending[-1]["mode"]!=1:
+            failures.append("Mode-1 submode without corresponding mode-1 dispatch")
+            return
+        submode=int(bytes(mu.mem_read(mu.reg_read(X.UC_X86_REG_RAX),1))[0])
+        pending[-1]["submode"]=submode
+        submode_counts[str(submode)]+=1
+
     def epilogue(mu):
         if not pending:
             # Original core has boundary/early-exit paths that reach the
@@ -103,15 +113,19 @@ def main():
             unmatched_epilogues[0]+=1
             return
         event=pending.pop()
-        if len(samples.get(str(event["mode"]),[]))<SAMPLES_PER_MODE:
+        group=str(event["mode"])
+        if event["mode"]==1:
+            group=f"1:{event.get('submode','fallback')}"
+        if len(samples.get(group,[]))<SAMPLES_PER_MODE:
             target=HEAP+event["output_offset"]
             event["after_hex"]=tile(mu,target).hex()
-            samples.setdefault(str(event["mode"]),[]).append(event)
+            samples.setdefault(group,[]).append(event)
         addresses.append((event["x"],event["y"],event["mode"]))
 
     hooks={
         image.base+MODE_RVA:dispatch,
         image.base+END_RVA:epilogue,
+        image.base+MODE1_SUBMODE_RVA:mode1_submode,
     }
     scratch=[SCRATCH_FIRST+i*SCRATCH_SPACING for i in range(9)]
     def setup(w):
@@ -144,6 +158,8 @@ def main():
         "block_modes":dict(sorted(mode_counts.items(),key=lambda kv:int(kv[0]))),
         "total_dispatches":sum(mode_counts.values()),
         "unmatched_shared_epilogues":unmatched_epilogues[0],
+        "mode1_submode_counts":dict(sorted(submode_counts.items(),key=lambda kv:int(kv[0]))),
+        "mode1_without_submode":mode_counts["1"]-sum(submode_counts.values()),
         "sample_blocks":samples,
         "tiles":addresses,
     }
@@ -151,6 +167,8 @@ def main():
     args.out.write_text(json.dumps(data,indent=2)+"\n")
     print("Original BO2 first luma keyframe block mode counts:",
           json.dumps(data["block_modes"],sort_keys=True))
+    print("Original Bink mode-1 submode counts:",json.dumps(data["mode1_submode_counts"],sort_keys=True),
+          "mode-1 fallback",data["mode1_without_submode"])
     print("Original frame Y SHA-256",Y_SHA,
           "total dispatched blocks",data["total_dispatches"])
     print("Real frame original mode/block samples:",args.out)
