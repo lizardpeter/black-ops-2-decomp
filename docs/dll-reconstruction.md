@@ -157,3 +157,35 @@ The GitHub Actions **DLL-specific steps** passed in [this run](https://github.co
 3. Verify all 16 XCurl and 19 Bink imported symbols for the three Store executables, including their *transitive* dependencies, before changing PE imports or linking replacements into the enhanced executable.
 
 **Not done:** either DLL elimination, original `BinkOpen` implementation, video decode, audio decode, or native-game end-to-end playback. Source reconstruction remains isolated from the working runtime.
+
+## Reconstruction continuation: actual video inverse block + XCurl getinfo core (2026-11-23)
+
+This pass uses the pinned original Ghidra disassembly and pseudocode. No FFmpeg, libcurl, or third-party codec source was imported. All new functions are intentionally isolated from the enhanced game build.
+
+### Newly reconstructed Bink internals
+
+| RVA | Source file | Transcribed behavior | Original-vs-source differential |
+|---|---|---|---|
+| `0x2A450` | [`audio_permute32.cpp`](../reconstructed_dlls/bink/audio_permute32.cpp) | 32-word bit-preserving sample permutation used by `FUN_1800293C0` | **518 vectors**, 128 bytes each |
+| `0x2A570` | [`audio_permute32.cpp`](../reconstructed_dlls/bink/audio_permute32.cpp) | Related 32-word permutation used by `FUN_1800295A0` | **518 vectors**, 128 bytes each |
+| `0x2F2E0` | [`video_inverse8x8.cpp`](../reconstructed_dlls/bink/video_inverse8x8.cpp) | Full original two-pass integer inverse transform from 64 quantized coefficients to 64 output pixels, including 32-bit signed wrap, shifts, constants and output stride | **624 blocks**, multiple coefficient distributions and 8/16/32-byte strides |
+
+The video inverse transform is reachable from `FUN_1800252C0`, below the video decoding tree. It is one actual block-decoding primitive, **not** a full Bink codec. All 64 pixel bytes *and* row padding are compared against pinned-original instruction execution under Unicorn. The two permutations are compared on arbitrary raw float bit patterns (including NaNs and signed zero). These functions have no internal DLL callees.
+
+**Next Bink video steps:** reconstruct entropy/bitstream parsing and coefficient production in `FUN_180024B80`, `FUN_180024FF0` and `FUN_1800252C0`; recover the other inverse-transform variants including `FUN_18002F630`; integrate block output into frame reconstruction, then prove actual `.bik` playback.
+
+### Newly reconstructed XCurl internal code
+
+| RVA | Source file | Transcribed behavior | Original-vs-source differential |
+|---|---|---|---|
+| `0xAD58` | [`getinfo_unlocked.cpp`](../reconstructed_dlls/xcurl/getinfo_unlocked.cpp) | Original `curl_easy_getinfo` inner option selection: 17 recognized option codes, exact struct offsets and 32-/64-bit and double conversion semantics, plus unknown-option `0x30` result | **399** handle/option combinations |
+
+This code covers only the field-selector body. The original `FUN_18000AD58` surrounds its selection logic with Windows critical-section operations and conditional ETW tracing. The differential harness models critical-section imports as no-ops while inspecting result/memory behavior; those synchronization and profiling dependencies are **not decompiled or replaced**. `curl_easy_getinfo` itself is still not a complete reconstructed public export.
+
+**Next XCurl steps:** reconstruct the allocator callback implementations and network/multi-handle state machine, then follow the actual BO2 call paths and identify service operations that can be intentionally removed rather than disguised as faithful decompilation.
+
+### Test evidence and remaining constraints
+
+The original-vs-source comparison steps for these three routines passed in [GitHub Actions run 45236933819](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45236933819). The pre-existing full game differential and enhanced-runtime checks are additional, separate stages whose final result should be verified before declaring the entire workflow green.
+
+**Not complete:** full native Bink video/audio playback, XCurl HTTP+TLS, or removing either PE import dependency. The Store EXEs are still linked to both original DLLs.
