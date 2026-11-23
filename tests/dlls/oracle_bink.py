@@ -104,7 +104,7 @@ def run(path):
         struct.pack_into("<I", handle, 0x1B8, 1921)
         struct.pack_into("<I", handle, 0x1BC, 1081)
         _, bufs, _ = call("BinkGetFrameBuffersInfo",
-                          [bytes(handle), b"\\xA5" * (54 * 4)])
+                          [bytes(handle), bytes([0xA5]) * (54 * 4)])
         words = struct.unpack("<54I", bufs[1])
         assert words[0] == frame_count
         assert words[1:7] == (1928, 1088, 968, 544, 0, 1)
