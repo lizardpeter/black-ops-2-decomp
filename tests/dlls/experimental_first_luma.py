@@ -94,8 +94,8 @@ def main():
                              "does not yet match the original")
     native_pgm=ROOT/"build/native-bink-first-luma-frame0.pgm"
     native_pgm.parent.mkdir(parents=True,exist_ok=True)
-    native_pgm.write_bytes(b"P5\\n256 256\\n255\\n"+native)
-    assert native_pgm.read_bytes()==b"P5\\n256 256\\n255\\n"+native
+    native_pgm.write_bytes(b"P5\n256 256\n255\n"+native)
+    assert native_pgm.read_bytes()==b"P5\n256 256\n255\n"+native
     print("FIRST FULL Y PLANE decoded entirely from original-derived "
           "reconstructed native C++ source: 65536 BYTES EXACT MATCH")
     print("Native verified luma image:",native_pgm)
