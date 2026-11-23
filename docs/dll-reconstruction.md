@@ -189,3 +189,26 @@ This code covers only the field-selector body. The original `FUN_18000AD58` surr
 The original-vs-source comparison steps for these three routines passed in [GitHub Actions run 45236933819](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45236933819). The pre-existing full game differential and enhanced-runtime checks are additional, separate stages whose final result should be verified before declaring the entire workflow green.
 
 **Not complete:** full native Bink video/audio playback, XCurl HTTP+TLS, or removing either PE import dependency. The Store EXEs are still linked to both original DLLs.
+
+## Continued Bink video decoder work: 2x blocks, byte interleaver and prediction (2026-11-23)
+
+All routines below are reconstructed from the original pinned Store x64 `binkw64.dll` machine code and Ghidra pseudocode. They are original-code source translations, **not wrappers around a codec library**.
+
+| Original RVA | Source | Reconstruction state | Verified differential cases |
+|---|---|---|---:|
+| `0x2F630` | [`video_inverse8x8_2x.cpp`](../reconstructed_dlls/bink/video_inverse8x8_2x.cpp) | **Complete original inner routine**: reuse our previously verified 8×8 quantized inverse transform, then duplicate each output byte to a 2×2 block. Writes 16×16 pixels, retaining output stride and padding. | **456** |
+| `0x237B0` | [`video_interleave_bytes.cpp`](../reconstructed_dlls/bink/video_interleave_bytes.cpp) | **Complete original inner routine**: interleave two fixed-length byte streams using the original 31-bit-truncated selection mask, append the unconsumed other stream, and return the count of mask-controlled selections. | **450** |
+| `0x2F9F0` | [`video_predict8x8_core.cpp`](../reconstructed_dlls/bink/video_predict8x8_core.cpp) | **Arithmetic stage matched**: reconstruct 8×8 residual through our validated integer inverse transform, then add it to the 8×8 prediction/reference frame modulo 256. Native API currently accepts the quantization matrix explicitly; the original six-argument function instead looks up a table at RVA `0x5C120 + quant_index * 0x100`. **The full original ABI and embedded lookup tables remain TODO.** | **630** |
+
+The exact original-vs-native tests are in
+[`differential_video_inverse8x8_2x.py`](../tests/dlls/differential_video_inverse8x8_2x.py),
+[`differential_video_interleave.py`](../tests/dlls/differential_video_interleave.py),
+and [`differential_video_predict8x8.py`](../tests/dlls/differential_video_predict8x8.py). The last test obtains the quantization matrices from `Image.data` of the SHA-256-pinned DLL, rather than relying on assumed/hardcoded matrix values. The relevant CI steps passed in [workflow 45240459153](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45240459153). These are **1,536 individual new differential comparisons**, not 1,536 decoded video frames.
+
+### Immediate decoder work remaining
+
+The contiguous core of video decoding remains in `FUN_1800252C0`, with entropy/bitstream routines `FUN_180023840`, `FUN_180024140`, `FUN_180024980`, `FUN_180024B80`, `FUN_180024DB0`, and `FUN_180024FF0`. `FUN_18002F9F0` now has matched arithmetic but needs the complete original quantization-table/index wrapper. This code must be reconstructed and validated using actual compressed frames before the 44 original `.bik` assets can play without `binkw64.dll`.
+
+For XCurl, original `FUN_18000932C` and `FUN_180009640` are allocator/deallocator dispatchers invoking callbacks at `PTR_FUN_180028018` and `PTR_FUN_180028008`, with conditional trace callbacks. These, the network request state machine, and all callback ownership/lifetime rules remain unimplemented. No no-op replacement or generic allocator should be passed off as a faithful reconstruction.
+
+**Neither original DLL was removed from the EXE import table, and the enhanced runtime was deliberately left unchanged.**
