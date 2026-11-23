@@ -23,7 +23,7 @@ int main() {
     assert(out[3] == 968 && out[4] == 544);
     assert(out[5] == 0);
     assert(out[6] == 1 && out[12] == 1 && out[18] == 1);
-    for (auto i : {8, 14, 20, 26}) {
+    for (unsigned i = 8; i <= 26; i += 6) {
         assert(out[i] == 0 && out[i + 1] == 0);
     }
     assert(out[10] == 0 && out[16] == 0 && out[22] == 0 && out[28] == 0);
