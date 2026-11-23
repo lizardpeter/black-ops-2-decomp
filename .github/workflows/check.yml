@@ -27,9 +27,9 @@ jobs:
           sudo apt-get update -q >/dev/null && sudo apt-get install -y -q clang lld llvm >/dev/null
           clang --version | head -1
           pip install -q -r tests/differential/requirements.txt
-      - name: Reconstructed Bink leaf-body tests (not differential yet)
+      - name: Reconstructed external-DLL source-body tests (not differential yet)
         run: |
-          for test in reconstructed_dlls/bink/test_bink_small.cpp reconstructed_dlls/bink/test_bink_leaf.cpp; do
+          for test in reconstructed_dlls/bink/test_bink_small.cpp reconstructed_dlls/bink/test_bink_leaf.cpp reconstructed_dlls/xcurl/test_slist.cpp; do
             clang++ -std=c++20 -O2 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer "$test" -o /tmp/bink_leaf_test
             /tmp/bink_leaf_test
           done
