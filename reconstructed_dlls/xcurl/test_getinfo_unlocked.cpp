@@ -4,6 +4,7 @@
 #include <cassert>
 #include <cstdint>
 #include <cstring>
+#include <utility>
 #include "getinfo_unlocked.cpp"
 
 static void set32(void* p, unsigned off, std::uint32_t v) {
