@@ -29,7 +29,7 @@ jobs:
           pip install -q -r tests/differential/requirements.txt
       - name: Reconstructed external-DLL source-body tests (not differential yet)
         run: |
-          for test in reconstructed_dlls/bink/test_bink_small.cpp reconstructed_dlls/bink/test_bink_leaf.cpp reconstructed_dlls/bink/test_bink_frames.cpp reconstructed_dlls/bink/test_bink_dispatch.cpp reconstructed_dlls/bink/test_header_validation.cpp reconstructed_dlls/xcurl/test_slist.cpp reconstructed_dlls/xcurl/test_duplicate_string.cpp; do
+          for test in reconstructed_dlls/bink/test_bink_small.cpp reconstructed_dlls/bink/test_bink_leaf.cpp reconstructed_dlls/bink/test_bink_frames.cpp reconstructed_dlls/bink/test_bink_dispatch.cpp reconstructed_dlls/bink/test_header_validation.cpp reconstructed_dlls/bink/test_transform_butterfly8.cpp reconstructed_dlls/xcurl/test_slist.cpp reconstructed_dlls/xcurl/test_duplicate_string.cpp; do
             clang++ -std=c++20 -O2 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer "$test" -o /tmp/bink_leaf_test
             /tmp/bink_leaf_test
           done
@@ -42,6 +42,11 @@ jobs:
           mkdir -p build
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/bink/bink_frames.cpp -o build/bink_frames_test.so
           python tests/dlls/differential_frames.py originals/dlls/binkw64.dll build/bink_frames_test.so
+      - name: Differential Bink codec SSE butterfly (original vs source)
+        run: |
+          clang++ -std=c++20 -O2 -shared -fPIC -fno-fast-math -ffp-contract=off \
+            -Wall -Wextra -Werror reconstructed_dlls/bink/transform_butterfly8.cpp -o build/bink_transform_test.so
+          python tests/dlls/differential_butterfly.py originals/dlls/binkw64.dll build/bink_transform_test.so
       - name: Parse three original Bink compressed frame indexes
         run: |
           python tools/dlls/fetch_bik_fixtures.py originals/bik
