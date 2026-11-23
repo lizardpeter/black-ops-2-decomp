@@ -230,8 +230,7 @@ jobs:
           name: original-bink-block-modes
           path: build/real-bink-block-modes.json
           if-no-files-found: warn
-      - name: Experimental all-source BO2 first Bink Y plane (diagnostic, not runtime)
-        continue-on-error: true
+      - name: Verify original byte-exact Y frame from native Bink source
         run: |
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
             reconstructed_dlls/bink/huffman_codebook.cpp \
