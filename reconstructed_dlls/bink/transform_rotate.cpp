@@ -26,8 +26,10 @@ extern "C" void bink_transform_rotate_stage(int count,
         const float left_second = samples[i + 1];
         coeff_lo += quotient;
         coeff_hi -= quotient;
-        right -= 2;
 
+        // Original RCX is decremented by 8 bytes before loads at RCX+8
+        // and RCX+12: the first pair is samples[count-2 : count], NOT
+        // samples[count-4 : count-2].
         const float diff = left_first - right[0];        // subss
         const float sum = left_second + right[1];        // addss
         const float secondary = 0.5f - *coeff_hi;        // subss
@@ -42,5 +44,6 @@ extern "C" void bink_transform_rotate_stage(int count,
         samples[i + 1] = left_second - rot_second;
         right[1] -= rot_second;
         right[0] += rot_first;
+        right -= 2;
     }
 }
