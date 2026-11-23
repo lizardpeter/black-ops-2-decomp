@@ -9,6 +9,7 @@ on:
     paths:
       - reconstructed_dlls/bink/video_luma_first_keyframe.cpp
       - tests/dlls/experimental_first_luma.py
+      - tools/dlls/trace_original_bik_entropy_rows.py
       - .github/workflows/bink-first-frame.yml
   workflow_dispatch:
 
