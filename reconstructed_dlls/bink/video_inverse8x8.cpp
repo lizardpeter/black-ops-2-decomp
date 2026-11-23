@@ -14,6 +14,8 @@
 // The game supplies valid, non-overlapping buffers. Negative strides must
 // point to a suitably positioned output buffer.
 #include <bit>
+#include <cstddef>
+#include <initializer_list>
 #include <cstdint>
 
 namespace t6_bink::internal {
