@@ -5,9 +5,9 @@ Original code from SHA-pinned Store binkw64.dll is executed in Unicorn.
 Our C++ reconstruction runs as a separate native shared library.
 Compare decoded bytes, buffer cursor/limit, and bit reservoir state.
 
-Synthetic streams use actual original state layouts, LSB-first packed words,
-fixed four-bit Huffman table entries and the repeated-literal branch. This is
-NOT yet coverage of arbitrary-length Huffman codes or complete frame entropy.
+Synthetic streams use original state layouts, LSB-first packed words, both
+fixed and mixed-length (1/2/3-bit) prefix-free Huffman tables, and the
+repeated-literal branch. This is not yet full game-frame integration.
 """
 import ctypes
 import hashlib
@@ -57,7 +57,18 @@ assert ctypes.sizeof(Decoder) == 0x48
 assert ctypes.sizeof(BitStream) == 24
 
 
-def make_stream(count, mode, codes):
+VARIABLE_CODES = ((0, 1), (1, 2), (3, 3), (7, 3))
+FIXED_TABLE = bytes(0x40 | i for i in range(16))
+VARIABLE_TABLE = bytes(
+    (0x10 | 0) if not (i & 1) else
+    (0x20 | 1) if (i & 3) == 1 else
+    (0x30 | 2) if (i & 7) == 3 else
+    (0x30 | 3)
+    for i in range(16)
+)
+
+
+def make_stream(count, mode, codes, variable):
     bits = []
     def add(v, n):
         for i in range(n):
@@ -69,7 +80,8 @@ def make_stream(count, mode, codes):
             add(codes[0], 4)
         else:
             for code in codes:
-                add(code, 4)
+                value, width = VARIABLE_CODES[code] if variable else (code, 4)
+                add(value, width)
     words = [0] * 32
     for i, bit in enumerate(bits):
         words[i // 32] |= bit << (i % 32)
@@ -93,15 +105,17 @@ def main():
     cases = []
     for count in (0, 1, 2, 3, 7, 8, 9, 15, 16, 31, 32, 47, 63):
         for mode in ((0, 1) if count else (0,)):
-            for _ in range(16):
-                codes = [rng.randrange(16) for _ in range(count if not mode else 1)]
-                cases.append((count, mode, codes))
+            for variable in ((False, True) if (count and not mode) else (False,)):
+                for _ in range(12):
+                    codes = [rng.randrange(4 if variable else 16)
+                             for _ in range(count if not mode else 1)]
+                    cases.append((count, mode, codes, variable))
 
-    table = bytes(0x40 | i for i in range(16))
     symbols = bytes(range(0x70, 0x80))
     compared = 0
-    for case, (count, mode, codes) in enumerate(cases):
-        words = make_stream(count, mode, codes)
+    for case, (count, mode, codes, variable) in enumerate(cases):
+        table = VARIABLE_TABLE if variable else FIXED_TABLE
+        words = make_stream(count, mode, codes, variable)
         word_bytes = struct.pack("<32I", *words)
         initial = bytes([0xA5]) * LENGTH
 
@@ -150,7 +164,7 @@ def main():
         if original_output != source_output:
             i = next(i for i, (a, b) in enumerate(zip(original_output, source_output)) if a != b)
             raise AssertionError(f"Entropy output mismatch case={case} len={count} "
-                                 f"mode={mode} at byte {i}: original={original_output[i]} "
+                                 f"mode={mode} variable={variable} at byte {i}: original={original_output[i]} "
                                  f"source={source_output[i]}")
         orig_decoder = buffers[0]
         original_current, original_limit = struct.unpack_from("<QQ", orig_decoder)
@@ -169,13 +183,13 @@ def main():
                 (state.cache, (native_next - ctypes.addressof(native_words)) // 4,
                  state.available_bits)):
             raise AssertionError(
-                f"Bit state mismatch case={case} count={count} mode={mode}: "
+                f"Bit state mismatch case={case} count={count} mode={mode} variable={variable}: "
                 f"orig={(cached, next_pointer - WORDS, bits_available)} "
                 f"native={(state.cache, native_next - ctypes.addressof(native_words), state.available_bits)}")
         compared += 1
 
     print(f"Bink original 0x{RVA:X} Huffman byte decoder differential PASS: "
-          f"{compared} synthetic streams (fixed-length Huffman and repeat branches)")
+          f"{compared} synthetic streams (mixed-length Huffman and repeat branches)")
 
 
 if __name__ == "__main__":
