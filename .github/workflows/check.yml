@@ -47,6 +47,11 @@ jobs:
           clang++ -std=c++20 -O2 -shared -fPIC -fno-fast-math -ffp-contract=off \
             -Wall -Wextra -Werror reconstructed_dlls/bink/transform_butterfly8.cpp -o build/bink_transform_test.so
           python tests/dlls/differential_butterfly.py originals/dlls/binkw64.dll build/bink_transform_test.so
+      - name: Differential Bink 16-float transform (original vs source)
+        run: |
+          clang++ -std=c++20 -O2 -shared -fPIC -fno-fast-math -ffp-contract=off \
+            -Wall -Wextra -Werror reconstructed_dlls/bink/transform_butterfly16.cpp -o build/bink_transform16_test.so
+          python tests/dlls/differential_butterfly16.py originals/dlls/binkw64.dll build/bink_transform16_test.so
       - name: Differential Bink audio rotation stage (original vs source)
         run: |
           clang++ -std=c++20 -O2 -shared -fPIC -fno-fast-math -ffp-contract=off \
