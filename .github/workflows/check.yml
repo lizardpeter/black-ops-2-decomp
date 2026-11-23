@@ -160,7 +160,9 @@ jobs:
         if: always()
         with:
           name: original-bink-real-frame-probe
-          path: build/real-bink-frame-probe.json
+          path: |
+            build/real-bink-frame-probe.json
+            build/original-bink-luma-frame0.pgm
           if-no-files-found: warn
       - name: Fetch originals
         run: |
