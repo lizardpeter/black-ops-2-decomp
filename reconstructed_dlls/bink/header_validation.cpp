@@ -6,25 +6,9 @@
 // observed in Ghidra after the original I/O layer has read a 0x2C-byte header.
 // The explicit length check is an ADDED safe helper contract: the original
 // routine had already read 44 bytes and checked its own I/O status.
-#include <cstddef>
-#include <cstdint>
+#include "header_validation.h"
 
 namespace t6_bink {
-struct HeaderPrefix {
-    std::uint32_t magic;
-    std::uint32_t payload_bytes;
-    std::uint32_t frame_count;
-    std::uint32_t largest_frame_bytes;
-    std::uint32_t frame_index_count;
-    std::uint32_t width;
-    std::uint32_t height;
-    std::uint32_t rate_numerator;
-    std::uint32_t rate_denominator;
-    std::uint32_t flags;
-    std::uint32_t audio_track_count;
-};
-static_assert(sizeof(HeaderPrefix) == 44);
-
 static std::uint32_t header_le32(const std::uint8_t* p) {
     return std::uint32_t(p[0]) | (std::uint32_t(p[1]) << 8) |
            (std::uint32_t(p[2]) << 16) | (std::uint32_t(p[3]) << 24);
