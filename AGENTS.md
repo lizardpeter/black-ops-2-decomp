@@ -10,7 +10,7 @@ PDBs) are the references; the 2015 Steam `t6mp.exe` (x86) is a `related` helper.
 | Kind | Where | Who writes it |
 |---|---|---|
 | **Generated** | `analysis/<build>/`, `STATUS.md` | Only the scripts in `tools/` (and the Ghidra workflow). Never hand-edit. |
-| **Authored** | `src/`, `include/`, `enhanced/`, `tests/`, `docs/`, `records/` | People and agents. |
+| **Authored** | `src/`, `include/`, `enhanced/`, `reconstructed_dlls/`, `tests/`, `docs/`, `records/` | People and agents. |
 
 If a generated file is wrong, fix the script that wrote it and re-run. Don't patch the output.
 
@@ -24,6 +24,7 @@ If a generated file is wrong, fix the script that wrote it and re-run. Don't pat
 | `records/` | `functions.tsv` (status), `names.tsv` (identifications in builds without symbols), `bugs.tsv`, `patches.tsv` |
 | `tests/differential/` | Reconstructions against the original code under Unicorn, x86 or x64 (`harness.py`, `run.py`, cases in `test_*.py`) |
 | `tools/` | Fetching, inventory, PDB extraction, Ghidra scripts, matching, the hybrid-link build (`build_recon.py`, `symbols.py`, `recon/`), status and graph generation |
+| `reconstructed_dlls/`, `tools/dlls/` | Authored, evidence-based source reconstructions of the original XCurl/Bink code, with hash-pinned fetch/inventory utilities; no vendor binary blobs or unverified drop-in replacements (see `docs/dll-reconstruction.md`) |
 
 ## Addresses
 
