@@ -266,10 +266,32 @@ The **real pinned DLL's BINKCONS** section contains a complete inventory of *six
 - Each type has exactly `1 << width` packed byte entries, for **976 lookup entries total**. Each entry encodes its Huffman code length in the high nibble and symbol-map index in the low nibble. Type 0 has 16 entries `0x40` through `0x4F` (fixed four-bit codes); the other types include 1–7-bit codes.
 - The RLE lengths above are the exact bytes at RVA `0x5A690`–`0x5A693`, referenced by the original `FUN_180024140` as `DAT_18005A684 + symbol`.
 
-These metadata values have been read from the SHA-256-pinned original DLL, **not invented**, and have not been silently substituted for a full `FUN_180023840` codebook initialization reconstruction.
+These metadata values were read from the SHA-256-pinned original DLL, **not invented**. They are now preserved byte-for-byte in [`original_huffman_tables.h`](../reconstructed_dlls/bink/original_huffman_tables.h) and used by the reconstructed `FUN_180023840`, verified against the original instructions.
 
 ### What remains before actual .bik playback
 
-The next highest-value original functions are **`FUN_180023840`** (codebook setup, including the symbol-map permutation syntax) and **`FUN_1800252C0`** (large frame/block traversal and mode handling). Need to validate the initialized Huffman tables and each reconstructed decoder against bitstreams extracted from *real* original BO2 `.bik` assets, then assemble YUV output and run end-to-end playback. The current differentials exercise intentionally constructed valid bitstreams, **not full video frames**, corrupted data, audio output, timing or asynchronous playback.
+The codebook initializer `FUN_180023840` is now reconstructed and synthetically verified, including all sixteen original table types. The highest-value next target is **`FUN_1800252C0`** (large frame/block traversal and mode handling), alongside its remaining block-parameter and reconstruction helpers. Need to validate the initialized Huffman tables and the verified entropy routines against bitstreams extracted from *real* original BO2 `.bik` assets, then assemble YUV output and run end-to-end playback. The current differentials exercise intentionally constructed valid bitstreams, **not full video frames**, corrupted data, audio output, timing or asynchronous playback.
 
 All three original Store EXEs still depend on `binkw64.dll` and `XCurl.dll`; their import tables remain unchanged. **Neither DLL has been eliminated.**
+
+## Bink Huffman codebook initialization + chained decoding verified (2026-11-23)
+
+**Original initializer:** `FUN_180023840` at RVA `0x23840` (2,297 original x64 bytes).
+**Reconstruction:** [`huffman_codebook.cpp`](../reconstructed_dlls/bink/huffman_codebook.cpp), using exact
+[original BINKCONS tables](../reconstructed_dlls/bink/original_huffman_tables.h), with standalone
+[`test_huffman_codebook.cpp`](../reconstructed_dlls/bink/test_huffman_codebook.cpp).
+
+- Original initializer's four arguments remain separate: 24-byte input bitstream, selected table pointer output, 32-bit table width output, and 16-byte symbol permutation output.
+- All **16** original Huffman types now select the exact original lookup bytes (total **976**), original widths and offsets.
+- Type 0 uses identity mapping. Nonzero types support (a) a 1–8-symbol explicit unique nibble prefix with remaining symbols in ascending order and (b) 2-bit-depth hierarchical symbol permutations: pair swaps followed by optional stable 2+2, 4+4, and 8+8 merges. These merges preserve the original `FUN_1800237B0` variable bit-consumption semantics (stop when one side is exhausted).
+- [`differential_huffman_codebook.py`](../tests/dlls/differential_huffman_codebook.py) verified **1,936 original-vs-native cases** on the pinned x64 instructions. Checks include output mappings, actual table bytes, and bitreader cache, count and next-word pointer. The first unit-test run detected a C++ assignment-order indexing bug in the generic merge; it was fixed before the passing original differential run.
+- [`differential_codebook_to_entropy.py`](../tests/dlls/differential_codebook_to_entropy.py) verifies a **chained** two-routine path: original codebook `0x23840` initialization, then original Huffman byte decoder `0x24980`, versus the corresponding separately compiled reconstructed sources. Uses actual codewords generated from all 16 original tables, plus independently calculated expected symbols. **558** valid synthetic compressed streams passed, including intermediate and final bitreader state and decoded bytes.
+- Both CI steps passed in [workflow 45253171154](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45253171154). That workflow's other, broader game checks are independent; do not infer end-to-end playback from these synthetic validations.
+
+### Size and effort remaining
+
+The original Store games' **19 imported Bink exports** reach approximately **189 distinct Ghidra-recognized functions** and **96,809 bytes** of machine code through static direct calls. The **16 imported XCurl exports** reach approximately **204 functions** and **61,829 bytes**. Those lower-bound figures omit callback, indirect and unrecognized code paths; they do **not** count required functions left to rewrite or represent completion percentages.
+
+The biggest outstanding Bink functions include `FUN_1800252C0` (8,618 bytes, core video frame traversal), `FUN_180017970` (8,714 bytes, media/file opening), and audio/frame scheduling/async paths. XCurl's remaining network and multi-handle machinery also has significant transitive dependencies. A successful synthetic entropy block does **not** mean full video frame output is near completion: actual frame layouts, chroma, motion/prediction, audio, timing and buffer allocation still need original-source recovery and real-media testing.
+
+The **next measurable milestone** is producing a byte-identical decoded YUV frame from a real pinned BO2 `.bik` media fixture through original and source implementations. A subsequent milestone is a complete playable clip without loading the original DLL, then removing PE imports after all 19 Bink entry points and their state/lifetime behavior are handled. XCurl requires a separate HTTP/TLS/multi-handle and callback reconstruction track. Neither DLL dependency has been removed.
