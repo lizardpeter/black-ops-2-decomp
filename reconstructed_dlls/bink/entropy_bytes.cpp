@@ -19,28 +19,46 @@
 namespace {
 using t6_bink::WordBitStream;
 
-// Original 32-bit LSB-first bit reservoir: a refill ORs one little-endian
-// word at bit offset available_bits then advances next_word by four bytes.
-// This does not enforce an artificial byte-alignment boundary.
-void refill(WordBitStream& s) {
-    const auto next = *s.next_word++;
-    s.cache = static_cast<std::uint32_t>(
-        std::uint64_t(s.cache) | (std::uint64_t(next) << s.available_bits));
-    s.available_bits += 32;
-}
-std::uint32_t peek(WordBitStream& s, std::uint32_t width) {
-    if (s.available_bits < width) refill(s);
-    return s.cache & ((std::uint32_t{1} << width) - 1U);
-}
-void consume(WordBitStream& s, std::uint32_t width) {
-    s.cache >>= width;
-    s.available_bits -= width;
-}
-std::uint32_t read(WordBitStream& s, std::uint32_t width) {
-    const auto result = peek(s, width);
-    consume(s, width);
-    return result;
-}
+// Original decoder keeps the combined incoming word in a 64-bit register
+// UNTIL after the code bits have been shifted out. Truncating to 32 bits
+// immediately on refill loses high bits of the new word at cross-word
+// boundaries; the exported bitstream cache is only narrowed on write-back.
+class BitCursor {
+  WordBitStream& state_;
+  std::uint64_t pending_;
+  std::uint32_t available_;
+  const std::uint32_t* next_;
+public:
+  explicit BitCursor(WordBitStream& state)
+      : state_(state), pending_(state.cache),
+        available_(state.available_bits), next_(state.next_word) {}
+
+  std::uint32_t available() const { return available_; }
+  const std::uint32_t* next() const { return next_; }
+  void refill() {
+      pending_ |= std::uint64_t(*next_++) << available_;
+      available_ += 32;
+  }
+  std::uint32_t peek(std::uint32_t width) {
+      if (available_ < width) refill();
+      return static_cast<std::uint32_t>(pending_) &
+             ((std::uint32_t{1} << width) - 1U);
+  }
+  void consume(std::uint32_t width) {
+      pending_ >>= width;
+      available_ -= width;
+  }
+  std::uint32_t read(std::uint32_t width) {
+      const auto result = peek(width);
+      consume(width);
+      return result;
+  }
+  void save() {
+      state_.cache = static_cast<std::uint32_t>(pending_);
+      state_.available_bits = available_;
+      state_.next_word = next_;
+  }
+};
 }
 
 extern "C" void bink_decode_entropy_bytes(t6_bink::ByteEntropyState* d,
@@ -48,19 +66,22 @@ extern "C" void bink_decode_entropy_bytes(t6_bink::ByteEntropyState* d,
                                            const std::uint32_t* word_end) {
     if (d->current != d->end) return;
 
-    const std::uint32_t count = read(*bits, d->count_bits);
+    BitCursor cursor(*bits);
+    const std::uint32_t count = cursor.read(d->count_bits);
     if (count == 0 || count > d->capacity) {
         d->current = d->buffer + 4;
         d->end = d->buffer;
+        cursor.save();
         return;
     }
     d->current = d->buffer;
     d->end = d->buffer + count;
 
-    const bool repeat = read(*bits, 1) != 0;
+    const bool repeat = cursor.read(1) != 0;
     if (repeat) {
-        const std::uint8_t literal = static_cast<std::uint8_t>(read(*bits, 4));
+        const std::uint8_t literal = static_cast<std::uint8_t>(cursor.read(4));
         for (std::uint32_t i = 0; i < count; ++i) d->buffer[i] = literal;
+        cursor.save();
         return;
     }
 
@@ -68,16 +89,17 @@ extern "C" void bink_decode_entropy_bytes(t6_bink::ByteEntropyState* d,
         // The original takes this boundary check before a necessary lookahead
         // refill. Its higher-level video decoder is responsible for providing
         // safe padding for the other bit consumption paths.
-        if (bits->available_bits < d->lookup_bits && bits->next_word >= word_end) {
+        if (cursor.available() < d->lookup_bits && cursor.next() >= word_end) {
             d->current = d->buffer + 4;
             d->end = d->buffer;
             return;
         }
-        const std::uint8_t packed = d->lookup_table[peek(*bits, d->lookup_bits)];
+        const std::uint8_t packed = d->lookup_table[cursor.peek(d->lookup_bits)];
         const std::uint32_t code_length = packed >> 4;
         const std::uint8_t code_symbol = packed & 15U;
-        if (bits->available_bits < code_length) refill(*bits);
-        consume(*bits, code_length);
+        if (cursor.available() < code_length) cursor.refill();
+        cursor.consume(code_length);
         d->buffer[i] = d->symbol_map[code_symbol];
     }
+    cursor.save();
 }
