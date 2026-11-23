@@ -1,14 +1,12 @@
 #!/usr/bin/env python3
-"""Differential Bink video residual/prediction math, original vs source.
+"""Differential FULL six-argument original Bink prediction vs source.
 
-The pinned DLL's original FUN_18002F9F0 selects a quantization matrix from
-BINKCONS RVA 0x5C120 + quant_index*0x100. Here that EXACT original matrix is
-read from the pinned PE image and passed explicitly to our reconstructed core.
-The core implements the original inverse-transform and byte-add arithmetic,
-but does NOT yet recreate the complete fixed-table/index ABI boundary.
-
-Original code runs in Unicorn; the decompiled native C++ core is run via ctypes.
-No third-party decoder is used, and full Bink frame decoding is not claimed.
+Original FUN_18002F9F0 (RVA 0x2F9F0) selects 8x8 quantization matrix
+BINKCONS RVA 0x5C120 + quant_index*0x100. Our source now embeds the exact
+16 original tables and exposes the six-argument original-compatible ABI.
+Both full indexed wrapper AND earlier explicit-matrix arithmetic core are
+compared to the pinned original DLL on 16*35*3 byte-exact block cases.
+No external decoder is used; this is not yet full Bink frame playback.
 """
 import ctypes
 import hashlib
@@ -40,10 +38,16 @@ def main():
         ctypes.POINTER(ctypes.c_int16), ctypes.POINTER(ctypes.c_int32),
         ctypes.POINTER(ctypes.c_uint8), ctypes.c_int32)
     fn.restype = None
+    full = lib.bink_video_predict8x8
+    full.argtypes = (
+        ctypes.POINTER(ctypes.c_uint8), ctypes.c_int32,
+        ctypes.POINTER(ctypes.c_int16), ctypes.c_int32,
+        ctypes.POINTER(ctypes.c_uint8), ctypes.c_int32)
+    full.restype = None
 
     rng = random.Random(RVA)
     checks = 0
-    for quant_index in (0, 1, 3, 5, 8, 11):
+    for quant_index in range(16):
         quant_offset = QUANT_TABLE_RVA + quant_index * 256
         table = bytes(img.data[quant_offset:quant_offset + 256])
         if len(table) != 256:
@@ -69,6 +73,17 @@ def main():
                 native_reference = (ctypes.c_uint8 * len(reference)).from_buffer_copy(reference)
                 fn(output, stride, native_coeff, native_quant, native_reference, pred_stride)
                 actual = ctypes.string_at(ctypes.addressof(output), len(initial))
+                indexed_output = (ctypes.c_uint8 * len(initial)).from_buffer_copy(initial)
+                full(indexed_output, stride, native_coeff, quant_index,
+                     native_reference, pred_stride)
+                indexed_bytes = ctypes.string_at(ctypes.addressof(indexed_output), len(initial))
+                if indexed_bytes != buffers[0]:
+                    position = next(i for i,(a,b) in enumerate(zip(indexed_bytes,buffers[0]))
+                                    if a != b)
+                    raise AssertionError(
+                        f"Full original ABI mismatch quant={quant_index}, sample={sample}, "
+                        f"stride={stride}, byte={position}: "
+                        f"original={buffers[0][position]}, native={indexed_bytes[position]}")
                 if actual != buffers[0]:
                     position = next(i for i, (a, b) in enumerate(zip(actual, buffers[0])) if a != b)
                     raise AssertionError(
@@ -78,8 +93,9 @@ def main():
                 if buffers[2] != reference or buffers[1] != coefficients_bytes:
                     raise AssertionError("Original Bink prediction modified its input buffers")
                 checks += 1
-    print(f"Bink predicted 8x8 core RVA 0x{RVA:X} differential PASS: {checks} outputs "
-          "(original quantization matrices passed explicitly)")
+    print(f"Bink original full-ABI prediction 0x{RVA:X} differential PASS: "
+          f"{checks} cases across all 16 ORIGINAL indexed quantization matrices "
+          "(also cross-checked against explicit-matrix source core)")
 
 
 if __name__ == "__main__":
