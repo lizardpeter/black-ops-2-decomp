@@ -62,6 +62,7 @@ def main():
     mode_counts=Counter()
     addresses=[]
     failures=[]
+    unmatched_epilogues=[0]
 
     def tile(mu,addr):
         return b"".join(bytes(mu.mem_read(addr+PIXELS*y,8)) for y in range(8))
@@ -96,7 +97,10 @@ def main():
 
     def epilogue(mu):
         if not pending:
-            failures.append("Tile epilogue without dispatch")
+            # Original core has boundary/early-exit paths that reach the
+            # shared tile continuation without passing through its jump
+            # table. They are not malformed compressed blocks.
+            unmatched_epilogues[0]+=1
             return
         event=pending.pop()
         if len(samples.get(str(event["mode"]),[]))<SAMPLES_PER_MODE:
@@ -139,6 +143,7 @@ def main():
         "original_luma_sha256":Y_SHA,
         "block_modes":dict(sorted(mode_counts.items(),key=lambda kv:int(kv[0]))),
         "total_dispatches":sum(mode_counts.values()),
+        "unmatched_shared_epilogues":unmatched_epilogues[0],
         "sample_blocks":samples,
         "tiles":addresses,
     }
