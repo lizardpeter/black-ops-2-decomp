@@ -120,7 +120,7 @@ def probe(img, filedata, *, frame=0, flag=0):
             saved = Path("build/original-bink-luma-frame0.pgm")
             saved.parent.mkdir(parents=True, exist_ok=True)
             saved.write_bytes(
-                f"P5\\n{width} {height}\\n255\\n".encode("ascii") + y_after)
+                f"P5\n{width} {height}\n255\n".encode("ascii") + y_after)
             report["original_oracle_grayscale_pgm"] = str(saved)
         report.update({
             "decoded_plane_available": changed > 0,
