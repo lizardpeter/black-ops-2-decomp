@@ -212,3 +212,34 @@ The contiguous core of video decoding remains in `FUN_1800252C0`, with entropy/b
 For XCurl, original `FUN_18000932C` and `FUN_180009640` are allocator/deallocator dispatchers invoking callbacks at `PTR_FUN_180028018` and `PTR_FUN_180028008`, with conditional trace callbacks. These, the network request state machine, and all callback ownership/lifetime rules remain unimplemented. No no-op replacement or generic allocator should be passed off as a faithful reconstruction.
 
 **Neither original DLL was removed from the EXE import table, and the enhanced runtime was deliberately left unchanged.**
+
+## Bink video entropy reconstruction: three matched routines (2026-11-23)
+
+This continuation advanced from already-verified pixel transforms into **actual source-level bitstream entropy decoding**. The evidence is the pinned Store x64 `binkw64.dll` machine code (SHA-256 `10e67763420dd5c2654648d1b0242ba8aceac14ac9211c202360a3f12219af17`), its full Ghidra output, and original-versus-recompiled differential tests. No Bink/FFmpeg/other decoder source or preexisting codec implementation is used.
+
+### Original memory layouts
+
+[`entropy_bytes.h`](../reconstructed_dlls/bink/entropy_bytes.h) captures the original `0x48`-byte decoder record: current and end pointers at +`0x00`/+`0x08`, 16-byte decoded Huffman symbol map at +`0x18`, lookahead width at +`0x28`, packed Huffman lookup pointer at +`0x30`, output-count bit width at +`0x38`, capacity at +`0x3C`, and buffer at +`0x40`. The bitstream record is `0x18` bytes: cached 32-bit value at +`0x00`, next word pointer at +`0x08`, and available-bit count at +`0x10`.
+
+[`entropy_bit_cursor.h`](../reconstructed_dlls/bink/entropy_bit_cursor.h) implements the original little-endian/LSB-first 32-bit word refill **and its 64-bit temporary accumulator**. Differential testing caught a premature 32-bit truncation at a word boundary and a premature next-word advance when Huffman lookahead examined but did not consume that word; both were corrected. The pointer, low-32-bit cache, and bit count are now directly compared with the original.
+
+### Reconstructed inner entropy functions
+
+| Original Bink RVA | Reconstructed source | Verified source behavior | Pinned-original differential cases |
+|---|---|---|---:|
+| `0x24980` | [`entropy_bytes.cpp`](../reconstructed_dlls/bink/entropy_bytes.cpp) | Bit-coded byte count; one-bit repeated-literal mode with four-bit literal, otherwise a byte-per-Huffman-code lookup using packed code length and symbol map; preserve source bitreader state | **444** |
+| `0x24B80` | [`entropy_nibbles.cpp`](../reconstructed_dlls/bink/entropy_nibbles.cpp) | Bit-coded byte count; decode two independent Huffman nibbles, combine as `low | (high << 4)`; preserve bitreader state | **300** |
+| `0x24DB0` | [`entropy_signed_bytes.cpp`](../reconstructed_dlls/bink/entropy_signed_bytes.cpp) | Bit-coded byte count; Huffman byte values plus sign bit when nonzero, or repeated 4-bit magnitude with optional sign bit; preserve bitreader state | **444** |
+
+**1,188 source-vs-original comparisons passed** for these routines. The test inputs include zero/short/long output counts, 32-bit word boundaries, 4-bit fixed Huffman codes, mixed 1/2/3-bit prefix-free Huffman codes, positive/negative values, repeated literals, and zero values requiring no sign bit. The test files are [`differential_entropy_bytes.py`](../tests/dlls/differential_entropy_bytes.py), [`differential_entropy_nibbles.py`](../tests/dlls/differential_entropy_nibbles.py), and [`differential_entropy_signed.py`](../tests/dlls/differential_entropy_signed.py). They run the **actual original instructions in Unicorn** with constructed valid original-layout tables and buffers, and compare decoded bytes, original state pointers, and bit-reservoir fields against separately compiled C++.
+
+The DLL-specific checks succeeded in [workflow 45246173263](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45246173263). That does not imply the entire enhanced-game workflow finished, nor that the original binary has been replaced.
+
+### Scope boundaries and next decoder targets
+
+- **Validated:** these three specific entropy functions on their synthetic, well-formed test matrix. Their original memory layouts and exact word-consumption semantics are captured, with no external decoder dependency.
+- **Not yet validated:** realistic Huffman tables initialized by the Bink stream header, real `.bik` compressed-frame input, malformed/corrupted streams, original `FUN_180023840` code-table initialization, the 16-bit coefficient/RLE bitstream routine `FUN_180024FF0`, and the full `FUN_1800252C0` frame/block decoder.
+- **Next:** reconstruct Huffman table initialization and signed 16-bit delta/RLE entropy path, then pass real frame bitstreams through the matching original and reconstructed decoder state and compare reconstructed YUV frames.
+- **No runtime integration yet:** both `binkw64.dll` and `XCurl.dll` remain required by the original Store EXE imports. The enhanced runtime has not been altered to load these incomplete replacements.
+
+These source routines are internal decoder components, not a completed Bink decoder or executable-compatible replacement DLL.
