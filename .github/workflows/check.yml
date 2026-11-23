@@ -52,6 +52,12 @@ jobs:
           clang++ -std=c++20 -O2 -shared -fPIC -fno-fast-math -ffp-contract=off \
             -Wall -Wextra -Werror reconstructed_dlls/bink/transform_butterfly16.cpp -o build/bink_transform16_test.so
           python tests/dlls/differential_butterfly16.py originals/dlls/binkw64.dll build/bink_transform16_test.so
+      - name: Differential chained original Bink codebook and byte entropy decoding
+        run: |
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/huffman_codebook.cpp \
+            reconstructed_dlls/bink/entropy_bytes.cpp -o build/bink_codebook_chained.so
+          python tests/dlls/differential_codebook_to_entropy.py originals/dlls/binkw64.dll build/bink_codebook_chained.so
       - name: Differential original Bink Huffman codebook type and symbol permutations
         run: |
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
