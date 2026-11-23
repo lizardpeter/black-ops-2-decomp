@@ -13,4 +13,9 @@ int main() {
     assert(samples[4] == 4.0f && samples[5] == 5.0f);
     assert(samples[6] == 2.5f && samples[7] == 5.5f);
     assert(samples[0] == 0.0f && samples[1] == 1.0f);
+    float alt[8] = {0, 1, 2, 3, 4, 5, 6, 7};
+    bink_transform_rotate_stage_alt(8, alt, 32, coeff);
+    assert(alt[2] == 0.5f && alt[3] == -0.5f);
+    assert(alt[6] == 7.5f && alt[7] == 3.5f);
+    assert(alt[0] == 0.0f && alt[1] == 1.0f);
 }
