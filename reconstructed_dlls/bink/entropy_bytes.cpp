@@ -39,17 +39,25 @@ public:
       pending_ |= std::uint64_t(*next_++) << available_;
       available_ += 32;
   }
-  std::uint32_t peek(std::uint32_t width) {
-      if (available_ < width) refill();
-      return static_cast<std::uint32_t>(pending_) &
+  // Original Huffman lookahead can combine the next word without
+  // advancing next_word. A short code may then consume entirely from the
+  // old reservoir; in that case the previewed word must remain unread.
+  std::uint32_t lookahead(std::uint32_t width) const {
+      std::uint64_t value = pending_;
+      if (available_ < width)
+          value |= std::uint64_t(*next_) << available_;
+      return static_cast<std::uint32_t>(value) &
              ((std::uint32_t{1} << width) - 1U);
   }
   void consume(std::uint32_t width) {
+      if (available_ < width) refill();
       pending_ >>= width;
       available_ -= width;
   }
   std::uint32_t read(std::uint32_t width) {
-      const auto result = peek(width);
+      if (available_ < width) refill();
+      const auto result = static_cast<std::uint32_t>(pending_) &
+                          ((std::uint32_t{1} << width) - 1U);
       consume(width);
       return result;
   }
@@ -92,12 +100,12 @@ extern "C" void bink_decode_entropy_bytes(t6_bink::ByteEntropyState* d,
         if (cursor.available() < d->lookup_bits && cursor.next() >= word_end) {
             d->current = d->buffer + 4;
             d->end = d->buffer;
+            cursor.save();
             return;
         }
-        const std::uint8_t packed = d->lookup_table[cursor.peek(d->lookup_bits)];
+        const std::uint8_t packed = d->lookup_table[cursor.lookahead(d->lookup_bits)];
         const std::uint32_t code_length = packed >> 4;
         const std::uint8_t code_symbol = packed & 15U;
-        if (cursor.available() < code_length) cursor.refill();
         cursor.consume(code_length);
         d->buffer[i] = d->symbol_map[code_symbol];
     }
