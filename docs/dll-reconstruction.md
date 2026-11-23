@@ -243,3 +243,33 @@ The DLL-specific checks succeeded in [workflow 45246173263](https://github.com/l
 - **No runtime integration yet:** both `binkw64.dll` and `XCurl.dll` remain required by the original Store EXE imports. The enhanced runtime has not been altered to load these incomplete replacements.
 
 These source routines are internal decoder components, not a completed Bink decoder or executable-compatible replacement DLL.
+
+## Original Bink coefficient and Huffman/RLE stream decoders — continuation (2026-11-23)
+
+This pass used the **original Ghidra pseudocode and instruction-level x64 behavior** for two additional video-decoding routines, not a guessed codec or a substitute multimedia library. The source stays separate from the enhanced runtime.
+
+| Original RVA | Reconstructed source | What it actually does | SHA-pinned original-versus-source checks |
+|---|---|---|---:|
+| `0x24FF0` | [`entropy_deltas16.cpp`](../reconstructed_dlls/bink/entropy_deltas16.cpp) | Decodes a bounded **16-bit coefficient stream** with signed/unsigned starting values, groups of up to eight subsequent coefficients, four-bit group delta widths, zero-width repeated groups, optional sign bits for nonzero deltas and low-16-bit output wrapping. The original count limit is **output capacity in bytes divided by two**, not capacity in bytes. | **672** |
+| `0x24140` | [`entropy_byte_rle.cpp`](../reconstructed_dlls/bink/entropy_byte_rle.cpp) | Huffman byte tokens; symbols 0–11 are literals; symbols 12–15 repeat the previous value **4, 8, 12, 32** times respectively. Also handles the distinct repeated-four-bit-literal mode. | **516** |
+
+These are **1,188 new differential comparisons**. Both functions reuse the original-layout records and shared source-level `BitCursor`, including the distinction between lookahead and consumption. Their tests check output bytes, both buffer pointers and the cached bitstream/available-bit/next-word fields. They also independently encode the expected output for well-formed synthetic streams rather than relying only on reconstruction-versus-original agreement.
+
+Source-level tests are [`test_entropy_deltas16.cpp`](../reconstructed_dlls/bink/test_entropy_deltas16.cpp) and [`test_entropy_byte_rle.cpp`](../reconstructed_dlls/bink/test_entropy_byte_rle.cpp); differential tests are [`differential_entropy_deltas16.py`](../tests/dlls/differential_entropy_deltas16.py) and [`differential_entropy_byte_rle.py`](../tests/dlls/differential_entropy_byte_rle.py). The dedicated steps passed in [workflow 45248746391](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45248746391); full-game checks are separate.
+
+### Original Huffman codebook metadata recovered
+
+The **real pinned DLL's BINKCONS** section contains a complete inventory of *sixteen* precomputed codebook lookup tables, selected at the beginning of `FUN_180023840`:
+
+- Table-width bytes: RVA `0x5A740`, **[4, 5, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 6, 7, 7, 7]**.
+- 16 little-endian 32-bit offsets at RVA `0x5A800`, into a common table base at RVA `0x5AD40`: **[0, 16, 48, 80, 112, 144, 176, 208, 272, 336, 400, 464, 528, 592, 720, 848]**.
+- Each type has exactly `1 << width` packed byte entries, for **976 lookup entries total**. Each entry encodes its Huffman code length in the high nibble and symbol-map index in the low nibble. Type 0 has 16 entries `0x40` through `0x4F` (fixed four-bit codes); the other types include 1–7-bit codes.
+- The RLE lengths above are the exact bytes at RVA `0x5A690`–`0x5A693`, referenced by the original `FUN_180024140` as `DAT_18005A684 + symbol`.
+
+These metadata values have been read from the SHA-256-pinned original DLL, **not invented**, and have not been silently substituted for a full `FUN_180023840` codebook initialization reconstruction.
+
+### What remains before actual .bik playback
+
+The next highest-value original functions are **`FUN_180023840`** (codebook setup, including the symbol-map permutation syntax) and **`FUN_1800252C0`** (large frame/block traversal and mode handling). Need to validate the initialized Huffman tables and each reconstructed decoder against bitstreams extracted from *real* original BO2 `.bik` assets, then assemble YUV output and run end-to-end playback. The current differentials exercise intentionally constructed valid bitstreams, **not full video frames**, corrupted data, audio output, timing or asynchronous playback.
+
+Both original Store EXEs' external dependencies, `binkw64.dll` and `XCurl.dll`, remain unchanged. **Neither DLL has been eliminated.**
