@@ -170,6 +170,17 @@ jobs:
             build/real-bink-frame-probe.json
             build/original-bink-luma-frame0.pgm
           if-no-files-found: warn
+      - name: Capture 65 actual original Bink coefficient blocks (first real keyframe)
+        run: |
+          python tools/dlls/capture_original_bik_coefficients.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            --out build/real-bink-coefficient-oracle.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-bink-coefficient-oracle
+          path: build/real-bink-coefficient-oracle.json
+          if-no-files-found: warn
       - name: Fetch originals
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/fetch_originals.py $b originals --only exe; done
