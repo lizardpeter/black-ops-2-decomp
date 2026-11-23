@@ -40,6 +40,11 @@ jobs:
           python tools/dlls/probe_original_bik_frame.py \
             originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
             --flags 0 --report build/original-bink-probe.json
+      - name: Trace original nine entropy stream refills per tile row
+        run: |
+          python tools/dlls/trace_original_bik_entropy_rows.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            --out build/original-bink-entropy-rows.json
       - name: Compile reconstructed-only Bink Y-plane decoder
         run: |
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
@@ -73,5 +78,6 @@ jobs:
           path: |
             build/original-bink-luma-frame0.pgm
             build/original-bink-probe.json
+            build/original-bink-entropy-rows.json
             build/first-luma-source-diagnostic.txt
           if-no-files-found: warn
