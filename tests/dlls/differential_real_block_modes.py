@@ -35,6 +35,15 @@ def main():
                       ctypes.POINTER(ctypes.c_uint8))
     pattern.restype=None
 
+    fill16=lib.bink_video_fill16x16
+    fill16.argtypes=(ctypes.POINTER(ctypes.c_uint8),ctypes.c_int32,ctypes.c_uint8)
+    fill16.restype=None
+    pattern16=lib.bink_video_two_color16x16
+    pattern16.argtypes=(ctypes.POINTER(ctypes.c_uint8),ctypes.c_int32,
+                        ctypes.c_uint8,ctypes.c_uint8,
+                        ctypes.POINTER(ctypes.c_uint8))
+    pattern16.restype=None
+
     checks=0
     for mode in (6,8):
         cases=data["sample_blocks"].get(str(mode),[])
@@ -63,7 +72,37 @@ def main():
                     f"colors={c.get('mode8_color0')},{c.get('mode8_color1')}, "
                     f"pattern={c.get('mode8_pattern_hex')}")
             checks+=1
-    print(f"Original BO2 Bink real-frame native block mode 6/8 PASS: "
-          f"{checks} original 8x8 pixel tiles; 16 two-color and 27 solid blocks")
+    for group,n in (("1:6",195),("1:8",7)):
+        cases=data["sample_blocks"].get(group,[])
+        if len(cases)!=n:
+            raise AssertionError(f"Expected {n} real original 16x16 tiles in {group}, "
+                                 f"received {len(cases)}")
+        for i,c in enumerate(cases):
+            assert c["mode"]==1 and c["submode"]==int(group[-1])
+            before=bytes.fromhex(c["before16_hex"])
+            expected=bytes.fromhex(c["after16_hex"])
+            assert len(before)==len(expected)==256
+            got=(ctypes.c_uint8*256).from_buffer_copy(before)
+            if group=="1:6":
+                fill16(got,16,expected[0])
+            else:
+                assert "mode1_pattern_color0" in c and "mode1_pattern_color1" in c
+                encoded=bytes.fromhex(c["mode1_pattern_hex"])
+                assert len(encoded)==8
+                patterns=(ctypes.c_uint8*8).from_buffer_copy(encoded)
+                pattern16(got,16,c["mode1_pattern_color0"],
+                          c["mode1_pattern_color1"],patterns)
+            if bytes(got)!=expected:
+                at=next(j for j,(a,b) in enumerate(zip(bytes(got),expected))
+                        if a!=b)
+                raise AssertionError(
+                    f"Original native 16x16 tile mismatch group={group} case={i} "
+                    f"at {c['x']},{c['y']}, pixel={at}, "
+                    f"original={expected[at]},native={bytes(got)[at]}; "
+                    f"pattern={c.get('mode1_pattern_hex')}")
+            checks+=1
+    print(f"Original BO2 Bink real-frame block modes PASS: "
+          f"{checks} tiles: 27 solid 8x8, 16 two-color 8x8, "
+          "195 solid 16x16 and 7 two-color patterned 16x16")
 
 if __name__=="__main__":main()
