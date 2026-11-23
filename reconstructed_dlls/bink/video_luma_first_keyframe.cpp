@@ -18,6 +18,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <cstring>
+#include <cstdio>
 #include <vector>
 
 namespace t6_bink {
@@ -205,18 +206,36 @@ extern "C" int bink_research_decode_boi_first_luma(
         state.current+=8;
         return bytes;
     };
+    std::uint32_t coefficient_calls=0;
     auto consume_coeff=[&](std::uint8_t* data) {
         auto& state=stream[kDC];
         if (state.current>=state.end) state.current=state.buffer+4;
         const auto baseline=read_le16(state.current);
         state.current+=2;
         std::memcpy(data,&baseline,2);
+        if (coefficient_calls==0)
+            std::fprintf(stderr,"SOURCE FIRST BLOCK pre-coeff: "
+                "DC=%u, bitreader word=%td, available=%u, cache=0x%x, "
+                "DC current=%td, DC end=%td\\n",
+                unsigned(baseline),bits.next_word-input.data(),
+                bits.available_bits,bits.cache,
+                state.current-state.buffer,state.end-state.buffer);
         bink_video_decode_coefficients(data,&bits);
+        if (coefficient_calls==0)
+            std::fprintf(stderr,"SOURCE FIRST BLOCK post-coeff: "
+                "word=%td, available=%u, cache=0x%x, AC[1]=%d\\n",
+                bits.next_word-input.data(),bits.available_bits,bits.cache,
+                int(std::int16_t(read_le16(data+2))));
+        ++coefficient_calls;
     };
     auto read_quant_index=[&]() -> std::uint32_t {
         t6_bink::internal::BitCursor cursor(bits);
         const auto n=cursor.read(4);
         cursor.save();
+        if (coefficient_calls==1)
+            std::fprintf(stderr,"SOURCE FIRST BLOCK qindex=%u, after-word=%td, "
+                "after-available=%u\\n",n,bits.next_word-input.data(),
+                bits.available_bits);
         return n;
     };
 
