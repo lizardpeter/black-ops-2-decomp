@@ -36,7 +36,7 @@ extern "C" void BinkGetFrameBuffersInfo(const void* handle, void* frame_buffer_i
     out[6] = 1;
     out[12] = 1;
     out[18] = 1;
-    for (unsigned i : {8U, 14U, 20U, 26U}) {
+    for (unsigned i = 8U; i <= 26U; i += 6U) {
         // Original uses a 64-bit store at each pointer field.
         std::memset(out + i, 0, 8);
     }
