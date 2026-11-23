@@ -98,3 +98,30 @@ Together with the first four setter bodies, **13 Bink exports** are transcribed.
 - No original binaries are committed, and neither original EXE import table nor the enhanced loader was changed.
 
 **Next:** run the Ghidra workflow, trace both `curl_slist` allocator callees and the call trees below `BinkOpen`/`BinkDoFrame`, then implement actual internal algorithms and differential test against pinned originals. No runtime replacement should be shipped until dependencies are fully reconstructed and matched.
+
+## Full Ghidra artifacts and decoder-path triage (2026-11-23)
+
+The [original-DLL Ghidra workflow](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45226208577) **succeeded for both pinned DLLs**. Its two artifacts contain disassembly, pseudocode, function tables and call graphs. Ghidra identified 515 Bink functions (486 non-thunk decompilation records) and 525 XCurl functions (501 decompilation records). These are *analyzed functions*, not reconstructed C++ matches.
+
+The new `tools/dlls/reachability.py` reads the original artifacts' `functions.tsv` and `callgraph.tsv`. The measured static reachability union of **all game-imported entry points** is 189/515 Bink functions and 204/525 XCurl functions. These counts are *not upper bounds*: indirect calls, callbacks, dynamic import resolution, and missing leaf edges can increase the actual implementation scope.
+
+Key direct edges from the real decoder:
+
+| Source | Original direct callees | Static transitive size |
+|---|---|---:|
+| `BinkOpen` (`0x19B80`) | `FUN_180017970` (initializer, 8,714-byte body) | 98 |
+| `BinkDoFrame` (`0x1B0C0`) | tail-jump to `BinkDoFramePlane` at `0x1A930` | 71 |
+| `BinkDoFramePlane` | `FUN_1800162D0` (I/O); `FUN_18001A260` (frame state); `FUN_18001A850` (audio handling); `FUN_1800274A0` (video decompression); `FUN_18001A380`; `RADTimerRead` | 70 |
+| `BinkDoFrameAsync` | `FUN_180021F70` (worker dispatch), `FUN_18001A260`, `FUN_180001010`, `BinkSetError`, `RADTimerRead` | 18 |
+| `curl_easy_init` | `FUN_18000DC94` and trace/allocator wrappers | 92 |
+| `curl_multi_perform` | `FUN_180019B8C` and timing/lock/tracing wrappers | 134 |
+
+**Prioritized decoder targets:** `FUN_180017970` for Bink header/open state, then `FUN_1800274A0` and `FUN_1800252C0` for core video decoding, and `FUN_18001A850` for audio. The presence of names and pseudocode does not imply a matched decoder.
+
+### Additional reconstructed source, tests and boundaries
+
+- `reconstructed_dlls/bink/bink_frames.cpp`: full instruction-derived body for BO2-imported `BinkGetFrameBuffersInfo` at RVA `17870`, including aligned YUV dimensions, descriptor flags, pointer clearing, and multi-buffer metadata copy. The matching standalone C++ test, extended original-Unicorn oracle, and a new `tests/dlls/differential_frames.py` compare byte-for-byte source/original outputs on deterministic edge and random cases. Results must be checked in the latest CI before declaring a differential match.
+- `reconstructed_dlls/bink/bink_dispatch.cpp`: `BinkOpen`'s original one-shot global option snapshot/reset and `BinkDoFrame`'s tail dispatch constant `0x303`. Both accurately expose **unresolved original decoder callees**, `FUN_180017970` and `BinkDoFramePlane`; they are not working video functions. The 4-byte uninitialized original stack gap in the BinkOpen options is explicitly documented.
+- `reconstructed_dlls/xcurl/duplicate_string.cpp`: internal `FUN_180017450` scans NUL, allocates exactly length+1 with allocation tag 5, then copies the string. The original `0x28020` indirect duplication slot points to this function. Internal allocator `FUN_18000932C` and copy `FUN_180004AD0` remain unresolved; tests use declared test fixtures only.
+
+**Do not remove** either import yet: `XCurl.dll` request engine and Bink's audio/video decoding algorithms still require substantial reconstruction. The goal remains original machine-code-derived behavior, without FFmpeg/libcurl substitutes or silent no-op stubs.
