@@ -92,7 +92,7 @@ def main():
             if idx_rva<0 or idx_rva%256 or idx_rva//256>=16:
                 errors.append(f"Transform {rva:#x} non-intra matrix ptr {table:#x}")
                 return
-            if stride!=256 or dest<HEAP or dest+size*stride>HEAP+Y_SIZE:
+            if stride!=256 or dest<HEAP or dest+(size-1)*stride+size>HEAP+Y_SIZE:
                 errors.append(f"Bad tile pointer/stride at {rva:#x} dst={dest:#x}")
                 return
             pending.append({
