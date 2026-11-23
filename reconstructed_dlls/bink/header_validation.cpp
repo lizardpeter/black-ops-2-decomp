@@ -36,9 +36,10 @@ static std::uint32_t header_le32(const std::uint8_t* p) {
 bool validate_header_prefix(const std::uint8_t* data, std::size_t bytes,
                             HeaderPrefix* parsed) {
     if (!data || bytes < sizeof(HeaderPrefix) || !parsed) return false;
-    HeaderPrefix header{};
-    auto* fields = &header.magic;
-    for (std::size_t i = 0; i < 11; ++i) fields[i] = header_le32(data + 4 * i);
+    std::uint32_t words[11] = {};
+    for (std::size_t i = 0; i < 11; ++i) words[i] = header_le32(data + 4 * i);
+    HeaderPrefix header{words[0], words[1], words[2], words[3], words[4],
+                        words[5], words[6], words[7], words[8], words[9], words[10]};
 
     // Original accepts BIKf, BIKg, BIKh, BIKi (little-endian magic).
     if (header.magic < 0x664B4942U || header.magic > 0x694B4942U) return false;
