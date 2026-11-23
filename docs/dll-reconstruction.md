@@ -62,4 +62,39 @@ The original allocators and full Bink handle type are unresolved; the standalone
 6. Reconstruct XCurl's HTTP/multi-handle semantics, callbacks, progress, errors, and TLS interactions. Separately determine which calls to decommissioned vendor services should be *intentionally removed from engine callers*, without confusing removal with faithful decompilation.
 7. Only once the transitive set is fully matched, redirect/remove the Store executable's two DLL dependencies and verify cold startup, videos, menu flow, and all three game modes.
 
-**Current status:** four small Bink functions transcribed, inventory and hash-pinned fetch tooling added. Nothing claims to replace the original DLLs yet.
+**Current status:** 13 Bink export bodies and two XCurl export caller bodies transcribed. The XCurl callers still need their original internal allocation callees. No end-to-end decoder, HTTP implementation, differential DLL harness, or DLL-free build exists.
+
+## Reconstruction pass, 2026-11-23
+
+These functions were decoded by disassembling bytes extracted from the SHA-256-pinned original DLLs; they are not copied from third-party library implementations.
+
+### Additional Bink leaf bodies (`reconstructed_dlls/bink/bink_leaf.cpp`)
+
+| Function | RVA | Machine-code behavior |
+|---|---|---|
+| `BinkSetError` | `14C00` | Copy up to 254 characters and NUL-terminate buffer at `31860` |
+| `BinkGetError` | `14C40` | Return pointer to buffer at `31860` |
+| `BinkSetFrameRate` | `16820` | Save two uint32 words at `570E4` and `311C0` |
+| `BinkSetFileOffset` | `16830` | Save uint64 at `57128` |
+| `BinkSetSimulate` | `16860` | Save uint32 at `570DC` |
+| `BinkSetWillLoop` | `1DA40` | Toggle bit `0x80` of uint32 at handle+`0x20` |
+| `BinkSetVideoOnOff` | `1D820` | Set handle+`0x134`, return input state |
+| `BinkGetTrackID` | `1D320` | Read indexed uint32 from pointer at handle+`0x1D0` |
+| `BinkGetTrackType` | `1D2E0` | Read indexed uint32 from pointer at handle+`0x1C8` |
+
+Together with the first four setter bodies, **13 Bink exports** are transcribed. Five are BO2 imports. All 13 need differential verification; original global initialization and downstream consumers remain unresolved. Standalone sanitizer-enabled tests passed locally.
+
+### XCurl caller transcriptions (`reconstructed_dlls/xcurl/slist.cpp`)
+
+- `curl_slist_append` at `1BB80`: duplicates a string through an original function pointer at RVA `28020`, allocates a 16-byte node through internal function `932C` with tag 5, and appends.
+- `curl_slist_free_all` at `1BC00`: walks nodes, frees the string if present, clears the pointer, then frees the node using internal function `9640` with tag 5.
+
+**Important:** these two callers are *partial* source reconstructions because the original allocator functions and indirect target are not reconstructed. The isolated control-flow tests use test-double allocators only; they are not substitutes in the production implementation. Networking/TLS and every Bink decode routine remain unreconstructed.
+
+### Analysis automation and tests
+
+- [Manual Ghidra workflow](../.github/workflows/dll-ghidra.yml) exports full-DLL function inventories, disassembly, call graphs, and pseudocode for both SHA-256-pinned originals as CI artifacts. The workflow has been added, **not executed/verified**.
+- [Standard CI](../.github/workflows/check.yml) now compiles and runs the Bink leaf and XCurl list tests using Clang with sanitizers.
+- No original binaries are committed, and neither original EXE import table nor the enhanced loader was changed.
+
+**Next:** run the Ghidra workflow, trace both `curl_slist` allocator callees and the call trees below `BinkOpen`/`BinkDoFrame`, then implement actual internal algorithms and differential test against pinned originals. No runtime replacement should be shipped until dependencies are fully reconstructed and matched.
