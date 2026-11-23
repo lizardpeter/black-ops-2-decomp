@@ -53,7 +53,7 @@ def main():
     fn.restype = ctypes.c_uint32
 
     rng = random.Random(0xAD58)
-    cases = [bytes(0x240), bytes([0xFF])*0x240, bytes(range(256))*2]
+    cases = [bytes(0x240), bytes([0xFF])*0x240, bytes(range(256))*2 + bytes(range(64))]
     cases += [rng.randbytes(0x240) for _ in range(16)]
     checks = 0
     for case_index, handle in enumerate(cases):
