@@ -114,6 +114,14 @@ def probe(img, filedata, *, frame=0, flag=0):
     if not isinstance(outcome, str) and buffers:
         y_after = buffers[0]
         changed = sum(a != b for a, b in zip(y_after, y_before))
+        if changed > 0 and frame == 0 and flag == 0:
+            # PGM P5 is a lossless grayscale image; no imaging libraries
+            # or resampling. This is an ORIGINAL-DLL oracle image only.
+            saved = Path("build/original-bink-luma-frame0.pgm")
+            saved.parent.mkdir(parents=True, exist_ok=True)
+            saved.write_bytes(
+                f"P5\\n{width} {height}\\n255\\n".encode("ascii") + y_after)
+            report["original_oracle_grayscale_pgm"] = str(saved)
         report.update({
             "decoded_plane_available": changed > 0,
             "y_plane_sha256": hashlib.sha256(y_after).hexdigest(),
