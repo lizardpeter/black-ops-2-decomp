@@ -42,6 +42,15 @@ jobs:
           mkdir -p build
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/bink/bink_frames.cpp -o build/bink_frames_test.so
           python tests/dlls/differential_frames.py originals/dlls/binkw64.dll build/bink_frames_test.so
+      - name: Parse three original Bink compressed frame indexes
+        run: |
+          python tools/dlls/fetch_bik_fixtures.py originals/bik
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp \
+            reconstructed_dlls/bink/test_bink_index.cpp -o /tmp/test_bink_index
+          /tmp/test_bink_index originals/bik/la_pip_seq_6.bik \
+            originals/bik/karma_pip_security_feed.bik originals/bik/yemen_drone_cam.bik
       - name: Fetch originals
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/fetch_originals.py $b originals --only exe; done
