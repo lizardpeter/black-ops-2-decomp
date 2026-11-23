@@ -93,6 +93,7 @@ jobs:
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
             reconstructed_dlls/bink/video_inverse8x8.cpp \
             reconstructed_dlls/bink/video_predict8x8_core.cpp \
+            reconstructed_dlls/bink/video_predict8x8.cpp \
             -o build/bink_video_predict8x8.so
           python tests/dlls/differential_video_predict8x8.py originals/dlls/binkw64.dll build/bink_video_predict8x8.so
       - name: Differential original Bink video bitmask byte interleaving
