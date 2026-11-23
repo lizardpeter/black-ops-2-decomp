@@ -155,7 +155,7 @@ extern "C" int bink_research_decode_boi_first_luma(
     stream[kDC]=make_stream(scratch[kDC].data(),
                             msb_width(blocks+511),align16(blocks*2+1039),11);
     stream[kOtherDC]=make_stream(scratch[kOtherDC].data(),
-                            msb_width(blocks*48+511),align16(blocks*2+1039),11,1024);
+                            msb_width(blocks*48+511),(blocks*48)+512,11,1024);
     stream[kRLE]=make_stream(scratch[kRLE].data(),
                             msb_width(blocks*48+511),blocks*48+512,4);
 
@@ -185,11 +185,17 @@ extern "C" int bink_research_decode_boi_first_luma(
         return code;
     };
 
-    auto consume_color=[&]() -> std::uint16_t {
+    // Original FUN_1800252C0 uses a *byte* pointer under its decompiler's
+    // ushort* color-stream alias: case 6 and submode 6 advance by ONE byte
+    // (cast pointer to integer, add 1), whereas both two-color modes 8
+    // advance by TWO bytes (puVar24 + 1 as ushort*).
+    // Advancing by two for solid fills exhausts the initial color block
+    // early and desynchronizes every subsequent entropy refill.
+    auto consume_color=[&](std::uint32_t bytes) -> std::uint16_t {
         auto& state=stream[kColor];
         if (state.current>=state.end) state.current=state.buffer+4;
         const std::uint16_t color=read_le16(state.current);
-        state.current+=2;
+        state.current+=bytes;
         return color;
     };
     auto consume_pattern=[&]() -> const std::uint8_t* {
@@ -256,9 +262,9 @@ extern "C" int bink_research_decode_boi_first_luma(
                     else return update_report(5,x,y,mode,subtype);
                     if(subtype==6U) {
                         bink_video_fill16x16(block,std::int32_t(stride),
-                                             std::uint8_t(consume_color()));
+                                             std::uint8_t(consume_color(1)));
                     } else if (subtype==8U) {
-                        const auto colors=consume_color();
+                        const auto colors=consume_color(2);
                         bink_video_two_color16x16(block,std::int32_t(stride),
                             std::uint8_t(colors),std::uint8_t(colors>>8),
                             consume_pattern());
@@ -284,10 +290,10 @@ extern "C" int bink_research_decode_boi_first_luma(
                 x+=8;
             } else if(mode==6U) {
                 bink_video_fill8x8(block,std::int32_t(stride),
-                                   std::uint8_t(consume_color()));
+                                   std::uint8_t(consume_color(1)));
                 x+=8;
             } else if(mode==8U) {
-                const auto colors=consume_color();
+                const auto colors=consume_color(2);
                 bink_video_two_color8x8(block,std::int32_t(stride),
                     std::uint8_t(colors),std::uint8_t(colors>>8),
                     consume_pattern());
