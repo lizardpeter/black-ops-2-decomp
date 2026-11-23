@@ -1,0 +1,77 @@
+name: Bink first real-frame source verification
+
+# Separate fast loop for the *experimental* all-source first BO2 .bik frame.
+# Intentionally independent of the full enhanced runtime build and its
+# six-minute multi-target integration checks. This job must FAIL on a native
+# pixel mismatch; it can never turn an original-only oracle into a PASS.
+on:
+  push:
+    paths:
+      - reconstructed_dlls/bink/video_luma_first_keyframe.cpp
+      - tests/dlls/experimental_first_luma.py
+      - .github/workflows/bink-first-frame.yml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  first-frame:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original-DLL emulation requirements
+        run: |
+          clang++ --version | head -1
+          pip install -q -r tests/differential/requirements.txt
+      - name: Fetch pinned original Bink DLL and real BO2 media fixture
+        run: |
+          python tools/dlls/fetch.py originals/dlls
+          python tools/dlls/fetch_bik_fixtures.py originals/bik
+      - name: Generate original 256x256 Y-plane oracle
+        run: |
+          python tools/dlls/probe_original_bik_frame.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            --flags 0 --report build/original-bink-probe.json
+      - name: Compile reconstructed-only Bink Y-plane decoder
+        run: |
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/huffman_codebook.cpp \
+            reconstructed_dlls/bink/entropy_byte_rle.cpp \
+            reconstructed_dlls/bink/entropy_adaptive_pairs.cpp \
+            reconstructed_dlls/bink/entropy_nibbles.cpp \
+            reconstructed_dlls/bink/entropy_signed_bytes.cpp \
+            reconstructed_dlls/bink/entropy_deltas16.cpp \
+            reconstructed_dlls/bink/entropy_bytes.cpp \
+            reconstructed_dlls/bink/video_coefficients.cpp \
+            reconstructed_dlls/bink/video_inverse8x8.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
+            reconstructed_dlls/bink/video_block_modes.cpp \
+            reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
+            -o build/bink_source_first_luma.so
+      - name: Enforce 65536-byte original-vs-native Y-plane equality
+        run: |
+          set -o pipefail
+          python tests/dlls/experimental_first_luma.py \
+            build/bink_source_first_luma.so originals/bik/la_pip_seq_6.bik \
+            build/original-bink-luma-frame0.pgm \
+            | tee build/first-luma-source-diagnostic.txt
+      - name: Preserve source-first-frame diagnostics and original oracle
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: original-vs-native-bink-first-frame
+          path: |
+            build/original-bink-luma-frame0.pgm
+            build/original-bink-probe.json
+            build/first-luma-source-diagnostic.txt
+          if-no-files-found: warn
