@@ -38,7 +38,12 @@ static std::uint32_t stable_merge(const std::uint8_t* left,
                                   std::uint8_t* out) {
     std::uint32_t l=0, r=0, used=0;
     while (l<half && r<half) {
-        out[l+r] = (mask & 1U) ? right[r++] : left[l++];
+        // Compute the destination index BEFORE incrementing a source index.
+        // Assignment evaluates its right-hand expression first in C++17+;
+        // "out[l+r] = right[r++]" would otherwise skip the first output.
+        const auto dest=l+r;
+        if (mask & 1U) out[dest]=right[r++];
+        else out[dest]=left[l++];
         mask >>= 1;
         ++used;
     }
