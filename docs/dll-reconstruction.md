@@ -1,0 +1,65 @@
+# Microsoft Store BO2: true external-DLL reconstruction
+
+## Goal and constraints
+
+Reconstruct the **actual code** and reachable algorithms of the original Microsoft Store x64 `XCurl.dll` and `binkw64.dll`, not compatibility wrappers around FFmpeg, libcurl, or other implementations. Preserve relevant ABI, state, error behavior, threading, and multimedia semantics. Differential-test the reconstructed source against the original binaries before replacing either dependency.
+
+This is **not done yet**. The shipped Store EXEs still import both DLLs at process startup. Reconstructing selected functions does not remove those PE imports; the enhanced loader must eventually redirect/remove the imports, or the fully rebuilt EXE must link replacements statically.
+
+## Original files (never commit them)
+
+| R2 key | Size | SHA-256 |
+|---|---:|---|
+| `bo2/DUMP/XCurl.dll` | 198,248 B | `65cd27b336abecf821896611c91e8ec74d0328bd65ec11aa5ef4e2affbdd4551` |
+| `bo2/DUMP/binkw64.dll` | 310,784 B | `10e67763420dd5c2654648d1b0242ba8aceac14ac9211c202360a3f12219af17` |
+
+Tools:
+
+```sh
+python tools/dlls/fetch.py
+python tools/dlls/inventory.py originals/dlls/XCurl.dll originals/dlls/binkw64.dll --json originals/dlls/inventory.json
+# Optional: add --clients originals/t6mp_msstore.exe originals/t6zm_msstore.exe originals/t6sp_msstore.exe
+```
+
+Fetch verifies SHA-256 and does **not execute** any file. Inventory uses the repository's `pefile` dependency and scans import names, exports and .pdata as data. Original binaries and generated inventories remain under ignored `originals/`.
+
+## Initial measured scope
+
+| | XCurl | Bink |
+|---|---:|---:|
+| Functions imported by each Store EXE | 16 | 19 |
+| Named exported entry points | 61 | 77 |
+| x64 unwind entries | 431 | 676 |
+
+Unwind entries are **not** a complete unique-function count: inlined routines, leaf functions, thunks, code sections without unwind records, and chained unwind regions require analysis.
+
+The 16 imports: `curl_global_init`, `curl_global_cleanup`, `curl_easy_init`, `curl_easy_cleanup`, `curl_easy_setopt`, `curl_easy_getinfo`, `curl_easy_strerror`, `curl_slist_append`, `curl_slist_free_all`, `curl_multi_init`, `curl_multi_cleanup`, `curl_multi_add_handle`, `curl_multi_remove_handle`, `curl_multi_perform`, `curl_multi_poll`, `curl_multi_info_read`.
+
+The 19 imports: `BinkOpen`, `BinkClose`, `BinkDoFrame`, `BinkDoFrameAsync`, `BinkDoFrameAsyncWait`, `BinkNextFrame`, `BinkPause`, `BinkGetRects`, `BinkGetFrameBuffersInfo`, `BinkRegisterFrameBuffers`, `BinkGetError`, `BinkGetRealtime`, `BinkSetSoundTrack`, `BinkSetMemory`, `BinkSetIOSize`, `BinkControlBackgroundIO`, `BinkStartAsyncThread`, `BinkRequestStopAsyncThread`, `BinkWaitStopAsyncThread`.
+
+## First transcribed source bodies
+
+`reconstructed_dlls/bink/bink_small.cpp` contains four independently decoded **export function bodies** from the original machine code. These are *not yet differential-tested or integrated*.
+
+| Function | Original RVA | Behavior observed in original bytes |
+|---|---|---|
+| `BinkSetMemory` | `0x1DA30` | Store allocator and deallocator pointers at RVAs `0x542A8` and `0x542B0` |
+| `BinkSetIOSize` | `0x16840` | Store unsigned 32-bit argument at global RVA `0x570E0` |
+| `BinkSetSoundTrack` | `0x16870` | Clamp unsigned count to 32, store it at `0x570B0`, copy that many 32-bit IDs to `0x57250` |
+| `BinkRegisterFrameBuffers` | `0x17950` | If handle and buffer pointer are non-null, store the latter at handle offset `0xD0` |
+
+Other initial observations: `BinkGetError` at `0x14C40` returns a pointer to a global at `0x31860` (bounds/writers still unknown). `BinkDoFrame` at `0x1B0C0` is a small dispatch stub, **not** the underlying frame decoder.
+
+The original allocators and full Bink handle type are unresolved; the standalone source does not yet reproduce original process initialization.
+
+## Steps to completion
+
+1. Import these exact hashes into Ghidra and export decompilation/disassembly/function tables, finding leaves in addition to .pdata-covered functions.
+2. Trace the full transitive call graphs from the 35 imported entry points, following indirect calls and noting unresolved edges.
+3. Recover all state and types. For Bink, this explicitly includes the **Bink container, video entropy/transform/decode pipeline, audio codec, frame buffers, timing, background worker threads, and error handling**. No third-party decoder or stub returns.
+4. Reconstruct every reachable function in readable source and differential-test semantics against the original DLL on Windows. Implement full import-compatible exports only when tested.
+5. Test complete playback of the **44 `.bik` assets** already in R2, comparing decoded frames, audio, timing, seeks, and failure behavior. The other 81 videos being `.webm` does not eliminate Bink decoding.
+6. Reconstruct XCurl's HTTP/multi-handle semantics, callbacks, progress, errors, and TLS interactions. Separately determine which calls to decommissioned vendor services should be *intentionally removed from engine callers*, without confusing removal with faithful decompilation.
+7. Only once the transitive set is fully matched, redirect/remove the Store executable's two DLL dependencies and verify cold startup, videos, menu flow, and all three game modes.
+
+**Current status:** four small Bink functions transcribed, inventory and hash-pinned fetch tooling added. Nothing claims to replace the original DLLs yet.
