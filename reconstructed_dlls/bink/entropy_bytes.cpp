@@ -13,61 +13,10 @@
 // aligned padded input words, <=31 count/lookahead bits, code lengths 1..15,
 // enough input for the decoded output, and an output buffer >=capacity+4.
 // Deliberately not a safe parser for untrusted arbitrary files by itself.
-#include "entropy_bytes.h"
+#include "entropy_bit_cursor.h"
 #include <cstdint>
 
-namespace {
-using t6_bink::WordBitStream;
-
-// Original decoder keeps the combined incoming word in a 64-bit register
-// UNTIL after the code bits have been shifted out. Truncating to 32 bits
-// immediately on refill loses high bits of the new word at cross-word
-// boundaries; the exported bitstream cache is only narrowed on write-back.
-class BitCursor {
-  WordBitStream& state_;
-  std::uint64_t pending_;
-  std::uint32_t available_;
-  const std::uint32_t* next_;
-public:
-  explicit BitCursor(WordBitStream& state)
-      : state_(state), pending_(state.cache),
-        available_(state.available_bits), next_(state.next_word) {}
-
-  std::uint32_t available() const { return available_; }
-  const std::uint32_t* next() const { return next_; }
-  void refill() {
-      pending_ |= std::uint64_t(*next_++) << available_;
-      available_ += 32;
-  }
-  // Original Huffman lookahead can combine the next word without
-  // advancing next_word. A short code may then consume entirely from the
-  // old reservoir; in that case the previewed word must remain unread.
-  std::uint32_t lookahead(std::uint32_t width) const {
-      std::uint64_t value = pending_;
-      if (available_ < width)
-          value |= std::uint64_t(*next_) << available_;
-      return static_cast<std::uint32_t>(value) &
-             ((std::uint32_t{1} << width) - 1U);
-  }
-  void consume(std::uint32_t width) {
-      if (available_ < width) refill();
-      pending_ >>= width;
-      available_ -= width;
-  }
-  std::uint32_t read(std::uint32_t width) {
-      if (available_ < width) refill();
-      const auto result = static_cast<std::uint32_t>(pending_) &
-                          ((std::uint32_t{1} << width) - 1U);
-      consume(width);
-      return result;
-  }
-  void save() {
-      state_.cache = static_cast<std::uint32_t>(pending_);
-      state_.available_bits = available_;
-      state_.next_word = next_;
-  }
-};
-}
+using t6_bink::internal::BitCursor;
 
 extern "C" void bink_decode_entropy_bytes(t6_bink::ByteEntropyState* d,
                                            t6_bink::WordBitStream* bits,
