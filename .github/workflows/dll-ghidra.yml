@@ -4,6 +4,12 @@ name: External DLL Ghidra analysis
 # analyzed as DATA, and not committed to Git or shipped to users.
 on:
   workflow_dispatch:
+  # Trigger the first analysis when this workflow itself is committed.
+  # Subsequent source or documentation commits do not re-run it.
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/dll-ghidra.yml
 
 permissions:
   contents: read
