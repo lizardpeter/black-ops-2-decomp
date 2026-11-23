@@ -33,9 +33,10 @@ Y_SHA="347b7e90cad7c4cc5d0e3e9b0541813b3a49605827aa72ec59c662ff1f24edaf"
 MODE_RVA=0x25A32
 END_RVA=0x25B17
 MODE1_SUBMODE_RVA=0x25BD5  # MOVZX ECX,byte ptr [RAX]
+MODE8_INPUT_RVA=0x2705E  # MOVZX EAX,byte ptr [R8], after mask-buffer reset
 FRAME_RVA=0x252C0
 PIXELS=256
-SAMPLES_PER_MODE=4
+SAMPLES_PER_MODE=64
 
 
 def main():
@@ -105,6 +106,15 @@ def main():
         pending[-1]["submode"]=submode
         submode_counts[str(submode)]+=1
 
+    def mode8_inputs(mu):
+        if not pending or pending[-1]["mode"]!=8:
+            failures.append("Mode-8 input hook without matching dispatch")
+            return
+        source=mu.reg_read(X.UC_X86_REG_R8)
+        pending[-1]["mode8_color0"]=mu.reg_read(X.UC_X86_REG_R10)&0xff
+        pending[-1]["mode8_color1"]=mu.reg_read(X.UC_X86_REG_R11)&0xff
+        pending[-1]["mode8_pattern_hex"]=bytes(mu.mem_read(source,8)).hex()
+
     def epilogue(mu):
         if not pending:
             # Original core has boundary/early-exit paths that reach the
@@ -126,6 +136,7 @@ def main():
         image.base+MODE_RVA:dispatch,
         image.base+END_RVA:epilogue,
         image.base+MODE1_SUBMODE_RVA:mode1_submode,
+        image.base+MODE8_INPUT_RVA:mode8_inputs,
     }
     scratch=[SCRATCH_FIRST+i*SCRATCH_SPACING for i in range(9)]
     def setup(w):
