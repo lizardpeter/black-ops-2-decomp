@@ -3,6 +3,7 @@
 #include <array>
 #include <cassert>
 #include <cstdint>
+#include "video_inverse8x8.cpp"
 #include "video_inverse8x8_2x.cpp"
 
 int main() {
