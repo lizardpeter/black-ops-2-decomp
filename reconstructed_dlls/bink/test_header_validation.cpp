@@ -48,6 +48,9 @@ int main() {
     }
     Words x = la_seq_6;
     x[0] = 0x6A4B4942U; assert(!accepts(x)); // BIKj
+    // Values numerically between BIKf and BIKi are NOT necessarily valid.
+    x = la_seq_6; x[0] = 0x664B4943U; assert(!accepts(x)); // BJKf
+    x = la_seq_6; x[0] = 0x674B4941U; assert(!accepts(x)); // BIKe
     x = la_seq_6; x[0] = 0; assert(!accepts(x));
     x = la_seq_6; x[2] = 0; assert(!accepts(x)); // zero frames
     x = la_seq_6; x[2] = 151; assert(!accepts(x)); // frame count > index count
