@@ -272,4 +272,4 @@ These metadata values have been read from the SHA-256-pinned original DLL, **not
 
 The next highest-value original functions are **`FUN_180023840`** (codebook setup, including the symbol-map permutation syntax) and **`FUN_1800252C0`** (large frame/block traversal and mode handling). Need to validate the initialized Huffman tables and each reconstructed decoder against bitstreams extracted from *real* original BO2 `.bik` assets, then assemble YUV output and run end-to-end playback. The current differentials exercise intentionally constructed valid bitstreams, **not full video frames**, corrupted data, audio output, timing or asynchronous playback.
 
-Both original Store EXEs' external dependencies, `binkw64.dll` and `XCurl.dll`, remain unchanged. **Neither DLL has been eliminated.**
+All three original Store EXEs still depend on `binkw64.dll` and `XCurl.dll`; their import tables remain unchanged. **Neither DLL has been eliminated.**
