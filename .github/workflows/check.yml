@@ -201,6 +201,17 @@ jobs:
           name: original-bink-coefficient-oracle
           path: build/real-bink-coefficient-oracle.json
           if-no-files-found: warn
+      - name: Differential 65 real Bink intra inverse blocks from actual keyframe
+        run: |
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/video_inverse8x8.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
+            -o build/bink_real_intra_transforms.so
+          python tests/dlls/differential_real_inverse_blocks.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            build/bink_real_intra_transforms.so
       - name: Trace original Bink first-frame block modes and pixel tiles
         run: |
           python tools/dlls/trace_original_bik_block_modes.py \
