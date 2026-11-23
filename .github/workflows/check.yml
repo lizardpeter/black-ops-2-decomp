@@ -146,6 +146,17 @@ jobs:
             reconstructed_dlls/bink/test_bink_index.cpp -o /tmp/test_bink_index
           /tmp/test_bink_index originals/bik/la_pip_seq_6.bik \
             originals/bik/karma_pip_security_feed.bik originals/bik/yemen_drone_cam.bik
+      - name: Probe actual BO2 Bink keyframe through original video decoder (diagnostic)
+        run: |
+          python tools/dlls/probe_original_bik_frame.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            --report build/real-bink-frame-probe.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-bink-real-frame-probe
+          path: build/real-bink-frame-probe.json
+          if-no-files-found: warn
       - name: Fetch originals
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/fetch_originals.py $b originals --only exe; done
