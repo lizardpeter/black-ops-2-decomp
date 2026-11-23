@@ -295,3 +295,109 @@ The original Store games' **19 imported Bink exports** reach approximately **189
 The biggest outstanding Bink functions include `FUN_1800252C0` (8,618 bytes, core video frame traversal), `FUN_180017970` (8,714 bytes, media/file opening), and audio/frame scheduling/async paths. XCurl's remaining network and multi-handle machinery also has significant transitive dependencies. A successful synthetic entropy block does **not** mean full video frame output is near completion: actual frame layouts, chroma, motion/prediction, audio, timing and buffer allocation still need original-source recovery and real-media testing.
 
 The **next measurable milestone** is producing a byte-identical decoded YUV frame from a real pinned BO2 `.bik` media fixture through original and source implementations. A subsequent milestone is a complete playable clip without loading the original DLL, then removing PE imports after all 19 Bink entry points and their state/lifetime behavior are handled. XCurl requires a separate HTTP/TLS/multi-handle and callback reconstruction track. Neither DLL dependency has been removed.
+
+## First real BO2 keyframe oracle + original coefficient source reconstruction (2026-11-23)
+
+This work moved from synthetic bitstreams to an actual SHA256-pinned BO2 Store
+`.bik` media fixture and full-frame execution of the **original** decoder. It
+also source-reconstructed another complex, frame-critical routine.
+
+### Original game video and luma oracle
+
+- Fixture: `la_pip_seq_6.bik` SHA-256
+  `c1171207707c3cdcc44160899efbdc7016b1df94b21d11c592546983dd15049c`,
+  256 × 256 pixels, 150 frames.
+- First compressed frame starts at byte 648 and is 1,676 bytes long.
+  Its 4-byte luma-plane partition offset is **1,372**, meaning 1,368 bytes of
+  compressed luma payload after the partition header.
+- [`tools/dlls/probe_original_bik_frame.py`](../tools/dlls/probe_original_bik_frame.py)
+  calls original `FUN_1800252C0` through Unicorn with original caller-derived
+  scratch buffers and real compressed bytes. The original function returned
+  the **end of the luma payload** and produced 65,536 modified Y-plane bytes.
+  Luma SHA-256: **`347b7e90cad7c4cc5d0e3e9b0541813b3a49605827aa72ec59c662ff1f24edaf`**.
+  It saves a lossless `original-bink-luma-frame0.pgm` reference artifact.
+  **The ORIGINAL DLL produced this image, not the native source frame decoder.**
+- The original luma trace reached 23 Huffman codebook setups, 65 coefficient
+  decodes, 36 2× inverse transforms, 29 8×8 inverse transforms, and the
+  original byte and signed/unsigned adaptive entropy paths.
+- [`differential_real_bik_codebooks.py`](../tests/dlls/differential_real_bik_codebooks.py)
+  runs original versus source `FUN_180023840` on **23 sequential codebooks
+  from each of three real BO2 video keyframes**. All **69** codebooks matched
+  table bytes, symbol mappings and bitstream state; unlike prior synthetic
+  tests these bytes came directly from the original compressed video data.
+
+### Native source-level coefficient block restored
+
+- Original `FUN_18002FD80` at RVA **`0x2FD80`** is a 2,193-byte x64
+  hierarchical bit-plane coefficient decoder.
+- [`video_coefficients.cpp`](../reconstructed_dlls/bink/video_coefficients.cpp)
+  reconstructs its original algorithm using a token queue with group
+  expansion, signed bit-plane magnitudes and the exact original 64-index
+  coefficient permutation. The caller's first 16-bit DC coefficient stays
+  untouched. The original 24-byte WordBitStream ABI and refill semantics
+  are preserved through the existing verified `BitCursor`.
+- [`capture_original_bik_coefficients.py`](../tools/dlls/capture_original_bik_coefficients.py)
+  records the initial and final **128-byte coefficient block and 24-byte
+  bitreader state for all 65 actual calls** from the successfully decoded
+  original first luma frame, together with the entire frame packet.
+  The captured corpus is an ephemeral CI artifact and **is not checked in**
+  with the proprietary original media.
+- [`replay_real_coefficient_corpus.py`](../tests/dlls/replay_real_coefficient_corpus.py)
+  independently replays those 65 records through the original x64 function
+  under Unicorn. All 65 exact output/state replays passed.
+- [`differential_real_coefficients.py`](../tests/dlls/differential_real_coefficients.py)
+  calls the pinned original function and the independently compiled
+  reconstructed C++ with matching real media inputs for each captured block;
+  **all 65 actual compressed-data blocks matched, byte-for-byte**, including
+  all 128 coefficient bytes and the 24-byte bitreader state after relocation.
+  The same source model was separately checked locally before committing it.
+- The 65 real blocks contain 4,160 total coefficient positions and have
+  1,487 nonzero decoded coefficients. The original decoder consumes
+  7,534 bits across those coefficient calls (11–333 bits per block).
+  Thus the test has nontrivial sparse/sign/bit-plane cases, not only zero
+  blocks.
+
+### Quantized prediction now has its original ABI and tables
+
+Previously the reconstructed core at `0x2F9F0` required its caller to pass
+the original quantization table. We extracted and committed **all 16 pinned
+original 8×8 int32 matrices** (4,096 original bytes at RVA `0x5C120`) in
+[`original_quant8x8.h`](../reconstructed_dlls/bink/original_quant8x8.h)
+and wrapped the tested arithmetic in
+[`video_predict8x8.cpp`](../reconstructed_dlls/bink/video_predict8x8.cpp).
+The six-argument original-compatible internal function passed **1,680**
+original-vs-C++ comparisons (16 table indices × 35 coefficient inputs ×
+three reference/output stride combinations), in addition to the existing
+explicit-table arithmetic comparison.
+
+### Original adaptive entropy pairs restored
+
+[`entropy_adaptive_pairs.cpp`](../reconstructed_dlls/bink/entropy_adaptive_pairs.cpp)
+reconstructs two original decoder routines, `0x243B0` (signed two-nibble
+adaptation) and `0x246A0` (unsigned), with the original adaptive record
+layout, symbol-map and table-pointer arrays, current-book updates, repeat
+mode, and sign conversion. A total **600** original-versus-source
+comparisons passed in
+[`differential_entropy_adaptive_pairs.py`](../tests/dlls/differential_entropy_adaptive_pairs.py).
+This is functionality actually reached by the first real Bink frame.
+
+### Remaining main first-frame source block
+
+The successful original luma frame trace gives us a concrete first-frame
+vertical slice. Its major decoding helper and entropy call sites have now
+been independently reconstructed and compared with the original, including
+the coefficient bit-plane function. The **remaining central source-port
+target is `FUN_1800252C0` (8,618 machine-code bytes)**, which orchestrates
+tile/block iteration, buffer readers, prediction and placement. It must be
+reconstructed and its 65,536-byte luma output compared against the original
+Y SHA-256 above.
+
+Passing the first **Y plane** will not yet implement full color frames:
+chroma plane orchestration, additional block modes, subsequent dependent
+frames, playback and timing, audio, and game integration remain separate
+targets. In particular, original `binkw64.dll` is still required by the
+Store game's external imports; removing `XCurl.dll` remains a completely
+separate large HTTP/TLS/networking/state-machine task.
+
+All new source/CI work is non-destructive and isolated from the enhanced
+runtime until a complete replacement is actually validated.
