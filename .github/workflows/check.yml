@@ -37,6 +37,11 @@ jobs:
         run: |
           python tools/dlls/fetch.py originals/dlls
           python tests/dlls/oracle_bink.py originals/dlls/binkw64.dll
+      - name: Differential Bink frame metadata (Unicorn vs reconstructed C++)
+        run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/bink/bink_frames.cpp -o build/bink_frames_test.so
+          python tests/dlls/differential_frames.py originals/dlls/binkw64.dll build/bink_frames_test.so
       - name: Fetch originals
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/fetch_originals.py $b originals --only exe; done
