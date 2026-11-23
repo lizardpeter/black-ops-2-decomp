@@ -29,7 +29,7 @@ jobs:
           pip install -q -r tests/differential/requirements.txt
       - name: Reconstructed external-DLL source-body tests (not differential yet)
         run: |
-          for test in reconstructed_dlls/bink/test_bink_small.cpp reconstructed_dlls/bink/test_bink_leaf.cpp reconstructed_dlls/bink/test_bink_frames.cpp reconstructed_dlls/bink/test_bink_dispatch.cpp reconstructed_dlls/bink/test_header_validation.cpp reconstructed_dlls/bink/test_transform_butterfly8.cpp reconstructed_dlls/bink/test_transform_rotate.cpp reconstructed_dlls/bink/test_bink_keyframe.cpp reconstructed_dlls/bink/test_audio_permute32.cpp reconstructed_dlls/bink/test_video_inverse8x8.cpp reconstructed_dlls/bink/test_video_inverse8x8_2x.cpp reconstructed_dlls/bink/test_video_interleave_bytes.cpp reconstructed_dlls/bink/test_video_predict8x8_core.cpp reconstructed_dlls/bink/test_entropy_bytes.cpp reconstructed_dlls/bink/test_entropy_nibbles.cpp reconstructed_dlls/xcurl/test_getinfo_unlocked.cpp reconstructed_dlls/xcurl/test_slist.cpp reconstructed_dlls/xcurl/test_duplicate_string.cpp; do
+          for test in reconstructed_dlls/bink/test_bink_small.cpp reconstructed_dlls/bink/test_bink_leaf.cpp reconstructed_dlls/bink/test_bink_frames.cpp reconstructed_dlls/bink/test_bink_dispatch.cpp reconstructed_dlls/bink/test_header_validation.cpp reconstructed_dlls/bink/test_transform_butterfly8.cpp reconstructed_dlls/bink/test_transform_rotate.cpp reconstructed_dlls/bink/test_bink_keyframe.cpp reconstructed_dlls/bink/test_audio_permute32.cpp reconstructed_dlls/bink/test_video_inverse8x8.cpp reconstructed_dlls/bink/test_video_inverse8x8_2x.cpp reconstructed_dlls/bink/test_video_interleave_bytes.cpp reconstructed_dlls/bink/test_video_predict8x8_core.cpp reconstructed_dlls/bink/test_entropy_bytes.cpp reconstructed_dlls/bink/test_entropy_nibbles.cpp reconstructed_dlls/bink/test_entropy_signed_bytes.cpp reconstructed_dlls/xcurl/test_getinfo_unlocked.cpp reconstructed_dlls/xcurl/test_slist.cpp reconstructed_dlls/xcurl/test_duplicate_string.cpp; do
             clang++ -std=c++20 -O2 -Wall -Wextra -Werror -fsanitize=address,undefined -fno-omit-frame-pointer "$test" -o /tmp/bink_leaf_test
             /tmp/bink_leaf_test
           done
@@ -52,6 +52,11 @@ jobs:
           clang++ -std=c++20 -O2 -shared -fPIC -fno-fast-math -ffp-contract=off \
             -Wall -Wextra -Werror reconstructed_dlls/bink/transform_butterfly16.cpp -o build/bink_transform16_test.so
           python tests/dlls/differential_butterfly16.py originals/dlls/binkw64.dll build/bink_transform16_test.so
+      - name: Differential Bink signed-byte entropy decoder (original vs source)
+        run: |
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/entropy_signed_bytes.cpp -o build/bink_entropy_signed.so
+          python tests/dlls/differential_entropy_signed.py originals/dlls/binkw64.dll build/bink_entropy_signed.so
       - name: Differential Bink nibble-pair entropy decoder (original vs source)
         run: |
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
