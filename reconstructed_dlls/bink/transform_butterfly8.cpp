@@ -28,3 +28,27 @@ extern "C" void bink_transform_butterfly8(float* x) {
     x[6] = diff04 - diff37;
     x[5] = sum15 - sum37;
 }
+
+// FUN_18002EC70 (RVA 0x2EC70), a distinct butterfly permutation.
+// Source follows the original scalar SSE dependency/order, not FFT library code.
+extern "C" void bink_transform_butterfly8_alt(float* x) {
+    const float x0 = x[0], x1 = x[1], x2 = x[2], x3 = x[3];
+    const float x4 = x[4], x5 = x[5], x6 = x[6], x7 = x[7];
+    const float diff15 = x1 - x5;
+    const float sum15 = x1 + x5;
+    const float diff04 = x0 - x4;
+    const float sum37 = x3 + x7;
+    const float sum04 = x0 + x4;
+    const float sum26 = x2 + x6;
+    const float diff26 = x2 - x6;
+    const float diff37 = x3 - x7;
+
+    x[1] = sum37 + sum15;
+    x[0] = sum26 + sum04;
+    x[4] = sum04 - sum26;
+    x[7] = diff15 - diff26;
+    x[5] = sum15 - sum37;
+    x[2] = diff04 - diff37;
+    x[3] = diff26 + diff15;
+    x[6] = diff37 + diff04;
+}
