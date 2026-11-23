@@ -175,6 +175,10 @@ jobs:
           python tools/dlls/capture_original_bik_coefficients.py \
             originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
             --out build/real-bink-coefficient-oracle.json
+      - name: Replay all 65 real coefficient blocks against independent original function
+        run: |
+          python tests/dlls/replay_real_coefficient_corpus.py \
+            originals/dlls/binkw64.dll build/real-bink-coefficient-oracle.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
