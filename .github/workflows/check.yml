@@ -147,6 +147,10 @@ jobs:
             reconstructed_dlls/bink/test_bink_index.cpp -o /tmp/test_bink_index
           /tmp/test_bink_index originals/bik/la_pip_seq_6.bik \
             originals/bik/karma_pip_security_feed.bik originals/bik/yemen_drone_cam.bik
+      - name: Differential 23 original Bink codebooks from actual BO2 first keyframes
+        run: |
+          python tests/dlls/differential_real_bik_codebooks.py \
+            originals/dlls/binkw64.dll build/bink_huffman_codebook.so originals/bik
       - name: Probe actual BO2 Bink keyframe through original video decoder (diagnostic)
         run: |
           python tools/dlls/probe_original_bik_frame.py \
