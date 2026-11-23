@@ -34,9 +34,10 @@ MODE_RVA=0x25A32
 END_RVA=0x25B17
 MODE1_SUBMODE_RVA=0x25BD5  # MOVZX ECX,byte ptr [RAX]
 MODE8_INPUT_RVA=0x2705E  # MOVZX EAX,byte ptr [R8], after mask-buffer reset
+MODE1_PATTERN_INPUT_RVA=0x26020  # Pattern data pointer RAX, colors R10/R11 ready
 FRAME_RVA=0x252C0
 PIXELS=256
-SAMPLES_PER_MODE=64
+SAMPLES_PER_MODE=256
 
 
 def main():
@@ -67,8 +68,9 @@ def main():
     failures=[]
     unmatched_epilogues=[0]
 
-    def tile(mu,addr):
-        return b"".join(bytes(mu.mem_read(addr+PIXELS*y,8)) for y in range(8))
+    def tile(mu,addr,side=8):
+        return b"".join(bytes(mu.mem_read(addr+PIXELS*y,side))
+                        for y in range(side))
 
     def dispatch(mu):
         mode=mu.reg_read(X.UC_X86_REG_RAX)&0xFFFFFFFF
@@ -105,6 +107,9 @@ def main():
         submode=int(bytes(mu.mem_read(mu.reg_read(X.UC_X86_REG_RAX),1))[0])
         pending[-1]["submode"]=submode
         submode_counts[str(submode)]+=1
+        if submode in (5,6,8):
+            pending[-1]["before16_hex"]=tile(
+                mu,HEAP+pending[-1]["output_offset"],16).hex()
 
     def mode8_inputs(mu):
         if not pending or pending[-1]["mode"]!=8:
@@ -114,6 +119,15 @@ def main():
         pending[-1]["mode8_color0"]=mu.reg_read(X.UC_X86_REG_R10)&0xff
         pending[-1]["mode8_color1"]=mu.reg_read(X.UC_X86_REG_R11)&0xff
         pending[-1]["mode8_pattern_hex"]=bytes(mu.mem_read(source,8)).hex()
+
+    def mode1_pattern_inputs(mu):
+        if not pending or pending[-1].get("submode")!=8:
+            failures.append("Mode-1 pattern input hook without submode 8")
+            return
+        pattern_ptr=mu.reg_read(X.UC_X86_REG_RAX)
+        pending[-1]["mode1_pattern_color0"]=mu.reg_read(X.UC_X86_REG_R10)&0xff
+        pending[-1]["mode1_pattern_color1"]=mu.reg_read(X.UC_X86_REG_R11)&0xff
+        pending[-1]["mode1_pattern_hex"]=bytes(mu.mem_read(pattern_ptr,8)).hex()
 
     def epilogue(mu):
         if not pending:
@@ -129,6 +143,8 @@ def main():
         if len(samples.get(group,[]))<SAMPLES_PER_MODE:
             target=HEAP+event["output_offset"]
             event["after_hex"]=tile(mu,target).hex()
+            if "before16_hex" in event:
+                event["after16_hex"]=tile(mu,target,16).hex()
             samples.setdefault(group,[]).append(event)
         addresses.append((event["x"],event["y"],event["mode"]))
 
@@ -137,6 +153,7 @@ def main():
         image.base+END_RVA:epilogue,
         image.base+MODE1_SUBMODE_RVA:mode1_submode,
         image.base+MODE8_INPUT_RVA:mode8_inputs,
+        image.base+MODE1_PATTERN_INPUT_RVA:mode1_pattern_inputs,
     }
     scratch=[SCRATCH_FIRST+i*SCRATCH_SPACING for i in range(9)]
     def setup(w):
