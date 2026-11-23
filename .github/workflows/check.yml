@@ -193,6 +193,17 @@ jobs:
           name: original-bink-coefficient-oracle
           path: build/real-bink-coefficient-oracle.json
           if-no-files-found: warn
+      - name: Trace original Bink first-frame block modes and pixel tiles
+        run: |
+          python tools/dlls/trace_original_bik_block_modes.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            --out build/real-bink-block-modes.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: original-bink-block-modes
+          path: build/real-bink-block-modes.json
+          if-no-files-found: warn
       - name: Fetch originals
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/fetch_originals.py $b originals --only exe; done
