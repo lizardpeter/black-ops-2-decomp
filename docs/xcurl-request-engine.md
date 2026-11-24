@@ -67,7 +67,7 @@ Original 0x102FC and 0xC070, ETW disabled: 1,024/1,024 local machine-code compar
 
 ## Asynchronous request startup coordinator
 
-Original 0x11978 and 0x11F10: 1,024 local passing original-machine comparisons. Recovered state guard, async status/result allocation/ownership and scan for type 2, URL/open/registration/options/header/certificate order, per-stage cancellation codes and close/finish selection, direct POST data, fixed-length callback and buffered callback upload modes. The original and native tests execute upload buffer, send, cancellation and completion helpers directly; GDK async result and setup helpers are explicit callback boundaries. Oversized fixed read return is rejected rather than permitting the original unsafe send length. No production GDK task queue, certificate or header-add adapter is supplied by this transaction. Buffered upload CI at 92852c1e passed (45436997675), including long-upload safety regression.
+Original 0x11978 and 0x11F10: 1,024 passing original-machine comparisons. Recovered state guard, metadata allocation/ownership and type-2 scan, URL/open/registration/options/header/certificate order, per-stage cancellation codes and close/finish selection, direct POST data, fixed-length callback and buffered callback upload modes. Startup now calls the reconstructed XAsyncGetStatus and XNetworking security-result-size/result wrappers instead of three generic result callbacks. The GDK QueryApiImpl resolver remains an explicit host boundary; the Windows GDK loader/initialization adapter is not yet complete. Oversized fixed read returns are rejected rather than permitting the original unsafe send length. The 1,024 startup cases pass CI at 45444003768.
 
 ## Outgoing header list
 
@@ -80,3 +80,20 @@ The Windows adapter now binds the recovered outgoing header and streamed upload 
 ## Certificate-store selector and lookup
 
 Original 0x10CA0 and 0x11478: 2,048 passing local original-machine comparisons (1,024 each), including all eight store-location names, original prefix-match and thumbprint length rules, malformed selectors, store-open error conversion, hash decode, lookup and cleanup, original ignored WinHTTP return and diagnostic ordering. Uses immutable borrowed string spans rather than temporary mutation and MSVC SSO; host string allocation failure is not original-equivalent. Cryptography calls are modeled. The original option 47 call uses the address of the certificate pointer with size 40; the native adapter is deliberately not implemented until that ABI can be validated on Windows. The expanded native streamed POST, outgoing header and response-delivery loopback passed (45437723076); outgoing-header differential passed (45437608735).
+
+
+## GDK interface wrappers
+
+The three interface data objects at original RVAs 0x20120, 0x20130 and 0x20140 were read directly from the hash-pinned Store XCurl.dll. Code references in the original binary establish the provider/IID pairs and byte offsets in the COM-style vtables. The method names/signatures are cross-checked against the public IXThreadingImpl and IXNetworkingImpl layouts; the original RVAs and vtable offsets are independently observed in XCurl machine code.
+
+- XThreading / XAsync provider and IID: `073b7dcb-1fcf-4030-94be-e3c9eb623428`.
+- XNetworking provider: `37e56907-2f10-41e8-b72f-36edb185331a`.
+- XNetworking interface IID: `bf2346b2-39af-4658-b5ea-44713c7e83b3`.
+
+All offsets include the three IUnknown entries; each successful QueryApiImpl result is released through vtable slot 2. Methods that the original calls only after XThreadAssertNotTimeSensitive retain that ordering.
+
+The new `gdk_interfaces.cpp` implements all 15 wrappers in the table in `xcurl-gdk-interface-map.md`. CI compares all 15 wrappers against the original machine code: 1,440 passing cases (96 per entry), including query GUID bytes, interface lifetime, vtable slot, argument widths/order, stack arguments, return values and output writes. The original request-start functions also pass 1,024 cases with the actual three GDK wrappers wired in.
+
+Important boundary: `GdkQueryServices.query` represents QueryApiImpl after runtime initialization. This work does not yet claim to load or initialize a real XGameRuntime module. The original lazy loader and initialization entrypoints at 0x5364 and 0x5148, including the exact package/module resolution behavior, remain to be bound to a native Windows host. No XGameRuntime runtime was loaded in these differential tests.
+
+Evidence generator: `tools/dlls/probe_xcurl_gdk.py`. Public interface-layout cross-checks: [IXThreadingImpl](https://github.com/xodus-gaming/xgameruntime-docs/blob/main/COM/XThreadingImpl/IXThreadingImpl.md) and [IXNetworkingImpl](https://github.com/xodus-gaming/xgameruntime-docs/blob/main/COM/XNetworkingImpl/IXNetworkingImpl.md).
