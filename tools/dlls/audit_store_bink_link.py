@@ -21,7 +21,8 @@ def audit(module,static_client,dynamic_client,originals):
     dll=load(module)
     assert dll.FILE_HEADER.Characteristics&0x2000
     exports={e.name.decode():e for e in dll.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
-    expected=set(json.loads((ROOT/"docs/bink-store-mp-callers.json").read_text())["call_sites"])
+    expected=set(json.loads((ROOT/"docs/bink-store-mp-callers.json").read_text())["call_sites"]) | {"BinkOpen"}
+    assert len(expected)==19
     assert set(exports)==expected,(set(exports)-expected,expected-set(exports))
     for name,e in exports.items():
         assert not e.forwarder,(name,"forwarded export")

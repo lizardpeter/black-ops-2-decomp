@@ -10,6 +10,7 @@ EXPORTS
     BinkGetRealtime
     BinkGetRects
     BinkNextFrame
+    BinkOpen
     BinkPause
     BinkRegisterFrameBuffers
     BinkRequestStopAsyncThread
