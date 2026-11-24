@@ -100,7 +100,7 @@ struct ResidentVideoSession::Worker {
 // routines. A single mutex serializes the OS file position and ring state;
 // original callbacks execute under that lock. No full-file read.
 struct ResidentVideoSession::StreamInput {
-    explicit StreamInput(ResidentVideoSession& session):owner(session) {}
+    explicit StreamInput(ResidentVideoSession& session):owner(session) {storage.configure(owner.alloc_,owner.free_);}
     ~StreamInput() {
         {std::lock_guard lock(mutex);stopping=true;}
         cv.notify_all();
@@ -108,7 +108,7 @@ struct ResidentVideoSession::StreamInput {
     }
     ResidentVideoSession& owner;
     std::ifstream file;
-    std::vector<std::uint64_t> storage;
+    NativeAllocation storage;
     std::mutex mutex;
     std::condition_variable cv;
     bool stopping=false;
@@ -188,7 +188,36 @@ void ResidentVideoSession::close() {
     opened_=failed_=false;
     info_=nullptr;timer_=nullptr;clock_ctx_=nullptr;
     header_={};handle_.clear();
-    file_.clear();packet_storage_.clear();file_size_=packet_offset_=0;error_.clear();
+    file_.clear();borrowed_=nullptr;packet_storage_.clear();file_size_=packet_offset_=0;error_.clear();
+}
+void ResidentVideoSession::set_memory_callbacks(Allocate alloc,Deallocate free_fn) {
+    if(opened_)throw std::logic_error("movie already open");
+    handle_.configure(alloc,free_fn);packet_storage_.configure(alloc,free_fn);
+    alloc_=alloc;free_=free_fn;
+}
+bool ResidentVideoSession::open_borrowed(const std::uint8_t* file,std::size_t bytes,ResidentTimer timer,void* ctx) {
+    close();
+    HeaderPrefix h{};
+    if(!file||!timer||bytes>256U*1024U*1024U || !validate_header_prefix(file,bytes,&h) ||
+       h.magic!=0x694B4942U || h.audio_track_count || (h.flags&~kAlphaFlag) ||
+       h.width<16 || h.width>1280 || h.height<16 || h.height>720 ||
+       std::uint64_t(h.payload_bytes)+8!=bytes || h.largest_frame_bytes>262144)
+        return fail("unsupported borrowed Store BIKi header");
+    std::vector<FrameSpan> spans(h.frame_count);
+    if(!read_video_only_index(file,bytes,spans.data(),spans.size(),&h) ||
+       !spans.front().keyframe || spans.back().end!=bytes)return fail("invalid borrowed index");
+    for(const auto& span:spans) {
+        VideoPacketLayout layout{};
+        if(!parse_video_packet({file+span.start,span.end-span.start},h.flags,layout))
+            return fail("invalid borrowed video packet");
+    }
+    ResidentBootstrapLayout plan{};
+    if(!resident_bootstrap_layout(h,plan,true))return fail("unsupported borrowed layout");
+    header_=h;file_size_=bytes;timer_=timer;clock_ctx_=ctx;borrowed_=file;
+    handle_.resize(plan.allocation_bytes/8);
+    if(!init_resident_external(handle_.data(),plan.allocation_bytes,file,bytes,0x04104400U,timer_,clock_ctx_))
+        return fail("borrowed bootstrap failed");
+    opened_=true;return true;
 }
 bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx) {
     return open_impl(std::move(file),timer,ctx,false,0);
@@ -367,7 +396,7 @@ bool ResidentVideoSession::decode_current_packet(RegisteredDecodeReport& report,
     const auto* packet=read<const std::uint8_t*>(state,0x100);
     const auto bytes=read<std::uint32_t>(state,0x13C);
     const auto off=read<std::uint32_t>(state,0x1E8);
-    const auto* base=packet_storage_.empty()?file_.data():
+    const auto* base=packet_storage_.empty()?(borrowed_?borrowed_:file_.data()):
         reinterpret_cast<const std::uint8_t*>(packet_storage_.data());
     if(off>file_size_ || bytes>file_size_-off ||
        (stream_ ? (read<std::uint32_t>(state,0x138)!=0 || !packet) :

@@ -8,6 +8,7 @@
 // declared, never faked or substituted in the production source.
 #include <cstddef>
 #include <cstdint>
+#include "bink_open_options.h"
 
 namespace t6_bink {
 extern std::uint32_t g_frame_rate_numerator;       // 0x570E4
@@ -22,20 +23,6 @@ std::uint64_t g_secondary_file_offset = 0;        // 0x57120
 // Exact field positions of the 48-byte stack record observed in the original
 // dispatcher. The gap at +0x1C was uninitialized in the original assembly;
 // not assumed meaningful until the full initializer at RVA 0x17970 is recovered.
-struct OpenOptions {
-    std::uint64_t file_offset;          // +0x00
-    std::uint32_t frame_rate_number;    // +0x08
-    std::uint32_t frame_rate_denominator;// +0x0C
-    std::uint32_t io_size;              // +0x10
-    std::uint32_t simulate;             // +0x14
-    std::uint32_t track_count;          // +0x18
-    std::uint32_t gap;                  // +0x1C, original stack uninitialized
-    const std::uint32_t* track_ids;     // +0x20
-    std::uint64_t secondary_offset;     // +0x28
-};
-static_assert(sizeof(OpenOptions) == 0x30);
-static_assert(offsetof(OpenOptions, track_ids) == 0x20);
-
 namespace internal {
 // Must be recovered from original DLL: FUN_180017970 and BinkDoFramePlane.
 void* open_decoder(void* name, const OpenOptions* options, std::uint32_t flags);

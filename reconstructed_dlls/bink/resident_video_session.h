@@ -1,5 +1,6 @@
 #pragma once
 #include "bink_index.h"
+#include "native_allocation.h"
 #include "resident_frame_state.h"
 #include "video_registered.h"
 #include <array>
@@ -30,6 +31,8 @@ public:
     ResidentVideoSession(ResidentVideoSession&&)=delete;
     ResidentVideoSession& operator=(ResidentVideoSession&&)=delete;
     bool open(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx);
+    bool open_borrowed(const std::uint8_t* file,std::size_t bytes,ResidentTimer timer,void* ctx);
+    void set_memory_callbacks(Allocate alloc,Deallocate free_fn);
     // Original fully preloaded filename path; refuse small-buffer streaming
     // rather than pretending that it is resident. Opens read-only.
     bool open_preloaded_file(const char* path,std::uint32_t io_size,ResidentTimer timer,void* ctx);
@@ -69,11 +72,14 @@ private:
     bool decode_current_packet(RegisteredDecodeReport& report,std::string& error) const;
     HeaderPrefix header_{};
     std::vector<std::uint8_t> file_;
-    std::vector<std::uint64_t> packet_storage_;
+    NativeAllocation packet_storage_;
+    const std::uint8_t* borrowed_=nullptr;
+    Allocate alloc_=nullptr;
+    Deallocate free_=nullptr;
     std::size_t file_size_=0,packet_offset_=0;
     // Original cache-line-separated bootstrap allocation. Eight-byte
     // aligned backing storage; no original OS mutex ownership here.
-    std::vector<std::uint64_t> handle_;
+    NativeAllocation handle_;
     RegisteredFrameBuffers* info_=nullptr;
     ResidentTimer timer_=nullptr;
     void* clock_ctx_=nullptr;
