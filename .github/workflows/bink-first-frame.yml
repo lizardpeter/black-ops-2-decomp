@@ -14,6 +14,7 @@ on:
       - tests/dlls/differential_bink_sequence.py
       - tests/dlls/differential_video_sparse_residual.py
       - tools/dlls/trace_original_bik_entropy_rows.py
+      - tools/dlls/native_bik_decode.cpp
       - .github/workflows/bink-first-frame.yml
   workflow_dispatch:
 
@@ -97,6 +98,47 @@ jobs:
           python tests/dlls/differential_bink_sequence.py \
             originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
             build/bink_source_first_luma.so --frames 150
+      - name: Build standalone source-only BIKi video decoder
+        run: |
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/huffman_codebook.cpp \
+            reconstructed_dlls/bink/entropy_byte_rle.cpp \
+            reconstructed_dlls/bink/entropy_adaptive_pairs.cpp \
+            reconstructed_dlls/bink/entropy_nibbles.cpp \
+            reconstructed_dlls/bink/entropy_signed_bytes.cpp \
+            reconstructed_dlls/bink/entropy_deltas16.cpp \
+            reconstructed_dlls/bink/entropy_bytes.cpp \
+            reconstructed_dlls/bink/video_coefficients.cpp \
+            reconstructed_dlls/bink/video_inverse8x8.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
+            reconstructed_dlls/bink/video_block_modes.cpp \
+            reconstructed_dlls/bink/video_predict8x8_core.cpp \
+            reconstructed_dlls/bink/video_predict8x8.cpp \
+            reconstructed_dlls/bink/video_sparse_residual.cpp \
+            reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp \
+            tools/dlls/native_bik_decode.cpp -o build/bink_decode_video
+          ldd build/bink_decode_video
+          build/bink_decode_video originals/bik/la_pip_seq_6.bik build/standalone-bink-sequence.yuv
+          cmp build/standalone-bink-sequence.yuv build/native-bink-sequence.yuv
+          sha256sum build/standalone-bink-sequence.yuv
+      - name: Compare two additional pinned BO2 video sequences
+        run: |
+          failed=0
+          for clip in karma_pip_security_feed yemen_drone_cam; do
+            if python tests/dlls/differential_bink_sequence.py \
+              originals/dlls/binkw64.dll "originals/bik/$clip.bik" \
+              build/bink_source_first_luma.so --report "build/$clip/bink-sequence-report.json"; then
+              build/bink_decode_video "originals/bik/$clip.bik" "build/$clip/standalone-bink-sequence.yuv" &&
+                cmp "build/$clip/standalone-bink-sequence.yuv" "build/$clip/native-bink-sequence.yuv" || failed=1
+            else
+              failed=1
+            fi
+          done
+          exit "$failed"
       - name: Preserve source-first-frame diagnostics and original oracle
         if: always()
         uses: actions/upload-artifact@v4
@@ -117,4 +159,10 @@ jobs:
             build/bink-sequence-report.json
             build/native-bink-sequence.yuv
             build/sequence-failed-*.pgm
+            build/standalone-bink-sequence.yuv
+            build/bink_decode_video
+            build/karma_pip_security_feed/*.json
+            build/karma_pip_security_feed/*.pgm
+            build/yemen_drone_cam/*.json
+            build/yemen_drone_cam/*.pgm
           if-no-files-found: warn
