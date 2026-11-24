@@ -104,7 +104,7 @@ extern "C" std::int64_t bink_research_file_refill(void* io,t6_bink::FileRead rea
     }
     const auto elapsed=time(io)-before;
     inc(io,0x90,elapsed);
-    if(!frame_active)inc(io,u(io,0x8C)?0x9C:0x98,elapsed);
+    inc(io,(frame_active||u(io,0x8C))?0x9C:0x98,elapsed);
     // The original successful-refill path jumps past the A8 snapshot
     // write; that write belongs to the no-refill branch only.
     return finish(got);
@@ -121,4 +121,39 @@ extern "C" std::uint32_t bink_research_file_control(void* io,std::uint32_t flags
         if(flags&0x80000000U && fill)fill(io,ctx);
     }
     return u(io,0xB0);
+}
+
+extern "C" std::int64_t bink_research_file_read_buffered(void* io,std::uint32_t frame,
+    std::uint32_t offset,void* dest,std::uint32_t bytes) {
+    (void)frame; // only used by the original telemetry path
+    if(!io||!dest)return -1;
+    if(u(io,0x80))return 0;
+    const auto pos=u(io,0xD0),avail=u(io,0xAC),capacity=u(io,0xA0),cursor=u(io,0xF0);
+    const auto* start=get<const std::uint8_t*>(io,0xD8);
+    if((offset!=UINT32_MAX && offset!=pos) || bytes>avail || avail>capacity ||
+       !capacity || cursor>=capacity || !start || pos>u(io,0xEC) ||
+       bytes>u(io,0xEC)-pos)return -1;
+    const auto before=time(io);
+    auto* output=static_cast<std::uint8_t*>(dest);
+    inc(io,0xD0,bytes);
+    const auto tail=capacity-cursor;
+    if(bytes>=tail) {
+        std::memcpy(output,start+cursor,tail);
+        output+=tail;
+        put(io,0xF0,0U);add(io,0xAC,0U-tail);add(io,0xF8,tail);
+        if(bytes>tail) {
+            const auto rest=bytes-tail;
+            std::memcpy(output,start,rest);
+            add(io,0xF0,rest);add(io,0xAC,0U-rest);add(io,0xF8,rest);
+        }
+    } else if(bytes) {
+        std::memcpy(output,start+cursor,bytes);
+        add(io,0xF0,bytes);add(io,0xAC,0U-bytes);add(io,0xF8,bytes);
+    }
+    inc(io,0x94,time(io)-before);
+    auto snapshot=std::min(u(io,0xEC)-u(io,0xD0),capacity);
+    if(u(io,0xAC)+0x20000U>snapshot)snapshot=u(io,0xAC);
+    put(io,0xA8,snapshot);
+    if(auto cb=get<BytesNotify>(io,0x70))cb(io,bytes);
+    return bytes;
 }

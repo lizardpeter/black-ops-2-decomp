@@ -21,3 +21,8 @@ extern "C" std::int64_t bink_research_file_refill(void* io,t6_bink::FileRead rea
 // Full control state transitions, including high-bit callback dispatch.
 extern "C" std::uint32_t bink_research_file_control(void* io,std::uint32_t flags,
     t6_bink::FileFill fill,void* context);
+
+ // Original 0x20270 sequential buffered-frame path. All requested bytes
+ // must already be in the ring; other seek/direct-read paths are separate.
+extern "C" std::int64_t bink_research_file_read_buffered(void* io,std::uint32_t frame,
+    std::uint32_t offset,void* dest,std::uint32_t bytes);

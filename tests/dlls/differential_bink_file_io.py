@@ -176,4 +176,42 @@ def main():
         assert bytes(h)==bs[0],(i,"refill",[(hex(j),a,b) for j,(a,b) in enumerate(zip(h,bs[0])) if a!=b][:24])
         assert ctypes.string_at(native_base,len(initial))==bytes(m.mu.mem_read(ARENA,len(initial))),(i,"buffer")
     print("Original sequential ring refill PASS: 96 state/buffer cases")
+    consume=lib.bink_research_file_read_buffered
+    consume.argtypes=(ctypes.c_void_p,ctypes.c_uint32,ctypes.c_uint32,ctypes.c_void_p,ctypes.c_uint32)
+    consume.restype=ctypes.c_int64
+    for i in range(192):
+        h=bytearray(rng.randbytes(IO_SIZE))
+        for off in (0x40,0x48,0x50,0x58,0x60,0x70,0x78):ptr(h,off,0)
+        ptr(h,0x68,fake_timer)
+        capacity=0x40000
+        cursor=rng.randrange(capacity)
+        count=rng.randrange(1,16384)
+        avail=rng.randrange(count,capacity+1)
+        pos=rng.randrange(0,100000)
+        for off,v in ((0x80,0),(0x84,0),(0xA0,capacity),(0xD0,pos),(0xEC,pos+avail+rng.randrange(1,capacity)),
+            (0xF0,cursor),(0xAC,avail),(0xF8,capacity-avail)):
+            put(h,off,v)
+        ptr(h,0xD8,ARENA);ptr(h,0xE0,ARENA+capacity);ptr(h,0x100,ARENA)
+        original_bytes=rng.randbytes(capacity)
+        m.mu.mem_write(ARENA,original_bytes);ctypes.memmove(native_base,original_bytes,capacity)
+        initial=rng.randbytes(count+16)
+        oc=[];nc=[]
+        def otime(mu):oc.append(1);return 2000+len(oc)
+        @TIMER
+        def ntime():nc.append(1);return 2000+len(nc)
+        offset=pos if i%2 else 0xffffffff
+        r,bs,_,_=m.call(img.base+0x20270,[bytes(h),i+1,offset,initial,count],"uint",
+                        fakes={fake_timer:otime})
+        assert isinstance(r,int),(i,r)
+        ptr(h,0x68,ctypes.cast(ntime,ctypes.c_void_p).value)
+        for off in (0xD8,0xE0,0x100):ptr(h,off,get64(h,off)-ARENA+native_base)
+        nh=(ctypes.c_uint8*IO_SIZE).from_buffer(h)
+        out=(ctypes.c_uint8*len(initial)).from_buffer_copy(initial)
+        actual=consume(nh,i+1,offset,out,count)
+        ptr(h,0x68,fake_timer)
+        for off in (0xD8,0xE0,0x100):ptr(h,off,get64(h,off)-native_base+ARENA)
+        assert actual==r and oc==nc and bytes(out)==bs[1],(i,actual,r,oc,nc)
+        assert bytes(h)==bs[0],(i,"consume",[(hex(j),a,b) for j,(a,b) in enumerate(zip(h,bs[0])) if a!=b][:24])
+        assert not m.imports_called,m.imports_called
+    print("Original sequential buffered frame read PASS: 192 full states and ring wrap cases")
 if __name__=="__main__":main()
