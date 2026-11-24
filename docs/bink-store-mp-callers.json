@@ -1,0 +1,83 @@
+{
+  "build": "t6mp_msstore",
+  "source": "Original SHA-pinned Store MP PE import directory and RIP-relative callsite scan",
+  "image_base": "0x140000000",
+  "open": [
+    {
+      "call_rva": "0x76E540",
+      "flags": "0x04104400",
+      "input": "memory",
+      "evidence": "BA 00 44 10 04; 49 8B CF; FF 15 82 9E 13 00"
+    },
+    {
+      "call_rva": "0x76E6B7",
+      "flags": "0x01104400",
+      "input": "file",
+      "evidence": "BA 00 44 10 01; 49 8B CF; FF 15 0B 9D 13 00"
+    }
+  ],
+  "call_sites": {
+    "BinkGetFrameBuffersInfo": [
+      "0x76DC92"
+    ],
+    "BinkRegisterFrameBuffers": [
+      "0x76DCA7"
+    ],
+    "BinkDoFrameAsync": [
+      "0x76DCB9",
+      "0x76E977"
+    ],
+    "BinkDoFrameAsyncWait": [
+      "0x76E10C",
+      "0x76E7B4"
+    ],
+    "BinkNextFrame": [
+      "0x76DD2B"
+    ],
+    "BinkDoFrame": [
+      "0x76E18C"
+    ],
+    "BinkGetRects": [
+      "0x76D95B"
+    ],
+    "BinkGetRealtime": [
+      "0x76DAA7"
+    ],
+    "BinkSetIOSize": [
+      "0x76E69F"
+    ],
+    "BinkSetSoundTrack": [
+      "0x76E532",
+      "0x76E6A9"
+    ],
+    "BinkControlBackgroundIO": [
+      "0x76DB59",
+      "0x76DB6B",
+      "0x76DC17"
+    ],
+    "BinkStartAsyncThread": [
+      "0x76E468",
+      "0x76E5DB"
+    ],
+    "BinkRequestStopAsyncThread": [
+      "0x76E806"
+    ],
+    "BinkWaitStopAsyncThread": [
+      "0x76E812"
+    ],
+    "BinkClose": [
+      "0x76E844"
+    ],
+    "BinkSetMemory": [
+      "0x76E3AE",
+      "0x76E4F8"
+    ],
+    "BinkPause": [
+      "0x76CE71",
+      "0x76E6D0"
+    ],
+    "BinkGetError": [
+      "0x76E471"
+    ]
+  }
+}

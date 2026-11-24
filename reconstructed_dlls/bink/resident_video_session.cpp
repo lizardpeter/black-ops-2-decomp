@@ -130,7 +130,7 @@ bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer tim
     timer_=timer;clock_ctx_=ctx;
     handle_.resize(plan.allocation_bytes/sizeof(std::uint64_t));
     if(!init_resident_external(handle_.data(),plan.allocation_bytes,file_.data(),file_.size(),
-                               0x04000400U|h.flags,timer_,clock_ctx_))
+                               0x04104400U,timer_,clock_ctx_))
         return fail("original-derived resident bootstrap failed");
     opened_=true;
     return true;

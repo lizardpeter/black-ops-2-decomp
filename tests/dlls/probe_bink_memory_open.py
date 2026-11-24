@@ -371,7 +371,7 @@ def main():
     a=p.parse_args()
     flags=a.flags
     if flags is None:
-        flags=(0x04000400|struct.unpack_from("<I",a.fixture.read_bytes(),36)[0]) if a.playback_out else FLAGS
+        flags=0x04104400 if a.playback_out else FLAGS
     result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback)
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")

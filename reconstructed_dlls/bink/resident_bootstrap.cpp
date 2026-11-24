@@ -55,7 +55,7 @@ bool init_resident_external(void* handle,std::size_t capacity,
     if(!handle || !timer || !header(data,bytes,h) ||
        (reinterpret_cast<std::uintptr_t>(handle)&7U) ||
        (reinterpret_cast<std::uintptr_t>(data)&3U) ||
-       (flags&~0x00100000U)!=0x04000400U ||
+       (flags&~0x00104000U)!=0x04000400U ||
        !resident_bootstrap_layout(h,plan) || capacity<plan.allocation_bytes)
         return false;
     std::vector<FrameSpan> spans(h.frame_count);

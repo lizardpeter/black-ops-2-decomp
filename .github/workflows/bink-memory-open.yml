@@ -15,7 +15,7 @@ jobs:
       fail-fast: false
       matrix:
         clip: [la_pip_seq_6, blackout_virus, karma_pip_helipad, generalstore, yemen_mendz]
-        flags: ['0x04000000', '0x04000400']
+        flags: ['0x04000000', '0x04000400', '0x04104400']
         include:
           - clip: generalstore
             flags: '0x04100400'
