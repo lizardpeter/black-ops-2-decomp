@@ -20,11 +20,11 @@ extern "C" void xcurl_research_start_request(void* request,void* task,const Star
     auto release_metadata=[&]{if(auto* old=ptr(p,0x90)){s->release(old,15,c);put<P>(p,0x90,nullptr);}};
     auto run=[&]{
         if(get<std::uint32_t>(p,0x28)!=1){action=2;return;}
-        auto h=t->async_status(task,c);if(failed(h)){t->diagnose(easy(),0x210b8,h,c);cancel(h,58);return;}
-        std::uint64_t bytes=0;h=t->async_size(task,&bytes,c);if(failed(h)){t->diagnose(easy(),0x21060,h,c);cancel(h,58);return;}
+        auto h=xcurl_research_gdk_async_get_status(task,0,t->gdk);if(failed(h)){t->diagnose(easy(),0x210b8,h,c);cancel(h,58);return;}
+        std::uint64_t bytes=0;h=xcurl_research_gdk_network_security_result_size(task,&bytes,t->gdk);if(failed(h)){t->diagnose(easy(),0x21060,h,c);cancel(h,58);return;}
         release_metadata();auto* meta=s->allocate(bytes,15,c);put(p,0x90,meta);
         if(!meta){t->diagnose(easy(),0x21038,0,c);cancel(0x8007000eU,58);return;}
-        void* parsed=ptr(p,0x98);h=t->async_result(task,bytes,meta,&parsed,c);put(p,0x98,parsed);
+        void* parsed=ptr(p,0x98);h=xcurl_research_gdk_network_security_result(task,bytes,nullptr,meta,&parsed,t->gdk);put(p,0x98,parsed);
         if(failed(h)){t->diagnose(easy(),0x20fe0,h,c);release_metadata();cancel(h,58);return;}
         auto count=get<std::uint64_t>(parsed,8);auto* items=ptr(parsed,0x10);
         for(std::uint64_t i=0;i<count;++i)if(get<std::uint32_t>(items,0)==2){p[0xd6]=1;break;}else items+=0x18;

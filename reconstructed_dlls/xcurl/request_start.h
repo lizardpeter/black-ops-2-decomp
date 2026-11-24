@@ -1,5 +1,6 @@
 #pragma once
 #include "upload_buffer.h"
+#include "gdk_interfaces.h"
 namespace t6_xcurl {
 // GDK asynchronous result APIs and not-yet-connected setup helpers.
 // Already recovered helpers are composed through the native adapter rather
@@ -7,9 +8,7 @@ namespace t6_xcurl {
 struct StartServices {
     const RequestServices* request;
     const BufferServices* buffer;
-    std::uint32_t (*async_status)(void*,void*);
-    std::uint32_t (*async_size)(void*,std::uint64_t*,void*);
-    std::uint32_t (*async_result)(void*,std::uint64_t,void*,void**,void*);
+    const GdkQueryServices* gdk;
     std::uint32_t (*crack)(const char16_t*,void*,void*,void*);
     std::uint32_t (*open)(void*,void*,void*,void*);
     std::uint32_t (*register_request)(void*,void*);
