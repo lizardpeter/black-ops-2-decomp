@@ -12,6 +12,7 @@ on:
       - tests/dlls/differential_first_color_keyframe.py
       - tests/dlls/probe_next_bink_luma.py
       - tests/dlls/differential_bink_sequence.py
+      - tests/dlls/differential_video_sparse_residual.py
       - tools/dlls/trace_original_bik_entropy_rows.py
       - .github/workflows/bink-first-frame.yml
   workflow_dispatch:
@@ -87,6 +88,10 @@ jobs:
           python tests/dlls/probe_next_bink_luma.py \
             originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
             build/native-bink-frame0-Y.pgm build/bink_source_first_luma.so
+      - name: Differential original sparse residual bitplane and prediction routines
+        run: |
+          python tests/dlls/differential_video_sparse_residual.py \
+            originals/dlls/binkw64.dll build/bink_source_first_luma.so
       - name: Compare full 150-frame color video sequence (original vs native)
         run: |
           python tests/dlls/differential_bink_sequence.py \
