@@ -224,8 +224,9 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
     auto older=index+frames;
     if(older>=n)older-=n;
     // The original subtracts the raw index entries (including key bits),
-    // multiplies in 32 bits and zero-extends before unsigned 64-bit division.
-    const auto product=(table[frame]-table[frame-frames])*u32(h,0x560);
+    // widens both entries before 64-bit subtraction and multiplication.
+    // Original 0x1C33*: REX.W sub/imul, unsigned div, store EAX.
+    const auto product=(std::uint64_t(table[frame])-table[frame-frames])*u32(h,0x560);
     t6_bink::RealtimeSnapshot result{};
     result.last_frame=u32(h,0x10);
     result.rate_numerator=u32(h,0x14);
@@ -244,4 +245,43 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
     result.history_4f0=delta[6];
     *out=result;
     return 0;
+}
+
+extern "C" std::int64_t bink_research_get_rects(void* h,std::uint32_t surface_type,
+    t6_bink::RectAllocate allocate,void* ctx) {
+    // Original branches preceding both allocation and rectangle scanning.
+    (void)surface_type; // only the pending dirty-map path consumes this
+    if(!h || (u32(h,0x20)&0x04003000U) || u32(h,0x57C)==2)return 0;
+    const auto* dirty=read<void*>(h,0xF0);
+    const auto cached=u32(h,0x3C);
+    // Do not synthesize the not-yet-transcribed dirty-map scan.
+    if(dirty && cached==UINT32_MAX)return -1;
+    if(!read<void*>(h,0xD8)) {
+        const auto length=u32(h,0x114);
+        if(!allocate || length>UINT32_MAX-47U)return -1;
+        // 0x1C86D: both 100 values, allocation accounting before align32.
+        put(h,0x148,100);
+        put(h,0x34,100);
+        const auto requested=length+16;
+        put(h,0x528,u32(h,0x528)+requested);
+        auto* buffer=static_cast<std::uint8_t*>(allocate((requested+31U)&~31U,ctx));
+        if(!buffer)return -1; // original would fault on null allocation
+        write(h,0xD8,buffer);
+        write(h,0xE0,buffer);
+        buffer[length]=1;
+    }
+    if(!dirty) {
+        put(h,0x3C,1);
+        put(h,0x40,0);put(h,0x44,0);
+        put(h,0x48,u32(h,0x00));put(h,0x4C,u32(h,0x04));
+        return 1;
+    }
+    return cached;
+}
+
+extern "C" std::uint32_t bink_research_control_background_io(void* h,std::uint32_t control) {
+    if(!h)return UINT32_MAX;
+    const auto callback=read<t6_bink::BackgroundIO>(h,0x220);
+    if(!callback)return UINT32_MAX;
+    return callback(static_cast<std::uint8_t*>(h)+0x1F0,control);
 }

@@ -51,3 +51,19 @@ static_assert(sizeof(RealtimeSnapshot)==0x38);
 extern "C" int bink_research_get_realtime(void* handle,
     t6_bink::RealtimeSnapshot* output,std::uint32_t frames,
     t6_bink::ResidentTimer timer,void* timer_context);
+
+namespace t6_bink {
+using RectAllocate = void* (*)(std::uint32_t bytes,void* context);
+using BackgroundIO = std::uint32_t (*)(void* io_state,std::uint32_t control);
+}
+// Original BinkGetRects 0x1C820: suppressed, lazy allocation, full-frame
+// and cached branches. The pending dirty-map scan is explicitly unsupported
+// (-1). The allocator is the boundary at original RVA 0x1010; it must return
+// a writable block for the requested aligned size. No original allocation
+// is silently replaced with a generic allocator.
+extern "C" std::int64_t bink_research_get_rects(void* handle,std::uint32_t surface_type,
+    t6_bink::RectAllocate allocate,void* context);
+// Original BinkControlBackgroundIO 0x1DA60, with telemetry disabled.
+// The callback at handle+0x220 is invoked with handle+0x1F0 and the
+// original unchanged control argument. Null paths return UINT32_MAX.
+extern "C" std::uint32_t bink_research_control_background_io(void* handle,std::uint32_t control);
