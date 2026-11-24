@@ -14,6 +14,7 @@
 // Original Store binkw64.dll SHA256:
 // 10e67763420dd5c2654648d1b0242ba8aceac14ac9211c202360a3f12219af17
 #include "entropy_bit_cursor.h"
+#include "video_plane.h"
 #include "original_scan_orders.h"
 #include <array>
 #include <bit>
@@ -64,22 +65,7 @@ extern "C" void bink_video_two_color8x8(
 extern "C" void bink_video_two_color16x16(
     std::uint8_t*,std::int32_t,std::uint8_t,std::uint8_t,const std::uint8_t*);
 
-struct BinkFirstLumaTrace {
-    std::uint32_t status;
-    std::uint32_t error_x;
-    std::uint32_t error_y;
-    std::uint32_t mode;
-    std::uint32_t submode;
-    std::uint32_t type_counts[10];
-    std::uint32_t submode_counts[10];
-    std::uint32_t input_words;
-    std::uint32_t input_bits_available;
-    std::uint32_t input_cache;
-    std::uint32_t first_mode_count;
-    std::uint8_t first_mode_bytes[32];
-    std::uint32_t first_submode_count;
-    std::uint8_t first_submode_bytes[32];
-};
+
 
 namespace {
 constexpr std::uint32_t kScratchSize=8192;
