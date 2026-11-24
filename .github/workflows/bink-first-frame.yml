@@ -10,6 +10,7 @@ on:
       - reconstructed_dlls/bink/video_luma_first_keyframe.cpp
       - tests/dlls/experimental_first_luma.py
       - tests/dlls/differential_first_color_keyframe.py
+      - tests/dlls/probe_next_bink_luma.py
       - tools/dlls/trace_original_bik_entropy_rows.py
       - .github/workflows/bink-first-frame.yml
   workflow_dispatch:
@@ -77,6 +78,11 @@ jobs:
           python tests/dlls/differential_first_color_keyframe.py \
             originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
             build/bink_source_first_luma.so
+      - name: Capture next original video frame with verified source keyframe reference
+        run: |
+          python tests/dlls/probe_next_bink_luma.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            build/native-bink-frame0-Y.pgm
       - name: Preserve source-first-frame diagnostics and original oracle
         if: always()
         uses: actions/upload-artifact@v4
@@ -91,4 +97,6 @@ jobs:
             build/bink-first-color-report.json
             build/original-bink-frame0-*.pgm
             build/native-bink-frame0-*.pgm
+            build/original-bink-frame1-Y.pgm
+            build/original-bink-frame1-report.json
           if-no-files-found: warn
