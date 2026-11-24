@@ -1,5 +1,6 @@
 #pragma once
 #include "bink_index.h"
+#include "video_packet.h"
 #include <array>
 #include <span>
 #include <string>
@@ -21,6 +22,7 @@ public:
     std::span<const std::uint8_t> plane(unsigned p) const;
     // Storage dimensions (original BinkGetFrameBuffersInfo round-to-8).
     // Visible dimensions remain in header().
+    unsigned plane_count() const { return !opened_ ? 0 : (header_.flags&kAlphaFlag ? 4 : 3); }
     unsigned plane_width(unsigned p) const;
     unsigned plane_height(unsigned p) const;
     const std::string& error() const { return error_; }
@@ -30,7 +32,7 @@ private:
     HeaderPrefix header_{};
     std::vector<std::uint8_t> file_;
     std::vector<FrameSpan> index_;
-    std::array<std::array<std::vector<std::uint8_t>,3>,2> buffers_;
+    std::array<std::array<std::vector<std::uint8_t>,4>,2> buffers_;
     std::uint32_t next_=0;
     bool opened_=false, failed_=false;
     std::string error_;

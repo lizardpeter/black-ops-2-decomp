@@ -5,6 +5,7 @@
 // be used: the inner original-derived bitreader is not hardened.
 #include "../../reconstructed_dlls/bink/video_playback.h"
 #include <array>
+#include <charconv>
 #include <cstddef>
 #include <cstdint>
 #include <filesystem>
@@ -23,7 +24,7 @@ int fail(const char* reason) {
 }
 
 int main(int argc,char** argv) {
-    if(argc!=3) return fail("usage: bink_decode_video INPUT.bik OUTPUT.yuv");
+    if(argc!=3 && argc!=5) return fail("usage: bink_decode_video INPUT.bik OUTPUT.yuv [--frames N]");
     const std::filesystem::path input_path=argv[1], output_path=argv[2];
     std::error_code ec;
     if(std::filesystem::exists(output_path,ec))
@@ -41,6 +42,14 @@ int main(int argc,char** argv) {
     t6_bink::VideoPlayback playback;
     if(!playback.open(std::move(file)))return fail(playback.error().c_str());
     const auto& header=playback.header();
+    std::uint32_t frames=header.frame_count;
+    if(argc==5) {
+        if(std::string(argv[3])!="--frames")return fail("expected --frames N");
+        const std::string text(argv[4]);
+        const auto parsed=std::from_chars(text.data(),text.data()+text.size(),frames);
+        if(parsed.ec!=std::errc{} || parsed.ptr!=text.data()+text.size() ||
+           !frames || frames>header.frame_count)return fail("invalid frame count");
+    }
     // Decode to a temporary output. Never advertise a completed video
     // or replace a preexisting destination if a frame fails validation.
     auto partial=output_path;
@@ -55,12 +64,12 @@ int main(int argc,char** argv) {
         std::filesystem::remove(partial,ignored);
         return fail(reason);
     };
-    while(true) {
+    while(playback.frames_decoded()<frames) {
         const auto result=playback.decode_next();
-        if(result==t6_bink::VideoPlayback::Result::end)break;
+        if(result==t6_bink::VideoPlayback::Result::end)return abort_decode("unexpected early end");
         if(result!=t6_bink::VideoPlayback::Result::frame)
             return abort_decode(playback.error().c_str());
-        for(unsigned p=0;p<3;++p) {
+        for(unsigned p=0;p<playback.plane_count();++p) {
             const auto plane=playback.plane(p);
             output.write(reinterpret_cast<const char*>(plane.data()),
                          static_cast<std::streamsize>(plane.size()));
@@ -73,9 +82,9 @@ int main(int argc,char** argv) {
         return abort_decode("output appeared during decode");
     std::filesystem::rename(partial,output_path,ec);
     if(ec)return abort_decode("cannot finalize output");
-    std::cout<<"Native Bink video-only decode complete: "<<header.frame_count
+    std::cout<<"Native Bink video-only decode complete: "<<frames
         <<" frames, "<<header.width<<"x"<<header.height
         <<", rate "<<header.rate_numerator<<"/"<<header.rate_denominator
-        <<", native planar output Y/C1/C2 (original decoder order)\n";
+        <<", native padded planar output Y/C1/C2"<<(playback.plane_count()==4?"/A":"")<<"\n";
     return 0;
 }

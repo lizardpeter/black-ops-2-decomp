@@ -95,6 +95,8 @@ def run(dll,video,library,frames,report_path):
             "complete_matching_frames":0,"matched_planes":0,"matched_bytes":0,"frames":[]}
     report_path.parent.mkdir(parents=True,exist_ok=True)
     def save():report_path.write_text(json.dumps(result,indent=2)+"\n")
+    output=report_path.parent/"coordinator-matched.yuv"
+    output.unlink(missing_ok=True)
     for frame in range(frames):
         start,end=offsets[frame]&~1,offsets[frame+1]&~1
         assert 44+4*(count+1)<=start<end<=len(data)
@@ -194,6 +196,8 @@ def run(dll,video,library,frames,report_path):
             result["matched_planes"]+=1
             result["matched_bytes"]+=len(actual)
             pos=next_pos
+        with output.open("ab") as decoded:
+            for p in range(len(dims)):decoded.write(native[dst][p])
         result["complete_matching_frames"]+=1
         save()
         print(f"COORDINATOR PASS {video.name} frame={frame} planes={len(order)}",flush=True)

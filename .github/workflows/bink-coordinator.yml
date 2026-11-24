@@ -3,6 +3,10 @@ on:
   push:
     paths:
       - tests/dlls/differential_bink_coordinator.py
+      - reconstructed_dlls/bink/video_packet.h
+      - reconstructed_dlls/bink/video_playback.*
+      - reconstructed_dlls/bink/test_video_packet.cpp
+      - tools/dlls/native_bik_decode.cpp
       - .github/workflows/bink-coordinator.yml
   workflow_dispatch:
 permissions:
@@ -48,12 +52,25 @@ jobs:
             reconstructed_dlls/bink/video_sparse_residual.cpp \
             reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
             -o build/bink_source.so
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp \
+            reconstructed_dlls/bink/video_playback.cpp \
+            tools/dlls/native_bik_decode.cpp build/bink_source.so \
+            -Wl,-rpath,"$PWD/build" -o build/bink_decode_video
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/test_video_packet.cpp -o build/test_video_packet
+          build/test_video_packet
       - name: Compare independently routed original full-frame coordinator
         run: |
           python tests/dlls/differential_bink_coordinator.py \
             --dll originals/dlls/binkw64.dll \
             --video "originals/bik/${{ matrix.clip }}.bik" \
             --library build/bink_source.so --frames 16
+      - name: Compare reusable native playback with matched coordinator frames
+        run: |
+          build/bink_decode_video "originals/bik/${{ matrix.clip }}.bik" build/playback.yuv --frames 16
+          cmp build/playback.yuv build/coordinator-matched.yuv
       - name: Preserve coordinator diagnostic
         if: always()
         uses: actions/upload-artifact@v4

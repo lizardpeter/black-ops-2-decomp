@@ -17,6 +17,7 @@ int main(int argc,char** argv) {
     assert(player.plane(0).empty());
     assert(player.open(file));
     assert(player.frames_decoded()==0 && player.plane(0).empty());
+    assert(player.plane_count()==3);
     assert(player.decode_next()==VideoPlayback::Result::frame);
     assert(player.current_keyframe());
     std::array<std::vector<std::uint8_t>,3> first;
