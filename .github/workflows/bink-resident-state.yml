@@ -4,6 +4,7 @@ on:
     paths:
       - reconstructed_dlls/bink/resident_frame_state.*
       - tests/dlls/differential_bink_resident_state.py
+      - tests/dlls/differential_bink_video_state.py
       - .github/workflows/bink-resident-state.yml
   workflow_dispatch:
 permissions:
@@ -29,4 +30,6 @@ jobs:
           clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
             reconstructed_dlls/bink/resident_frame_state.cpp -o build/bink_resident_state.so
           python tests/dlls/differential_bink_resident_state.py \
+            originals/dlls/binkw64.dll build/bink_resident_state.so
+          python tests/dlls/differential_bink_video_state.py \
             originals/dlls/binkw64.dll build/bink_resident_state.so

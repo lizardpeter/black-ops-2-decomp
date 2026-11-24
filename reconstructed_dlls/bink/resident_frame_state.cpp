@@ -78,3 +78,123 @@ extern "C" int bink_research_next_resident_frame(void* h,
     put(h,0x27C,0);
     return result;
 }
+
+extern "C" std::int64_t bink_research_pause_video_only(void* h,std::uint32_t paused,
+    t6_bink::ResidentTimer timer,void* ctx) {
+    if(!h)return 0;
+    if(!timer || u32(h,0x144))return -1;
+    const auto now=timer(ctx);
+    const auto stamp=u32(h,0x530);
+    if(stamp && stamp!=UINT32_MAX) {
+        put(h,0x530,0);
+        put(h,0x558,u32(h,0x558)+now-stamp);
+    }
+    const auto old=u32(h,0x128);
+    put(h,0x570,0);
+    put(h,0x128,paused);
+    const auto after=timer(ctx);
+    // Preserve original zero/nonzero transitions and raw pause word.
+    if(!paused && old)
+        put(h,0x534,after-u32(h,0x58C));
+    else if(paused && !old) {
+        const auto start=u32(h,0x534);
+        put(h,0x58C,start?after-start:0);
+    }
+    return u32(h,0x128);
+}
+
+extern "C" int bink_research_prepare_video_frame(void* h,std::uint32_t now) {
+    if(!h || u32(h,0x0C)==u32(h,0x56C))return 0;
+    if(u32(h,0x144))return -1;
+    if(u32(h,0x270))put(h,0x1C,1);
+    if(u32(h,0x1C))return 0;
+    // Original 0x1A2D4/0x1A2E1 call audio toggle if resync + sound-on.
+    // Do not claim that unimplemented path; reject before further writes.
+    if(u32(h,0x578) && u32(h,0x130))return -1;
+    const auto stamp=u32(h,0x530);
+    if(stamp && stamp!=UINT32_MAX) {
+        put(h,0x530,0);
+        put(h,0x558,u32(h,0x558)+now-stamp);
+    }
+    if(u32(h,0x578)) {
+        put(h,0x578,0);
+        put(h,0x534,0);
+        put(h,0x58C,0);
+    }
+    if(u32(h,0x128)) {
+        put(h,0x534,0);
+        put(h,0x58C,0);
+    }
+    put(h,0x57C,0);
+    put(h,0x27C,1);
+    auto* dirty=read<void*>(h,0xE0);
+    if(u32(h,0x134) && read<void*>(h,0xD0) &&
+       u32(h,0x59C)!=0x6132424BU && !u32(h,0x12C) && dirty)
+        std::memset(dirty,0,u32(h,0x114)); // original 0x5E10
+    put(h,0x148,0);
+    write(h,0xE8,dirty);
+    return 1;
+}
+
+extern "C" int bink_research_finish_video_frame(void* h,std::uint32_t now,
+    t6_bink::ResidentTimer timer,void* ctx) {
+    if(!h || !timer || u32(h,0x144))return -1;
+    const auto n=u32(h,0x510),old_index=u32(h,0x514);
+    if(!n || old_index>=n || n>0x7fffffffU ||
+       (!u32(h,0x524) && !u32(h,0x560)))return -1;
+    constexpr std::size_t ring_offsets[]={0x4D8,0x4E8,0x4E0,0x4F0,0x4F8,0x500,0x508};
+    for(auto off:ring_offsets)if(!read<std::uint32_t*>(h,off))return -1;
+    // Original swaps the registered slot only if the other Y pointer exists.
+    auto* desc=read<void*>(h,0xD0);
+    if(desc) {
+        const auto slot=u32(desc,0x14);
+        if(slot>1)return -1;
+        const auto next=slot^1U;
+        if(read<void*>(desc,0x20+next*0x60))put(desc,0x14,next);
+    }
+    const auto index=old_index?old_index-1:n-1;
+    put(h,0x514,index);
+    const auto previous=u32(h,0x570);
+    if(previous) {
+        const auto elapsed=now-previous;
+        const auto worst=u32(h,0x540);
+        if(elapsed>worst) {
+            put(h,0x548,worst);
+            put(h,0x54C,u32(h,0x544));
+            put(h,0x540,elapsed);
+            put(h,0x544,u32(h,0x56C));
+        // The original compares the absolute tick (EDX), not elapsed (ECX).
+        } else if(now>u32(h,0x548)) {
+            put(h,0x548,elapsed);
+            put(h,0x54C,u32(h,0x56C));
+        }
+    }
+    put(h,0x570,now);
+    const std::uint32_t values[]={now,u32(h,0x550),u32(h,0x554),u32(h,0x558),
+        u32(h,0x284),u32(h,0x288),u32(h,0x28C)};
+    for(unsigned i=0;i<7;++i)
+        read<std::uint32_t*>(h,ring_offsets[i])[index]=values[i];
+    if(!u32(h,0x524)) {
+        const auto ms=static_cast<std::uint32_t>(std::uint64_t(u32(h,0x564))*1000/u32(h,0x560));
+        read<std::uint32_t*>(h,0x4D8)[old_index]=now-ms;
+        put(h,0x524,now);
+        put(h,0x28C,0);
+        put(h,0x288,0);
+    }
+    const auto dirty=read<void*>(h,0xE8);
+    write(h,0xF0,dirty);
+    if(dirty)put(h,0x3C,UINT32_MAX);
+    put(h,0x520,u32(h,0x520)+1);
+    if(!u32(h,0x534)) {
+        const auto tick=timer(ctx);
+        put(h,0x58C,0);
+        put(h,0x534,tick);
+        put(h,0x538,u32(h,0x520)-1);
+    }
+    put(h,0x530,UINT32_MAX);
+    put(h,0x56C,u32(h,0x0C));
+    put(h,0x10,u32(h,0x0C));
+    put(h,0x34,u32(h,0x148));
+    put(h,0x27C,0);
+    return 0;
+}

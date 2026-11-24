@@ -19,3 +19,17 @@ extern "C" int bink_research_select_resident_frame(void* handle,std::uint32_t fr
     t6_bink::ResidentTimer timer,void* timer_context);
 extern "C" int bink_research_next_resident_frame(void* handle,
     t6_bink::ResidentTimer timer,void* timer_context);
+
+// Original audio-free BinkPause (0x1BEF0); returns exact pause argument.
+// Invalid/unsupported handles are reported as -1 via the signed status.
+extern "C" std::int64_t bink_research_pause_video_only(void* handle,std::uint32_t paused,
+    t6_bink::ResidentTimer timer,void* timer_context);
+// Original prepare helper 0x1A260, video-only. Returns 1 when ready,
+// 0 for original null/duplicate/error return, -1 for unsupported state.
+extern "C" int bink_research_prepare_video_frame(void* handle,std::uint32_t now);
+// Original finish helper 0x1A380, video-only. The seven caller-owned
+// history arrays must each contain handle+0x510 uint32 elements. The
+// caller owns the 0xD8 registered descriptor and optional dirty map.
+// Returns original 0; -1 for invalid or unsupported state.
+extern "C" int bink_research_finish_video_frame(void* handle,std::uint32_t now,
+    t6_bink::ResidentTimer timer,void* timer_context);
