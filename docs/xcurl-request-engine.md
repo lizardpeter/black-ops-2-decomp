@@ -52,3 +52,7 @@ Original 0x14D04, 0x1ABB0, 0x14F84 and 0xCD4C: **2,048 local original-machine co
 ## Full response header orchestration
 
 Original 0x12228 now directly invokes reconstructed 0x14D04/0x14F84/0x1ABB0/0xCD4C, with 1,024 local original-machine comparisons. Numeric status and length, raw header/version detection, optional content type, effective URL conversion, scheme publication, error cleanup and allocation ownership compared across full object and buffer memory. WinHTTP, CRT strncmp and 0x14AC0 URL cracking are explicit boundaries. Extended Windows smoke checks actual header query, getinfo fields, header callback bytes and ownership cleanup on GET and POST; the smoke uses a test-only WinHttpCrackUrl adapter (not the original insecure URL reporting path). New Windows CI pending.
+
+## URL cracking checkpoint
+
+Translated 0x14AC0, including the complete 0x68-byte x64 URL_COMPONENTS initialization, HRESULT conversion, HTTP warning/report ownership and unsupported scheme rejection. The formatter 0x1ADA4, platform reporting 0x54F4 and WinHTTP remain explicit service boundaries. Added 1,024 original-machine cases; local compilation timed out, so verification is pending CI. The full response-header chain and Windows loopback acceptance at fc32dd67 passed CI (45434669548, 45434669794).

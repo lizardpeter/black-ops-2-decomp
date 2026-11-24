@@ -9,6 +9,8 @@ on:
       - reconstructed_dlls/xcurl/transfer_callbacks.*
       - reconstructed_dlls/xcurl/header_query.*
       - reconstructed_dlls/xcurl/response_headers.*
+      - reconstructed_dlls/xcurl/url_crack.*
+      - tests/dlls/differential_xcurl_url.py
       - tests/dlls/differential_xcurl_receive_headers.py
       - tests/dlls/differential_xcurl_header_query.py
       - tests/dlls/differential_xcurl_callbacks.py
@@ -46,7 +48,7 @@ jobs:
           pip install -q -r tests/differential/requirements.txt
           python tools/dlls/fetch.py originals/dlls
           mkdir -p build
-          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp reconstructed_dlls/xcurl/http_status.cpp reconstructed_dlls/xcurl/engine_scheduler.cpp reconstructed_dlls/xcurl/request_prepare.cpp reconstructed_dlls/xcurl/http_setup.cpp reconstructed_dlls/xcurl/session_cache.cpp reconstructed_dlls/xcurl/response_body.cpp reconstructed_dlls/xcurl/transfer_callbacks.cpp reconstructed_dlls/xcurl/header_query.cpp reconstructed_dlls/xcurl/response_headers.cpp -o build/xcurl_request.so
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp reconstructed_dlls/xcurl/http_status.cpp reconstructed_dlls/xcurl/engine_scheduler.cpp reconstructed_dlls/xcurl/request_prepare.cpp reconstructed_dlls/xcurl/http_setup.cpp reconstructed_dlls/xcurl/session_cache.cpp reconstructed_dlls/xcurl/response_body.cpp reconstructed_dlls/xcurl/transfer_callbacks.cpp reconstructed_dlls/xcurl/header_query.cpp reconstructed_dlls/xcurl/response_headers.cpp reconstructed_dlls/xcurl/url_crack.cpp -o build/xcurl_request.so
           python tests/dlls/differential_xcurl_request.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_status.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_scheduler.py originals/dlls/XCurl.dll build/xcurl_request.so
@@ -59,3 +61,4 @@ jobs:
           python tests/dlls/differential_xcurl_callbacks.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_header_query.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_receive_headers.py originals/dlls/XCurl.dll build/xcurl_request.so
+          python tests/dlls/differential_xcurl_url.py originals/dlls/XCurl.dll build/xcurl_request.so
