@@ -18,7 +18,7 @@ from capstone.x86_const import X86_REG_RIP
 
 SHA256 = "65cd27b336abecf821896611c91e8ec74d0328bd65ec11aa5ef4e2affbdd4551"
 TARGETS = (0x20120, 0x20130, 0x20140)
-KNOWN = (0x5148, 0x5364, 0x53A4)
+KNOWN = (0x5148, 0x5364, 0x53A4, 0x11978, 0x11F10)
 EXPORTS = (
     "QueryApiImpl", "InitializeApiImpl", "InitializeApiImplEx",
     "XErrorReport", "UninitializeApiImpl",
@@ -190,6 +190,7 @@ def main():
               f"direct_calls={','.join(fn['direct_calls'])}")
         print("\n".join(fn["instructions"]))
     print("\nDYNAMIC LOADER STRINGS", json.dumps(strings, sort_keys=True))
+    print("\nREFERENCED DATA STRINGS", json.dumps(data_strings, sort_keys=True))
     print("\nDYNAMIC IMPORTS")
     for dll, names in imports.items():
         selected = [name for name in names if any(key in name.lower() for key in
