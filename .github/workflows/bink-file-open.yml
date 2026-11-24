@@ -1,0 +1,49 @@
+name: Bink original Store file-backed lifecycle
+on:
+  push:
+    paths:
+      - tests/dlls/probe_bink_memory_open.py
+      - .github/workflows/bink-file-open.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  file-open:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        clip: [la_pip_seq_6, blackout_virus, yemen_mendz]
+        io_size: ['0x180000','0x10000']
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tests/differential
+            tests/dlls
+            tools/dlls
+            docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - run: |
+          python tools/dlls/fetch.py originals/dlls
+          CLIP="${{ matrix.clip }}.bik" PYTHONPATH=tests/dlls python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from verify_bink_corpus import fetch, MANIFEST
+          clips={c["name"]:c for c in json.loads(MANIFEST.read_text())["clips"]}
+          fetch(clips[os.environ["CLIP"]],Path("originals/bik"))
+          PY
+      - name: Execute actual Store file-backed flag path
+        run: |
+          python tests/dlls/probe_bink_memory_open.py \
+            originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
+            --flags 0x01104400 --io-size "${{ matrix.io_size }}" --out build/original-file-open.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bink-file-open-${{ matrix.clip }}-${{ matrix.io_size }}
+          path: build/original-file-open.json
+          if-no-files-found: warn

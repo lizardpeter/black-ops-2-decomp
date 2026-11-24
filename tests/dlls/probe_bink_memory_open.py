@@ -36,8 +36,11 @@ POINTERS=(0xd0,0xd8,0xe0,0xe8,0xf0,0x100,0x108,0x198,0x1a0,0x1c0,
           0x1c8,0x1d0,0x1d8,0x200,0x220,0x228,0x4d8,0x4e0,0x4e8,
           0x4f0,0x4f8,0x500,0x508,0x5a0)
 
-def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
+def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_size=0x180000):
     data=fixture.read_bytes()
+    file_mode=not bool(flags&0x04000000)
+    input_data=fixture.name.encode("ascii")+b"\0" if file_mode else data
+    if file_mode and (library or playback_out):raise ValueError("file mode supports lifecycle probe only")
     pin=next(c["sha256"] for c in json.loads(MANIFEST.read_text())["clips"] if c["name"]==fixture.name)
     assert hashlib.sha256(data).hexdigest()==pin
     assert hashlib.sha256(dll.read_bytes()).hexdigest()==PIN
@@ -126,6 +129,72 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
             ("ReleaseSemaphore",release_semaphore),("CloseHandle",close_handle)):
         m.on_import("kernel32.dll!"+name,callback)
         modeled.add("kernel32.dll!"+name.lower())
+    # Win32 synchronous read-only file boundary. The original Bink
+    # routines still determine all read, seek, buffer and close behavior.
+    file_events=[]
+    file_handle=0x72000000
+    file_position=0
+    file_open=False
+    last_error=0
+    def create_file(mu):
+        nonlocal file_position,file_open
+        name=string(mu,mu.reg_read(X.UC_X86_REG_RCX))
+        access=mu.reg_read(X.UC_X86_REG_EDX)
+        assert name==fixture.name and not file_open
+        assert not access&0x40000000 # GENERIC_WRITE
+        file_position=0;file_open=True
+        objects[file_handle]=["file",0,0]
+        file_events.append(["open",name,access])
+        mu.reg_write(X.UC_X86_REG_RAX,file_handle)
+    def seek_file(mu):
+        nonlocal file_position,last_error
+        assert file_open and mu.reg_read(X.UC_X86_REG_RCX)==file_handle
+        low=mu.reg_read(X.UC_X86_REG_EDX)
+        high=mu.reg_read(X.UC_X86_REG_R8)
+        method=mu.reg_read(X.UC_X86_REG_R9D)
+        offset=ctypes.c_int32(low).value if not high else ctypes.c_int64(
+            low|(struct.unpack("<I",bytes(mu.mem_read(high,4)))[0]<<32)).value
+        assert method in (0,1,2)
+        target=(0,file_position,len(data))[method]+offset
+        if target<0:
+            last_error=131;mu.reg_write(X.UC_X86_REG_RAX,0xffffffff);return
+        file_position=target
+        if high:mu.mem_write(high,struct.pack("<I",(target>>32)&0xffffffff))
+        file_events.append(["seek",method,offset,target])
+        last_error=0
+        mu.reg_write(X.UC_X86_REG_RAX,target&0xffffffff)
+    def read_file(mu):
+        nonlocal file_position,last_error
+        assert file_open and mu.reg_read(X.UC_X86_REG_RCX)==file_handle
+        output=mu.reg_read(X.UC_X86_REG_RDX)
+        count=mu.reg_read(X.UC_X86_REG_R8D)
+        got=mu.reg_read(X.UC_X86_REG_R9)
+        overlapped=struct.unpack("<Q",bytes(mu.mem_read(mu.reg_read(X.UC_X86_REG_RSP)+0x28,8)))[0]
+        assert not overlapped,"unmodeled overlapped file read"
+        assert count<=ARENA_SIZE
+        payload=data[file_position:file_position+count]
+        if payload:mu.mem_write(output,payload)
+        if got:mu.mem_write(got,struct.pack("<I",len(payload)))
+        file_events.append(["read",file_position,count,len(payload)])
+        file_position+=len(payload);last_error=0
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    def last_error_get(mu):mu.reg_write(X.UC_X86_REG_RAX,last_error)
+    def last_error_set(mu):
+        nonlocal last_error
+        last_error=mu.reg_read(X.UC_X86_REG_ECX)
+    def close_with_file(mu):
+        nonlocal file_open
+        handle=mu.reg_read(X.UC_X86_REG_RCX)
+        if handle==file_handle:
+            assert file_open
+            file_open=False;file_events.append(["close"])
+        close_handle(mu)
+    if file_mode:
+        for name,callback in (("CreateFileA",create_file),("SetFilePointer",seek_file),
+                 ("ReadFile",read_file),("GetLastError",last_error_get),
+                 ("SetLastError",last_error_set),("CloseHandle",close_with_file)):
+            m.on_import("kernel32.dll!"+name,callback)
+            modeled.add("kernel32.dll!"+name.lower())
     cursor=ARENA
     allocations=[]
     freed=[]
@@ -152,9 +221,21 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
         ticks.append(tick)
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
-            "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events}
-    ret,bufs,global_writes,_=m.call(img.exports["BinkOpen"],[data,flags],"uint64",
-                       fakes={img.base+0x1010:alloc,img.base+0x1FF00:clock},
+            "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events,
+            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events}
+    # Store caller explicitly sets zero sound tracks; file caller also
+    # supplies its computed buffer size. Replay original setter writes.
+    pre={}
+    if file_mode:
+        r,_,pre,_=m.call(img.exports["BinkSetIOSize"],[io_size],"void")
+        assert r is None
+    def setup_options(w):
+        for address,value in pre.items():w.write(address,value)
+    r,_,writes,_=m.call(img.exports["BinkSetSoundTrack"],[0,0],"void",setup=setup_options)
+    assert r is None
+    pre.update(writes)
+    ret,bufs,global_writes,_=m.call(img.exports["BinkOpen"],[input_data,flags],"uint64",
+                       setup=setup_options,fakes={img.base+0x1010:alloc,img.base+0x1FF00:clock},
                        limit=60_000_000)
     result["original_return"]=ret
     result["imports_called"]=m.imports_called
@@ -182,7 +263,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
     index=bytes(m.mu.mem_read(actual_index,(n+1)*4))
     expected_index=data[44:44+(n+1)*4]
     result["index_matches"]=index==expected_index
-    result["input_unchanged"]=bool(bufs) and bufs[0]==data
+    result["input_unchanged"]=bool(bufs) and bufs[0]==input_data
     result["frame_metadata_matches"]=(u32(0)==words[5] and u32(4)==words[6]
         and u32(8)==n and u32(0x0c)==1 and u32(0x14)==words[7] and u32(0x18)==words[8])
     # Do not bless an emulated path which depended on an unmodeled OS call.
@@ -201,7 +282,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
     # Replay original image globals, retaining actual original allocations.
     # Machine.call resets its input heap, so restore the unchanged movie bytes.
     def setup_close(w):
-        m.mu.mem_write(input_base,data)
+        m.mu.mem_write(input_base,input_data)
         for address,value in global_writes.items():w.write(address,value)
     def free(mu):
         raw=mu.reg_read(X.UC_X86_REG_RCX)
@@ -218,6 +299,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
     result["close_verified"]=(closed is None and sorted(result["freed_offsets"])==
         sorted(a["offset"] for a in allocations) and
         all(name.lower() in modeled for name in m.imports_called))
+    if file_mode:result["close_verified"]=result["close_verified"] and not file_open
     result["verified"]=result["verified"] and result["close_verified"]
     # Compare the source allocation and known initial fields against the
     # real initializer, not against an independently fabricated handle.
@@ -368,11 +450,12 @@ def main():
     p.add_argument("--library",type=Path)
     p.add_argument("--playback-out",type=Path)
     p.add_argument("--async-playback",action="store_true")
+    p.add_argument("--io-size",type=lambda s:int(s,0),default=0x180000)
     a=p.parse_args()
     flags=a.flags
     if flags is None:
         flags=0x04104400 if a.playback_out else FLAGS
-    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback)
+    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback,a.io_size)
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)
