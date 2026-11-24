@@ -1,0 +1,59 @@
+name: Bink static native API integration
+on:
+  push:
+    paths:
+      - reconstructed_dlls/bink/**
+      - .github/workflows/bink-native-api.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native-api:
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch pinned video fixtures (no original DLL)
+        run: python tools/dlls/fetch_bik_fixtures.py originals/bik
+      - name: Compile and link native static library
+        run: |
+          cmake -S reconstructed_dlls/bink -B build/native -DCMAKE_BUILD_TYPE=Release
+          cmake --build build/native --config Release --parallel 2
+      - name: Exercise public ABI and compare source session output
+        shell: python
+        run: |
+          import pathlib, subprocess, hashlib
+          root=pathlib.Path("build/native")
+          def exe(name):
+              return next(p for p in root.rglob(name+"*") if p.is_file() and p.name in (name,name+".exe"))
+          api=exe("test_native_api")
+          session=exe("test_native_session")
+          def run(ex,clip,out,*args):
+              subprocess.run([str(ex),str(clip),str(out),*args],check=True)
+              return hashlib.sha256(out.read_bytes()).hexdigest()
+          clip=pathlib.Path("originals/bik/la_pip_seq_6.bik")
+          base=run(session,clip,root/"base.yuv")
+          for args in [(),("--async",),("--file",),("--file","--async")]:
+              assert run(api,clip,root/"api.yuv",*args)==base
+          clip=pathlib.Path("originals/bik/blackout_virus.bik")
+          base=run(session,clip,root/"base.yuv","--all")
+          for args in [("--stream",),("--stream","--async")]:
+              assert run(api,clip,root/"api.yuv",*args)==base
+          print("All native API pixel hashes match; no original DLL downloaded")
+      - name: Audit Windows import table
+        if: runner.os == 'Windows'
+        shell: python
+        run: |
+          import pathlib, subprocess, sys
+          subprocess.run([sys.executable,"-m","pip","install","pefile"],check=True)
+          import pefile
+          p=next(pathlib.Path("build/native").rglob("test_native_api.exe"))
+          imports=[i.dll.decode() for i in pefile.PE(str(p)).DIRECTORY_ENTRY_IMPORT]
+          print(imports)
+          assert not any("bink" in i.lower() or "xcurl" in i.lower() for i in imports)
