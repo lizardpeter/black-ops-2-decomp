@@ -23,3 +23,7 @@ Reconstructed disabled-ETW status routing including send/write completion, heade
 ## Request preparation (0xC6A0, 0xD174, 0x11780, 0xCF90)
 
 1,024/1,024 local original-machine differential cases, 256 per function. Recovered transfer reset and tagged releases, URL/default/port preparation control flow, asynchronous task context construction and launch, cancellation/error behavior, and the top-level easy start chain. Original uninitialized aggregate padding is explicitly zeroed and excluded from equivalence; all other bytes and call traces compared. URL conversion/copy and task submission remain explicit boundaries; original start callback 0x11F10 is not yet translated. Next prioritize URL conversion 0x10EA4 and 0x94AC, then connection and request open, real task queue, header/body delivery and WinHTTP integration.
+
+## HTTP setup (0x10748, 0x131A8, 0x137B8, 0x12FD8) and UTF-16 copy (0x94AC)
+
+Actual local original-machine tests passed 1,536 setup cases and 256 copy cases. Original WinHTTP API order, method/port selection, session acquisition arguments, hostname temporary NUL and restoration, secure flag, streaming upload retry on 87, request options and timeout/error behavior verified. UTF-16 copy includes terminator, tag 7 allocation, failure output and original non-freeing ownership. The session acquisition 0x15F40, diagnostic and WinHTTP APIs are explicit boundaries; not end-to-end HTTP. Next: session cache 0x15F40 and complete request init 0x11478/0x11F10 plus header/body helpers.
