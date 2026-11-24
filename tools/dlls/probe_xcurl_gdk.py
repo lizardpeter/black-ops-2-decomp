@@ -62,6 +62,10 @@ def target_references(pe, table, md):
                 found[target].append((start, end, ins))
     return found
 
+def read_cstring(pe, rva, limit=256):
+    blob = pe.get_data(rva, limit)
+    return blob.split(b"\\0", 1)[0].decode("utf-8", "backslashreplace")
+
 def raw_strings(data, pe, needles):
     results = {}
     for label, needle in needles.items():
@@ -137,6 +141,9 @@ def main():
             "instructions": [fmt(insn, base) for insn in ins],
         }
 
+    data_strings = {hex(rva): read_cstring(pe, rva) for rva in
+                    (0x1FF78, 0x1FF90, 0x1FFA0, 0x1FFB8, 0x1FFD0, 0x1FFE0, 0x20378)}
+
     known = {}
     for rva in KNOWN:
         start, end = containing(table, rva)
@@ -163,7 +170,7 @@ def main():
         "exception_function_count": len(table),
         "interface_data": targets, "code_references": xrefs,
         "interface_reference_functions": referenced,
-        "known_gdk_functions": known, "imports": imports,
+        "known_gdk_functions": known, "data_strings": data_strings, "imports": imports,
         "dynamic_loader_strings": strings,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
