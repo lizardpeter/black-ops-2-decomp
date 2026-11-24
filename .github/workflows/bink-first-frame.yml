@@ -12,6 +12,7 @@ on:
       - tests/dlls/differential_first_color_keyframe.py
       - tests/dlls/probe_next_bink_luma.py
       - tests/dlls/differential_bink_sequence.py
+      - tests/differential/harness.py
       - tests/dlls/differential_video_sparse_residual.py
       - tools/dlls/trace_original_bik_entropy_rows.py
       - tools/dlls/native_bik_decode.cpp
@@ -160,6 +161,27 @@ jobs:
             --report build/haiti_int_1c/bink-sequence-report.json
           build/bink_decode_video originals/bik/haiti_int_1c.bik build/haiti_int_1c/standalone-bink-sequence.yuv
           cmp build/haiti_int_1c/standalone-bink-sequence.yuv build/haiti_int_1c/native-bink-sequence.yuv
+      - name: Verify 1280x720 Store video (first 16 frames)
+        if: always()
+        run: |
+          python tests/dlls/differential_bink_sequence.py \
+            originals/dlls/binkw64.dll originals/bik/blackout_virus.bik \
+            build/bink_source_first_luma.so --frames 16 \
+            --report build/blackout_virus/bink-sequence-report.json
+      - name: Verify padded 640x380 Store video (first 16 frames)
+        if: always()
+        run: |
+          python tests/dlls/differential_bink_sequence.py \
+            originals/dlls/binkw64.dll originals/bik/blackout_lockout.bik \
+            build/bink_source_first_luma.so --frames 16 \
+            --report build/blackout_lockout/bink-sequence-report.json
+      - name: Verify odd 450x337 Store video (first 16 frames)
+        if: always()
+        run: |
+          python tests/dlls/differential_bink_sequence.py \
+            originals/dlls/binkw64.dll originals/bik/karma_pip_helipad.bik \
+            build/bink_source_first_luma.so --frames 16 \
+            --report build/karma_pip_helipad/bink-sequence-report.json
       - name: Preserve source-first-frame diagnostics and original oracle
         if: always()
         uses: actions/upload-artifact@v4
@@ -188,4 +210,10 @@ jobs:
             build/yemen_drone_cam/*.pgm
             build/haiti_int_1c/*.json
             build/haiti_int_1c/*.pgm
+            build/blackout_virus/*.json
+            build/blackout_virus/*.pgm
+            build/blackout_lockout/*.json
+            build/blackout_lockout/*.pgm
+            build/karma_pip_helipad/*.json
+            build/karma_pip_helipad/*.pgm
           if-no-files-found: warn

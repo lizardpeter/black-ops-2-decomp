@@ -528,3 +528,18 @@ CLI output. It does not claim original BINK handle ABI compatibility.
 The expanded CI tests the complete 761-frame Haiti clip and standalone
 output as well as playback reset and end-state behavior; those expanded
 results remain pending until the new workflow succeeds.
+
+[CI run 45309320585](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45309320585)
+completed successfully, including all 761 Haiti frames, standalone byte
+comparison and the playback lifecycle test. Verified full sequences now
+cover 1,197 frames / 3,591 planes / 211,181,568 exact decoded bytes.
+
+The next experimental expansion removes the research-only 512x512 and
+32-KiB limits, retains original round-to-eight buffer geometry, increases
+independent entropy storage, and gives the x64 oracle an opt-in 4 MiB
+argument arena. Three separately SHA-pinned Store fixtures cover 1280x720,
+640x380 and 450x337. Each has an independent first-16-frame CI stage;
+these new geometries are NOT considered verified before the differential
+passes. Native output uses padded storage planes; visible dimensions are
+still the header dimensions. A bottom-edge 16x16 write is rejected until
+its behavior is verified.

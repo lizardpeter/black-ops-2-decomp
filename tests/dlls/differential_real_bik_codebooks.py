@@ -122,6 +122,6 @@ def main():
               f"luma split={split}, 23 REAL codebook mappings and cursors PASS, "
               f"consumed {last} bits, widths={selected}")
     print(f"Real BO2 video first-keyframe Huffman init differential PASS: "
-          f"{compared} chained codebooks across three SHA-pinned media files")
+          f"{compared} chained codebooks across {len(FIXTURES)} SHA-pinned media files")
 
 if __name__=="__main__":main()

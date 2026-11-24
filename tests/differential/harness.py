@@ -221,14 +221,18 @@ CRT_MODELS_X64 = {"vcruntime140.dll!memset": _crt_memset, "vcruntime140.dll!memc
 
 
 class Machine:
-    def __init__(self, *images: Image):
+    def __init__(self, *images: Image, large_heap=False):
         self.images = images
         self.x64 = images[0].x64
+        # Opt-in for large x64 video-plane buffers; preserve all old addresses.
+        if large_heap and not self.x64:
+            raise ValueError("large argument arena is x64-only")
+        self.heap, self.heap_size = (0x32000000, 0x00400000) if large_heap else (HEAP, HEAP_SIZE)
         mu = self.mu = Uc(UC_ARCH_X86, UC_MODE_64 if self.x64 else UC_MODE_32)
         for img in images:
             mu.mem_map(img.base, img.size)
             mu.mem_write(img.base, img.data[:img.size])
-        for va, size in ((STACK, STACK_SIZE), (HEAP, HEAP_SIZE), (SENTINEL, 0x1000), (TEB, TEB_SIZE),
+        for va, size in ((STACK, STACK_SIZE), (self.heap, self.heap_size), (SENTINEL, 0x1000), (TEB, TEB_SIZE),
                          (TLS_BLOCK, TLS_SIZE), (STUBS, STUBS_SIZE), (SCRATCH, SCRATCH_SIZE),
                          (OBJECTS, OBJECTS_SIZE)):
             mu.mem_map(va, size)
@@ -467,7 +471,7 @@ class Machine:
         Returns (value, [buffer contents after the call], {address: byte} written in mapped images, [observed]).
         A crash returns ("fault: ...", [], writes, observed)."""
         mu = self.mu
-        mu.mem_write(HEAP, b"\0" * HEAP_SIZE)
+        mu.mem_write(self.heap, b"\0" * self.heap_size)
         mu.mem_write(SCRATCH, b"\0" * SCRATCH_SIZE)
         mu.mem_write(OBJECTS, b"\0" * OBJECTS_SIZE)
         # the stack the frames use starts from the same bytes for every call, so a local the code reads before writing
@@ -483,9 +487,11 @@ class Machine:
             self._hook_at(a)
         if setup:
             setup(Writer(self))
-        heap, bufs, slots = HEAP, [], []  # slot: (kind, value) with kind int, q, f, d
+        heap, bufs, slots = self.heap, [], []  # slot: (kind, value) with kind int, q, f, d
         for a in args:
             if isinstance(a, (bytes, bytearray)):
+                if heap + _page(len(a) + 16) > self.heap + self.heap_size:
+                    raise ValueError("argument buffers exceed oracle heap")
                 mu.mem_write(heap, bytes(a))
                 bufs.append((heap, len(a)))
                 slots.append(("int", heap))

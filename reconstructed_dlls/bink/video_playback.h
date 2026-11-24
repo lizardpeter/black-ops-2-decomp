@@ -19,6 +19,8 @@ public:
     std::uint32_t frames_decoded() const { return next_; }
     bool current_keyframe() const;
     std::span<const std::uint8_t> plane(unsigned p) const;
+    // Storage dimensions (original BinkGetFrameBuffersInfo round-to-8).
+    // Visible dimensions remain in header().
     unsigned plane_width(unsigned p) const;
     unsigned plane_height(unsigned p) const;
     const std::string& error() const { return error_; }

@@ -68,7 +68,9 @@ extern "C" void bink_video_two_color16x16(
 
 
 namespace {
-constexpr std::uint32_t kScratchSize=8192;
+// Largest Store luma row is 160 blocks; allow the original capacity plus
+// alignment/lookahead tail. Each stream has independent storage.
+constexpr std::uint32_t kScratchSize=16384;
 enum :std::size_t {
     kMode=0,kSubmode=1,kColor=2,kPattern=3,
     kMotionX=4,kMotionY=5,kDC=6,kOtherDC=7,kRLE=8,kNumStreams=9
@@ -107,8 +109,8 @@ t6_bink::ByteEntropyState make_stream(
 // diagnostic failure; no completion should be claimed in that case.
 // The plane's start and end are byte offsets into the compressed frame.
 // Return the original-style next-word position in report->input_words.
-// This remains restricted to verified keyframe modes and 16-aligned
-// planes, not a hardened parser for untrusted media.
+// Padded 8-aligned planes up to the largest Store geometry.
+// Larger and odd-sized video compatibility remains subject to differential CI.
 extern "C" int bink_research_decode_video_plane(
         const std::uint8_t* compressed,std::uint32_t compressed_bytes,
         std::uint32_t start,std::uint32_t split,
@@ -119,9 +121,9 @@ extern "C" int bink_research_decode_video_plane(
     if (!report) return -1;
     *report=BinkFirstLumaTrace{};
     if (!compressed || !output || stride<width ||
-        width<16 || height<16 || width>512 || height>512 ||
-        (width&15U)!=0U || (height&15U)!=0U ||
-        compressed_bytes<4 || compressed_bytes>32768U ||
+        width<8 || height<8 || width>1280 || height>720 ||
+        (width&7U)!=0U || (height&7U)!=0U ||
+        compressed_bytes<4 || compressed_bytes>262144U ||
         (compressed_bytes&3U)!=0U) {
         report->status=1;return 1;
     }
@@ -373,6 +375,9 @@ extern "C" int bink_research_decode_video_plane(
                     subtype=*stream[kSubmode].current++;
                     if(subtype<10U)++report->submode_counts[subtype];
                     else return update_report(5,x,y,mode,subtype);
+                    // Do not write a 16x16 block beyond the allocated plane.
+                    // A valid stream should not dispatch one on an 8-row tail.
+                    if(y+16>height)return update_report(9,x,y,mode,subtype);
                     if(subtype==3U) {
                         std::array<std::uint8_t,64> tile{};
                         if(!run_pixels(tile))return update_report(8,x,y,mode,subtype);

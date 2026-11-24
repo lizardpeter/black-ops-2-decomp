@@ -24,11 +24,10 @@ bool VideoPlayback::open(std::vector<std::uint8_t> file) {
        !validate_header_prefix(file.data(),file.size(),&h))
         return fail("invalid original Bink header");
     if(h.magic!=0x694B4942U || h.audio_track_count!=0 || h.flags!=0 ||
-       h.width<32 || h.width>512 || h.height<32 || h.height>512 ||
-       (h.width&31U) || (h.height&31U) ||
+       h.width<16 || h.width>1280 || h.height<16 || h.height>720 ||
        std::uint64_t(h.payload_bytes)+8!=file.size() ||
-       h.largest_frame_bytes>32768)
-        return fail("not a supported 32-aligned BIKi video-only fixture");
+       h.largest_frame_bytes>262144)
+        return fail("not a supported Store BIKi video-only fixture");
     std::vector<FrameSpan> index(h.frame_count);
     if(!read_video_only_index(file.data(),file.size(),index.data(),index.size(),&h) ||
        !index.front().keyframe || index.back().end!=file.size())
@@ -36,7 +35,7 @@ bool VideoPlayback::open(std::vector<std::uint8_t> file) {
     // Validate every packet span before any call into the source bitreader.
     for(const auto& span:index) {
         const auto bytes=span.end-span.start;
-        if(bytes<8 || bytes>32768 || (bytes&3U))
+        if(bytes<8 || bytes>262144 || (bytes&3U))
             return fail("unsupported packet length");
         const auto split=le32(file.data()+span.start);
         if(split<=4 || split>=bytes || (split&3U))
@@ -49,10 +48,10 @@ bool VideoPlayback::open(std::vector<std::uint8_t> file) {
     return reset();
 }
 unsigned VideoPlayback::plane_width(unsigned p) const {
-    return !opened_ || p>=3 ? 0 : (p==0 ? header_.width : header_.width/2);
+    return !opened_ || p>=3 ? 0 : ((p==0 ? header_.width : (header_.width+1)/2)+7U)&~7U;
 }
 unsigned VideoPlayback::plane_height(unsigned p) const {
-    return !opened_ || p>=3 ? 0 : (p==0 ? header_.height : header_.height/2);
+    return !opened_ || p>=3 ? 0 : ((p==0 ? header_.height : (header_.height+1)/2)+7U)&~7U;
 }
 bool VideoPlayback::reset() {
     if(!opened_)return fail("no opened video");
