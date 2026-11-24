@@ -1,0 +1,63 @@
+name: Bink Store import-compatible validation
+on:
+  push:
+    paths:
+      - reconstructed_dlls/bink/**
+      - tools/dlls/audit_store_bink_link.py
+      - .github/workflows/bink-store-validation.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  store-validation:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/bink
+            tools
+            docs
+            target.toml
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install pefile
+          python tools/dlls/fetch_bik_fixtures.py originals/bik
+          python tools/fetch_originals.py t6mp_msstore originals --only exe
+          python tools/fetch_originals.py t6sp_msstore originals --only exe
+          python tools/fetch_originals.py t6zm_msstore originals --only exe
+      - name: Compile static and import-compatible validation builds
+        run: |
+          cmake -S reconstructed_dlls/bink -B build/store -T ClangCL -A x64 -DT6_BINK_STORE_VALIDATION=ON
+          cmake --build build/store --config Release --parallel 2
+      - name: Verify native imported calls and static calls have identical output
+        shell: python
+        run: |
+          import pathlib,subprocess,hashlib
+          root=pathlib.Path("build/store")
+          static=next(root.rglob("test_native_api.exe"))
+          dynamic=next(root.rglob("test_store_import_client.exe"))
+          dll=dynamic.parent/"binkw64.dll"
+          assert dll.is_file()
+          for clip,modes in [("la_pip_seq_6",[(),("--async",),("--file",),("--file","--async")]),
+                             ("blackout_virus",[("--stream",),("--stream","--async")])]:
+              for args in modes:
+                  a=root/"static.yuv"; b=root/"dynamic.yuv"
+                  for exe,out in [(static,a),(dynamic,b)]:
+                      subprocess.run([str(exe),"originals/bik/"+clip+".bik",str(out),*args],check=True,timeout=120)
+                  for suffix in ("",".rects"):
+                      assert hashlib.sha256(pathlib.Path(str(a)+suffix).read_bytes()).digest()==hashlib.sha256(pathlib.Path(str(b)+suffix).read_bytes()).digest()
+          subprocess.run(["python","tools/dlls/audit_store_bink_link.py","--module",str(dll),
+              "--static-client",str(static),"--dynamic-client",str(dynamic),"--originals","originals",
+              "--out",str(root/"store-link-audit.json")],check=True)
+      - name: Preserve source-built validation module and audit only
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-bink-store-validation-x64
+          path: |
+            build/store/store-validation/Release/binkw64.dll
+            build/store/store-validation/Release/test_store_import_client.exe
+            build/store/store-link-audit.json
+          if-no-files-found: error

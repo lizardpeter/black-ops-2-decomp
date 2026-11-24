@@ -1,0 +1,20 @@
+LIBRARY binkw64
+EXPORTS
+    BinkClose
+    BinkControlBackgroundIO
+    BinkDoFrame
+    BinkDoFrameAsync
+    BinkDoFrameAsyncWait
+    BinkGetError
+    BinkGetFrameBuffersInfo
+    BinkGetRealtime
+    BinkGetRects
+    BinkNextFrame
+    BinkPause
+    BinkRegisterFrameBuffers
+    BinkRequestStopAsyncThread
+    BinkSetIOSize
+    BinkSetMemory
+    BinkSetSoundTrack
+    BinkStartAsyncThread
+    BinkWaitStopAsyncThread

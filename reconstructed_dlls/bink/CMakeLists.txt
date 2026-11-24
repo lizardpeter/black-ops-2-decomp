@@ -56,3 +56,23 @@ if(T6_BINK_TRACE_BITS)
     add_executable(test_native_plane_trace test_native_plane_trace.cpp)
     target_link_libraries(test_native_plane_trace PRIVATE t6_native_bink)
 endif()
+
+# Optional real-game caller validation only. The final rebuilt EXE
+# links t6_native_bink directly; this target is not the final dependency-free build.
+option(T6_BINK_STORE_VALIDATION "Build source-only Store import-compatible validation DLL" OFF)
+if(T6_BINK_STORE_VALIDATION)
+    if(NOT WIN32 OR NOT CMAKE_SIZEOF_VOID_P EQUAL 8)
+        message(FATAL_ERROR "Store validation target requires Windows x64")
+    endif()
+    add_library(t6_bink_store_validation SHARED store_validation.cpp store_bink_exports.def)
+    target_link_libraries(t6_bink_store_validation PRIVATE t6_native_bink)
+    set_target_properties(t6_bink_store_validation PROPERTIES OUTPUT_NAME binkw64
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/store-validation"
+        ARCHIVE_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/store-validation")
+    add_executable(test_store_import_client test_native_api.cpp)
+    # Test client resolves all Bink names through the new import library.
+    target_link_libraries(test_store_import_client PRIVATE t6_bink_store_validation)
+    target_compile_options(test_store_import_client PRIVATE /UNDEBUG)
+    set_target_properties(test_store_import_client PROPERTIES
+        RUNTIME_OUTPUT_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/store-validation")
+endif()
