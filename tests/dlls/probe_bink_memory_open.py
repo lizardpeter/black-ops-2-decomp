@@ -36,7 +36,7 @@ POINTERS=(0xd0,0xd8,0xe0,0xe8,0xf0,0x100,0x108,0x198,0x1a0,0x1c0,
           0x1c8,0x1d0,0x1d8,0x200,0x220,0x228,0x4d8,0x4e0,0x4e8,
           0x4f0,0x4f8,0x500,0x508,0x5a0)
 
-def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_size=0x180000):
+def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_size=0x180000,defer_worker=False):
     data=fixture.read_bytes()
     file_mode=not bool(flags&0x04000000)
     input_data=fixture.name.encode("ascii")+b"\0" if file_mode else data
@@ -170,6 +170,52 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         mu.reg_write(X.UC_X86_REG_RAX,0)
     m.on_import("kernel32.dll!GetEnvironmentVariableA",environment)
     modeled.add("kernel32.dll!getenvironmentvariablea")
+    # Scheduler boundary: original creation is CREATE_SUSPENDED. This
+    # optional startup-only oracle postpones actual worker execution.
+    # It must NEVER report original Close or worker execution as verified.
+    threads={}
+    thread_events=[]
+    current_priority=0
+    def create_thread(mu):
+        rsp=mu.reg_read(X.UC_X86_REG_RSP)
+        flags,thread_id=struct.unpack("<QQ",bytes(mu.mem_read(rsp+0x28,16)))
+        start=mu.reg_read(X.UC_X86_REG_R8)
+        argument=mu.reg_read(X.UC_X86_REG_R9)
+        assert flags==4 and img.base<=start<img.base+img.size
+        handle=0x73000000+len(threads)*16
+        threads[handle]={"entry":start-img.base,"argument":argument,"suspended":1,"priority":0}
+        objects[handle]=["thread",0,0]
+        if thread_id:mu.mem_write(thread_id,struct.pack("<I",100+len(threads)))
+        thread_events.append(["create",hex(start-img.base),hex(argument),flags])
+        mu.reg_write(X.UC_X86_REG_RAX,handle)
+    def resume_thread(mu):
+        h=mu.reg_read(X.UC_X86_REG_RCX)
+        t=threads[h]
+        old=t["suspended"]
+        if old:t["suspended"]-=1
+        thread_events.append(["resume",old])
+        mu.reg_write(X.UC_X86_REG_RAX,old)
+    def get_current_thread(mu):mu.reg_write(X.UC_X86_REG_RAX,0xfffffffffffffffe)
+    def get_thread_priority(mu):
+        h=mu.reg_read(X.UC_X86_REG_RCX)
+        mu.reg_write(X.UC_X86_REG_RAX,threads[h]["priority"] if h in threads else current_priority)
+    def set_thread_priority(mu):
+        nonlocal current_priority
+        h=mu.reg_read(X.UC_X86_REG_RCX)
+        p=ctypes.c_int32(mu.reg_read(X.UC_X86_REG_EDX)).value
+        if h in threads:threads[h]["priority"]=p
+        else:current_priority=p
+        thread_events.append(["priority",p])
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    def get_current_thread_id(mu):mu.reg_write(X.UC_X86_REG_RAX,1)
+    def sleep(mu):thread_events.append(["sleep",mu.reg_read(X.UC_X86_REG_ECX)])
+    if defer_worker:
+        assert file_mode and not library and not playback_out
+        for name,callback in (("CreateThread",create_thread),("ResumeThread",resume_thread),
+                ("GetCurrentThread",get_current_thread),("GetCurrentThreadId",get_current_thread_id),
+                ("GetThreadPriority",get_thread_priority),("SetThreadPriority",set_thread_priority),("Sleep",sleep)):
+            m.on_import("kernel32.dll!"+name,callback)
+            modeled.add("kernel32.dll!"+name.lower())
     # Win32 synchronous read-only file boundary. The original Bink
     # routines still determine all read, seek, buffer and close behavior.
     file_events=[]
@@ -263,7 +309,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
             "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events,
-            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events,"tls_events":tls_events,"env_queries":env_queries}
+            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events,"tls_events":tls_events,"env_queries":env_queries,"thread_events":thread_events,"deferred_worker":defer_worker}
     # Store caller explicitly sets zero sound tracks; file caller also
     # supplies its computed buffer size. Replay original setter writes.
     pre={}
@@ -309,6 +355,21 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         and u32(8)==n and u32(0x0c)==1 and u32(0x14)==words[7] and u32(0x18)==words[8])
     # Do not bless an emulated path which depended on an unmodeled OS call.
     result["verified"]=result["index_matches"] and result["input_unchanged"] and result["frame_metadata_matches"] and not result["unmodeled_imports"]
+    if defer_worker:
+        # Capture the actual ring state and original function-pointer
+        # table before the worker is scheduled. Do not call Close with an
+        # intentionally unexecuted thread.
+        io=raw[0x1F0:0x1F0+0x110]
+        result["io_words"]={hex(i):struct.unpack_from("<I",io,i)[0]
+            for i in range(0x80,0xC0,4)}
+        result["io_words"].update({hex(i):struct.unpack_from("<I",io,i)[0]
+            for i in (0xD0,0xE8,0xEC,0xF0,0xF4,0xF8,0x108)})
+        result["io_pointers"]={hex(i):normalize(struct.unpack_from("<Q",io,i)[0])
+            for i in tuple(range(0,0x80,8))+(0xC0,0xC8,0xD8,0xE0,0x100)}
+        result["startup_verified"]=result["verified"] and bool(threads) and all(not t["suspended"] for t in threads.values())
+        result["close_verified"]=False
+        result["verified"]=result["startup_verified"]
+        return result
     descriptor=p64(0xd0)
     if descriptor:
         desc=bytes(m.mu.mem_read(descriptor,0xd8))
@@ -542,15 +603,17 @@ def main():
     p.add_argument("--playback-out",type=Path)
     p.add_argument("--async-playback",action="store_true")
     p.add_argument("--io-size",type=lambda s:int(s,0),default=0x180000)
+    p.add_argument("--defer-worker",action="store_true")
     a=p.parse_args()
     flags=a.flags
     if flags is None:
         flags=0x04104400 if a.playback_out else FLAGS
-    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback,a.io_size)
+    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback,a.io_size,a.defer_worker)
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)
     mode="file-backed" if result["file_mode"] else "memory-backed"
     if not result["verified"]:raise SystemExit(f"Original {mode} lifecycle probe not yet verified")
-    print(f"Original {mode} BinkOpen/BinkClose PASS")
+    if a.defer_worker:print("Original streaming startup PASS (worker deferred, close NOT tested)")
+    else:print(f"Original {mode} BinkOpen/BinkClose PASS")
 if __name__=="__main__":main()
