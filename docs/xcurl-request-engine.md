@@ -19,3 +19,7 @@ Reconstructed disabled-ETW status routing including send/write completion, heade
 ## Core scheduler (0x18F68, 0x19344, 0x1925C, 0x19514, 0x19614)
 
 1,280/1,280 local original-machine comparisons, 256 each: global admission reservation including wraparound, race with cancellation between reservation and admission, list movement, generation-based active progress, abort sweep, single-event wait and wakeup arbitration. Windows synchronization and actual request launch/progress remain explicit boundaries. Source joins the static target; this is not a completed network ABI.
+
+## Request preparation (0xC6A0, 0xD174, 0x11780, 0xCF90)
+
+1,024/1,024 local original-machine differential cases, 256 per function. Recovered transfer reset and tagged releases, URL/default/port preparation control flow, asynchronous task context construction and launch, cancellation/error behavior, and the top-level easy start chain. Original uninitialized aggregate padding is explicitly zeroed and excluded from equivalence; all other bytes and call traces compared. URL conversion/copy and task submission remain explicit boundaries; original start callback 0x11F10 is not yet translated. Next prioritize URL conversion 0x10EA4 and 0x94AC, then connection and request open, real task queue, header/body delivery and WinHTTP integration.

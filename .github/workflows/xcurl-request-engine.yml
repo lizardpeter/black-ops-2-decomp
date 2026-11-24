@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - reconstructed_dlls/xcurl/request_engine.*
+      - reconstructed_dlls/xcurl/request_prepare.*
+      - tests/dlls/differential_xcurl_prepare.py
       - reconstructed_dlls/xcurl/http_status.*
       - reconstructed_dlls/xcurl/engine_scheduler.*
       - tests/dlls/differential_xcurl_scheduler.py
@@ -30,7 +32,8 @@ jobs:
           pip install -q -r tests/differential/requirements.txt
           python tools/dlls/fetch.py originals/dlls
           mkdir -p build
-          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp reconstructed_dlls/xcurl/http_status.cpp reconstructed_dlls/xcurl/engine_scheduler.cpp -o build/xcurl_request.so
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp reconstructed_dlls/xcurl/http_status.cpp reconstructed_dlls/xcurl/engine_scheduler.cpp reconstructed_dlls/xcurl/request_prepare.cpp -o build/xcurl_request.so
           python tests/dlls/differential_xcurl_request.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_status.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_scheduler.py originals/dlls/XCurl.dll build/xcurl_request.so
+          python tests/dlls/differential_xcurl_prepare.py originals/dlls/XCurl.dll build/xcurl_request.so
