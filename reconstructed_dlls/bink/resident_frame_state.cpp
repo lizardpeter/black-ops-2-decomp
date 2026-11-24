@@ -287,3 +287,48 @@ extern "C" std::uint32_t bink_research_control_background_io(void* h,std::uint32
     if(!callback)return UINT32_MAX;
     return callback(static_cast<std::uint8_t*>(h)+0x1F0,control);
 }
+
+extern "C" int bink_research_submit_async(void* h,std::uint32_t first,
+    std::uint32_t second,t6_bink::ResidentTimer timer,void* clock_ctx,
+    t6_bink::RectAllocate allocate,void* alloc_ctx,
+    t6_bink::AsyncEnqueue enqueue,void* queue_ctx,char* error,
+    std::uintptr_t* worker_entry,std::uintptr_t entry_address) {
+    if(!h)return 0;
+    if(!error || !worker_entry)return -1;
+    if(u32(h,0x120)||u32(h,0x124)) {
+        constexpr char msg[]="There is already an async decompression in progress on this HBINK.";
+        std::memcpy(error,msg,sizeof(msg));
+        return 0;
+    }
+    if(!timer || !enqueue || u32(h,0x144) ||
+       (reinterpret_cast<std::uintptr_t>(h)&7U))return -1;
+    const auto* first_map=read<void*>(h,0xD8);
+    const auto* active_map=read<void*>(h,0xE0);
+    if(first_map && (!active_map || first_map==active_map)) {
+        const auto length=u32(h,0x114);
+        if(!allocate || length>UINT32_MAX-47U)return -1;
+        const auto requested=length+16;
+        put(h,0x528,u32(h,0x528)+requested);
+        auto* buffer=static_cast<std::uint8_t*>(allocate((requested+31U)&~31U,alloc_ctx));
+        if(!buffer)return -1;
+        write(h,0xE0,buffer);
+        buffer[length]=0;
+    }
+    const auto prepared=bink_research_prepare_video_frame(h,timer(clock_ctx));
+    if(prepared!=1)return prepared;
+    // 0x21494 writes the worker entry even if queueing subsequently fails.
+    *worker_entry=entry_address;
+    const auto address=reinterpret_cast<std::uintptr_t>(h);
+    if(enqueue(first,address|(first==second?6U:2U),queue_ctx))
+        put(h,0x120,first|0x300U);
+    // Original optionally copies the worker-queue error pointer into g_error.
+    // This narrow dispatcher assumes that pointer is null; queue-error
+    // publication is a separate boundary, not yet implemented.
+    if(first!=second && enqueue(second,address|5U,queue_ctx))
+        put(h,0x124,second|0x300U);
+    return (u32(h,0x120)||u32(h,0x124))?1:0;
+}
+
+extern "C" int bink_research_async_wait_idle(const void* h) {
+    return !h || (!u32(h,0x120) && !u32(h,0x124)) ? 1 : -1;
+}

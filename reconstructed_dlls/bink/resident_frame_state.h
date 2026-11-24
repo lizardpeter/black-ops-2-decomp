@@ -67,3 +67,21 @@ extern "C" std::int64_t bink_research_get_rects(void* handle,std::uint32_t surfa
 // The callback at handle+0x220 is invoked with handle+0x1F0 and the
 // original unchanged control argument. Null paths return UINT32_MAX.
 extern "C" std::uint32_t bink_research_control_background_io(void* handle,std::uint32_t control);
+
+namespace t6_bink {
+// Original queue boundary 0x21F70: worker ID, 8-byte tagged handle.
+using AsyncEnqueue = int (*)(std::uint32_t worker,std::uintptr_t message,void* context);
+}
+// Original video-only BinkDoFrameAsync (0x213F0). Callback injection
+// models only worker queue submission, not successful worker execution.
+// Caller owns handle, dirty map and allocator. error[256] and worker_entry
+// model the original global state, including error copy on busy submit.
+// Returns 0 or 1 as original, -1 for unsupported input.
+extern "C" int bink_research_submit_async(void* handle,std::uint32_t first,
+    std::uint32_t second,t6_bink::ResidentTimer timer,void* timer_context,
+    t6_bink::RectAllocate allocate,void* allocate_context,
+    t6_bink::AsyncEnqueue enqueue,void* queue_context,char* error,
+    std::uintptr_t* worker_entry,std::uintptr_t entry_address);
+// Returns 1 for original idle/null path, -1 for outstanding worker state.
+// No synchronous substitute for the original wait loop.
+extern "C" int bink_research_async_wait_idle(const void* handle);
