@@ -89,7 +89,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
         dirty_fn.restype=ctypes.c_int
     dirty_stride=(((width+15)//16)+15)&~15
     dirty_len=dirty_stride*((height+15)//16)
-    dirty_addr=OBJECTS+0x6000
+    dirty_addr=0x30006000 # non-journaled SCRATCH; original writes must survive call
     assert dirty_len+64<0xA000
     class RegisteredTrace(ctypes.Structure):
         _fields_=[('status',ctypes.c_uint32),('plane',ctypes.c_uint32),
