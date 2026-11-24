@@ -24,7 +24,7 @@ extern "C" void xcurl_research_start_request(void* request,void* task,const Star
         std::uint64_t bytes=0;h=xcurl_research_gdk_network_security_result_size(task,&bytes,t->gdk);if(failed(h)){t->diagnose(easy(),0x21060,h,c);cancel(h,58);return;}
         release_metadata();auto* meta=s->allocate(bytes,15,c);put(p,0x90,meta);
         if(!meta){t->diagnose(easy(),0x21038,0,c);cancel(0x8007000eU,58);return;}
-        void* parsed=ptr(p,0x98);h=xcurl_research_gdk_network_security_result(task,bytes,nullptr,meta,&parsed,t->gdk);put(p,0x98,parsed);
+        h=xcurl_research_gdk_network_security_result(task,bytes,nullptr,meta,reinterpret_cast<void**>(p+0x98),t->gdk);
         if(failed(h)){t->diagnose(easy(),0x20fe0,h,c);release_metadata();cancel(h,58);return;}
         auto count=get<std::uint64_t>(parsed,8);auto* items=ptr(parsed,0x10);
         for(std::uint64_t i=0;i<count;++i)if(get<std::uint32_t>(items,0)==2){p[0xd6]=1;break;}else items+=0x18;
