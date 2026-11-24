@@ -21,9 +21,12 @@ int main(int argc,char** argv) {
         else if(arg=="--all")all=true;
         else assert(false);
     }
-    std::ifstream input(argv[1],std::ios::binary);
-    assert(input);
-    std::vector<std::uint8_t> file((std::istreambuf_iterator<char>(input)),{});
+    std::vector<std::uint8_t> file;
+    if(!preloaded&&!streamed) {
+        std::ifstream input(argv[1],std::ios::binary);
+        assert(input);
+        file.assign(std::istreambuf_iterator<char>(input),{});
+    }
     std::uint32_t tick=1000;
     const auto clock=[](void* p)->std::uint32_t {
         auto& t=*static_cast<std::uint32_t*>(p);return ++t;

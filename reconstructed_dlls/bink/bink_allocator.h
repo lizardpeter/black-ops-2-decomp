@@ -12,3 +12,10 @@ using Deallocate=void (*)(void*);
 extern "C" void* bink_research_allocate_custom(std::uint32_t bytes,
     t6_bink::Allocate allocate,t6_bink::Deallocate free_fn);
 extern "C" int bink_research_free_custom(void* memory);
+
+ // Original custom-null fallthrough to the default heap, but custom -1
+ // is terminal failure. Host fallback callbacks supply platform heap
+ // allocation/free (the original uses HeapCreate/HeapAlloc/HeapFree).
+extern "C" void* bink_research_allocate_with_fallback(std::uint32_t bytes,
+    t6_bink::Allocate allocate,t6_bink::Deallocate free_fn,t6_bink::Allocate fallback);
+extern "C" int bink_research_free_with_fallback(void* memory,t6_bink::Deallocate fallback_free);

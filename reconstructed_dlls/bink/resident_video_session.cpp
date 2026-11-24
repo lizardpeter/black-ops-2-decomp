@@ -392,9 +392,12 @@ ResidentVideoSession::DecodeResult ResidentVideoSession::do_frame() {
     }
     if(frame_number()==last_decoded_frame())return DecodeResult::already_decoded;
     auto* state=handle_.data();
+    std::unique_lock<std::mutex> io_lock;
+    if(stream_)io_lock=std::unique_lock(stream_->mutex);
     if(bink_research_prepare_video_frame(state,timer_(clock_ctx_))!=1) {
         fail("original prepare state rejected frame");return DecodeResult::error;
     }
+    if(io_lock.owns_lock())io_lock.unlock();
     if(stream_ && !stream_->read_pending()) {
         fail("stream packet read failed");return DecodeResult::error;
     }
@@ -402,6 +405,7 @@ ResidentVideoSession::DecodeResult ResidentVideoSession::do_frame() {
     if(!decode_current_packet(report,reason)) {
         fail(std::move(reason));return DecodeResult::error;
     }
+    if(stream_)io_lock.lock();
     if(bink_research_finish_video_frame(state,timer_(clock_ctx_),timer_,clock_ctx_) ||
        info_->frame_num!=report.destination_slot || last_decoded_frame()!=frame_number()) {
         fail("original completion state rejected frame");return DecodeResult::error;
@@ -425,6 +429,8 @@ ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uin
         fail("stream packet read failed");return SubmitResult::error;
     }
     auto& queue=*worker_;
+    std::unique_lock<std::mutex> io_lock;
+    if(stream_)io_lock=std::unique_lock(stream_->mutex);
     auto result=bink_research_submit_async(handle_.data(),worker,worker,timer_,clock_ctx_,
         nullptr,nullptr,Worker::enqueue,&queue,queue.api_error,&queue.wait_entry,
         reinterpret_cast<std::uintptr_t>(&bink_research_wait_async));
@@ -440,6 +446,8 @@ ResidentVideoSession::WaitResult ResidentVideoSession::wait_async(std::int32_t t
     if(!worker_) {fail("missing native async worker");return WaitResult::error;}
     auto& queue=*worker_;
     const auto mask=1U<<queue.id;
+    std::unique_lock<std::mutex> io_lock;
+    if(stream_)io_lock=std::unique_lock(stream_->mutex);
     const int result=bink_research_wait_async(handle_.data(),timeout,mask,mask,timer_,clock_ctx_,
         Worker::receive,Worker::notify,&queue,queue.api_error);
     if(result==0)return WaitResult::pending;
@@ -456,6 +464,8 @@ bool ResidentVideoSession::next_frame() {
     // The underlying original BinkNextFrame transcription is less restrictive.
     if(!opened_ || failed_ || !info_ || frame_number()!=last_decoded_frame())
         return fail("advance requires completed current frame");
+    std::unique_lock<std::mutex> io_lock;
+    if(stream_)io_lock=std::unique_lock(stream_->mutex);
     if(stream_ ? bink_research_next_stream_frame(handle_.data(),timer_,clock_ctx_) :
         bink_research_next_resident_frame(handle_.data(),timer_,clock_ctx_))
         return fail("original next-frame state failed");
@@ -463,6 +473,8 @@ bool ResidentVideoSession::next_frame() {
 }
 bool ResidentVideoSession::realtime(RealtimeSnapshot& output,std::uint32_t frames) {
     if(!opened_ || failed_ || async_pending() || !last_decoded_frame())return false;
+    std::unique_lock<std::mutex> io_lock;
+    if(stream_)io_lock=std::unique_lock(stream_->mutex);
     return bink_research_get_realtime(handle_.data(),&output,frames,timer_,clock_ctx_)==0;
 }
 std::uint32_t ResidentVideoSession::control_background_io(std::uint32_t flags) {
@@ -473,6 +485,8 @@ std::uint32_t ResidentVideoSession::control_background_io(std::uint32_t flags) {
 bool ResidentVideoSession::pause(std::uint32_t value) {
     if(async_pending())return false;
     if(!opened_ || failed_)return fail("no resident movie");
+    std::unique_lock<std::mutex> io_lock;
+    if(stream_)io_lock=std::unique_lock(stream_->mutex);
     if(bink_research_pause_video_only(handle_.data(),value,timer_,clock_ctx_)!=value)
         return fail("original pause state failed");
     return true;
