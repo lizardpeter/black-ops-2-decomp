@@ -66,7 +66,7 @@ def main():
         def setup(w):
             w.write(img.base+0x542A8,struct.pack("<Q",img.base+alloc_rva))
             w.write(img.base+0x542B0,struct.pack("<Q",img.base+free_rva))
-            w.write(img.base+0x542B8,bytes(8))
+            w.write(img.base+0x542A0,bytes(8))
             m.mu.mem_write(original_base,initial)
         r,_,_,_=m.call(img.base+0x1010,[size],"uint64",setup=setup,
                        fakes={img.base+alloc_rva:oa})
@@ -90,7 +90,7 @@ def main():
             # Current global free callback must not replace allocation's
             # captured footer callback.
             w.write(img.base+0x542B0,bytes(8))
-            w.write(img.base+0x542B8,struct.pack('<Q',0x77770000))
+            w.write(img.base+0x542A0,struct.pack('<Q',0x77770000))
         rr,_,_,_=m.call(img.base+0x10d0,[r],"void",setup=setup_free,fakes={img.base+free_rva:of})
         assert rr is None and free(result,fallback_free)==0 and original_calls==native_calls,(i,rr,original_calls,native_calls)
     @ALLOC
