@@ -43,3 +43,17 @@ extern "C" void xcurl_research_body_worker(void* task,const BodyServices* b){
     if(!failed(status)){status=b->deliver(e,ptr(e,0x340+8*get<std::uint32_t>(task,8)),get<std::uint32_t>(task,12),c);if(failed(status)){xcurl_research_easy_cancel(e,status,23,s);xcurl_research_request_stop(e+0x230,s);}}
     s->enter(e+0x10,c);put(e,0x338,get<std::uint32_t>(e,0x338)&~(1U<<(get<std::uint32_t>(task,8)&31)));s->leave(e+0x10,c);
 }
+// Original 0xAB3C. Callback invocation at 0xB9B4 is a separate boundary.
+extern "C" std::uint32_t xcurl_research_deliver_body(void* easy,const void* data,std::uint32_t length,const DeliveryServices* d){
+    auto* e=static_cast<P>(easy);auto* s=d->request;auto c=s->context;
+    s->enter(e+0x50,c);auto limit=get<std::uint32_t>(e,0xac);auto* callback=ptr(e,0x110);auto* userdata=ptr(e,0x108);bool debug=e[0x176]!=0;s->leave(e+0x50,c);
+    auto* bytes=static_cast<const std::uint8_t*>(data);
+    // Nonzero chunk limit is required for progress, unless callback returns an error.
+    while(length){auto chunk=std::min(limit,length);if(debug)s->debug_data(e,3,bytes,chunk,c);
+        auto count=d->write(callback,bytes,chunk,userdata,c);put(e,0x33c,get<std::uint32_t>(e,0x33c)+static_cast<std::uint32_t>(count));
+        if(count==0x10000001ULL){d->diagnose(e,0x20958,0,0,c);return 0x800704c7U;}
+        if(count!=chunk){d->diagnose(e,0x20988,count,chunk,c);return 0x800700eaU;}
+        bytes+=chunk;length-=chunk;
+    }
+    return 0;
+}

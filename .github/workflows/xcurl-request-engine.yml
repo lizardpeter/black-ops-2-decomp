@@ -7,6 +7,7 @@ on:
       - reconstructed_dlls/xcurl/session_cache.*
       - reconstructed_dlls/xcurl/response_body.*
       - tests/dlls/differential_xcurl_body.py
+      - tests/dlls/differential_xcurl_delivery.py
       - tests/dlls/differential_xcurl_session.py
       - tests/dlls/differential_xcurl_http_setup.py
       - tests/dlls/differential_xcurl_copy_utf16.py
@@ -48,3 +49,4 @@ jobs:
           python tests/dlls/differential_xcurl_copy_utf16.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_session.py originals/dlls/XCurl.dll build/xcurl_request.so
           python tests/dlls/differential_xcurl_body.py originals/dlls/XCurl.dll build/xcurl_request.so
+          python tests/dlls/differential_xcurl_delivery.py originals/dlls/XCurl.dll build/xcurl_request.so
