@@ -1,6 +1,7 @@
 // Real loopback HTTP smoke for reconstructed setup and transfer leaves. The
 // harness drives callbacks; not a test of the still-incomplete production task queue.
 #include "winhttp_services.h"
+#include "gdk_runtime_win32.h"
 #include "response_headers.h"
 #include "transfer_callbacks.h"
 #include <algorithm>
@@ -120,6 +121,9 @@ std::string request(P easy,void* session,std::uint16_t port,const char16_t* meth
 }
 }
 int main(int argc,char** argv){
+#ifdef _WIN32
+    require(win32_gdk_query_services()!=nullptr,"native GDK QueryApiImpl adapter available");
+#endif
     require(argc==2,"port required");auto port=static_cast<std::uint16_t>(std::atoi(argv[1]));
     alignas(8) std::array<std::uint8_t,0x80> cache{};alignas(8) std::array<std::uint8_t,0x368> easy{};
     init_cs(cache.data());init_cs(easy.data()+0x188);init_cs(easy.data()+0x50);auto* list=cache.data()+0x28;put(list,0,list);put(list,8,list);

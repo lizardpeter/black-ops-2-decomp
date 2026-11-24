@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - reconstructed_dlls/xcurl/**
+      - reconstructed_dlls/xcurl/gdk_runtime.*
+      - reconstructed_dlls/xcurl/gdk_interfaces.*
       - tests/dlls/verify_xcurl_winhttp.py
       - .github/workflows/xcurl-winhttp-native.yml
   workflow_dispatch:
