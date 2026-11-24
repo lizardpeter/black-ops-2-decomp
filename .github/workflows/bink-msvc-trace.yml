@@ -1,0 +1,51 @@
+name: Bink Windows compiler bitstream diagnosis
+on:
+  push:
+    paths:
+      - .github/workflows/bink-msvc-trace.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  trace:
+    runs-on: windows-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - toolset: default
+            config: Release
+          - toolset: default
+            config: Debug
+          - toolset: ClangCL
+            config: Release
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/bink
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python tools/dlls/fetch_bik_fixtures.py originals/bik
+      - run: |
+          cmake -S reconstructed_dlls/bink -B build/trace -DT6_BINK_TRACE_BITS=ON ${{ matrix.toolset == 'ClangCL' && '-T ClangCL' || '' }}
+          cmake --build build/trace --config ${{ matrix.config }} --target test_native_plane_trace --parallel 2
+      - shell: python
+        run: |
+          import pathlib,subprocess,hashlib
+          exe=next(pathlib.Path("build/trace").rglob("test_native_plane_trace.exe"))
+          p=subprocess.run([str(exe),"originals/bik/la_pip_seq_6.bik","build/plane.raw"],capture_output=True,text=True)
+          print(p.stdout)
+          print(p.stderr)
+          print("PLANE HASH",hashlib.sha256(pathlib.Path("build/plane.raw").read_bytes()).hexdigest())
+          pathlib.Path("build/trace.txt").write_text(p.stdout+p.stderr)
+          assert p.returncode==0
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: plane-trace-${{ matrix.toolset }}-${{ matrix.config }}
+          path: |
+            build/trace.txt
+            build/plane.raw

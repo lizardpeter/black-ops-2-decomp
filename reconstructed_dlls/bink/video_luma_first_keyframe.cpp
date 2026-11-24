@@ -22,6 +22,9 @@
 #include <cstdint>
 #include <cstring>
 #include <vector>
+#ifdef T6_BINK_TRACE_BITS
+#include <cstdio>
+#endif
 
 namespace t6_bink {
 struct AdaptiveNibbleBooks {
@@ -168,18 +171,47 @@ extern "C" int bink_research_decode_video_plane_dirty(
     stream[kRLE]=make_stream(scratch[kRLE].data(),
                             msb_width(blocks*48+511),blocks*48+512,4);
 
+    #ifdef T6_BINK_TRACE_BITS
+    const auto trace_bits=[&](const char* phase,unsigned a,unsigned b) {
+        std::fprintf(stderr,"BITTRACE %s %u %u words=%td available=%u cache=%08x\n",
+            phase,a,b,bits.next_word-input.data(),bits.available_bits,bits.cache);
+    };
+    const auto trace_stream=[&](unsigned i,unsigned row) {
+        trace_bits("entropy",row,i);
+        const auto& s=stream[i];
+        const auto n=s.end-s.current;
+        std::fprintf(stderr,"TOKENS %u %u len=%td",row,i,n);
+        if(n>0)for(std::ptrdiff_t k=0;k<n&&k<12;++k)std::fprintf(stderr," %02x",unsigned(s.current[k]));
+        std::fprintf(stderr,"\n");
+    };
+    trace_bits("begin",width,height);
+    #endif
     bink_init_huffman_codebook(&bits,&stream[kMode].lookup_table,
                 &stream[kMode].lookup_bits,stream[kMode].symbol_map);
+    #ifdef T6_BINK_TRACE_BITS
+    trace_bits("codebook",0,0);
+    #endif
     bink_init_huffman_codebook(&bits,&stream[kSubmode].lookup_table,
                 &stream[kSubmode].lookup_bits,stream[kSubmode].symbol_map);
+    #ifdef T6_BINK_TRACE_BITS
+    trace_bits("codebook",1,0);
+    #endif
     t6_bink::AdaptiveNibbleBooks books{};
-    for (unsigned i=0;i<16;++i)
+    for (unsigned i=0;i<16;++i) {
         bink_init_huffman_codebook(&bits,&books.lookup_table[i],
                 &books.lookup_bits[i],books.symbol_map[i]);
+        #ifdef T6_BINK_TRACE_BITS
+        trace_bits("adaptivebook",i,0);
+        #endif
+    }
     books.current_symbol=0;
-    for (std::size_t i:{kColor,kPattern,kMotionX,kMotionY,kRLE})
+    for (std::size_t i:{kColor,kPattern,kMotionX,kMotionY,kRLE}) {
         bink_init_huffman_codebook(&bits,&stream[i].lookup_table,
                   &stream[i].lookup_bits,stream[i].symbol_map);
+        #ifdef T6_BINK_TRACE_BITS
+        trace_bits("codebook",static_cast<unsigned>(i),0);
+        #endif
+    }
 
     const auto update_report=[&](int code,std::uint32_t x,std::uint32_t y,
                                   std::uint32_t mode,std::uint32_t submode) {
@@ -297,14 +329,41 @@ extern "C" int bink_research_decode_video_plane_dirty(
     if(dirty && ((scale!=1&&scale!=2)||dirty_stride<(width*scale+15)/16))return update_report(1,0,0,0,0);
     for(std::uint32_t y=0;y<height;y+=8) {
         bink_decode_entropy_byte_rle(&stream[kMode],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(0,y);
+        #endif
         bink_decode_entropy_byte_rle(&stream[kSubmode],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(1,y);
+        #endif
         bink_decode_adaptive_nibbles(&stream[kColor],&bits,&books,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(2,y);
+        #endif
         bink_decode_entropy_nibbles(&stream[kPattern],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(3,y);
+        #endif
         bink_decode_entropy_signed_bytes(&stream[kMotionX],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(4,y);
+        #endif
         bink_decode_entropy_signed_bytes(&stream[kMotionY],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(5,y);
+        #endif
         bink_decode_entropy_deltas16(&stream[kDC],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(6,y);
+        #endif
         bink_decode_entropy_deltas16(&stream[kOtherDC],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(7,y);
+        #endif
         bink_decode_entropy_bytes(&stream[kRLE],&bits,stream_end);
+        #ifdef T6_BINK_TRACE_BITS
+        if(y<16)trace_stream(8,y);
+        #endif
 
         if (y==0) {
             const auto n=stream[kMode].end-stream[kMode].current;
@@ -333,6 +392,9 @@ extern "C" int bink_research_decode_video_plane_dirty(
                 continue;
             }
             const std::uint32_t mode=*stream[kMode].current++;
+            #ifdef T6_BINK_TRACE_BITS
+            if(y<16)trace_bits("mode",y,(x<<8)|mode);
+            #endif
             if(mode<10U)++report->type_counts[mode];
             else return update_report(4,x,y,mode,0xff);
             std::uint8_t* block=output+std::ptrdiff_t(y)*stride+x;
