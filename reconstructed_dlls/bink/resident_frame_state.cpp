@@ -296,7 +296,11 @@ int scan_dirty_rects(void* h,const std::uint8_t* dirty,std::uint32_t surface) {
         put(h,0x3C,0);return 0;
     }
     unsigned count=1;
-    if(!(surface&0x08000000U)) {
+    // Bit 27 jumps around the copy of the trimmed rectangle into the
+    // stack list; it keeps the original full rounded rectangle if any
+    // dirty cell exists. The all-clean path still returns zero.
+    if(surface&0x08000000U)r[0]={0,0,int(cols*16),int(rows*16)};
+    else {
         while(count<8) {
             DirtySplit best{};unsigned index=0;
             for(unsigned i=0;i<count;++i) {
