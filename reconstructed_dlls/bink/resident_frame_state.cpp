@@ -214,9 +214,11 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
     const auto index=u32(h,0x514);
     const auto frame=u32(h,0x0C);
     const auto* table=read<const std::uint32_t*>(h,0x1A0);
-    if(n<2 || index>=n || !frame || frame>u32(h,0x08) || !table)return -1;
+    if(!n || index>=n || !frame || frame>u32(h,0x08) || !table)return -1;
     if(!frames || frames>=n)frames=n-1;
     if(frame<frames)frames=frame-1;
+    // Original 0x1C2F5 forces a minimum of one sampled frame.
+    if(!frames)frames=1;
     const auto divisor=std::uint64_t(u32(h,0x564))*frames;
     if(!divisor)return -1;
     constexpr std::size_t ring_offsets[]={0x4D8,0x4E8,0x4E0,0x4F8,0x500,0x508,0x4F0};
@@ -241,7 +243,7 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
         const auto* ring=read<const std::uint32_t*>(h,ring_offsets[i]);
         delta[i]=ring[index]-ring[older];
     }
-    result.elapsed=delta[0];result.history_4e8=delta[1];result.history_4e0=delta[2];
+    result.elapsed=delta[0]?delta[0]:1U;result.history_4e8=delta[1];result.history_4e0=delta[2];
     result.history_4f8=delta[3];result.history_500=delta[4];result.history_508=delta[5];
     result.history_4f0=delta[6];
     *out=result;

@@ -24,11 +24,11 @@ def main():
     fn.argtypes=(ctypes.c_void_p,ctypes.c_void_p,ctypes.c_uint32,CLOCK,ctypes.c_void_p)
     fn.restype=ctypes.c_int
     rng=random.Random(0x1C290)
-    for case in range(640):
+    for case in range(896):
         h=bytearray(rng.randbytes(SIZE))
-        n=rng.choice([2,3,4,8,32,64])
+        n=rng.choice([2,3,4,8,32,64]) if case<640 else rng.choice([1,2,3,32])
         total=rng.randrange(2,80)
-        frame=rng.randrange(2,total+1)
+        frame=rng.randrange(2,total+1) if case<640 else rng.choice([1,2,total])
         request=rng.choice([0,1,2,n-1,n,n+1,frame,0xffffffff])
         for off,val in ((0x08,total),(0x0C,frame),(0x10,rng.randrange(frame+1)),
                        (0x14,rng.getrandbits(32)),(0x18,rng.getrandbits(32)),
@@ -45,6 +45,7 @@ def main():
         data=struct.pack(f"<{len(entries)}I",*entries)
         ptr(h,0x1A0,TABLE)
         rings=[rng.randbytes(4*n+16) for _ in range(7)]
+        if case>=640 and case%2==0:rings[0]=bytes(4*n+16)
         for off,addr in zip(RING_OFFSETS,RINGS):ptr(h,off,addr)
         out=rng.randbytes(0x38+16)
         now=rng.getrandbits(32)
@@ -83,5 +84,5 @@ def main():
     h=(ctypes.c_uint8*SIZE)()
     assert fn(None,o,1,unused,None)==0 and bytes(o)==bytes([0xA5])*72
     assert fn(h,None,1,unused,None)==0
-    print("BinkGetRealtime differential PASS: 640 complete handle/output cases + null paths")
+    print("BinkGetRealtime differential PASS: 896 complete handle/output cases + null paths")
 if __name__=="__main__":main()
