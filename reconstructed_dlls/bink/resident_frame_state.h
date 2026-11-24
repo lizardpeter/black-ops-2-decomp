@@ -85,3 +85,29 @@ extern "C" int bink_research_submit_async(void* handle,std::uint32_t first,
 // Returns 1 for original idle/null path, -1 for outstanding worker state.
 // No synchronous substitute for the original wait loop.
 extern "C" int bink_research_async_wait_idle(const void* handle);
+
+namespace t6_bink {
+struct AsyncCompletion {
+    std::uintptr_t tagged_handle;
+    std::int64_t result;
+};
+static_assert(sizeof(AsyncCompletion)==16);
+// Queue receives exactly the original 16-byte completion message, with
+// the original signed wait timeout. Optional queue error is borrowed.
+using AsyncReceive = int (*)(std::uint32_t worker,std::int32_t timeout,
+    AsyncCompletion* completion,const char** queue_error,void* context);
+using AsyncNotify = void (*)(std::uint32_t worker,void* context);
+}
+// Original BinkDoFrameAsyncWait (0x21590), resident audio-free paths.
+// Masks correspond to original globals 0x570BC and 0x570A4. Receive
+// and notify boundaries correspond to 0x21BE0 and 0x21FF0. All returned
+// tagged handles must be valid original-layout handle storage. The
+// original drains a worker's completion queue after its first receipt;
+// cross-handle completion clears the other handle's pending bit and
+// notifies its worker. Returns original 0 (timeout) or 1 (completed),
+// -1 on unsupported input, rather than faking completion.
+extern "C" int bink_research_wait_async(void* handle,std::int32_t timeout,
+    std::uint32_t active_mask,std::uint32_t running_mask,
+    t6_bink::ResidentTimer timer,void* timer_context,
+    t6_bink::AsyncReceive receive,t6_bink::AsyncNotify notify,
+    void* queue_context,char* error);

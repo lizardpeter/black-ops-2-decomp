@@ -333,3 +333,61 @@ extern "C" int bink_research_submit_async(void* h,std::uint32_t first,
 extern "C" int bink_research_async_wait_idle(const void* h) {
     return !h || (!u32(h,0x120) && !u32(h,0x124)) ? 1 : -1;
 }
+
+extern "C" int bink_research_wait_async(void* h,std::int32_t timeout,
+    std::uint32_t active_mask,std::uint32_t running_mask,
+    t6_bink::ResidentTimer timer,void* clock_ctx,
+    t6_bink::AsyncReceive receive,t6_bink::AsyncNotify notify,
+    void* queue_ctx,char* error) {
+    if(!h || (!u32(h,0x120)&&!u32(h,0x124)))return 1;
+    if(!timer || !receive || !notify || !error || u32(h,0x144))return -1;
+    const auto start=timeout>0?timer(clock_ctx):0;
+    const auto publish=[&](const char* message) {
+        if(!message)return;
+        // 0x216F3: copy a NUL-terminated error, limited to 255 bytes.
+        std::size_t i=0;
+        for(;i<254 && message[i];++i)error[i]=message[i];
+        error[i]=0;
+    };
+    for(;;) {
+        for(unsigned slot=0;slot<2;++slot) {
+            const auto off=0x120U+slot*4;
+            if(!(u32(h,off)&0x100U))continue;
+            auto delay=timeout;
+            for(;;) {
+                const auto worker=u32(h,off)&~0x300U;
+                // Original uses x86's modulo-32 shift, then tests the
+                // active mask before the range and running-mask checks.
+                const auto bit=1U<<(worker&31U);
+                if(!(active_mask&bit)) {
+                    if(worker>=8) {publish("Out of range thread number.");break;}
+                    if(!(running_mask&bit)) {publish("Invalid thread number.");break;}
+                }
+                if(worker>=8)return -1; // unsafe original out-of-array access
+                t6_bink::AsyncCompletion completion{};
+                const char* queue_error=nullptr;
+                if(!receive(worker,delay,&completion,&queue_error,queue_ctx)) {
+                    publish(queue_error);
+                    break;
+                }
+                auto* owner=reinterpret_cast<void*>(completion.tagged_handle&~std::uintptr_t(1));
+                if(!owner || (reinterpret_cast<std::uintptr_t>(owner)&7U))return -1;
+                const auto target=0x120U+4U*(completion.tagged_handle&1U);
+                if(owner!=h)notify(u32(owner,target)&~0x300U,queue_ctx);
+                put(owner,target,u32(owner,target)&~0x100U);
+                delay=0;
+            }
+        }
+        if(!((u32(h,0x120)|u32(h,0x124))&0x100U)) {
+            put(h,0x120,0);put(h,0x124,0);
+            // 0x21791: swap the two dirty maps, then invoke the
+            // same original finish helper used by the synchronous path.
+            auto* a=read<void*>(h,0xD8);
+            auto* b=read<void*>(h,0xE0);
+            if(a && b) {write(h,0xD8,b);write(h,0xE0,a);}
+            return bink_research_finish_video_frame(h,timer(clock_ctx),timer,clock_ctx)==0?1:-1;
+        }
+        if(!timeout)return 0;
+        if(timeout>0 && timer(clock_ctx)-start>=static_cast<std::uint32_t>(timeout))return 0;
+    }
+}
