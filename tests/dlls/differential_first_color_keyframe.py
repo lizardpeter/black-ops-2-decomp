@@ -102,10 +102,12 @@ def main():
               f"mode={trace.mode} submode={trace.submode}, next={native_next}, "
               f"SHA={actual_sha} differences={diffs}, modes={list(trace.type_counts)}, "
               f"submodes={list(trace.submode_counts)}",flush=True)
-        good=status==0 and diffs==0 and native_next==original_next
+        modes_match=(list(trace.type_counts)==[modes[i] for i in range(10)]
+                     and list(trace.submode_counts)==[submodes[i] for i in range(10)])
+        good=status==0 and diffs==0 and native_next==original_next and modes_match
         planes.append(dict(plane=plane,side=side,original_sha=orig_sha,native_sha=actual_sha,
                            original_next=original_next,native_next=native_next,
-                           mismatched_pixels=diffs,status=status,passed=good))
+                           mismatched_pixels=diffs,status=status,mode_counts_match=modes_match,passed=good))
         if good:
             (build/f"native-bink-frame0-{plane}.pgm").write_bytes(header+actual)
         mismatched=mismatched or not good
