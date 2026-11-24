@@ -164,7 +164,8 @@ def main():
     if hasattr(pe, "DIRECTORY_ENTRY_IMPORT"):
         for entry in pe.DIRECTORY_ENTRY_IMPORT:
             dll = entry.dll.decode("ascii", "replace")
-            names = [imp.name.decode("ascii", "replace") if imp.name else f"ordinal_{imp.ordinal}"
+            names = [{"name": imp.name.decode("ascii", "replace") if imp.name else f"ordinal_{imp.ordinal}",
+                      "iat_rva": hex(imp.address - base)}
                      for imp in entry.imports]
             imports[dll] = names
     needles = {name: name.encode() for name in EXPORTS}
@@ -203,10 +204,10 @@ def main():
     print("\nWIDE DATA STRINGS", json.dumps(wide_strings, sort_keys=True))
     print("\nDYNAMIC IMPORTS")
     for dll, names in imports.items():
-        selected = [name for name in names if any(key in name.lower() for key in
+        selected = [item for item in names if any(key in item["name"].lower() for key in
                     ("loadlibrary", "getprocaddress", "srwlock", "debugbreak", "getlasterror"))]
         if selected:
-            print(dll, ", ".join(selected))
+            print(dll, ", ".join(f'{item["name"]}@{item["iat_rva"]}' for item in selected))
     print(f"\nEvidence JSON: {args.out}")
 
 if __name__ == "__main__":
