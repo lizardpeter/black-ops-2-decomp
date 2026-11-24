@@ -39,10 +39,10 @@ def main():
         def lock(mu):oc.append(('lock',))
         def unlock(mu):oc.append(('unlock',))
         def load(mu):
-            oc.append(('load',m.read_cstr(reg(mu,'RCX')),reg(mu,'EDX'),reg(mu,'R8D')))
+            oc.append(('load',m.read_cstr(reg(mu,'RCX')).decode('ascii'),reg(mu,'EDX'),reg(mu,'R8D')))
             mu.reg_write(X.UC_X86_REG_RAX,MODULE if loadok else 0)
         def resolve(mu):
-            n=m.read_cstr(reg(mu,'RDX'));oc.append(('resolve',reg(mu,'RCX'),n));mu.reg_write(X.UC_X86_REG_RAX,available[names.index(n)])
+            raw=m.read_cstr(reg(mu,'RDX'));n=raw.decode('ascii');oc.append(('resolve',reg(mu,'RCX'),n));mu.reg_write(X.UC_X86_REG_RAX,available[names.index(raw)])
         def old(mu):
             oc.append(('initialize',funcs[1],reg(mu,'ECX'),reg(mu,'EDX'),0));mu.reg_write(X.UC_X86_REG_RAX,status)
         def new(mu):
@@ -51,7 +51,7 @@ def main():
             cls=bytes(mu.mem_read(reg(mu,'RCX'),16));iid=bytes(mu.mem_read(reg(mu,'RDX'),16));oc.append(('query',funcs[0],cls,iid))
             mu.mem_write(reg(mu,'R8'),struct.pack('<Q',IFACE));mu.reg_write(X.UC_X86_REG_RAX,qstatus)
         def report(mu):
-            oc.append(('report',funcs[3],reg(mu,'ECX'),m.read_cstr(reg(mu,'RDX'))));mu.reg_write(X.UC_X86_REG_RAX,0)
+            oc.append(('report',funcs[3],reg(mu,'ECX'),m.read_cstr(reg(mu,'RDX')).decode('ascii')));mu.reg_write(X.UC_X86_REG_RAX,0)
         def brk(mu):oc.append(('break',))
         imports={'AcquireSRWLockExclusive':lock,'ReleaseSRWLockExclusive':unlock,'LoadLibraryExA':load,'GetProcAddress':resolve,'DebugBreak':brk}
         for n in img.iat.values():
