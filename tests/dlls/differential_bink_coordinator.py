@@ -55,7 +55,8 @@ def fetch_alpha(directory):
         assert len(data)<=8*1024*1024 and sha(data)==pin
         dest.write_bytes(data)
 
-def run(dll,video,library,frames,report_path,expected_sha256=None):
+def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,padding_byte=0):
+    assert lookahead in (0,4) and 0<=padding_byte<=255
     assert sha(dll.read_bytes())==PIN_DLL
     data=video.read_bytes()
     pin=expected_sha256 or {**FIXTURES,**ALPHA}[video.name]
@@ -92,6 +93,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
     assert cursor<=ARENA+0x00400000
     result={"fixture":video.name,"sha256":pin,"visible_dimensions":[width,height],
             "plane_dimensions":dims,"original_coordinator_rva":"0x274A0",
+            "lookahead_bytes":lookahead,"padding_byte":padding_byte,
             "complete_matching_frames":0,"matched_planes":0,"matched_bytes":0,"frames":[]}
     report_path.parent.mkdir(parents=True,exist_ok=True)
     def save():report_path.write_text(json.dumps(result,indent=2)+"\n")
@@ -101,7 +103,9 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
         start,end=offsets[frame]&~1,offsets[frame+1]&~1
         assert 44+4*(count+1)<=start<end<=len(data)
         packet=data[start:end]
-        assert len(packet)<SCRATCH_POINTERS-PACKET and len(packet)%4==0
+        assert len(packet)+lookahead<SCRATCH_POINTERS-PACKET and len(packet)%4==0
+        native_packet=packet+bytes([padding_byte])*lookahead
+        limit_bytes=len(native_packet)
         aend=u32(packet,0) if alpha else 0
         assert not alpha or 4<aend<len(packet)-4 and aend%4==0
         yend=aend+u32(packet,aend)
@@ -137,7 +141,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
             mu=machine.mu
             mu.mem_write(DESCRIPTOR,bytes(descriptor))
             mu.mem_write(SIZES,struct.pack("<9Q",*([16384]*9)))
-            mu.mem_write(PACKET,packet+bytes(256))
+            mu.mem_write(PACKET,native_packet+bytes(256))
             mu.mem_write(STACK,bytes(STACK_SIZE-0x10000))
             for s in range(2):
                 for p in range(len(dims)):
@@ -145,10 +149,11 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
         hooks={img.base+PLANE:at_plane}
         hooks.update({img.base+x:at_return for x in RETURNS})
         # The original coordinator increments argument 6 by four before
-        # forwarding its exclusive word-end to every plane (0x276a*).
-        # Pass the inclusive final word address, not an exclusive byte end.
+        # forwarding its exclusive word-end. lookahead=4 models the real
+        # BinkDoFramePlane caller (handle+0x13c full packet length, RVA
+        # 0x164f9 and 0x1a975), while zero preserves the previous oracle.
         returned,_,_,_=machine.call(img.base+COORD,
-            [DESCRIPTOR,0,0,PACKET,0,PACKET+len(packet)-4,SIZES,flags,flags],
+            [DESCRIPTOR,0,0,PACKET,0,PACKET+limit_bytes-4,SIZES,flags,flags],
             ret="uint",setup=setup,at=hooks,limit=max(15_000_000,yw*yh*400))
         rec={"index":frame,"original_return":returned,"original_plane_calls":calls,
              "alpha_end":aend,"y_end":yend,"planes":[]}
@@ -156,7 +161,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
         save()
         if isinstance(returned,str) or len(calls)!=len(order):
             raise AssertionError(f"original coordinator failure: {returned}, calls={calls}")
-        raw=(ctypes.c_uint8*len(packet)).from_buffer_copy(packet)
+        raw=(ctypes.c_uint8*limit_bytes).from_buffer_copy(native_packet)
         pos=4
         for j,p in enumerate(order):
             w,h=dims[p]
@@ -168,7 +173,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
             out=(ctypes.c_uint8*len(before)).from_buffer_copy(before)
             prior=(ctypes.c_uint8*len(previous)).from_buffer_copy(previous)
             trace=Trace()
-            status=fn(raw,len(packet),pos,len(packet),w,h,out,w,prior,ctypes.byref(trace))
+            status=fn(raw,limit_bytes,pos,limit_bytes,w,h,out,w,prior,ctypes.byref(trace))
             next_pos=4*trace.input_words
             expected=bytes(machine.mu.mem_read(addresses[dst][p],w*h))
             actual=bytes(out)
@@ -177,7 +182,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
             route=calls[j]
             route_match=(route["dst"]==addresses[dst][p] and route["ref"]==addresses[ref][p]
                          and route["width"]==w and route["height"]==h and route["stride"]==w
-                         and route["start"]==pos and route["limit"]==len(packet))
+                         and route["start"]==pos and route["limit"]==limit_bytes)
             plane={"plane":p,"status":status,"route_match":route_match,
                    "native_start":pos,"native_next":next_pos,"original_next":route.get("next"),
                    "native_sha256":sha(actual),"original_sha256":sha(expected),
@@ -190,7 +195,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None):
                 or not plane["guard_unchanged"] or not plane["reference_unchanged"]):
                 raise AssertionError(f"coordinator differential mismatch frame={frame}: {plane}; "
                                      f"original route={route}, expected dst={addresses[dst][p]:#x} "
-                                     f"ref={addresses[ref][p]:#x} dims={w}x{h} limit={len(packet)}")
+                                     f"ref={addresses[ref][p]:#x} dims={w}x{h} limit={limit_bytes}")
             original[dst][p]=expected
             native[dst][p]=actual
             result["matched_planes"]+=1
@@ -210,11 +215,13 @@ def main():
     p.add_argument("--video",type=Path)
     p.add_argument("--library",type=Path)
     p.add_argument("--frames",type=int,default=16)
+    p.add_argument("--lookahead",type=int,choices=(0,4),default=0)
+    p.add_argument("--pad-byte",type=lambda v:int(v,0),default=0)
     p.add_argument("--report",type=Path,default=Path("build/coordinator-report.json"))
     a=p.parse_args()
     if a.fetch_alpha is not None:fetch_alpha(a.fetch_alpha)
     else:
         assert a.dll and a.video and a.library
-        run(a.dll,a.video,a.library,a.frames,a.report)
+        run(a.dll,a.video,a.library,a.frames,a.report,lookahead=a.lookahead,padding_byte=a.pad_byte)
 
 if __name__=="__main__":main()
