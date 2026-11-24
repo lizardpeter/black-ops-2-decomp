@@ -443,3 +443,53 @@ The remaining work includes interframe prediction and other block modes,
 multi-frame/container integration, audio, public Bink API and lifetime
 behavior, and finally safe BO2 runtime integration. Both external DLLs
 remain required.
+
+## Full dependent-frame video reconstruction (2026-11-23)
+
+[Dedicated verification run 45305067741](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45305067741)
+first established exact frame-1 luminance reconstruction with 692 direct
+reference blocks, 9 motion copies, 5 motion-plus-inverse-transform blocks
+and 4 raw blocks (plus intra blocks). The 65,536 native Y bytes matched
+original SHA-256 `e825e8c947fa9bb709b175982af887782ee12089ba3bf9c59fc34a85eb204f61`.
+
+The [sequential differential](../tests/dlls/differential_bink_sequence.py)
+then exercised all three planes with two **independent** alternating frame
+buffers per implementation. The native decoder consumes the compressed packet
+and its own previous decoded image, not original decoded reference pixels.
+Each plane's output, next-word cursor and original block/submode histograms
+are compared; failure reports the exact frame, plane, position and differing
+pixels. Identical initial buffer values are used to preserve skipped tail
+blocks; this is not yet a test of BinkOpen or actual game buffer allocation.
+
+- Original implementation at commit `bf4c105d` matched frames 0–147.
+  At frame index 148 it encountered a previously unimplemented mode-1
+  submode 9 (doubled raw pixels).
+- The coordinator now implements the ten main block modes, including original
+  run-coded mode 3, sparse residual motion mode 4, and doubled submodes 3/9.
+  Exact original scan permutations were recovered from BINKCONS RVA
+  `0x5A940` in [original_scan_orders.h](../reconstructed_dlls/bink/original_scan_orders.h).
+- [video_sparse_residual.cpp](../reconstructed_dlls/bink/video_sparse_residual.cpp)
+  reconstructs the original `0x30620` sparse signed bitplane decoder
+  (including its change-budget early exits and existing-coefficient
+  refinements) and `0x30A60` pixel permutation/addition. The [independent
+  differential](../tests/dlls/differential_video_sparse_residual.py) passed
+  **512** original-vs-native output/cursor cases.
+- [CI run 45305529699](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45305529699)
+  then passed **all 150 frames, 450 planes and 14,745,600 output bytes** of
+  `la_pip_seq_6.bik`, including both last frames, with identical original
+  and native pixels, cursor offsets and block-mode distributions.
+  Original DLL execution is solely the independent reference in this test.
+  The native code uses no original executable code at runtime.
+- [Standalone C++ decoder](../tools/dlls/native_bik_decode.cpp) now links
+  the reconstructed codec and existing original-derived video-only index
+  parser directly, checks packet/plane offsets, and writes planar Y/C1/C2
+  output with original ordering. It restricts input to the studied BIKi
+  256x256 video-only format; the inner codec is not hardened for arbitrary
+  untrusted files. CI compilation and comparison with the matched
+  differential output, and full-sequence tests of the other two pinned
+  videos, are added but are not claimed successful until their runs finish.
+
+The 150-frame result is complete video-only decoding for one fixture,
+not a claim of complete codec coverage, sound playback, timing, BinkOpen,
+Bink's full exported API, or game integration. The original Store
+executables still have both external DLL imports.
