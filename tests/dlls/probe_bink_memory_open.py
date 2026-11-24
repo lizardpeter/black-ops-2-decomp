@@ -52,8 +52,26 @@ def run(dll,fixture,flags):
                           1,1,8664,65536,6,0)
         assert len(block)==48
         mu.mem_write(address,block)
-    modeled={'kernel32.dll!getsysteminfo'}
+    # Optional dynamic platform facilities are absent in the deterministic
+    # environment. Record requested names, do not bypass any internal logic.
+    dynamic_queries=[]
+    def string(mu,p):
+        if not p:return None
+        if p<65536:return f"ordinal:{p}"
+        return bytes(mu.mem_read(p,256)).split(b'\0',1)[0].decode('ascii',errors='replace')
+    def module(mu):
+        name=string(mu,mu.reg_read(X.UC_X86_REG_RCX))
+        dynamic_queries.append(["module",name])
+        # Kernel32 is loaded; other optional DLLs may legitimately be absent.
+        mu.reg_write(X.UC_X86_REG_RAX,0x70000000 if name is None or name.lower() in ("kernel32","kernel32.dll") else 0)
+    def proc(mu):
+        name=string(mu,mu.reg_read(X.UC_X86_REG_RDX))
+        dynamic_queries.append(["proc",name])
+        mu.reg_write(X.UC_X86_REG_RAX,0)
+    modeled={'kernel32.dll!getsysteminfo','kernel32.dll!getmodulehandlea','kernel32.dll!getprocaddress'}
     m.on_import('kernel32.dll!GetSystemInfo',system_info)
+    m.on_import('kernel32.dll!GetModuleHandleA',module)
+    m.on_import('kernel32.dll!GetProcAddress',proc)
     cursor=ARENA
     allocations=[]
     ticks=[]
@@ -74,7 +92,7 @@ def run(dll,fixture,flags):
         ticks.append(tick)
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
-            "allocations":allocations,"timer_calls":ticks}
+            "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries}
     ret,bufs,_,_=m.call(img.exports["BinkOpen"],[data,flags],"uint64",
                        fakes={img.base+0x1010:alloc,img.base+0x1FF00:clock},
                        limit=60_000_000)
