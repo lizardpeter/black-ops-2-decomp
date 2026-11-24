@@ -1,0 +1,34 @@
+name: XCurl GDK interface evidence
+on:
+  push:
+    paths:
+      - tools/dlls/probe_xcurl_gdk.py
+      - tools/dlls/fetch.py
+      - tests/differential/requirements.txt
+      - .github/workflows/xcurl-gdk-evidence.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect-original:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tools/dlls
+            tests/differential
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - name: Fetch and verify original Store XCurl
+        run: python tools/dlls/fetch.py originals/dlls
+      - name: Inspect interface IDs, xrefs and original GDK wrappers
+        run: python tools/dlls/probe_xcurl_gdk.py --dll originals/dlls/XCurl.dll --out build/xcurl-gdk-evidence.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xcurl-gdk-interface-evidence
+          path: build/xcurl-gdk-evidence.json
+          retention-days: 14
