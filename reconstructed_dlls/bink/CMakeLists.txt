@@ -37,7 +37,15 @@ add_library(t6::bink ALIAS t6_native_bink)
 target_compile_features(t6_native_bink PUBLIC cxx_std_20)
 target_link_libraries(t6_native_bink PUBLIC Threads::Threads)
 target_include_directories(t6_native_bink PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
-# Diagnostic isolation only: keep the production Release configuration unchanged.
+# MSVC Release currently misdecodes a coefficient block in a pinned real
+# Store clip. The /Od isolation of this single TU restores the verified
+# first-plane cursor and pixels. Keep the rest of the decoder optimized.
+# This is a provisional compiler workaround, not a proven root-cause fix.
+option(T6_BINK_MSVC_COEFFICIENT_WORKAROUND "Disable optimization in the MSVC coefficient decoder" ON)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND T6_BINK_MSVC_COEFFICIENT_WORKAROUND)
+    set_source_files_properties(video_coefficients.cpp PROPERTIES COMPILE_OPTIONS /Od)
+endif()
+# Diagnostic isolation can explicitly disable the workaround.
 set(T6_BINK_MSVC_DIAGNOSTIC_SOURCE "" CACHE STRING "Single decoder translation unit to compile without MSVC optimization")
 if(T6_BINK_MSVC_DIAGNOSTIC_SOURCE)
     if(NOT CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

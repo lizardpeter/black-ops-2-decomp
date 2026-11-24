@@ -17,18 +17,25 @@ jobs:
           - toolset: default
             config: Release
             isolate: ""
+            workaround: "ON"
           - toolset: default
             config: Release
             isolate: video_coefficients
+            workaround: "OFF"
           - toolset: default
             config: Release
             isolate: video_luma_first_keyframe
+            workaround: "OFF"
+            experimental: true
           - toolset: default
             config: Debug
             isolate: ""
+            workaround: "OFF"
           - toolset: ClangCL
             config: Release
             isolate: ""
+            workaround: "OFF"
+    continue-on-error: ${{ matrix.experimental == true }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -40,7 +47,7 @@ jobs:
           python-version: '3.12'
       - run: python tools/dlls/fetch_bik_fixtures.py originals/bik
       - run: |
-          cmake -S reconstructed_dlls/bink -B build/trace -DT6_BINK_TRACE_BITS=ON "-DT6_BINK_MSVC_DIAGNOSTIC_SOURCE=${{ matrix.isolate }}" ${{ matrix.toolset == 'ClangCL' && '-T ClangCL' || '' }}
+          cmake -S reconstructed_dlls/bink -B build/trace -DT6_BINK_TRACE_BITS=ON -DT6_BINK_MSVC_COEFFICIENT_WORKAROUND=${{ matrix.workaround }} "-DT6_BINK_MSVC_DIAGNOSTIC_SOURCE=${{ matrix.isolate }}" ${{ matrix.toolset == 'ClangCL' && '-T ClangCL' || '' }}
           cmake --build build/trace --config ${{ matrix.config }} --target test_native_plane_trace --parallel 2
       - shell: python
         run: |

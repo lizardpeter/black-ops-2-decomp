@@ -86,7 +86,7 @@ def main():
     pe=load(a.dll)
     ranges=functions(pe)
     exports={e.name.decode():e.address for e in pe.DIRECTORY_ENTRY_EXPORT.symbols if e.name}
-    roots=[exports["curl_easy_setopt"],0xcbf8]
+    roots=[exports["curl_easy_setopt"],0xcbf8,0xeaf8]
     evidence={}
     for r in roots:
         item,targets=function_evidence(pe,r,ranges)
@@ -118,6 +118,20 @@ def main():
     for r in roots:
         print("\nFUNCTION",hex(r))
         print("\n".join(evidence[hex(r)]["instructions"]))
+    for name in ("curl_easy_init","curl_easy_cleanup","curl_multi_init","curl_multi_cleanup",
+                 "curl_multi_add_handle","curl_multi_remove_handle","curl_multi_perform",
+                 "curl_multi_poll","curl_multi_info_read"):
+        r=exports[name]
+        if r in ranges:
+            item,targets=function_evidence(pe,r,ranges)
+            print("\nLIFECYCLE",name,hex(r))
+            print("\n".join(item["instructions"]))
+            result["functions"][hex(r)]=item
+            result["exports"][name]=hex(r)
+            for t in targets:
+                if t in ranges and hex(t) not in result["functions"]:
+                    result["functions"][hex(t)]=function_evidence(pe,t,ranges)[0]
+    a.out.write_text(json.dumps(result,indent=2)+"\n")
     for n,b in observed.items():
         print(n, {k:[x["option"] for x in b[k]] for k in ("setopt","getinfo")})
     # Unresolved values remain explicit rather than being copied from MP.
