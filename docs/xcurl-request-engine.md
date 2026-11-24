@@ -56,3 +56,7 @@ Original 0x12228 now directly invokes reconstructed 0x14D04/0x14F84/0x1ABB0/0xCD
 ## URL cracking checkpoint
 
 Translated 0x14AC0, including the complete 0x68-byte x64 URL_COMPONENTS initialization, HRESULT conversion, HTTP warning/report ownership and unsupported scheme rejection. The formatter 0x1ADA4, platform reporting 0x54F4 and WinHTTP remain explicit service boundaries. All 1,024 original-machine cases passed locally after switching to GCC following the Clang execution timeout; CI differential run 45435399365 also passed. The native URL reporting services and formatter still require integration. The full response-header chain and Windows loopback acceptance at fc32dd67 passed CI (45434669548, 45434669794).
+
+## Streamed upload continuation
+
+Original 0x12868 and 0xC9C0, disabled ETW: 1,024 local original-machine comparisons (512 per entry). Active-state guard, tag-16 buffer allocation, real original read callback dispatch, fixed-length byte accounting, hexadecimal chunk framing and terminal chunk, EOF, custom-trailer delegation, callback abort/overflow, debug notification and WinHTTP write error cancellation. Comparison includes normalized object bytes and exact written buffer contents. The CRT formatter is modeled with the verified original `%zx%s` format; custom trailer generation 0x10420 and WinHTTP are explicit boundaries. Local GCC test passed; CI pending. No public ABI replacement claimed.
