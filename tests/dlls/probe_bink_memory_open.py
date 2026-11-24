@@ -44,6 +44,16 @@ def run(dll,fixture,flags):
     img=Image(dll)
     m=Machine(img,large_heap=True)
     m.mu.mem_map(ARENA,ARENA_SIZE)
+    # Model the x64 Windows SYSTEM_INFO ABI, not a Bink internal routine.
+    # Use a fixed AMD64 single-logical-CPU environment for reproducibility.
+    def system_info(mu):
+        address=mu.reg_read(X.UC_X86_REG_RCX)
+        block=struct.pack('<HHIQQQIIIHH',9,0,4096,0x10000,0x7ffffffeffff,
+                          1,1,8664,65536,6,0)
+        assert len(block)==48
+        mu.mem_write(address,block)
+    modeled={'kernel32.dll!getsysteminfo'}
+    m.on_import('kernel32.dll!GetSystemInfo',system_info)
     cursor=ARENA
     allocations=[]
     ticks=[]
@@ -70,6 +80,7 @@ def run(dll,fixture,flags):
                        limit=60_000_000)
     result["original_return"]=ret
     result["imports_called"]=m.imports_called
+    result["unmodeled_imports"]=[name for name in m.imports_called if name.lower() not in modeled]
     if not isinstance(ret,int) or not ARENA<=ret<cursor:
         result["verified"]=False
         return result
@@ -97,7 +108,7 @@ def run(dll,fixture,flags):
     result["frame_metadata_matches"]=(u32(0)==words[5] and u32(4)==words[6]
         and u32(8)==n and u32(0x0c)==1 and u32(0x14)==words[7] and u32(0x18)==words[8])
     # Do not bless an emulated path which depended on an unmodeled OS call.
-    result["verified"]=result["index_matches"] and result["input_unchanged"] and result["frame_metadata_matches"] and not result["imports_called"]
+    result["verified"]=result["index_matches"] and result["input_unchanged"] and result["frame_metadata_matches"] and not result["unmodeled_imports"]
     return result
 
 def main():
