@@ -33,7 +33,7 @@ def main():
     for i in range(384):
         h=bytearray(rng.randbytes(SIZE))
         length=rng.randrange(256)
-        flags=rng.choice([0,0x100000,0x4000000,0x1000,0x2000,0x80])
+        flags=rng.choice([0,0x100000,0x4000000,0x1000,0x2000,0x80,0x80000])
         for off,val in ((0,rng.randrange(1,1281)),(4,rng.randrange(1,721)),
             (0x20,flags),(0x57C,rng.choice([0,0,0,1,2])),(0x114,length),
             (0x3C,rng.randrange(9))):
@@ -55,7 +55,7 @@ def main():
         def setup(w):
             m.mu.mem_write(BUFFER,initial)
             m.mu.mem_write(DIRTY,bytes(512))
-        fmt=rng.getrandbits(32)
+        fmt=rng.choice([0,0x80000,0x4000000,0x4080000,rng.getrandbits(32)])
         ret,bufs,_,_=m.call(img.exports["BinkGetRects"],[bytes(h),fmt],"uint",
             setup=setup,fakes={img.base+0x1010:alloc})
         assert isinstance(ret,int),(i,ret)

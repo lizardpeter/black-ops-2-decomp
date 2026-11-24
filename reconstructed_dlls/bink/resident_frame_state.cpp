@@ -250,8 +250,10 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
 extern "C" std::int64_t bink_research_get_rects(void* h,std::uint32_t surface_type,
     t6_bink::RectAllocate allocate,void* ctx) {
     // Original branches preceding both allocation and rectangle scanning.
-    (void)surface_type; // only the pending dirty-map path consumes this
-    if(!h || (u32(h,0x20)&0x04003000U) || u32(h,0x57C)==2)return 0;
+    // 0x1C837 tests the argument, not handle flags. Bit 19 on either
+    // argument or handle bypasses the 0x57C == 2 suppression.
+    if(!h || (surface_type&0x04000000U))return 0;
+    if(!((surface_type|u32(h,0x20))&0x00080000U) && u32(h,0x57C)==2)return 0;
     const auto* dirty=read<void*>(h,0xF0);
     const auto cached=u32(h,0x3C);
     // Do not synthesize the not-yet-transcribed dirty-map scan.
@@ -268,7 +270,7 @@ extern "C" std::int64_t bink_research_get_rects(void* h,std::uint32_t surface_ty
         if(!buffer)return -1; // original would fault on null allocation
         write(h,0xD8,buffer);
         write(h,0xE0,buffer);
-        buffer[length]=1;
+        buffer[length]=0;
     }
     if(!dirty) {
         put(h,0x3C,1);
