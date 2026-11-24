@@ -66,6 +66,12 @@ def read_cstring(pe, rva, limit=256):
     blob = pe.get_data(rva, limit)
     return blob.split(b"\\0", 1)[0].decode("utf-8", "backslashreplace")
 
+def read_wstring(pe, rva, limit=512):
+    blob = pe.get_data(rva, limit)
+    blob = blob[:len(blob) - (len(blob) % 2)]
+    end = next((i for i in range(0, len(blob), 2) if blob[i:i+2] == b"\\0\\0"), len(blob))
+    return blob[:end].decode("utf-16le", "backslashreplace")
+
 def raw_strings(data, pe, needles):
     results = {}
     for label, needle in needles.items():
@@ -142,7 +148,9 @@ def main():
         }
 
     data_strings = {hex(rva): read_cstring(pe, rva) for rva in
-                    (0x1FF78, 0x1FF90, 0x1FFA0, 0x1FFB8, 0x1FFD0, 0x1FFE0, 0x20378)}
+                    (0x1FF78, 0x1FF90, 0x1FFA0, 0x1FFB8, 0x1FFD0, 0x1FFE0)}
+    wide_strings = {hex(rva): read_wstring(pe, rva) for rva in
+                    (0x20320, 0x20340, 0x20360, 0x20378, 0x203A0, 0x203C0)}
 
     known = {}
     for rva in KNOWN:
@@ -170,7 +178,8 @@ def main():
         "exception_function_count": len(table),
         "interface_data": targets, "code_references": xrefs,
         "interface_reference_functions": referenced,
-        "known_gdk_functions": known, "data_strings": data_strings, "imports": imports,
+        "known_gdk_functions": known, "data_strings": data_strings,
+        "wide_strings": wide_strings, "imports": imports,
         "dynamic_loader_strings": strings,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -191,6 +200,7 @@ def main():
         print("\n".join(fn["instructions"]))
     print("\nDYNAMIC LOADER STRINGS", json.dumps(strings, sort_keys=True))
     print("\nREFERENCED DATA STRINGS", json.dumps(data_strings, sort_keys=True))
+    print("\nWIDE DATA STRINGS", json.dumps(wide_strings, sort_keys=True))
     print("\nDYNAMIC IMPORTS")
     for dll, names in imports.items():
         selected = [name for name in names if any(key in name.lower() for key in
