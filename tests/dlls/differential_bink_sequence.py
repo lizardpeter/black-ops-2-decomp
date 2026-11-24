@@ -89,10 +89,11 @@ def main():
             start,end=(offsets[frame]&~1,offsets[frame+1]&~1)
             assert 44+4*(count+1)<=start<end<=len(data)
             packet=data[start:end]
-            assert len(packet)<=SCRATCH_POINTERS-PACKET
+            assert len(packet)+4<=SCRATCH_POINTERS-PACKET
             split,=struct.unpack_from("<I",packet)
             assert 4<split<=len(packet) and split%4==0 and len(packet)%4==0
-            raw=(ctypes.c_uint8*len(packet)).from_buffer_copy(packet)
+            padded=packet+bytes(4)
+            raw=(ctypes.c_uint8*len(padded)).from_buffer_copy(padded)
             dst=frame%2
             ref=1-dst
             op=np=4
@@ -101,22 +102,22 @@ def main():
             report["frames"].append(frame_report)
             for i,(w,h) in enumerate(dims):
                 if i==1:op=np=split
-                # Match the verified first-frame luma oracle. Later Y
-                # frames use packet-end, as in the tested frame-1 probe.
-                limit=split if frame==0 and i==0 else len(packet)
+                # Match the actual BinkDoFramePlane -> FUN_1800274A0 call:
+                # coordinator adds a four-byte lookahead to full packet end.
+                limit=len(padded)
                 modes,submodes=Counter(),Counter()
                 def mode(mu):
                     modes[mu.reg_read(X.UC_X86_REG_RAX)&0xffffffff]+=1
                 def submode(mu):
                     submodes[bytes(mu.mem_read(mu.reg_read(X.UC_X86_REG_RAX),1))[0]]+=1
                 def setup(w):
-                    w.write(PACKET,packet)
+                    w.write(PACKET,padded)
                     w.write(SCRATCH_POINTERS,struct.pack("<9Q",*scratch))
                     w.u32(STATS,0)
                 returned,bufs,_,_=machine.call(
                     img.base+0x252C0,
                     [original[dst][i],original[ref][i],w,h,w,
-                     PACKET+op,PACKET+limit,0,STATS,0,1 if i==0 else 2,
+                     PACKET+op,PACKET+limit,offsets[frame]&1,STATS,0,1 if i==0 else 2,
                      SCRATCH_POINTERS,0,STATS],
                     ret="uint64",setup=setup,
                     at={img.base+0x25A32:mode,img.base+0x25BD5:submode},
@@ -130,7 +131,7 @@ def main():
                 out=(ctypes.c_uint8*(w*h)).from_buffer_copy(native[dst][i])
                 prior=(ctypes.c_uint8*(w*h)).from_buffer_copy(native[ref][i])
                 trace=Trace()
-                status=fn(raw,len(packet),np,limit,w,h,out,w,prior,ctypes.byref(trace))
+                status=fn(raw,len(padded),np,limit,w,h,out,w,prior,ctypes.byref(trace))
                 actual=bytes(out)
                 np=4*trace.input_words
                 # Avoid scanning megabytes in Python on the matching path.
@@ -161,7 +162,7 @@ def main():
                 report["matched_planes"]+=1
                 report["matched_bytes"]+=len(actual)
                 if frame==0 and i==0 and pin==PIN_VIDEO:assert sha(actual)==PIN_Y
-            assert op==np==len(packet)
+            assert op==np and op<=len(padded)
             for plane in native[dst]:decoded.write(plane)
             report["complete_matching_frames"]+=1
             save()

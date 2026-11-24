@@ -55,7 +55,7 @@ def fetch_alpha(directory):
         assert len(data)<=8*1024*1024 and sha(data)==pin
         dest.write_bytes(data)
 
-def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,padding_byte=0):
+def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0):
     assert lookahead in (0,4) and 0<=padding_byte<=255
     assert sha(dll.read_bytes())==PIN_DLL
     data=video.read_bytes()
@@ -90,7 +90,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,pa
         for w,h in dims:
             addresses[slot].append(cursor)
             cursor=(cursor+w*h+len(guard)+4095)&~4095
-    assert cursor<=ARENA+0x00400000
+    assert cursor<=ARENA+machine.heap_size, 'oracle arena too small for two padded four-plane frames'
     result={"fixture":video.name,"sha256":pin,"visible_dimensions":[width,height],
             "plane_dimensions":dims,"original_coordinator_rva":"0x274A0",
             "lookahead_bytes":lookahead,"padding_byte":padding_byte,
@@ -111,6 +111,9 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,pa
         yend=aend+u32(packet,aend)
         assert aend+4<yend<len(packet) and yend%4==0
         dst,ref=frame%2,1-frame%2
+        # Original FUN_180016420 stores current index low bit in handle+0x140.
+        # BinkDoFramePlane forwards that value as coordinator argument five.
+        keyframe=(offsets[frame]&1) if lookahead else 0
         # Original descriptor layout verified by BinkGetFrameBuffersInfo.
         # The slot field names the reference slot; the coordinator selects
         # the opposite destination when that slot is allocated.
@@ -133,6 +136,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,pa
                           "height":mu.reg_read(X.UC_X86_REG_R9)&0xffffffff,
                           "stride":stride&0xffffffff,"start":begin-PACKET,
                           "limit":limit-PACKET,
+                          "keyframe":struct.unpack_from("<I",stack,0x18)[0],
                           "plane_flags":struct.unpack_from("<I",stack,0x40)[0]})
         def at_return(mu):
             calls[-1]["next"]=mu.reg_read(X.UC_X86_REG_RAX)-PACKET
@@ -153,9 +157,9 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,pa
         # BinkDoFramePlane caller (handle+0x13c full packet length, RVA
         # 0x164f9 and 0x1a975), while zero preserves the previous oracle.
         returned,_,_,_=machine.call(img.base+COORD,
-            [DESCRIPTOR,0,0,PACKET,0,PACKET+limit_bytes-4,SIZES,flags,flags],
+            [DESCRIPTOR,0,0,PACKET,keyframe,PACKET+limit_bytes-4,SIZES,flags,flags],
             ret="uint",setup=setup,at=hooks,limit=max(15_000_000,yw*yh*400))
-        rec={"index":frame,"original_return":returned,"original_plane_calls":calls,
+        rec={"index":frame,"original_return":returned,"original_plane_calls":calls,"keyframe":keyframe,
              "alpha_end":aend,"y_end":yend,"planes":[]}
         result["frames"].append(rec)
         save()
@@ -182,7 +186,8 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=0,pa
             route=calls[j]
             route_match=(route["dst"]==addresses[dst][p] and route["ref"]==addresses[ref][p]
                          and route["width"]==w and route["height"]==h and route["stride"]==w
-                         and route["start"]==pos and route["limit"]==limit_bytes)
+                         and route["start"]==pos and route["limit"]==limit_bytes
+                         and route["keyframe"]==keyframe)
             plane={"plane":p,"status":status,"route_match":route_match,
                    "native_start":pos,"native_next":next_pos,"original_next":route.get("next"),
                    "native_sha256":sha(actual),"original_sha256":sha(expected),
@@ -215,7 +220,7 @@ def main():
     p.add_argument("--video",type=Path)
     p.add_argument("--library",type=Path)
     p.add_argument("--frames",type=int,default=16)
-    p.add_argument("--lookahead",type=int,choices=(0,4),default=0)
+    p.add_argument("--lookahead",type=int,choices=(0,4),default=4)
     p.add_argument("--pad-byte",type=lambda v:int(v,0),default=0)
     p.add_argument("--report",type=Path,default=Path("build/coordinator-report.json"))
     a=p.parse_args()

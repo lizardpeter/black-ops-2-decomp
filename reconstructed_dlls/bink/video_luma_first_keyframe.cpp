@@ -123,7 +123,7 @@ extern "C" int bink_research_decode_video_plane(
     if (!compressed || !output || stride<width ||
         width<8 || height<8 || width>1280 || height>720 ||
         (width&7U)!=0U || (height&7U)!=0U ||
-        compressed_bytes<4 || compressed_bytes>262144U ||
+        compressed_bytes<4 || compressed_bytes>262148U ||
         (compressed_bytes&3U)!=0U) {
         report->status=1;return 1;
     }

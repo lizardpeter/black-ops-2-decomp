@@ -80,6 +80,12 @@ VideoPlayback::Result VideoPlayback::decode_next() {
     const auto& previous=buffers_[1-next_%2];
     // Original coordinator decodes A (if present), Y, C1, C2, whereas
     // the caller-facing frame descriptor uses Y/C1/C2/A storage order.
+    // Original BinkDoFramePlane supplies the full indexed packet size
+    // (handle+0x13c); FUN_1800274A0 adds one word before passing the
+    // exclusive end to its plane decoder. Zero guard data is independent
+    // of actual next-frame contents; differential tests also use 0xA5.
+    std::vector<std::uint8_t> padded(packet,packet+bytes);
+    padded.resize(bytes+4U,0);
     const bool alpha=plane_count()==4;
     const std::array<unsigned,4> order{3,0,1,2};
     std::uint32_t pos=alpha?layout.alpha_start:layout.luma_start;
@@ -87,15 +93,15 @@ VideoPlayback::Result VideoPlayback::decode_next() {
         const unsigned p=order[i];
         if(p==0)pos=layout.luma_start;
         if(p==1)pos=layout.luma_end;
-        const auto limit=bytes;
+        const auto limit=bytes+4U;
         const auto w=plane_width(p),h=plane_height(p);
         BinkFirstLumaTrace trace{};
-        const int status=bink_research_decode_video_plane(packet,bytes,pos,limit,
+        const int status=bink_research_decode_video_plane(padded.data(),limit,pos,limit,
             w,h,current[p].data(),w,previous[p].data(),&trace);
         const auto cursor=4U*trace.input_words;
-        if(status || cursor<=pos || cursor>limit || (p==3 && cursor!=layout.alpha_end) ||
-           (p==0 && cursor!=layout.luma_end) ||
-           (p==2 && cursor!=bytes)) {
+        if(status || cursor<=pos || cursor>limit || (p==3 && cursor>layout.alpha_end+4U) ||
+           (p==0 && cursor>layout.luma_end+4U) ||
+           (p==1 && cursor>=limit)) {
             fail("frame="+std::to_string(next_)+" plane="+std::to_string(p)+
                  " status="+std::to_string(status)+" block="+std::to_string(trace.error_x)+
                  ","+std::to_string(trace.error_y)+" mode="+std::to_string(trace.mode)+

@@ -227,7 +227,7 @@ class Machine:
         # Opt-in for large x64 video-plane buffers; preserve all old addresses.
         if large_heap and not self.x64:
             raise ValueError("large argument arena is x64-only")
-        self.heap, self.heap_size = (0x32000000, 0x00400000) if large_heap else (HEAP, HEAP_SIZE)
+        self.heap, self.heap_size = (0x32000000, 0x00800000) if large_heap else (HEAP, HEAP_SIZE)
         mu = self.mu = Uc(UC_ARCH_X86, UC_MODE_64 if self.x64 else UC_MODE_32)
         for img in images:
             mu.mem_map(img.base, img.size)

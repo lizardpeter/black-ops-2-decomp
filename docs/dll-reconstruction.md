@@ -583,3 +583,21 @@ routing and byte equality, then compares the source playback output.
 Default: first 16 frames per asset; dispatch frames=0 for every frame.
 The workflow retains JSON evidence, not decoded game media. Full-corpus
 compatibility remains unverified until all shards pass.
+
+### Original caller end and keyframe propagation
+
+Further direct disassembly establishes that the earlier whole-coordinator
+probe's inclusive final-word convention is not the full BinkDoFramePlane
+caller convention. Original FUN_180016420 (around RVA 0x164F9) stores the
+difference of consecutive masked frame offsets at handle+0x13C and the
+current index low bit at +0x140. BinkDoFramePlane at 0x1A975 forms its
+packet-end pointer from that full byte length; the call to 0x274A0 at
+0x1AC37 forwards the keyframe bit and full packet end. The coordinator
+adds four before forwarding its exclusive word end to 0x252C0.
+The separate real-caller lookahead workflow confirmed independent native
+plane equality with zero and 0xA5 guard words on seven tested clips.
+Native playback and subsequent corpus oracles now use this actual
+one-word lookahead and the original coordinator tests forward the index
+keyframe bit. The earlier packet-end-only tests remain historical evidence,
+not proof of this precise original caller convention. The 720p-alpha
+oracle arena is enlarged to 8 MiB for two four-plane padded buffers.

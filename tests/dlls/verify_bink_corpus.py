@@ -9,6 +9,7 @@ clip is recorded and never promoted to a corpus pass. Originals stay ignored.
 import argparse
 import hashlib
 import json
+import re
 import struct
 import subprocess
 import sys
@@ -45,7 +46,7 @@ def fetch(clip,directory):
                     h.update(chunk)
                     out.write(chunk)
             if size!=clip["size_bytes"] or h.hexdigest()!=clip["sha256"]:
-                raise ValueError("fixture integrity mismatch")
+                raise ValueError(f"fixture integrity mismatch: size={size}/{clip['size_bytes']} sha={h.hexdigest()}/{clip['sha256']}")
             partial.replace(path)
         finally:
             partial.unlink(missing_ok=True)
@@ -83,6 +84,7 @@ def main():
     assert len({c["name"] for c in clips})==44
     assert sum(c["frames"] for c in clips)==inventory["total_frames"]
     assert all(c["audio_tracks"]==0 for c in clips)
+    assert all(re.fullmatch(r"[0-9a-f]{64}",c["sha256"]) for c in clips)
     def count(c):return c["frames"] if a.frames==0 else min(c["frames"],a.frames)
     def weight(c):return count(c)*c["width"]*c["height"]*(5 if c["flags"] else 3)
     groups=[[] for _ in range(a.shards)]
@@ -121,7 +123,7 @@ def main():
             result.pop("pass_")
             print("CORPUS PASS",json.dumps(result),flush=True)
         except Exception as e:
-            result["error"]=str(e)
+            result["error"]=f"{type(e).__name__}: {e}"
             print("CORPUS FAIL",json.dumps(result),flush=True)
         finally:
             # Keep compact JSON evidence, not gigabytes of decoded game media.

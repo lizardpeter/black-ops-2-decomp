@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - .github/workflows/bink-original-end.yml
+      - tests/differential/harness.py
   workflow_dispatch:
 permissions:
   contents: read
