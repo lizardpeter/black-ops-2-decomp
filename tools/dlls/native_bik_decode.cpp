@@ -46,10 +46,12 @@ int main(int argc,char** argv) {
     if(!t6_bink::validate_header_prefix(file.data(),file.size(),&header))
         return fail("invalid original Bink header");
     if(header.magic!=0x694B4942U || header.audio_track_count!=0 ||
-        header.flags!=0 || header.width!=256 || header.height!=256 ||
+        header.flags!=0 || header.width<32 || header.width>512 ||
+        header.height<32 || header.height>512 ||
+        (header.width&31U) || (header.height&31U) ||
         std::uint64_t(header.payload_bytes)+8!=file.size() ||
         header.largest_frame_bytes>32768)
-        return fail("not a supported BIKi 256x256 video-only fixture");
+        return fail("not a supported 32-aligned BIKi video-only fixture");
     std::vector<t6_bink::FrameSpan> index(header.frame_count);
     if(!t6_bink::read_video_only_index(file.data(),file.size(),
             index.data(),index.size(),&header) ||
@@ -58,11 +60,12 @@ int main(int argc,char** argv) {
 
     // Match the independently verified two-buffer research configuration.
     // Skipped tail blocks preserve previous contents of the destination slot.
-    const std::array<unsigned,3> sides{256,128,128};
+    const std::array<unsigned,3> widths{header.width,header.width/2,header.width/2};
+    const std::array<unsigned,3> heights{header.height,header.height/2,header.height/2};
     std::array<std::array<std::vector<std::uint8_t>,3>,2> frames;
     for(unsigned slot=0;slot<2;++slot)
         for(unsigned i=0;i<3;++i)
-            frames[slot][i].assign(sides[i]*sides[i],slot==0?0xB7:0x80);
+            frames[slot][i].assign(widths[i]*heights[i],slot==0?0xB7:0x80);
     // Decode to a temporary output. Never advertise a completed video
     // or replace a preexisting destination if a frame fails validation.
     auto partial=output_path;
@@ -92,10 +95,10 @@ int main(int argc,char** argv) {
         for(unsigned p=0;p<3;++p) {
             if(p==1)pos=split;
             const std::uint32_t limit=(f==0&&p==0)?split:bytes;
-            const auto side=sides[p];
+            const auto w=widths[p], h=heights[p];
             BinkFirstLumaTrace trace{};
             const int status=bink_research_decode_video_plane(packet,bytes,pos,limit,
-                side,side,current[p].data(),side,previous[p].data(),&trace);
+                w,h,current[p].data(),w,previous[p].data(),&trace);
             const auto next=4U*trace.input_words;
             if(status || next<=pos || next>limit || (p==0&&next!=split) ||
                 (p==2&&next!=bytes)) {
