@@ -493,3 +493,28 @@ The 150-frame result is complete video-only decoding for one fixture,
 not a claim of complete codec coverage, sound playback, timing, BinkOpen,
 Bink's full exported API, or game integration. The original Store
 executables still have both external DLL imports.
+
+## Standalone decoder and Store media coverage (2026-11-23)
+
+[CI run 45306338122](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45306338122)
+passed the 150-frame regression, standalone C++ executable compilation and
+byte comparison, and the two additional complete sequences
+`karma_pip_security_feed.bik` (114 frames) and `yemen_drone_cam.bik`
+(172 frames). The complete tested 256x256 corpus is now **436 frames,
+1,308 planes, 42,860,544 exact matching decoded bytes**. The standalone
+executable links the source codec and uses no original DLL at runtime.
+
+The sequence driver and standalone executable now support rectangular
+32-aligned video-only dimensions through 512x512. A fourth pinned original
+fixture, `haiti_int_1c.bik` (512x288, 761 frames), is included in the
+fixture downloader, with a first-32-frame differential stage. Its result
+is not included in the verified counts above until that stage passes.
+
+The [Store Bink asset inventory](bink-store-media-inventory.json) records
+the original headers for all **44** `.bik` objects in the Store video
+folder: 18,155 frames, zero embedded audio tracks, and six clips carrying
+the original alpha flag (0x100000). The largest category is 1280x720
+(24 clips). Prioritize large and odd-sized padded plane decoding, then
+alpha decoding and the original frame-buffer/API integration; the full
+embedded-audio codec is not required by the inspected asset headers.
+This does not prove audio-related public API calls are unused.
