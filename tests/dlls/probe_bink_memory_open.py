@@ -207,13 +207,21 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         else:current_priority=p
         thread_events.append(["priority",p])
         mu.reg_write(X.UC_X86_REG_RAX,1)
+    affinity={}
+    def set_affinity(mu):
+        h=mu.reg_read(X.UC_X86_REG_RCX)
+        mask=mu.reg_read(X.UC_X86_REG_RDX)
+        assert mask and h in threads
+        old=affinity.get(h,1);affinity[h]=mask
+        thread_events.append(["affinity",mask]);mu.reg_write(X.UC_X86_REG_RAX,old)
     def get_current_thread_id(mu):mu.reg_write(X.UC_X86_REG_RAX,1)
     def sleep(mu):thread_events.append(["sleep",mu.reg_read(X.UC_X86_REG_ECX)])
     if defer_worker:
         assert file_mode and not library and not playback_out
         for name,callback in (("CreateThread",create_thread),("ResumeThread",resume_thread),
                 ("GetCurrentThread",get_current_thread),("GetCurrentThreadId",get_current_thread_id),
-                ("GetThreadPriority",get_thread_priority),("SetThreadPriority",set_thread_priority),("Sleep",sleep)):
+                ("GetThreadPriority",get_thread_priority),("SetThreadPriority",set_thread_priority),
+                ("SetThreadAffinityMask",set_affinity),("Sleep",sleep)):
             m.on_import("kernel32.dll!"+name,callback)
             modeled.add("kernel32.dll!"+name.lower())
     # WinMM timer period is a process-level boundary, independent of
