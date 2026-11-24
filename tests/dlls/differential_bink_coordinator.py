@@ -142,8 +142,11 @@ def run(dll,video,library,frames,report_path):
                     mu.mem_write(addresses[s][p],original[s][p]+guard)
         hooks={img.base+PLANE:at_plane}
         hooks.update({img.base+x:at_return for x in RETURNS})
+        # The original coordinator increments argument 6 by four before
+        # forwarding its exclusive word-end to every plane (0x276a*).
+        # Pass the inclusive final word address, not an exclusive byte end.
         returned,_,_,_=machine.call(img.base+COORD,
-            [DESCRIPTOR,0,0,PACKET,0,PACKET+len(packet),SIZES,flags,flags],
+            [DESCRIPTOR,0,0,PACKET,0,PACKET+len(packet)-4,SIZES,flags,flags],
             ret="uint",setup=setup,at=hooks,limit=max(15_000_000,yw*yh*400))
         rec={"index":frame,"original_return":returned,"original_plane_calls":calls,
              "alpha_end":aend,"y_end":yend,"planes":[]}
@@ -183,7 +186,9 @@ def run(dll,video,library,frames,report_path):
             save()
             if (status or not route_match or route.get("next")!=next_pos or expected!=actual
                 or not plane["guard_unchanged"] or not plane["reference_unchanged"]):
-                raise AssertionError(f"coordinator differential mismatch frame={frame}: {plane}")
+                raise AssertionError(f"coordinator differential mismatch frame={frame}: {plane}; "
+                                     f"original route={route}, expected dst={addresses[dst][p]:#x} "
+                                     f"ref={addresses[ref][p]:#x} dims={w}x{h} limit={len(packet)}")
             original[dst][p]=expected
             native[dst][p]=actual
             result["matched_planes"]+=1
