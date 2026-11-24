@@ -43,7 +43,7 @@ def run(dll,fixture,flags):
     assert words[0]==0x694b4942 and words[10]==0
     img=Image(dll)
     m=Machine(img,large_heap=True)
-    m.mu.mem_map(ARENA,ARENA_SIZE)
+    m.mu.mem_map(ARENA-0x1000,ARENA_SIZE+0x1000)
     # Model the x64 Windows SYSTEM_INFO ABI, not a Bink internal routine.
     # Use a fixed AMD64 single-logical-CPU environment for reproducibility.
     def system_info(mu):
@@ -126,6 +126,8 @@ def run(dll,fixture,flags):
         modeled.add("kernel32.dll!"+name.lower())
     cursor=ARENA
     allocations=[]
+    freed=[]
+    free_target=img.base+0x17950 # distinct instrumented allocator callback address
     ticks=[]
     def alloc(mu):
         nonlocal cursor
@@ -137,6 +139,10 @@ def run(dll,fixture,flags):
         # Original initializer owns all initialization; allocator boundary
         # supplies zero-filled committed pages, as the default heap path does.
         mu.mem_write(address,bytes(size))
+        # Original allocation footer: type 3 (custom allocator), raw-pointer
+        # delta byte, deallocation callback at user_ptr-12.
+        mu.mem_write(address-12,struct.pack('<Q',free_target))
+        mu.mem_write(address-2,b'\x03\x20')
         allocations.append({"offset":address-ARENA,"requested_bytes":size})
         return address
     def clock(mu):
@@ -145,7 +151,7 @@ def run(dll,fixture,flags):
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
             "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events}
-    ret,bufs,_,_=m.call(img.exports["BinkOpen"],[data,flags],"uint64",
+    ret,bufs,global_writes,_=m.call(img.exports["BinkOpen"],[data,flags],"uint64",
                        fakes={img.base+0x1010:alloc,img.base+0x1FF00:clock},
                        limit=60_000_000)
     result["original_return"]=ret
@@ -179,6 +185,35 @@ def run(dll,fixture,flags):
         and u32(8)==n and u32(0x0c)==1 and u32(0x14)==words[7] and u32(0x18)==words[8])
     # Do not bless an emulated path which depended on an unmodeled OS call.
     result["verified"]=result["index_matches"] and result["input_unchanged"] and result["frame_metadata_matches"] and not result["unmodeled_imports"]
+    descriptor=p64(0xd0)
+    if descriptor:
+        desc=bytes(m.mu.mem_read(descriptor,0xd8))
+        result["descriptor"]={"header":list(struct.unpack_from("<6I",desc)),
+            "slots":[[{"allocate":struct.unpack_from("<I",desc,0x18+s*0x60+p*0x18)[0],
+                       "data":normalize(struct.unpack_from("<Q",desc,0x20+s*0x60+p*0x18)[0]),
+                       "pitch":struct.unpack_from("<I",desc,0x28+s*0x60+p*0x18)[0]}
+                      for p in range(4)] for s in range(2)]}
+    # Replay original image globals, retaining actual original allocations.
+    # Machine.call resets its input heap, so restore the unchanged movie bytes.
+    def setup_close(w):
+        m.mu.mem_write(input_base,data)
+        for address,value in global_writes.items():w.write(address,value)
+    def free(mu):
+        raw=mu.reg_read(X.UC_X86_REG_RCX)
+        user=raw+32
+        assert user in [ARENA+a["offset"] for a in allocations],hex(raw)
+        assert user not in freed,hex(raw)
+        freed.append(user)
+        return 0
+    closed,_,_,_=m.call(img.exports["BinkClose"],[ret],"void",setup=setup_close,
+        fakes={img.base+0x1FF00:clock,free_target:free},limit=60_000_000)
+    result["close_return"]=closed
+    result["close_imports_called"]=m.imports_called
+    result["freed_offsets"]=[a-ARENA for a in freed]
+    result["close_verified"]=(closed is None and sorted(result["freed_offsets"])==
+        sorted(a["offset"] for a in allocations) and
+        all(name.lower() in modeled for name in m.imports_called))
+    result["verified"]=result["verified"] and result["close_verified"]
     return result
 
 def main():

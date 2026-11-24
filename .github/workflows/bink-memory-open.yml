@@ -13,7 +13,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        clip: [la_pip_seq_6, blackout_virus, karma_pip_helipad]
+        clip: [la_pip_seq_6, blackout_virus, karma_pip_helipad, generalstore, yemen_mendz]
+        flags: ['0x04000000', '0x04000400']
     steps:
       - uses: actions/checkout@v4
         with:
@@ -32,10 +33,10 @@ jobs:
         run: |
           python tests/dlls/probe_bink_memory_open.py \
             originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
-            --out build/original-memory-open.json
+            --flags "${{ matrix.flags }}" --out build/original-memory-open.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: bink-memory-open-${{ matrix.clip }}
+          name: bink-memory-open-${{ matrix.clip }}-${{ matrix.flags }}
           path: build/original-memory-open.json
           if-no-files-found: warn
