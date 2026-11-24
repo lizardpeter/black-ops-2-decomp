@@ -11,12 +11,14 @@
 
 int main(int argc,char** argv) {
     using namespace t6_bink;
-    assert(argc>=3 && argc<=5);
-    bool async=false,preloaded=false;
+    assert(argc>=3 && argc<=7);
+    bool async=false,preloaded=false,streamed=false,all=false;
     for(int i=3;i<argc;++i) {
         const std::string_view arg(argv[i]);
         if(arg=="--async")async=true;
         else if(arg=="--file")preloaded=true;
+        else if(arg=="--stream")streamed=true;
+        else if(arg=="--all")all=true;
         else assert(false);
     }
     std::ifstream input(argv[1],std::ios::binary);
@@ -28,7 +30,8 @@ int main(int argc,char** argv) {
     };
     ResidentVideoSession movie;
     assert(!movie.open({},clock,&tick));
-    if(preloaded)assert(movie.open_preloaded_file(argv[1],0x1000000,clock,&tick));
+    if(streamed)assert(movie.open_streaming_file(argv[1],0x10000,clock,&tick));
+    else if(preloaded)assert(movie.open_preloaded_file(argv[1],0x1000000,clock,&tick));
     else assert(movie.open(std::move(file),clock,&tick));
     assert(movie.frame_number()==1 && movie.last_decoded_frame()==0 && movie.keyframe()==1);
     RegisteredFrameBuffers info{};
@@ -44,7 +47,7 @@ int main(int argc,char** argv) {
             plane.allocate=1;plane.data=v.data();plane.pitch=w;
         }
     assert(movie.register_buffers(info));
-    if(preloaded) {
+    if(preloaded||streamed) {
         assert(movie.control_background_io(2)==0);
         assert(movie.control_background_io(0x80000002)==0);
         assert(movie.control_background_io(1)==1);
@@ -52,7 +55,12 @@ int main(int argc,char** argv) {
     std::ofstream out(argv[2],std::ios::binary);
     assert(out);
     assert(movie.header().frame_count>=16);
-    for(unsigned i=0;i<16;++i) {
+    const auto frames=all?movie.header().frame_count:16U;
+    for(unsigned i=0;i<frames;++i) {
+        // Exercise both real background refill and suspended/direct-read
+        // playback; the latter must not stall when the ring empties.
+        if(streamed && i==frames/3)assert(movie.control_background_io(2)==0);
+        if(streamed && i==2*frames/3)assert(movie.control_background_io(0x80000001)==1);
         assert(movie.frame_number()==i+1);
         if(i==4) {
             assert(movie.pause(1) && movie.is_paused());
@@ -87,12 +95,12 @@ int main(int argc,char** argv) {
         const auto before_tick=tick;
         assert(movie.do_frame()==ResidentVideoSession::DecodeResult::already_decoded);
         assert(tick==before_tick && info.frame_num==slot && before==storage[slot]);
-        if(i!=15)assert(movie.next_frame());
+        if(i+1!=frames)assert(movie.next_frame());
     }
     out.close();assert(out);
     movie.close();
     assert(movie.frame_number()==0 && movie.last_decoded_frame()==0);
     assert(!movie.next_frame());
     std::cout<<"Resident frame state + registered "<<(async?"async":"sync")
-             <<" decode integrated PASS: 16 frames\n";
+             <<" decode integrated PASS: "<<frames<<" frames\n";
 }

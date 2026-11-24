@@ -391,3 +391,43 @@ extern "C" int bink_research_wait_async(void* h,std::int32_t timeout,
         if(timeout>0 && timer(clock_ctx)-start>=static_cast<std::uint32_t>(timeout))return 0;
     }
 }
+
+extern "C" int bink_research_select_stream_frame(void* h,std::uint32_t frame,
+    t6_bink::ResidentTimer timer,void* ctx) {
+    if(!h||!timer||!u32(h,0x08)||frame>u32(h,0x08)||u32(h,0x144)||
+       u32(h,0x138)||read<void*>(h,0x1D8)||!read<void*>(h,0x5A0)||
+       !read<void*>(h,0x1A0))return static_cast<int>(Result::unsupported);
+    const auto i=frame?frame-1:0;
+    put(h,0x57C,0);put(h,0x10,u32(h,0x0C));
+    if(i==0) {
+        const auto now=timer(ctx);
+        if(!u32(h,0x574))put(h,0x574,now);
+        if(now-u32(h,0x574)>300000U){put(h,0x574,now);put(h,0x578,1);}
+    }
+    const auto* table=read<const std::uint32_t*>(h,0x1A0);
+    const auto raw=read<std::uint32_t>(table,std::size_t(i)*4);
+    const auto offset=raw&~1U;
+    const auto next=read<std::uint32_t>(table,std::size_t(i+1)*4)&~1U;
+    put(h,0x1EC,i+1);put(h,0x1E8,offset);put(h,0x140,raw&1U);
+    put(h,0x13C,next-offset);
+    const auto scratch=read<std::uintptr_t>(h,0x5A0);
+    const auto aligned=(scratch+0x100U)&~std::uintptr_t(0x7F);
+    write(h,0x100,aligned-(0x80U-(offset&0x7FU)));
+    put(h,0x138,1U);put(h,0x0C,i+1);
+    return 0;
+}
+extern "C" int bink_research_next_stream_frame(void* h,t6_bink::ResidentTimer timer,void* ctx) {
+    if(!h)return 0;
+    if(u32(h,0x120)||u32(h,0x124))return static_cast<int>(Result::busy);
+    if(!timer||!u32(h,0x08)||u32(h,0x144)||u32(h,0x138))
+        return static_cast<int>(Result::unsupported);
+    put(h,0x27C,1);
+    const auto now=timer(ctx),paused=u32(h,0x530);
+    if(paused && paused!=UINT32_MAX) {
+        put(h,0x530,0);put(h,0x558,u32(h,0x558)+now-paused);
+    }
+    const auto current=u32(h,0x0C);
+    const auto result=bink_research_select_stream_frame(h,current<u32(h,0x08)?current+1:1,timer,ctx);
+    put(h,0x27C,0);
+    return result;
+}

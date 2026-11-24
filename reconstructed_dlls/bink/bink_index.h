@@ -16,4 +16,8 @@ struct FrameSpan {
 bool read_video_only_index(const std::uint8_t* data, std::size_t size,
                            FrameSpan* output, std::size_t capacity,
                            HeaderPrefix* parsed = nullptr);
+
+// Read only the header and index; the compressed payload need not be resident.
+bool read_video_only_index_prefix(const std::uint8_t* prefix,std::size_t prefix_bytes,
+    std::size_t file_bytes,FrameSpan* output,std::size_t capacity,HeaderPrefix* parsed);
 }

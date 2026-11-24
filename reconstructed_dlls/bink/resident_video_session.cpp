@@ -1,5 +1,7 @@
 #include "resident_video_session.h"
 #include "resident_bootstrap.h"
+#include "file_io_state.h"
+#include <algorithm>
 #include <cstring>
 #include <utility>
 #include <condition_variable>
@@ -93,6 +95,86 @@ struct ResidentVideoSession::Worker {
     }
     static void notify(std::uint32_t,void*) {} // no other handle in this adapter
 };
+
+// Actual host file and worker adapter for the original file I/O state
+// routines. A single mutex serializes the OS file position and ring state;
+// original callbacks execute under that lock. No full-file read.
+struct ResidentVideoSession::StreamInput {
+    explicit StreamInput(ResidentVideoSession& session):owner(session) {}
+    ~StreamInput() {
+        {std::lock_guard lock(mutex);stopping=true;}
+        cv.notify_all();
+        if(thread.joinable())thread.join();
+    }
+    ResidentVideoSession& owner;
+    std::ifstream file;
+    std::vector<std::uint64_t> storage;
+    std::mutex mutex;
+    std::condition_variable cv;
+    bool stopping=false;
+    std::thread thread;
+    void* io() {return reinterpret_cast<std::uint8_t*>(owner.handle_.data())+0x1F0;}
+    static std::uint32_t tick() {
+        return static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::steady_clock::now().time_since_epoch()).count());
+    }
+    static int held_lock(void*) {return 1;} // outer real mutex owns this boundary
+    static void seek(void* p,std::uint64_t offset) {
+        auto& self=*static_cast<StreamInput*>(p);
+        self.file.clear();self.file.seekg(static_cast<std::streamoff>(offset));
+    }
+    static std::uint32_t read_file(void* p,void* output,std::uint32_t count) {
+        auto& self=*static_cast<StreamInput*>(p);
+        self.file.read(static_cast<char*>(output),count);
+        return static_cast<std::uint32_t>(self.file.gcount());
+    }
+    bool can_fill() {
+        const auto* s=io();
+        return !read<std::uint32_t>(s,0x80)&&!read<std::uint32_t>(s,0xB0)&&
+            read<std::uint32_t>(s,0xF8)>=0x20000U &&
+            read<std::uint32_t>(s,0xF4)<read<std::uint32_t>(s,0xEC);
+    }
+    static std::int64_t refill(void* state,void* ctx) {
+        auto& self=*static_cast<StreamInput*>(ctx);
+        return self.can_fill()?bink_research_file_refill(state,read_file,&self):0;
+    }
+    void start() {
+        // Original open performs initial refill before handing back HBINK.
+        {std::lock_guard lock(mutex);while(can_fill())if(refill(io(),this)<=0)break;}
+        thread=std::thread([this] {
+            std::unique_lock lock(mutex);
+            for(;;) {
+                cv.wait(lock,[&]{return stopping||can_fill();});
+                if(stopping)return;
+                if(refill(io(),this)<=0) {
+                    // Failed read is terminal; avoid an unproductive spin.
+                    put(io(),0x80,1U);
+                }
+                cv.notify_all();
+                // Give foreground frame consumption a scheduling opportunity.
+                lock.unlock();std::this_thread::yield();lock.lock();
+            }
+        });
+    }
+    bool read_pending() {
+        auto* state=owner.handle_.data();
+        if(!read<std::uint32_t>(state,0x138))return true;
+        const auto offset=read<std::uint32_t>(state,0x1E8);
+        const auto count=read<std::uint32_t>(state,0x13C);
+        auto* dest=read<void*>(state,0x100);
+        std::unique_lock lock(mutex);
+        const auto got=bink_research_file_read_frame(io(),read<std::uint32_t>(state,0x1EC),
+            offset,dest,count,seek,read_file,this);
+        if(got!=count)return false;
+        put(state,0x138,0U);put(state,0x598,offset+count);
+        lock.unlock();cv.notify_all();return true;
+    }
+    std::uint32_t control(std::uint32_t flags) {
+        std::lock_guard lock(mutex);
+        const auto result=bink_research_file_control(io(),flags,refill,this);
+        cv.notify_all();return result;
+    }
+};
 ResidentVideoSession::ResidentVideoSession()=default;
 ResidentVideoSession::~ResidentVideoSession(){close();}
 bool ResidentVideoSession::fail(std::string reason) {
@@ -101,6 +183,7 @@ bool ResidentVideoSession::fail(std::string reason) {
 void ResidentVideoSession::close() {
     // Join the real worker before releasing any borrowed/owned storage.
     worker_.reset();
+    stream_.reset();
     // Do not otherwise touch the borrowed descriptor during close.
     opened_=failed_=false;
     info_=nullptr;timer_=nullptr;clock_ctx_=nullptr;
@@ -123,6 +206,83 @@ bool ResidentVideoSession::open_preloaded_file(const char* path,std::uint32_t io
         return fail("cannot read complete movie");
     input.close();
     return open_impl(std::move(file),timer,ctx,true,io_size);
+}
+
+bool ResidentVideoSession::open_streaming_file(const char* path,std::uint32_t io_size,ResidentTimer timer,void* ctx) {
+    close();
+    if(!path||!timer||io_size>0x7FFE0000U)return fail("invalid streaming open");
+    auto input=std::make_unique<StreamInput>(*this);
+    input->file.open(path,std::ios::binary|std::ios::ate);
+    if(!input->file)return fail("cannot open stream file");
+    const auto size=input->file.tellg();
+    if(size<44 || size>256*1024*1024)return fail("invalid streaming file size");
+    file_size_=static_cast<std::size_t>(size);
+    input->file.seekg(0);
+    std::vector<std::uint8_t> prefix(44);
+    if(!input->file.read(reinterpret_cast<char*>(prefix.data()),44))return fail("short stream header");
+    HeaderPrefix h{};
+    if(!validate_header_prefix(prefix.data(),prefix.size(),&h) || h.magic!=0x694B4942U ||
+       h.audio_track_count || (h.flags&~kAlphaFlag) || h.width<16 || h.width>1280 ||
+       h.height<16 || h.height>720 || h.frame_count!=h.frame_index_count ||
+       std::uint64_t(h.payload_bytes)+8!=file_size_ || h.largest_frame_bytes>0x20000U)
+        return fail("unsupported Store streaming header");
+    const auto reserve=bink_research_file_io_reserve(io_size);
+    if(reserve>=(h.payload_bytes/10U)*5U)
+        return fail("original file mode would preload this movie");
+    const auto index_bytes=4U*(h.frame_count+1U);
+    prefix.resize(44U+index_bytes);
+    if(prefix.size()>file_size_ || !input->file.read(reinterpret_cast<char*>(prefix.data()+44),index_bytes))
+        return fail("short stream index");
+    std::vector<FrameSpan> spans(h.frame_count);
+    if(!read_video_only_index_prefix(prefix.data(),prefix.size(),file_size_,spans.data(),spans.size(),&h) ||
+       !spans.front().keyframe || spans.back().end!=file_size_)
+        return fail("invalid stream index");
+    for(const auto& span:spans)
+        if(span.end<=span.start || span.end-span.start>h.largest_frame_bytes)
+            return fail("invalid stream packet span");
+    ResidentBootstrapLayout plan{};
+    if(!resident_bootstrap_layout(h,plan,true,index_bytes))return fail("unsupported stream handle layout");
+    // Original 0x18F00 reserve: largest packet+0x500 rounded to
+    // 32, then cache-line pad to 32 mod 1024. Followed by the ring reserve.
+    const auto rounded=(h.largest_frame_bytes+0x51FU)&~31U;
+    const auto scratch_bytes=rounded+((((1U-(rounded>>5))&31U))<<5);
+    const auto allocation=reserve+scratch_bytes;
+    handle_.resize(plan.allocation_bytes/8);
+    input->storage.resize(allocation/8);
+    std::memset(handle_.data(),0,plan.allocation_bytes);
+    auto* state=reinterpret_cast<std::uint8_t*>(handle_.data());
+    auto* owned_prefix=state+plan.init_region_offset+96;
+    std::memcpy(owned_prefix,prefix.data(),prefix.size());
+    auto* index=reinterpret_cast<std::uint32_t*>(owned_prefix+44);
+    put(state,0,h.width);put(state,4,h.height);put(state,8,h.frame_count);
+    put(state,0x14,h.rate_numerator);put(state,0x18,h.rate_denominator);
+    put(state,0x20,0x01004400U|h.flags);put(state,0x24,h.flags);put(state,0x28,h.payload_bytes);
+    const auto cols=(((h.width+15U)>>4)+15U)&~15U;
+    put(state,0x110,cols);put(state,0x114,cols*((h.height+15U)>>4));
+    put(state,0x118,h.largest_frame_bytes);put(state,0x11C,h.frame_index_count);
+    put(state,0x134,1U);put(state,0x1B8,h.width);put(state,0x1BC,h.height);
+    put(state,0x108,state+plan.track_ids_offset);put(state,0x198,state+plan.dummy_audio_offset);
+    for(auto off:{0x1A0,0x1C0,0x1C8,0x1D0})put(state,off,index);
+    put(state,0x228,state);
+    constexpr std::size_t rings[]={0x4D8,0x4E0,0x4E8,0x4F0,0x4F8,0x500,0x508};
+    for(unsigned i=0;i<7;++i)put(state,rings[i],state+plan.history_offsets[i]);
+    put(state,0x510,plan.history_count);put(state,0x528,plan.accounted_bytes+allocation);
+    put(state,0x560,h.rate_numerator);put(state,0x564,h.rate_denominator);put(state,0x59C,h.magic);
+    auto* raw=reinterpret_cast<std::uint8_t*>(input->storage.data());
+    put(state,0x5A0,raw+reserve);
+    auto* io=state+0x1F0;
+    put(io,0x38,state);put(io,0x48,&StreamInput::held_lock);put(io,0x68,&StreamInput::tick);
+    put(io,0xD0,spans.front().start);put(io,0xF4,spans.front().start);
+    if(bink_research_file_set_buffer(io,raw,reserve+8,static_cast<std::uint32_t>(file_size_)))
+        return fail("original ring layout rejected");
+    StreamInput::seek(input.get(),spans.front().start);
+    if(!input->file)return fail("cannot seek first stream packet");
+    header_=h;timer_=timer;clock_ctx_=ctx;
+    if(bink_research_select_stream_frame(state,1,timer_,clock_ctx_))return fail("original streaming select failed");
+    put(state,0x10,UINT32_MAX);
+    try {input->start();}catch(const std::exception& e){return fail(e.what());}
+    stream_=std::move(input);opened_=true;
+    return true;
 }
 bool ResidentVideoSession::open_impl(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx,
                                      bool file_mode,std::uint32_t io_size) {
@@ -209,8 +369,9 @@ bool ResidentVideoSession::decode_current_packet(RegisteredDecodeReport& report,
     const auto off=read<std::uint32_t>(state,0x1E8);
     const auto* base=packet_storage_.empty()?file_.data():
         reinterpret_cast<const std::uint8_t*>(packet_storage_.data());
-    if(off<packet_offset_ || off>file_size_ || bytes>file_size_-off ||
-       packet!=base+(off-packet_offset_)) {
+    if(off>file_size_ || bytes>file_size_-off ||
+       (stream_ ? (read<std::uint32_t>(state,0x138)!=0 || !packet) :
+        (off<packet_offset_ || packet!=base+(off-packet_offset_)))) {
         reason="resident frame pointer out of bounds";return false;
     }
     if(decode_registered_packet({packet,bytes},header_.flags,*info_,report)) {
@@ -233,6 +394,9 @@ ResidentVideoSession::DecodeResult ResidentVideoSession::do_frame() {
     auto* state=handle_.data();
     if(bink_research_prepare_video_frame(state,timer_(clock_ctx_))!=1) {
         fail("original prepare state rejected frame");return DecodeResult::error;
+    }
+    if(stream_ && !stream_->read_pending()) {
+        fail("stream packet read failed");return DecodeResult::error;
     }
     RegisteredDecodeReport report{};std::string reason;
     if(!decode_current_packet(report,reason)) {
@@ -257,6 +421,9 @@ ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uin
     }
     // Resident mode has no allocated dirty map (0xD8); no allocator
     // boundary is needed. The real dispatch stores the pending word.
+    if(stream_ && !stream_->read_pending()) {
+        fail("stream packet read failed");return SubmitResult::error;
+    }
     auto& queue=*worker_;
     auto result=bink_research_submit_async(handle_.data(),worker,worker,timer_,clock_ctx_,
         nullptr,nullptr,Worker::enqueue,&queue,queue.api_error,&queue.wait_entry,
@@ -289,7 +456,8 @@ bool ResidentVideoSession::next_frame() {
     // The underlying original BinkNextFrame transcription is less restrictive.
     if(!opened_ || failed_ || !info_ || frame_number()!=last_decoded_frame())
         return fail("advance requires completed current frame");
-    if(bink_research_next_resident_frame(handle_.data(),timer_,clock_ctx_))
+    if(stream_ ? bink_research_next_stream_frame(handle_.data(),timer_,clock_ctx_) :
+        bink_research_next_resident_frame(handle_.data(),timer_,clock_ctx_))
         return fail("original next-frame state failed");
     return true;
 }
@@ -299,6 +467,7 @@ bool ResidentVideoSession::realtime(RealtimeSnapshot& output,std::uint32_t frame
 }
 std::uint32_t ResidentVideoSession::control_background_io(std::uint32_t flags) {
     if(!opened_||async_pending())return UINT32_MAX;
+    if(stream_)return stream_->control(flags);
     return bink_research_control_background_io(handle_.data(),flags);
 }
 bool ResidentVideoSession::pause(std::uint32_t value) {

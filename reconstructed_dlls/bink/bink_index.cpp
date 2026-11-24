@@ -17,8 +17,12 @@ static std::uint32_t index_le32(const std::uint8_t* p) {
 bool read_video_only_index(const std::uint8_t* data, std::size_t size,
                            FrameSpan* output, std::size_t capacity,
                            HeaderPrefix* parsed) {
+    return read_video_only_index_prefix(data,size,size,output,capacity,parsed);
+}
+bool read_video_only_index_prefix(const std::uint8_t* data,std::size_t prefix_bytes,std::size_t size,
+    FrameSpan* output,std::size_t capacity,HeaderPrefix* parsed) {
     HeaderPrefix h{};
-    if (!validate_header_prefix(data, size, &h)) return false;
+    if (!validate_header_prefix(data, prefix_bytes, &h)) return false;
     // Audio-track descriptors require another 12 bytes per track in this
     // revision; their handling is intentionally left for later reconstruction.
     if (h.audio_track_count != 0 || h.frame_count != h.frame_index_count) return false;
@@ -26,7 +30,7 @@ bool read_video_only_index(const std::uint8_t* data, std::size_t size,
         size > std::numeric_limits<std::uint32_t>::max()) return false;
 
     const std::size_t table_end = 44U + 4U * (std::size_t(h.frame_count) + 1U);
-    if (table_end > size) return false;
+    if (table_end > size || table_end > prefix_bytes) return false;
     auto entry = [&](std::size_t i) {
         return index_le32(data + 44U + i * 4U);
     };

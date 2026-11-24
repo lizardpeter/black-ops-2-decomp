@@ -111,3 +111,11 @@ extern "C" int bink_research_wait_async(void* handle,std::int32_t timeout,
     t6_bink::ResidentTimer timer,void* timer_context,
     t6_bink::AsyncReceive receive,t6_bink::AsyncNotify notify,
     void* queue_context,char* error);
+
+ // Original select-frame streaming scratch alignment (0x16530) and pending
+ // read setup; only audio-free, sequential/restart frames with no pending
+ // prior read. The original I/O callback is executed by the stream adapter.
+extern "C" int bink_research_select_stream_frame(void* handle,std::uint32_t frame,
+    t6_bink::ResidentTimer timer,void* timer_context);
+extern "C" int bink_research_next_stream_frame(void* handle,
+    t6_bink::ResidentTimer timer,void* timer_context);

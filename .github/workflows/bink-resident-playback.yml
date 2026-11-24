@@ -5,6 +5,7 @@ on:
       - reconstructed_dlls/bink/resident_video_session.*
       - reconstructed_dlls/bink/resident_frame_state.*
       - reconstructed_dlls/bink/resident_bootstrap.*
+      - reconstructed_dlls/bink/file_io_state.*
       - reconstructed_dlls/bink/test_resident_video_session.cpp
       - .github/workflows/bink-resident-playback.yml
       - tests/dlls/probe_bink_memory_open.py
@@ -57,6 +58,7 @@ jobs:
             reconstructed_dlls/bink/bink_index.cpp \
             reconstructed_dlls/bink/resident_frame_state.cpp \
             reconstructed_dlls/bink/resident_bootstrap.cpp \
+            reconstructed_dlls/bink/file_io_state.cpp \
             reconstructed_dlls/bink/resident_video_session.cpp \
             reconstructed_dlls/bink/test_resident_video_session.cpp build/bink_source.so \
             -Wl,-rpath,"$PWD/build" -o build/test_resident_video_session
@@ -96,6 +98,14 @@ jobs:
             --flags 0x01104400 --io-size 0x1000000 \
             --out build/original-public-file-async.json --playback-out build/original-public-file-async.yuv --async-playback
           cmp build/playback-file-async.yuv build/original-public-file-async.yuv
+      - name: Full bounded-memory streaming verification across ring wraps and direct reads
+        if: matrix.clip == 'blackout_virus' || matrix.clip == 'yemen_mendz'
+        run: |
+          build/test_resident_video_session "originals/bik/${{ matrix.clip }}.bik" build/full-memory.yuv --all
+          build/test_resident_video_session "originals/bik/${{ matrix.clip }}.bik" build/full-stream.yuv --stream --all
+          cmp build/full-stream.yuv build/full-memory.yuv
+          build/test_resident_video_session "originals/bik/${{ matrix.clip }}.bik" build/full-stream-async.yuv --stream --async --all
+          cmp build/full-stream-async.yuv build/full-memory.yuv
       - name: Preserve coordinator diagnostic
         if: always()
         uses: actions/upload-artifact@v4

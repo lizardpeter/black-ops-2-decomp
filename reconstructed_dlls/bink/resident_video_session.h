@@ -33,6 +33,9 @@ public:
     // Original fully preloaded filename path; refuse small-buffer streaming
     // rather than pretending that it is resident. Opens read-only.
     bool open_preloaded_file(const char* path,std::uint32_t io_size,ResidentTimer timer,void* ctx);
+    // Bounded-memory filename stream, with an actual background refill
+    // thread and the original circular-buffer read/seek primitives.
+    bool open_streaming_file(const char* path,std::uint32_t io_size,ResidentTimer timer,void* ctx);
     void close();
     void* native_handle() {return opened_?handle_.data():nullptr;}
     std::uint32_t control_background_io(std::uint32_t flags);
@@ -59,6 +62,7 @@ public:
     unsigned plane_height(unsigned p) const;
 private:
     struct Worker;
+    struct StreamInput;
     bool fail(std::string reason);
     bool open_impl(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx,
                    bool file_mode,std::uint32_t io_size);
@@ -76,5 +80,6 @@ private:
     bool opened_=false,failed_=false;
     std::string error_;
     std::unique_ptr<Worker> worker_;
+    std::unique_ptr<StreamInput> stream_;
 };
 }
