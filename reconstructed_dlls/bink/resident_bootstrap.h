@@ -19,7 +19,8 @@ struct ResidentBootstrapLayout {
     std::uint32_t dummy_audio_offset=0,track_ids_offset=0;
     std::uint32_t init_region_offset=0,allocation_bytes=0,accounted_bytes=0;
 };
-bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out);
+bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out,
+                               bool explicit_no_tracks=false);
 // Validated Store subset. Caller owns the allocation and input bytes;
 // the index and packet pointers borrow the resident input. Only observed
 // handle fields are initialized, and the original three timer calls
@@ -29,6 +30,6 @@ bool init_resident_external(void* handle,std::size_t capacity,
     const std::uint8_t* data,std::size_t bytes,std::uint32_t flags,
     ResidentTimer timer,void* timer_context);
 }
-extern "C" std::uint32_t bink_research_resident_bootstrap_size(const std::uint8_t*,std::size_t);
+extern "C" std::uint32_t bink_research_resident_bootstrap_size(const std::uint8_t*,std::size_t,std::uint32_t flags);
 extern "C" int bink_research_init_resident_external(void*,std::size_t,
     const std::uint8_t*,std::size_t,std::uint32_t,t6_bink::ResidentTimer,void*);

@@ -160,6 +160,16 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
                           ("TlsSetValue",tls_set),("TlsFree",tls_free)):
         m.on_import("kernel32.dll!"+name,callback)
         modeled.add("kernel32.dll!"+name.lower())
+    # No process configuration overrides in this reproducible environment.
+    env_queries=[]
+    def environment(mu):
+        nonlocal last_error
+        name=string(mu,mu.reg_read(X.UC_X86_REG_RCX))
+        env_queries.append(name)
+        last_error=203 # ERROR_ENVVAR_NOT_FOUND
+        mu.reg_write(X.UC_X86_REG_RAX,0)
+    m.on_import("kernel32.dll!GetEnvironmentVariableA",environment)
+    modeled.add("kernel32.dll!getenvironmentvariablea")
     # Win32 synchronous read-only file boundary. The original Bink
     # routines still determine all read, seek, buffer and close behavior.
     file_events=[]
@@ -253,7 +263,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
             "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events,
-            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events,"tls_events":tls_events}
+            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events,"tls_events":tls_events,"env_queries":env_queries}
     # Store caller explicitly sets zero sound tracks; file caller also
     # supplies its computed buffer size. Replay original setter writes.
     pre={}
@@ -337,13 +347,13 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
     if library and flags&0x400:
         lib=ctypes.CDLL(str(library.resolve()))
         size=lib.bink_research_resident_bootstrap_size
-        size.argtypes=(ctypes.c_void_p,ctypes.c_size_t);size.restype=ctypes.c_uint32
+        size.argtypes=(ctypes.c_void_p,ctypes.c_size_t,ctypes.c_uint32);size.restype=ctypes.c_uint32
         initialize=lib.bink_research_init_resident_external
         initialize.argtypes=(ctypes.c_void_p,ctypes.c_size_t,ctypes.c_void_p,
             ctypes.c_size_t,ctypes.c_uint32,CLOCK,ctypes.c_void_p)
         initialize.restype=ctypes.c_int
         source=(ctypes.c_uint8*len(data)).from_buffer_copy(data)
-        count=size(source,len(data))
+        count=size(source,len(data),flags)
         native=(ctypes.c_uint64*((count+7)//8))()
         original_ticks=ticks[:3]
         native_ticks=[]
@@ -357,7 +367,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         native_base=ctypes.addressof(native);source_base=ctypes.addressof(source)
         def norm_native(p):
             if not p:return None
-            if native_base<=p<native_base+count:return {"allocation_offset":p-native_base}
+            if native_base<=p<=native_base+count:return {"allocation_offset":p-native_base}
             if source_base<=p<source_base+len(data):return {"file_offset":p-source_base}
             return {"other":hex(p)}
         pointers={hex(off):norm_native(struct.unpack_from("<Q",native_raw,off)[0]) for off in POINTERS}

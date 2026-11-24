@@ -19,7 +19,7 @@ bool header(const std::uint8_t* data,std::size_t bytes,t6_bink::HeaderPrefix& h)
 }
 }
 namespace t6_bink {
-bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out) {
+bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out,bool explicit_no_tracks) {
     out={};
     if(!h.rate_numerator || !h.rate_denominator || h.audio_track_count)return false;
     // Original 32-bit unsigned add/div; cap the research allocation
@@ -42,7 +42,9 @@ bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& ou
     for(auto& off:out.history_offsets)off=reserve(4*n);
     out.dummy_audio_offset=reserve(0x1C0);
     out.track_ids_offset=reserve(0);
-    out.init_region_offset=reserve(0x104);
+    // With BinkSetSoundTrack(0,null) and flag 0x4000, the original
+    // omits the final region entirely (track-ID pointer is one-past-end).
+    if(!explicit_no_tracks)out.init_region_offset=reserve(0x104);
     out.allocation_bytes=0x5C0U+total;
     out.accounted_bytes=0x5B8U+total;
     return true;
@@ -56,7 +58,7 @@ bool init_resident_external(void* handle,std::size_t capacity,
        (reinterpret_cast<std::uintptr_t>(handle)&7U) ||
        (reinterpret_cast<std::uintptr_t>(data)&3U) ||
        (flags&~0x00104000U)!=0x04000400U ||
-       !resident_bootstrap_layout(h,plan) || capacity<plan.allocation_bytes)
+       !resident_bootstrap_layout(h,plan,(flags&0x4000U)!=0) || capacity<plan.allocation_bytes)
         return false;
     std::vector<FrameSpan> spans(h.frame_count);
     if(!read_video_only_index(data,bytes,spans.data(),spans.size(),&h) ||
@@ -94,10 +96,10 @@ bool init_resident_external(void* handle,std::size_t capacity,
     return true;
 }
 }
-extern "C" std::uint32_t bink_research_resident_bootstrap_size(const std::uint8_t* data,std::size_t bytes) {
+extern "C" std::uint32_t bink_research_resident_bootstrap_size(const std::uint8_t* data,std::size_t bytes,std::uint32_t flags) {
     t6_bink::HeaderPrefix h{};
     t6_bink::ResidentBootstrapLayout plan{};
-    return header(data,bytes,h)&&t6_bink::resident_bootstrap_layout(h,plan)?plan.allocation_bytes:0;
+    return header(data,bytes,h)&&t6_bink::resident_bootstrap_layout(h,plan,(flags&0x4000U)!=0)?plan.allocation_bytes:0;
 }
 extern "C" int bink_research_init_resident_external(void* handle,std::size_t capacity,
     const std::uint8_t* data,std::size_t bytes,std::uint32_t flags,t6_bink::ResidentTimer timer,void* ctx) {

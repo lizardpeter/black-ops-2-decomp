@@ -125,7 +125,7 @@ bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer tim
             return fail("invalid resident video packet");
     }
     ResidentBootstrapLayout plan{};
-    if(!resident_bootstrap_layout(h,plan))return fail("unsupported original resident layout");
+    if(!resident_bootstrap_layout(h,plan,true))return fail("unsupported original resident layout");
     header_=h;file_=std::move(file);
     timer_=timer;clock_ctx_=ctx;
     handle_.resize(plan.allocation_bytes/sizeof(std::uint64_t));
