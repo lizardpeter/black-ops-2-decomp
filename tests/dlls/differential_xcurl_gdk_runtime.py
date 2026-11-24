@@ -84,12 +84,9 @@ def main():
         svc=Services(nl,nu,nload,nr,ni,nq,rp,df,db,None)
         if name=='load':got=fn(C.byref(native),C.byref(svc))
         elif name=='initialize':got=fn(C.byref(native),flags,C.byref(svc))
-        else:got=fn(C.byref(native),CLS,IID,C.cast(host_ptr(native,OUT),C.POINTER(P)),C.byref(svc))
+        else:got=fn(C.byref(native),CLS,IID,C.byref(out),C.byref(svc))
         raw=bytes(native)
         assert (got,nc,raw,out.value)==(ret,oc,expected_state,expected_out),(name,i,got,ret,nc,oc,raw.hex(),expected_state.hex(),out.value,expected_out)
       print(name,'PASS 512',flush=True)
     print('XCurl GDK runtime PASS: 1536 original-machine comparisons')
-def host_ptr(runtime,offset):
-    # query output pointer is a separate native scratch field below; keep its value
-    return C.addressof(runtime)+offset
 if __name__=='__main__':main()
