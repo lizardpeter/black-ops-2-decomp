@@ -29,6 +29,12 @@ std::uint32_t send(void* h,const void* p,std::uint32_t n,std::uint32_t total,voi
 }
 std::uint32_t set_context(void* h,void* context,void*){auto v=reinterpret_cast<DWORD_PTR>(context);return ::WinHttpSetOption(h,WINHTTP_OPTION_CONTEXT_VALUE,&v,sizeof(v));}
 std::uintptr_t set_callback(void* h,std::uint32_t flags,void* context){return reinterpret_cast<std::uintptr_t>(::WinHttpSetStatusCallback(h,static_cast<WinHttpHost*>(context)->status_callback,flags,0));}
+std::uint32_t query_headers(void* h,std::uint32_t level,void* buffer,std::uint32_t* bytes,void*) {
+    DWORD n=*bytes;auto ok=::WinHttpQueryHeaders(h,level,WINHTTP_HEADER_NAME_BY_INDEX,buffer,&n,WINHTTP_NO_HEADER_INDEX);*bytes=n;return ok;
+}
+int convert_utf8(const char16_t* p,int units,char* out,int bytes,void*) {
+    return ::WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,w(p),units,out,bytes,nullptr,nullptr);
+}
 std::uint32_t native_addref(void* p){return xcurl_research_session_addref(p);}
 std::uint32_t native_release(void* p);
 using RefFn=std::uint32_t(*)(void*);
@@ -38,6 +44,7 @@ void release_session(void* p,void*){native_release(p);}
 }
 SessionServices winhttp_session_services(WinHttpHost* host){return {enter,leave,alloc,release,session,option,error,close,diagnostic,vtable,host};}
 HttpSetupServices winhttp_setup_services(WinHttpHost* host){return {connect,open,option,timeouts,error,diagnostic,retry,host};}
+HeaderQueryServices winhttp_header_query_services(WinHttpHost* host){return {alloc,release,query_headers,error,convert_utf8,host};}
 void bind_winhttp_request_services(RequestServices& s,WinHttpHost* host){
     s.enter=enter;s.leave=leave;s.allocate=alloc;s.release=release;s.set_event=event;s.close_http=close;s.release_connection=release_session;
     s.create_event=create_event;s.last_error=error;s.diagnostic=diagnostic;s.read=read;s.receive=receive;s.send=send;s.set_context=set_context;s.set_callback=set_callback;s.context=host;

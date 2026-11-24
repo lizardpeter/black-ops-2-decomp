@@ -33,8 +33,9 @@ extern "C" void xcurl_research_header_worker(void* easy,const HeaderServices* h)
     auto cb=get<TransferCallback>(e,0x130);auto ud=ptr(e,0x128);auto status=get<std::uint32_t>(e,0x228);
     if(!cb&&e[0x175]){cb=get<TransferCallback>(e,0x110);ud=ptr(e,0x108);}
     bool debug=e[0x176]!=0;s->leave(e+0x188,c);
-    // The original expects a valid NUL-terminated header allocation and length
-    // including that terminator. A null/zero buffer is not a valid successful task.
+    // The original uses an allocation and explicit byte count, not strlen.
+    // 0x1ABB0 publishes UTF-8 byte count excluding its terminator; the
+    // bounded scan uses buffer+length-1 as its sentinel.
     if(!failed(status)&&buffer&&length){
         auto* end=buffer+length-1;
         for(auto* p=buffer;p<end;){

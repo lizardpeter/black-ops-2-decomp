@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <winhttp.h>
 #include "session_cache.h"
+#include "header_query.h"
 namespace t6_xcurl {
 // Diagnostic and status callback are supplied by the caller. These services
 // bind only original OS boundaries; no unfinished queue/engine callbacks are filled.
@@ -19,6 +20,7 @@ struct WinHttpHost {
 };
 SessionServices winhttp_session_services(WinHttpHost*);
 HttpSetupServices winhttp_setup_services(WinHttpHost*);
+HeaderQueryServices winhttp_header_query_services(WinHttpHost*);
 void bind_winhttp_request_services(RequestServices&,WinHttpHost*);
 }
 #endif
