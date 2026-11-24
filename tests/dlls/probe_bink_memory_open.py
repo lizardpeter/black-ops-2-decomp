@@ -129,6 +129,37 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
             ("ReleaseSemaphore",release_semaphore),("CloseHandle",close_handle)):
         m.on_import("kernel32.dll!"+name,callback)
         modeled.add("kernel32.dll!"+name.lower())
+    # Win32 thread-local storage for the one emulated calling thread.
+    # Do not model background thread execution by pretending it succeeded:
+    # unmodeled thread creation/scheduling remains a hard failure.
+    tls_slots={}
+    tls_events=[]
+    def tls_alloc(mu):
+        index=0
+        while index in tls_slots:index+=1
+        tls_slots[index]=0
+        tls_events.append(["alloc",index])
+        mu.reg_write(X.UC_X86_REG_RAX,index)
+    def tls_get(mu):
+        index=mu.reg_read(X.UC_X86_REG_ECX)
+        assert index in tls_slots
+        mu.reg_write(X.UC_X86_REG_RAX,tls_slots[index])
+    def tls_set(mu):
+        index=mu.reg_read(X.UC_X86_REG_ECX)
+        assert index in tls_slots
+        tls_slots[index]=mu.reg_read(X.UC_X86_REG_RDX)
+        tls_events.append(["set",index])
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    def tls_free(mu):
+        index=mu.reg_read(X.UC_X86_REG_ECX)
+        assert index in tls_slots
+        del tls_slots[index]
+        tls_events.append(["free",index])
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    for name,callback in (("TlsAlloc",tls_alloc),("TlsGetValue",tls_get),
+                          ("TlsSetValue",tls_set),("TlsFree",tls_free)):
+        m.on_import("kernel32.dll!"+name,callback)
+        modeled.add("kernel32.dll!"+name.lower())
     # Win32 synchronous read-only file boundary. The original Bink
     # routines still determine all read, seek, buffer and close behavior.
     file_events=[]
@@ -222,7 +253,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
             "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events,
-            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events}
+            "file_mode":file_mode,"io_size":io_size if file_mode else None,"file_events":file_events,"tls_events":tls_events}
     # Store caller explicitly sets zero sound tracks; file caller also
     # supplies its computed buffer size. Replay original setter writes.
     pre={}
@@ -252,7 +283,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
     def normalize(p):
         if not p:return None
         if ARENA<=p<cursor:return {"allocation_offset":p-ARENA}
-        if input_base<=p<input_base+len(data):return {"file_offset":p-input_base}
+        if input_base<=p<input_base+len(input_data):return {"file_offset":p-input_base}
         if img.base<=p<img.base+img.size:return {"original_rva":p-img.base}
         return {"other":hex(p)}
     result["handle_offset"]=ret-ARENA
@@ -459,6 +490,7 @@ def main():
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)
-    if not result["verified"]:raise SystemExit("Original memory-open probe not yet verified")
-    print("Original memory-backed BinkOpen PASS")
+    mode="file-backed" if result["file_mode"] else "memory-backed"
+    if not result["verified"]:raise SystemExit(f"Original {mode} lifecycle probe not yet verified")
+    print(f"Original {mode} BinkOpen/BinkClose PASS")
 if __name__=="__main__":main()
