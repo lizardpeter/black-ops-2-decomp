@@ -53,10 +53,11 @@ def main():
             if n.split('!')[-1] in imports:m.on_import(n,imports[n.split('!')[-1]])
         fakes=dict(zip(funcs,[query,old,new,report,lambda mu:0]))
         args=[] if name=='load' else [flags] if name=='initialize' else [CLS,IID,OUT]
-        ret,_,_,_=m.call(img.base+rva,args,'uint',setup=setup,fakes=fakes)
+        ret,_,writes,_=m.call(img.base+rva,args,'uint',setup=setup,fakes=fakes)
         assert isinstance(ret,int),(name,i,ret,m.imports_called)
-        expected_state=bytes(m.mu.mem_read(img.base+0x289d0,0x38))
-        expected_out=struct.unpack('<Q',m.mu.mem_read(OUT,8))[0]
+        expected_state=bytes(writes.get(img.base+0x289d0+k,bytes([v]))[0] for k,v in enumerate(initial))
+        initial_out=struct.pack('<Q',0x77777777)
+        expected_out=struct.unpack('<Q',bytes(writes.get(OUT+k,bytes([v]))[0] for k,v in enumerate(initial_out)))[0]
 
         native=Runtime.from_buffer_copy(initial);out=P(0x77777777)
         @LOCK
@@ -66,7 +67,7 @@ def main():
         @LOAD
         def nload(n,f,c):nc.append(('load',n.decode(),0,f));return MODULE if loadok else None
         @RESOLVE
-        def nr(mod,n,c):nc.append(('resolve',mod,n));return available[names.index(n.decode())] or None
+        def nr(mod,n,c):nc.append(('resolve',mod,n.decode()));return available[names.index(n.decode())] or None
         @INIT
         def ni(p,a,b,z,c):
             if a>0xffffffff: nc.append(('initialize',p,a,b,z))
