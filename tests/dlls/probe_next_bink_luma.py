@@ -7,6 +7,7 @@ original x64 plane decoder executes frame 1. This establishes the golden
 output and original block-mode distribution; it does not claim source
 decoding of the dependent frame.
 """
+import ctypes
 import hashlib
 import json
 import struct
@@ -18,7 +19,7 @@ ROOT=Path(__file__).resolve().parents[2]
 sys.path.insert(0,str(ROOT/"tests/differential"))
 sys.path.insert(0,str(ROOT/"tools/dlls"))
 from harness import Image,Machine
-from experimental_first_luma import PIN_VIDEO,PIN_Y
+from experimental_first_luma import PIN_VIDEO,PIN_Y,Trace
 from probe_original_bik_frame import (
     PIN_DLL,PACKET,SCRATCH_POINTERS,SCRATCH_FIRST,SCRATCH_SPACING,STATS,
 )
@@ -78,5 +79,35 @@ def main():
     (build/"original-bink-frame1-Y.pgm").write_bytes(header+expected)
     (build/"original-bink-frame1-report.json").write_text(json.dumps(report,indent=2)+"\n")
     print("ORIGINAL NEXT FRAME:",json.dumps(report,sort_keys=True))
+    if len(sys.argv)>4:
+        native=ctypes.CDLL(str(Path(sys.argv[4]).resolve()))
+        fn=native.bink_research_decode_video_plane
+        byteptr=ctypes.POINTER(ctypes.c_uint8)
+        fn.argtypes=(byteptr,ctypes.c_uint32,ctypes.c_uint32,ctypes.c_uint32,
+                     ctypes.c_uint32,ctypes.c_uint32,byteptr,ctypes.c_uint32,
+                     byteptr,ctypes.POINTER(Trace))
+        fn.restype=ctypes.c_int
+        raw=(ctypes.c_uint8*len(packet)).from_buffer_copy(packet)
+        reference=(ctypes.c_uint8*65536).from_buffer_copy(ref)
+        output=(ctypes.c_uint8*65536)(*([0xB7]*65536))
+        trace=Trace()
+        status=fn(raw,len(packet),4,len(packet),256,256,output,256,
+                  reference,ctypes.byref(trace))
+        actual=bytes(output)
+        mismatches=[i for i,(a,b) in enumerate(zip(actual,expected)) if a!=b]
+        counts=list(trace.type_counts)
+        subcounts=list(trace.submode_counts)
+        report.update(native_status=status,native_y_sha256=hashlib.sha256(actual).hexdigest(),
+            native_offset=4*trace.input_words,native_modes=counts,native_submodes=subcounts,
+            pixel_differences=len(mismatches),
+            first_differences=[(i%256,i//256,expected[i],actual[i]) for i in mismatches[:16]],
+            error_position=[trace.error_x,trace.error_y,trace.mode,trace.submode])
+        print("NATIVE NEXT FRAME:",json.dumps(report,sort_keys=True),flush=True)
+        (build/"original-bink-frame1-report.json").write_text(json.dumps(report,indent=2)+"\n")
+        (build/"native-bink-frame1-Y.pgm").write_bytes(header+actual)
+        assert status==0 and not mismatches and 4*trace.input_words==returned-PACKET
+        assert counts==[modes[i] for i in range(10)] and subcounts==[submodes[i] for i in range(10)]
+        assert bytes(reference)==ref
+        print("SOURCE DEPENDENT FRAME 1 Y PASS: 65536 exact bytes and mode/cursor state")
 
 if __name__=="__main__":main()
