@@ -1,0 +1,31 @@
+name: Bink original file I/O primitives
+on:
+  push:
+    paths:
+      - reconstructed_dlls/bink/file_io_state.*
+      - tests/dlls/differential_bink_file_io.py
+      - .github/workflows/bink-file-io.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  file-io:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/bink
+            tests/differential
+            tests/dlls
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - run: python tools/dlls/fetch.py originals/dlls
+      - run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/file_io_state.cpp -o build/file_io.so
+          python tests/dlls/differential_bink_file_io.py originals/dlls/binkw64.dll build/file_io.so
