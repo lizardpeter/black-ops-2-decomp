@@ -55,8 +55,9 @@ def fetch_alpha(directory):
         assert len(data)<=8*1024*1024 and sha(data)==pin
         dest.write_bytes(data)
 
-def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0):
+def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0,pitch_extra=0):
     assert lookahead in (0,4) and 0<=padding_byte<=255
+    assert 0<=pitch_extra<=256 and pitch_extra%8==0
     assert sha(dll.read_bytes())==PIN_DLL
     data=video.read_bytes()
     pin=expected_sha256 or {**FIXTURES,**ALPHA}[video.name]
@@ -69,6 +70,8 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
     cw,ch=round8((width+1)//2),round8((height+1)//2)
     dims=[(yw,yh),(cw,ch),(cw,ch)]+([(yw,yh)] if alpha else [])
     order=[3,0,1,2] if alpha else [0,1,2]
+    pitches=[w+pitch_extra for w,h in dims]
+    storage=[pitch*h for pitch,(w,h) in zip(pitches,dims)]
     offsets=struct.unpack_from(f"<{count+1}I",data,44)
     img=Image(dll)
     machine=Machine(img,large_heap=True)
@@ -81,18 +84,23 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
     fn.restype=ctypes.c_int
     # Give the original independent plane buffers in an explicit x64 arena.
     # A guard region after every plane is checked for writes by the original.
-    original=[[bytes([0xB7 if s==0 else 0x80])*(w*h) for w,h in dims] for s in range(2)]
+    original=[]
+    for slot in range(2):
+        # Distinct sentinel row padding makes unintended writes observable.
+        original.append([(bytes([0xB7 if slot==0 else 0x80])*w+
+                          bytes([0xD3 if slot==0 else 0xE4])*(pitch-w))*h
+                         for pitch,(w,h) in zip(pitches,dims)])
     native=[p.copy() for p in original]
     addresses=[[],[]]
     cursor=ARENA
     guard=bytes([0xA7])*4096
     for slot in range(2):
-        for w,h in dims:
+        for size in storage:
             addresses[slot].append(cursor)
-            cursor=(cursor+w*h+len(guard)+4095)&~4095
+            cursor=(cursor+size+len(guard)+4095)&~4095
     assert cursor<=ARENA+machine.heap_size, 'oracle arena too small for two padded four-plane frames'
     result={"fixture":video.name,"sha256":pin,"visible_dimensions":[width,height],
-            "plane_dimensions":dims,"original_coordinator_rva":"0x274A0",
+            "plane_dimensions":dims,"plane_pitches":pitches,"original_coordinator_rva":"0x274A0",
             "lookahead_bytes":lookahead,"padding_byte":padding_byte,
             "complete_matching_frames":0,"matched_planes":0,"matched_bytes":0,"frames":[]}
     report_path.parent.mkdir(parents=True,exist_ok=True)
@@ -124,7 +132,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
                 pos=0x18+s*0x60+p*0x18
                 struct.pack_into("<I",descriptor,pos,1)
                 struct.pack_into("<Q",descriptor,pos+8,addresses[s][p])
-                struct.pack_into("<I",descriptor,pos+16,w)
+                struct.pack_into("<I",descriptor,pos+16,pitches[p])
         calls=[]
         def at_plane(mu):
             sp=mu.reg_read(X.UC_X86_REG_RSP)
@@ -169,6 +177,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
         pos=4
         for j,p in enumerate(order):
             w,h=dims[p]
+            pitch,size=pitches[p],storage[p]
             # Independently derive partition routing from packet headers.
             if p==0:pos=aend+4
             if p==1:pos=yend
@@ -177,30 +186,31 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
             out=(ctypes.c_uint8*len(before)).from_buffer_copy(before)
             prior=(ctypes.c_uint8*len(previous)).from_buffer_copy(previous)
             trace=Trace()
-            status=fn(raw,limit_bytes,pos,limit_bytes,w,h,out,w,prior,ctypes.byref(trace))
+            status=fn(raw,limit_bytes,pos,limit_bytes,w,h,out,pitch,prior,ctypes.byref(trace))
             next_pos=4*trace.input_words
-            expected=bytes(machine.mu.mem_read(addresses[dst][p],w*h))
+            expected=bytes(machine.mu.mem_read(addresses[dst][p],size))
             actual=bytes(out)
-            original_guard=bytes(machine.mu.mem_read(addresses[dst][p]+w*h,len(guard)))
-            original_ref=bytes(machine.mu.mem_read(addresses[ref][p],w*h))
+            original_guard=bytes(machine.mu.mem_read(addresses[dst][p]+size,len(guard)))
+            original_ref=bytes(machine.mu.mem_read(addresses[ref][p],size))
             route=calls[j]
             route_match=(route["dst"]==addresses[dst][p] and route["ref"]==addresses[ref][p]
-                         and route["width"]==w and route["height"]==h and route["stride"]==w
+                         and route["width"]==w and route["height"]==h and route["stride"]==pitch
                          and route["start"]==pos and route["limit"]==limit_bytes
                          and route["keyframe"]==keyframe)
             plane={"plane":p,"status":status,"route_match":route_match,
                    "native_start":pos,"native_next":next_pos,"original_next":route.get("next"),
                    "native_sha256":sha(actual),"original_sha256":sha(expected),
+                   "pitch":pitch,"padding_unchanged":all(actual[y*pitch+w:(y+1)*pitch]==before[y*pitch+w:(y+1)*pitch] for y in range(h)),
                    "guard_unchanged":original_guard==guard,"reference_unchanged":
                    bytes(prior)==previous and original_ref==original[ref][p],
                    "native_position":[trace.error_x,trace.error_y,trace.mode,trace.submode]}
             rec["planes"].append(plane)
             save()
             if (status or not route_match or route.get("next")!=next_pos or expected!=actual
-                or not plane["guard_unchanged"] or not plane["reference_unchanged"]):
+                or not plane["guard_unchanged"] or not plane["reference_unchanged"] or not plane["padding_unchanged"]):
                 raise AssertionError(f"coordinator differential mismatch frame={frame}: {plane}; "
                                      f"original route={route}, expected dst={addresses[dst][p]:#x} "
-                                     f"ref={addresses[ref][p]:#x} dims={w}x{h} limit={limit_bytes}")
+                                     f"ref={addresses[ref][p]:#x} dims={w}x{h} pitch={pitch} limit={limit_bytes}")
             original[dst][p]=expected
             native[dst][p]=actual
             result["matched_planes"]+=1
@@ -222,11 +232,18 @@ def main():
     p.add_argument("--frames",type=int,default=16)
     p.add_argument("--lookahead",type=int,choices=(0,4),default=4)
     p.add_argument("--pad-byte",type=lambda v:int(v,0),default=0)
+    p.add_argument("--pitch-extra",type=int,default=0)
+    p.add_argument("--manifest",type=Path,default=None)
     p.add_argument("--report",type=Path,default=Path("build/coordinator-report.json"))
     a=p.parse_args()
     if a.fetch_alpha is not None:fetch_alpha(a.fetch_alpha)
     else:
         assert a.dll and a.video and a.library
-        run(a.dll,a.video,a.library,a.frames,a.report,lookahead=a.lookahead,padding_byte=a.pad_byte)
+        pin=None
+        if a.manifest:
+            pins={c["name"]:c["sha256"] for c in json.loads(a.manifest.read_text())["clips"]}
+            pin=pins[a.video.name]
+        run(a.dll,a.video,a.library,a.frames,a.report,expected_sha256=pin,
+            lookahead=a.lookahead,padding_byte=a.pad_byte,pitch_extra=a.pitch_extra)
 
 if __name__=="__main__":main()

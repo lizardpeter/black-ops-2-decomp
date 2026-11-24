@@ -1,0 +1,76 @@
+name: Bink registered pitched frame-buffer verification
+on:
+  push:
+    paths:
+      - .github/workflows/bink-pitched-buffers.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  pitched:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        clip: [la_pip_seq_6, blackout_virus, karma_pip_helipad, yemen_mendz, sam_gizmos_v2]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/bink
+            tests/differential
+            tests/dlls
+            tools/dlls
+            docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install oracle requirements and fetch manifest-pinned clip
+        env:
+          CLIP: ${{ matrix.clip }}
+        run: |
+          pip install -q -r tests/differential/requirements.txt
+          python tools/dlls/fetch.py originals/dlls
+          PYTHONPATH=tests/dlls python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from verify_bink_corpus import fetch, MANIFEST
+          clips={c["name"]:c for c in json.loads(MANIFEST.read_text())["clips"]}
+          fetch(clips[os.environ["CLIP"]+".bik"],Path("originals/bik"))
+          PY
+      - name: Compile source-only plane decoder
+        run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/huffman_codebook.cpp \
+            reconstructed_dlls/bink/entropy_byte_rle.cpp \
+            reconstructed_dlls/bink/entropy_adaptive_pairs.cpp \
+            reconstructed_dlls/bink/entropy_nibbles.cpp \
+            reconstructed_dlls/bink/entropy_signed_bytes.cpp \
+            reconstructed_dlls/bink/entropy_deltas16.cpp \
+            reconstructed_dlls/bink/entropy_bytes.cpp \
+            reconstructed_dlls/bink/video_coefficients.cpp \
+            reconstructed_dlls/bink/video_inverse8x8.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
+            reconstructed_dlls/bink/video_block_modes.cpp \
+            reconstructed_dlls/bink/video_predict8x8_core.cpp \
+            reconstructed_dlls/bink/video_predict8x8.cpp \
+            reconstructed_dlls/bink/video_sparse_residual.cpp \
+            reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
+            -o build/bink_source.so
+      - name: Compare original registered buffers, source pixels and untouched row padding
+        run: |
+          python tests/dlls/differential_bink_coordinator.py \
+            --dll originals/dlls/binkw64.dll \
+            --video "originals/bik/${{ matrix.clip }}.bik" \
+            --library build/bink_source.so --frames 16 --pitch-extra 64 \
+            --manifest docs/bink-store-media-inventory.json \
+            --report build/pitched/coordinator-report.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: pitched-${{ matrix.clip }}
+          path: build/pitched/*.json
+          if-no-files-found: warn
