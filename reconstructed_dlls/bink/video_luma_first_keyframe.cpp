@@ -51,6 +51,8 @@ extern "C" void bink_video_inverse8x8_indexed(
     std::uint8_t*,std::int32_t,const std::int16_t*,std::uint32_t);
 extern "C" void bink_video_inverse8x8_2x_indexed(
     std::uint8_t*,std::int32_t,const std::int16_t*,std::uint32_t);
+extern "C" void bink_video_predict8x8(std::uint8_t*,std::int32_t,
+    const std::int16_t*,std::int32_t,const std::uint8_t*,std::int32_t);
 extern "C" void bink_video_fill8x8(std::uint8_t*,std::int32_t,std::uint8_t);
 extern "C" void bink_video_fill16x16(std::uint8_t*,std::int32_t,std::uint8_t);
 extern "C" void bink_video_two_color8x8(
@@ -117,11 +119,12 @@ t6_bink::ByteEntropyState make_stream(
 // Return the original-style next-word position in report->input_words.
 // This remains restricted to verified keyframe modes and 16-aligned
 // planes, not a hardened parser for untrusted media.
-extern "C" int bink_research_decode_keyframe_plane(
+extern "C" int bink_research_decode_video_plane(
         const std::uint8_t* compressed,std::uint32_t compressed_bytes,
         std::uint32_t start,std::uint32_t split,
         std::uint32_t width,std::uint32_t height,
         std::uint8_t* output,std::uint32_t stride,
+        const std::uint8_t* reference,
         BinkFirstLumaTrace* report) {
     if (!report) return -1;
     *report=BinkFirstLumaTrace{};
@@ -219,8 +222,8 @@ extern "C" int bink_research_decode_keyframe_plane(
         state.current+=8;
         return bytes;
     };
-    auto consume_coeff=[&](std::uint8_t* data) {
-        auto& state=stream[kDC];
+    auto consume_coeff=[&](std::uint8_t* data,std::size_t dc_stream=kDC) {
+        auto& state=stream[dc_stream];
         if (state.current>=state.end) state.current=state.buffer+4;
         const auto baseline=read_le16(state.current);
         state.current+=2;
@@ -232,6 +235,31 @@ extern "C" int bink_research_decode_keyframe_plane(
         const auto n=cursor.read(4);
         cursor.save();
         return n;
+    };
+
+    // Original modes 2/7 take horizontal and vertical motion from the
+    // paired signed-byte streams. The original resets both cursors when
+    // the vertical stream is exhausted. The original bounds test is a
+    // linear pointer comparison, not independent x/y clipping.
+    const auto motion_reference=[&](std::uint32_t x,std::uint32_t y)
+            -> const std::uint8_t* {
+        auto& mx=stream[kMotionX];
+        auto& my=stream[kMotionY];
+        if (my.current>=my.end) {
+            my.current=my.buffer+4;
+            mx.current=mx.buffer+4;
+        }
+        const int dx=static_cast<std::int8_t>(*mx.current++);
+        const int dy=static_cast<std::int8_t>(*my.current++);
+        const auto offset=std::int64_t(y)*stride+x+dx+std::int64_t(dy)*stride;
+        const auto max_offset=std::int64_t(height-8)*stride+width-8;
+        if (!reference || offset<0 || offset>max_offset) return nullptr;
+        return reference+offset;
+    };
+    const auto copy_reference=[&](std::uint8_t* dst,const std::uint8_t* src) {
+        for(unsigned row=0;row<8;++row)
+            std::memcpy(dst+std::ptrdiff_t(row)*stride,
+                        src+std::ptrdiff_t(row)*stride,8);
     };
 
     for(std::uint32_t y=0;y<height;y+=8) {
@@ -275,7 +303,30 @@ extern "C" int bink_research_decode_keyframe_plane(
             if(mode<10U)++report->type_counts[mode];
             else return update_report(4,x,y,mode,0xff);
             std::uint8_t* block=output+std::ptrdiff_t(y)*stride+x;
-            if(mode==1U) {
+            if (mode==0U) {
+                if (!reference) return update_report(7,x,y,mode,0xff);
+                copy_reference(block,reference+std::ptrdiff_t(y)*stride+x);
+                x+=8;
+            } else if (mode==2U || mode==7U) {
+                if (!reference) return update_report(7,x,y,mode,0xff);
+                const auto* src=motion_reference(x,y);
+                if (src && mode==2U) copy_reference(block,src);
+                else if (src) {
+                    alignas(2) std::array<std::uint8_t,128> coeff{};
+                    consume_coeff(coeff.data(),kOtherDC);
+                    bink_video_predict8x8(block,std::int32_t(stride),
+                        reinterpret_cast<const std::int16_t*>(coeff.data()),
+                        std::int32_t(read_quant_index()),src,std::int32_t(stride));
+                }
+                x+=8;
+            } else if (mode==9U) {
+                auto& state=stream[kColor];
+                if (state.current>=state.end) state.current=state.buffer+4;
+                for(unsigned row=0;row<8;++row)
+                    std::memcpy(block+std::ptrdiff_t(row)*stride,state.current+8*row,8);
+                state.current+=64;
+                x+=8;
+            } else if(mode==1U) {
                 // At the right edge the original breaks out of the mode-1
                 // case and advances 8 pixels instead of 16.
                 if (x+16>width) { x+=8; continue; }
@@ -329,6 +380,17 @@ extern "C" int bink_research_decode_keyframe_plane(
         }
     }
     return update_report(0,width,height,0,0);
+}
+
+// Retain original keyframe-only API for existing callers.
+extern "C" int bink_research_decode_keyframe_plane(
+        const std::uint8_t* compressed,std::uint32_t compressed_bytes,
+        std::uint32_t start,std::uint32_t split,
+        std::uint32_t width,std::uint32_t height,
+        std::uint8_t* output,std::uint32_t stride,
+        BinkFirstLumaTrace* report) {
+    return bink_research_decode_video_plane(compressed,compressed_bytes,
+        start,split,width,height,output,stride,nullptr,report);
 }
 
 // Preserve the original tested first-luma entry point and packet layout.
