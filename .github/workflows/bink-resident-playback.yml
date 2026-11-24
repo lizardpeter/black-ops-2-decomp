@@ -52,7 +52,7 @@ jobs:
             reconstructed_dlls/bink/video_sparse_residual.cpp \
             reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
             -o build/bink_source.so
-          clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+          clang++ -std=c++20 -O2 -pthread -Wall -Wextra -Werror \
             reconstructed_dlls/bink/header_validation.cpp \
             reconstructed_dlls/bink/bink_index.cpp \
             reconstructed_dlls/bink/resident_frame_state.cpp \
@@ -70,6 +70,8 @@ jobs:
         run: |
           build/test_resident_video_session "originals/bik/${{ matrix.clip }}.bik" build/playback.yuv
           cmp build/playback.yuv build/coordinator-matched.yuv
+          build/test_resident_video_session "originals/bik/${{ matrix.clip }}.bik" build/playback-async.yuv --async
+          cmp build/playback-async.yuv build/playback.yuv
       - name: Compare full original public synchronous and async playback against native pixels
         run: |
           python tests/dlls/probe_bink_memory_open.py \

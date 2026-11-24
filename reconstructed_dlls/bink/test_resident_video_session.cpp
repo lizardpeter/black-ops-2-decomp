@@ -7,10 +7,13 @@
 #include <iostream>
 #include <iterator>
 #include <utility>
+#include <string_view>
 
 int main(int argc,char** argv) {
     using namespace t6_bink;
-    assert(argc==3);
+    assert(argc==3 || argc==4);
+    const bool async=argc==4 && std::string_view(argv[3])=="--async";
+    assert(argc==3 || async);
     std::ifstream input(argv[1],std::ios::binary);
     assert(input);
     std::vector<std::uint8_t> file((std::istreambuf_iterator<char>(input)),{});
@@ -44,9 +47,24 @@ int main(int argc,char** argv) {
             assert(movie.pause(1) && movie.is_paused());
             assert(movie.pause(0) && !movie.is_paused());
         }
-        auto result=movie.do_frame();
-        if(result!=ResidentVideoSession::DecodeResult::frame) {
-            std::cerr<<movie.error()<<"\n";return 1;
+        if(async) {
+            using Submit=ResidentVideoSession::SubmitResult;
+            using Wait=ResidentVideoSession::WaitResult;
+            assert(movie.wait_async(0)==Wait::idle);
+            assert(movie.do_frame_async(i%8)==Submit::submitted);
+            assert(movie.async_pending());
+            assert(movie.do_frame_async(i%8)==Submit::busy);
+            assert(movie.do_frame()==ResidentVideoSession::DecodeResult::busy);
+            assert(!movie.next_frame());
+            auto result=movie.wait_async(0);
+            if(result==Wait::pending)result=movie.wait_async(-1);
+            if(result!=Wait::frame) {std::cerr<<movie.error()<<"\n";return 1;}
+            assert(!movie.async_pending() && movie.wait_async(0)==Wait::idle);
+        } else {
+            auto result=movie.do_frame();
+            if(result!=ResidentVideoSession::DecodeResult::frame) {
+                std::cerr<<movie.error()<<"\n";return 1;
+            }
         }
         assert(info.frame_num==i%2 && movie.last_decoded_frame()==i+1);
         for(unsigned p=0;p<movie.plane_count();++p) {
@@ -64,5 +82,6 @@ int main(int argc,char** argv) {
     movie.close();
     assert(movie.frame_number()==0 && movie.last_decoded_frame()==0);
     assert(!movie.next_frame());
-    std::cout<<"Resident frame state + registered decode integrated PASS: 16 frames\n";
+    std::cout<<"Resident frame state + registered "<<(async?"async":"sync")
+             <<" decode integrated PASS: 16 frames\n";
 }

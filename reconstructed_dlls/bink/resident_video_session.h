@@ -3,6 +3,7 @@
 #include "resident_frame_state.h"
 #include "video_registered.h"
 #include <array>
+#include <memory>
 #include <string>
 #include <vector>
 
@@ -13,12 +14,17 @@ namespace t6_bink {
 // the full BinkOpen initializer and OS object lifetime remain unresolved.
 // All file and table storage is owned here. Registered output is borrowed;
 // its caller must keep the descriptor and both frame slots alive.
-// This is synchronous, trusted Store BIKi video only, no original DLL ABI,
-// streaming, audio, worker threads or OS timer implementation.
+// Trusted resident Store BIKi video only, with synchronous decode and a
+// single actual host worker thread using the original async dispatch/wait
+// state routines. The portable thread is a platform adapter, not the full
+// recovered original worker pool or DLL ABI. No streaming or audio.
 class ResidentVideoSession {
 public:
-    enum class DecodeResult { frame, already_decoded, error };
-    ResidentVideoSession()=default;
+    enum class DecodeResult { frame, already_decoded, busy, error };
+    enum class SubmitResult { submitted, busy, already_decoded, error };
+    enum class WaitResult { frame, pending, idle, error };
+    ResidentVideoSession();
+    ~ResidentVideoSession();
     ResidentVideoSession(const ResidentVideoSession&)=delete;
     ResidentVideoSession& operator=(const ResidentVideoSession&)=delete;
     ResidentVideoSession(ResidentVideoSession&&)=delete;
@@ -27,6 +33,11 @@ public:
     void close();
     bool register_buffers(RegisteredFrameBuffers& info);
     DecodeResult do_frame();
+    // Same-worker submission: original work message tag 6. The host
+    // worker and registered buffers stay alive until wait or close.
+    SubmitResult do_frame_async(std::uint32_t worker=0);
+    WaitResult wait_async(std::int32_t timeout);
+    bool async_pending() const;
     bool next_frame();
     bool pause(std::uint32_t value);
     // Valid only after at least one completed frame; does not poison playback
@@ -42,7 +53,9 @@ public:
     unsigned plane_width(unsigned p) const;
     unsigned plane_height(unsigned p) const;
 private:
+    struct Worker;
     bool fail(std::string reason);
+    bool decode_current_packet(RegisteredDecodeReport& report,std::string& error) const;
     HeaderPrefix header_{};
     std::vector<std::uint8_t> file_;
     // Original cache-line-separated bootstrap allocation. Eight-byte
@@ -53,5 +66,6 @@ private:
     void* clock_ctx_=nullptr;
     bool opened_=false,failed_=false;
     std::string error_;
+    std::unique_ptr<Worker> worker_;
 };
 }
