@@ -16,6 +16,7 @@ on:
       - reconstructed_dlls/xcurl/request_headers.*
       - reconstructed_dlls/xcurl/certificate.*
       - reconstructed_dlls/xcurl/gdk_interfaces.*
+      - reconstructed_dlls/xcurl/gdk_runtime.*
       - tests/dlls/differential_xcurl_start.py
       - tests/dlls/differential_xcurl_gdk_interfaces.py
       - tests/dlls/differential_xcurl_certificate.py
