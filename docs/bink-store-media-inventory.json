@@ -1,0 +1,391 @@
+{
+  "source": "BO2 Store R2 bo2/DUMP/video/; original 44-byte BIKi headers inspected 2026-11-23; metadata only",
+  "files": 44,
+  "total_frames": 18155,
+  "embedded_audio_tracks": 0,
+  "alpha_flag_files": 6,
+  "dimensions": {
+    "1280x720": {
+      "files": 24,
+      "frames": 11085
+    },
+    "640x380": {
+      "files": 1,
+      "frames": 318
+    },
+    "640x720": {
+      "files": 1,
+      "frames": 90
+    },
+    "256x256": {
+      "files": 13,
+      "frames": 3642
+    },
+    "512x288": {
+      "files": 3,
+      "frames": 2608
+    },
+    "450x337": {
+      "files": 1,
+      "frames": 114
+    },
+    "225x169": {
+      "files": 1,
+      "frames": 298
+    }
+  },
+  "clips": [
+    {
+      "name": "afghanistan_int_1.bik",
+      "frames": 655,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "afghanistan_int_2.bik",
+      "frames": 626,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_CCTV.bik",
+      "frames": 909,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_CCTV_2.bik",
+      "frames": 226,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_dradis.bik",
+      "frames": 670,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_lockout.bik",
+      "frames": 318,
+      "width": 640,
+      "height": 380,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_virus.bik",
+      "frames": 120,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_virus_2.bik",
+      "frames": 916,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "blackout_virus_mason.bik",
+      "frames": 120,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part01.bik",
+      "frames": 270,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part01_loop.bik",
+      "frames": 120,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part02.bik",
+      "frames": 165,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part02_loop.bik",
+      "frames": 120,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part03.bik",
+      "frames": 165,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part03_loop.bik",
+      "frames": 120,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part04.bik",
+      "frames": 160,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part04_loop.bik",
+      "frames": 164,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "crc_part05.bik",
+      "frames": 576,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "default.bik",
+      "frames": 1229,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "eye_v5.bik",
+      "frames": 90,
+      "width": 640,
+      "height": 720,
+      "flags": 1048576,
+      "audio_tracks": 0
+    },
+    {
+      "name": "generalstore.bik",
+      "frames": 542,
+      "width": 256,
+      "height": 256,
+      "flags": 1048576,
+      "audio_tracks": 0
+    },
+    {
+      "name": "haiti_int_1.bik",
+      "frames": 1364,
+      "width": 512,
+      "height": 288,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "haiti_int_1b.bik",
+      "frames": 483,
+      "width": 512,
+      "height": 288,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "haiti_int_1c.bik",
+      "frames": 761,
+      "width": 512,
+      "height": 288,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "karma_pip_exiting_the_mall.bik",
+      "frames": 191,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "karma_pip_helipad.bik",
+      "frames": 114,
+      "width": 450,
+      "height": 337,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "karma_pip_helipad_v2.bik",
+      "frames": 357,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "karma_pip_security_feed.bik",
+      "frames": 114,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "karma_pip_stairs.bik",
+      "frames": 286,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_1.bik",
+      "frames": 450,
+      "width": 256,
+      "height": 256,
+      "flags": 1048576,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_2.bik",
+      "frames": 450,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_3.bik",
+      "frames": 450,
+      "width": 256,
+      "height": 256,
+      "flags": 1048576,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_4.bik",
+      "frames": 180,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_5.bik",
+      "frames": 150,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_6.bik",
+      "frames": 150,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "la_pip_seq_7.bik",
+      "frames": 150,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "nicaragua_int_1.bik",
+      "frames": 1513,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "panama_int_1.bik",
+      "frames": 605,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "panama_int_2.bik",
+      "frames": 724,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "panama_int_3.bik",
+      "frames": 563,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "sam_gizmos_v2.bik",
+      "frames": 180,
+      "width": 1280,
+      "height": 720,
+      "flags": 1048576,
+      "audio_tracks": 0
+    },
+    {
+      "name": "spider_bootup.bik",
+      "frames": 169,
+      "width": 1280,
+      "height": 720,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "yemen_drone_cam.bik",
+      "frames": 172,
+      "width": 256,
+      "height": 256,
+      "flags": 0,
+      "audio_tracks": 0
+    },
+    {
+      "name": "yemen_mendz.bik",
+      "frames": 298,
+      "width": 225,
+      "height": 169,
+      "flags": 1048576,
+      "audio_tracks": 0
+    }
+  ]
+}
