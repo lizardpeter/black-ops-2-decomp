@@ -72,7 +72,7 @@ jobs:
             -Wl,-rpath,"$PWD/build" -o build/bink_decode_video
       - name: Verify shard against independent original full-frame coordinator
         env:
-          FRAMES: ${{ inputs.frames || '16' }}
+          FRAMES: ${{ inputs.frames || (github.ref_name == 'native-bink-full-corpus' && '0' || '16') }}
           SHARD: ${{ matrix.shard }}
         run: |
           python tests/dlls/verify_bink_corpus.py \

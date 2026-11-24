@@ -601,3 +601,11 @@ one-word lookahead and the original coordinator tests forward the index
 keyframe bit. The earlier packet-end-only tests remain historical evidence,
 not proof of this precise original caller convention. The 720p-alpha
 oracle arena is enlarged to 8 MiB for two four-plane padded buffers.
+
+
+## Store BIKi complete-corpus smoke gate and registered output (2026-11-23)
+
+- The corrected independent original-coordinator/standalone source playback comparison passed **44/44 assets**, first 16 frames each, in [run 45312616836](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45312616836): 704 frames, 2,208 planes, 609,588,224 exact decoded bytes. All six alpha assets and all original dimensions are represented. The manifest individually pins the SHA-256 and geometry of all 44 files (18,155 frames). No embedded audio tracks were present.
+- Original caller inspection established that the full indexed packet length, not the first luma partition limit, is passed to `FUN_1800274A0`; the original coordinator extends the bound by four bytes. The original keyframe index flag is also propagated. [Run 45312616785](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45312616785) passed the real caller and guard-byte comparisons. Zero-padding is verified for these fixtures; do not assume arbitrary malformed packets are equivalent.
+- The native registered-frame coordinator now implements the original x64 0xD8 frame-buffer descriptor, per-plane caller pointers and pitches, alpha/Y/chroma partition routing, and alternate reference/destination slots. Five pitched original-coordinator tests passed in [45312742361](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45312742361); five tests using the actual new native registered coordinator and independently owned buffers passed in [45312919457](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45312919457). This is internal decode integration, not the complete exported BINK handle or async/thread API.
+- Full-sequence verification of all 18,155 frames remains a distinct gate. The `native-bink-full-corpus` validation branch runs the exhaustive gate on corpus-triggering pushes; other branches retain the 16-frame smoke default. Explicit workflow dispatch can override the frame count. No game imports have been redirected and no third-party codec is used.
