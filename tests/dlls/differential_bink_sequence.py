@@ -44,7 +44,8 @@ def main():
     assert sha(data)==pin and data[:4]==b"BIKi"
     count,=struct.unpack_from("<I",data,8)
     width,height=struct.unpack_from("<II",data,20)
-    assert count>0 and (width,height)==(256,256)
+    assert count>0 and 32<=width<=512 and 32<=height<=512
+    assert width%32==height%32==0
     assert struct.unpack_from("<II",data,36)==(0,0) # no flags/audio
     if a.frames is None:a.frames=count
     assert 1<=a.frames<=count
@@ -59,11 +60,11 @@ def main():
                  ctypes.c_uint32,ctypes.c_uint32,byteptr,ctypes.c_uint32,
                  byteptr,ctypes.POINTER(Trace))
     fn.restype=ctypes.c_int
-    dims=(256,128,128)
+    dims=((width,height),(width//2,height//2),(width//2,height//2))
     # Reproduce alternating frame buffers, retaining older pixels in
     # blocks skipped by original boundary guards. Identical initial states
     # in independent original and native storage, not oracle-fed prediction.
-    original=[[bytes([0xB7 if slot==0 else 0x80])*(s*s) for s in dims]
+    original=[[bytes([0xB7 if slot==0 else 0x80])*(w*h) for w,h in dims]
               for slot in range(2)]
     native=[row.copy() for row in original]
     scratch=[SCRATCH_FIRST+i*SCRATCH_SPACING for i in range(9)]
@@ -89,7 +90,7 @@ def main():
             frame_report={"index":frame,"keyframe":bool(offsets[frame]&1),
                           "packet_bytes":len(packet),"planes":[]}
             report["frames"].append(frame_report)
-            for i,side in enumerate(dims):
+            for i,(w,h) in enumerate(dims):
                 if i==1:op=np=split
                 # Match the verified first-frame luma oracle. Later Y
                 # frames use packet-end, as in the tested frame-1 probe.
@@ -105,7 +106,7 @@ def main():
                     w.u32(STATS,0)
                 returned,bufs,_,_=machine.call(
                     img.base+0x252C0,
-                    [original[dst][i],original[ref][i],side,side,side,
+                    [original[dst][i],original[ref][i],w,h,w,
                      PACKET+op,PACKET+limit,0,STATS,0,1 if i==0 else 2,
                      SCRATCH_POINTERS,0,STATS],
                     ret="uint64",setup=setup,
@@ -117,30 +118,30 @@ def main():
                     raise AssertionError(report["failure"])
                 expected=bufs[0]
                 op=returned-PACKET
-                out=(ctypes.c_uint8*(side*side)).from_buffer_copy(native[dst][i])
-                prior=(ctypes.c_uint8*(side*side)).from_buffer_copy(native[ref][i])
+                out=(ctypes.c_uint8*(w*h)).from_buffer_copy(native[dst][i])
+                prior=(ctypes.c_uint8*(w*h)).from_buffer_copy(native[ref][i])
                 trace=Trace()
-                status=fn(raw,len(packet),np,limit,side,side,out,side,prior,ctypes.byref(trace))
+                status=fn(raw,len(packet),np,limit,w,h,out,w,prior,ctypes.byref(trace))
                 actual=bytes(out)
                 np=4*trace.input_words
                 differences=[k for k,(v,w) in enumerate(zip(expected,actual)) if v!=w]
                 modes_match=(list(trace.type_counts)==[modes[k] for k in range(10)]
                          and list(trace.submode_counts)==[submodes[k] for k in range(10)])
-                record={"plane":i,"side":side,"status":status,
+                record={"plane":i,"width":w,"height":h,"status":status,
                         "original_sha256":sha(expected),"native_sha256":sha(actual),
                         "original_next":op,"native_next":np,
                         "original_modes":dict(modes),"original_submodes":dict(submodes),
                         "native_modes":list(trace.type_counts),
                         "native_submodes":list(trace.submode_counts),
                         "mode_counts_match":modes_match,"differences":len(differences),
-                        "first_differences":[[k%side,k//side,expected[k],actual[k]]
+                        "first_differences":[[k%w,k//w,expected[k],actual[k]]
                                              for k in differences[:12]],
                         "native_position":[trace.error_x,trace.error_y,trace.mode,trace.submode]}
                 frame_report["planes"].append(record)
                 if (status or differences or op!=np or not modes_match
                         or bytes(prior)!=native[ref][i] or bufs[1]!=original[ref][i]):
                     report["failure"]={"frame":frame,**record}
-                    header=f"P5\n{side} {side}\n255\n".encode()
+                    header=f"P5\n{w} {h}\n255\n".encode()
                     (a.report.parent/"sequence-failed-original.pgm").write_bytes(header+expected)
                     (a.report.parent/"sequence-failed-native.pgm").write_bytes(header+actual)
                     save()
