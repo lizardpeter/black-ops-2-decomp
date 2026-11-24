@@ -45,6 +45,18 @@ def disassemble(md, pe, start, end):
 def fmt(ins, base):
     return f"{ins.address-base:08x}  {ins.mnemonic:8s} {ins.op_str}"
 
+def data_references(pe, table, md, targets):
+    base = pe.OPTIONAL_HEADER.ImageBase
+    found = {target: [] for target in targets}
+    for start, end in table.items():
+        for ins in disassemble(md, pe, start, end):
+            for op in ins.operands:
+                if op.type == CS_OP_MEM and op.mem.base == X86_REG_RIP:
+                    target = ins.address + ins.size + op.mem.disp - base
+                    if target in found:
+                        found[target].append({"function": hex(start), "instruction": fmt(ins, base)})
+    return found
+
 def target_references(pe, table, md):
     base = pe.OPTIONAL_HEADER.ImageBase
     targets = set(TARGETS)
@@ -122,6 +134,8 @@ def main():
         }
 
     references = target_references(pe, table, md)
+    data_targets = (0x1FF78, 0x1FF90, 0x1FFA0, 0x1FFB8, 0x1FFD0, 0x1FFE0, 0x20320, 0x20360, 0x20378)
+    data_xrefs = data_references(pe, table, md, data_targets)
     xrefs = {}
     for target, rows in references.items():
         xrefs[hex(target)] = []
@@ -168,6 +182,16 @@ def main():
                       "iat_rva": hex(imp.address - base)}
                      for imp in entry.imports]
             imports[dll] = names
+    delay_imports = {}
+    for entry in getattr(pe, "DIRECTORY_ENTRY_DELAY_IMPORT", []):
+        dll = entry.dll.decode("ascii", "replace")
+        delay_imports[dll] = [{"name": imp.name.decode("ascii", "replace") if imp.name else f"ordinal_{imp.ordinal}",
+                               "iat_rva": hex(imp.address - base)} for imp in entry.imports]
+    loader_targets = {}
+    for rva in (0x1FBF8, 0x1F5E8, 0x1F5F8, 0x1F610):
+        blob = pe.get_data(rva, 16)
+        loader_targets[hex(rva)] = {"section": section_name(pe, rva), "bytes": blob.hex(),
+                                    "qword": hex(int.from_bytes(blob[:8], "little")) if len(blob) >= 8 else None}
     needles = {name: name.encode() for name in EXPORTS}
     needles["xgameruntime.dll"] = b"xgameruntime.dll"
     needles["xgameruntime.dll_utf16"] = "xgameruntime.dll".encode("utf-16le")
@@ -178,9 +202,11 @@ def main():
         "machine": hex(pe.FILE_HEADER.Machine),
         "exception_function_count": len(table),
         "interface_data": targets, "code_references": xrefs,
+        "data_references": {hex(k): v for k,v in data_xrefs.items()},
         "interface_reference_functions": referenced,
         "known_gdk_functions": known, "data_strings": data_strings,
         "wide_strings": wide_strings, "imports": imports,
+        "delay_imports": delay_imports, "loader_iat_targets": loader_targets,
         "dynamic_loader_strings": strings,
     }
     args.out.parent.mkdir(parents=True, exist_ok=True)
@@ -202,6 +228,9 @@ def main():
     print("\nDYNAMIC LOADER STRINGS", json.dumps(strings, sort_keys=True))
     print("\nREFERENCED DATA STRINGS", json.dumps(data_strings, sort_keys=True))
     print("\nWIDE DATA STRINGS", json.dumps(wide_strings, sort_keys=True))
+    print("\nDATA XREFS", json.dumps({hex(k): v for k,v in data_xrefs.items()}, sort_keys=True))
+    print("\nDELAY IMPORTS", json.dumps(delay_imports, sort_keys=True))
+    print("\nLOADER IAT TARGETS", json.dumps(loader_targets, sort_keys=True))
     print("\nDYNAMIC IMPORTS")
     for dll, names in imports.items():
         selected = [item for item in names if any(key in item["name"].lower() for key in
