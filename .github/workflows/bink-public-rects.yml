@@ -1,0 +1,72 @@
+name: Bink public rectangle and playback equivalence
+on:
+  push:
+    paths:
+      - .github/workflows/bink-public-rects.yml
+      - reconstructed_dlls/bink/video_registered.h
+      - reconstructed_dlls/bink/resident_video_session.*
+      - reconstructed_dlls/bink/resident_frame_state.*
+      - reconstructed_dlls/bink/video_luma_first_keyframe.cpp
+      - tests/dlls/probe_bink_memory_open.py
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  public-rects:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        clip: [la_pip_seq_6, generalstore, yemen_mendz, blackout_virus, karma_pip_helipad]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/bink
+            tools/dlls
+            tests/dlls
+            tests/differential
+            docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -q -r tests/differential/requirements.txt
+          python tools/dlls/fetch.py originals/dlls
+          python tools/dlls/fetch_bik_fixtures.py originals/bik
+          python tests/dlls/differential_bink_coordinator.py --fetch-alpha originals/bik
+      - run: |
+          cmake -S reconstructed_dlls/bink -B build/native -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_COMPILER=clang++
+          cmake --build build/native --parallel 2 --target test_native_api
+      - name: Verify original and native public API (memory and preloaded file, sync and async)
+        shell: bash
+        run: |
+          clip="originals/bik/${{ matrix.clip }}.bik"
+          for input in memory file; do
+            for mode in sync async; do
+              extra=()
+              args=()
+              if [ "$input" = file ]; then
+                extra+=(--flags 0x01104400 --io-size 0x1000000)
+                args+=(--file)
+              fi
+              if [ "$mode" = async ]; then
+                extra+=(--async-playback)
+                args+=(--async)
+              fi
+              stem="build/native/$input-$mode"
+              python tests/dlls/probe_bink_memory_open.py originals/dlls/binkw64.dll "$clip" --out "$stem.json" --playback-out "$stem.original.yuv" --rects "${extra[@]}"
+              build/native/test_native_api "$clip" "$stem.native.yuv" "${args[@]}"
+              cmp "$stem.original.yuv" "$stem.native.yuv"
+              cmp "$stem.original.yuv.rects" "$stem.native.yuv.rects"
+              echo "PUBLIC PIXEL AND RECTANGLE PASS ${{ matrix.clip }} $input $mode"
+            done
+          done
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: public-rects-${{ matrix.clip }}
+          path: |
+            build/native/*.json
+            build/native/*.rects
+          if-no-files-found: warn
