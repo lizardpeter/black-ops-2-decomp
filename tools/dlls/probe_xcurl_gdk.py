@@ -120,6 +120,23 @@ def main():
             if item not in xrefs[hex(target)]:
                 xrefs[hex(target)].append(item)
 
+    xref_functions = {}
+    for rows in references.values():
+        for start, end, _ in rows:
+            xref_functions[start] = end
+    referenced = {}
+    for start, end in sorted(xref_functions.items()):
+        ins = disassemble(md, pe, start, end)
+        direct_calls = sorted({
+            op.imm - base for insn in ins if insn.mnemonic == "call"
+            for op in insn.operands if op.type == CS_OP_IMM
+        })
+        referenced[hex(start)] = {
+            "end": hex(end),
+            "direct_calls": [hex(x) for x in direct_calls],
+            "instructions": [fmt(insn, base) for insn in ins],
+        }
+
     known = {}
     for rva in KNOWN:
         start, end = containing(table, rva)
@@ -145,6 +162,7 @@ def main():
         "machine": hex(pe.FILE_HEADER.Machine),
         "exception_function_count": len(table),
         "interface_data": targets, "code_references": xrefs,
+        "interface_reference_functions": referenced,
         "known_gdk_functions": known, "imports": imports,
         "dynamic_loader_strings": strings,
     }
@@ -159,6 +177,10 @@ def main():
             print(f"XREF function {ref['function']}..{ref['end']}: {ref['instruction']}")
     for rva, fn in known.items():
         print(f"\nKNOWN GDK FUNCTION {rva} range={fn['function']}..{fn['end']}")
+        print("\n".join(fn["instructions"]))
+    for rva, fn in referenced.items():
+        print(f"\nINTERFACE REFERENCE FUNCTION {rva}..{fn['end']} "
+              f"direct_calls={','.join(fn['direct_calls'])}")
         print("\n".join(fn["instructions"]))
     print("\nDYNAMIC LOADER STRINGS", json.dumps(strings, sort_keys=True))
     print("\nDYNAMIC IMPORTS")
