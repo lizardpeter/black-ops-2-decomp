@@ -72,6 +72,58 @@ def run(dll,fixture,flags):
     m.on_import('kernel32.dll!GetSystemInfo',system_info)
     m.on_import('kernel32.dll!GetModuleHandleA',module)
     m.on_import('kernel32.dll!GetProcAddress',proc)
+    # Single-threaded Win32 synchronization model. Track ownership/counts
+    # and reject waits on objects which cannot actually be acquired.
+    objects={}
+    sync_events=[]
+    def new_object(kind,value,maximum):
+        handle=0x71000000+len(objects)*16
+        objects[handle]=[kind,value,maximum]
+        sync_events.append(["create",kind,value,maximum])
+        m.mu.reg_write(X.UC_X86_REG_RAX,handle)
+    def mutex(mu):
+        new_object("mutex",int(bool(mu.reg_read(X.UC_X86_REG_EDX))),1)
+    def semaphore(mu):
+        value=mu.reg_read(X.UC_X86_REG_EDX);maximum=mu.reg_read(X.UC_X86_REG_R8D)
+        assert 0<=value<=maximum
+        new_object("semaphore",value,maximum)
+    def wait(mu):
+        handle=mu.reg_read(X.UC_X86_REG_RCX)
+        timeout=mu.reg_read(X.UC_X86_REG_EDX)
+        kind,value,maximum=objects[handle]
+        if kind=="mutex":objects[handle][1]+=1;ret=0
+        elif value:objects[handle][1]-=1;ret=0
+        else:ret=258
+        sync_events.append(["wait",kind,timeout,ret])
+        mu.reg_write(X.UC_X86_REG_RAX,ret)
+    def release_mutex(mu):
+        handle=mu.reg_read(X.UC_X86_REG_RCX)
+        kind,value,maximum=objects[handle]
+        assert kind=="mutex" and value
+        objects[handle][1]-=1
+        sync_events.append(["release",kind])
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    def release_semaphore(mu):
+        handle=mu.reg_read(X.UC_X86_REG_RCX)
+        count=mu.reg_read(X.UC_X86_REG_EDX)
+        prev=mu.reg_read(X.UC_X86_REG_R8)
+        kind,value,maximum=objects[handle]
+        assert kind=="semaphore" and value+count<=maximum
+        if prev:mu.mem_write(prev,struct.pack("<I",value))
+        objects[handle][1]+=count
+        sync_events.append(["release",kind,count])
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    def close_handle(mu):
+        handle=mu.reg_read(X.UC_X86_REG_RCX)
+        assert handle in objects
+        sync_events.append(["close",objects[handle][0]])
+        objects[handle][0]="closed"
+        mu.reg_write(X.UC_X86_REG_RAX,1)
+    for name,callback in (("CreateMutexA",mutex),("CreateSemaphoreA",semaphore),
+            ("WaitForSingleObject",wait),("ReleaseMutex",release_mutex),
+            ("ReleaseSemaphore",release_semaphore),("CloseHandle",close_handle)):
+        m.on_import("kernel32.dll!"+name,callback)
+        modeled.add("kernel32.dll!"+name.lower())
     cursor=ARENA
     allocations=[]
     ticks=[]
@@ -92,7 +144,7 @@ def run(dll,fixture,flags):
         ticks.append(tick)
         return tick
     result={"fixture":fixture.name,"flags":flags,"header":list(words),
-            "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries}
+            "allocations":allocations,"timer_calls":ticks,"dynamic_queries":dynamic_queries,"sync_events":sync_events}
     ret,bufs,_,_=m.call(img.exports["BinkOpen"],[data,flags],"uint64",
                        fakes={img.base+0x1010:alloc,img.base+0x1FF00:clock},
                        limit=60_000_000)
