@@ -76,7 +76,7 @@ struct BinkFirstLumaTrace {
 };
 
 namespace {
-constexpr std::uint32_t kWidth=256,kHeight=256,kScratchSize=8192;
+constexpr std::uint32_t kScratchSize=8192;
 enum :std::size_t {
     kMode=0,kSubmode=1,kColor=2,kPattern=3,
     kMotionX=4,kMotionY=5,kDC=6,kOtherDC=7,kRLE=8,kNumStreams=9
@@ -113,47 +113,55 @@ t6_bink::ByteEntropyState make_stream(
 
 // Status 0 is a fully completed luma output. Nonzero is an explicit
 // diagnostic failure; no completion should be claimed in that case.
-extern "C" int bink_research_decode_boi_first_luma(
+// The plane's start and end are byte offsets into the compressed frame.
+// Return the original-style next-word position in report->input_words.
+// This remains restricted to verified keyframe modes and 16-aligned
+// planes, not a hardened parser for untrusted media.
+extern "C" int bink_research_decode_keyframe_plane(
         const std::uint8_t* compressed,std::uint32_t compressed_bytes,
+        std::uint32_t start,std::uint32_t split,
+        std::uint32_t width,std::uint32_t height,
         std::uint8_t* output,std::uint32_t stride,
         BinkFirstLumaTrace* report) {
     if (!report) return -1;
     *report=BinkFirstLumaTrace{};
-    if (!compressed || !output || stride<kWidth ||
-        compressed_bytes<8 || compressed_bytes>32768U ||
+    if (!compressed || !output || stride<width ||
+        width<16 || height<16 || width>512 || height>512 ||
+        (width&15U)!=0U || (height&15U)!=0U ||
+        compressed_bytes<4 || compressed_bytes>32768U ||
         (compressed_bytes&3U)!=0U) {
         report->status=1;return 1;
     }
-    const std::uint32_t split=read_le32(compressed);
-    if (split<8 || split>compressed_bytes || (split&3U)!=0U) {
+    if (start>=split || split>compressed_bytes ||
+        (start&3U)!=0U || (split&3U)!=0U) {
         report->status=2;return 2;
     }
     std::vector<std::uint32_t> input(compressed_bytes/4U+64U,0U);
     for (std::uint32_t i=0;i<compressed_bytes/4U;++i)
         input[i]=read_le32(compressed+4U*i);
     t6_bink::WordBitStream bits{};
-    bits.next_word=input.data()+1;
+    bits.next_word=input.data()+start/4;
     const auto* stream_end=input.data()+split/4;
 
     // The original frame-plane coordinator owns nine independent buffered
     // token streams; 32 rows of 8x8 blocks (width/8=32).
-    constexpr std::uint32_t blocks=32;
+    const std::uint32_t blocks=width/8;
     std::array<std::array<std::uint8_t,kScratchSize>,kNumStreams> scratch{};
     std::array<t6_bink::ByteEntropyState,kNumStreams> stream{};
     stream[kMode]=make_stream(scratch[kMode].data(),
-                            msb_width(blocks+511),align16(blocks+527),4);
+                            msb_width(blocks+511),align16(blocks+512),4);
     stream[kSubmode]=make_stream(scratch[kSubmode].data(),
-                            msb_width(blocks/2+511),align16(blocks/2+527),4);
+                            msb_width(blocks/2+511),align16(blocks/2+512),4);
     stream[kColor]=make_stream(scratch[kColor].data(),
                             msb_width(blocks*64+511),blocks*64+512,8);
     stream[kPattern]=make_stream(scratch[kPattern].data(),
-                            msb_width(blocks*8+511),align16(blocks*8+527),8);
+                            msb_width(blocks*8+511),align16(blocks*8+512),8);
     stream[kMotionX]=make_stream(scratch[kMotionX].data(),
-                            msb_width(blocks+511),align16(blocks+527),5,16);
+                            msb_width(blocks+511),align16(blocks+512),5,16);
     stream[kMotionY]=make_stream(scratch[kMotionY].data(),
-                            msb_width(blocks+511),align16(blocks+527),5,16);
+                            msb_width(blocks+511),align16(blocks+512),5,16);
     stream[kDC]=make_stream(scratch[kDC].data(),
-                            msb_width(blocks+511),align16(blocks*2+1039),11);
+                            msb_width(blocks+511),align16(blocks*2+1024),11);
     // Both original 16-bit delta contexts use a TEN-bit count width and
     // 1,088-byte capacity on this 256px plane. Original Unicorn entry-hook
     // at RVA 0x24FF0 confirms DC=(width11,mode0,count10,cap1088)
@@ -161,7 +169,7 @@ extern "C" int bink_research_decode_boi_first_luma(
     // with the separate RLE stream's 11-bit count consumes one extra bit
     // on row 0 and corrupts all subsequent coefficient transforms.
     stream[kOtherDC]=make_stream(scratch[kOtherDC].data(),
-                            msb_width(blocks+511),align16(blocks*2+1039),11,1024);
+                            msb_width(blocks+511),align16(blocks*2+1024),11,1024);
     stream[kRLE]=make_stream(scratch[kRLE].data(),
                             msb_width(blocks*48+511),blocks*48+512,4);
 
@@ -226,7 +234,7 @@ extern "C" int bink_research_decode_boi_first_luma(
         return n;
     };
 
-    for(std::uint32_t y=0;y<kHeight;y+=8) {
+    for(std::uint32_t y=0;y<height;y+=8) {
         bink_decode_entropy_byte_rle(&stream[kMode],&bits,stream_end);
         bink_decode_entropy_byte_rle(&stream[kSubmode],&bits,stream_end);
         bink_decode_adaptive_nibbles(&stream[kColor],&bits,&books,stream_end);
@@ -252,7 +260,7 @@ extern "C" int bink_research_decode_boi_first_luma(
             }
         }
 
-        for(std::uint32_t x=0;x<kWidth;) {
+        for(std::uint32_t x=0;x<width;) {
             if (stream[kMode].current>=stream[kMode].end)
                 return update_report(3,x,y,0xff,0xff);
             const std::uint32_t mode=*stream[kMode].current++;
@@ -261,7 +269,7 @@ extern "C" int bink_research_decode_boi_first_luma(
             std::uint8_t* block=output+std::ptrdiff_t(y)*stride+x;
             if(mode==1U) {
                 std::uint32_t subtype=0xff;
-                if ((y&8U)==0 && x+16<=kWidth &&
+                if ((y&8U)==0 && x+16<=width &&
                     stream[kSubmode].current<stream[kSubmode].end) {
                     subtype=*stream[kSubmode].current++;
                     if(subtype<10U)++report->submode_counts[subtype];
@@ -309,5 +317,20 @@ extern "C" int bink_research_decode_boi_first_luma(
             }
         }
     }
-    return update_report(0,kWidth,kHeight,0,0);
+    return update_report(0,width,height,0,0);
+}
+
+// Preserve the original tested first-luma entry point and packet layout.
+extern "C" int bink_research_decode_boi_first_luma(
+        const std::uint8_t* compressed,std::uint32_t compressed_bytes,
+        std::uint8_t* output,std::uint32_t stride,
+        BinkFirstLumaTrace* report) {
+    if (!report) return -1;
+    if (!compressed || compressed_bytes<8) {
+        *report=BinkFirstLumaTrace{};
+        report->status=1;
+        return 1;
+    }
+    return bink_research_decode_keyframe_plane(compressed,compressed_bytes,
+        4,read_le32(compressed),256,256,output,stride,report);
 }
