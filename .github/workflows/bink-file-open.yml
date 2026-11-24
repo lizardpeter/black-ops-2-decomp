@@ -23,6 +23,7 @@ jobs:
             tests/dlls
             tools/dlls
             docs
+            reconstructed_dlls/bink
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -36,11 +37,19 @@ jobs:
           clips={c["name"]:c for c in json.loads(MANIFEST.read_text())["clips"]}
           fetch(clips[os.environ["CLIP"]],Path("originals/bik"))
           PY
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/resident_bootstrap.cpp \
+            reconstructed_dlls/bink/resident_frame_state.cpp \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp -o build/bink_bootstrap.so
       - name: Execute actual Store file-backed flag path
         run: |
+          extra=()
+          if [ "${{ matrix.io_size }}" = "0x180000" ] || [ "${{ matrix.clip }}" = "la_pip_seq_6" ]; then extra+=(--library build/bink_bootstrap.so); fi
           python tests/dlls/probe_bink_memory_open.py \
             originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
-            --flags 0x01104400 --io-size "${{ matrix.io_size }}" --out build/original-file-open.json
+            --flags 0x01104400 --io-size "${{ matrix.io_size }}" --out build/original-file-open.json "${extra[@]}"
       - uses: actions/upload-artifact@v4
         if: always()
         with:

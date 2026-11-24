@@ -20,7 +20,7 @@ struct ResidentBootstrapLayout {
     std::uint32_t init_region_offset=0,allocation_bytes=0,accounted_bytes=0;
 };
 bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out,
-                               bool explicit_no_tracks=false);
+                               bool explicit_no_tracks=false,std::uint32_t file_index_bytes=0);
 // Validated Store subset. Caller owns the allocation and input bytes;
 // the index and packet pointers borrow the resident input. Only observed
 // handle fields are initialized, and the original three timer calls
@@ -32,4 +32,24 @@ bool init_resident_external(void* handle,std::size_t capacity,
 }
 extern "C" std::uint32_t bink_research_resident_bootstrap_size(const std::uint8_t*,std::size_t,std::uint32_t flags);
 extern "C" int bink_research_init_resident_external(void*,std::size_t,
+    const std::uint8_t*,std::size_t,std::uint32_t,t6_bink::ResidentTimer,void*);
+
+// Original file-preload subset of BinkOpen 0x01104400. All compressed
+// packets have been read and the OS file closed; no background worker.
+// 0x20990 sizes the I/O reserve, 0x18Dxx adds 0x400 to compressed
+// payload and aligns the second allocation. Caller owns both allocations.
+namespace t6_bink {
+struct PreloadedFileLayout {
+    ResidentBootstrapLayout handle{};
+    std::uint32_t first_packet=0,payload_bytes=0,payload_allocation=0;
+};
+bool preloaded_file_layout(const std::uint8_t* data,std::size_t bytes,
+    std::uint32_t io_size,PreloadedFileLayout& out);
+bool init_preloaded_file(void* handle,std::size_t capacity,void* payload,std::size_t payload_capacity,
+    const std::uint8_t* data,std::size_t bytes,std::uint32_t io_size,
+    ResidentTimer timer,void* timer_context);
+}
+extern "C" std::uint32_t bink_research_file_handle_size(const std::uint8_t*,std::size_t,std::uint32_t);
+extern "C" std::uint32_t bink_research_file_payload_size(const std::uint8_t*,std::size_t,std::uint32_t);
+extern "C" int bink_research_init_preloaded_file(void*,std::size_t,void*,std::size_t,
     const std::uint8_t*,std::size_t,std::uint32_t,t6_bink::ResidentTimer,void*);

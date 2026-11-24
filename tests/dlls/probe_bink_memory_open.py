@@ -40,7 +40,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
     data=fixture.read_bytes()
     file_mode=not bool(flags&0x04000000)
     input_data=fixture.name.encode("ascii")+b"\0" if file_mode else data
-    if file_mode and (library or playback_out):raise ValueError("file mode supports lifecycle probe only")
+    if file_mode and playback_out:raise ValueError("file mode supports lifecycle probe only")
     pin=next(c["sha256"] for c in json.loads(MANIFEST.read_text())["clips"] if c["name"]==fixture.name)
     assert hashlib.sha256(data).hexdigest()==pin
     assert hashlib.sha256(dll.read_bytes()).hexdigest()==PIN
@@ -344,7 +344,52 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
     result["verified"]=result["verified"] and result["close_verified"]
     # Compare the source allocation and known initial fields against the
     # real initializer, not against an independently fabricated handle.
-    if library and flags&0x400:
+    if library and file_mode:
+        # Fully resident file path only. A small-buffer original that
+        # starts a streaming worker is not accepted as preloaded source.
+        lib=ctypes.CDLL(str(library.resolve()))
+        hs=lib.bink_research_file_handle_size
+        ps=lib.bink_research_file_payload_size
+        for fn in (hs,ps):
+            fn.argtypes=(ctypes.c_void_p,ctypes.c_size_t,ctypes.c_uint32);fn.restype=ctypes.c_uint32
+        initialize=lib.bink_research_init_preloaded_file
+        initialize.argtypes=(ctypes.c_void_p,ctypes.c_size_t,ctypes.c_void_p,ctypes.c_size_t,
+            ctypes.c_void_p,ctypes.c_size_t,ctypes.c_uint32,CLOCK,ctypes.c_void_p)
+        initialize.restype=ctypes.c_int
+        source=(ctypes.c_uint8*len(data)).from_buffer_copy(data)
+        hsize=hs(source,len(data),io_size);psize=ps(source,len(data),io_size)
+        assert hsize and psize,(hsize,psize)
+        native=(ctypes.c_uint64*(hsize//8))()
+        payload=(ctypes.c_uint64*(psize//8))()
+        native_ticks=[]
+        @CLOCK
+        def native_clock(ctx):
+            t=100000+len(native_ticks)*3
+            native_ticks.append(t);return t
+        status=initialize(native,hsize,payload,psize,source,len(data),io_size,native_clock,None)
+        native_raw=bytes(native)
+        fields={hex(off):struct.unpack_from("<I",native_raw,off)[0] for off in WORDS}
+        native_base=ctypes.addressof(native);payload_base=ctypes.addressof(payload)
+        def norm_native(off):
+            p=struct.unpack_from("<Q",native_raw,off)[0]
+            if not p:return None
+            if off in (0x200,0x220):
+                # Compare callback presence; behavior is verified separately.
+                return result["pointers"][hex(off)]
+            if native_base<=p<native_base+hsize:return {"allocation_offset":p-native_base}
+            if payload_base<=p<payload_base+psize:return {"allocation_offset":allocations[1]["offset"]+p-payload_base}
+            return {"other":hex(p)}
+        pointers={hex(off):norm_native(off) for off in POINTERS}
+        mismatches={k:[result["fields"][k],v] for k,v in fields.items() if v!=result["fields"][k]}
+        ptr_mismatches={k:[result["pointers"][k],v] for k,v in pointers.items() if v!=result["pointers"][k]}
+        first=struct.unpack_from("<I",data,44)[0]&~1
+        result["source_file_bootstrap"]={"return":status,"allocations":[hsize,psize],
+            "timer_calls":native_ticks,"field_mismatches":mismatches,"pointer_mismatches":ptr_mismatches}
+        result["source_file_bootstrap"]["verified"]=(status==0 and [hsize,psize]==[a["requested_bytes"] for a in allocations]
+            and native_ticks==ticks[:6] and not mismatches and not ptr_mismatches and bytes(source)==data
+            and bytes(payload)[:len(data)-first]==data[first:])
+        result["verified"]=result["verified"] and result["source_file_bootstrap"]["verified"]
+    elif library and flags&0x400:
         lib=ctypes.CDLL(str(library.resolve()))
         size=lib.bink_research_resident_bootstrap_size
         size.argtypes=(ctypes.c_void_p,ctypes.c_size_t,ctypes.c_uint32);size.restype=ctypes.c_uint32

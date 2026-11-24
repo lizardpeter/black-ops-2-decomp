@@ -3,6 +3,7 @@
 #include "resident_bootstrap.h"
 #include "bink_index.h"
 #include <cstring>
+#include <algorithm>
 #include <limits>
 #include <vector>
 
@@ -19,7 +20,8 @@ bool header(const std::uint8_t* data,std::size_t bytes,t6_bink::HeaderPrefix& h)
 }
 }
 namespace t6_bink {
-bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out,bool explicit_no_tracks) {
+bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& out,bool explicit_no_tracks,
+                               std::uint32_t file_index_bytes) {
     out={};
     if(!h.rate_numerator || !h.rate_denominator || h.audio_track_count)return false;
     // Original 32-bit unsigned add/div; cap the research allocation
@@ -44,7 +46,8 @@ bool resident_bootstrap_layout(const HeaderPrefix& h,ResidentBootstrapLayout& ou
     out.track_ids_offset=reserve(0);
     // With BinkSetSoundTrack(0,null) and flag 0x4000, the original
     // omits the final region entirely (track-ID pointer is one-past-end).
-    if(!explicit_no_tracks)out.init_region_offset=reserve(0x104);
+    if(file_index_bytes)out.init_region_offset=reserve(file_index_bytes+0x8C);
+    else if(!explicit_no_tracks)out.init_region_offset=reserve(0x104);
     out.allocation_bytes=0x5C0U+total;
     out.accounted_bytes=0x5B8U+total;
     return true;
@@ -104,4 +107,89 @@ extern "C" std::uint32_t bink_research_resident_bootstrap_size(const std::uint8_
 extern "C" int bink_research_init_resident_external(void* handle,std::size_t capacity,
     const std::uint8_t* data,std::size_t bytes,std::uint32_t flags,t6_bink::ResidentTimer timer,void* ctx) {
     return t6_bink::init_resident_external(handle,capacity,data,bytes,flags,timer,ctx)?0:1;
+}
+
+namespace t6_bink {
+namespace {
+// 0x20990: rounded 128KiB I/O size plus 4KiB alignment, minimum 0x41000.
+std::uint32_t file_io_reserve(std::uint32_t io) {
+    return std::max(0x41000U,((io+0x1FFFFU)&~0x1FFFFU)+0x1000U);
+}
+std::uint32_t file_size_callback(void*,std::uint32_t io) {return file_io_reserve(io);}
+// Original 0x20F80 state transition, for a CLOSED, fully preloaded file.
+// The streaming callback boundaries are intentionally not invoked here.
+std::uint32_t preloaded_control(void* io,std::uint32_t flags) {
+    std::uint32_t state=0;
+    std::memcpy(&state,static_cast<std::uint8_t*>(io)+0xB0,4);
+    if(flags&1U) {if(!state)state=1;}
+    else if(flags&2U) {if(state==1)state=0;}
+    put(io,0xB0,state);
+    return state;
+}
+}
+bool preloaded_file_layout(const std::uint8_t* data,std::size_t bytes,std::uint32_t io_size,PreloadedFileLayout& out) {
+    out={};
+    HeaderPrefix h{};
+    if(!header(data,bytes,h) || io_size>0x7FFE0000U ||
+       bytes>256U*1024U*1024U)return false;
+    const auto index_bytes=4U*(h.frame_count+1U);
+    if(std::uint64_t(index_bytes)+44>bytes)return false;
+    std::vector<FrameSpan> spans(h.frame_count);
+    if(!read_video_only_index(data,bytes,spans.data(),spans.size(),&h) ||
+       !spans.front().keyframe || spans.back().end!=bytes)return false;
+    // 0x18CDx: if the aligned reserve is smaller than half of the
+    // compressed file, the original may launch a streaming worker.
+    // Do not silently substitute resident playback on that path.
+    if(file_io_reserve(io_size)<(h.payload_bytes/10U)*5U)return false;
+    if(!resident_bootstrap_layout(h,out.handle,true,index_bytes))return false;
+    out.first_packet=spans.front().start;
+    out.payload_bytes=static_cast<std::uint32_t>(bytes-out.first_packet);
+    out.payload_allocation=(out.payload_bytes+0x400U+31U)&~31U;
+    return true;
+}
+bool init_preloaded_file(void* handle,std::size_t capacity,void* payload,std::size_t payload_capacity,
+    const std::uint8_t* data,std::size_t bytes,std::uint32_t io_size,
+    ResidentTimer timer,void* ctx) {
+    HeaderPrefix h{};
+    PreloadedFileLayout plan{};
+    if(!handle || !payload || !timer || !header(data,bytes,h) ||
+       (reinterpret_cast<std::uintptr_t>(handle)&7U) ||
+       (reinterpret_cast<std::uintptr_t>(payload)&7U) ||
+       !preloaded_file_layout(data,bytes,io_size,plan) ||
+       capacity<plan.handle.allocation_bytes || payload_capacity<plan.payload_allocation)
+        return false;
+    auto* state=static_cast<std::uint8_t*>(handle);
+    // Common original metadata/rings. Use resident initializer with an
+    // independently padded plan; then replace borrowed index with the
+    // original file-owned prefix and resident packet base. Timer calls
+    // at the three earlier I/O boundaries precede initial frame select.
+    (void)timer(ctx);(void)timer(ctx);(void)timer(ctx);
+    std::memset(state,0,plan.handle.allocation_bytes);
+    if(!init_resident_external(state,capacity,data,bytes,0x04104400U,timer,ctx))return false;
+    const auto prefix=44U+4U*(h.frame_count+1U);
+    auto* file_header=state+plan.handle.init_region_offset+96;
+    std::memcpy(file_header,data,prefix);
+    const auto* index=reinterpret_cast<const std::uint32_t*>(file_header+44);
+    put(state,0x1A0,index);put(state,0x1C0,index);put(state,0x1C8,index);put(state,0x1D0,index);
+    std::memset(payload,0,plan.payload_allocation);
+    std::memcpy(payload,data+plan.first_packet,plan.payload_bytes);
+    put(state,0x100,payload);put(state,0x1D8,payload);
+    put(state,0x20,0x09006400U|h.flags);
+    put(state,0x528,plan.handle.accounted_bytes+plan.payload_bytes+0x400U);
+    put(state,0x200,&file_size_callback);
+    put(state,0x220,&preloaded_control);
+    return true;
+}
+}
+extern "C" std::uint32_t bink_research_file_handle_size(const std::uint8_t* data,std::size_t bytes,std::uint32_t io) {
+    t6_bink::PreloadedFileLayout p{};
+    return t6_bink::preloaded_file_layout(data,bytes,io,p)?p.handle.allocation_bytes:0;
+}
+extern "C" std::uint32_t bink_research_file_payload_size(const std::uint8_t* data,std::size_t bytes,std::uint32_t io) {
+    t6_bink::PreloadedFileLayout p{};
+    return t6_bink::preloaded_file_layout(data,bytes,io,p)?p.payload_allocation:0;
+}
+extern "C" int bink_research_init_preloaded_file(void* h,std::size_t cap,void* p,std::size_t pcap,
+    const std::uint8_t* data,std::size_t bytes,std::uint32_t io,t6_bink::ResidentTimer timer,void* ctx) {
+    return t6_bink::init_preloaded_file(h,cap,p,pcap,data,bytes,io,timer,ctx)?0:1;
 }
