@@ -40,6 +40,14 @@ int main(int argc,char** argv) {
         std::ifstream input(argv[1],std::ios::binary);assert(input);
         bytes.assign(std::istreambuf_iterator<char>(input),{});
     }
+    assert(BinkStartAsyncThread(8,nullptr)==0);
+    assert(BinkRequestStopAsyncThread(7)==0);
+    assert(BinkWaitStopAsyncThread(7)==0);
+    if(async) {
+        assert(BinkStartAsyncThread(0,nullptr)==1);
+        assert(BinkStartAsyncThread(0,nullptr)==0);
+        assert(BinkStartAsyncThread(1,nullptr)==1);
+    }
     BinkSetMemory(alloc,release);
     BinkSetSoundTrack(0,nullptr);
     if(file)BinkSetIOSize(stream?0x10000U:0x1000000U);
@@ -71,7 +79,7 @@ int main(int argc,char** argv) {
         if(i==4){assert(BinkPause(h,1)==1);assert(BinkPause(h,0)==0);}
         if(async) {
             assert(BinkDoFrameAsyncWait(h,0)==1);
-            assert(BinkDoFrameAsync(h,0,0)==1);
+            assert(BinkDoFrameAsync(h,i%2,i%2)==1);
             assert(BinkDoFrameAsyncWait(h,-1)==1);
         } else BinkDoFrame(h);
         if(read32(h,0x56C)!=i+1){std::cerr<<BinkGetError()<<"\n";return 2;}
@@ -85,5 +93,14 @@ int main(int argc,char** argv) {
     RealtimeSnapshot rt{};BinkGetRealtime(h,&rt,2);
     out.close();assert(out);
     BinkClose(h);assert(blocks.empty()&&alloc_calls==free_calls);
+    if(async) {
+        for(unsigned n=0;n<2;++n) {
+            assert(BinkRequestStopAsyncThread(n)==1);
+            assert(BinkWaitStopAsyncThread(n)==1);
+            assert(BinkStartAsyncThread(n,nullptr)==1);
+            assert(BinkRequestStopAsyncThread(n)==1);
+            assert(BinkWaitStopAsyncThread(n)==1);
+        }
+    }
     std::cout<<"Static native API PASS: "<<frames<<" frames, "<<alloc_calls<<" original-layout allocations freed\n";
 }

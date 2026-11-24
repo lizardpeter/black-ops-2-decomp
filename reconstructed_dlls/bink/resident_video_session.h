@@ -5,6 +5,7 @@
 #include "video_registered.h"
 #include <array>
 #include <memory>
+#include <functional>
 #include <string>
 #include <vector>
 
@@ -46,7 +47,8 @@ public:
     DecodeResult do_frame();
     // Same-worker submission: original work message tag 6. The host
     // worker and registered buffers stay alive until wait or close.
-    SubmitResult do_frame_async(std::uint32_t worker=0);
+    using Executor=std::function<bool(std::function<void()>)>;
+    SubmitResult do_frame_async(std::uint32_t worker=0,Executor executor={});
     WaitResult wait_async(std::int32_t timeout);
     bool async_pending() const;
     bool next_frame();

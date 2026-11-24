@@ -4,6 +4,11 @@
 #include "bink_open_options.h"
 #include "resident_video_session.h"
 #include "file_io_state.h"
+#include "async_lifecycle.h"
+#include <thread>
+#include <deque>
+#include <array>
+#include <condition_variable>
 #include <chrono>
 #include <cstring>
 #include <fstream>
@@ -22,8 +27,69 @@ struct Entry {
     ResidentVideoSession movie;
     RegisteredFrameBuffers* registered=nullptr;
 };
+// Platform adapter: original lifecycle mask and zero-message stop semantics,
+// with real numbered host worker threads and a FIFO. Completed decode
+// messages are retained by each session (not the original global queue).
+struct HostPool {
+    struct Slot {
+        std::mutex mutex;
+        std::condition_variable cv;
+        std::deque<std::function<void()>> queue;
+        std::thread thread;
+        bool stopping=false;
+        ~Slot() {stop();if(thread.joinable())thread.join();}
+        void stop() {
+            {std::lock_guard lock(mutex);stopping=true;}
+            cv.notify_all();
+        }
+        bool start() {
+            if(thread.joinable())return false;
+            stopping=false;
+            try {thread=std::thread([this] {
+                std::unique_lock lock(mutex);
+                for(;;) {
+                    cv.wait(lock,[&]{return stopping||!queue.empty();});
+                    if(queue.empty()&&stopping)return;
+                    auto task=std::move(queue.front());queue.pop_front();
+                    lock.unlock();task();lock.lock();
+                }
+            });return true;}catch(...){return false;}
+        }
+        bool submit(std::function<void()> job) {
+            std::lock_guard lock(mutex);
+            if(stopping||!thread.joinable()||queue.size()>=80)return false;
+            queue.push_back(std::move(job));cv.notify_one();return true;
+        }
+    };
+    AsyncLifecycle state{};
+    std::array<Slot,8> slots;
+    static int init(std::uint32_t,unsigned,void*) {return 1;} // in-place host queue storage
+    static void destroy(std::uint32_t,unsigned,void*) {} // queue storage owned by slot
+    static int launch(std::uint32_t n,void* ctx) {
+        return static_cast<HostPool*>(ctx)->slots[n].start();
+    }
+    static int request(std::uint32_t n,std::uintptr_t msg,void* ctx) {
+        if(msg)return 0;
+        static_cast<HostPool*>(ctx)->slots[n].stop();return 1;
+    }
+    static int join(std::uint32_t n,void* ctx) {
+        auto& slot=static_cast<HostPool*>(ctx)->slots[n];
+        if(!slot.thread.joinable())return 0;
+        slot.thread.join();return 1;
+    }
+};
+HostPool pool;
 std::mutex registry_mutex;
 std::unordered_map<void*,std::unique_ptr<Entry>> registry;
+void report_lifecycle() {
+    switch(pool.state.error_rva) {
+    case 0x5F530:BinkSetError("Out of range thread number.");break;
+    case 0x5F550:BinkSetError("Already loaded on this thread number.");break;
+    case 0x5F578:BinkSetError("Invalid thread number.");break;
+    case 0x5F590:BinkSetError("Wait not queued for this thread.");break;
+    default:break;
+    }
+}
 std::uint32_t tick(void*) {
     return static_cast<std::uint32_t>(std::chrono::duration_cast<std::chrono::milliseconds>(
         std::chrono::steady_clock::now().time_since_epoch()).count());
@@ -109,7 +175,10 @@ extern "C" int BinkDoFrameAsync(void* h,std::uint32_t first,std::uint32_t second
         if(first!=second||first>=8) {BinkSetError("only same-worker submission recovered");return 0;}
         if(!ensure_buffers(h,*e))return 0;
         using R=ResidentVideoSession::SubmitResult;
-        const auto r=e->movie.do_frame_async(first);
+        if(!(pool.state.running&(1U<<first))) {BinkSetError("Invalid thread number.");return 0;}
+        const auto r=e->movie.do_frame_async(first,[first](std::function<void()> job) {
+            return pool.slots[first].submit(std::move(job));
+        });
         if(r==R::submitted)return 1;
         if(r==R::error)report(*e,"native async submission rejected");
         return 0;
@@ -138,4 +207,23 @@ extern "C" void BinkGetRealtime(void* h,RealtimeSnapshot* out,std::uint32_t fram
 extern "C" std::uint32_t BinkControlBackgroundIO(void* h,std::uint32_t flags) {
     std::lock_guard lock(registry_mutex);auto* e=find(h);
     return e?e->movie.control_background_io(flags):UINT32_MAX;
+}
+
+extern "C" int BinkStartAsyncThread(std::uint32_t n,void*) {
+    std::lock_guard lock(registry_mutex);
+    const auto r=bink_research_start_worker(&pool.state,n,HostPool::init,HostPool::destroy,HostPool::launch,&pool);
+    if(!r)report_lifecycle();return r;
+}
+extern "C" int BinkRequestStopAsyncThread(std::uint32_t n) {
+    std::lock_guard lock(registry_mutex);
+    const auto r=bink_research_stop_worker(&pool.state,n,HostPool::request,&pool);
+    if(!r)report_lifecycle();return r;
+}
+extern "C" int BinkWaitStopAsyncThread(std::uint32_t n) {
+    std::lock_guard lock(registry_mutex);
+    // Do not join a live, non-stopping thread even when the original
+    // stop-requested bit from an earlier lifecycle remains set.
+    if(n<8 && (pool.state.running&(1U<<n))) {BinkSetError("Wait not queued for this thread.");return 0;}
+    const auto r=bink_research_join_worker(&pool.state,n,HostPool::join,HostPool::destroy,&pool);
+    if(!r)report_lifecycle();return r;
 }

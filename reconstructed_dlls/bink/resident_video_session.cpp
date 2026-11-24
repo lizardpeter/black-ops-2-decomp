@@ -28,13 +28,17 @@ namespace t6_bink {
 // and wait own all pending bits, descriptor swaps and finish state.
 // The worker never changes the caller's handle or slot selection.
 struct ResidentVideoSession::Worker {
-    explicit Worker(ResidentVideoSession& session):owner(session),thread([this]{run();}) {}
+    explicit Worker(ResidentVideoSession& session,bool external):owner(session),external_(external) {
+        if(!external_)thread=std::thread([this]{run();});
+    }
     ~Worker() {
         {std::lock_guard lock(mutex);stopping=true;}
         cv.notify_all();
-        thread.join();
+        if(thread.joinable())thread.join();
+        else {std::unique_lock lock(mutex);cv.wait(lock,[&]{return !queued&&!running;});}
     }
     ResidentVideoSession& owner;
+    bool external_;
     std::mutex mutex;
     std::condition_variable cv;
     bool stopping=false,queued=false,running=false,ready=false;
@@ -51,18 +55,21 @@ struct ResidentVideoSession::Worker {
         for(;;) {
             cv.wait(lock,[&]{return stopping||queued;});
             if(stopping&&!queued)return;
-            queued=false;running=true;
-            lock.unlock();
-            RegisteredDecodeReport local{};
-            std::string reason;
-            bool ok=false;
-            try {ok=owner.decode_current_packet(local,reason);}
-            catch(const std::exception& e) {reason=e.what();}
-            catch(...) {reason="unexpected native worker failure";}
-            lock.lock();
-            report=local;error=std::move(reason);success=ok;
-            running=false;ready=true;cv.notify_all();
+            execute(lock);
         }
+    }
+    void execute(std::unique_lock<std::mutex>& lock) {
+        queued=false;running=true;
+        lock.unlock();
+        RegisteredDecodeReport local{};
+        std::string reason;
+        bool ok=false;
+        try {ok=owner.decode_current_packet(local,reason);}
+        catch(const std::exception& e) {reason=e.what();}
+        catch(...) {reason="unexpected native worker failure";}
+        lock.lock();
+        report=local;error=std::move(reason);success=ok;
+        running=false;ready=true;cv.notify_all();
     }
     static int enqueue(std::uint32_t worker,std::uintptr_t message,void* ctx) {
         auto& self=*static_cast<Worker*>(ctx);
@@ -72,9 +79,16 @@ struct ResidentVideoSession::Worker {
         // Do not wake until original submit has stored its pending word.
         self.id=worker;self.tag=message;return 1;
     }
-    void launch() {
+    bool launch(const Executor& executor) {
         {std::lock_guard lock(mutex);queued=true;success=false;error.clear();}
-        cv.notify_one();
+        if(!external_) {cv.notify_one();return true;}
+        bool accepted=false;
+        try {if(executor)accepted=executor([this] {std::unique_lock lock(mutex);execute(lock);});}
+        catch(...) {}
+        if(!accepted) {
+            std::lock_guard lock(mutex);queued=false;cv.notify_all();
+        }
+        return accepted;
     }
     static int receive(std::uint32_t worker,std::int32_t timeout,
                        AsyncCompletion* completion,const char** error,void* ctx) {
@@ -441,14 +455,15 @@ ResidentVideoSession::DecodeResult ResidentVideoSession::do_frame() {
     }
     return DecodeResult::frame;
 }
-ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uint32_t worker) {
+ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uint32_t worker,Executor executor) {
     if(async_pending())return SubmitResult::busy;
     if(!opened_ || failed_ || !info_ || worker>=8) {
         fail("no ready resident async video or invalid worker");return SubmitResult::error;
     }
     if(frame_number()==last_decoded_frame())return SubmitResult::already_decoded;
     try {
-        if(!worker_)worker_=std::make_unique<Worker>(*this);
+        if(worker_ && worker_->external_!=bool(executor))worker_.reset();
+        if(!worker_)worker_=std::make_unique<Worker>(*this,bool(executor));
     } catch(const std::exception& e) {
         fail(e.what());return SubmitResult::error;
     }
@@ -466,7 +481,10 @@ ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uin
     if(result!=1) {
         fail("original async submission rejected frame");return SubmitResult::error;
     }
-    queue.launch();
+    if(!queue.launch(executor)) {
+        put(handle_.data(),0x120,0U);put(handle_.data(),0x124,0U);
+        fail("native worker queue rejected task");return SubmitResult::error;
+    }
     return SubmitResult::submitted;
 }
 ResidentVideoSession::WaitResult ResidentVideoSession::wait_async(std::int32_t timeout) {

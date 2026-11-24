@@ -30,6 +30,7 @@ add_library(t6_native_bink STATIC
     bink_leaf.cpp
     bink_small.cpp
     bink_frames.cpp
+    async_lifecycle.cpp
     bink_native_api.cpp
 )
 target_compile_features(t6_native_bink PUBLIC cxx_std_20)
