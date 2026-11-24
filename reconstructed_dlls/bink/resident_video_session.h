@@ -30,7 +30,12 @@ public:
     ResidentVideoSession(ResidentVideoSession&&)=delete;
     ResidentVideoSession& operator=(ResidentVideoSession&&)=delete;
     bool open(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx);
+    // Original fully preloaded filename path; refuse small-buffer streaming
+    // rather than pretending that it is resident. Opens read-only.
+    bool open_preloaded_file(const char* path,std::uint32_t io_size,ResidentTimer timer,void* ctx);
     void close();
+    void* native_handle() {return opened_?handle_.data():nullptr;}
+    std::uint32_t control_background_io(std::uint32_t flags);
     bool register_buffers(RegisteredFrameBuffers& info);
     DecodeResult do_frame();
     // Same-worker submission: original work message tag 6. The host
@@ -55,9 +60,13 @@ public:
 private:
     struct Worker;
     bool fail(std::string reason);
+    bool open_impl(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx,
+                   bool file_mode,std::uint32_t io_size);
     bool decode_current_packet(RegisteredDecodeReport& report,std::string& error) const;
     HeaderPrefix header_{};
     std::vector<std::uint8_t> file_;
+    std::vector<std::uint64_t> packet_storage_;
+    std::size_t file_size_=0,packet_offset_=0;
     // Original cache-line-separated bootstrap allocation. Eight-byte
     // aligned backing storage; no original OS mutex ownership here.
     std::vector<std::uint64_t> handle_;

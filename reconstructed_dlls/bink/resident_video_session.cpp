@@ -7,6 +7,7 @@
 #include <mutex>
 #include <thread>
 #include <exception>
+#include <fstream>
 
 namespace {
 template<class T> T read(const void* h,std::size_t off) {
@@ -104,9 +105,27 @@ void ResidentVideoSession::close() {
     opened_=failed_=false;
     info_=nullptr;timer_=nullptr;clock_ctx_=nullptr;
     header_={};handle_.clear();
-    file_.clear();error_.clear();
+    file_.clear();packet_storage_.clear();file_size_=packet_offset_=0;error_.clear();
 }
 bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx) {
+    return open_impl(std::move(file),timer,ctx,false,0);
+}
+bool ResidentVideoSession::open_preloaded_file(const char* path,std::uint32_t io_size,ResidentTimer timer,void* ctx) {
+    close();
+    if(!path)return fail("null movie filename");
+    std::ifstream input(path,std::ios::binary|std::ios::ate);
+    if(!input)return fail("cannot open movie file");
+    const auto size=input.tellg();
+    if(size<44 || size>256*1024*1024)return fail("unsupported movie file size");
+    std::vector<std::uint8_t> file(static_cast<std::size_t>(size));
+    input.seekg(0);
+    if(!input.read(reinterpret_cast<char*>(file.data()),size))
+        return fail("cannot read complete movie");
+    input.close();
+    return open_impl(std::move(file),timer,ctx,true,io_size);
+}
+bool ResidentVideoSession::open_impl(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx,
+                                     bool file_mode,std::uint32_t io_size) {
     close();
     HeaderPrefix h{};
     if(!timer || file.size()>256U*1024U*1024U ||
@@ -124,14 +143,29 @@ bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer tim
         if(!parse_video_packet({file.data()+span.start,span.end-span.start},h.flags,layout))
             return fail("invalid resident video packet");
     }
-    ResidentBootstrapLayout plan{};
-    if(!resident_bootstrap_layout(h,plan,true))return fail("unsupported original resident layout");
-    header_=h;file_=std::move(file);
+    header_=h;file_size_=file.size();
     timer_=timer;clock_ctx_=ctx;
-    handle_.resize(plan.allocation_bytes/sizeof(std::uint64_t));
-    if(!init_resident_external(handle_.data(),plan.allocation_bytes,file_.data(),file_.size(),
-                               0x04104400U,timer_,clock_ctx_))
-        return fail("original-derived resident bootstrap failed");
+    if(file_mode) {
+        PreloadedFileLayout plan{};
+        if(!preloaded_file_layout(file.data(),file.size(),io_size,plan))
+            return fail("original file mode requires unresolved streaming path");
+        packet_offset_=plan.first_packet;
+        handle_.resize(plan.handle.allocation_bytes/sizeof(std::uint64_t));
+        packet_storage_.resize(plan.payload_allocation/sizeof(std::uint64_t));
+        if(!init_preloaded_file(handle_.data(),plan.handle.allocation_bytes,
+            packet_storage_.data(),plan.payload_allocation,file.data(),file.size(),io_size,timer_,clock_ctx_))
+            return fail("original-derived preloaded file bootstrap failed");
+        // The original closes its file and owns only the copied index and
+        // compressed payload. Release our temporary complete-file input.
+    } else {
+        ResidentBootstrapLayout plan{};
+        if(!resident_bootstrap_layout(h,plan,true))return fail("unsupported original resident layout");
+        file_=std::move(file);
+        handle_.resize(plan.allocation_bytes/sizeof(std::uint64_t));
+        if(!init_resident_external(handle_.data(),plan.allocation_bytes,file_.data(),file_.size(),
+                                   0x04104400U,timer_,clock_ctx_))
+            return fail("original-derived resident bootstrap failed");
+    }
     opened_=true;
     return true;
 }
@@ -173,7 +207,10 @@ bool ResidentVideoSession::decode_current_packet(RegisteredDecodeReport& report,
     const auto* packet=read<const std::uint8_t*>(state,0x100);
     const auto bytes=read<std::uint32_t>(state,0x13C);
     const auto off=read<std::uint32_t>(state,0x1E8);
-    if(off>file_.size() || bytes>file_.size()-off || packet!=file_.data()+off) {
+    const auto* base=packet_storage_.empty()?file_.data():
+        reinterpret_cast<const std::uint8_t*>(packet_storage_.data());
+    if(off<packet_offset_ || off>file_size_ || bytes>file_size_-off ||
+       packet!=base+(off-packet_offset_)) {
         reason="resident frame pointer out of bounds";return false;
     }
     if(decode_registered_packet({packet,bytes},header_.flags,*info_,report)) {
@@ -259,6 +296,10 @@ bool ResidentVideoSession::next_frame() {
 bool ResidentVideoSession::realtime(RealtimeSnapshot& output,std::uint32_t frames) {
     if(!opened_ || failed_ || async_pending() || !last_decoded_frame())return false;
     return bink_research_get_realtime(handle_.data(),&output,frames,timer_,clock_ctx_)==0;
+}
+std::uint32_t ResidentVideoSession::control_background_io(std::uint32_t flags) {
+    if(!opened_||async_pending())return UINT32_MAX;
+    return bink_research_control_background_io(handle_.data(),flags);
 }
 bool ResidentVideoSession::pause(std::uint32_t value) {
     if(async_pending())return false;

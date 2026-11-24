@@ -40,7 +40,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
     data=fixture.read_bytes()
     file_mode=not bool(flags&0x04000000)
     input_data=fixture.name.encode("ascii")+b"\0" if file_mode else data
-    if file_mode and playback_out:raise ValueError("file mode supports lifecycle probe only")
+    if file_mode and library and playback_out:raise ValueError("compare bootstrap before playback")
     pin=next(c["sha256"] for c in json.loads(MANIFEST.read_text())["clips"] if c["name"]==fixture.name)
     assert hashlib.sha256(data).hexdigest()==pin
     assert hashlib.sha256(dll.read_bytes()).hexdigest()==PIN
@@ -318,7 +318,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
                        "pitch":struct.unpack_from("<I",desc,0x28+s*0x60+p*0x18)[0]}
                       for p in range(4)] for s in range(2)]}
     if playback_out:
-        result['playback']=exercise_playback(m,img,ret,data,input_base,global_writes,cursor,clock,alloc,playback_out,async_mode)
+        result['playback']=exercise_playback(m,img,ret,data,input_base,global_writes,cursor,clock,alloc,playback_out,async_mode,input_data,modeled,file_mode)
         result['verified']=result['verified'] and result['playback']['verified']
     # Replay original image globals, retaining actual original allocations.
     # Machine.call resets its input heap, so restore the unchanged movie bytes.
@@ -425,12 +425,12 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         result["verified"]=result["verified"] and result["source_bootstrap"]["verified"]
     return result
 
-def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,alloc,out,async_mode):
+def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,alloc,out,async_mode,input_data,modeled,file_mode):
     """Original public API end-to-end. Only Win32 boundaries/queue scheduling
     are modeled; the initializer, worker decoder, completion, and advance
     all execute original machine code. Output is the original pixel planes."""
     def setup(w):
-        m.mu.mem_write(input_base,data)
+        m.mu.mem_write(input_base,input_data)
         for address,value in globals_state.items():w.write(address,value)
     fakes={img.base+0x1FF00:clock,img.base+0x1010:alloc}
     imports=[]
@@ -470,6 +470,11 @@ def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,al
         spans.append(planes)
     call(img.exports["BinkRegisterFrameBuffers"],[handle,desc],"void")
     assert struct.unpack("<Q",bytes(m.mu.mem_read(handle+0xD0,8)))[0]==desc
+    if file_mode:
+        controls=[]
+        for control in (2,0x80000002,1):
+            controls.append(call(img.exports['BinkControlBackgroundIO'],[handle,control]))
+        assert controls==[0,0,1],controls
     if async_mode:
         # Real worker queue global masks, one valid worker. The test drives
         # the original worker body explicitly between submission and wait.
@@ -524,7 +529,7 @@ def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,al
                 stream.write(pixels);digest.update(pixels)
             frames.append({"frame":i+1,"slot":slot,"key":read32(handle+0x140)})
             if i!=15:call(img.exports["BinkNextFrame"],[handle],"void")
-    return {"verified":not imports,"async":async_mode,"frames":frames,
+    return {"verified":all(name.lower() in modeled for name in imports),"async":async_mode,"frames":frames,
             "bytes":out.stat().st_size,"sha256":digest.hexdigest(),"imports":imports}
 
 def main():

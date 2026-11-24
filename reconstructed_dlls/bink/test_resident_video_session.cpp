@@ -11,9 +11,14 @@
 
 int main(int argc,char** argv) {
     using namespace t6_bink;
-    assert(argc==3 || argc==4);
-    const bool async=argc==4 && std::string_view(argv[3])=="--async";
-    assert(argc==3 || async);
+    assert(argc>=3 && argc<=5);
+    bool async=false,preloaded=false;
+    for(int i=3;i<argc;++i) {
+        const std::string_view arg(argv[i]);
+        if(arg=="--async")async=true;
+        else if(arg=="--file")preloaded=true;
+        else assert(false);
+    }
     std::ifstream input(argv[1],std::ios::binary);
     assert(input);
     std::vector<std::uint8_t> file((std::istreambuf_iterator<char>(input)),{});
@@ -23,7 +28,8 @@ int main(int argc,char** argv) {
     };
     ResidentVideoSession movie;
     assert(!movie.open({},clock,&tick));
-    assert(movie.open(std::move(file),clock,&tick));
+    if(preloaded)assert(movie.open_preloaded_file(argv[1],0x1000000,clock,&tick));
+    else assert(movie.open(std::move(file),clock,&tick));
     assert(movie.frame_number()==1 && movie.last_decoded_frame()==0 && movie.keyframe()==1);
     RegisteredFrameBuffers info{};
     info.buffer_count=2;info.frame_num=1;
@@ -38,6 +44,11 @@ int main(int argc,char** argv) {
             plane.allocate=1;plane.data=v.data();plane.pitch=w;
         }
     assert(movie.register_buffers(info));
+    if(preloaded) {
+        assert(movie.control_background_io(2)==0);
+        assert(movie.control_background_io(0x80000002)==0);
+        assert(movie.control_background_io(1)==1);
+    } else assert(movie.control_background_io(1)==UINT32_MAX);
     std::ofstream out(argv[2],std::ios::binary);
     assert(out);
     assert(movie.header().frame_count>=16);
