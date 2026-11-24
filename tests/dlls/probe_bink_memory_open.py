@@ -216,6 +216,24 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
                 ("GetThreadPriority",get_thread_priority),("SetThreadPriority",set_thread_priority),("Sleep",sleep)):
             m.on_import("kernel32.dll!"+name,callback)
             modeled.add("kernel32.dll!"+name.lower())
+    # WinMM timer period is a process-level boundary, independent of
+    # original streaming worker scheduling.
+    periods={}
+    def time_begin(mu):
+        period=mu.reg_read(X.UC_X86_REG_ECX)
+        periods[period]=periods.get(period,0)+1
+        thread_events.append(["timer_begin",period])
+        mu.reg_write(X.UC_X86_REG_RAX,0)
+    def time_end(mu):
+        period=mu.reg_read(X.UC_X86_REG_ECX)
+        assert periods.get(period,0)>0
+        periods[period]-=1
+        thread_events.append(["timer_end",period])
+        mu.reg_write(X.UC_X86_REG_RAX,0)
+    if defer_worker:
+        for name,callback in (("timeBeginPeriod",time_begin),("timeEndPeriod",time_end)):
+            m.on_import("winmm.dll!"+name,callback)
+            modeled.add("winmm.dll!"+name.lower())
     # Win32 synchronous read-only file boundary. The original Bink
     # routines still determine all read, seek, buffer and close behavior.
     file_events=[]
