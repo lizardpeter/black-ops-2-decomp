@@ -133,7 +133,12 @@ def main():
         def release(mu):oc.append(('release',reg(mu,'RCX')));mu.reg_write(X.UC_X86_REG_RAX,1)
         def assert_method(mu):oc.append(('method', (reg(mu,'RCX'),)))
         def method(mu):
-            names=['RDX','R8','R9'];vals=[reg(mu,'RCX')]+[reg(mu,n) for n in names[:case['reg_args']]]
+            names=['RDX','R8','R9'];vals=[reg(mu,'RCX')]
+            for name,kind in zip(names[:case['reg_args']],case['method_kinds'][:case['reg_args']]):
+                value=reg(mu,name)
+                if kind=='u':value&=0xffffffff
+                elif kind=='b':value&=0xff
+                vals.append(value)
             for j in range(case['stack_args']):
                 vals.append(struct.unpack('<Q',mu.mem_read(reg(mu,'RSP')+0x28+8*j,8))[0])
             oc.append(('method',tuple(vals)));write_orig(mu,vals)
