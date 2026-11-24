@@ -1,0 +1,31 @@
+name: XCurl original global lifecycle
+on:
+  push:
+    paths:
+      - reconstructed_dlls/xcurl/global_lifecycle.*
+      - reconstructed_dlls/xcurl/api_profile.*
+      - tests/dlls/differential_xcurl_global.py
+      - .github/workflows/xcurl-global.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  global-lifecycle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tests/dlls
+            tests/differential
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -q -r tests/differential/requirements.txt
+          python tools/dlls/fetch.py originals/dlls
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/{global_lifecycle,api_profile,getinfo_unlocked}.cpp -o build/xcurl_global.so
+          python tests/dlls/differential_xcurl_global.py originals/dlls/XCurl.dll build/xcurl_global.so
