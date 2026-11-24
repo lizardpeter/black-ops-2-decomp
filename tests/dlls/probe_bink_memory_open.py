@@ -178,10 +178,10 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
     current_priority=0
     def create_thread(mu):
         rsp=mu.reg_read(X.UC_X86_REG_RSP)
-        flags,thread_id=struct.unpack("<QQ",bytes(mu.mem_read(rsp+0x28,16)))
+        flags,thread_id=struct.unpack("<I4xQ",bytes(mu.mem_read(rsp+0x28,16)))
         start=mu.reg_read(X.UC_X86_REG_R8)
         argument=mu.reg_read(X.UC_X86_REG_R9)
-        assert flags==4 and img.base<=start<img.base+img.size
+        assert flags==4 and img.base<=start<img.base+img.size,(flags,hex(start),hex(argument))
         handle=0x73000000+len(threads)*16
         threads[handle]={"entry":start-img.base,"argument":argument,"suspended":1,"priority":0}
         objects[handle]=["thread",0,0]
