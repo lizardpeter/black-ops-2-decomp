@@ -9,7 +9,7 @@ from harness import Image,Machine,OBJECTS
 from differential_xcurl_getinfo import SHA256,OPTIONS
 from unicorn import x86_const as X
 class Profile(C.Structure):
-    _fields_=[("first_tick",C.c_uint64),("counts",C.c_uint32*32)]
+    _fields_=[("first_tick",C.c_uint64),("counts",C.c_uint32*24)]
 LOCK=C.CFUNCTYPE(None,C.c_void_p,C.c_void_p)
 TICK=C.CFUNCTYPE(C.c_uint64,C.c_void_p)
 ERROR=C.CFUNCTYPE(None,C.c_uint32,C.c_uint32,C.c_void_p)
@@ -29,7 +29,7 @@ def main():
         opt=OPTIONS[i%len(OPTIONS)]
         present=i%8!=0
         first=0 if i%3==0 else rng.getrandbits(64)
-        counts=[rng.getrandbits(32) for _ in range(32)]
+        counts=[rng.getrandbits(32) for _ in range(24)]
         if i%4==0:counts[10]=0xffffffff
         clock=rng.getrandbits(64)
         oc=[];nc=[]
@@ -46,16 +46,16 @@ def main():
             if name.endswith("!GetTickCount64"):m.on_import(name,otick)
         def setup(w):
             w.write(img.base+0x28ba0,struct.pack("<Q",first))
-            w.write(img.base+0x28bb0,struct.pack("<32I",*counts))
+            w.write(img.base+0x28bb0,struct.pack("<24I",*counts))
             m.mu.mem_write(A,h);m.mu.mem_write(OUT,filler)
         ret,_,writes,_=m.call(img.exports["curl_easy_getinfo"],[A if present else 0,opt,OUT],"uint",
                                setup=setup,fakes={img.base+0x83d8:oerror})
         assert isinstance(ret,int),(i,ret,m.imports_called)
         def updated(a,old):return b"".join(writes.get(img.base+a+j,bytes([v])) for j,v in enumerate(old))
         expected_first=struct.unpack("<Q",updated(0x28ba0,struct.pack("<Q",first)))[0]
-        expected_counts=struct.unpack("<32I",updated(0x28bb0,struct.pack("<32I",*counts)))
+        expected_counts=struct.unpack("<24I",updated(0x28bb0,struct.pack("<24I",*counts)))
         native_h=C.create_string_buffer(h,len(h));native_out=C.create_string_buffer(filler,len(filler))
-        prof=Profile(first,(C.c_uint32*32)(*counts))
+        prof=Profile(first,(C.c_uint32*24)(*counts))
         sentinel=0x123456
         def nlock(p,phase):
             assert p in (sentinel,C.addressof(native_h)+0x188)

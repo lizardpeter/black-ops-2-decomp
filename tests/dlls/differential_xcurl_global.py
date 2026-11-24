@@ -33,7 +33,7 @@ def main():
             engine=rng.choice([0,0x76543000])
             first=rng.choice([0,rng.getrandbits(64)])
             now=rng.getrandbits(64)
-            counters=[rng.getrandbits(32) for _ in range(32)]
+            counters=[rng.getrandbits(32) for _ in range(24)]
             outcome=rng.choice([0,0,2,27])
             next_engine=0x76544000 if outcome==0 else engine
             oc=[];nc=[]
@@ -57,7 +57,7 @@ def main():
                 w.write(img.base+0x28c18,struct.pack("<I",refs))
                 w.write(img.base+0x28c10,struct.pack("<Q",engine))
                 w.write(img.base+0x28ba0,struct.pack("<Q",first))
-                w.write(img.base+0x28bb0,struct.pack("<32I",*counters))
+                w.write(img.base+0x28bb0,struct.pack("<24I",*counters))
             ret,_,writes,_=m.call(img.exports["curl_global_"+action],[rng.getrandbits(32)] if action=="init" else [],
                 "uint" if action=="init" else "void",setup=setup,
                 fakes={img.base+r:cb for r,cb in [(0x9ba0,oinit),(0x165d0,odestroy),(0x9640,ofree),(0x5568,oshutdown),(0x83d8,oerror)]})
@@ -66,8 +66,8 @@ def main():
             expected_ref=struct.unpack("<I",updated(0x28c18,struct.pack("<I",refs)))[0]
             expected_engine=struct.unpack("<Q",updated(0x28c10,struct.pack("<Q",engine)))[0]
             expected_first=struct.unpack("<Q",updated(0x28ba0,struct.pack("<Q",first)))[0]
-            expected_counts=struct.unpack("<32I",updated(0x28bb0,struct.pack("<32I",*counters)))
-            prof=Profile(first,(C.c_uint32*32)(*counters));state=State(engine,refs)
+            expected_counts=struct.unpack("<24I",updated(0x28bb0,struct.pack("<24I",*counters)))
+            prof=Profile(first,(C.c_uint32*24)(*counters));state=State(engine,refs)
             sentinel=0x12345
             @LOCK
             def enter(p,ctx):assert p==sentinel;nc.append(("enter",))

@@ -2,10 +2,11 @@
 #include <cstdint>
 namespace t6_xcurl {
 // Recovered profiling fields 0x28BA0 and 0x28BB0+4*API ID.
+// 24 DWORD slots end exactly at the engine pointer (0x28C10).
 // Only IDs recovered from the original caller are used here.
 struct ApiProfile {
     std::uint64_t first_tick=0;
-    std::uint32_t counts[32]{};
+    std::uint32_t counts[24]{};
 };
 using Lock=void(*)(void* address,void* context);
 using Tick=std::uint64_t(*)(void* context);

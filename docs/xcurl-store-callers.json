@@ -1,0 +1,371 @@
+{
+  "schema": 1,
+  "source": "Pinned Store client PE import scan. MP options directly recovered from preceding argument setup; SP/ZM sites recorded in corresponding order, numeric values not independently decoded.",
+  "imports": [
+    "curl_easy_cleanup",
+    "curl_easy_getinfo",
+    "curl_easy_init",
+    "curl_easy_setopt",
+    "curl_easy_strerror",
+    "curl_global_cleanup",
+    "curl_global_init",
+    "curl_multi_add_handle",
+    "curl_multi_cleanup",
+    "curl_multi_info_read",
+    "curl_multi_init",
+    "curl_multi_perform",
+    "curl_multi_poll",
+    "curl_multi_remove_handle",
+    "curl_slist_append",
+    "curl_slist_free_all"
+  ],
+  "builds": [
+    {
+      "build": "t6mp_msstore",
+      "call_sites": {
+        "curl_global_cleanup": [
+          "0x884C2A"
+        ],
+        "curl_global_init": [
+          "0x88515D"
+        ],
+        "curl_easy_init": [
+          "0x888BBA"
+        ],
+        "curl_slist_append": [
+          "0x888907"
+        ],
+        "curl_easy_strerror": [
+          "0x888A12"
+        ],
+        "curl_multi_init": [
+          "0x88A649"
+        ],
+        "curl_multi_add_handle": [
+          "0x88A123"
+        ],
+        "curl_multi_perform": [
+          "0x88A784"
+        ],
+        "curl_multi_info_read": [
+          "0x88A7E8"
+        ],
+        "curl_multi_poll": [
+          "0x88A8FD"
+        ],
+        "curl_multi_remove_handle": [
+          "0x88A497",
+          "0x88A854"
+        ],
+        "curl_multi_cleanup": [
+          "0x889FFF",
+          "0x88A08F"
+        ]
+      },
+      "easy_cleanup_sites": 26,
+      "slist_free_all_sites": 26,
+      "setopt": [
+        {
+          "call_rva": "0x888CEB",
+          "option": 60
+        },
+        {
+          "call_rva": "0x888D70",
+          "option": 14
+        },
+        {
+          "call_rva": "0x888DFA",
+          "option": 20012
+        },
+        {
+          "call_rva": "0x888E80",
+          "option": 10009
+        },
+        {
+          "call_rva": "0x888F67",
+          "option": 10002
+        },
+        {
+          "call_rva": "0x889098",
+          "option": 44
+        },
+        {
+          "call_rva": "0x889123",
+          "option": 46
+        },
+        {
+          "call_rva": "0x8891A9",
+          "option": 10036
+        },
+        {
+          "call_rva": "0x8893F7",
+          "option": 10023
+        },
+        {
+          "call_rva": "0x8894DB",
+          "option": 155
+        },
+        {
+          "call_rva": "0x889560",
+          "option": 41
+        },
+        {
+          "call_rva": "0x8895E5",
+          "option": 42
+        },
+        {
+          "call_rva": "0x88966C",
+          "option": 10010
+        },
+        {
+          "call_rva": "0x8896F6",
+          "option": 20011
+        },
+        {
+          "call_rva": "0x88977C",
+          "option": 10001
+        },
+        {
+          "call_rva": "0x889806",
+          "option": 20079
+        },
+        {
+          "call_rva": "0x88988C",
+          "option": 10029
+        },
+        {
+          "call_rva": "0x889916",
+          "option": 20094
+        }
+      ],
+      "getinfo": [
+        {
+          "call_rva": "0x8889C3",
+          "option": 2097177
+        },
+        {
+          "call_rva": "0x888A3B",
+          "option": 2097154
+        }
+      ]
+    },
+    {
+      "build": "t6sp_msstore",
+      "call_sites": {
+        "curl_global_cleanup": [
+          "0x7179DA"
+        ],
+        "curl_global_init": [
+          "0x717F0D"
+        ],
+        "curl_easy_init": [
+          "0x71B96A"
+        ],
+        "curl_slist_append": [
+          "0x71B6B7"
+        ],
+        "curl_easy_strerror": [
+          "0x71B7C2"
+        ],
+        "curl_multi_init": [
+          "0x71D3F9"
+        ],
+        "curl_multi_add_handle": [
+          "0x71CED3"
+        ],
+        "curl_multi_perform": [
+          "0x71D534"
+        ],
+        "curl_multi_info_read": [
+          "0x71D598"
+        ],
+        "curl_multi_poll": [
+          "0x71D6AD"
+        ],
+        "curl_multi_remove_handle": [
+          "0x71D247",
+          "0x71D604"
+        ],
+        "curl_multi_cleanup": [
+          "0x71CDAF",
+          "0x71CE3F"
+        ]
+      },
+      "easy_cleanup_sites": 26,
+      "slist_free_all_sites": 26,
+      "setopt": [
+        {
+          "call_rva": "0x71BA9B"
+        },
+        {
+          "call_rva": "0x71BB20"
+        },
+        {
+          "call_rva": "0x71BBAA"
+        },
+        {
+          "call_rva": "0x71BC30"
+        },
+        {
+          "call_rva": "0x71BD17"
+        },
+        {
+          "call_rva": "0x71BE48"
+        },
+        {
+          "call_rva": "0x71BED3"
+        },
+        {
+          "call_rva": "0x71BF59"
+        },
+        {
+          "call_rva": "0x71C1A7"
+        },
+        {
+          "call_rva": "0x71C28B"
+        },
+        {
+          "call_rva": "0x71C310"
+        },
+        {
+          "call_rva": "0x71C395"
+        },
+        {
+          "call_rva": "0x71C41C"
+        },
+        {
+          "call_rva": "0x71C4A6"
+        },
+        {
+          "call_rva": "0x71C52C"
+        },
+        {
+          "call_rva": "0x71C5B6"
+        },
+        {
+          "call_rva": "0x71C63C"
+        },
+        {
+          "call_rva": "0x71C6C6"
+        }
+      ],
+      "getinfo": [
+        {
+          "call_rva": "0x71B773"
+        },
+        {
+          "call_rva": "0x71B7EB"
+        }
+      ]
+    },
+    {
+      "build": "t6zm_msstore",
+      "call_sites": {
+        "curl_global_cleanup": [
+          "0x88271A"
+        ],
+        "curl_global_init": [
+          "0x882C4D"
+        ],
+        "curl_easy_init": [
+          "0x8866AA"
+        ],
+        "curl_slist_append": [
+          "0x8863F7"
+        ],
+        "curl_easy_strerror": [
+          "0x886502"
+        ],
+        "curl_multi_init": [
+          "0x888139"
+        ],
+        "curl_multi_add_handle": [
+          "0x887C13"
+        ],
+        "curl_multi_perform": [
+          "0x888274"
+        ],
+        "curl_multi_info_read": [
+          "0x8882D8"
+        ],
+        "curl_multi_poll": [
+          "0x8883ED"
+        ],
+        "curl_multi_remove_handle": [
+          "0x887F87",
+          "0x888344"
+        ],
+        "curl_multi_cleanup": [
+          "0x887AEF",
+          "0x887B7F"
+        ]
+      },
+      "easy_cleanup_sites": 26,
+      "slist_free_all_sites": 26,
+      "setopt": [
+        {
+          "call_rva": "0x8867DB"
+        },
+        {
+          "call_rva": "0x886860"
+        },
+        {
+          "call_rva": "0x8868EA"
+        },
+        {
+          "call_rva": "0x886970"
+        },
+        {
+          "call_rva": "0x886A57"
+        },
+        {
+          "call_rva": "0x886B88"
+        },
+        {
+          "call_rva": "0x886C13"
+        },
+        {
+          "call_rva": "0x886C99"
+        },
+        {
+          "call_rva": "0x886EE7"
+        },
+        {
+          "call_rva": "0x886FCB"
+        },
+        {
+          "call_rva": "0x887050"
+        },
+        {
+          "call_rva": "0x8870D5"
+        },
+        {
+          "call_rva": "0x88715C"
+        },
+        {
+          "call_rva": "0x8871E6"
+        },
+        {
+          "call_rva": "0x88726C"
+        },
+        {
+          "call_rva": "0x8872F6"
+        },
+        {
+          "call_rva": "0x88737C"
+        },
+        {
+          "call_rva": "0x887406"
+        }
+      ],
+      "getinfo": [
+        {
+          "call_rva": "0x8864B3"
+        },
+        {
+          "call_rva": "0x88652B"
+        }
+      ]
+    }
+  ]
+}
