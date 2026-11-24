@@ -15,3 +15,7 @@ Next: 13E14 WinHTTP status handler, 10748 connection/open-request, 131A8 option 
 ## WinHTTP notification dispatcher (13E14)
 
 Reconstructed disabled-ETW status routing including send/write completion, header availability, data availability/read completion, redirect allocation, handle closure, partial-body and excess-length detection, and request-error/HRESULT mapping. Local differential: **3,840 passing cases**, 240 each across 16 status values (including inactive and unknown values). Full object bytes and callback order/arguments compared against original x64 execution; previously reconstructed cancel, close, finish, receive and notification routines execute directly. Unported sending, redirect-copy, upload, headers, publication and read-scheduling helpers are explicit modeled boundaries; ETW and real WinHTTP traffic are not tested. Combined with the 2,560 request-engine cases: 6,400 local comparisons.
+
+## Core scheduler (0x18F68, 0x19344, 0x1925C, 0x19514, 0x19614)
+
+1,280/1,280 local original-machine comparisons, 256 each: global admission reservation including wraparound, race with cancellation between reservation and admission, list movement, generation-based active progress, abort sweep, single-event wait and wakeup arbitration. Windows synchronization and actual request launch/progress remain explicit boundaries. Source joins the static target; this is not a completed network ABI.
