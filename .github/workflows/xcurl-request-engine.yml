@@ -1,0 +1,30 @@
+name: XCurl original request engine and WinHTTP boundaries
+on:
+  push:
+    paths:
+      - reconstructed_dlls/xcurl/request_engine.*
+      - tests/dlls/differential_xcurl_request.py
+      - .github/workflows/xcurl-request-engine.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  differential:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tests/differential
+            tests/dlls
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -q -r tests/differential/requirements.txt
+          python tools/dlls/fetch.py originals/dlls
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp -o build/xcurl_request.so
+          python tests/dlls/differential_xcurl_request.py originals/dlls/XCurl.dll build/xcurl_request.so
