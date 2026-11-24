@@ -31,6 +31,7 @@ def main():
     strings=[b"",b"abc",b"gzip",b"deflate",b"gzip,deflate",b"*",b"GZIP",b"https://example.invalid"]
     string_opts={10002,10016,10018,10025,10036,10102,10165}
     count=0
+    failures=[]
     for opt in options:
       for j,val in enumerate(values):
         count+=1
@@ -86,8 +87,10 @@ def main():
         result=bytearray(bytes(native))
         for off in (0x10,0x48):
             if struct.unpack_from("<Q",result,off)[0]==dest_ptr:struct.pack_into("<Q",result,off,DEST)
-        assert got==ret and nc==oc,(opt,j,got,ret,nc,oc)
-        assert result==original,(opt,j,[(i,a,b) for i,(a,b) in enumerate(zip(result,original)) if a!=b])
-        assert bytes(dest)==original_dest,(opt,j,"copy bytes")
+        if got!=ret or nc!=oc or result!=original or bytes(dest)!=original_dest:
+            failure=(opt,j,got,ret,nc,oc,[(i,a,b) for i,(a,b) in enumerate(zip(result,original)) if a!=b],bytes(dest)!=original_dest)
+            failures.append(failure)
+            print("DISPATCH MISMATCH",failure,flush=True)
+    assert not failures, f"{len(failures)} of {count} mismatches"
     print(f"XCurl original dispatcher PASS: {count} cases, {len(options)} selectors")
 if __name__=="__main__":main()

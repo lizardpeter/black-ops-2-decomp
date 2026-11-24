@@ -1,0 +1,33 @@
+name: XCurl local research dependencies handoff
+on:
+  push:
+    paths:
+      - .github/workflows/xcurl-local-handoff.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  handoff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tests/differential
+            tests/dlls
+            tools/dlls
+            docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+      - run: |
+          mkdir -p handoff/wheels handoff/source
+          python -m pip download --only-binary=:all: -r tests/differential/requirements.txt -d handoff/wheels
+          cp -r reconstructed_dlls tests tools docs handoff/source/
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xcurl-local-research-kit
+          path: handoff/
+          retention-days: 1
+          if-no-files-found: error

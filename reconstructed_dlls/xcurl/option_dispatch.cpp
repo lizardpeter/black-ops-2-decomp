@@ -65,7 +65,7 @@ extern "C" std::uint32_t xcurl_research_dispatch_option(void* options,int option
         if(u<=4){put(p,0x108,u);return 0;}
         return u==5||u==30?4U:43U;
     case 98:
-        put(p,0x34,n<1||n>0x80000?0x80000U:std::max(u,0x2000U));return 0;
+        put(p,0x34,n>0x80000?0x80000U:static_cast<std::uint32_t>(std::max(n,0x2000)));return 0;
     case 136:return flag(0xfc);
     case 155:case 156:
         if(n<0)return 43;
