@@ -57,8 +57,8 @@ using RectAllocate = void* (*)(std::uint32_t bytes,void* context);
 using BackgroundIO = std::uint32_t (*)(void* io_state,std::uint32_t control);
 }
 // Original BinkGetRects 0x1C820: suppressed, lazy allocation, full-frame
-// and cached branches. The pending dirty-map scan is explicitly unsupported
-// (-1). The allocator is the boundary at original RVA 0x1010; it must return
+// cached and dirty-map scan branches (bounding, splitting, sorting and scaling).
+// The allocator is the boundary at original RVA 0x1010; it must return
 // a writable block for the requested aligned size. No original allocation
 // is silently replaced with a generic allocator.
 extern "C" std::int64_t bink_research_get_rects(void* handle,std::uint32_t surface_type,

@@ -77,6 +77,36 @@ def main():
     before=bytes(h)
     assert rects(nh,0,native_alloc,None)==-1 and bytes(h)==before
     print("Original BinkGetRects supported branches PASS: 384 complete handle/allocation cases")
+    # Real 16x16-cell dirty maps; zero, full, isolated and multi-region maps.
+    for i in range(512):
+        h=bytearray(rng.randbytes(SIZE))
+        cols=rng.randrange(1,17);rows=rng.randrange(1,17);stride=16
+        width=cols*16-rng.randrange(16);height=rows*16-rng.randrange(16)
+        for off,val in ((0,width),(4,height),(0x20,0),(0x57C,0),(0x110,stride),
+                        (0x114,stride*rows),(0x3C,0xffffffff),(0x568,(i%8)<<28)):
+            put(h,off,val)
+        ptr(h,0xD8,BUFFER);ptr(h,0xE0,BUFFER);ptr(h,0xF0,DIRTY)
+        # Padding columns deliberately set to 0xDD, must be ignored.
+        dirty_map=bytearray([0xdd]*(stride*rows))
+        for y in range(rows):
+            for x in range(cols):
+                dirty_map[y*stride+x]=(0 if i%8==0 else 1 if i%8==1 else
+                    rng.randrange(1,256) if rng.randrange(1+(i%9))==0 else 0)
+        fmt=0x08000000 if i%3==0 else 0
+        def setup(w):m.mu.mem_write(DIRTY,bytes(dirty_map))
+        ret,bufs,_,_=m.call(img.exports["BinkGetRects"],[bytes(h),fmt],"uint",setup=setup)
+        assert isinstance(ret,int),(i,ret)
+        native=bytearray(h)
+        nd=(ctypes.c_uint8*len(dirty_map)).from_buffer_copy(dirty_map)
+        ptr(native,0xF0,ctypes.addressof(nd))
+        nh=(ctypes.c_uint8*SIZE).from_buffer(native)
+        got=rects(nh,fmt,native_alloc,None)
+        ptr(native,0xF0,DIRTY)
+        assert got==ret and bytes(native)==bufs[0],(i,width,height,fmt,got,ret,
+            [(hex(j),a,b) for j,(a,b) in enumerate(zip(native,bufs[0])) if a!=b][:40])
+        assert bytes(nd)==bytes(dirty_map)
+        assert not m.imports_called,m.imports_called
+    print("Original dirty-map rectangle scan PASS: 512 full-handle cases")
     callback_rva=0x17950
     for i in range(192):
         h=bytearray(rng.randbytes(SIZE))

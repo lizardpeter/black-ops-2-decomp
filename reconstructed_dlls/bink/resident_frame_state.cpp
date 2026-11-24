@@ -248,6 +248,83 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
     return 0;
 }
 
+namespace {
+struct DirtyRect {std::int32_t x,y,w,h;};
+// 0x1C440: trim empty outside rows/columns, 16x16 dirty-map cells.
+// The output is left untouched if no cell in the supplied rectangle is set.
+bool bound_dirty(DirtyRect& out,const std::uint8_t* map,std::uint32_t stride,DirtyRect in) {
+    int x0=in.x/16,y0=in.y/16,x1=x0+in.w/16,y1=y0+in.h/16;
+    int left=x1,top=y1,right=x0-1,bottom=y0-1;
+    for(int y=y0;y<y1;++y)for(int x=x0;x<x1;++x)if(map[std::size_t(y)*stride+x]) {
+        if(x<left)left=x;
+        if(x>right)right=x;
+        if(y<top)top=y;
+        if(y>bottom)bottom=y;
+    }
+    if(right<left)return false;
+    out={left*16,top*16,(right-left+1)*16,(bottom-top+1)*16};return true;
+}
+struct DirtySplit {DirtyRect first{},second{};int saving=0;};
+// 0x1C610: split at half width/height rounded up to 16. The
+// horizontal (top/bottom) candidate replaces the vertical one only
+// if strictly better. Tight input guarantees nonempty halves.
+DirtySplit split_dirty(DirtyRect r,const std::uint8_t* map,std::uint32_t stride) {
+    DirtySplit best{};
+    const auto consider=[&](DirtyRect a,DirtyRect b) {
+        DirtyRect aa{},bb{};
+        if(!bound_dirty(aa,map,stride,a)||!bound_dirty(bb,map,stride,b))return;
+        const int saving=r.w*r.h-aa.w*aa.h-bb.w*bb.h;
+        if(saving>best.saving)best={aa,bb,saving};
+    };
+    if(r.w>=32) {
+        const int n=(r.w/2+15)&~15;
+        consider({r.x,r.y,n,r.h},{r.x+n,r.y,r.w-n,r.h});
+    }
+    if(r.h>=32) {
+        const int n=(r.h/2+15)&~15;
+        consider({r.x,r.y,r.w,n},{r.x,r.y+n,r.w,r.h-n});
+    }
+    return best;
+}
+int scan_dirty_rects(void* h,const std::uint8_t* dirty,std::uint32_t surface) {
+    const auto width=u32(h,0),height=u32(h,4),stride=u32(h,0x110),length=u32(h,0x114);
+    if(!width||!height||width>32767||height>32767)return -1;
+    const auto cols=(width+15)/16,rows=(height+15)/16;
+    if(stride<cols || std::uint64_t(stride)*rows>length)return -1;
+    DirtyRect r[8]{};
+    if(!bound_dirty(r[0],dirty,stride,{0,0,int(cols*16),int(rows*16)})) {
+        put(h,0x3C,0);return 0;
+    }
+    unsigned count=1;
+    if(!(surface&0x08000000U)) {
+        while(count<8) {
+            DirtySplit best{};unsigned index=0;
+            for(unsigned i=0;i<count;++i) {
+                auto s=split_dirty(r[i],dirty,stride);
+                if(s.saving>best.saving){best=s;index=i;}
+            }
+            if(!best.saving)break;
+            r[index]=best.first;r[count++]=best.second;
+        }
+    }
+    put(h,0x3C,count);
+    // Original orders by y<<16 plus x before applying scale/clipping.
+    for(unsigned i=0;i<count;++i) {
+        unsigned j=0;
+        for(unsigned k=1;k<count;++k)
+            if(r[k].y<r[j].y || (r[k].y==r[j].y && r[k].x<r[j].x))j=k;
+        auto a=r[j];r[j].y=0x7fffffff;
+        const auto scale=u32(h,0x568)&0x70000000U;
+        if(scale==0x30000000U||scale==0x40000000U||scale==0x50000000U){a.x*=2;a.w*=2;}
+        if(scale==0x10000000U||scale==0x20000000U||scale==0x40000000U||scale==0x50000000U){a.y*=2;a.h*=2;}
+        if(std::uint32_t(a.x+a.w)>width)a.w=int(width)-a.x;
+        if(std::uint32_t(a.y+a.h)>height)a.h=int(height)-a.y;
+        write(h,0x40+i*16,a);
+    }
+    return static_cast<int>(count);
+}
+}
+
 extern "C" std::int64_t bink_research_get_rects(void* h,std::uint32_t surface_type,
     t6_bink::RectAllocate allocate,void* ctx) {
     // Original branches preceding both allocation and rectangle scanning.
@@ -257,8 +334,6 @@ extern "C" std::int64_t bink_research_get_rects(void* h,std::uint32_t surface_ty
     if(!((surface_type|u32(h,0x20))&0x00080000U) && u32(h,0x57C)==2)return 0;
     const auto* dirty=read<void*>(h,0xF0);
     const auto cached=u32(h,0x3C);
-    // Do not synthesize the not-yet-transcribed dirty-map scan.
-    if(dirty && cached==UINT32_MAX)return -1;
     if(!read<void*>(h,0xD8)) {
         const auto length=u32(h,0x114);
         if(!allocate || length>UINT32_MAX-47U)return -1;
@@ -279,6 +354,7 @@ extern "C" std::int64_t bink_research_get_rects(void* h,std::uint32_t surface_ty
         put(h,0x48,u32(h,0x00));put(h,0x4C,u32(h,0x04));
         return 1;
     }
+    if(cached==UINT32_MAX)return scan_dirty_rects(h,static_cast<const std::uint8_t*>(dirty),surface_type);
     return cached;
 }
 
