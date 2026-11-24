@@ -543,3 +543,17 @@ these new geometries are NOT considered verified before the differential
 passes. Native output uses padded storage planes; visible dimensions are
 still the header dimensions. A bottom-edge 16x16 write is rejected until
 its behavior is verified.
+
+### Original whole-frame routing and alpha investigation
+
+The original coordinator at RVA 0x274A0 was disassembled directly from the
+pinned Store DLL. The four calls to 0x252C0 are at 0x277D2 (alpha), 0x27882
+(luma), 0x27941 and 0x279BF (chroma). Alpha-flagged BIKi packets begin with
+an alpha partition offset, then a luma partition offset relative to that
+second word; verified by inspecting pinned original generalstore.bik and
+yemen_mendz.bik packet headers. This is a container/layout observation,
+not yet verified alpha decoding. The new separate coordinator CI invokes
+the real original coordinator with a reconstructed frame-buffer descriptor,
+then compares independent native plane routing, output bytes, cursor and
+buffer guards. No original output or cursor drives the native decode.
+The matrix exercises standard, alpha, HD and odd-sized cases separately.

@@ -1,0 +1,63 @@
+name: Bink whole-frame coordinator verification
+on:
+  push:
+    paths:
+      - tests/dlls/differential_bink_coordinator.py
+      - .github/workflows/bink-coordinator.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  coordinator:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        clip: [la_pip_seq_6, generalstore, yemen_mendz, blackout_virus, karma_pip_helipad]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install original-DLL emulation requirements
+        run: pip install -q -r tests/differential/requirements.txt
+      - name: Fetch SHA-pinned originals
+        run: |
+          python tools/dlls/fetch.py originals/dlls
+          python tools/dlls/fetch_bik_fixtures.py originals/bik
+          python tests/dlls/differential_bink_coordinator.py --fetch-alpha originals/bik
+      - name: Compile source-only plane decoder
+        run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/huffman_codebook.cpp \
+            reconstructed_dlls/bink/entropy_byte_rle.cpp \
+            reconstructed_dlls/bink/entropy_adaptive_pairs.cpp \
+            reconstructed_dlls/bink/entropy_nibbles.cpp \
+            reconstructed_dlls/bink/entropy_signed_bytes.cpp \
+            reconstructed_dlls/bink/entropy_deltas16.cpp \
+            reconstructed_dlls/bink/entropy_bytes.cpp \
+            reconstructed_dlls/bink/video_coefficients.cpp \
+            reconstructed_dlls/bink/video_inverse8x8.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
+            reconstructed_dlls/bink/video_block_modes.cpp \
+            reconstructed_dlls/bink/video_predict8x8_core.cpp \
+            reconstructed_dlls/bink/video_predict8x8.cpp \
+            reconstructed_dlls/bink/video_sparse_residual.cpp \
+            reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
+            -o build/bink_source.so
+      - name: Compare independently routed original full-frame coordinator
+        run: |
+          python tests/dlls/differential_bink_coordinator.py \
+            --dll originals/dlls/binkw64.dll \
+            --video "originals/bik/${{ matrix.clip }}.bik" \
+            --library build/bink_source.so --frames 16
+      - name: Preserve coordinator diagnostic
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: coordinator-${{ matrix.clip }}
+          path: build/coordinator-report.json
+          if-no-files-found: warn
