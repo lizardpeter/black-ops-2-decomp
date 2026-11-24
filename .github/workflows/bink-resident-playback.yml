@@ -7,6 +7,7 @@ on:
       - reconstructed_dlls/bink/resident_bootstrap.*
       - reconstructed_dlls/bink/test_resident_video_session.cpp
       - .github/workflows/bink-resident-playback.yml
+      - tests/dlls/probe_bink_memory_open.py
   workflow_dispatch:
 permissions:
   contents: read
@@ -69,10 +70,22 @@ jobs:
         run: |
           build/test_resident_video_session "originals/bik/${{ matrix.clip }}.bik" build/playback.yuv
           cmp build/playback.yuv build/coordinator-matched.yuv
+      - name: Compare full original public synchronous and async playback against native pixels
+        run: |
+          python tests/dlls/probe_bink_memory_open.py \
+            originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
+            --out build/original-public-sync.json --playback-out build/original-public-sync.yuv
+          cmp build/playback.yuv build/original-public-sync.yuv
+          python tests/dlls/probe_bink_memory_open.py \
+            originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
+            --out build/original-public-async.json --playback-out build/original-public-async.yuv --async-playback
+          cmp build/playback.yuv build/original-public-async.yuv
       - name: Preserve coordinator diagnostic
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: resident-playback-${{ matrix.clip }}
-          path: build/coordinator-report.json
+          path: |
+            build/coordinator-report.json
+            build/original-public-*.json
           if-no-files-found: warn

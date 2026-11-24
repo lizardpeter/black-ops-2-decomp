@@ -36,7 +36,7 @@ POINTERS=(0xd0,0xd8,0xe0,0xe8,0xf0,0x100,0x108,0x198,0x1a0,0x1c0,
           0x1c8,0x1d0,0x1d8,0x200,0x220,0x228,0x4d8,0x4e0,0x4e8,
           0x4f0,0x4f8,0x500,0x508,0x5a0)
 
-def run(dll,fixture,flags,library=None):
+def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False):
     data=fixture.read_bytes()
     pin=next(c["sha256"] for c in json.loads(MANIFEST.read_text())["clips"] if c["name"]==fixture.name)
     assert hashlib.sha256(data).hexdigest()==pin
@@ -195,6 +195,9 @@ def run(dll,fixture,flags,library=None):
                        "data":normalize(struct.unpack_from("<Q",desc,0x20+s*0x60+p*0x18)[0]),
                        "pitch":struct.unpack_from("<I",desc,0x28+s*0x60+p*0x18)[0]}
                       for p in range(4)] for s in range(2)]}
+    if playback_out:
+        result['playback']=exercise_playback(m,img,ret,data,input_base,global_writes,cursor,clock,alloc,playback_out,async_mode)
+        result['verified']=result['verified'] and result['playback']['verified']
     # Replay original image globals, retaining actual original allocations.
     # Machine.call resets its input heap, so restore the unchanged movie bytes.
     def setup_close(w):
@@ -254,15 +257,119 @@ def run(dll,fixture,flags,library=None):
         result["verified"]=result["verified"] and result["source_bootstrap"]["verified"]
     return result
 
+def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,alloc,out,async_mode):
+    """Original public API end-to-end. Only Win32 boundaries/queue scheduling
+    are modeled; the initializer, worker decoder, completion, and advance
+    all execute original machine code. Output is the original pixel planes."""
+    def setup(w):
+        m.mu.mem_write(input_base,data)
+        for address,value in globals_state.items():w.write(address,value)
+    fakes={img.base+0x1FF00:clock,img.base+0x1010:alloc}
+    imports=[]
+    def call(va,args,kind="uint",extra=None):
+        ret,_,writes,_=m.call(va,args,kind,setup=setup,fakes={**fakes,**(extra or {})},
+                              limit=400_000_000)
+        imports.extend(m.imports_called)
+        if isinstance(ret,str):raise RuntimeError((hex(va),ret,m.imports_called))
+        globals_state.update(writes)
+        return ret
+    def read32(address):
+        return struct.unpack("<I",bytes(m.mu.mem_read(address,4)))[0]
+    def write32(address,v):m.mu.mem_write(address,struct.pack("<I",v))
+    desc=(cursor+63)&~63
+    cursor=desc+0x100
+    m.mu.mem_write(desc,bytes(0xD8))
+    call(img.exports["BinkGetFrameBuffersInfo"],[handle,desc],"void")
+    dims=[read32(desc+4*i) for i in range(6)]
+    assert dims[0]==2
+    # Match the standalone native session's independently initialized slots.
+    write32(desc+0x14,1)
+    spans=[]
+    for slot in range(2):
+        planes=[]
+        for p in range(4):
+            off=desc+0x18+slot*0x60+p*0x18
+            if not read32(off):continue
+            width,height=(dims[1],dims[2]) if p in (0,3) else (dims[3],dims[4])
+            cursor=(cursor+63)&~63
+            size=width*height
+            assert cursor+size+64<=ARENA+ARENA_SIZE
+            m.mu.mem_write(cursor,bytes([0xB7 if slot==0 else 0x80])*size)
+            m.mu.mem_write(off+8,struct.pack("<Q",cursor))
+            write32(off+0x10,width)
+            planes.append((cursor,size))
+            cursor+=size+64
+        spans.append(planes)
+    call(img.exports["BinkRegisterFrameBuffers"],[handle,desc],"void")
+    assert struct.unpack("<Q",bytes(m.mu.mem_read(handle+0xD0,8)))[0]==desc
+    if async_mode:
+        # Real worker queue global masks, one valid worker. The test drives
+        # the original worker body explicitly between submission and wait.
+        for addr in (0x570BC,0x570A4):
+            for i,v in enumerate(struct.pack("<I",1)):globals_state[img.base+addr+i]=bytes([v])
+    out.parent.mkdir(parents=True,exist_ok=True)
+    digest=hashlib.sha256()
+    frames=[]
+    with out.open("wb") as stream:
+        for i in range(16):
+            assert read32(handle+0x0C)==i+1
+            if i==4:
+                assert call(img.exports["BinkPause"],[handle,1])==1
+                assert call(img.exports["BinkPause"],[handle,0])==0
+            if not async_mode:
+                ret=call(img.exports["BinkDoFrame"],[handle],"uint64")
+                assert ret==1,(i,ret)
+            else:
+                submitted=[]
+                def enqueue(mu):
+                    assert mu.reg_read(X.UC_X86_REG_ECX)==0
+                    assert mu.reg_read(X.UC_X86_REG_R8D)==8
+                    tag=struct.unpack("<Q",bytes(mu.mem_read(mu.reg_read(X.UC_X86_REG_RDX),8)))[0]
+                    submitted.append(tag)
+                    return 1
+                assert call(img.exports["BinkDoFrameAsync"],[handle,0,0],
+                            extra={img.base+0x21F70:enqueue})==1
+                assert submitted==[handle|6]
+                assert read32(handle+0x120)==0x300
+                # Real 0x1AD10 worker decode (same tag extraction as 0x2135B).
+                worker_return=call(img.base+0x1AD10,[submitted[0]&~7,(submitted[0]>>1)&3],"int")
+                completion=[(submitted[0]&~6,worker_return)]
+                def receive(mu):
+                    assert mu.reg_read(X.UC_X86_REG_RCX)==img.base+0x3C860
+                    assert mu.reg_read(X.UC_X86_REG_R9D)==16
+                    if not completion:return 0
+                    tag,result=completion.pop(0)
+                    mu.mem_write(mu.reg_read(X.UC_X86_REG_R8),struct.pack("<Qq",tag,result))
+                    return 1
+                assert call(img.exports["BinkDoFrameAsyncWait"],[handle,0],
+                            extra={img.base+0x21BE0:receive})==1
+                assert not completion
+                assert read32(handle+0x120)==read32(handle+0x124)==0
+            assert read32(handle+0x56C)==i+1,(i,read32(handle+0x56C))
+            slot=read32(desc+0x14)
+            assert slot==i%2,(i,slot)
+            for address,size in spans[slot]:
+                pixels=bytes(m.mu.mem_read(address,size))
+                stream.write(pixels);digest.update(pixels)
+            frames.append({"frame":i+1,"slot":slot,"key":read32(handle+0x140)})
+            if i!=15:call(img.exports["BinkNextFrame"],[handle],"void")
+    return {"verified":not imports,"async":async_mode,"frames":frames,
+            "bytes":out.stat().st_size,"sha256":digest.hexdigest(),"imports":imports}
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("dll",type=Path)
     p.add_argument("fixture",type=Path)
     p.add_argument("--out",type=Path,required=True)
-    p.add_argument("--flags",type=lambda s:int(s,0),default=FLAGS)
+    p.add_argument("--flags",type=lambda s:int(s,0))
     p.add_argument("--library",type=Path)
+    p.add_argument("--playback-out",type=Path)
+    p.add_argument("--async-playback",action="store_true")
     a=p.parse_args()
-    result=run(a.dll,a.fixture,a.flags,a.library)
+    flags=a.flags
+    if flags is None:
+        flags=(0x04000400|struct.unpack_from("<I",a.fixture.read_bytes(),36)[0]) if a.playback_out else FLAGS
+    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback)
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)
