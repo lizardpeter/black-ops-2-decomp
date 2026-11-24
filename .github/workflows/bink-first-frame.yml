@@ -121,11 +121,22 @@ jobs:
             reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
             reconstructed_dlls/bink/header_validation.cpp \
             reconstructed_dlls/bink/bink_index.cpp \
+            reconstructed_dlls/bink/video_playback.cpp \
             tools/dlls/native_bik_decode.cpp -o build/bink_decode_video
           ldd build/bink_decode_video
           build/bink_decode_video originals/bik/la_pip_seq_6.bik build/standalone-bink-sequence.yuv
           cmp build/standalone-bink-sequence.yuv build/native-bink-sequence.yuv
           sha256sum build/standalone-bink-sequence.yuv
+      - name: Verify reusable native playback lifecycle and reset
+        run: |
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp \
+            reconstructed_dlls/bink/video_playback.cpp \
+            reconstructed_dlls/bink/test_video_playback.cpp \
+            build/bink_source_first_luma.so -Wl,-rpath,"$PWD/build" \
+            -o build/test_video_playback
+          build/test_video_playback originals/bik/la_pip_seq_6.bik
       - name: Compare two additional pinned BO2 video sequences
         run: |
           failed=0
@@ -140,13 +151,15 @@ jobs:
             fi
           done
           exit "$failed"
-      - name: Verify rectangular 512x288 original BO2 video (first 32 frames)
+      - name: Verify complete rectangular 512x288 original BO2 video
         if: always()
         run: |
           python tests/dlls/differential_bink_sequence.py \
             originals/dlls/binkw64.dll originals/bik/haiti_int_1c.bik \
-            build/bink_source_first_luma.so --frames 32 \
+            build/bink_source_first_luma.so \
             --report build/haiti_int_1c/bink-sequence-report.json
+          build/bink_decode_video originals/bik/haiti_int_1c.bik build/haiti_int_1c/standalone-bink-sequence.yuv
+          cmp build/haiti_int_1c/standalone-bink-sequence.yuv build/haiti_int_1c/native-bink-sequence.yuv
       - name: Preserve source-first-frame diagnostics and original oracle
         if: always()
         uses: actions/upload-artifact@v4

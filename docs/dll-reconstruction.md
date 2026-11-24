@@ -518,3 +518,13 @@ the original alpha flag (0x100000). The largest category is 1280x720
 alpha decoding and the original frame-buffer/API integration; the full
 embedded-audio codec is not required by the inspected asset headers.
 This does not prove audio-related public API calls are unused.
+
+The rectangular stage in CI run 45306338122 also completed successfully:
+32 frames, 96 planes, 7,077,888 exact matching bytes. Across the four
+fixtures this establishes 468 matching frames and 49,938,432 decoded bytes.
+The source playback coordinator now separates open/index validation,
+sequential decode, borrowed plane views, end-of-stream and rewind from
+CLI output. It does not claim original BINK handle ABI compatibility.
+The expanded CI tests the complete 761-frame Haiti clip and standalone
+output as well as playback reset and end-state behavior; those expanded
+results remain pending until the new workflow succeeds.
