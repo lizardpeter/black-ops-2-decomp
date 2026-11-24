@@ -33,3 +33,21 @@ extern "C" int bink_research_prepare_video_frame(void* handle,std::uint32_t now)
 // Returns original 0; -1 for invalid or unsupported state.
 extern "C" int bink_research_finish_video_frame(void* handle,std::uint32_t now,
     t6_bink::ResidentTimer timer,void* timer_context);
+
+namespace t6_bink {
+// Exact 0x38-byte output of BinkGetRealtime (RVA 0x1C290).
+// Field names deliberately describe measured sources, not inferred SDK semantics.
+struct RealtimeSnapshot {
+    std::uint32_t last_frame, rate_numerator, rate_denominator, sample_frames;
+    std::uint32_t elapsed, history_4e8, history_4e0, history_4f8;
+    std::uint32_t history_500, history_508, history_4f0;
+    std::uint32_t state_298, state_29c, byte_rate;
+};
+static_assert(sizeof(RealtimeSnapshot)==0x38);
+}
+// Exact original valid-history arithmetic. Returns 0 (including null handle
+// or output) or -1 if the original would divide by zero or access an invalid
+// history index. Timer boundary supplied by caller. No output on rejection.
+extern "C" int bink_research_get_realtime(void* handle,
+    t6_bink::RealtimeSnapshot* output,std::uint32_t frames,
+    t6_bink::ResidentTimer timer,void* timer_context);

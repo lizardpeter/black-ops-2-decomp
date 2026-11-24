@@ -136,6 +136,10 @@ bool ResidentVideoSession::next_frame() {
         return fail("original next-frame state failed");
     return true;
 }
+bool ResidentVideoSession::realtime(RealtimeSnapshot& output,std::uint32_t frames) {
+    if(!opened_ || failed_ || !last_decoded_frame())return false;
+    return bink_research_get_realtime(handle_.data(),&output,frames,timer_,clock_ctx_)==0;
+}
 bool ResidentVideoSession::pause(std::uint32_t value) {
     if(!opened_ || failed_)return fail("no resident movie");
     if(bink_research_pause_video_only(handle_.data(),value,timer_,clock_ctx_)!=value)

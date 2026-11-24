@@ -198,3 +198,50 @@ extern "C" int bink_research_finish_video_frame(void* h,std::uint32_t now,
     put(h,0x27C,0);
     return 0;
 }
+
+extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out,
+    std::uint32_t frames,t6_bink::ResidentTimer timer,void* ctx) {
+    if(!h || !out)return 0;
+    if(!timer)return -1;
+    // 0x1C290: expire the pending timing stamp before computing history.
+    const auto now=timer(ctx);
+    const auto stamp=u32(h,0x530);
+    if(stamp && stamp!=UINT32_MAX) {
+        put(h,0x530,0);
+        put(h,0x558,u32(h,0x558)+now-stamp);
+    }
+    const auto n=u32(h,0x510);
+    const auto index=u32(h,0x514);
+    const auto frame=u32(h,0x0C);
+    const auto* table=read<const std::uint32_t*>(h,0x1A0);
+    if(n<2 || index>=n || !frame || frame>u32(h,0x08) || !table)return -1;
+    if(!frames || frames>=n)frames=n-1;
+    if(frame<frames)frames=frame-1;
+    const auto divisor=std::uint64_t(u32(h,0x564))*frames;
+    if(!divisor)return -1;
+    constexpr std::size_t ring_offsets[]={0x4D8,0x4E8,0x4E0,0x4F8,0x500,0x508,0x4F0};
+    for(auto off:ring_offsets)if(!read<const std::uint32_t*>(h,off))return -1;
+    auto older=index+frames;
+    if(older>=n)older-=n;
+    // The original subtracts the raw index entries (including key bits),
+    // multiplies in 32 bits and zero-extends before unsigned 64-bit division.
+    const auto product=(table[frame]-table[frame-frames])*u32(h,0x560);
+    t6_bink::RealtimeSnapshot result{};
+    result.last_frame=u32(h,0x10);
+    result.rate_numerator=u32(h,0x14);
+    result.rate_denominator=u32(h,0x18);
+    result.sample_frames=frames;
+    result.state_298=u32(h,0x298);
+    result.state_29c=u32(h,0x29C);
+    result.byte_rate=static_cast<std::uint32_t>(std::uint64_t(product)/divisor);
+    std::uint32_t delta[7]{};
+    for(unsigned i=0;i<7;++i) {
+        const auto* ring=read<const std::uint32_t*>(h,ring_offsets[i]);
+        delta[i]=ring[index]-ring[older];
+    }
+    result.elapsed=delta[0];result.history_4e8=delta[1];result.history_4e0=delta[2];
+    result.history_4f8=delta[3];result.history_500=delta[4];result.history_508=delta[5];
+    result.history_4f0=delta[6];
+    *out=result;
+    return 0;
+}

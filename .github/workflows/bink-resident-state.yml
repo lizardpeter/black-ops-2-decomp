@@ -5,6 +5,7 @@ on:
       - reconstructed_dlls/bink/resident_frame_state.*
       - tests/dlls/differential_bink_resident_state.py
       - tests/dlls/differential_bink_video_state.py
+      - tests/dlls/differential_bink_realtime.py
       - .github/workflows/bink-resident-state.yml
   workflow_dispatch:
 permissions:
@@ -32,4 +33,7 @@ jobs:
           python tests/dlls/differential_bink_resident_state.py \
             originals/dlls/binkw64.dll build/bink_resident_state.so
           python tests/dlls/differential_bink_video_state.py \
+            originals/dlls/binkw64.dll build/bink_resident_state.so
+
+          python tests/dlls/differential_bink_realtime.py \
             originals/dlls/binkw64.dll build/bink_resident_state.so

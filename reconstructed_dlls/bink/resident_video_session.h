@@ -28,6 +28,9 @@ public:
     DecodeResult do_frame();
     bool next_frame();
     bool pause(std::uint32_t value);
+    // Valid only after at least one completed frame; does not poison playback
+    // on a rejected history window.
+    bool realtime(RealtimeSnapshot& output,std::uint32_t frames);
     const HeaderPrefix& header() const {return header_;}
     std::uint32_t frame_number() const;
     std::uint32_t last_decoded_frame() const;
