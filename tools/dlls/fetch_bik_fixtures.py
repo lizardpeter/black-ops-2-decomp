@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-"""Fetch three SHA-pinned original BO2 .bik fixtures from R2 for offline tests.
+"""Fetch four SHA-pinned original BO2 .bik fixtures from R2 for offline tests.
 
 The fixtures are read-only original media and MUST NOT be committed.
-Each is <520 KiB. No decoding or execution takes place.
+Each is <1.4 MB. No decoding or execution takes place.
 """
 import argparse
 import hashlib
@@ -12,6 +12,7 @@ from pathlib import Path
 
 BASE = "https://r2.houseofkublai.com/"
 FIXTURES = {
+    "haiti_int_1c.bik": "d74398662e7829a379806104b233ca9161761ae31792675ad22d56627122f85e",
     "la_pip_seq_6.bik": "c1171207707c3cdcc44160899efbdc7016b1df94b21d11c592546983dd15049c",
     "karma_pip_security_feed.bik": "18daa35802784540f6713c083ae78bd6e14bf442f96028201ede851f643db062",
     "yemen_drone_cam.bik": "9fa2f650c715734c69e465352e162951c5c38cb162f99dbd4843115e4cfdd20e",
