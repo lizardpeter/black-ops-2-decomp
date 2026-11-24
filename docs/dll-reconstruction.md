@@ -401,3 +401,45 @@ separate large HTTP/TLS/networking/state-machine task.
 
 All new source/CI work is non-destructive and isolated from the enhanced
 runtime until a complete replacement is actually validated.
+
+## First complete real BO2 Bink color keyframe (2026-11-23)
+
+The reconstructed native C++ plane coordinator now reproduces all three
+planes of the first real `la_pip_seq_6.bik` keyframe, including the two
+128×128 chroma planes. The original binary is used only for the independent
+Unicorn reference decode in the differential test; it is not called by
+the native source decoder.
+
+[Source plane coordinator](../reconstructed_dlls/bink/video_luma_first_keyframe.cpp)
+and [three-plane differential test](../tests/dlls/differential_first_color_keyframe.py).
+
+| Plane | Dimensions | Exact matching bytes | Next packet offset | SHA-256 |
+|---|---|---:|---:|---|
+| Y | 256×256 | 65,536 | 1,372 | `347b7e90cad7c4cc5d0e3e9b0541813b3a49605827aa72ec59c662ff1f24edaf` |
+| Chroma 1 | 128×128 | 16,384 | 1,580 | `da5d24dd5daf0d2204e312c198aae5ecf3fc5ce0a20c90e75f3725b20f0bc69c` |
+| Chroma 2 | 128×128 | 16,384 | 1,676 | `b16cfbb69348d5676817b3e8c67e0019b8c8a45a322b40ceb835d5a71800fb6e` |
+
+All **98,304 output bytes**, compressed-word cursors, and observed mode
+and submode counts matched in [CI run 45304096171](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45304096171).
+Both implementations used identically initialized destination and reference
+buffers. The original end-of-input/mode-stream guard leaves any skipped
+destination blocks unchanged; the source now reproduces this behavior
+rather than decoding remaining buffered tokens past the packet boundary.
+The native first chroma cursor selects the second chroma input independently
+of the oracle. The strict regression workflow saves the three native and
+original planes and the comparison report as artifacts.
+
+The original entropy contexts use width-dependent counts/capacities; the
+source now computes these for the plane dimensions rather than assuming
+a 256-pixel luma plane. The supported subset remains the observed keyframe
+modes, not the entire original 0x252C0 routine. This is not a claim of
+complete Bink playback or a hardened arbitrary-input parser.
+
+The next target is dependent-frame decoding with actual previous-frame
+pixels. [Frame-1 original probe](../tests/dlls/probe_next_bink_luma.py)
+uses the verified native frame-0 luminance output as the reference and
+records the original next frame's mode histogram and pixel oracle.
+The remaining work includes interframe prediction and other block modes,
+multi-frame/container integration, audio, public Bink API and lifetime
+behavior, and finally safe BO2 runtime integration. Both external DLLs
+remain required.
