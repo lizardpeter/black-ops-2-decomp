@@ -8,8 +8,9 @@
 
 namespace t6_bink {
 // Research integration of the original-derived resident frame-state
-// routines and registered video coordinator. The minimal state bootstrap
-// is a deliberate source adapter, NOT a recovered BinkOpen initializer.
+// routines and registered video coordinator. The resident external-buffer
+// bootstrap layout and observed handle fields are original-derived, but
+// the full BinkOpen initializer and OS object lifetime remain unresolved.
 // All file and table storage is owned here. Registered output is borrowed;
 // its caller must keep the descriptor and both frame slots alive.
 // This is synchronous, trusted Store BIKi video only, no original DLL ABI,
@@ -44,9 +45,9 @@ private:
     bool fail(std::string reason);
     HeaderPrefix header_{};
     std::vector<std::uint8_t> file_;
-    std::vector<std::uint32_t> index_;
-    alignas(8) std::array<std::uint8_t,0x5A8> handle_{};
-    std::array<std::array<std::uint32_t,32>,7> history_{};
+    // Original cache-line-separated bootstrap allocation. Eight-byte
+    // aligned backing storage; no original OS mutex ownership here.
+    std::vector<std::uint64_t> handle_;
     RegisteredFrameBuffers* info_=nullptr;
     ResidentTimer timer_=nullptr;
     void* clock_ctx_=nullptr;

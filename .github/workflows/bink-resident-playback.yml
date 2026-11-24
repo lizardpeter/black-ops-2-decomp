@@ -4,6 +4,7 @@ on:
     paths:
       - reconstructed_dlls/bink/resident_video_session.*
       - reconstructed_dlls/bink/resident_frame_state.*
+      - reconstructed_dlls/bink/resident_bootstrap.*
       - reconstructed_dlls/bink/test_resident_video_session.cpp
       - .github/workflows/bink-resident-playback.yml
   workflow_dispatch:
@@ -54,6 +55,7 @@ jobs:
             reconstructed_dlls/bink/header_validation.cpp \
             reconstructed_dlls/bink/bink_index.cpp \
             reconstructed_dlls/bink/resident_frame_state.cpp \
+            reconstructed_dlls/bink/resident_bootstrap.cpp \
             reconstructed_dlls/bink/resident_video_session.cpp \
             reconstructed_dlls/bink/test_resident_video_session.cpp build/bink_source.so \
             -Wl,-rpath,"$PWD/build" -o build/test_resident_video_session

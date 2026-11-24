@@ -4,6 +4,7 @@ on:
     paths:
       - tests/dlls/probe_bink_memory_open.py
       - .github/workflows/bink-memory-open.yml
+      - reconstructed_dlls/bink/resident_bootstrap.*
   workflow_dispatch:
 permissions:
   contents: read
@@ -15,6 +16,11 @@ jobs:
       matrix:
         clip: [la_pip_seq_6, blackout_virus, karma_pip_helipad, generalstore, yemen_mendz]
         flags: ['0x04000000', '0x04000400']
+        include:
+          - clip: generalstore
+            flags: '0x04100400'
+          - clip: yemen_mendz
+            flags: '0x04100400'
     steps:
       - uses: actions/checkout@v4
         with:
@@ -22,18 +28,32 @@ jobs:
             tests/differential
             tests/dlls
             tools/dlls
+            docs
+            reconstructed_dlls/bink
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
       - run: pip install -q -r tests/differential/requirements.txt
       - run: |
           python tools/dlls/fetch.py originals/dlls
-          python tools/dlls/fetch_bik_fixtures.py originals/bik
+          CLIP="${{ matrix.clip }}.bik" PYTHONPATH=tests/dlls python - <<'PY'
+          import json, os
+          from pathlib import Path
+          from verify_bink_corpus import fetch, MANIFEST
+          clips={c["name"]:c for c in json.loads(MANIFEST.read_text())["clips"]}
+          fetch(clips[os.environ["CLIP"]],Path("originals/bik"))
+          PY
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/resident_bootstrap.cpp \
+            reconstructed_dlls/bink/resident_frame_state.cpp \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp -o build/bink_bootstrap.so
       - name: Execute original BinkOpen with resident memory and deterministic boundary callbacks
         run: |
           python tests/dlls/probe_bink_memory_open.py \
             originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
-            --flags "${{ matrix.flags }}" --out build/original-memory-open.json
+            --flags "${{ matrix.flags }}" --library build/bink_bootstrap.so --out build/original-memory-open.json
       - uses: actions/upload-artifact@v4
         if: always()
         with:

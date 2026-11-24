@@ -44,14 +44,14 @@ extern "C" int bink_research_select_resident_frame(void* h,std::uint32_t frame,
         }
     }
     const auto* table=read<const std::uint32_t*>(h,0x1A0);
-    const auto first=table[0]&~1U;
-    const auto raw=table[i];
+    const auto first=read<std::uint32_t>(table,0)&~1U;
+    const auto raw=read<std::uint32_t>(table,std::size_t(i)*4);
     const auto offset=raw&~1U;
     // Preserve original 32-bit arithmetic and key bit.
     put(h,0x1EC,i+1);
     put(h,0x1E8,offset);
     put(h,0x140,raw&1U);
-    put(h,0x13C,(table[i+1]&~1U)-offset);
+    put(h,0x13C,(read<std::uint32_t>(table,std::size_t(i+1)*4)&~1U)-offset);
     write(h,0x100,read<std::uintptr_t>(h,0x1D8)+std::uint32_t(offset-first));
     // Resident branch skips the streaming refill and telemetry (disabled).
     put(h,0x0C,i+1);
@@ -226,7 +226,8 @@ extern "C" int bink_research_get_realtime(void* h,t6_bink::RealtimeSnapshot* out
     // The original subtracts the raw index entries (including key bits),
     // widens both entries before 64-bit subtraction and multiplication.
     // Original 0x1C33*: REX.W sub/imul, unsigned div, store EAX.
-    const auto product=(std::uint64_t(table[frame])-table[frame-frames])*u32(h,0x560);
+    const auto product=(std::uint64_t(read<std::uint32_t>(table,std::size_t(frame)*4))-
+        read<std::uint32_t>(table,std::size_t(frame-frames)*4))*u32(h,0x560);
     t6_bink::RealtimeSnapshot result{};
     result.last_frame=u32(h,0x10);
     result.rate_numerator=u32(h,0x14);

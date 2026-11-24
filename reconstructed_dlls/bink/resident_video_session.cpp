@@ -1,4 +1,5 @@
 #include "resident_video_session.h"
+#include "resident_bootstrap.h"
 #include <cstring>
 #include <utility>
 
@@ -21,8 +22,8 @@ void ResidentVideoSession::close() {
     // Do not touch the borrowed descriptor during close.
     opened_=failed_=false;
     info_=nullptr;timer_=nullptr;clock_ctx_=nullptr;
-    header_={};handle_.fill(0);history_={};
-    file_.clear();index_.clear();error_.clear();
+    header_={};handle_.clear();
+    file_.clear();error_.clear();
 }
 bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer timer,void* ctx) {
     close();
@@ -37,33 +38,19 @@ bool ResidentVideoSession::open(std::vector<std::uint8_t> file,ResidentTimer tim
     if(!read_video_only_index(file.data(),file.size(),spans.data(),spans.size(),&h) ||
        !spans.front().keyframe || spans.back().end!=file.size())
         return fail("invalid resident index");
-    std::vector<std::uint32_t> raw_index;
-    raw_index.reserve(h.frame_count+1U);
     for(const auto& span:spans) {
         VideoPacketLayout layout{};
         if(!parse_video_packet({file.data()+span.start,span.end-span.start},h.flags,layout))
             return fail("invalid resident video packet");
-        raw_index.push_back(span.start|std::uint32_t(span.keyframe));
     }
-    raw_index.push_back(spans.back().end);
-    header_=h;file_=std::move(file);index_=std::move(raw_index);
+    ResidentBootstrapLayout plan{};
+    if(!resident_bootstrap_layout(h,plan))return fail("unsupported original resident layout");
+    header_=h;file_=std::move(file);
     timer_=timer;clock_ctx_=ctx;
-    auto* state=handle_.data();
-    // Only fields observed in the verified source routines and frame
-    // descriptor APIs are initialized. Unknown fields are not claimed.
-    put(state,0x00,h.width);put(state,0x04,h.height);put(state,0x08,h.frame_count);
-    put(state,0x14,h.rate_numerator);put(state,0x18,h.rate_denominator);
-    put(state,0x20,h.flags);put(state,0x134,1U);
-    put(state,0x1B8,h.width);put(state,0x1BC,h.height);
-    put(state,0x1A0,index_.data());
-    put(state,0x1D8,file_.data()+spans.front().start);
-    put(state,0x59C,h.magic);
-    put(state,0x510,static_cast<std::uint32_t>(history_[0].size()));
-    put(state,0x560,h.rate_numerator);put(state,0x564,h.rate_denominator);
-    constexpr std::size_t offsets[]={0x4D8,0x4E8,0x4E0,0x4F0,0x4F8,0x500,0x508};
-    for(unsigned i=0;i<7;++i)put(state,offsets[i],history_[i].data());
-    if(bink_research_select_resident_frame(state,1,timer_,clock_ctx_))
-        return fail("initial frame selection failed");
+    handle_.resize(plan.allocation_bytes/sizeof(std::uint64_t));
+    if(!init_resident_external(handle_.data(),plan.allocation_bytes,file_.data(),file_.size(),
+                               0x04000400U|h.flags,timer_,clock_ctx_))
+        return fail("original-derived resident bootstrap failed");
     opened_=true;
     return true;
 }
@@ -89,16 +76,16 @@ bool ResidentVideoSession::register_buffers(RegisteredFrameBuffers& info) {
     return true;
 }
 std::uint32_t ResidentVideoSession::frame_number() const {
-    return read<std::uint32_t>(handle_.data(),0x0C);
+    return handle_.empty()?0:read<std::uint32_t>(handle_.data(),0x0C);
 }
 std::uint32_t ResidentVideoSession::last_decoded_frame() const {
-    return read<std::uint32_t>(handle_.data(),0x56C);
+    return handle_.empty()?0:read<std::uint32_t>(handle_.data(),0x56C);
 }
 std::uint32_t ResidentVideoSession::keyframe() const {
-    return read<std::uint32_t>(handle_.data(),0x140);
+    return handle_.empty()?0:read<std::uint32_t>(handle_.data(),0x140);
 }
 bool ResidentVideoSession::is_paused() const {
-    return read<std::uint32_t>(handle_.data(),0x128)!=0;
+    return !handle_.empty()&&read<std::uint32_t>(handle_.data(),0x128)!=0;
 }
 ResidentVideoSession::DecodeResult ResidentVideoSession::do_frame() {
     if(!opened_ || failed_ || !info_) {

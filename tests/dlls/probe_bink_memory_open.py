@@ -8,6 +8,7 @@ runs normally. Any unmodeled imported function is a verification failure.
 No game data or vendor binary is emitted; only JSON layout evidence.
 """
 import argparse
+import ctypes
 import hashlib
 import json
 import struct
@@ -18,15 +19,16 @@ sys.path.insert(0,str(ROOT/"tests/differential"))
 sys.path.insert(0,str(ROOT/"tools/dlls"))
 from harness import Image,Machine,HEAP
 from differential_bink_resident_state import PIN
-from fetch_bik_fixtures import FIXTURES
+from verify_bink_corpus import MANIFEST
+from differential_bink_resident_state import CLOCK
 from unicorn import x86_const as X
 
 ARENA=0x34000000
 ARENA_SIZE=16*1024*1024
 FLAGS=0x04000000 # actual in-memory branch at original 0x17A65
 
-WORDS=(0,4,8,0x0c,0x10,0x14,0x18,0x1c,0x20,0x24,0x34,0x3c,
-       0x110,0x114,0x120,0x124,0x128,0x12c,0x130,0x134,0x138,0x13c,
+WORDS=(0,4,8,0x0c,0x10,0x14,0x18,0x1c,0x20,0x24,0x28,0x34,0x3c,
+       0x110,0x114,0x118,0x11c,0x120,0x124,0x128,0x12c,0x130,0x134,0x138,0x13c,
        0x140,0x144,0x148,0x1b8,0x1bc,0x1e8,0x1ec,0x270,0x27c,
        0x510,0x514,0x520,0x524,0x528,0x530,0x534,0x538,0x560,0x564,
        0x56c,0x570,0x574,0x578,0x57c,0x58c,0x59c)
@@ -34,9 +36,9 @@ POINTERS=(0xd0,0xd8,0xe0,0xe8,0xf0,0x100,0x108,0x198,0x1a0,0x1c0,
           0x1c8,0x1d0,0x1d8,0x200,0x220,0x228,0x4d8,0x4e0,0x4e8,
           0x4f0,0x4f8,0x500,0x508,0x5a0)
 
-def run(dll,fixture,flags):
+def run(dll,fixture,flags,library=None):
     data=fixture.read_bytes()
-    pin=FIXTURES[fixture.name]
+    pin=next(c["sha256"] for c in json.loads(MANIFEST.read_text())["clips"] if c["name"]==fixture.name)
     assert hashlib.sha256(data).hexdigest()==pin
     assert hashlib.sha256(dll.read_bytes()).hexdigest()==PIN
     words=struct.unpack_from("<11I",data)
@@ -214,6 +216,42 @@ def run(dll,fixture,flags):
         sorted(a["offset"] for a in allocations) and
         all(name.lower() in modeled for name in m.imports_called))
     result["verified"]=result["verified"] and result["close_verified"]
+    # Compare the source allocation and known initial fields against the
+    # real initializer, not against an independently fabricated handle.
+    if library and flags&0x400:
+        lib=ctypes.CDLL(str(library.resolve()))
+        size=lib.bink_research_resident_bootstrap_size
+        size.argtypes=(ctypes.c_void_p,ctypes.c_size_t);size.restype=ctypes.c_uint32
+        initialize=lib.bink_research_init_resident_external
+        initialize.argtypes=(ctypes.c_void_p,ctypes.c_size_t,ctypes.c_void_p,
+            ctypes.c_size_t,ctypes.c_uint32,CLOCK,ctypes.c_void_p)
+        initialize.restype=ctypes.c_int
+        source=(ctypes.c_uint8*len(data)).from_buffer_copy(data)
+        count=size(source,len(data))
+        native=(ctypes.c_uint64*((count+7)//8))()
+        original_ticks=ticks[:3]
+        native_ticks=[]
+        @CLOCK
+        def native_clock(ctx):
+            t=100000+len(native_ticks)*3
+            native_ticks.append(t);return t
+        status=initialize(native,count,source,len(data),flags,native_clock,None)
+        native_raw=bytes(native)
+        fields={hex(off):struct.unpack_from("<I",native_raw,off)[0] for off in WORDS}
+        native_base=ctypes.addressof(native);source_base=ctypes.addressof(source)
+        def norm_native(p):
+            if not p:return None
+            if native_base<=p<native_base+count:return {"allocation_offset":p-native_base}
+            if source_base<=p<source_base+len(data):return {"file_offset":p-source_base}
+            return {"other":hex(p)}
+        pointers={hex(off):norm_native(struct.unpack_from("<Q",native_raw,off)[0]) for off in POINTERS}
+        mismatches={k:[result["fields"][k],v] for k,v in fields.items() if v!=result["fields"][k]}
+        ptr_mismatches={k:[result["pointers"][k],v] for k,v in pointers.items() if v!=result["pointers"][k]}
+        result["source_bootstrap"]={"return":status,"allocation_bytes":count,
+            "timer_calls":native_ticks,"field_mismatches":mismatches,"pointer_mismatches":ptr_mismatches}
+        result["source_bootstrap"]["verified"]=(status==0 and count==allocations[0]["requested_bytes"]
+            and native_ticks==original_ticks and not mismatches and not ptr_mismatches and bytes(source)==data)
+        result["verified"]=result["verified"] and result["source_bootstrap"]["verified"]
     return result
 
 def main():
@@ -222,8 +260,9 @@ def main():
     p.add_argument("fixture",type=Path)
     p.add_argument("--out",type=Path,required=True)
     p.add_argument("--flags",type=lambda s:int(s,0),default=FLAGS)
+    p.add_argument("--library",type=Path)
     a=p.parse_args()
-    result=run(a.dll,a.fixture,a.flags)
+    result=run(a.dll,a.fixture,a.flags,a.library)
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)
