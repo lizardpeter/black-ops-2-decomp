@@ -69,7 +69,7 @@ extern "C" std::uint32_t xcurl_research_dispatch_option(void* options,int option
     case 136:return flag(0xfc);
     case 155:case 156:
         if(n<0)return 43;
-        put(p,option==155?0x28:0x2c,u);return 0;
+        put(p,option==155?0x28:0x2c,option==155?u:u*1000U);return 0;
     case 157:return flag(0xf9,true);
     case 158:return flag(0xfa,true);
     case 161:
