@@ -261,13 +261,24 @@ extern "C" int bink_research_decode_keyframe_plane(
         }
 
         for(std::uint32_t x=0;x<width;) {
-            if (stream[kMode].current>=stream[kMode].end)
-                return update_report(3,x,y,0xff,0xff);
+            // Original 0x252C0 dispatch guard: if the compressed next-word
+            // pointer reaches the supplied end OR the mode stream is
+            // exhausted, take the default 8-pixel advance, without
+            // reading a mode or touching destination pixels. This matters
+            // for the two final 8x8 blocks of the real second chroma plane.
+            if (bits.next_word>=stream_end ||
+                stream[kMode].current>=stream[kMode].end) {
+                x+=8;
+                continue;
+            }
             const std::uint32_t mode=*stream[kMode].current++;
             if(mode<10U)++report->type_counts[mode];
             else return update_report(4,x,y,mode,0xff);
             std::uint8_t* block=output+std::ptrdiff_t(y)*stride+x;
             if(mode==1U) {
+                // At the right edge the original breaks out of the mode-1
+                // case and advances 8 pixels instead of 16.
+                if (x+16>width) { x+=8; continue; }
                 std::uint32_t subtype=0xff;
                 if ((y&8U)==0 && x+16<=width &&
                     stream[kSubmode].current<stream[kSubmode].end) {
