@@ -11,6 +11,7 @@ on:
       - tests/dlls/experimental_first_luma.py
       - tests/dlls/differential_first_color_keyframe.py
       - tests/dlls/probe_next_bink_luma.py
+      - tests/dlls/differential_bink_sequence.py
       - tools/dlls/trace_original_bik_entropy_rows.py
       - .github/workflows/bink-first-frame.yml
   workflow_dispatch:
@@ -85,6 +86,11 @@ jobs:
           python tests/dlls/probe_next_bink_luma.py \
             originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
             build/native-bink-frame0-Y.pgm build/bink_source_first_luma.so
+      - name: Compare full 150-frame color video sequence (original vs native)
+        run: |
+          python tests/dlls/differential_bink_sequence.py \
+            originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik \
+            build/bink_source_first_luma.so --frames 150
       - name: Preserve source-first-frame diagnostics and original oracle
         if: always()
         uses: actions/upload-artifact@v4
@@ -102,4 +108,7 @@ jobs:
             build/original-bink-frame1-Y.pgm
             build/native-bink-frame1-Y.pgm
             build/original-bink-frame1-report.json
+            build/bink-sequence-report.json
+            build/native-bink-sequence.yuv
+            build/sequence-failed-*.pgm
           if-no-files-found: warn
