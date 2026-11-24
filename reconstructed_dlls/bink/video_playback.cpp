@@ -1,7 +1,7 @@
 // Reusable source playback coordinator; packet and plane contracts inherited
 // from the original-derived differential-tested standalone research decoder.
 #include "video_playback.h"
-#include "video_plane.h"
+#include "video_registered.h"
 #include <algorithm>
 #include <utility>
 
@@ -71,44 +71,28 @@ VideoPlayback::Result VideoPlayback::decode_next() {
     const auto span=index_[next_];
     const auto bytes=span.end-span.start;
     const auto* packet=file_.data()+span.start;
-    VideoPacketLayout layout{};
-    if(!parse_video_packet({packet,bytes},header_.flags,layout)) {
-        fail("invalid video plane partition");
-        return Result::error;
-    }
-    auto& current=buffers_[next_%2];
-    const auto& previous=buffers_[1-next_%2];
-    // Original coordinator decodes A (if present), Y, C1, C2, whereas
-    // the caller-facing frame descriptor uses Y/C1/C2/A storage order.
-    // Original BinkDoFramePlane supplies the full indexed packet size
-    // (handle+0x13c); FUN_1800274A0 adds one word before passing the
-    // exclusive end to its plane decoder. Zero guard data is independent
-    // of actual next-frame contents; differential tests also use 0xA5.
-    std::vector<std::uint8_t> padded(packet,packet+bytes);
-    padded.resize(bytes+4U,0);
-    const bool alpha=plane_count()==4;
-    const std::array<unsigned,4> order{3,0,1,2};
-    std::uint32_t pos=alpha?layout.alpha_start:layout.luma_start;
-    for(unsigned i=alpha?0U:1U;i<order.size();++i) {
-        const unsigned p=order[i];
-        if(p==0)pos=layout.luma_start;
-        if(p==1)pos=layout.luma_end;
-        const auto limit=bytes+4U;
-        const auto w=plane_width(p),h=plane_height(p);
-        BinkFirstLumaTrace trace{};
-        const int status=bink_research_decode_video_plane(padded.data(),limit,pos,limit,
-            w,h,current[p].data(),w,previous[p].data(),&trace);
-        const auto cursor=4U*trace.input_words;
-        if(status || cursor<=pos || cursor>limit || (p==3 && cursor>layout.alpha_end+4U) ||
-           (p==0 && cursor>layout.luma_end+4U) ||
-           (p==1 && cursor>=limit)) {
-            fail("frame="+std::to_string(next_)+" plane="+std::to_string(p)+
-                 " status="+std::to_string(status)+" block="+std::to_string(trace.error_x)+
-                 ","+std::to_string(trace.error_y)+" mode="+std::to_string(trace.mode)+
-                 " submode="+std::to_string(trace.submode)+" input_offset="+std::to_string(cursor));
-            return Result::error;
+    RegisteredFrameBuffers info{};
+    info.buffer_count=2;
+    info.y_width=plane_width(0);
+    info.y_height=plane_height(0);
+    info.c_width=plane_width(1);
+    info.c_height=plane_height(1);
+    info.frame_num=1-next_%2;
+    for(unsigned slot=0;slot<2;++slot)
+        for(unsigned p=0;p<plane_count();++p) {
+            auto& plane=info.slots[slot].planes[p];
+            plane.allocate=1;
+            plane.data=buffers_[slot][p].data();
+            plane.pitch=plane_width(p);
         }
-        pos=cursor;
+    RegisteredDecodeReport report{};
+    const int status=decode_registered_packet({packet,bytes},header_.flags,info,report);
+    if(status || report.destination_slot!=next_%2) {
+        fail("frame="+std::to_string(next_)+" plane="+std::to_string(report.plane)+
+             " status="+std::to_string(status)+" block="+std::to_string(report.trace.error_x)+
+             ","+std::to_string(report.trace.error_y)+" mode="+std::to_string(report.trace.mode)+
+             " submode="+std::to_string(report.trace.submode)+" input_offset="+std::to_string(report.next_offset));
+        return Result::error;
     }
     ++next_;
     return Result::frame;

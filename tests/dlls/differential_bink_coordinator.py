@@ -55,9 +55,10 @@ def fetch_alpha(directory):
         assert len(data)<=8*1024*1024 and sha(data)==pin
         dest.write_bytes(data)
 
-def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0,pitch_extra=0):
+def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0,pitch_extra=0,registered=False):
     assert lookahead in (0,4) and 0<=padding_byte<=255
     assert 0<=pitch_extra<=256 and pitch_extra%8==0
+    assert not registered or (lookahead==4 and padding_byte==0)
     assert sha(dll.read_bytes())==PIN_DLL
     data=video.read_bytes()
     pin=expected_sha256 or {**FIXTURES,**ALPHA}[video.name]
@@ -82,6 +83,14 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
                  ctypes.c_uint32,ctypes.c_uint32,ptr,ctypes.c_uint32,
                  ptr,ctypes.POINTER(Trace))
     fn.restype=ctypes.c_int
+    class RegisteredTrace(ctypes.Structure):
+        _fields_=[('status',ctypes.c_uint32),('plane',ctypes.c_uint32),
+                  ('destination_slot',ctypes.c_uint32),('next_offset',ctypes.c_uint32),('trace',Trace)]
+    registered_fn=None
+    if registered:
+        registered_fn=lib.bink_research_decode_registered_packet
+        registered_fn.argtypes=(ptr,ctypes.c_uint32,ctypes.c_uint32,ctypes.c_void_p,ctypes.POINTER(RegisteredTrace))
+        registered_fn.restype=ctypes.c_int
     # Give the original independent plane buffers in an explicit x64 arena.
     # A guard region after every plane is checked for writes by the original.
     original=[]
@@ -91,6 +100,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
                           bytes([0xD3 if slot==0 else 0xE4])*(pitch-w))*h
                          for pitch,(w,h) in zip(pitches,dims)])
     native=[p.copy() for p in original]
+    registered_state=[p.copy() for p in original]
     addresses=[[],[]]
     cursor=ARENA
     guard=bytes([0xA7])*4096
@@ -101,7 +111,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
     assert cursor<=ARENA+machine.heap_size, 'oracle arena too small for two padded four-plane frames'
     result={"fixture":video.name,"sha256":pin,"visible_dimensions":[width,height],
             "plane_dimensions":dims,"plane_pitches":pitches,"original_coordinator_rva":"0x274A0",
-            "lookahead_bytes":lookahead,"padding_byte":padding_byte,
+            "lookahead_bytes":lookahead,"padding_byte":padding_byte,"registered_source":registered,
             "complete_matching_frames":0,"matched_planes":0,"matched_bytes":0,"frames":[]}
     report_path.parent.mkdir(parents=True,exist_ok=True)
     def save():report_path.write_text(json.dumps(result,indent=2)+"\n")
@@ -173,6 +183,35 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
         save()
         if isinstance(returned,str) or len(calls)!=len(order):
             raise AssertionError(f"original coordinator failure: {returned}, calls={calls}")
+        if registered:
+            # Independent registered storage, exact 0xD8 x64 layout, same
+            # initial state and pitch, never populated from oracle output.
+            desc=bytearray(descriptor)
+            allocated=[[(ctypes.c_uint8*(len(v)+len(guard))).from_buffer_copy(v+guard)
+                        for v in slot] for slot in registered_state]
+            for slot in range(2):
+                for p in range(len(dims)):
+                    struct.pack_into("<Q",desc,0x18+slot*0x60+p*0x18+8,
+                                     ctypes.addressof(allocated[slot][p]))
+            descbuf=ctypes.create_string_buffer(bytes(desc),len(desc))
+            raw_packet=(ctypes.c_uint8*len(packet)).from_buffer_copy(packet)
+            registered_report=RegisteredTrace()
+            status=registered_fn(raw_packet,len(packet),flags,descbuf,ctypes.byref(registered_report))
+            rec["registered"]={"status":status,"plane":registered_report.plane,
+                               "destination_slot":registered_report.destination_slot,
+                               "next_offset":registered_report.next_offset,
+                               "descriptor_unchanged":bytes(descbuf)==bytes(desc)}
+            save()
+            if status or registered_report.destination_slot!=dst or bytes(descbuf)!=bytes(desc):
+                raise AssertionError(f"registered source coordinator failed frame={frame}: {rec['registered']}")
+            for slot in range(2):
+                for p,size in enumerate(storage):
+                    actual=bytes(allocated[slot][p])
+                    expected=bytes(machine.mu.mem_read(addresses[slot][p],size))
+                    if actual[:size]!=expected or actual[size:]!=guard:
+                        raise AssertionError(f"registered buffer mismatch frame={frame} slot={slot} plane={p}")
+                    registered_state[slot][p]=actual[:size]
+            rec["registered"]["all_buffers_match"]=True
         raw=(ctypes.c_uint8*limit_bytes).from_buffer_copy(native_packet)
         pos=4
         for j,p in enumerate(order):
@@ -234,6 +273,7 @@ def main():
     p.add_argument("--pad-byte",type=lambda v:int(v,0),default=0)
     p.add_argument("--pitch-extra",type=int,default=0)
     p.add_argument("--manifest",type=Path,default=None)
+    p.add_argument("--registered",action="store_true")
     p.add_argument("--report",type=Path,default=Path("build/coordinator-report.json"))
     a=p.parse_args()
     if a.fetch_alpha is not None:fetch_alpha(a.fetch_alpha)
@@ -244,6 +284,6 @@ def main():
             pins={c["name"]:c["sha256"] for c in json.loads(a.manifest.read_text())["clips"]}
             pin=pins[a.video.name]
         run(a.dll,a.video,a.library,a.frames,a.report,expected_sha256=pin,
-            lookahead=a.lookahead,padding_byte=a.pad_byte,pitch_extra=a.pitch_extra)
+            lookahead=a.lookahead,padding_byte=a.pad_byte,pitch_extra=a.pitch_extra,registered=a.registered)
 
 if __name__=="__main__":main()
