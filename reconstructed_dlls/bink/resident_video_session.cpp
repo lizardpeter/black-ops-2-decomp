@@ -419,7 +419,12 @@ bool ResidentVideoSession::decode_current_packet(RegisteredDecodeReport& report,
     }
     if(decode_registered_packet({packet,bytes},header_.flags,*info_,report)) {
         reason="resident packet decode failed at frame="+std::to_string(frame_number())+
-             " plane="+std::to_string(report.plane)+" status="+std::to_string(report.status);
+             " plane="+std::to_string(report.plane)+" status="+std::to_string(report.status)+
+             " inner="+std::to_string(report.trace.status)+
+             " x="+std::to_string(report.trace.error_x)+" y="+std::to_string(report.trace.error_y)+
+             " mode="+std::to_string(report.trace.mode)+" subtype="+std::to_string(report.trace.submode)+
+             " words="+std::to_string(report.trace.input_words)+" next="+std::to_string(report.next_offset)+
+             " packet="+std::to_string(bytes)+" first_modes="+std::to_string(report.trace.first_mode_count);
         return false;
     }
     return true;

@@ -12,7 +12,13 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, windows-latest]
+        include:
+          - os: ubuntu-latest
+            toolset: default
+          - os: windows-latest
+            toolset: default
+          - os: windows-latest
+            toolset: ClangCL
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v4
@@ -23,7 +29,7 @@ jobs:
         run: python tools/dlls/fetch_bik_fixtures.py originals/bik
       - name: Compile and link native static library
         run: |
-          cmake -S reconstructed_dlls/bink -B build/native -DCMAKE_BUILD_TYPE=Release
+          cmake -S reconstructed_dlls/bink -B build/native -DCMAKE_BUILD_TYPE=Release ${{ matrix.toolset == 'ClangCL' && '-T ClangCL' || '' }}
           cmake --build build/native --config Release --parallel 2
       - name: Exercise public ABI and compare source session output
         shell: python
