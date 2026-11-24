@@ -227,3 +227,8 @@ extern "C" int BinkWaitStopAsyncThread(std::uint32_t n) {
     const auto r=bink_research_join_worker(&pool.state,n,HostPool::join,HostPool::destroy,&pool);
     if(!r)report_lifecycle();return r;
 }
+
+extern "C" std::uint32_t BinkGetRects(void* h,std::uint32_t surface) {
+    std::lock_guard lock(registry_mutex);auto* e=find(h);
+    return e?e->movie.get_rects(surface):0;
+}

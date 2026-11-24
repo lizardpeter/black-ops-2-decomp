@@ -36,7 +36,7 @@ POINTERS=(0xd0,0xd8,0xe0,0xe8,0xf0,0x100,0x108,0x198,0x1a0,0x1c0,
           0x1c8,0x1d0,0x1d8,0x200,0x220,0x228,0x4d8,0x4e0,0x4e8,
           0x4f0,0x4f8,0x500,0x508,0x5a0)
 
-def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_size=0x180000,defer_worker=False):
+def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_size=0x180000,defer_worker=False,rects=False):
     data=fixture.read_bytes()
     file_mode=not bool(flags&0x04000000)
     input_data=fixture.name.encode("ascii")+b"\0" if file_mode else data
@@ -405,7 +405,11 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
                        "pitch":struct.unpack_from("<I",desc,0x28+s*0x60+p*0x18)[0]}
                       for p in range(4)] for s in range(2)]}
     if playback_out:
-        result['playback']=exercise_playback(m,img,ret,data,input_base,global_writes,cursor,clock,alloc,playback_out,async_mode,input_data,modeled,file_mode)
+        # Separate the playback descriptor/planes from subsequent original
+        # lazy dirty-map allocations. Reserve the first half of the arena
+        # for original allocator calls and the second for caller buffers.
+        playback_cursor=max(cursor,ARENA+ARENA_SIZE//2)
+        result['playback']=exercise_playback(m,img,ret,data,input_base,global_writes,playback_cursor,clock,alloc,playback_out,async_mode,input_data,modeled,file_mode,rects=rects)
         result['verified']=result['verified'] and result['playback']['verified']
     # Replay original image globals, retaining actual original allocations.
     # Machine.call resets its input heap, so restore the unchanged movie bytes.
@@ -512,7 +516,7 @@ def run(dll,fixture,flags,library=None,playback_out=None,async_mode=False,io_siz
         result["verified"]=result["verified"] and result["source_bootstrap"]["verified"]
     return result
 
-def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,alloc,out,async_mode,input_data,modeled,file_mode):
+def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,alloc,out,async_mode,input_data,modeled,file_mode,rects=False):
     """Original public API end-to-end. Only Win32 boundaries/queue scheduling
     are modeled; the initializer, worker decoder, completion, and advance
     all execute original machine code. Output is the original pixel planes."""
@@ -570,6 +574,7 @@ def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,al
     out.parent.mkdir(parents=True,exist_ok=True)
     digest=hashlib.sha256()
     frames=[]
+    rect_bytes=bytearray()
     with out.open("wb") as stream:
         for i in range(16):
             assert read32(handle+0x0C)==i+1
@@ -615,7 +620,14 @@ def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,al
                 pixels=bytes(m.mu.mem_read(address,size))
                 stream.write(pixels);digest.update(pixels)
             frames.append({"frame":i+1,"slot":slot,"key":read32(handle+0x140)})
+            if rects:
+                n=call(img.exports["BinkGetRects"],[handle,0])
+                assert n<=8 and n==read32(handle+0x3C)
+                rect_bytes.extend(struct.pack("<I",n))
+                rect_bytes.extend(m.mu.mem_read(handle+0x40,n*16))
+                assert call(img.exports["BinkGetRects"],[handle,0])==n
             if i!=15:call(img.exports["BinkNextFrame"],[handle],"void")
+    if rects:Path(str(out)+".rects").write_bytes(rect_bytes)
     return {"verified":all(name.lower() in modeled for name in imports),"async":async_mode,"frames":frames,
             "bytes":out.stat().st_size,"sha256":digest.hexdigest(),"imports":imports}
 
@@ -628,13 +640,14 @@ def main():
     p.add_argument("--library",type=Path)
     p.add_argument("--playback-out",type=Path)
     p.add_argument("--async-playback",action="store_true")
+    p.add_argument("--rects",action="store_true")
     p.add_argument("--io-size",type=lambda s:int(s,0),default=0x180000)
     p.add_argument("--defer-worker",action="store_true")
     a=p.parse_args()
     flags=a.flags
     if flags is None:
         flags=0x04104400 if a.playback_out else FLAGS
-    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback,a.io_size,a.defer_worker)
+    result=run(a.dll,a.fixture,flags,a.library,a.playback_out,a.async_playback,a.io_size,a.defer_worker,a.rects)
     a.out.parent.mkdir(parents=True,exist_ok=True)
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     print(json.dumps(result,indent=2),flush=True)

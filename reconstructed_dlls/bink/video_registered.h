@@ -54,7 +54,8 @@ struct RegisteredDecodeReport {
 inline int decode_registered_packet(std::span<const std::uint8_t> packet,
                                     std::uint32_t flags,
                                     const RegisteredFrameBuffers& info,
-                                    RegisteredDecodeReport& report) {
+                                    RegisteredDecodeReport& report,
+                                    std::uint8_t* dirty=nullptr,std::uint32_t dirty_stride=0) {
     report=RegisteredDecodeReport{};
     const auto fail=[&](std::uint32_t code) {
         report.status=code;
@@ -102,9 +103,9 @@ inline int decode_registered_packet(std::span<const std::uint8_t> packet,
         const auto h=(p==0 || p==3)?info.y_height:info.c_height;
         const auto& current=info.slots[dst].planes[p];
         const auto& previous=info.slots[ref].planes[p];
-        const int status=bink_research_decode_video_plane(
+        const int status=bink_research_decode_video_plane_dirty(
             padded.data(),limit,pos,limit,w,h,current.data,current.pitch,
-            previous.data,&report.trace);
+            previous.data,&report.trace,dirty,dirty_stride,(p==0||p==3)?1U:2U);
         const auto cursor=4U*report.trace.input_words;
         report.next_offset=cursor;
         if(status || cursor<=pos || cursor>limit ||

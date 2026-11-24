@@ -52,6 +52,22 @@ jobs:
           for args in [("--stream",),("--stream","--async")]:
               assert run(api,clip,root/"api.yuv",*args)==base
           print("All native API pixel hashes match; no original DLL downloaded")
+      - name: Compare native rectangle stream with original public API
+        if: runner.os == 'Linux'
+        shell: bash
+        run: |
+          pip install -q -r tests/differential/requirements.txt
+          python tools/dlls/fetch.py originals/dlls
+          for mode in sync async; do
+            extra=()
+            if [ "$mode" = async ]; then extra+=(--async-playback); fi
+            python tests/dlls/probe_bink_memory_open.py originals/dlls/binkw64.dll originals/bik/la_pip_seq_6.bik --out build/native/original-$mode.json --playback-out build/native/original-$mode.yuv --rects "${extra[@]}"
+            args=()
+            if [ "$mode" = async ]; then args+=(--async); fi
+            build/native/test_native_api originals/bik/la_pip_seq_6.bik build/native/native-$mode.yuv "${args[@]}"
+            cmp build/native/native-$mode.yuv build/native/original-$mode.yuv
+            cmp build/native/native-$mode.yuv.rects build/native/original-$mode.yuv.rects
+          done
       - name: Audit Windows import table
         if: runner.os == 'Windows'
         shell: python

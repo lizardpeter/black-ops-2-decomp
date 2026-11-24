@@ -73,6 +73,7 @@ int main(int argc,char** argv) {
     if(file){assert(BinkControlBackgroundIO(h,2)==0);assert(BinkControlBackgroundIO(h,1)==1);}
     else assert(BinkControlBackgroundIO(h,1)==UINT32_MAX);
     std::ofstream out(argv[2],std::ios::binary);assert(out);
+    std::ofstream rectout(std::string(argv[2])+".rects",std::ios::binary);assert(rectout);
     const auto frames=stream?read32(h,8):16U;
     for(unsigned i=0;i<frames;++i) {
         assert(read32(h,0xC)==i+1);
@@ -88,6 +89,11 @@ int main(int argc,char** argv) {
             auto& v=storage[info.frame_num][p];
             out.write(reinterpret_cast<const char*>(v.data()),v.size());
         }
+        const auto n=BinkGetRects(h,0);
+        assert(n<=8 && n==read32(h,0x3c));
+        rectout.write(reinterpret_cast<const char*>(&n),4);
+        rectout.write(static_cast<const char*>(h)+0x40,n*16);
+        assert(BinkGetRects(h,0)==n); // cached path
         if(i+1!=frames)BinkNextFrame(h);
     }
     RealtimeSnapshot rt{};BinkGetRealtime(h,&rt,2);

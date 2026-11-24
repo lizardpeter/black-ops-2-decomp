@@ -3,13 +3,15 @@
 #include "resident_frame_state.h"
 #include <cstdint>
 // Linkable Store video-only API subset; NOT a drop-in DLL or complete game ABI.
-// BinkGetRects is not exported until dirty-map behavior is recovered.
+// Store video-only external-buffer paths; original global completion queue
+// and split-worker decode are not yet reconstructed.
 extern "C" {
 void* BinkOpen(void* input,std::uint32_t flags);
 void BinkClose(void* handle);
 std::uint64_t BinkDoFrame(void* handle);
 int BinkDoFrameAsync(void* handle,std::uint32_t first,std::uint32_t second);
 int BinkDoFrameAsyncWait(void* handle,std::int32_t timeout);
+std::uint32_t BinkGetRects(void* handle,std::uint32_t surface);
 int BinkStartAsyncThread(std::uint32_t worker,void* reserved);
 int BinkRequestStopAsyncThread(std::uint32_t worker);
 int BinkWaitStopAsyncThread(std::uint32_t worker);

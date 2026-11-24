@@ -202,11 +202,13 @@ void ResidentVideoSession::close() {
     opened_=failed_=false;
     info_=nullptr;timer_=nullptr;clock_ctx_=nullptr;
     header_={};handle_.clear();
+    for(auto& map:dirty_maps_)map.clear();
     file_.clear();borrowed_=nullptr;packet_storage_.clear();file_size_=packet_offset_=0;error_.clear();
 }
 void ResidentVideoSession::set_memory_callbacks(Allocate alloc,Deallocate free_fn) {
     if(opened_)throw std::logic_error("movie already open");
     handle_.configure(alloc,free_fn);packet_storage_.configure(alloc,free_fn);
+    for(auto& map:dirty_maps_)map.configure(alloc,free_fn);
     alloc_=alloc;free_=free_fn;
 }
 bool ResidentVideoSession::open_borrowed(const std::uint8_t* file,std::size_t bytes,ResidentTimer timer,void* ctx) {
@@ -405,6 +407,21 @@ std::uint32_t ResidentVideoSession::keyframe() const {
 bool ResidentVideoSession::is_paused() const {
     return !handle_.empty()&&read<std::uint32_t>(handle_.data(),0x128)!=0;
 }
+void* ResidentVideoSession::allocate_dirty(std::uint32_t bytes,void* ctx) {
+    auto& self=*static_cast<ResidentVideoSession*>(ctx);
+    try {
+        for(auto& map:self.dirty_maps_)if(map.empty()) {
+            map.resize((std::size_t(bytes)+7)/8);return map.data();
+        }
+    } catch(...) {}
+    return nullptr;
+}
+std::uint32_t ResidentVideoSession::get_rects(std::uint32_t surface) {
+    if(!opened_||failed_||async_pending())return 0;
+    auto result=bink_research_get_rects(handle_.data(),surface,allocate_dirty,this);
+    if(result<0) {fail("native dirty rectangle calculation failed");return 0;}
+    return static_cast<std::uint32_t>(result);
+}
 bool ResidentVideoSession::decode_current_packet(RegisteredDecodeReport& report,std::string& reason) const {
     const auto* state=handle_.data();
     const auto* packet=read<const std::uint8_t*>(state,0x100);
@@ -417,7 +434,8 @@ bool ResidentVideoSession::decode_current_packet(RegisteredDecodeReport& report,
         (off<packet_offset_ || packet!=base+(off-packet_offset_)))) {
         reason="resident frame pointer out of bounds";return false;
     }
-    if(decode_registered_packet({packet,bytes},header_.flags,*info_,report)) {
+    if(decode_registered_packet({packet,bytes},header_.flags,*info_,report,
+        read<std::uint8_t*>(state,0xE8),read<std::uint32_t>(state,0x110))) {
         reason="resident packet decode failed at frame="+std::to_string(frame_number())+
              " plane="+std::to_string(report.plane)+" status="+std::to_string(report.status)+
              " inner="+std::to_string(report.trace.status)+
@@ -472,8 +490,8 @@ ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uin
     } catch(const std::exception& e) {
         fail(e.what());return SubmitResult::error;
     }
-    // Resident mode has no allocated dirty map (0xD8); no allocator
-    // boundary is needed. The real dispatch stores the pending word.
+    // The original lazily allocates its second dirty map for async decode.
+    // The real dispatch stores the pending word.
     if(stream_ && !stream_->read_pending()) {
         fail("stream packet read failed");return SubmitResult::error;
     }
@@ -481,7 +499,7 @@ ResidentVideoSession::SubmitResult ResidentVideoSession::do_frame_async(std::uin
     std::unique_lock<std::mutex> io_lock;
     if(stream_)io_lock=std::unique_lock(stream_->mutex);
     auto result=bink_research_submit_async(handle_.data(),worker,worker,timer_,clock_ctx_,
-        nullptr,nullptr,Worker::enqueue,&queue,queue.api_error,&queue.wait_entry,
+        allocate_dirty,this,Worker::enqueue,&queue,queue.api_error,&queue.wait_entry,
         reinterpret_cast<std::uintptr_t>(&bink_research_wait_async));
     if(result!=1) {
         fail("original async submission rejected frame");return SubmitResult::error;

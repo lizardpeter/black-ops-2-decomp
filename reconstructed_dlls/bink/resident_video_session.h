@@ -44,6 +44,7 @@ public:
     void* native_handle() {return opened_?handle_.data():nullptr;}
     std::uint32_t control_background_io(std::uint32_t flags);
     bool register_buffers(RegisteredFrameBuffers& info);
+    std::uint32_t get_rects(std::uint32_t surface);
     DecodeResult do_frame();
     // Same-worker submission: original work message tag 6. The host
     // worker and registered buffers stay alive until wait or close.
@@ -82,6 +83,8 @@ private:
     // Original cache-line-separated bootstrap allocation. Eight-byte
     // aligned backing storage; no original OS mutex ownership here.
     NativeAllocation handle_;
+    std::array<NativeAllocation,2> dirty_maps_;
+    static void* allocate_dirty(std::uint32_t bytes,void* ctx);
     RegisteredFrameBuffers* info_=nullptr;
     ResidentTimer timer_=nullptr;
     void* clock_ctx_=nullptr;
