@@ -1,0 +1,41 @@
+name: Bink original memory-backed handle bootstrap
+on:
+  push:
+    paths:
+      - tests/dlls/probe_bink_memory_open.py
+      - .github/workflows/bink-memory-open.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  memory-open:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        clip: [la_pip_seq_6, blackout_virus, karma_pip_helipad]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tests/differential
+            tests/dlls
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - run: |
+          python tools/dlls/fetch.py originals/dlls
+          python tools/dlls/fetch_bik_fixtures.py originals/bik
+      - name: Execute original BinkOpen with resident memory and deterministic boundary callbacks
+        run: |
+          python tests/dlls/probe_bink_memory_open.py \
+            originals/dlls/binkw64.dll "originals/bik/${{ matrix.clip }}.bik" \
+            --out build/original-memory-open.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bink-memory-open-${{ matrix.clip }}
+          path: build/original-memory-open.json
+          if-no-files-found: warn
