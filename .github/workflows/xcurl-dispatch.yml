@@ -1,0 +1,30 @@
+name: XCurl original option dispatcher
+on:
+  push:
+    paths:
+      - reconstructed_dlls/xcurl/option_dispatch.*
+      - tests/dlls/differential_xcurl_dispatch.py
+      - .github/workflows/xcurl-dispatch.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  differential:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tests/dlls
+            tests/differential
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install -q -r tests/differential/requirements.txt
+          python tools/dlls/fetch.py originals/dlls
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/option_dispatch.cpp -o build/xcurl_dispatch.so
+          python tests/dlls/differential_xcurl_dispatch.py originals/dlls/XCurl.dll build/xcurl_dispatch.so
