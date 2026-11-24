@@ -4,7 +4,7 @@ project(t6_native_xcurl_research LANGUAGES CXX)
 # curl ABI or a networking implementation; never substitute it for XCurl.dll.
 add_library(t6_native_xcurl_research STATIC
     allocation.cpp duplicate_string.cpp slist.cpp easy_strerror.cpp
-    getinfo_unlocked.cpp api_profile.cpp global_lifecycle.cpp easy_setopt.cpp option_dispatch.cpp wide_string.cpp handle_lifecycle.cpp multi_queue.cpp request_engine.cpp)
+    getinfo_unlocked.cpp api_profile.cpp global_lifecycle.cpp easy_setopt.cpp option_dispatch.cpp wide_string.cpp handle_lifecycle.cpp multi_queue.cpp request_engine.cpp http_status.cpp)
 add_library(t6::xcurl_research ALIAS t6_native_xcurl_research)
 target_compile_features(t6_native_xcurl_research PUBLIC cxx_std_20)
 target_include_directories(t6_native_xcurl_research PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")

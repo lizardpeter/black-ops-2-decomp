@@ -3,6 +3,8 @@ on:
   push:
     paths:
       - reconstructed_dlls/xcurl/request_engine.*
+      - reconstructed_dlls/xcurl/http_status.*
+      - tests/dlls/differential_xcurl_status.py
       - tests/dlls/differential_xcurl_request.py
       - .github/workflows/xcurl-request-engine.yml
   workflow_dispatch:
@@ -26,5 +28,6 @@ jobs:
           pip install -q -r tests/differential/requirements.txt
           python tools/dlls/fetch.py originals/dlls
           mkdir -p build
-          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp -o build/xcurl_request.so
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/request_engine.cpp reconstructed_dlls/xcurl/http_status.cpp -o build/xcurl_request.so
           python tests/dlls/differential_xcurl_request.py originals/dlls/XCurl.dll build/xcurl_request.so
+          python tests/dlls/differential_xcurl_status.py originals/dlls/XCurl.dll build/xcurl_request.so
