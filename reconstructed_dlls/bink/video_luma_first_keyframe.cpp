@@ -1,7 +1,8 @@
 // Experimental first REAL BIKi keyframe luma coordinator.
 // Original machine-code-derived FUN_1800252C0 control-flow translation,
-// restricted to the block modes OBSERVED on the first original BO2 video
-// la_pip_seq_6.bik (256x256): 1/submode(5,6,8), 5, 6, and 8.
+// source for all ten primary dispatch modes, including reference-frame
+// motion prediction, sparse residuals, and run-coded pixel blocks.
+// Only the tested fixture paths are currently verified.
 //
 // Unlike earlier original-only oracles this attempts the complete LUMA plane
 // using ONLY independently reconstructed C++ source routines, original
@@ -13,6 +14,7 @@
 // Original Store binkw64.dll SHA256:
 // 10e67763420dd5c2654648d1b0242ba8aceac14ac9211c202360a3f12219af17
 #include "entropy_bit_cursor.h"
+#include "original_scan_orders.h"
 #include <array>
 #include <bit>
 #include <cstddef>
@@ -51,6 +53,8 @@ extern "C" void bink_video_inverse8x8_indexed(
     std::uint8_t*,std::int32_t,const std::int16_t*,std::uint32_t);
 extern "C" void bink_video_inverse8x8_2x_indexed(
     std::uint8_t*,std::int32_t,const std::int16_t*,std::uint32_t);
+extern "C" void bink_video_residual_prediction(std::uint8_t*,std::uint32_t,
+    t6_bink::WordBitStream*,std::uint32_t,const std::uint8_t*,std::uint32_t);
 extern "C" void bink_video_predict8x8(std::uint8_t*,std::int32_t,
     const std::int16_t*,std::int32_t,const std::uint8_t*,std::int32_t);
 extern "C" void bink_video_fill8x8(std::uint8_t*,std::int32_t,std::uint8_t);
@@ -237,6 +241,43 @@ extern "C" int bink_research_decode_video_plane(
         return n;
     };
 
+    // Original mode 3/submode 3: four-bit scan-order selection, then
+    // run lengths from the ninth entropy bundle and a repeat/literal
+    // bit for each run. A final single pixel takes no extra run flag.
+    const auto run_pixels=[&](std::array<std::uint8_t,64>& tile) {
+        auto& runs=stream[kRLE];
+        auto& colors=stream[kColor];
+        if(runs.current>=runs.end)runs.current=runs.buffer+4;
+        if(colors.current>=colors.end)colors.current=colors.buffer+4;
+        const auto* scan=t6_bink::original_tables::scan_orders.data()+64*read_quant_index();
+        unsigned pos=0;
+        while(pos<63) {
+            const unsigned n=unsigned(*runs.current++)+1;
+            if(n>64-pos)return false;
+            t6_bink::internal::BitCursor cursor(bits);
+            const bool repeat=cursor.read(1)!=0;
+            cursor.save();
+            if(repeat) {
+                const auto value=*colors.current++;
+                for(unsigned j=0;j<n;++j)tile[scan[pos++]]=value;
+            } else {
+                for(unsigned j=0;j<n;++j)tile[scan[pos++]]=*colors.current++;
+            }
+        }
+        if(pos==63)tile[scan[pos++]]=*colors.current++;
+        return pos==64;
+    };
+    const auto place_pixels=[&](std::uint8_t* dst,const std::uint8_t* tile,bool doubled) {
+        if(!doubled) {
+            for(unsigned row=0;row<8;++row)
+                std::memcpy(dst+std::ptrdiff_t(row)*stride,tile+8*row,8);
+        } else {
+            for(unsigned y=0;y<16;++y)
+                for(unsigned x=0;x<16;++x)
+                    dst[std::ptrdiff_t(y)*stride+x]=tile[8*(y/2)+x/2];
+        }
+    };
+
     // Original modes 2/7 take horizontal and vertical motion from the
     // paired signed-byte streams. The original resets both cursors when
     // the vertical stream is exhausted. The original bounds test is a
@@ -307,17 +348,27 @@ extern "C" int bink_research_decode_video_plane(
                 if (!reference) return update_report(7,x,y,mode,0xff);
                 copy_reference(block,reference+std::ptrdiff_t(y)*stride+x);
                 x+=8;
-            } else if (mode==2U || mode==7U) {
+            } else if (mode==2U || mode==4U || mode==7U) {
                 if (!reference) return update_report(7,x,y,mode,0xff);
                 const auto* src=motion_reference(x,y);
                 if (src && mode==2U) copy_reference(block,src);
-                else if (src) {
+                else if(src && mode==4U) {
+                    t6_bink::internal::BitCursor cursor(bits);
+                    const auto budget=cursor.read(7);
+                    cursor.save();
+                    bink_video_residual_prediction(block,stride,&bits,budget,src,stride);
+                } else if (src) {
                     alignas(2) std::array<std::uint8_t,128> coeff{};
                     consume_coeff(coeff.data(),kOtherDC);
                     bink_video_predict8x8(block,std::int32_t(stride),
                         reinterpret_cast<const std::int16_t*>(coeff.data()),
                         std::int32_t(read_quant_index()),src,std::int32_t(stride));
                 }
+                x+=8;
+            } else if (mode==3U) {
+                std::array<std::uint8_t,64> tile{};
+                if(!run_pixels(tile))return update_report(8,x,y,mode,0xff);
+                place_pixels(block,tile.data(),false);
                 x+=8;
             } else if (mode==9U) {
                 auto& state=stream[kColor];
@@ -336,7 +387,16 @@ extern "C" int bink_research_decode_video_plane(
                     subtype=*stream[kSubmode].current++;
                     if(subtype<10U)++report->submode_counts[subtype];
                     else return update_report(5,x,y,mode,subtype);
-                    if(subtype==6U) {
+                    if(subtype==3U) {
+                        std::array<std::uint8_t,64> tile{};
+                        if(!run_pixels(tile))return update_report(8,x,y,mode,subtype);
+                        place_pixels(block,tile.data(),true);
+                    } else if(subtype==9U) {
+                        auto& colors=stream[kColor];
+                        if(colors.current>=colors.end)colors.current=colors.buffer+4;
+                        place_pixels(block,colors.current,true);
+                        colors.current+=64;
+                    } else if(subtype==6U) {
                         bink_video_fill16x16(block,std::int32_t(stride),
                                              std::uint8_t(consume_color(1)));
                     } else if (subtype==8U) {
