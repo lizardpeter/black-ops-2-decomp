@@ -91,7 +91,9 @@ def main():
         svc=Services(nl,nu,nload,nr,ni,nq,rp,df,db,None)
         if name=='load':got=fn(C.byref(native),C.byref(svc))
         elif name=='initialize':got=fn(C.byref(native),flags,C.byref(svc))
-        else:got=fn(C.byref(native),CLS,IID,C.byref(out),C.byref(svc))
+        else:
+            cls_buffer=C.create_string_buffer(16);iid_buffer=C.create_string_buffer(16)
+            got=fn(C.byref(native),C.addressof(cls_buffer),C.addressof(iid_buffer),C.byref(out),C.byref(svc))
         raw=bytes(native)
         assert (got,nc,raw,out.value)==(ret,oc,expected_state,expected_out),(name,i,got,ret,nc,oc,raw.hex(),expected_state.hex(),out.value,expected_out)
       print(name,'PASS 512',flush=True)
