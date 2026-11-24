@@ -19,6 +19,7 @@ jobs:
             tools
             docs
             target.toml
+            tests/dlls/native_bink_consumer
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
@@ -52,6 +53,23 @@ jobs:
           subprocess.run(["python","tools/dlls/audit_store_bink_link.py","--module",str(dll),
               "--static-client",str(static),"--dynamic-client",str(dynamic),"--originals","originals",
               "--out",str(root/"store-link-audit.json")],check=True)
+      - name: Verify external game-style CMake consumer links Bink statically
+        shell: pwsh
+        run: |
+          cmake -S tests/dlls/native_bink_consumer -B build/consumer -T ClangCL -A x64
+          cmake --build build/consumer --config Release --parallel 2
+          build/consumer/Release/native_bink_consumer.exe originals/bik/la_pip_seq_6.bik build/consumer/playback.yuv --async
+          python -c "import pefile; p=pefile.PE('build/consumer/Release/native_bink_consumer.exe'); d=[i.dll.decode().lower() for i in p.DIRECTORY_ENTRY_IMPORT]; print(d); assert not any('bink' in x or 'xcurl' in x for x in d)"
+      - name: Preserve source-built static library for native integration
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-bink-static-x64
+          path: |
+            build/store/Release/t6_native_bink.lib
+            reconstructed_dlls/bink/bink_native_api.h
+            reconstructed_dlls/bink/bink_allocator.h
+            reconstructed_dlls/bink/resident_frame_state.h
+          if-no-files-found: error
       - name: Preserve source-built validation module and audit only
         uses: actions/upload-artifact@v4
         with:

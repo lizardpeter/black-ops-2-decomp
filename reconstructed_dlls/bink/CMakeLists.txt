@@ -33,9 +33,12 @@ add_library(t6_native_bink STATIC
     async_lifecycle.cpp
     bink_native_api.cpp
 )
+add_library(t6::bink ALIAS t6_native_bink)
 target_compile_features(t6_native_bink PUBLIC cxx_std_20)
 target_link_libraries(t6_native_bink PUBLIC Threads::Threads)
 target_include_directories(t6_native_bink PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+option(T6_BINK_BUILD_TESTS "Build standalone native playback test executables" ON)
+if(T6_BINK_BUILD_TESTS)
 add_executable(test_native_api test_native_api.cpp)
 target_link_libraries(test_native_api PRIVATE t6_native_bink)
 add_executable(test_native_session test_resident_video_session.cpp)
@@ -49,6 +52,7 @@ foreach(t test_native_api test_native_session test_native_pool)
         target_compile_options(${t} PRIVATE -UNDEBUG)
     endif()
 endforeach()
+endif()
 
 option(T6_BINK_TRACE_BITS "Diagnostic first-plane bitstream trace" OFF)
 if(T6_BINK_TRACE_BITS)

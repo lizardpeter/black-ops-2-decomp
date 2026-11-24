@@ -1,0 +1,16 @@
+# Source-link contract for a future game executable, independent of the
+# standalone Bink project and of the optional DLL validation target.
+cmake_minimum_required(VERSION 3.20)
+project(t6_bink_consumer LANGUAGES CXX)
+set(T6_BINK_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+set(T6_BINK_STORE_VALIDATION OFF CACHE BOOL "" FORCE)
+set(T6_BINK_TRACE_BITS OFF CACHE BOOL "" FORCE)
+set(BINK_SOURCE "${CMAKE_CURRENT_LIST_DIR}/../../../reconstructed_dlls/bink")
+add_subdirectory("${BINK_SOURCE}" "${CMAKE_CURRENT_BINARY_DIR}/bink")
+add_executable(native_bink_consumer "${BINK_SOURCE}/test_native_api.cpp")
+target_link_libraries(native_bink_consumer PRIVATE t6::bink)
+if(MSVC)
+    target_compile_options(native_bink_consumer PRIVATE /UNDEBUG)
+else()
+    target_compile_options(native_bink_consumer PRIVATE -UNDEBUG)
+endif()
