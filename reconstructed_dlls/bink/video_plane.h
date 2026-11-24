@@ -27,3 +27,11 @@ extern "C" int bink_research_decode_video_plane(
     std::uint32_t width,std::uint32_t height,
     std::uint8_t* output,std::uint32_t stride,
     const std::uint8_t* reference,BinkFirstLumaTrace* report);
+
+// Original 0x252C0 optional dirty map: 16x16 luma cells, scale=1 for
+// Y/A and scale=2 for chroma. Caller supplies zero-initialized map.
+extern "C" int bink_research_decode_video_plane_dirty(
+    const std::uint8_t* compressed,std::uint32_t compressed_bytes,
+    std::uint32_t start,std::uint32_t split,std::uint32_t width,std::uint32_t height,
+    std::uint8_t* output,std::uint32_t stride,const std::uint8_t* reference,
+    BinkFirstLumaTrace* report,std::uint8_t* dirty,std::uint32_t dirty_stride,std::uint32_t scale);

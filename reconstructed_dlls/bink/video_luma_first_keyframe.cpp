@@ -111,13 +111,13 @@ t6_bink::ByteEntropyState make_stream(
 // Return the original-style next-word position in report->input_words.
 // Padded 8-aligned planes up to the largest Store geometry.
 // Larger and odd-sized video compatibility remains subject to differential CI.
-extern "C" int bink_research_decode_video_plane(
+extern "C" int bink_research_decode_video_plane_dirty(
         const std::uint8_t* compressed,std::uint32_t compressed_bytes,
         std::uint32_t start,std::uint32_t split,
         std::uint32_t width,std::uint32_t height,
         std::uint8_t* output,std::uint32_t stride,
         const std::uint8_t* reference,
-        BinkFirstLumaTrace* report) {
+        BinkFirstLumaTrace* report,std::uint8_t* dirty,std::uint32_t dirty_stride,std::uint32_t scale) {
     if (!report) return -1;
     *report=BinkFirstLumaTrace{};
     if (!compressed || !output || stride<width ||
@@ -291,6 +291,10 @@ extern "C" int bink_research_decode_video_plane(
                         src+std::ptrdiff_t(row)*stride,8);
     };
 
+    const auto mark_dirty=[&](std::uint32_t x,std::uint32_t y) {
+        if(dirty)dirty[std::size_t(y*scale/16)*dirty_stride+x*scale/16]=1;
+    };
+    if(dirty && ((scale!=1&&scale!=2)||dirty_stride<(width*scale+15)/16))return update_report(1,0,0,0,0);
     for(std::uint32_t y=0;y<height;y+=8) {
         bink_decode_entropy_byte_rle(&stream[kMode],&bits,stream_end);
         bink_decode_entropy_byte_rle(&stream[kSubmode],&bits,stream_end);
@@ -332,6 +336,9 @@ extern "C" int bink_research_decode_video_plane(
             if(mode<10U)++report->type_counts[mode];
             else return update_report(4,x,y,mode,0xff);
             std::uint8_t* block=output+std::ptrdiff_t(y)*stride+x;
+            // Original non-copy primary modes set the corresponding byte
+            // in the macroblock dirty map; the doubled mode is handled below.
+            if(mode!=0U && mode!=1U)mark_dirty(x,y);
             if (mode==0U) {
                 if (!reference) return update_report(7,x,y,mode,0xff);
                 copy_reference(block,reference+std::ptrdiff_t(y)*stride+x);
@@ -369,6 +376,7 @@ extern "C" int bink_research_decode_video_plane(
                 // At the right edge the original breaks out of the mode-1
                 // case and advances 8 pixels instead of 16.
                 if (x+16>width) { x+=8; continue; }
+                mark_dirty(x,y);mark_dirty(x+8,y);
                 std::uint32_t subtype=0xff;
                 if ((y&8U)==0 && x+16<=width &&
                     stream[kSubmode].current<stream[kSubmode].end) {
@@ -431,6 +439,14 @@ extern "C" int bink_research_decode_video_plane(
         }
     }
     return update_report(0,width,height,0,0);
+}
+
+extern "C" int bink_research_decode_video_plane(
+    const std::uint8_t* compressed,std::uint32_t compressed_bytes,std::uint32_t start,std::uint32_t split,
+    std::uint32_t width,std::uint32_t height,std::uint8_t* output,std::uint32_t stride,
+    const std::uint8_t* reference,BinkFirstLumaTrace* report) {
+    return bink_research_decode_video_plane_dirty(compressed,compressed_bytes,start,split,width,height,
+        output,stride,reference,report,nullptr,0,1);
 }
 
 // Retain original keyframe-only API for existing callers.

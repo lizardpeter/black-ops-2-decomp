@@ -55,7 +55,7 @@ def fetch_alpha(directory):
         assert len(data)<=8*1024*1024 and sha(data)==pin
         dest.write_bytes(data)
 
-def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0,pitch_extra=0,registered=False):
+def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,padding_byte=0,pitch_extra=0,registered=False,dirty=False):
     assert lookahead in (0,4) and 0<=padding_byte<=255
     assert 0<=pitch_extra<=256 and pitch_extra%8==0
     assert not registered or (lookahead==4 and padding_byte==0)
@@ -83,6 +83,14 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
                  ctypes.c_uint32,ctypes.c_uint32,ptr,ctypes.c_uint32,
                  ptr,ctypes.POINTER(Trace))
     fn.restype=ctypes.c_int
+    if dirty:
+        dirty_fn=lib.bink_research_decode_video_plane_dirty
+        dirty_fn.argtypes=fn.argtypes+(ptr,ctypes.c_uint32,ctypes.c_uint32)
+        dirty_fn.restype=ctypes.c_int
+    dirty_stride=(((width+15)//16)+15)&~15
+    dirty_len=dirty_stride*((height+15)//16)
+    dirty_addr=OBJECTS+0x6000
+    assert dirty_len+64<0xA000
     class RegisteredTrace(ctypes.Structure):
         _fields_=[('status',ctypes.c_uint32),('plane',ctypes.c_uint32),
                   ('destination_slot',ctypes.c_uint32),('next_offset',ctypes.c_uint32),('trace',Trace)]
@@ -143,6 +151,8 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
                 struct.pack_into("<I",descriptor,pos,1)
                 struct.pack_into("<Q",descriptor,pos+8,addresses[s][p])
                 struct.pack_into("<I",descriptor,pos+16,pitches[p])
+        native_dirty=(ctypes.c_uint8*(dirty_len+64))()
+        for q in range(dirty_len,dirty_len+64):native_dirty[q]=0xA7
         calls=[]
         def at_plane(mu):
             sp=mu.reg_read(X.UC_X86_REG_RSP)
@@ -162,6 +172,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
             # Direct scratch writes, no originals supplied to native decode.
             mu=machine.mu
             mu.mem_write(DESCRIPTOR,bytes(descriptor))
+            if dirty:mu.mem_write(dirty_addr,bytes(dirty_len)+bytes([0xA7])*64)
             mu.mem_write(SIZES,struct.pack("<9Q",*([16384]*9)))
             mu.mem_write(PACKET,native_packet+bytes(256))
             mu.mem_write(STACK,bytes(STACK_SIZE-0x10000))
@@ -175,7 +186,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
         # BinkDoFramePlane caller (handle+0x13c full packet length, RVA
         # 0x164f9 and 0x1a975), while zero preserves the previous oracle.
         returned,_,_,_=machine.call(img.base+COORD,
-            [DESCRIPTOR,0,0,PACKET,keyframe,PACKET+limit_bytes-4,SIZES,flags,flags],
+            [DESCRIPTOR,dirty_addr if dirty else 0,dirty_stride if dirty else 0,PACKET,keyframe,PACKET+limit_bytes-4,SIZES,flags,flags],
             ret="uint",setup=setup,at=hooks,limit=max(15_000_000,yw*yh*400))
         rec={"index":frame,"original_return":returned,"original_plane_calls":calls,"keyframe":keyframe,
              "alpha_end":aend,"y_end":yend,"planes":[]}
@@ -225,7 +236,9 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
             out=(ctypes.c_uint8*len(before)).from_buffer_copy(before)
             prior=(ctypes.c_uint8*len(previous)).from_buffer_copy(previous)
             trace=Trace()
-            status=fn(raw,limit_bytes,pos,limit_bytes,w,h,out,pitch,prior,ctypes.byref(trace))
+            if dirty:
+                status=dirty_fn(raw,limit_bytes,pos,limit_bytes,w,h,out,pitch,prior,ctypes.byref(trace),native_dirty,dirty_stride,1 if p in (0,3) else 2)
+            else:status=fn(raw,limit_bytes,pos,limit_bytes,w,h,out,pitch,prior,ctypes.byref(trace))
             next_pos=4*trace.input_words
             expected=bytes(machine.mu.mem_read(addresses[dst][p],size))
             actual=bytes(out)
@@ -255,6 +268,12 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
             result["matched_planes"]+=1
             result["matched_bytes"]+=len(actual)
             pos=next_pos
+        if dirty:
+            expected=bytes(machine.mu.mem_read(dirty_addr,dirty_len+64));actual=bytes(native_dirty)
+            diff=[(j,a,b) for j,(a,b) in enumerate(zip(actual,expected)) if a!=b]
+            rec["dirty"]={"native_sha":sha(actual),"original_sha":sha(expected),"mismatches":diff[:32],"match":not diff,"original_dirty":sum(bool(x) for x in expected[:dirty_len]),"native_dirty":sum(bool(x) for x in actual[:dirty_len])}
+            save()
+            assert not diff,(frame,dirty_stride,rec["dirty"])
         with output.open("ab") as decoded:
             for p in range(len(dims)):decoded.write(native[dst][p])
         result["complete_matching_frames"]+=1
@@ -274,6 +293,7 @@ def main():
     p.add_argument("--pitch-extra",type=int,default=0)
     p.add_argument("--manifest",type=Path,default=None)
     p.add_argument("--registered",action="store_true")
+    p.add_argument("--dirty",action="store_true")
     p.add_argument("--report",type=Path,default=Path("build/coordinator-report.json"))
     a=p.parse_args()
     if a.fetch_alpha is not None:fetch_alpha(a.fetch_alpha)
@@ -284,6 +304,6 @@ def main():
             pins={c["name"]:c["sha256"] for c in json.loads(a.manifest.read_text())["clips"]}
             pin=pins[a.video.name]
         run(a.dll,a.video,a.library,a.frames,a.report,expected_sha256=pin,
-            lookahead=a.lookahead,padding_byte=a.pad_byte,pitch_extra=a.pitch_extra,registered=a.registered)
+            lookahead=a.lookahead,padding_byte=a.pad_byte,pitch_extra=a.pitch_extra,registered=a.registered,dirty=a.dirty)
 
 if __name__=="__main__":main()
