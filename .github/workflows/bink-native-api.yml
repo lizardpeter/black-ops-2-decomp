@@ -51,6 +51,7 @@ jobs:
           base=run(session,clip,root/"base.yuv","--all")
           for args in [("--stream",),("--stream","--async")]:
               assert run(api,clip,root/"api.yuv",*args)==base
+          subprocess.run([str(exe("test_native_pool")), "originals/bik/la_pip_seq_6.bik"],check=True,timeout=120)
           print("All native API pixel hashes match; no original DLL downloaded")
       - name: Compare native rectangle stream with original public API
         if: runner.os == 'Linux'

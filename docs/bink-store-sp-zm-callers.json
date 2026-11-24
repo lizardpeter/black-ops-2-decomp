@@ -1,0 +1,195 @@
+{
+  "schema": 1,
+  "source": "Original Store PE import directory and RIP-relative callsite scan; source-only evidence, no game binary committed",
+  "imports": [
+    "BinkClose",
+    "BinkControlBackgroundIO",
+    "BinkDoFrame",
+    "BinkDoFrameAsync",
+    "BinkDoFrameAsyncWait",
+    "BinkGetError",
+    "BinkGetFrameBuffersInfo",
+    "BinkGetRealtime",
+    "BinkGetRects",
+    "BinkNextFrame",
+    "BinkOpen",
+    "BinkPause",
+    "BinkRegisterFrameBuffers",
+    "BinkRequestStopAsyncThread",
+    "BinkSetIOSize",
+    "BinkSetMemory",
+    "BinkSetSoundTrack",
+    "BinkStartAsyncThread",
+    "BinkWaitStopAsyncThread"
+  ],
+  "builds": [
+    {
+      "build": "t6sp_msstore",
+      "call_sites": {
+        "BinkPause": [
+          "0x619431",
+          "0x61AC90"
+        ],
+        "BinkGetRects": [
+          "0x619F1B"
+        ],
+        "BinkGetRealtime": [
+          "0x61A067"
+        ],
+        "BinkControlBackgroundIO": [
+          "0x61A119",
+          "0x61A12B",
+          "0x61A1D7"
+        ],
+        "BinkGetFrameBuffersInfo": [
+          "0x61A252"
+        ],
+        "BinkRegisterFrameBuffers": [
+          "0x61A267"
+        ],
+        "BinkDoFrameAsync": [
+          "0x61A279",
+          "0x61AF37"
+        ],
+        "BinkNextFrame": [
+          "0x61A2EB"
+        ],
+        "BinkDoFrameAsyncWait": [
+          "0x61A6CC",
+          "0x61AD74"
+        ],
+        "BinkDoFrame": [
+          "0x61A74C"
+        ],
+        "BinkSetMemory": [
+          "0x61A96E",
+          "0x61AAB8"
+        ],
+        "BinkStartAsyncThread": [
+          "0x61AA28",
+          "0x61AB9B"
+        ],
+        "BinkGetError": [
+          "0x61AA31"
+        ],
+        "BinkSetSoundTrack": [
+          "0x61AAF2",
+          "0x61AC69"
+        ],
+        "BinkOpen": [
+          "0x61AB00",
+          "0x61AC77"
+        ],
+        "BinkSetIOSize": [
+          "0x61AC5F"
+        ],
+        "BinkRequestStopAsyncThread": [
+          "0x61ADC6"
+        ],
+        "BinkWaitStopAsyncThread": [
+          "0x61ADD2"
+        ],
+        "BinkClose": [
+          "0x61AE04"
+        ]
+      },
+      "open_flags": [
+        "0x04104400",
+        "0x01104400"
+      ],
+      "rect_surface": 0,
+      "async_worker_same": true,
+      "async_initial_worker": 0,
+      "sound_tracks": 0,
+      "background_io": [
+        2,
+        2147483650,
+        1
+      ]
+    },
+    {
+      "build": "t6zm_msstore",
+      "call_sites": {
+        "BinkPause": [
+          "0x76A9B1",
+          "0x76C210"
+        ],
+        "BinkGetRects": [
+          "0x76B49B"
+        ],
+        "BinkGetRealtime": [
+          "0x76B5E7"
+        ],
+        "BinkControlBackgroundIO": [
+          "0x76B699",
+          "0x76B6AB",
+          "0x76B757"
+        ],
+        "BinkGetFrameBuffersInfo": [
+          "0x76B7D2"
+        ],
+        "BinkRegisterFrameBuffers": [
+          "0x76B7E7"
+        ],
+        "BinkDoFrameAsync": [
+          "0x76B7F9",
+          "0x76C4B7"
+        ],
+        "BinkNextFrame": [
+          "0x76B86B"
+        ],
+        "BinkDoFrameAsyncWait": [
+          "0x76BC4C",
+          "0x76C2F4"
+        ],
+        "BinkDoFrame": [
+          "0x76BCCC"
+        ],
+        "BinkSetMemory": [
+          "0x76BEEE",
+          "0x76C038"
+        ],
+        "BinkStartAsyncThread": [
+          "0x76BFA8",
+          "0x76C11B"
+        ],
+        "BinkGetError": [
+          "0x76BFB1"
+        ],
+        "BinkSetSoundTrack": [
+          "0x76C072",
+          "0x76C1E9"
+        ],
+        "BinkOpen": [
+          "0x76C080",
+          "0x76C1F7"
+        ],
+        "BinkSetIOSize": [
+          "0x76C1DF"
+        ],
+        "BinkRequestStopAsyncThread": [
+          "0x76C346"
+        ],
+        "BinkWaitStopAsyncThread": [
+          "0x76C352"
+        ],
+        "BinkClose": [
+          "0x76C384"
+        ]
+      },
+      "open_flags": [
+        "0x04104400",
+        "0x01104400"
+      ],
+      "rect_surface": 0,
+      "async_worker_same": true,
+      "async_initial_worker": 0,
+      "sound_tracks": 0,
+      "background_io": [
+        2,
+        2147483650,
+        1
+      ]
+    }
+  ]
+}
