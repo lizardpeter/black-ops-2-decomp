@@ -22,6 +22,7 @@ sys.path.insert(0,str(ROOT/"tests/differential"))
 sys.path.insert(0,str(ROOT/"tools/dlls"))
 from harness import Image,Machine
 from experimental_first_luma import PIN_VIDEO,PIN_Y,Trace
+from fetch_bik_fixtures import FIXTURES
 from probe_original_bik_frame import (
     PIN_DLL,PACKET,SCRATCH_POINTERS,SCRATCH_FIRST,SCRATCH_SPACING,STATS,
 )
@@ -34,16 +35,18 @@ def main():
     p.add_argument("dll",type=Path)
     p.add_argument("video",type=Path)
     p.add_argument("library",type=Path)
-    p.add_argument("--frames",type=int,default=150)
+    p.add_argument("--frames",type=int,default=None)
     p.add_argument("--report",type=Path,default=ROOT/"build/bink-sequence-report.json")
     a=p.parse_args()
     assert sha(a.dll.read_bytes())==PIN_DLL
     data=a.video.read_bytes()
-    assert sha(data)==PIN_VIDEO and data[:4]==b"BIKi"
-    count,width,height=struct.unpack_from("<I8xII",data,8)
-    # Header offsets: frame count=8, width=20, height=24.
+    pin=FIXTURES[a.video.name]
+    assert sha(data)==pin and data[:4]==b"BIKi"
+    count,=struct.unpack_from("<I",data,8)
     width,height=struct.unpack_from("<II",data,20)
-    assert count==150 and (width,height)==(256,256)
+    assert count>0 and (width,height)==(256,256)
+    assert struct.unpack_from("<II",data,36)==(0,0) # no flags/audio
+    if a.frames is None:a.frames=count
     assert 1<=a.frames<=count
     offsets=struct.unpack_from(f"<{count+1}I",data,44)
     assert (offsets[-1]&~1)==len(data)
@@ -64,7 +67,7 @@ def main():
               for slot in range(2)]
     native=[row.copy() for row in original]
     scratch=[SCRATCH_FIRST+i*SCRATCH_SPACING for i in range(9)]
-    report={"fixture_sha256":PIN_VIDEO,"requested_frames":a.frames,
+    report={"fixture":a.video.name,"fixture_sha256":pin,"requested_frames":a.frames,
             "complete_matching_frames":0,"matched_planes":0,"matched_bytes":0,
             "frames":[]}
     a.report.parent.mkdir(parents=True,exist_ok=True)
@@ -146,7 +149,7 @@ def main():
                 native[dst][i]=actual
                 report["matched_planes"]+=1
                 report["matched_bytes"]+=len(actual)
-                if frame==0 and i==0:assert sha(actual)==PIN_Y
+                if frame==0 and i==0 and pin==PIN_VIDEO:assert sha(actual)==PIN_Y
             assert op==np==len(packet)
             for plane in native[dst]:decoded.write(plane)
             report["complete_matching_frames"]+=1
