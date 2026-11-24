@@ -15,6 +15,7 @@ on:
       - tests/dlls/differential_video_sparse_residual.py
       - tools/dlls/trace_original_bik_entropy_rows.py
       - tools/dlls/native_bik_decode.cpp
+      - tools/dlls/fetch_bik_fixtures.py
       - .github/workflows/bink-first-frame.yml
   workflow_dispatch:
 
@@ -139,6 +140,13 @@ jobs:
             fi
           done
           exit "$failed"
+      - name: Verify rectangular 512x288 original BO2 video (first 32 frames)
+        if: always()
+        run: |
+          python tests/dlls/differential_bink_sequence.py \
+            originals/dlls/binkw64.dll originals/bik/haiti_int_1c.bik \
+            build/bink_source_first_luma.so --frames 32 \
+            --report build/haiti_int_1c/bink-sequence-report.json
       - name: Preserve source-first-frame diagnostics and original oracle
         if: always()
         uses: actions/upload-artifact@v4
@@ -165,4 +173,6 @@ jobs:
             build/karma_pip_security_feed/*.pgm
             build/yemen_drone_cam/*.json
             build/yemen_drone_cam/*.pgm
+            build/haiti_int_1c/*.json
+            build/haiti_int_1c/*.pgm
           if-no-files-found: warn
