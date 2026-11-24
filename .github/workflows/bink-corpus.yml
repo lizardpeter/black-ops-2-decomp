@@ -1,0 +1,87 @@
+name: Bink complete Store asset corpus
+on:
+  push:
+    paths:
+      - docs/bink-store-media-inventory.json
+      - tests/dlls/verify_bink_corpus.py
+      - .github/workflows/bink-corpus.yml
+  workflow_dispatch:
+    inputs:
+      frames:
+        description: "Per-clip frames (0 = every frame of all 44 assets)"
+        default: "16"
+        required: true
+        type: string
+permissions:
+  contents: read
+concurrency:
+  group: bink-corpus-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  corpus:
+    runs-on: ubuntu-latest
+    timeout-minutes: 120
+    strategy:
+      fail-fast: false
+      max-parallel: 6
+      matrix:
+        shard: [0,1,2,3,4,5,6,7,8,9,10]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/bink
+            tests/differential
+            tests/dlls
+            tools/dlls
+            docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Install oracle dependencies
+        run: pip install -q -r tests/differential/requirements.txt
+      - name: Fetch SHA-pinned original DLL
+        run: python tools/dlls/fetch.py originals/dlls
+      - name: Compile original-derived source decoder and playback
+        run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/huffman_codebook.cpp \
+            reconstructed_dlls/bink/entropy_byte_rle.cpp \
+            reconstructed_dlls/bink/entropy_adaptive_pairs.cpp \
+            reconstructed_dlls/bink/entropy_nibbles.cpp \
+            reconstructed_dlls/bink/entropy_signed_bytes.cpp \
+            reconstructed_dlls/bink/entropy_deltas16.cpp \
+            reconstructed_dlls/bink/entropy_bytes.cpp \
+            reconstructed_dlls/bink/video_coefficients.cpp \
+            reconstructed_dlls/bink/video_inverse8x8.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
+            reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
+            reconstructed_dlls/bink/video_block_modes.cpp \
+            reconstructed_dlls/bink/video_predict8x8_core.cpp \
+            reconstructed_dlls/bink/video_predict8x8.cpp \
+            reconstructed_dlls/bink/video_sparse_residual.cpp \
+            reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
+            -o build/bink_source.so
+          clang++ -std=c++20 -O2 -Wall -Wextra -Werror \
+            reconstructed_dlls/bink/header_validation.cpp \
+            reconstructed_dlls/bink/bink_index.cpp \
+            reconstructed_dlls/bink/video_playback.cpp \
+            tools/dlls/native_bik_decode.cpp build/bink_source.so \
+            -Wl,-rpath,"$PWD/build" -o build/bink_decode_video
+      - name: Verify shard against independent original full-frame coordinator
+        env:
+          FRAMES: ${{ inputs.frames || '16' }}
+          SHARD: ${{ matrix.shard }}
+        run: |
+          python tests/dlls/verify_bink_corpus.py \
+            --dll originals/dlls/binkw64.dll \
+            --library build/bink_source.so --player build/bink_decode_video \
+            --frames "$FRAMES" --shard "$SHARD" --shards 11
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: bink-corpus-shard-${{ matrix.shard }}
+          path: build/corpus/**/*.json
+          if-no-files-found: warn

@@ -1,5 +1,5 @@
 {
-  "source": "BO2 Store R2 bo2/DUMP/video/; original 44-byte BIKi headers inspected 2026-11-23; metadata only",
+  "source": "BO2 Store R2 bo2/DUMP/video/; all 44 complete objects independently SHA-256 hashed; header and size metadata only",
   "files": 44,
   "total_frames": 18155,
   "embedded_audio_tracks": 0,
@@ -41,7 +41,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "a4bc5bc6fd4efd0b33f4a8f828ae58a72c5b31d6e8911f170d8a676bf75e1ae5",
+      "size_bytes": 19660232,
+      "max_frame_bytes": 94256
     },
     {
       "name": "afghanistan_int_2.bik",
@@ -49,7 +52,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "d44b49ca14010fadfa82eee06f2c60b1fd2abbf3a84e8d58eae2b505dd043756",
+      "size_bytes": 18792304,
+      "max_frame_bytes": 96100
     },
     {
       "name": "blackout_CCTV.bik",
@@ -57,7 +63,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "299d8d26da28515dde5956e916becfa3223a03bda26ba3b6759b6494fea3a49e",
+      "size_bytes": 10103644,
+      "max_frame_bytes": 31192
     },
     {
       "name": "blackout_CCTV_2.bik",
@@ -65,7 +74,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "02242f70721f5c0d8fdb40bbb0cddb8e4350e55f23eb7c87b0886c53adbd7aa8",
+      "size_bytes": 1453408,
+      "max_frame_bytes": 8400
     },
     {
       "name": "blackout_dradis.bik",
@@ -73,7 +85,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "eb56c166f69b0a449d355046f60fd4529356c05ac370ba799e85287297ca5fa1",
+      "size_bytes": 9927956,
+      "max_frame_bytes": 43820
     },
     {
       "name": "blackout_lockout.bik",
@@ -81,7 +96,10 @@
       "width": 640,
       "height": 380,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "9e940b38bc41f8001cc5d752c3cb8f6b8a37e989e3968023014aa228b79b0417",
+      "size_bytes": 2356784,
+      "max_frame_bytes": 23556
     },
     {
       "name": "blackout_virus.bik",
@@ -89,7 +107,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "ac4501f8c4c11efb7f39fc3bdd045e834ca2f6a77b55276da6f8a7240e70d72f",
+      "size_bytes": 1351016,
+      "max_frame_bytes": 33392
     },
     {
       "name": "blackout_virus_2.bik",
@@ -97,7 +118,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "acf2fd922422971ba7011d11eb2718b2b4a04ed8e2164a02e46ce6d984df313a",
+      "size_bytes": 10182208,
+      "max_frame_bytes": 35604
     },
     {
       "name": "blackout_virus_mason.bik",
@@ -105,7 +129,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "97629f60516c8bedf663ce360c2abfcdbba36156955b8b804e40f905a0d74357",
+      "size_bytes": 1333720,
+      "max_frame_bytes": 33088
     },
     {
       "name": "crc_part01.bik",
@@ -113,7 +140,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "6a1f0bedaf962b97893f0158794487d4f4885835707bc6bd7ae6c050351d271c",
+      "size_bytes": 5001644,
+      "max_frame_bytes": 59176
     },
     {
       "name": "crc_part01_loop.bik",
@@ -121,7 +151,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "96101ebc792c09319561528ded09fd49b0b44aca81ee454bd4b00cfdf46af30c",
+      "size_bytes": 2227624,
+      "max_frame_bytes": 58056
     },
     {
       "name": "crc_part02.bik",
@@ -129,7 +162,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "6ae267b5b6c036f97d57cb5055bacd6f711edc97a3cb5792d4e259f6f9b3ef35",
+      "size_bytes": 3057408,
+      "max_frame_bytes": 52568
     },
     {
       "name": "crc_part02_loop.bik",
@@ -137,7 +173,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "9f4fbd7b033b50d786396a77d9a50a60bf67deca155ce208d8cc400b358a8965",
+      "size_bytes": 2223988,
+      "max_frame_bytes": 53296
     },
     {
       "name": "crc_part03.bik",
@@ -145,7 +184,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "9f48fe2676dcf3e9f96e675367359ad74d1d8e9295fc138d1d4ff3479a4dc218",
+      "size_bytes": 3056476,
+      "max_frame_bytes": 53288
     },
     {
       "name": "crc_part03_loop.bik",
@@ -153,7 +195,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "dfd881beec4efe1379e0c6814302f4786845df5f39993a62a036b5e50040e503",
+      "size_bytes": 2224076,
+      "max_frame_bytes": 53428
     },
     {
       "name": "crc_part04.bik",
@@ -161,7 +206,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "f0ca3157fb483f6c393fc60f005c34c086281b5f2d645b37897cd8d4d2615357",
+      "size_bytes": 2964032,
+      "max_frame_bytes": 41496
     },
     {
       "name": "crc_part04_loop.bik",
@@ -169,7 +217,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "a77318b254927016014bef0f85746da391b9783e79a90d72adcfe8ab583e33da",
+      "size_bytes": 3038416,
+      "max_frame_bytes": 49040
     },
     {
       "name": "crc_part05.bik",
@@ -177,7 +228,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "bed57c1a795d008d52b48f469fb54c686595e0e5ab35898ea5f8beec8bf53ae8",
+      "size_bytes": 10307612,
+      "max_frame_bytes": 55008
     },
     {
       "name": "default.bik",
@@ -185,7 +239,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "0a83e1bfb014424f006f37a1cdd845c444da65299fb23fcb6a56c596dcc4121f",
+      "size_bytes": 1191452,
+      "max_frame_bytes": 3460
     },
     {
       "name": "eye_v5.bik",
@@ -193,7 +250,10 @@
       "width": 640,
       "height": 720,
       "flags": 1048576,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "4135be1e75594b69220be6db670bdbb19ea027964fb9f6b151d5584f830f045f",
+      "size_bytes": 1403984,
+      "max_frame_bytes": 27472
     },
     {
       "name": "generalstore.bik",
@@ -201,7 +261,10 @@
       "width": 256,
       "height": 256,
       "flags": 1048576,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "4067bb05d24030a7676adf53e35df3cb0308ed87bddfc3f5c6c2343542e269ce",
+      "size_bytes": 2009180,
+      "max_frame_bytes": 9252
     },
     {
       "name": "haiti_int_1.bik",
@@ -209,7 +272,10 @@
       "width": 512,
       "height": 288,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "dc0a5e32c7ac37c706347859d4d1457b281e569e08bf7c825ef3d80d2e368f4d",
+      "size_bytes": 2505820,
+      "max_frame_bytes": 5972
     },
     {
       "name": "haiti_int_1b.bik",
@@ -217,7 +283,10 @@
       "width": 512,
       "height": 288,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "78133bca0ebe93b641b20d5c0dd92bef4074d7926a3f97321e389b00148b4782",
+      "size_bytes": 18730780,
+      "max_frame_bytes": 117848
     },
     {
       "name": "haiti_int_1c.bik",
@@ -225,7 +294,10 @@
       "width": 512,
       "height": 288,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "d74398662e7829a379806104b233ca9161761ae31792675ad22d56627122f85e",
+      "size_bytes": 1399864,
+      "max_frame_bytes": 5676
     },
     {
       "name": "karma_pip_exiting_the_mall.bik",
@@ -233,7 +305,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "7ada0f32962dee4ab5114d97030cd36ab64af0ed988fbda76acce45be494706b",
+      "size_bytes": 708076,
+      "max_frame_bytes": 8816
     },
     {
       "name": "karma_pip_helipad.bik",
@@ -241,7 +316,10 @@
       "width": 450,
       "height": 337,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "a01145cf7264b212f0f96813e28958605ca0a4fced2c5a1579a77b5759d71910",
+      "size_bytes": 422548,
+      "max_frame_bytes": 7428
     },
     {
       "name": "karma_pip_helipad_v2.bik",
@@ -249,7 +327,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "1eb297cdc76f6092df8d5efc4d9f806f257fad55d84fe558120d3028bd0114e4",
+      "size_bytes": 1322468,
+      "max_frame_bytes": 8020
     },
     {
       "name": "karma_pip_security_feed.bik",
@@ -257,7 +338,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "18daa35802784540f6713c083ae78bd6e14bf442f96028201ede851f643db062",
+      "size_bytes": 422748,
+      "max_frame_bytes": 8044
     },
     {
       "name": "karma_pip_stairs.bik",
@@ -265,7 +349,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "7fadb1db2d4e1bb80ec77799fa966893e45f5d8bc7dad2454e682e94a7ad68eb",
+      "size_bytes": 1060892,
+      "max_frame_bytes": 10684
     },
     {
       "name": "la_pip_seq_1.bik",
@@ -273,7 +360,10 @@
       "width": 256,
       "height": 256,
       "flags": 1048576,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "f9cb57df9bb479ce237468c5c36215db752f720cc26638de3da692f2afe8a35e",
+      "size_bytes": 1671064,
+      "max_frame_bytes": 6668
     },
     {
       "name": "la_pip_seq_2.bik",
@@ -281,7 +371,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "0800d3658b100a0838b7fa45b428252d21a0a02b3fe9e9eac2c7fdec3e73149b",
+      "size_bytes": 1002496,
+      "max_frame_bytes": 7060
     },
     {
       "name": "la_pip_seq_3.bik",
@@ -289,7 +382,10 @@
       "width": 256,
       "height": 256,
       "flags": 1048576,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "147c4d31ec98fe893432e2cde6f1591b58f918b2baf00e69572703ca47969d14",
+      "size_bytes": 1670708,
+      "max_frame_bytes": 6852
     },
     {
       "name": "la_pip_seq_4.bik",
@@ -297,7 +393,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "c23684f95ee47826abafaa2ac7af4a205249c32b8e5d9231d93241bf1e10e3ed",
+      "size_bytes": 401392,
+      "max_frame_bytes": 4692
     },
     {
       "name": "la_pip_seq_5.bik",
@@ -305,7 +404,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "9b19a7c7e0b405efe2808d9d9be0ee48ba174a9f11ad87738a31401943",
+      "size_bytes": 335720,
+      "max_frame_bytes": 3152
     },
     {
       "name": "la_pip_seq_6.bik",
@@ -313,7 +415,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "c1171207707c3cdcc44160899efbdc7016b1df94b21d11c592546983dd15049c",
+      "size_bytes": 335164,
+      "max_frame_bytes": 3384
     },
     {
       "name": "la_pip_seq_7.bik",
@@ -321,7 +426,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "9666f6ffedd666ac93987df089fb2280c4adf757ab8c41305bdd62a244e0eaf2",
+      "size_bytes": 335724,
+      "max_frame_bytes": 3464
     },
     {
       "name": "nicaragua_int_1.bik",
@@ -329,7 +437,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "55e2dd424aa23698ff0e5e704f7372836ea328e2bbf3c674071e34a0c1c9309d",
+      "size_bytes": 40358080,
+      "max_frame_bytes": 90988
     },
     {
       "name": "panama_int_1.bik",
@@ -337,7 +448,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "10c4817003a0e8aac225a7ef0c0d494769877138b8c39016f899f65ec2a03170",
+      "size_bytes": 18157360,
+      "max_frame_bytes": 95252
     },
     {
       "name": "panama_int_2.bik",
@@ -345,7 +459,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "bf532fa8e6ad92e68b0de614571da01c519593dccf2bedfa5cf1f32f706d2f2a",
+      "size_bytes": 21733556,
+      "max_frame_bytes": 96532
     },
     {
       "name": "panama_int_3.bik",
@@ -353,7 +470,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "6a727b029619d87abbc73c64793801a9199f9e2affd59d531b46a01350267154",
+      "size_bytes": 22524732,
+      "max_frame_bytes": 120584
     },
     {
       "name": "sam_gizmos_v2.bik",
@@ -361,7 +481,10 @@
       "width": 1280,
       "height": 720,
       "flags": 1048576,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "226e5545e7e3345ef28b51cde4cecd42e2c4c8d4c6a8fe45f38455f35f2389f2",
+      "size_bytes": 687304,
+      "max_frame_bytes": 10292
     },
     {
       "name": "spider_bootup.bik",
@@ -369,7 +492,10 @@
       "width": 1280,
       "height": 720,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "8aa7dcf6265543705fcd557d209cd14d0b5cb435777e5026d6f658bead415f60",
+      "size_bytes": 2003788,
+      "max_frame_bytes": 32732
     },
     {
       "name": "yemen_drone_cam.bik",
@@ -377,7 +503,10 @@
       "width": 256,
       "height": 256,
       "flags": 0,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "9fa2f650c715734c69e465352e162951c5c38cb162f99dbd4843115e4cfdd20e",
+      "size_bytes": 517352,
+      "max_frame_bytes": 6212
     },
     {
       "name": "yemen_mendz.bik",
@@ -385,7 +514,12 @@
       "width": 225,
       "height": 169,
       "flags": 1048576,
-      "audio_tracks": 0
+      "audio_tracks": 0,
+      "sha256": "282f1553eecec45305a6fa4e5dda431831aec7e1e2e51bfa5b65d18d3384dcde",
+      "size_bytes": 553272,
+      "max_frame_bytes": 2988
     }
-  ]
+  ],
+  "total_compressed_bytes": 252728072,
+  "maximum_frame_bytes": 120584
 }

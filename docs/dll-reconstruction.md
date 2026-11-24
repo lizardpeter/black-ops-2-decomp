@@ -557,3 +557,29 @@ the real original coordinator with a reconstructed frame-buffer descriptor,
 then compares independent native plane routing, output bytes, cursor and
 buffer guards. No original output or cursor drives the native decode.
 The matrix exercises standard, alpha, HD and odd-sized cases separately.
+
+[CI 45311746575](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45311746575)
+passed the original whole-frame coordinator comparison for all five cases:
+la_pip_seq_6, blackout_virus (1280x720), karma_pip_helipad (450x337),
+generalstore (alpha), and yemen_mendz (odd-sized alpha). In total this is
+80 frames, 272 planes and 31,773,696 matching bytes, including the 16
+baseline la_pip_seq_6 frames already counted in the previous corpus.
+The original coordinator accepts an inclusive final-word input pointer;
+it adds four before forwarding the exclusive end to each plane.
+
+[CI 45311849448](https://github.com/lizardpeter/black-ops-2-decomp/actions/runs/45311849448)
+then passed all five original-coordinator and reusable playback output
+comparisons on the four-plane source playback branch. The native playback
+now validates alpha and Y partition offsets and exposes padded Y/C1/C2/A
+planes in descriptor order. The independent decoder path has no vendor
+DLL/SDK/FFmpeg dependency. This does not establish original public handle,
+threading, I/O or timing ABI compatibility.
+
+All 44 original BIKi files are now SHA-256 pinned in the Store inventory,
+including exact compressed size and largest-frame header fields. The
+largest declared frame is 120584 bytes. The dedicated corpus workflow
+balances all 44 assets across 11 shards, verifies original whole-frame
+routing and byte equality, then compares the source playback output.
+Default: first 16 frames per asset; dispatch frames=0 for every frame.
+The workflow retains JSON evidence, not decoded game media. Full-corpus
+compatibility remains unverified until all shards pass.

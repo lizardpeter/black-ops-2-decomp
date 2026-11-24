@@ -55,10 +55,10 @@ def fetch_alpha(directory):
         assert len(data)<=8*1024*1024 and sha(data)==pin
         dest.write_bytes(data)
 
-def run(dll,video,library,frames,report_path):
+def run(dll,video,library,frames,report_path,expected_sha256=None):
     assert sha(dll.read_bytes())==PIN_DLL
     data=video.read_bytes()
-    pin={**FIXTURES,**ALPHA}[video.name]
+    pin=expected_sha256 or {**FIXTURES,**ALPHA}[video.name]
     assert sha(data)==pin and data[:4]==b"BIKi"
     count,width,height,flags=u32(data,8),u32(data,20),u32(data,24),u32(data,36)
     assert u32(data,40)==0 and flags in (0,ALPHA_FLAG)
