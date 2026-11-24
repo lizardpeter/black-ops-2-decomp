@@ -12,6 +12,11 @@ REPORT=C.CFUNCTYPE(None,P,U,C.c_char_p,P)
 DEBUG_FLAGS=C.CFUNCTYPE(B,P)
 class Services(C.Structure):
     _fields_=[('lock',LOCK),('unlock',LOCK),('load',LOAD),('resolve',RESOLVE),('initialize',INIT),('query',QUERY),('report',REPORT),('debug_flags',DEBUG_FLAGS),('debug_break',LOCK),('context',P)]
+def cstr(value):
+    if isinstance(value,str):return value
+    if isinstance(value,bytes):return value.decode('ascii')
+    raw=C.cast(value,C.c_char_p).value
+    return raw.decode('ascii') if raw else ''
 def main():
     dll,library=map(Path,sys.argv[1:3]);assert hashlib.sha256(dll.read_bytes()).hexdigest()==SHA256
     img=Image(dll);m=Machine(img);m.mu.mem_map(A,0x10000);m.mu.mem_map(0x7ffe0000,0x1000);lib=C.CDLL(str(library.resolve()));rng=random.Random(0x5148)
@@ -65,9 +70,9 @@ def main():
         @LOCK
         def nu(c):nc.append(('unlock',))
         @LOAD
-        def nload(n,f,c):nc.append(('load',n.decode(),0,f));return MODULE if loadok else None
+        def nload(n,f,c):nc.append(('load',cstr(n),0,f));return MODULE if loadok else None
         @RESOLVE
-        def nr(mod,n,c):nc.append(('resolve',mod,n.decode()));return available[names.index(n.decode())] or None
+        def nr(mod,n,c):nc.append(('resolve',mod,cstr(n)));return available[names.index(cstr(n))] or None
         @INIT
         def ni(p,a,b,z,c):
             if a>0xffffffff: nc.append(('initialize',p,a,b,z))
@@ -77,7 +82,7 @@ def main():
         def nq(p,a,b,o,c):
             nc.append(('query',p,C.string_at(a,16),C.string_at(b,16)));o[0]=IFACE;return qstatus
         @REPORT
-        def rp(p,k,n,c):nc.append(('report',p,k,n.decode()))
+        def rp(p,k,n,c):nc.append(('report',p,k,cstr(n)))
         @DEBUG_FLAGS
         def df(c):return debug
         @LOCK
