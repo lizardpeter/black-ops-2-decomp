@@ -3,6 +3,7 @@ on:
   push:
     paths:
       - .github/workflows/bink-msvc-trace.yml
+      - reconstructed_dlls/bink/video_luma_first_keyframe.cpp
   workflow_dispatch:
 permissions:
   contents: read

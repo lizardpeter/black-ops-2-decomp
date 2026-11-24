@@ -330,39 +330,39 @@ extern "C" int bink_research_decode_video_plane_dirty(
     for(std::uint32_t y=0;y<height;y+=8) {
         bink_decode_entropy_byte_rle(&stream[kMode],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(0,y);
+        trace_stream(0,y);
         #endif
         bink_decode_entropy_byte_rle(&stream[kSubmode],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(1,y);
+        trace_stream(1,y);
         #endif
         bink_decode_adaptive_nibbles(&stream[kColor],&bits,&books,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(2,y);
+        trace_stream(2,y);
         #endif
         bink_decode_entropy_nibbles(&stream[kPattern],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(3,y);
+        trace_stream(3,y);
         #endif
         bink_decode_entropy_signed_bytes(&stream[kMotionX],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(4,y);
+        trace_stream(4,y);
         #endif
         bink_decode_entropy_signed_bytes(&stream[kMotionY],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(5,y);
+        trace_stream(5,y);
         #endif
         bink_decode_entropy_deltas16(&stream[kDC],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(6,y);
+        trace_stream(6,y);
         #endif
         bink_decode_entropy_deltas16(&stream[kOtherDC],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(7,y);
+        trace_stream(7,y);
         #endif
         bink_decode_entropy_bytes(&stream[kRLE],&bits,stream_end);
         #ifdef T6_BINK_TRACE_BITS
-        if(y<16)trace_stream(8,y);
+        trace_stream(8,y);
         #endif
 
         if (y==0) {
@@ -393,7 +393,7 @@ extern "C" int bink_research_decode_video_plane_dirty(
             }
             const std::uint32_t mode=*stream[kMode].current++;
             #ifdef T6_BINK_TRACE_BITS
-            if(y<16)trace_bits("mode",y,(x<<8)|mode);
+            trace_bits("mode",y,(x<<8)|mode);
             #endif
             if(mode<10U)++report->type_counts[mode];
             else return update_report(4,x,y,mode,0xff);
