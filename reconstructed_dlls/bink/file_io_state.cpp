@@ -105,7 +105,8 @@ extern "C" std::int64_t bink_research_file_refill(void* io,t6_bink::FileRead rea
     const auto elapsed=time(io)-before;
     inc(io,0x90,elapsed);
     if(!frame_active)inc(io,u(io,0x8C)?0x9C:0x98,elapsed);
-    put(io,0xA8,u(io,0xAC));
+    // The original successful-refill path jumps past the A8 snapshot
+    // write; that write belongs to the no-refill branch only.
     return finish(got);
 }
 // 0x20F80: bit 0 has priority; bit 31 invokes the corresponding
