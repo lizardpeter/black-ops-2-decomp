@@ -3,6 +3,7 @@
 #include "winhttp_services.h"
 #include "response_headers.h"
 #include "transfer_callbacks.h"
+#include <algorithm>
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -56,10 +57,19 @@ void header_diag(void*,std::uint32_t site,std::uint64_t,std::uint64_t,void*){std
 std::uint64_t header_callback(void* p,std::uint64_t size,std::uint64_t n,void* ctx){
     require(size==1,"header callback size");static_cast<std::string*>(ctx)->append(static_cast<const char*>(p),static_cast<std::size_t>(n));return n;
 }
+struct ReadCursor { const std::string* body; std::size_t offset=0; };
+std::uint64_t read_callback(void* p,std::uint64_t size,std::uint64_t n,void* ctx){
+    require(size==1,"upload callback element size");auto& cursor=*static_cast<ReadCursor*>(ctx);auto count=std::min<std::uint64_t>(n,cursor.body->size()-cursor.offset);std::memcpy(p,cursor.body->data()+cursor.offset,static_cast<std::size_t>(count));cursor.offset+=static_cast<std::size_t>(count);return count;
+}
+std::uint64_t deliver_callback(void* callback,const void* p,std::uint64_t n,void* userdata,void*){
+    return xcurl_research_invoke_write(reinterpret_cast<TransferCallback>(callback),p,n,userdata);
+}
+void upload_diag(void*,std::uint32_t site,std::uint64_t a,std::uint64_t b,void*){std::fprintf(stderr,"upload diagnostic %x %llx %llx\n",site,static_cast<unsigned long long>(a),static_cast<unsigned long long>(b));}
+void delivery_diag(void*,std::uint32_t site,std::uint64_t a,std::uint32_t b,void*){upload_diag(nullptr,site,a,b,nullptr);}
 void init_cs(P p){require(InitializeCriticalSectionEx(reinterpret_cast<CRITICAL_SECTION*>(p),0,0)!=FALSE,"init critical section");}
 void destroy_cs(P p){DeleteCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(p));}
-std::string request(P easy,void* session,std::uint16_t port,const char16_t* method,const char16_t* path,const std::string& body,WinHttpHost& host){
-    P r=easy+0x230;std::memset(r,0,0xe0);put(r,0x30,easy);put(r,0x40,session);
+std::string request(P easy,void* session,std::uint16_t port,const char16_t* method,const char16_t* path,const std::string& body,WinHttpHost& host,bool streaming=false){
+    P r=easy+0x230;std::memset(r,0,0xe0);init_cs(r);put(r,0x30,easy);put(r,0x40,session);put(r,0x28,2U);put(easy,0x80,std::u16string_view(method)==u"POST"?2U:0U);put(easy,0x228,0U);
     alignas(8) std::array<std::uint8_t,0x68> url{};char16_t hostname[]=u"127.0.0.1";
     put(url.data(),0x14,1U);put(url.data(),0x18,hostname+0);put(url.data(),0x20,9U);put(url.data(),0x48,path);
     auto setup=winhttp_setup_services(&host);require(xcurl_research_http_open(r,easy,method,url.data(),nullptr,port,&setup)==0,"native http_open");
@@ -67,8 +77,23 @@ std::string request(P easy,void* session,std::uint16_t port,const char16_t* meth
     require(xcurl_research_http_options(r,opt,1,&setup)==0,"native http_options");
     Notices notices;active=&notices;RequestServices rs{};bind_winhttp_request_services(rs,&host);
     require(xcurl_research_http_register(r,&rs)==0,"native http_register");
-    require(xcurl_research_http_send(r,body.empty()?nullptr:body.data(),body.size(),body.size(),&rs)==0,"native http_send");
+    struct Node{const char* data;Node* next;};
+    Node header{"X-XCurl-Request: original-path",nullptr};
+    auto ah=winhttp_add_header_services(&rs);
+    require(xcurl_research_add_request_headers(r,&header,&ah)==0,"original request header list");
+    require(xcurl_research_http_send(r,streaming||body.empty()?nullptr:body.data(),streaming?0:body.size(),body.size(),&rs)==0,"native http_send");
     notices.wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE);
+    if(streaming){
+        ReadCursor cursor{&body};put(easy,0x118,&cursor);put(easy,0x120,&read_callback);put(easy,0xb0,4096U);put(easy,0xf0,static_cast<std::uint64_t>(body.size()));put(easy,0xf8,static_cast<std::uint64_t>(body.size()));put(r,0xd0,1U);
+        auto upload=winhttp_upload_services(&rs,nullptr,upload_diag);
+        unsigned writes=0;
+        while(!r[0xd5]){
+            xcurl_research_upload_continue(r,&upload);require(get<std::uint32_t>(easy,0x228)==0,"original streamed upload state");
+            notices.wait(WINHTTP_CALLBACK_STATUS_WRITE_COMPLETE);require(++writes<=20,"upload bounded progress");
+        }
+        require(writes>1&&cursor.offset==body.size()&&get<std::uint64_t>(r,0xa0)==body.size(),"original multi-write upload count");
+        rs.release(get<void*>(r,0xb0),16,rs.context);put(r,0xb0,static_cast<void*>(nullptr));put(easy,0x120,static_cast<TransferCallback>(nullptr));put(easy,0x118,static_cast<void*>(nullptr));
+    }
     require(xcurl_research_http_receive(r,&rs)==0,"native http_receive");notices.wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE);
     auto h=get<HINTERNET>(r,0x50);std::uint32_t code=0;
     auto ascii=std::string("http://127.0.0.1:")+std::to_string(port);
@@ -83,25 +108,29 @@ std::string request(P easy,void* session,std::uint16_t port,const char16_t* meth
     require(header_text.starts_with("HTTP/1.1 200")&&header_text.find("X-XCurl-Test: native")!=std::string::npos,"header callback bytes");
     require(!get<void*>(easy,0x1d0)&&!get<std::uint64_t>(easy,0x1c8),"header ownership released");
     put(easy,0x130,static_cast<TransferCallback>(nullptr));put(easy,0x128,static_cast<void*>(nullptr));
-    std::array<char,8192> buffer{};std::string response;
-    for(;;){require(xcurl_research_http_read(r,buffer.data(),static_cast<std::uint32_t>(buffer.size()),&rs)==0,"native http_read");auto n=notices.wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE);if(!n.length)break;response.append(buffer.data(),n.length);}
+    std::array<char,8192> buffer{};std::string response;put(easy,0xac,2048U);put(easy,0x108,&response);put(easy,0x110,&header_callback);put(easy,0x33c,0U);
+    DeliveryServices ds{&rs,deliver_callback,delivery_diag};
+    for(;;){require(xcurl_research_http_read(r,buffer.data(),static_cast<std::uint32_t>(buffer.size()),&rs)==0,"native http_read");auto n=notices.wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE);if(!n.length)break;require(xcurl_research_deliver_body(easy,buffer.data(),n.length,&ds)==0,"original body delivery");}
+    require(get<std::uint32_t>(easy,0x33c)==response.size(),"original body accounting");put(easy,0x110,static_cast<TransferCallback>(nullptr));put(easy,0x108,static_cast<void*>(nullptr));
     require(get<std::uint64_t>(easy,0x1f8)==response.size(),"published content length");
     for(auto off:{0x208U,0x218U}){rs.release(get<void*>(easy,off),8,rs.context);put(easy,off,static_cast<void*>(nullptr));}
     require(WinHttpCloseHandle(h)!=FALSE,"close request");notices.wait(WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING);active=nullptr;
     require(WinHttpCloseHandle(get<HINTERNET>(r,0x48))!=FALSE,"close connection");
-    return response;
+    destroy_cs(r);return response;
 }
 }
 int main(int argc,char** argv){
     require(argc==2,"port required");auto port=static_cast<std::uint16_t>(std::atoi(argv[1]));
     alignas(8) std::array<std::uint8_t,0x80> cache{};alignas(8) std::array<std::uint8_t,0x368> easy{};
-    init_cs(cache.data());init_cs(easy.data()+0x188);auto* list=cache.data()+0x28;put(list,0,list);put(list,8,list);
+    init_cs(cache.data());init_cs(easy.data()+0x188);init_cs(easy.data()+0x50);auto* list=cache.data()+0x28;put(list,0,list);put(list,8,list);
     WinHttpHost host{notify,diagnostic,nullptr};auto ss=winhttp_session_services(&host);void* first=nullptr;void* second=nullptr;
     require(xcurl_research_session_acquire(cache.data(),easy.data(),0,1,&first,&ss)==0&&first,"session acquire");
     require(xcurl_research_session_acquire(cache.data(),easy.data(),0,1,&second,&ss)==0&&second==first,"session cache hit");
     require(request(easy.data(),first,port,u"GET",u"/get",{},host)=="xcurl-native-get","GET body");
     std::string body="xcurl-native-post";require(request(easy.data(),second,port,u"POST",u"/echo",body,host)==body,"POST echo");
+    std::string streamed;for(unsigned i=0;i<24579;++i)streamed.push_back(static_cast<char>('a'+i%26));
+    require(request(easy.data(),second,port,u"POST",u"/echo",streamed,host,true)==streamed,"streamed POST echo");
     require(xcurl_research_session_release(second,&ss)==2,"release second reference");require(xcurl_research_session_release(first,&ss)==1,"release first reference");
-    xcurl_research_session_cache_clear(cache.data(),&ss);destroy_cs(easy.data()+0x188);destroy_cs(cache.data());
-    std::puts("XCurl native WinHTTP loopback PASS: session reuse, HTTP GET and POST, async send/receive/read, original header query/metadata/callback, cleanup");
+    xcurl_research_session_cache_clear(cache.data(),&ss);destroy_cs(easy.data()+0x50);destroy_cs(easy.data()+0x188);destroy_cs(cache.data());
+    std::puts("XCurl native WinHTTP loopback PASS: session reuse, HTTP GET, direct POST, streamed multi-write POST, original outgoing headers/body delivery, header metadata/callback, cleanup");
 }

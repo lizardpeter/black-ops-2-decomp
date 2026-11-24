@@ -72,3 +72,7 @@ Original 0x11978 and 0x11F10: 1,024 local passing original-machine comparisons. 
 ## Outgoing header list
 
 Original 0x10038, disabled ETW: 1,024 passing local original-machine comparisons. Reuses the recovered 0x1AC88 converter directly, preserves the original UTF-16 buffer reuse, case-sensitive Transfer-Encoding/chunked detection, POST data exception, debug bytes, WinHttpAddRequestHeaders flags 0xA0000000, ignored 12150 error and first-error break. Original header list is valid non-null string nodes; an invalid null node is not a supported input. Windows I/O and the allocation callbacks are modeled during the differential. Startup coordinator CI passed (45437375067). Next wire actual WinHTTP add/write and run streamed loopback.
+
+## Native upload/write and outgoing header acceptance
+
+The Windows adapter now binds the recovered outgoing header and streamed upload routines to WinHttpAddRequestHeaders and WinHttpWriteData. Expanded independent loopback smoke verifies the server observes the outgoing header on every request, a 24,579-byte fixed-length streamed POST uses multiple original upload callbacks/writes, the server echoes exact bytes, and all response bodies pass the recovered delivery callback/accounting path. The harness still drives the callback sequence and uses test-only URL cracking; this is an acceptance slice, not the finished task queue/public ABI. Windows CI pending.

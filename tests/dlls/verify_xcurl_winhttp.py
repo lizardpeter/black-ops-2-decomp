@@ -10,6 +10,9 @@ import pefile
 class Handler(http.server.BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
     def reply(self, body):
+        if self.headers.get('X-XCurl-Request') != 'original-path':
+            self.send_error(400, 'Missing reconstructed outgoing header')
+            return
         self.send_response(200)
         self.send_header('Content-Length', str(len(body)))
         self.send_header('Content-Type', 'text/plain')
