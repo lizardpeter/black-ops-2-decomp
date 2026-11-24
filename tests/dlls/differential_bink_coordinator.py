@@ -165,7 +165,11 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
                           "stride":stride&0xffffffff,"start":begin-PACKET,
                           "limit":limit-PACKET,
                           "keyframe":struct.unpack_from("<I",stack,0x18)[0],
-                          "plane_flags":struct.unpack_from("<I",stack,0x40)[0]})
+                          "plane_flags":struct.unpack_from("<I",stack,0x40)[0],
+                          "dirty_pointer":hex(struct.unpack_from("<Q",stack,0x20)[0]),
+                          "dirty_stride":struct.unpack_from("<I",stack,0x28)[0],
+                          "dirty_scale":struct.unpack_from("<I",stack,0x30)[0],
+                          "remaining_stack":stack.hex()})
         def at_return(mu):
             calls[-1]["next"]=mu.reg_read(X.UC_X86_REG_RAX)-PACKET
         def setup(writer):
@@ -273,7 +277,7 @@ def run(dll,video,library,frames,report_path,expected_sha256=None,lookahead=4,pa
             diff=[(j,a,b) for j,(a,b) in enumerate(zip(actual,expected)) if a!=b]
             rec["dirty"]={"native_sha":sha(actual),"original_sha":sha(expected),"mismatches":diff[:32],"match":not diff,"original_dirty":sum(bool(x) for x in expected[:dirty_len]),"native_dirty":sum(bool(x) for x in actual[:dirty_len])}
             save()
-            assert not diff,(frame,dirty_stride,rec["dirty"])
+            assert not diff,(frame,dirty_stride,rec["dirty"],calls)
         with output.open("ab") as decoded:
             for p in range(len(dims)):decoded.write(native[dst][p])
         result["complete_matching_frames"]+=1
