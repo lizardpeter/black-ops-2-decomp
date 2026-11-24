@@ -1,6 +1,8 @@
 // Real loopback HTTP smoke for reconstructed setup and transfer leaves. The
 // harness drives callbacks; not a test of the still-incomplete production task queue.
 #include "winhttp_services.h"
+#include "response_headers.h"
+#include "transfer_callbacks.h"
 #include <array>
 #include <atomic>
 #include <chrono>
@@ -44,6 +46,16 @@ void CALLBACK notify(HINTERNET,DWORD_PTR,DWORD status,LPVOID info,DWORD length){
     n->record({status,length,error});
 }
 void diagnostic(void*,std::uint32_t site,std::uint32_t status,void*){std::fprintf(stderr,"XCurl site %x status %x\n",site,status);}
+std::uint32_t crack_for_test(const char16_t* url,void*,std::uint32_t* scheme,void*){
+    URL_COMPONENTS parts{};parts.dwStructSize=sizeof(parts);parts.dwSchemeLength=DWORD(-1);
+    if(!WinHttpCrackUrl(reinterpret_cast<LPCWSTR>(url),0,0,&parts))return HRESULT_FROM_WIN32(GetLastError());
+    *scheme=static_cast<std::uint32_t>(parts.nScheme);return 0;
+}
+void receive_diag(void*,std::uint32_t site,std::uint64_t a,std::uint32_t b,void*){std::fprintf(stderr,"receive diagnostic %x %llx %x\n",site,static_cast<unsigned long long>(a),b);}
+void header_diag(void*,std::uint32_t site,std::uint64_t,std::uint64_t,void*){std::fprintf(stderr,"header diagnostic %x\n",site);}
+std::uint64_t header_callback(void* p,std::uint64_t size,std::uint64_t n,void* ctx){
+    require(size==1,"header callback size");static_cast<std::string*>(ctx)->append(static_cast<const char*>(p),static_cast<std::size_t>(n));return n;
+}
 void init_cs(P p){require(InitializeCriticalSectionEx(reinterpret_cast<CRITICAL_SECTION*>(p),0,0)!=FALSE,"init critical section");}
 void destroy_cs(P p){DeleteCriticalSection(reinterpret_cast<CRITICAL_SECTION*>(p));}
 std::string request(P easy,void* session,std::uint16_t port,const char16_t* method,const char16_t* path,const std::string& body,WinHttpHost& host){
@@ -58,10 +70,23 @@ std::string request(P easy,void* session,std::uint16_t port,const char16_t* meth
     require(xcurl_research_http_send(r,body.empty()?nullptr:body.data(),body.size(),body.size(),&rs)==0,"native http_send");
     notices.wait(WINHTTP_CALLBACK_STATUS_SENDREQUEST_COMPLETE);
     require(xcurl_research_http_receive(r,&rs)==0,"native http_receive");notices.wait(WINHTTP_CALLBACK_STATUS_HEADERS_AVAILABLE);
-    auto h=get<HINTERNET>(r,0x50);DWORD code=0,len=sizeof(code);
-    require(WinHttpQueryHeaders(h,WINHTTP_QUERY_STATUS_CODE|WINHTTP_QUERY_FLAG_NUMBER,nullptr,&code,&len,nullptr)!=FALSE&&code==200,"HTTP 200");
+    auto h=get<HINTERNET>(r,0x50);std::uint32_t code=0;
+    auto ascii=std::string("http://127.0.0.1:")+std::to_string(port);
+    std::u16string effective(ascii.begin(),ascii.end());effective+=path;put(r,0x38,effective.c_str());
+    auto qs=winhttp_header_query_services(&host);ReceiveHeaderServices hs{&qs,&rs,crack_for_test,receive_diag};
+    require(xcurl_research_receive_headers(r,easy,&code,&hs)==0&&code==200,"reconstructed headers / HTTP 200");
+    require(get<std::uint32_t>(easy,0x1e0)==200&&get<std::uint32_t>(easy,0x1dc)==2,"published response status/version");
+    require(std::strcmp(get<const char*>(easy,0x210),"http")==0,"published scheme");
+    require(std::strcmp(get<const char*>(easy,0x218),"text/plain")==0,"published content type");
+    std::string header_text;put(easy,0x128,&header_text);put(easy,0x130,&header_callback);
+    HeaderServices hworker{&rs,nullptr,header_diag};xcurl_research_header_worker(easy,&hworker);
+    require(header_text.starts_with("HTTP/1.1 200")&&header_text.find("X-XCurl-Test: native")!=std::string::npos,"header callback bytes");
+    require(!get<void*>(easy,0x1d0)&&!get<std::uint64_t>(easy,0x1c8),"header ownership released");
+    put(easy,0x130,static_cast<TransferCallback>(nullptr));put(easy,0x128,static_cast<void*>(nullptr));
     std::array<char,8192> buffer{};std::string response;
     for(;;){require(xcurl_research_http_read(r,buffer.data(),static_cast<std::uint32_t>(buffer.size()),&rs)==0,"native http_read");auto n=notices.wait(WINHTTP_CALLBACK_STATUS_READ_COMPLETE);if(!n.length)break;response.append(buffer.data(),n.length);}
+    require(get<std::uint64_t>(easy,0x1f8)==response.size(),"published content length");
+    for(auto off:{0x208U,0x218U}){rs.release(get<void*>(easy,off),8,rs.context);put(easy,off,static_cast<void*>(nullptr));}
     require(WinHttpCloseHandle(h)!=FALSE,"close request");notices.wait(WINHTTP_CALLBACK_STATUS_HANDLE_CLOSING);active=nullptr;
     require(WinHttpCloseHandle(get<HINTERNET>(r,0x48))!=FALSE,"close connection");
     return response;
@@ -78,5 +103,5 @@ int main(int argc,char** argv){
     std::string body="xcurl-native-post";require(request(easy.data(),second,port,u"POST",u"/echo",body,host)==body,"POST echo");
     require(xcurl_research_session_release(second,&ss)==2,"release second reference");require(xcurl_research_session_release(first,&ss)==1,"release first reference");
     xcurl_research_session_cache_clear(cache.data(),&ss);destroy_cs(easy.data()+0x188);destroy_cs(cache.data());
-    std::puts("XCurl native WinHTTP loopback PASS: session reuse, HTTP GET and POST, async send/receive/read, cleanup");
+    std::puts("XCurl native WinHTTP loopback PASS: session reuse, HTTP GET and POST, async send/receive/read, original header query/metadata/callback, cleanup");
 }
