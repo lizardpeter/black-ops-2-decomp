@@ -246,6 +246,8 @@ jobs:
             reconstructed_dlls/bink/video_inverse8x8_indexed.cpp \
             reconstructed_dlls/bink/video_inverse8x8_2x_indexed.cpp \
             reconstructed_dlls/bink/video_block_modes.cpp \
+            reconstructed_dlls/bink/video_predict8x8_core.cpp \
+            reconstructed_dlls/bink/video_predict8x8.cpp \
             reconstructed_dlls/bink/video_luma_first_keyframe.cpp \
             -o build/bink_source_first_luma.so
           python tests/dlls/experimental_first_luma.py \
