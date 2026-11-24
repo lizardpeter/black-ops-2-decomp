@@ -21,7 +21,7 @@ void* default_allocate(std::size_t n,void*) {
 }
 void default_free(void* p,void*) {
 #ifdef _WIN32
-    HeapFree(GetProcessHeap(),0,p);
+    ::HeapFree(GetProcessHeap(),0,p);
 #else
     std::free(p);
 #endif
@@ -36,7 +36,7 @@ void* default_reallocate(void* p,std::size_t n,void* ctx) {
 #endif
 }
 HeapAllocate allocate=default_allocate;
-HeapFree release=default_free;
+t6_xcurl::HeapFree release=default_free;
 HeapReallocate reallocate=default_reallocate;
 void* context=nullptr;
 }

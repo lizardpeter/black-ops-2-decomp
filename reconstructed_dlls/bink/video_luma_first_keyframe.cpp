@@ -252,7 +252,13 @@ extern "C" int bink_research_decode_video_plane_dirty(
         const auto baseline=read_le16(state.current);
         state.current+=2;
         std::memcpy(data,&baseline,2);
+        #ifdef T6_BINK_TRACE_BITS
+        trace_bits("coeff-before",static_cast<unsigned>(dc_stream),0);
+        #endif
         bink_video_decode_coefficients(data,&bits);
+        #ifdef T6_BINK_TRACE_BITS
+        trace_bits("coeff-after",static_cast<unsigned>(dc_stream),0);
+        #endif
     };
     auto read_quant_index=[&]() -> std::uint32_t {
         t6_bink::internal::BitCursor cursor(bits);
@@ -443,6 +449,9 @@ extern "C" int bink_research_decode_video_plane_dirty(
                 if ((y&8U)==0 && x+16<=width &&
                     stream[kSubmode].current<stream[kSubmode].end) {
                     subtype=*stream[kSubmode].current++;
+                    #ifdef T6_BINK_TRACE_BITS
+                    trace_bits("submode",y,(x<<8)|subtype);
+                    #endif
                     if(subtype<10U)++report->submode_counts[subtype];
                     else return update_report(5,x,y,mode,subtype);
                     // Do not write a 16x16 block beyond the allocated plane.

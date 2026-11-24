@@ -3,7 +3,7 @@ on:
   push:
     paths:
       - .github/workflows/bink-msvc-trace.yml
-      - reconstructed_dlls/bink/video_luma_first_keyframe.cpp
+      - reconstructed_dlls/bink/**
   workflow_dispatch:
 permissions:
   contents: read
@@ -16,10 +16,19 @@ jobs:
         include:
           - toolset: default
             config: Release
+            isolate: ""
+          - toolset: default
+            config: Release
+            isolate: video_coefficients
+          - toolset: default
+            config: Release
+            isolate: video_luma_first_keyframe
           - toolset: default
             config: Debug
+            isolate: ""
           - toolset: ClangCL
             config: Release
+            isolate: ""
     steps:
       - uses: actions/checkout@v4
         with:
@@ -31,7 +40,7 @@ jobs:
           python-version: '3.12'
       - run: python tools/dlls/fetch_bik_fixtures.py originals/bik
       - run: |
-          cmake -S reconstructed_dlls/bink -B build/trace -DT6_BINK_TRACE_BITS=ON ${{ matrix.toolset == 'ClangCL' && '-T ClangCL' || '' }}
+          cmake -S reconstructed_dlls/bink -B build/trace -DT6_BINK_TRACE_BITS=ON "-DT6_BINK_MSVC_DIAGNOSTIC_SOURCE=${{ matrix.isolate }}" ${{ matrix.toolset == 'ClangCL' && '-T ClangCL' || '' }}
           cmake --build build/trace --config ${{ matrix.config }} --target test_native_plane_trace --parallel 2
       - shell: python
         run: |
@@ -40,13 +49,16 @@ jobs:
           p=subprocess.run([str(exe),"originals/bik/la_pip_seq_6.bik","build/plane.raw"],capture_output=True,text=True)
           print(p.stdout)
           print(p.stderr)
-          print("PLANE HASH",hashlib.sha256(pathlib.Path("build/plane.raw").read_bytes()).hexdigest())
+          digest=hashlib.sha256(pathlib.Path("build/plane.raw").read_bytes()).hexdigest()
+          print("PLANE HASH",digest)
           pathlib.Path("build/trace.txt").write_text(p.stdout+p.stderr)
           assert p.returncode==0
+          assert "cursor=1372 luma_end=1372" in p.stdout, "luma cursor diverged"
+          assert digest=="347b7e90cad7c4cc5d0e3e9b0541813b3a49605827aa72ec59c662ff1f24edaf", "first luma pixels diverged"
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: plane-trace-${{ matrix.toolset }}-${{ matrix.config }}
+          name: plane-trace-${{ matrix.toolset }}-${{ matrix.config }}-${{ matrix.isolate || 'normal' }}
           path: |
             build/trace.txt
             build/plane.raw

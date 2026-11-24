@@ -1,0 +1,31 @@
+name: XCurl original setopt instruction evidence
+on:
+  push:
+    paths:
+      - tools/dlls/probe_xcurl_setopt.py
+      - docs/xcurl-store-callers.json
+      - .github/workflows/xcurl-setopt-evidence.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  evidence:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: |
+          pip install pefile capstone
+          python tools/dlls/fetch.py originals/dlls
+          python tools/fetch_originals.py t6mp_msstore originals --only exe
+          python tools/fetch_originals.py t6sp_msstore originals --only exe
+          python tools/fetch_originals.py t6zm_msstore originals --only exe
+      - run: python tools/dlls/probe_xcurl_setopt.py --dll originals/dlls/XCurl.dll --originals originals --out build/xcurl-setopt-evidence.json
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: xcurl-setopt-instruction-evidence
+          path: build/xcurl-setopt-evidence.json
+          if-no-files-found: warn
