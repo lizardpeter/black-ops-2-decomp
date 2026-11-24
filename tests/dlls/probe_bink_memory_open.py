@@ -318,7 +318,10 @@ def exercise_playback(m,img,handle,data,input_base,globals_state,cursor,clock,al
                 assert call(img.exports["BinkPause"],[handle,0])==0
             if not async_mode:
                 ret=call(img.exports["BinkDoFrame"],[handle],"uint64")
-                assert ret==1,(i,ret)
+                # 0x1ACxx forwards the finish helper return (zero), not
+                # the async enqueue success convention. Verify real state
+                # and pixels below instead of treating this as a boolean.
+                assert ret==0,(i,ret)
             else:
                 submitted=[]
                 def enqueue(mu):
