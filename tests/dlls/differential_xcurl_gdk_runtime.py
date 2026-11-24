@@ -72,7 +72,8 @@ def main():
         @LOAD
         def nload(n,f,c):nc.append(('load',cstr(n),0,f));return MODULE if loadok else None
         @RESOLVE
-        def nr(mod,n,c):nc.append(('resolve',mod,cstr(n)));return available[names.index(cstr(n))] or None
+        def nr(mod,n,c):
+            name=cstr(n);nc.append(('resolve',mod,name));return available[names.index(name.encode('ascii'))] or None
         @INIT
         def ni(p,a,b,z,c):
             if a>0xffffffff: nc.append(('initialize',p,a,b,z))
