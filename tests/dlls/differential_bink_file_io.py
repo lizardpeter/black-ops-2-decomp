@@ -214,4 +214,62 @@ def main():
         assert bytes(h)==bs[0],(i,"consume",[(hex(j),a,b) for j,(a,b) in enumerate(zip(h,bs[0])) if a!=b][:24])
         assert not m.imports_called,m.imports_called
     print("Original sequential buffered frame read PASS: 192 full states and ring wrap cases")
+    full=lib.bink_research_file_read_frame
+    full.argtypes=(ctypes.c_void_p,ctypes.c_uint32,ctypes.c_uint32,ctypes.c_void_p,ctypes.c_uint32,SEEK,READ,ctypes.c_void_p)
+    full.restype=ctypes.c_int64
+    for i in range(256):
+        h=bytearray(rng.randbytes(IO_SIZE))
+        for off in (0x40,0x48,0x50,0x58,0x60,0x70,0x78):ptr(h,off,0)
+        ptr(h,0x68,fake_timer);ptr(h,0xC0,0);ptr(h,0xC8,0x76543210)
+        capacity=0x40000;cursor=rng.randrange(capacity);count=rng.randrange(1,16384)
+        avail=rng.randrange(count)
+        pos=rng.randrange(20000,100000)
+        offset=[pos,pos+avail//2,pos-100,pos+avail+1024][i%4]
+        skip=offset-pos
+        buffered=avail-skip if 0<skip<=avail else avail if not skip else 0
+        expected_read=count-buffered
+        assert expected_read>0
+        got=expected_read if i%5 else expected_read//2
+        for off,v in ((0x80,0),(0x84,0),(0x108,0),(0xA0,capacity),(0xD0,pos),(0xF4,pos+avail),
+            (0xEC,pos+avail+capacity),(0xF0,cursor),(0xAC,avail),(0xF8,capacity-avail)):
+            put(h,off,v)
+        ptr(h,0xD8,ARENA);ptr(h,0xE0,ARENA+capacity);ptr(h,0x100,ARENA)
+        ring=rng.randbytes(capacity)
+        m.mu.mem_write(ARENA,ring);ctypes.memmove(native_base,ring,capacity)
+        initial=rng.randbytes(count+16);payload=rng.randbytes(got)
+        oc=[];nc=[];os=[];ns=[]
+        def ot(mu):oc.append(1);return 3000+len(oc)
+        @TIMER
+        def nt():nc.append(1);return 3000+len(nc)
+        def seek_win(mu):
+            low=mu.reg_read(X.UC_X86_REG_EDX)
+            high=mu.reg_read(X.UC_X86_REG_R8)
+            target=low|(struct.unpack("<I",bytes(mu.mem_read(high,4)))[0]<<32)
+            os.append(("seek",target));mu.reg_write(X.UC_X86_REG_RAX,low)
+        def read_win(mu):
+            n=mu.reg_read(X.UC_X86_REG_R8D);os.append(("read",n))
+            assert n==expected_read,(i,n,expected_read,offset,pos,avail)
+            if got:mu.mem_write(mu.reg_read(X.UC_X86_REG_RDX),payload)
+            mu.mem_write(mu.reg_read(X.UC_X86_REG_R9),struct.pack("<I",got))
+            mu.reg_write(X.UC_X86_REG_RAX,1)
+        m.on_import("kernel32.dll!SetFilePointer",seek_win)
+        m.on_import("kernel32.dll!ReadFile",read_win)
+        r,bs,_,_=m.call(img.base+0x20270,[bytes(h),i+1,offset,initial,count],"uint",
+                        fakes={fake_timer:ot})
+        assert isinstance(r,int),(i,r)
+        @SEEK
+        def nseek(ctx,target):ns.append(("seek",target))
+        @READ
+        def nread(ctx,dest,n):
+            ns.append(("read",n));ctypes.memmove(dest,payload,got);return got
+        ptr(h,0x68,ctypes.cast(nt,ctypes.c_void_p).value)
+        for off in (0xD8,0xE0,0x100):ptr(h,off,get64(h,off)-ARENA+native_base)
+        nh=(ctypes.c_uint8*IO_SIZE).from_buffer(h)
+        out=(ctypes.c_uint8*len(initial)).from_buffer_copy(initial)
+        actual=full(nh,i+1,offset,out,count,nseek,nread,None)
+        ptr(h,0x68,fake_timer)
+        for off in (0xD8,0xE0,0x100):ptr(h,off,get64(h,off)-native_base+ARENA)
+        assert actual==r and oc==nc and os==ns and bytes(out)==bs[1],(i,actual,r,oc,nc,os,ns)
+        assert bytes(h)==bs[0],(i,"read-frame",[(hex(j),a,b) for j,(a,b) in enumerate(zip(h,bs[0])) if a!=b][:24])
+    print("Original buffered/direct/seek frame reads PASS: 256 full states")
 if __name__=="__main__":main()

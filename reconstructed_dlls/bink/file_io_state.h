@@ -26,3 +26,9 @@ extern "C" std::uint32_t bink_research_file_control(void* io,std::uint32_t flags
  // must already be in the ring; other seek/direct-read paths are separate.
 extern "C" std::int64_t bink_research_file_read_buffered(void* io,std::uint32_t frame,
     std::uint32_t offset,void* dest,std::uint32_t bytes);
+
+ // Sequential or explicit offset frame read at 0x20270, with direct
+ // file fallback after consuming buffered data. No pre-loop state 0x108.
+extern "C" std::int64_t bink_research_file_read_frame(void* io,std::uint32_t frame,
+    std::uint32_t offset,void* dest,std::uint32_t bytes,
+    t6_bink::FileSeek seek,t6_bink::FileRead read,void* context);
