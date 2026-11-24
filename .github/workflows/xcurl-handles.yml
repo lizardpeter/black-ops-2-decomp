@@ -5,6 +5,7 @@ on:
       - reconstructed_dlls/xcurl/**
       - tests/dlls/differential_xcurl_wide.py
       - tests/dlls/differential_xcurl_handles.py
+      - tests/dlls/differential_xcurl_multi_queue.py
       - .github/workflows/xcurl-handles.yml
   workflow_dispatch:
 permissions:
@@ -27,6 +28,7 @@ jobs:
           pip install -q -r tests/differential/requirements.txt
           python tools/dlls/fetch.py originals/dlls
           mkdir -p build
-          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/{option_dispatch,wide_string,handle_lifecycle}.cpp -o build/xcurl_handles.so
+          clang++ -std=c++20 -O2 -shared -fPIC -Wall -Wextra -Werror reconstructed_dlls/xcurl/{option_dispatch,wide_string,handle_lifecycle,multi_queue}.cpp -o build/xcurl_handles.so
           python tests/dlls/differential_xcurl_wide.py originals/dlls/XCurl.dll build/xcurl_handles.so
           python tests/dlls/differential_xcurl_handles.py originals/dlls/XCurl.dll build/xcurl_handles.so
+          python tests/dlls/differential_xcurl_multi_queue.py originals/dlls/XCurl.dll build/xcurl_handles.so
