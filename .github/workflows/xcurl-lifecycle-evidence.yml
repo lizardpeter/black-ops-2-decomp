@@ -1,0 +1,33 @@
+name: XCurl remaining lifecycle instruction evidence
+on:
+  push:
+    paths:
+      - tools/dlls/probe_xcurl_lifecycle.py
+      - .github/workflows/xcurl-lifecycle-evidence.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            tools/dlls
+            tests/differential
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - run: python tools/dlls/fetch.py originals/dlls
+      - name: Inspect remaining original lifecycle and callback functions
+        run: |
+          mkdir -p build
+          python tools/dlls/probe_xcurl_lifecycle.py originals/dlls/XCurl.dll | tee build/xcurl-lifecycle-evidence.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xcurl-lifecycle-evidence
+          path: build/xcurl-lifecycle-evidence.txt
+          retention-days: 14
