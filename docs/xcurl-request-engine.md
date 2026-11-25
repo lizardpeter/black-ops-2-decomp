@@ -254,3 +254,16 @@ The bound startup path refuses a 64-bit upload size that cannot fit WinHTTP's DW
 
 ## Native upload trailer formatter
 Recovered 10420 from the pinned original's instructions: call easy+140 with slist output and userdata +138, count 5 bytes plus each string and CRLF, allocate/reuse tag-16 request buffer +B0/+A8, emit the zero-chunk marker and trailer lines, and free the callback-owned list. Bound integration checks DWORD length, records allocation/callback failures, and reloads the request buffer after possible replacement instead of preserving the original stale pointer. Native trailer formatting now has a default implementation, with five source-test modes (reuse, no list, callback failure, growth and allocation failure). No claim of a full live chunked-upload trailer handshake or original-machine differential yet. TLS cleanup passed in run 45556231443, but its earlier HTTP test had failed and was masked by the final PowerShell command; the workflow now treats the separate HTTP and TLS steps independently.
+
+
+## Verified diagnostics and completion reservation
+Run 45558866518 passed 768 original diagnostic publication comparisons (384 each at A224/A32C; CRT formatting modeled explicitly). Run 45558740494 passed Windows transport, including exact application callback abort and timeout error-buffer strings, after the native status dispatcher rejected stale callbacks following close. The original status dispatcher remains unchanged for differential testing. The native facade reserves the 0x28-byte completion node before multi admission, returning multi code 3 if reservation fails. The node is moved into the completion queue or released for detached transfers; pending reservations are released at easy cleanup. The bound completion queue fallback uses reserved storage even when submission fails. Source-link run 45558740522 passed all 15 tests on Linux and Windows; injected allocation failure during inline completion preserved the message and counters. The original completion routine retains its observed allocation behavior.
+
+## Genuine GDK loopback acceptance
+The independent consumer now accepts an opt-in local transfer mode. On a Windows x64 machine with real Gaming Services, run:
+
+```powershell
+python tests/dlls/native_xcurl_consumer/verify_live_loopback.py path/to/native_xcurl_consumer.exe
+````
+
+The fixture uses an ephemeral 127.0.0.1 port, actual production runtime startup and actual GDK security information callbacks; no mock is installed. Missing GDK is a hard failure in this mode, and the subprocess has a timeout. Standard hosted CI continues to validate lifecycle/closed-owner behavior without network requests. Live transfer acceptance is not yet verified.
