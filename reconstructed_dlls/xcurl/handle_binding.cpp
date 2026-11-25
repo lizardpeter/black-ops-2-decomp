@@ -10,7 +10,7 @@ void* HandleBinding::allocate(std::size_t n,std::uint32_t t,void* c){auto* s=sel
 void HandleBinding::release(void* p,std::uint32_t t,void* c){auto* s=self(c).api_.engine;s->release(p,t,s->context);}
 void HandleBinding::initialize_lock(void* p,void* c){auto* s=self(c).api_.engine;s->initialize_cs(p,s->context);}
 std::uint32_t HandleBinding::start_global(void* c){
-    auto& a=self(c).api_;return xcurl_research_engine_bootstrap(&a.global,a.engine_limit,&a.frequency,a.engine);
+    auto& a=self(c).api_;return bound_engine_bootstrap(&a.global,a.engine_limit,&a.frequency,a.engine,&a.startup);
 }
 std::uint32_t HandleBinding::start_easy(void* p,void* c){return xcurl_research_easy_start_engine(p,self(c).easy_.request);}
 void HandleBinding::destroy_easy(void* p,void* c){xcurl_research_easy_destroy_engine(p,&self(c).easy_);}

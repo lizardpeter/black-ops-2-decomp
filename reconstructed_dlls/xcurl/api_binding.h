@@ -18,6 +18,7 @@ struct ApiBinding {
     ActiveRequestLog active_log=nullptr;
     GlobalShutdown shutdown_runtime=nullptr;
     void* context=nullptr;
+    BootstrapReport startup{};
 };
 std::uint32_t bound_global_init(ApiBinding&);
 void bound_global_cleanup(ApiBinding&);

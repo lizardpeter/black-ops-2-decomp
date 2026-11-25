@@ -86,6 +86,7 @@ int main(){
         assert(bound_global_init(b)==0&&bound_global_init(b)==0);
         assert(b.global.engine&&b.global.references==2&&h.starts==1&&b.frequency==10000000);
         assert(read<std::uint32_t>(b.global.engine,0x44)==77);
+        assert(b.startup.stage==BootstrapStage::ready&&!b.startup.status&&b.startup.frequency_available);
         assert(h.queue==1&&h.telemetry==1&&h.mutex==1&&h.app==1&&h.registered==1);
         alignas(8) std::array<unsigned char,0x368> easy{};
         char url[]="https://example.test/one";
@@ -112,11 +113,14 @@ int main(){
         h.fail_alloc=mode==0;h.fail_runtime=mode==1;h.fail_register=mode==2;
         assert(bound_global_init(b)==2&&bound_global_init(b)==2);
         assert(!b.global.engine&&b.global.references==2&&h.errors==2&&h.starts==1);
+        assert(b.startup.stage==(mode==1?BootstrapStage::runtime:BootstrapStage::engine));
+        assert(b.startup.status==(mode==0?27U:0x80004005U)&&!b.startup.frequency_available);
         bound_global_cleanup(b);assert(h.shutdowns==0);
         bound_global_cleanup(b);assert(h.shutdowns==1&&!b.global.references);
         f.balanced();
         h.fail_alloc=h.fail_runtime=h.fail_register=false;
         assert(bound_global_init(b)==0&&b.global.engine&&h.starts==2);
+        assert(b.startup.stage==BootstrapStage::ready&&b.startup.frequency_available);
         bound_global_cleanup(b);assert(h.shutdowns==2);f.balanced();
     }
 }

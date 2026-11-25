@@ -78,12 +78,21 @@ extern "C" std::uint32_t xcurl_research_engine_create(GlobalLifecycle* global,co
     if(failed(status)){xcurl_research_engine_destroy(g,s);s->release(g,11,c);}else global->engine=g;
     return status;
 }
-extern "C" std::uint32_t xcurl_research_engine_bootstrap(GlobalLifecycle* global,std::uint32_t limit,std::uint64_t* frequency,const EngineServices* s){
-    auto c=s->context;if(failed(s->initialize_runtime(c)))return 2;if(global->engine)return 0;
+std::uint32_t t6_xcurl::bound_engine_bootstrap(GlobalLifecycle* global,std::uint32_t limit,std::uint64_t* frequency,const EngineServices* s,BootstrapReport* report){
+    auto c=s->context;auto runtime=s->initialize_runtime(c);
+    if(report)*report={BootstrapStage::runtime,runtime,false};
+    if(failed(runtime))return 2;
+    if(global->engine){if(report)*report={BootstrapStage::ready,0,*frequency!=0};return 0;}
     // Original 0x169FC returns positive 27 on allocation failure and 0x9BA0
     // mistakenly treats it as a successful HRESULT. Do not dereference null.
-    auto status=xcurl_research_engine_create(global,s);if(failed(status)||!global->engine)return 2;
-    xcurl_research_engine_set_limit(global->engine,limit,s);s->query_frequency(frequency,c);return 0;
+    auto status=xcurl_research_engine_create(global,s);
+    if(report)*report={BootstrapStage::engine,status,false};
+    if(failed(status)||!global->engine)return 2;
+    xcurl_research_engine_set_limit(global->engine,limit,s);auto frequency_ok=s->query_frequency(frequency,c);
+    if(report)*report={BootstrapStage::ready,status,frequency_ok!=0};return 0;
+}
+extern "C" std::uint32_t xcurl_research_engine_bootstrap(GlobalLifecycle* global,std::uint32_t limit,std::uint64_t* frequency,const EngineServices* s){
+    return bound_engine_bootstrap(global,limit,frequency,s,nullptr);
 }
 extern "C" std::uint32_t xcurl_research_verify_server_certificate(void* request,const GdkQueryServices* s){
     auto* metadata=ptr(request,0x98);if(!metadata)return 0x80072f89U;

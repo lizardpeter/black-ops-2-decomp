@@ -8,6 +8,14 @@ namespace t6_xcurl {
 // critical sections, a session cache and the runtime-owned notification handles.
 // The host owns the callback entrypoints and must drain them before destruction.
 inline constexpr std::size_t engine_bytes=0xa8;
+enum class BootstrapStage : std::uint32_t {not_attempted, runtime, engine, ready};
+struct BootstrapReport {
+    BootstrapStage stage=BootstrapStage::not_attempted;
+    // Exact return value from the runtime or engine initialization boundary.
+    // Engine allocation failure is the original positive CURLcode 27.
+    std::uint32_t status=0;
+    bool frequency_available=false;
+};
 struct EngineServices {
     const GdkQueryServices* gdk;
     const SessionServices* sessions;
@@ -29,6 +37,7 @@ struct EngineServices {
     std::uint32_t(*query_frequency)(std::uint64_t*,void*);
     void* context;
 };
+std::uint32_t bound_engine_bootstrap(GlobalLifecycle*,std::uint32_t,std::uint64_t*,const EngineServices*,BootstrapReport*);
 }
 extern "C" {
 void* xcurl_research_engine_construct(void*,const t6_xcurl::EngineServices*);

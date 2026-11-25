@@ -35,6 +35,7 @@ public:
     bool installed() const noexcept{return installed_;}
     std::uint32_t references() const noexcept{return api_.global.references;}
     bool engine_ready() const noexcept{return api_.global.engine!=nullptr;}
+    BootstrapReport startup_report() const noexcept{return api_.startup;}
 private:
     const GdkQueryServices& gdk_;
     ApiBinding api_{};

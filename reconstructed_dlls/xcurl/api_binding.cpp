@@ -13,7 +13,7 @@ void error(std::uint32_t status,std::uint32_t api,void* c){auto& b=binding(c);if
 void active(void* p,void* c){auto& b=binding(c);if(b.active_log)b.active_log(p,b.context);}
 std::uint32_t init(GlobalLifecycle* global,void* c){
     auto& b=binding(c);
-    return xcurl_research_engine_bootstrap(global,b.engine_limit,&b.frequency,b.engine);
+    return bound_engine_bootstrap(global,b.engine_limit,&b.frequency,b.engine,&b.startup);
 }
 void destroy(void* p,void* c){
     // Bootstrap may have failed while the original refcount stayed nonzero.

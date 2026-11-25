@@ -25,11 +25,13 @@ int run(bool require_live){
             if(!check(!curl_easy_init()&&!curl_multi_init(),"failed runtime blocks handles"))return 1;
             curl_global_cleanup();curl_global_cleanup();
             if(!check(!runtime.references()&&!runtime.engine_ready(),"failed initialization cleanup"))return 1;
-            std::printf("GDK live initialization unavailable: %d (attempt %u)\n",status,i+1);
+            auto report=runtime.startup_report();
+            if(!check(report.stage==t6_xcurl::BootstrapStage::runtime||report.stage==t6_xcurl::BootstrapStage::engine,"startup failure stage recorded"))return 1;
+            std::printf("GDK live initialization unavailable: %d (attempt %u), stage %u, original status 0x%08x\n",status,i+1,static_cast<unsigned>(report.stage),report.status);
             if(require_live)return 2;
             continue;
         }
-        if(!check(runtime.engine_ready()&&runtime.references()==1,"live GDK engine created"))return 1;
+        if(!check(runtime.engine_ready()&&runtime.references()==1&&runtime.startup_report().stage==t6_xcurl::BootstrapStage::ready,"live GDK engine created"))return 1;
         auto* easy=curl_easy_init();auto* multi=curl_multi_init();
         bool ok=check(easy&&multi,"live handle creation");
         auto* headers=curl_slist_append(nullptr,"X-XCurl-Consumer: native");
