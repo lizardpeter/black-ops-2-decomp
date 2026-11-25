@@ -55,22 +55,53 @@ def canonical(name):
     return None
 
 VOLATILE={"rax","rcx","rdx","r8","r9","r10","r11"}
-def constant_arg(ins,k):
+def constant_args(ins,k):
     from collections import deque
+    from itertools import product
+    LIMIT=8
     by_addr={i.address:j for j,i in enumerate(ins)}
+    branch_targets={i.operands[0].imm for i in ins
+                    if i.mnemonic.startswith(("j","loop")) and i.operands and i.operands[0].type==CS_OP_IMM}
+    # Unknown indirect branches could enter any block with unknown state.
+    if any(i.mnemonic.startswith(("j","loop")) and
+           (not i.operands or i.operands[0].type!=CS_OP_IMM) for i in ins):return None
     incoming={0:{}};pending=deque([0])
+    def finite(values):
+        result=frozenset(values)
+        return result if len(result)<=LIMIT else None
     def merge(j,values):
         if j is None or not 0<=j<len(ins):return
         if j not in incoming:
             incoming[j]=values.copy();pending.append(j);return
-        old=incoming[j];new={r:v for r,v in old.items() if values.get(r)==v}
+        old=incoming[j];new={}
+        for r,v in old.items():
+            if r in values:
+                merged=finite(v|values[r])
+                if merged is not None:new[r]=merged
         if new!=old:incoming[j]=new;pending.append(j)
     def value(i,operand,state):
-        if operand.type==CS_OP_IMM:return operand.imm
+        if operand.type==CS_OP_IMM:return frozenset([operand.imm])
         if operand.type==CS_OP_REG:
             v=state.get(canonical(i.reg_name(operand.reg)))
-            if v is not None and operand.size in (4,8):return v&((1<<(8*operand.size))-1)
+            if v is not None and operand.size in (4,8):
+                return finite(n&((1<<(8*operand.size))-1) for n in v)
         return None
+    def refine_equality(j,values,equal):
+        # Only use a directly preceding 64-bit compare when the branch is
+        # not itself a target of any other decoded branch. A 32-bit compare
+        # would not prove the upper half of the register.
+        if not j or ins[j].address in branch_targets:return values
+        cmp=ins[j-1];ops=cmp.operands
+        if cmp.mnemonic!="cmp" or len(ops)!=2 or ops[0].type!=CS_OP_REG or ops[0].size!=8 or ops[1].type!=CS_OP_IMM:return values
+        r=canonical(cmp.reg_name(ops[0].reg))
+        if not r:return values
+        v=ops[1].imm&((1<<64)-1);old=values.get(r)
+        if equal:
+            if old is not None and v not in old:return None
+            return dict(values,**{r:frozenset([v])})
+        if old is None:return values
+        remain=old-{v}
+        return dict(values,**{r:remain}) if remain else None
     while pending:
         j=pending.popleft();i=ins[j];state=incoming[j];out=state.copy()
         op=i.operands;mn=i.mnemonic
@@ -84,27 +115,34 @@ def constant_arg(ins,k):
             dst=canonical(i.reg_name(op[0].reg));v=None
             if dst:
                 if mn in ("mov","movabs") and len(op)==2:v=value(i,op[1],state)
-                elif mn=="xor" and len(op)==2 and op[1].type==CS_OP_REG and op[0].reg==op[1].reg:v=0
+                elif mn=="xor" and len(op)==2 and op[1].type==CS_OP_REG and op[0].reg==op[1].reg:v=frozenset([0])
                 elif mn=="lea" and len(op)==2 and op[1].type==CS_OP_MEM:
                     m=op[1].mem
-                    base=state.get(canonical(i.reg_name(m.base))) if m.base else 0
-                    index=state.get(canonical(i.reg_name(m.index))) if m.index else 0
-                    if base is not None and index is not None and not m.segment:v=base+index*m.scale+m.disp
+                    base=state.get(canonical(i.reg_name(m.base))) if m.base else frozenset([0])
+                    index=state.get(canonical(i.reg_name(m.index))) if m.index else frozenset([0])
+                    if base is not None and index is not None and not m.segment:v=finite(a+b*m.scale+m.disp for a,b in product(base,index))
                 elif mn in ("add","sub","and","or","xor") and len(op)==2:
                     a=value(i,op[0],state);b=value(i,op[1],state)
                     if a is not None and b is not None:
-                        v={"add":lambda:a+b,"sub":lambda:a-b,"and":lambda:a&b,"or":lambda:a|b,"xor":lambda:a^b}[mn]()
-                if v is not None:out[dst]=v&((1<<(8*op[0].size))-1)
+                        func={"add":lambda x,y:x+y,"sub":lambda x,y:x-y,"and":lambda x,y:x&y,"or":lambda x,y:x|y,"xor":lambda x,y:x^y}[mn]
+                        v=finite(func(x,y) for x,y in product(a,b))
+                if v is not None:out[dst]=finite(n&((1<<(8*op[0].size))-1) for n in v)
         if mn.startswith(("ret","iret")) or mn in ("int3","ud2"):continue
         if mn.startswith("j") or mn.startswith("loop"):
-            # An unknown jump target could enter any block with unknown
-            # register state. Refuse a proof instead of guessing jump tables.
-            if not op or op[0].type!=CS_OP_IMM:return None
-            merge(by_addr.get(op[0].imm),out)
-            if mn in ("jmp","ljmp"):continue
-        merge(j+1,out)
+            yes=out;no=out
+            if mn in ("je","jz","jne","jnz"):
+                is_equal=mn in ("je","jz")
+                yes=refine_equality(j,out,is_equal);no=refine_equality(j,out,not is_equal)
+            if yes is not None:merge(by_addr.get(op[0].imm),yes)
+            if mn in ("jmp","ljmp") or no is None:continue
+            merge(j+1,no)
+        else:merge(j+1,out)
     v=incoming.get(k,{}).get("rdx")
-    return None if v is None else v&0xffffffff
+    return None if v is None else sorted({n&0xffffffff for n in v})
+
+def constant_arg(ins,k):
+    values=constant_args(ins,k)
+    return values[0] if values is not None and len(values)==1 else None
 
 def call_evidence(pe,rva,expected,iat):
     base=pe.OPTIONAL_HEADER.ImageBase
@@ -130,8 +168,9 @@ def call_evidence(pe,rva,expected,iat):
             target=iat.get(thunk.address+thunk.size+thunk.operands[0].mem.disp)
     assert target==expected,(hex(rva),target,expected)
     prior=ins[max(0,k-24):k]
-    option=constant_arg(ins,k)
-    return {"rva":hex(rva),"option":option,"proof":"control-flow constant" if option is not None else None,
+    options=constant_args(ins,k)
+    option=options[0] if options is not None and len(options)==1 else None
+    return {"rva":hex(rva),"option":option,"options":options,"proof":"control-flow value set" if options is not None else None,
             "instructions":[format_ins(pe,i) for i in prior+[call]]}
 
 def main():
@@ -165,8 +204,10 @@ def main():
             records=[]
             for site in b[kind]:
                 rec=call_evidence(client,int(site["call_rva"],16),"curl_easy_"+kind,iat)
-                if "option" in site and rec["option"] is not None:
-                    assert rec["option"]==site["option"],(name,site,rec)
+                if "option" in site and rec["options"] is not None:
+                    assert site["option"] in rec["options"],(name,site,rec)
+                if "options" in site and rec["options"] is not None:
+                    assert rec["options"]==site["options"],(name,site,rec)
                 records.append(rec)
             observed[name][kind]=records
     result={"dll_sha256":SHA,"exports":{"curl_easy_setopt":hex(roots[0])},
@@ -191,15 +232,15 @@ def main():
                     result["functions"][hex(t)]=function_evidence(pe,t,ranges)[0]
     a.out.write_text(json.dumps(result,indent=2)+"\n")
     for n,b in observed.items():
-        print(n, {k:[x["option"] for x in b[k]] for k in ("setopt","getinfo")})
+        print(n, {k:[x["options"] for x in b[k]] for k in ("setopt","getinfo")})
     # Unresolved values remain explicit rather than being copied from MP.
     mp=observed["t6mp_msstore"]
     for k in ("setopt","getinfo"):
-        if any(x["option"] is None for x in mp[k]):
+        if any(x["options"] is None for x in mp[k]):
             print("Incomplete literal recovery for MP",k)
         for n,b in observed.items():
             if n=="t6mp_msstore":continue
             pairs=list(zip(mp[k],b[k]))
-            assert all(x["option"]==y["option"] for x,y in pairs if x["option"] is not None and y["option"] is not None),(n,k)
+            assert all(x["options"]==y["options"] for x,y in pairs if x["options"] is not None and y["options"] is not None),(n,k)
     print("Read-only option-path evidence saved; unresolved values are null.")
 if __name__=="__main__":main()

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Exercise branches and Win64 call clobbers without original files."""
-from probe_xcurl_setopt import decoder,constant_arg
+from probe_xcurl_setopt import decoder,constant_arg,constant_args
 
 def check(code,want,idx=-1):
     ins=list(decoder().disasm(bytes.fromhex(code),0x1000))
@@ -24,4 +24,10 @@ check("ba2c000000 b201 e800000000",None)
 check("bb2a000000 8d5302 e800000000",44)
 # indirect branch refuses analysis
 check("ba2c000000 ffe0 e800000000",None)
-print("XCurl caller constant propagation PASS: 8 control-flow cases")
+# Two legitimate constants are preserved, not incorrectly collapsed.
+ins=list(decoder().disasm(bytes.fromhex("ba2c000000 85c0 7405 ba2e000000 e800000000"),0x1000))
+assert constant_args(ins,len(ins)-1)==[44,46]
+# cmp rcx,4; jne other; lea edi,[rcx+42]; jmp merge; mov edi,44; mov edx,edi; call
+ins=list(decoder().disasm(bytes.fromhex("4883f904 7505 8d792a eb05 bf2c000000 89fa e800000000"),0x1000))
+assert constant_args(ins,len(ins)-1)==[44,46]
+print("XCurl caller constant propagation PASS: 10 control-flow cases")

@@ -55,16 +55,17 @@ def main():
         for kind,supported in (("setopt",supported_setopt&implemented_setopt),("getinfo",supported_getinfo)):
             for site in build[kind]:
                 rec=call_evidence(pe,int(site["call_rva"],16),"curl_easy_"+kind,iat)
-                value=rec["option"]
-                if value is None:
+                values=rec["options"]
+                if values is None:
                     result["unresolved"].append({"build":name,"kind":kind,"rva":rec["rva"]})
                     print("UNRESOLVED",name,rec["rva"],"\n"+"\n".join(rec["instructions"]),flush=True)
                 else:
-                    assert value in supported,(name,kind,rec["rva"],value)
-                    if "option" in site:assert value==site["option"],(name,site,rec)
-                entry[kind].append({"rva":rec["rva"],"option":value})
+                    assert set(values)<=supported,(name,kind,rec["rva"],values)
+                    if "option" in site:assert site["option"] in values,(name,site,rec)
+                    if "options" in site:assert site["options"]==values,(name,site,rec)
+                entry[kind].append({"rva":rec["rva"],"options":values})
         result["originals"][name]=entry
-        print(name,"16 imports matched", {k:[v["option"] for v in entry[k]] for k in ("setopt","getinfo")},flush=True)
+        print(name,"16 imports matched", {k:[v["options"] for v in entry[k]] for k in ("setopt","getinfo")},flush=True)
     args.out.parent.mkdir(parents=True,exist_ok=True)
     args.out.write_text(json.dumps(result,indent=2)+"\n")
     print("All 16 source-linked x64 symbols confirmed in executable sections; no vendor XCurl or libcurl imports.")
