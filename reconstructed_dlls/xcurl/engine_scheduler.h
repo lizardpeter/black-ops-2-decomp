@@ -13,6 +13,8 @@ struct SchedulerServices {
 }
 extern "C" {
 void xcurl_research_advance_pending(void*,void*,const t6_xcurl::SchedulerServices*);
+// Integration safety: publish admission before a potentially inline completion.
+void xcurl_bound_advance_pending(void*,void*,const t6_xcurl::SchedulerServices*);
 void xcurl_research_advance_active(void*,const t6_xcurl::SchedulerServices*);
 void xcurl_research_abort_all(void*,const t6_xcurl::SchedulerServices*);
 std::uint32_t xcurl_research_multi_wait(void*,std::uint32_t,std::uint32_t*,const t6_xcurl::SchedulerServices*);

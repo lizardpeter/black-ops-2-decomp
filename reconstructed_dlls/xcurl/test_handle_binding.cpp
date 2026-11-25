@@ -7,7 +7,7 @@ using namespace t6_xcurl;
 namespace {
 using P=std::uint8_t*;
 template<class T>void put(void* p,unsigned o,T v){std::memcpy(static_cast<P>(p)+o,&v,sizeof(v));}
-template<class T>T get(const void* p,unsigned o){T v;std::memcpy(&v,static_cast<const P>(p)+o,sizeof(v));return v;}
+template<class T>T get(const void* p,unsigned o){T v;std::memcpy(&v,static_cast<const std::uint8_t*>(p)+o,sizeof(v));return v;}
 struct Host {
     unsigned locks=0,cs=0,allocs=0,frees=0,events=0,closed=0,queries=0,releases=0,queues=0,term=0,dispatches=0,errors=0;
     bool fail_queue=false;

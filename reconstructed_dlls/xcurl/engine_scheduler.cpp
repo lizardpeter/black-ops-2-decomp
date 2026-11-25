@@ -11,7 +11,8 @@ P ptr(P p,unsigned o){return get<P>(p,o);}
 void increment(P p,unsigned o,std::uint32_t n){put(p,o,get<std::uint32_t>(p,o)+n);}
 void move_back(P h,P n){put(ptr(n,0),8,ptr(n,8));put(ptr(n,8),0,ptr(n,0));put(n,0,h);put(n,8,ptr(h,8));put(ptr(h,8),0,n);put(h,8,n);}
 }
-extern "C" void xcurl_research_advance_pending(void* multi,void* engine,const SchedulerServices* s){
+namespace {
+void advance_pending(void* multi,void* engine,const SchedulerServices* s,bool publish_before_start){
     auto* m=static_cast<P>(multi);auto* g=static_cast<P>(engine);auto c=s->context;
     s->enter(g,c);auto enabled=g[0x49];s->leave(g,c);
     auto* head=m+0x40;std::uint32_t count=0;
@@ -23,12 +24,26 @@ extern "C" void xcurl_research_advance_pending(void* multi,void* engine,const Sc
     else{count=limit-current;put(g,0x40,limit);}
     s->leave(g,c);std::uint32_t started=0;
     s->enter(m+0x10,c);if(!m[0xc0]){
-        while(started<count){auto* e=ptr(head,0);if(!e||e==head)break;s->start_easy(e,c);++started;move_back(m+0x50,e);}
-        if(started)s->reset_event(ptr(m,0xb0),c);
-        increment(m,0x3c,started);
+        while(started<count){
+            auto* e=ptr(head,0);if(!e||e==head)break;
+            if(publish_before_start){
+                // A failed GDK submit can complete inline. Make the easy
+                // visible to A6B0 and count it before invoking CF90.
+                move_back(m+0x50,e);
+                if(!get<std::uint32_t>(m,0x3c))s->reset_event(ptr(m,0xb0),c);
+                increment(m,0x3c,1);++started;s->start_easy(e,c);
+            }else{s->start_easy(e,c);++started;move_back(m+0x50,e);}
+        }
+        if(!publish_before_start){
+            if(started)s->reset_event(ptr(m,0xb0),c);
+            increment(m,0x3c,started);
+        }
     }s->leave(m+0x10,c);
     if(count!=started){s->enter(g,c);increment(g,0x40,started-count);s->leave(g,c);}
 }
+}
+extern "C" void xcurl_research_advance_pending(void* m,void* g,const SchedulerServices* s){advance_pending(m,g,s,false);}
+extern "C" void xcurl_bound_advance_pending(void* m,void* g,const SchedulerServices* s){advance_pending(m,g,s,true);}
 extern "C" void xcurl_research_advance_active(void* multi,const SchedulerServices* s){
     auto* m=static_cast<P>(multi);auto c=s->context;increment(m,0xc4,1);auto* head=m+0x50;
     for(;;){P selected=nullptr;s->enter(m+0x10,c);

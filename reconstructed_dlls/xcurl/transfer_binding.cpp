@@ -23,7 +23,7 @@ void TransferBinding::event(void* p,void* c){auto* r=self(c).prepare_.request;r-
 std::uint32_t TransferBinding::wait_one(void* p,std::uint32_t t,void* c){auto& h=self(c).host_;return h.wait_one(p,t,h.context);}
 std::uint32_t TransferBinding::wait_many(std::uint32_t n,const void* p,std::uint32_t t,void* c){auto& h=self(c).host_;return h.wait_many(n,p,t,h.context);}
 void TransferBinding::release_mutex(void* p,void* c){auto& h=self(c).host_;h.release_mutex(p,h.context);}
-void TransferBinding::pending(void* p,void* c){auto& b=self(c);xcurl_research_advance_pending(p,b.global_.engine,&b.scheduler_);}
+void TransferBinding::pending(void* p,void* c){auto& b=self(c);xcurl_bound_advance_pending(p,b.global_.engine,&b.scheduler_);}
 void TransferBinding::active(void* p,void* c){auto& b=self(c);xcurl_research_advance_active(p,&b.scheduler_);}
 std::uint8_t TransferBinding::done(void* p,void* c){return xcurl_research_easy_done(p,self(c).prepare_.request);}
 void TransferBinding::adjust(std::uint32_t n,void* c){auto& b=self(c);xcurl_research_engine_decrement(b.global_.engine,n,b.prepare_.request);}

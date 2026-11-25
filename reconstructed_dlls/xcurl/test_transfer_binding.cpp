@@ -35,7 +35,7 @@ std::uint32_t wait_many(std::uint32_t n,const void*,std::uint32_t t,void* c){ass
 void* alloc(std::size_t n,std::uint32_t tag,void* c){assert(tag==12);++host(c).allocs;return std::malloc(n);}
 void release(void* p,std::uint32_t tag,void* c){assert(tag==12);++host(c).frees;std::free(p);}
 void adjust(std::uint32_t n,void* c){host(c).tasks->adjust_global(n);}
-void diag(void*,std::uint32_t site,std::uint32_t status,void*){assert(site==0x20f80&&status==0x80004005U);}
+void diag(void*,std::uint32_t site,std::uint32_t status,void*){assert((site==0x20f80||site==0x20920)&&status==0x80004005U);}
 std::uint32_t submit(void* q,void* e,void* c){return host(c).tasks->submit_completion(q,e);}
 std::uint8_t dispatch(void* q,std::uint32_t p,std::uint32_t t,void* c){return host(c).tasks->dispatch(q,p,t);}
 std::uint32_t gdk_submit(void* o,void* queue,std::uint32_t port,void* context,void* cb){
@@ -93,10 +93,19 @@ int main(){
     assert(msg&&remaining==0&&get<void*>(msg,8)==a&&get<std::uint32_t>(msg,16)==58);
     assert(!b.info_read(m,&remaining)&&remaining==0&&h.allocs==2&&h.frees==2);
     assert(b.remove(m,a)==0&&b.remove(m,z)==0&&get<std::uint32_t>(m,0x38)==0);
+    // Force the recovered BA8C synchronous fallback during admission.
+    h.fail_submit=true;assert(b.add(m,pending)==0);
+    assert(b.perform(m,&running)==0&&running==0&&h.starts==3);
+    assert(get<std::uint32_t>(g,0x40)==0&&get<std::uint32_t>(m,0x3c)==0);
+    msg=static_cast<P>(b.info_read(m,&remaining));
+    assert(msg&&remaining==0&&get<void*>(msg,8)==pending&&get<std::uint32_t>(msg,16)==58);
+    assert(!b.info_read(m,&remaining)&&h.allocs==3&&h.frees==3);
+    assert(b.remove(m,pending)==0&&get<std::uint32_t>(m,0x38)==0);
+    h.fail_submit=false;
     std::uint32_t count=99;
     assert(b.poll(m,42,&count)==0&&count==0);
     assert(b.wait(m,1,&count)==0&&count==1);
     assert(b.wakeup(m)==0);
-    assert(h.locks==0&&h.resets==2&&h.releases>=2&&!h.pending);
+    assert(h.locks==0&&h.resets==3&&h.releases>=2&&!h.pending);
     h.global.engine=nullptr;assert(b.perform(m,&running)==1);
 }
