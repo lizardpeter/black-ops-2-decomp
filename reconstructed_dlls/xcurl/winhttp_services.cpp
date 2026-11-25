@@ -23,7 +23,9 @@ void debug_data(void* e,std::uint32_t type,const void* p,std::uint64_t n,void* c
     (void)xcurl_research_debug_data(e,static_cast<int>(type),p,n,&services);
 }
 void retry(void* e,void* ctx){diagnostic(e,0x21520,0,ctx);}
-void* session(const char16_t* agent,std::uint32_t flags,void*){return ::WinHttpOpen(w(agent),4,nullptr,nullptr,flags);}
+void* session(const char16_t* agent,std::uint32_t flags,void*){// Original checks last-error after WinHttpOpen even on success.
+    // Clear stale error 87 before the call to prevent an unnecessary second session.
+    ::SetLastError(ERROR_SUCCESS);return ::WinHttpOpen(w(agent),4,nullptr,nullptr,flags);}
 void* connect(void* h,const char16_t* hostname,std::uint16_t port,void*){return ::WinHttpConnect(h,w(hostname),port,0);}
 void* open(void* h,const char16_t* method,const char16_t* path,const char16_t* const* accepts,std::uint32_t flags,void*){
     return ::WinHttpOpenRequest(h,w(method),w(path),nullptr,nullptr,reinterpret_cast<LPCWSTR*>(const_cast<const char16_t**>(accepts)),flags);

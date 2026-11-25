@@ -15,6 +15,7 @@
 #include <mutex>
 #include <string>
 #include <vector>
+#include <wincrypt.h>
 using namespace t6_xcurl;
 namespace {
 void require(bool ok,const char* label){if(!ok){std::fprintf(stderr,"FAIL %s (Win32 %lu)\n",label,GetLastError());std::exit(1);}}
@@ -28,6 +29,8 @@ struct Mock {
     Interface t{thread.data(),this},n{network.data(),this},e{errors.data(),this};
     Queue* engine=nullptr;
     std::atomic<unsigned> queue_count{0},queries{0},releases{0},starts{0},reports{0};
+    bool tls=false;
+    std::atomic<unsigned> verifications{0},accepted{0};
     Mock();
 };
 Mock& self(void* p){return *static_cast<Mock::Interface*>(p)->owner;}
@@ -60,17 +63,40 @@ std::uint32_t register_connect(void*,void*,void* engine,void* callback,void* tok
 }
 std::uint8_t unregister_connect(void*,std::uint64_t,std::uint8_t){return 1;}
 std::uint32_t security_async(void* p,const char16_t* text,void* block){
-    require(std::u16string_view(text).starts_with(u"http://127.0.0.1:"),"loopback only security fixture");
+    require(std::u16string_view(text).starts_with(self(p).tls?u"https://127.0.0.1:":u"http://127.0.0.1:"),"loopback only security fixture");
     auto& m=self(p);++m.starts;
     auto* queue=get<Queue*>(block,0);require(queue==m.engine,"engine queue");
     auto worker=+[](void* b,bool){get<void(*)(void*)>(b,16)(b);};
     return submit(p,queue,1,block,reinterpret_cast<void*>(worker));
 }
 std::uint32_t security_size(void*,void*,std::uint64_t* n){*n=24;return 0;}
-std::uint32_t security_result(void*,void*,std::uint64_t n,std::uint64_t*,void* data,void** info){
-    require(n==24,"security metadata size");std::memset(data,0,24);*info=data;return 0;
+std::uint32_t security_result(void* p,void*,std::uint64_t n,std::uint64_t*,void* data,void** info){
+    require(n==24,"security metadata size");std::memset(data,0,24);if(self(p).tls)put(data,0,std::uint32_t(0x800));*info=data;return 0;
 }
-std::uint32_t verify(void*,void*,const void*){return 0;} // fixture only: cleartext localhost
+std::uint32_t verify(void* p,void* request,const void*){
+    auto& m=self(p);if(!m.tls)return 0; // cleartext loopback only
+    ++m.verifications;
+    // Test substitute for the GDK certificate service uses Windows trust
+    // chain and SSL hostname policy, not a blanket acceptance callback.
+    PCCERT_CONTEXT cert=nullptr;DWORD size=sizeof(cert);
+    if(!WinHttpQueryOption(request,WINHTTP_OPTION_SERVER_CERT_CONTEXT,&cert,&size)||!cert)return 0x80072f89U;
+    CERT_CHAIN_PARA params{};params.cbSize=sizeof(params);
+    LPSTR eku=const_cast<LPSTR>(szOID_PKIX_KP_SERVER_AUTH);
+    params.RequestedUsage.dwType=USAGE_MATCH_TYPE_AND;
+    params.RequestedUsage.Usage.cUsageIdentifier=1;params.RequestedUsage.Usage.rgpszUsageIdentifier=&eku;
+    PCCERT_CHAIN_CONTEXT chain=nullptr;
+    bool ok=CertGetCertificateChain(nullptr,cert,nullptr,cert->hCertStore,&params,0,nullptr,&chain)!=FALSE;
+    if(ok){
+        SSL_EXTRA_CERT_CHAIN_POLICY_PARA ssl{};ssl.cbSize=sizeof(ssl);ssl.dwAuthType=AUTHTYPE_SERVER;
+        ssl.pwszServerName=const_cast<wchar_t*>(L"127.0.0.1");
+        CERT_CHAIN_POLICY_PARA policy{};policy.cbSize=sizeof(policy);policy.pvExtraPolicyPara=&ssl;
+        CERT_CHAIN_POLICY_STATUS result{};result.cbSize=sizeof(result);
+        ok=CertVerifyCertificateChainPolicy(CERT_CHAIN_POLICY_SSL,chain,&policy,&result)&&!result.dwError;
+    }
+    if(chain)CertFreeCertificateChain(chain);CertFreeCertificateContext(cert);
+    if(ok)++m.accepted;
+    return ok?0U:0x80072f89U;
+}
 void report(void* p,std::uint32_t,const char* msg){require(std::strstr(msg,"127.0.0.1"),"loopback warning");++self(p).reports;}
 template<class F>void slot(std::array<void*,30>& a,unsigned n,F fn){a[n]=reinterpret_cast<void*>(fn);}
 Mock::Mock(){
@@ -187,10 +213,33 @@ void batch(void* m,Mock& mock,unsigned port){
     curl_slist_free_all(list);
     std::puts("XCurl batch PASS: admission limit, 13 parallel requests, reuse, invalid URL, HTTP error, active cancel");
 }
+// Each TLS server has a distinct certificate and the mock never accepts a
+// remote endpoint. Schannel also retains its ordinary WinHTTP verification.
+void tls_transfer(void* m,Mock& mock,unsigned port,bool valid){
+    auto* e=curl_easy_init();require(e,"TLS easy init");
+    std::string body;auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
+    auto url=std::string("https://127.0.0.1:")+std::to_string(port)+"/get";
+    configure(e,url,list,&body);
+    auto before=mock.accepted.load();
+    require(!curl_multi_add_handle(m,e),"TLS add");pump(m,mock);
+    int n=0;auto* msg=curl_multi_info_read(m,&n);
+    require(msg&&msg->easy==e&&!n,"TLS completion");
+    std::int32_t http=0,hr=0;
+    require(!curl_easy_getinfo(e,0x200002,&http)&&!curl_easy_getinfo(e,0x200019,&hr),"TLS metadata");
+    if(valid){
+        require(!msg->data.result&&http==200&&body=="xcurl-native-get","trusted TLS response");
+        require(mock.accepted>before,"Windows certificate chain and hostname accepted");
+    }else{
+        require(msg->data.result&&hr&&body.empty()&&mock.accepted==before,"untrusted TLS rejected");
+    }
+    require(!curl_multi_remove_handle(m,e),"TLS remove");require(!curl_multi_info_read(m,&n),"TLS message retired");
+    curl_easy_cleanup(e);curl_slist_free_all(list);
+    std::printf("XCurl TLS %s PASS: result %s, native Schannel, GDK fixture chain policy\\n",valid?"trusted":"untrusted",valid?"success":"rejected");
+}
 }
 int main(int argc,char** argv){
-    require(argc==2,"port argument");auto port=static_cast<unsigned>(std::atoi(argv[1]));
-    Mock mock;GdkQueryServices gdk{query,&mock};ApiBinding api{};WinHttpHost host{nullptr,diag,nullptr};RequestServices request{};
+    require(argc==2||argc==3,"HTTP port or trusted and untrusted TLS ports");auto port=static_cast<unsigned>(std::atoi(argv[1]));
+    Mock mock;mock.tls=argc==3;GdkQueryServices gdk{query,&mock};ApiBinding api{};WinHttpHost host{nullptr,diag,nullptr};RequestServices request{};
     TaskQueueBinding tasks(api.global,request,gdk);Win32UrlBinding urls(host,request,gdk);
     WinHttpPipeline pipe(api.global,host,request,tasks,gdk,urls.crack_services(),nullptr);
     auto os=win32_multi_host_services(nullptr);TransferBinding transfers(api.global,urls.prepare_services(),os);
@@ -208,10 +257,10 @@ int main(int argc,char** argv){
     HandleBinding handles(api,easy,multi);GameApi facade(api,handles,transfers);
     require(facade.install()&&!curl_global_init(3),"global init");
     auto* m=curl_multi_init();require(m,"multi init");
-    for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);
-    batch(m,mock,port);
+    if(mock.tls){tls_transfer(m,mock,port,true);tls_transfer(m,mock,static_cast<unsigned>(std::atoi(argv[2])),false);}
+    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&mock.starts==19&&mock.reports>=19,"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==2&&!mock.reports&&mock.verifications>0):(mock.starts==19&&mock.reports>=19)),"balanced runtime lifetime");
     require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }
