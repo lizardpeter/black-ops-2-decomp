@@ -16,7 +16,7 @@ void CallbackBinding::start_entry(void* async){
 }
 void CallbackBinding::status_entry(std::uintptr_t request,std::uint32_t status,const void* info,std::uint32_t length){
     // Disabled-ETW 14A00 forwards dwContext, status, info and length.
-    auto* b=active_.load();if(b&&request)xcurl_research_http_status(reinterpret_cast<void*>(request),status,info,length,&b->status_);
+    auto* b=active_.load();if(b&&request)xcurl_bound_http_status(reinterpret_cast<void*>(request),status,info,length,&b->status_);
 }
 std::uint32_t CallbackBinding::submit_header(void* queue,void* easy,std::uint32_t id,void*){
     auto* b=active_.load();if(!b)return 0x8000ffffU;

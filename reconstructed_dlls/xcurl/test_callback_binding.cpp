@@ -12,7 +12,7 @@ template<class T>void put(void* p,unsigned o,T v){std::memcpy(static_cast<P>(p)+
 template<class T>T get(const void* p,unsigned o){T v;std::memcpy(&v,static_cast<const std::uint8_t*>(p)+o,sizeof(v));return v;}
 void circle(P p){put(p,0,p);put(p,8,p);}
 struct Host {
-    unsigned locks=0,signals=0,allocated=0,freed=0,queries=0,released=0;
+    unsigned locks=0,signals=0,allocated=0,freed=0,queries=0,released=0,diagnostics=0;
     std::string headers,body;
     RequestServices request{};
     std::array<void*,30> slots{};
@@ -49,6 +49,7 @@ int main(){
     GdkQueryServices gdk{query,&h};TaskQueueBinding tasks(global,h.request,gdk);h.tasks=&tasks;
     StartServices start{};start.request=&h.request;start.gdk=&gdk;
     StatusServices status{};status.request=&h.request;status.gdk=&gdk;
+    status.diagnostic=[](void*,std::uint32_t,std::uint64_t,std::uint64_t,std::uint32_t,void* c){++host(c).diagnostics;};
     HeaderServices headers{&h.request,nullptr,nullptr};BodyServices body{&h.request,nullptr,deliver};UploadServices upload{&h.request,nullptr,nullptr,nullptr};
     CallbackBinding callbacks(tasks,start,status,headers,body,upload),other(tasks,start,status,headers,body,upload);
     assert(callbacks.activate()&&!other.activate());
@@ -72,6 +73,12 @@ int main(){
     put(r,0x28,6U);put(r,0x60,r);put(r,0x50,&h);
     auto start_fn=reinterpret_cast<void(*)(void*)>(CallbackBinding::start_token());start_fn(r+0x58);
     assert(get<std::uint32_t>(r,0x28)==6);
+    // Late read/error callbacks following local cancellation must not touch
+    // the already-completing handle or the primary diagnostic.
+    std::array<std::uint64_t,2> aborted{3,12017};
+    for(auto state:{5U,6U}){put(r,0x28,state);CallbackBinding::status_entry(reinterpret_cast<std::uintptr_t>(r),0x200000,aborted.data(),16);CallbackBinding::status_entry(reinterpret_cast<std::uintptr_t>(r),0x40000,nullptr,0);}
+    put(r,0x28,2U);CallbackBinding::status_entry(reinterpret_cast<std::uintptr_t>(r),0x200000,nullptr,0);
+    assert(!h.diagnostics&&get<std::uint32_t>(r,0x28)==2);put(r,0x28,6U);
     CallbackBinding::status_entry(reinterpret_cast<std::uintptr_t>(r),0x800,nullptr,0);
     assert(!get<void*>(r,0x50)&&get<std::uint32_t>(r,0x28)==6);
     callbacks.deactivate();assert(other.activate());callbacks.deactivate();other.deactivate();

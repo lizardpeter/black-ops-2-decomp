@@ -11,13 +11,27 @@ template<class T>void put(P p,unsigned o,T v){std::memcpy(p+o,&v,sizeof(v));}
 bool failed(std::uint32_t x){return (x&0x80000000U)!=0;}
 std::uint32_t hr(std::uint32_t x){return std::bit_cast<std::int32_t>(x)>0?(x&0xffffU)|0x80070000U:x;}
 }
-extern "C" void xcurl_research_http_status(void* request,std::uint32_t status,const void* info,std::uint32_t length,const StatusServices* s){
+namespace {
+void http_status(void* request,std::uint32_t status,const void* info,std::uint32_t length,const StatusServices* s,bool bound){
     auto* p=static_cast<P>(request);auto* r=s->request;auto ctx=r->context;
     auto easy=[&]{return get<P>(p,0x30);};
+    // WinHTTP can notify an aborted pending read after a user callback has
+    // already canceled and closed the request. Do not let that notification
+    // overwrite the first failure text, enqueue more work or close twice.
+    if(bound&&status!=0x800){
+        r->enter(p,ctx);auto state=get<std::uint32_t>(p,0x28);r->leave(p,ctx);
+        if(state>=5||state==0)return;
+        if(status==0x200000&&(!info||length<16))return;
+        if(status==0x40000&&(!info||length<4))return;
+        if(status==0x4000&&(!info||length<2||length%2))return;
+    }
     auto close=[&]{xcurl_research_request_close(p,r);};
     auto diag=[&](unsigned site,std::uint64_t a,std::uint64_t b=0,std::uint32_t c=0){s->diagnostic(easy(),site,a,b,c,ctx);};
     auto cancel=[&](std::uint32_t h,unsigned code){xcurl_research_easy_cancel(easy(),h,code,r);close();};
-    auto fail=[&](unsigned site,std::uint32_t h,unsigned code){diag(site,h);cancel(h,code);};
+    auto fail=[&](unsigned site,std::uint32_t h,unsigned code){
+        if(bound){r->enter(easy()+0x188,ctx);bool earlier=failed(get<std::uint32_t>(easy(),0x228));r->leave(easy()+0x188,ctx);if(earlier){close();return;}}
+        diag(site,h);cancel(h,code);
+    };
     auto release=[&](unsigned off,unsigned tag){if(auto* v=get<P>(p,off)){r->release(v,tag,ctx);put<P>(p,off,nullptr);}};
     auto query=[&]{if(!s->query_available(get<P>(p,0x50),ctx))fail(0x21868,hr(r->last_error(ctx)),56);};
     auto eof=[&](unsigned site){auto received=get<std::uint64_t>(p,0xc8),expected=get<std::uint64_t>(p,0xc0);if(p[0xb8]&&get<std::uint32_t>(easy(),0x80)!=3&&!easy()[0x174]&&received<expected){diag(site,received,expected,0x8007000dU);cancel(0x8007000dU,18);}else close();};
@@ -37,3 +51,7 @@ extern "C" void xcurl_research_http_status(void* request,std::uint32_t status,co
     default:break;
     }
 }
+
+}
+extern "C" void xcurl_research_http_status(void* p,std::uint32_t n,const void* i,std::uint32_t l,const StatusServices* s){http_status(p,n,i,l,s,false);}
+extern "C" void xcurl_bound_http_status(void* p,std::uint32_t n,const void* i,std::uint32_t l,const StatusServices* s){http_status(p,n,i,l,s,true);}

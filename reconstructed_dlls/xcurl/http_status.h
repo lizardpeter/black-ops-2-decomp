@@ -16,3 +16,5 @@ struct StatusServices {
 };
 }
 extern "C" void xcurl_research_http_status(void*,std::uint32_t,const void*,std::uint32_t,const t6_xcurl::StatusServices*);
+
+extern "C" void xcurl_bound_http_status(void*,std::uint32_t,const void*,std::uint32_t,const t6_xcurl::StatusServices*);

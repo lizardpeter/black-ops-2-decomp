@@ -71,6 +71,6 @@ void* WinHttpPipeline::reallocate(void* p,std::size_t n,std::uint32_t t,void*){r
 void WinHttpPipeline::diag(void* e,std::uint32_t site,std::uint32_t value,void* c){auto& r=self(c).request_;r.diagnostic(e,site,value,r.context);}
 void WinHttpPipeline::diag64(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t b,void* c){winhttp_report_diagnostic(e,site,a,b,0,static_cast<std::uint32_t>(a),static_cast<WinHttpHost*>(c));}
 void WinHttpPipeline::diag_mixed(void* e,std::uint32_t site,std::uint64_t a,std::uint32_t b,void* c){winhttp_report_diagnostic(e,site,a,b,b,b?b:static_cast<std::uint32_t>(a),static_cast<WinHttpHost*>(c));}
-void WinHttpPipeline::diag_status(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t,std::uint32_t b,void* c){diag(e,site,b?b:static_cast<std::uint32_t>(a),c);}
+void WinHttpPipeline::diag_status(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t b,std::uint32_t h,void* c){winhttp_report_diagnostic(e,site,a,b,h,h?h:static_cast<std::uint32_t>(a),static_cast<WinHttpHost*>(c));}
 }
 #endif
