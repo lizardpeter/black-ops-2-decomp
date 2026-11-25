@@ -49,7 +49,6 @@ std::uint8_t gdk_dispatch(void* o,void* queue,std::uint32_t port,std::uint32_t t
 std::uint32_t gdk_create(void* o,std::uint32_t a,std::uint32_t b,void** out){auto& h=obj(o);assert(a==0&&b==0);++h.creates;*out=h.queue;return 0;}
 void gdk_cancel(void* o,void* p){auto& h=obj(o);assert(p==h.queue);++h.cancels;}
 void thread_assert(void*){}
-void after_cancel(void*,void*){assert(false);}
 std::uint32_t query(const void*,const void*,void** out,void* c){*out=&host(c).object;return 0;}
 std::uint32_t release_interface(void* p){++obj(p).releases;return 1;}
 std::uint32_t security_async(void* p,const char16_t*,void* block){
@@ -78,7 +77,7 @@ int main(){
     void* q=nullptr;assert(tasks.create(&q)==0&&q==h.queue&&h.creates==1);tasks.cancel(q);assert(h.cancels==1);
     h.fail_submit=true;assert(tasks.submit_completion(q,nullptr)==0x80004005U&&!h.pending);h.fail_submit=false;
     PrepareServices prepare{};prepare.request=&h.request;prepare.gdk=&gdk;
-    MultiHostServices os{wait_one,wait_many,unlock,reset,after_cancel,&h};TransferBinding b(h.global,prepare,os);
+    MultiHostServices os{wait_one,wait_many,unlock,reset,&h};TransferBinding b(h.global,prepare,os);
     auto* a=e1.data();auto* z=e2.data();auto* pending=e3.data();
     assert(b.add(nullptr,a)==1&&b.add(m,nullptr)==2);
     assert(b.add(m,a)==0&&b.add(m,a)==7&&b.add(m,z)==0&&b.add(m,pending)==0);

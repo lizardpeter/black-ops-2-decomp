@@ -1,4 +1,5 @@
 #include "transfer_binding.h"
+#include "multi_lifecycle.h"
 #include <cstring>
 namespace t6_xcurl {
 TransferBinding::TransferBinding(GlobalLifecycle& g,const PrepareServices& p,const MultiHostServices& h)
@@ -16,7 +17,7 @@ void TransferBinding::start(void* p,void* c){
 }
 void TransferBinding::progress(void* p,void* c){xcurl_research_easy_progress(p,self(c).prepare_.request);}
 void TransferBinding::cancel(void* p,std::uint32_t h,std::uint32_t code,void* c){xcurl_research_easy_cancel(p,h,code,self(c).prepare_.request);}
-void TransferBinding::after_cancel(void* p,void* c){auto& h=self(c).host_;h.after_cancel(p,h.context);}
+void TransferBinding::after_cancel(void* p,void* c){xcurl_research_easy_stop(p,self(c).prepare_.request);}
 void TransferBinding::reset(void* p,void* c){auto& h=self(c).host_;h.reset_event(p,h.context);}
 void TransferBinding::event(void* p,void* c){auto* r=self(c).prepare_.request;r->set_event(p,r->context);}
 std::uint32_t TransferBinding::wait_one(void* p,std::uint32_t t,void* c){auto& h=self(c).host_;return h.wait_one(p,t,h.context);}

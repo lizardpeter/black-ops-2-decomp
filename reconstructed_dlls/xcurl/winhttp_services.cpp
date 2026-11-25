@@ -57,6 +57,10 @@ std::uint32_t wait_one(void* h,std::uint32_t t,void*){return ::WaitForSingleObje
 std::uint32_t wait_many(std::uint32_t n,const void* p,std::uint32_t t,void*){return ::WaitForMultipleObjects(n,static_cast<const HANDLE*>(p),FALSE,t);}
 void reset_event(void* h,void*){::ResetEvent(h);}
 void release_mutex(void* h,void*){::ReleaseMutex(h);}
+void delete_cs(void* p,void*){::DeleteCriticalSection(static_cast<CRITICAL_SECTION*>(p));}
+void close_handle(void* h,void*){::CloseHandle(h);}
+void* create_mutex(void*){return ::CreateMutexW(nullptr,FALSE,nullptr);}
+void* create_multi_event(std::uint8_t manual,std::uint8_t initial,void*){return ::CreateEventW(nullptr,manual,initial,nullptr);}
 }
 SessionServices winhttp_session_services(WinHttpHost* host){return {enter,leave,alloc,release,session,option,error,close,diagnostic,vtable,host};}
 HttpSetupServices winhttp_setup_services(WinHttpHost* host){return {connect,open,option,timeouts,error,diagnostic,retry,host};}
@@ -68,6 +72,8 @@ void bind_winhttp_request_services(RequestServices& s,WinHttpHost* host){
     s.create_event=create_event;s.last_error=error;s.diagnostic=diagnostic;s.read=read;s.receive=receive;s.send=send;s.set_context=set_context;s.set_callback=set_callback;s.context=host;
     if(host->tasks){s.create_queue=create_queue;s.queue_dispatch=dispatch_queue;s.cancel_task=cancel_task;s.submit_completion=submit_completion;s.adjust_global=adjust_global;}
 }
-MultiHostServices win32_multi_host_services(EngineStep after_cancel,void* context){return {wait_one,wait_many,release_mutex,reset_event,after_cancel,context};}
+MultiHostServices win32_multi_host_services(void* context){return {wait_one,wait_many,release_mutex,reset_event,context};}
+EasyLifecycleServices win32_easy_lifecycle_services(const RequestServices* r,const GdkQueryServices* g){return {r,g,delete_cs,close_handle,nullptr};}
+MultiLifecycleServices win32_multi_lifecycle_services(const SchedulerServices* s,const RequestServices* r){return {s,r,create_mutex,create_multi_event,close_handle,release_mutex,error,nullptr};}
 }
 #endif

@@ -10,8 +10,6 @@ struct MultiHostServices {
     WaitOne wait_one;
     WaitMany wait_many;
     EventAction release_mutex,reset_event;
-    // Original 0xCEFC remains an explicit, unported cancellation boundary.
-    EngineStep after_cancel;
     void* context;
 };
 class TransferBinding {
