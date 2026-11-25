@@ -25,11 +25,14 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install pefile==2024.8.26 cryptography
-      - run: |
-          cmake -S reconstructed_dlls/xcurl -B build/xcurl -A x64
-          cmake --build build/xcurl --config Release --target test_xcurl_winhttp test_xcurl_game_pipeline
-          python tests/dlls/verify_xcurl_winhttp.py build/xcurl/Release/test_xcurl_winhttp.exe
-
-          python tests/dlls/verify_xcurl_winhttp.py build/xcurl/Release/test_xcurl_game_pipeline.exe
-
-          python tests/dlls/verify_xcurl_tls.py build/xcurl/Release/test_xcurl_game_pipeline.exe
+      - name: Configure
+        run: cmake -S reconstructed_dlls/xcurl -B build/xcurl -A x64
+      - name: Build
+        run: cmake --build build/xcurl --config Release --target test_xcurl_winhttp test_xcurl_game_pipeline
+      - name: Native transport leaves
+        run: python tests/dlls/verify_xcurl_winhttp.py build/xcurl/Release/test_xcurl_winhttp.exe
+      - name: Full game-facing HTTP pipeline
+        run: python tests/dlls/verify_xcurl_winhttp.py build/xcurl/Release/test_xcurl_game_pipeline.exe
+      - name: HTTPS and mutual TLS pipeline
+        if: success() || failure()
+        run: python tests/dlls/verify_xcurl_tls.py build/xcurl/Release/test_xcurl_game_pipeline.exe
