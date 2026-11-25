@@ -110,11 +110,14 @@ def main():
             try:
                 if client_imported:
                     subprocess.run(["powershell","-NoProfile","-NonInteractive","-Command",
-                        f"$ErrorActionPreference='Stop'; $cert=Get-Item -LiteralPath 'Cert:\\CurrentUser\\My\\{client_thumb}'; "
+                        "$ErrorActionPreference='Stop'; "
+                        "$store=[System.Security.Cryptography.X509Certificates.X509Store]::new('My','CurrentUser'); "
+                        "$store.Open('ReadWrite'); "
+                        f"$matches=$store.Certificates.Find('FindByThumbprint','{client_thumb}',$false); "
+                        "if ($matches.Count -ne 1) { throw 'Expected exactly one fixture certificate' }; $cert=$matches[0]; "
                         "$key=[System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert); "
                         "if ($null -eq $key) { throw 'Missing imported private key' }; "
-                        "$store=[System.Security.Cryptography.X509Certificates.X509Store]::new('My','CurrentUser'); "
-                        "$store.Open('ReadWrite'); try { $store.Remove($cert) } finally { $store.Close() }; "
+                        "try { $store.Remove($cert) } finally { $store.Close() }; "
                         "try { if ($key -is [System.Security.Cryptography.RSACng]) { $key.Key.Delete() } "
                         "elseif ($key -is [System.Security.Cryptography.RSACryptoServiceProvider]) { $key.PersistKeyInCsp=$false; $key.Clear() } "
                         "else { throw 'Unsupported test key provider' } } finally { $key.Dispose(); $cert.Dispose() }"],
