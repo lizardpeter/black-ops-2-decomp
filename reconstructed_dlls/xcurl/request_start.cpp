@@ -11,7 +11,8 @@ template<class T>void put(void* p,unsigned o,T v){std::memcpy(static_cast<P>(p)+
 P ptr(const void* p,unsigned o){return get<P>(p,o);}
 bool failed(std::uint32_t n){return (n&0x80000000U)!=0;}
 }
-extern "C" void xcurl_research_start_request(void* request,void* task,const StartServices* t){
+namespace {
+void start_request(void* request,void* task,const StartServices* t,bool bound){
     auto* p=static_cast<P>(request);auto* s=t->request;auto c=s->context;
     s->enter(p,c);unsigned action=0;
     auto easy=[&]{return ptr(p,0x30);};
@@ -22,15 +23,22 @@ extern "C" void xcurl_research_start_request(void* request,void* task,const Star
         if(get<std::uint32_t>(p,0x28)!=1){action=2;return;}
         auto h=xcurl_research_gdk_async_get_status(task,0,t->gdk);if(failed(h)){t->diagnose(easy(),0x210b8,h,c);cancel(h,58);return;}
         std::uint64_t bytes=0;h=xcurl_research_gdk_network_security_result_size(task,&bytes,t->gdk);if(failed(h)){t->diagnose(easy(),0x21060,h,c);cancel(h,58);return;}
-        release_metadata();auto* meta=s->allocate(bytes,15,c);put(p,0x90,meta);
+        release_metadata();
+        if(bound){put<P>(p,0x98,nullptr);if(bytes<24||bytes>SIZE_MAX){cancel(0x8007000dU,58);return;}}
+        auto* meta=s->allocate(bytes,15,c);put(p,0x90,meta);
         if(!meta){t->diagnose(easy(),0x21038,0,c);cancel(0x8007000eU,58);return;}
         h=xcurl_research_gdk_network_security_result(task,bytes,nullptr,meta,reinterpret_cast<void**>(p+0x98),t->gdk);
         if(failed(h)){t->diagnose(easy(),0x20fe0,h,c);release_metadata();cancel(h,58);return;}
         auto* parsed=ptr(p,0x98);
+        // GDK returns pointers into the result buffer supplied by this call.
+        // Validate that range before dereferencing result fields in the native path.
+        auto inside=[&](const void* q,std::uint64_t n){auto base=reinterpret_cast<std::uintptr_t>(meta),v=reinterpret_cast<std::uintptr_t>(q);return v>=base&&v-base<=bytes&&n<=bytes-(v-base);};
+        if(bound&&!inside(parsed,24)){cancel(0x8007000dU,58);return;}
         auto count=get<std::uint64_t>(parsed,8);auto* items=ptr(parsed,0x10);
+        if(bound&&count&&(count>bytes/24||!inside(items,count*24))){cancel(0x8007000dU,58);return;}
         for(std::uint64_t i=0;i<count;++i)if(get<std::uint32_t>(items,0)==2){p[0xd6]=1;break;}else items+=0x18;
         alignas(8) std::array<std::uint8_t,0x68> url{};
-        h=t->crack(get<const char16_t*>(p,0x38),easy(),url.data(),c);if(failed(h)){action=2;return;}
+        h=t->crack(get<const char16_t*>(p,0x38),easy(),url.data(),c);if(failed(h)){if(bound)cancel(h,3);else action=2;return;}
         h=t->open(p,easy(),url.data(),c);if(failed(h)){cancel(h,55);return;}
         h=t->register_request(p,c);if(failed(h)){s->close_http(ptr(p,0x50),c);put<P>(p,0x50,nullptr);cancel(h,55);return;}
         put(p,0x28,2U);
@@ -59,4 +67,7 @@ extern "C" void xcurl_research_start_request(void* request,void* task,const Star
     };
     run();s->leave(p,c);if(action==1)xcurl_research_request_close(p,s);else if(action==2)xcurl_research_request_finish(p,s);
 }
-extern "C" void xcurl_research_start_worker(void* task,const StartServices* t){xcurl_research_start_request(ptr(task,8),task,t);}
+}
+extern "C" void xcurl_research_start_request(void* p,void* task,const StartServices* t){start_request(p,task,t,false);}
+extern "C" void xcurl_research_start_worker(void* task,const StartServices* t){start_request(ptr(task,8),task,t,false);}
+extern "C" void xcurl_bound_start_worker(void* task,const StartServices* t){start_request(ptr(task,8),task,t,true);}

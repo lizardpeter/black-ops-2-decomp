@@ -52,13 +52,23 @@ extern "C" void xcurl_research_request_begin(void* request,const PrepareServices
     }
     r->leave(p,c);if(finish)xcurl_research_request_finish(p,r);
 }
-extern "C" std::uint32_t xcurl_research_easy_begin(void* easy,const PrepareServices* s){
+namespace {
+std::uint32_t easy_begin(void* easy,const PrepareServices* s,bool bound){
     auto* e=static_cast<P>(easy);auto* r=s->request;auto c=r->context;
     xcurl_research_easy_reset_transfer(e,r);auto status=xcurl_research_easy_prepare_url(e,s);
     if(failed(status))r->diagnostic(e,0x207b8,status,c);
     auto* p=e+0x230;
     auto* url=ptr(e,0x1b8);
+    if(bound&&!url&&!failed(status)){
+        // Never pass a null URL to the real Gaming Services security API.
+        status=0x80072ee5U;r->diagnostic(e,0x207b8,status,c);
+        xcurl_research_easy_cancel(e,status,3,r);xcurl_research_request_stop(p,r);
+    }
     if(url&&failed(s->copy_url(url,p+0x38,c))){r->diagnostic(ptr(p,0x30),0x20de8,0,c);xcurl_research_easy_cancel(ptr(p,0x30),0x8007000eU,27,r);xcurl_research_request_finish(p,r);}
     else xcurl_research_request_begin(p,s);
     return get<std::uint32_t>(e,0x220);
 }
+
+}
+extern "C" std::uint32_t xcurl_research_easy_begin(void* e,const PrepareServices* s){return easy_begin(e,s,false);}
+extern "C" std::uint32_t xcurl_bound_easy_begin(void* e,const PrepareServices* s){return easy_begin(e,s,true);}

@@ -12,7 +12,7 @@ bool CallbackBinding::activate(){CallbackBinding* expected=nullptr;return active
 void CallbackBinding::deactivate(){auto* expected=this;active_.compare_exchange_strong(expected,nullptr);}
 void* CallbackBinding::start_token(){return reinterpret_cast<void*>(start_entry);}
 void CallbackBinding::start_entry(void* async){
-    auto* b=active_.load();if(b&&async)xcurl_research_start_worker(async,&b->start_);
+    auto* b=active_.load();if(b&&async)xcurl_bound_start_worker(async,&b->start_);
 }
 void CallbackBinding::status_entry(std::uintptr_t request,std::uint32_t status,const void* info,std::uint32_t length){
     // Disabled-ETW 14A00 forwards dwContext, status, info and length.

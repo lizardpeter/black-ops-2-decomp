@@ -30,6 +30,7 @@ struct Mock {
     Queue* engine=nullptr;
     std::atomic<unsigned> queue_count{0},queries{0},releases{0},starts{0},reports{0};
     bool tls=false;
+    unsigned bad_metadata=0;
     std::atomic<unsigned> verifications{0},accepted{0};
     Mock();
 };
@@ -69,9 +70,11 @@ std::uint32_t security_async(void* p,const char16_t* text,void* block){
     auto worker=+[](void* b,bool){get<void(*)(void*)>(b,16)(b);};
     return submit(p,queue,1,block,reinterpret_cast<void*>(worker));
 }
-std::uint32_t security_size(void*,void*,std::uint64_t* n){*n=24;return 0;}
+std::uint32_t security_size(void* p,void*,std::uint64_t* n){*n=self(p).bad_metadata==1?8:24;return 0;}
 std::uint32_t security_result(void* p,void*,std::uint64_t n,std::uint64_t*,void* data,void** info){
-    require(n==24,"security metadata size");std::memset(data,0,24);if(self(p).tls)put(data,0,std::uint32_t(0x800));*info=data;return 0;
+    require(n==24,"security metadata size");std::memset(data,0,24);if(self(p).tls)put(data,0,std::uint32_t(0x800));*info=data;
+    switch(self(p).bad_metadata){case 2:*info=nullptr;break;case 3:*info=static_cast<char*>(data)+8;break;case 4:put(data,8,UINT64_MAX);break;case 5:put(data,8,std::uint64_t(1));put(data,16,static_cast<char*>(data)+16);break;}
+    return 0;
 }
 std::uint32_t verify(void* p,void* request,const void*){
     auto& m=self(p);if(!m.tls)return 0; // cleartext loopback only
@@ -194,6 +197,18 @@ void batch(void* m,Mock& mock,unsigned port){
     require(!curl_easy_getinfo(e,0x200019,&error)&&static_cast<std::uint32_t>(error)==0x80072ee5U,"original HRESULT getinfo");
     require(curl_easy_strerror(msg->data.result)&&*curl_easy_strerror(msg->data.result),"original error string symbol linked");
     require(!curl_multi_remove_handle(m,e),"invalid remove");require(!curl_multi_info_read(m,&n),"invalid message retired");
+    require(!curl_easy_setopt(e,10002,static_cast<const char*>(nullptr))&&!curl_multi_add_handle(m,e),"missing URL add");
+    pump(m,mock);msg=curl_multi_info_read(m,&n);
+    require(msg&&msg->data.result==3&&!n&&mock.starts==starts,"missing URL rejected before security");
+    require(!curl_multi_remove_handle(m,e)&&!curl_multi_info_read(m,&n),"missing URL retired");
+    for(unsigned mode=1;mode<=5;++mode){
+        mock.bad_metadata=mode;configure(e,base+"/get",list,&bodies[0]);
+        require(!curl_multi_add_handle(m,e),"malformed security result add");pump(m,mock);msg=curl_multi_info_read(m,&n);
+        require(msg&&msg->easy==e&&msg->data.result==58&&!n&&bodies[0].empty(),"malformed security result rejected");
+        require(!curl_easy_getinfo(e,0x200019,&error)&&static_cast<std::uint32_t>(error)==0x8007000dU,"malformed result HRESULT");
+        require(!curl_multi_remove_handle(m,e)&&!curl_multi_info_read(m,&n),"malformed result retired");
+    }
+    mock.bad_metadata=0;
     // The actual HTTP status notification publishes metadata before fail-on-error.
     configure(e,base+"/missing",list,&bodies[0]);require(!curl_easy_setopt(e,45,1L)&&!curl_multi_add_handle(m,e),"HTTP error add");
     pump(m,mock);msg=curl_multi_info_read(m,&n);
@@ -318,7 +333,7 @@ int main(int argc,char** argv){
         tls_transfer(m,mock,mutual,true,argv[4]);}
     else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==23&&mock.reports>=23)),"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==28&&mock.reports>=28)),"balanced runtime lifetime");
     require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }

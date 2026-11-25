@@ -13,7 +13,7 @@ void TransferBinding::start(void* p,void* c){
     auto& b=self(c);auto prepare=b.prepare_;
     // Read the current engine-owned queue at admission, not construction.
     std::memcpy(&prepare.engine_queue,static_cast<const std::uint8_t*>(b.global_.engine)+0x90,sizeof(void*));
-    xcurl_research_easy_begin(p,&prepare);
+    xcurl_bound_easy_begin(p,&prepare);
 }
 void TransferBinding::progress(void* p,void* c){xcurl_research_easy_progress(p,self(c).prepare_.request);}
 void TransferBinding::cancel(void* p,std::uint32_t h,std::uint32_t code,void* c){xcurl_research_easy_cancel(p,h,code,self(c).prepare_.request);}

@@ -20,3 +20,5 @@ struct StartServices {
 }
 extern "C" void xcurl_research_start_request(void*,void*,const t6_xcurl::StartServices*);
 extern "C" void xcurl_research_start_worker(void*,const t6_xcurl::StartServices*);
+
+extern "C" void xcurl_bound_start_worker(void*,const t6_xcurl::StartServices*);

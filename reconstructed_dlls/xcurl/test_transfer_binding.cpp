@@ -32,8 +32,8 @@ void reset(void*,void* c){++host(c).resets;}
 void unlock(void*,void* c){++host(c).unlocks;}
 std::uint32_t wait_one(void*,std::uint32_t t,void* c){++host(c).waits;return t==42?0x102:0;}
 std::uint32_t wait_many(std::uint32_t n,const void*,std::uint32_t t,void* c){assert(n==2);return wait_one(nullptr,t,c);}
-void* alloc(std::size_t n,std::uint32_t tag,void* c){assert(tag==12);++host(c).allocs;return std::malloc(n);}
-void release(void* p,std::uint32_t tag,void* c){assert(tag==12);++host(c).frees;std::free(p);}
+void* alloc(std::size_t n,std::uint32_t tag,void* c){assert(tag==12||tag==7);if(tag==12)++host(c).allocs;return std::malloc(n);}
+void release(void* p,std::uint32_t tag,void* c){assert(tag==12||tag==7);if(tag==12)++host(c).frees;std::free(p);}
 void adjust(std::uint32_t n,void* c){host(c).tasks->adjust_global(n);}
 void diag(void*,std::uint32_t site,std::uint32_t status,void*){assert((site==0x20f80||site==0x20920)&&status==0x80004005U);}
 std::uint32_t submit(void* q,void* e,void* c){return host(c).tasks->submit_completion(q,e);}
@@ -77,6 +77,9 @@ int main(){
     void* q=nullptr;assert(tasks.create(&q)==0&&q==h.queue&&h.creates==1);tasks.cancel(q);assert(h.cancels==1);
     h.fail_submit=true;assert(tasks.submit_completion(q,nullptr)==0x80004005U&&!h.pending);h.fail_submit=false;
     PrepareServices prepare{};prepare.request=&h.request;prepare.gdk=&gdk;
+    prepare.prepare_url=[](void*,void*,void* out,void* c)->std::uint32_t{auto* q=alloc(8,7,c);std::memcpy(q,u"url",8);std::memcpy(out,&q,8);return 0;};
+    prepare.copy_url=[](const void* src,void* out,void* c)->std::uint32_t{auto* q=alloc(8,7,c);std::memcpy(q,src,8);std::memcpy(out,&q,8);return 0;};
+    for(auto* e:{e1.data(),e2.data(),e3.data()})put(e,0x88,"url");
     MultiHostServices os{wait_one,wait_many,unlock,reset,&h};TransferBinding b(h.global,prepare,os);
     auto* a=e1.data();auto* z=e2.data();auto* pending=e3.data();
     assert(b.add(nullptr,a)==1&&b.add(m,nullptr)==2);
@@ -107,5 +110,6 @@ int main(){
     assert(b.wait(m,1,&count)==0&&count==1);
     assert(b.wakeup(m)==0);
     assert(h.locks==0&&h.resets==3&&h.releases>=2&&!h.pending);
+    for(auto* e:{e1.data(),e2.data(),e3.data()})xcurl_research_easy_reset_transfer(e,&h.request);
     h.global.engine=nullptr;assert(b.perform(m,&running)==1);
 }

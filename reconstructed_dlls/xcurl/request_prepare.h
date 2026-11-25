@@ -21,4 +21,5 @@ void xcurl_research_easy_reset_transfer(void*,const t6_xcurl::RequestServices*);
 std::uint32_t xcurl_research_easy_prepare_url(void*,const t6_xcurl::PrepareServices*);
 void xcurl_research_request_begin(void*,const t6_xcurl::PrepareServices*);
 std::uint32_t xcurl_research_easy_begin(void*,const t6_xcurl::PrepareServices*);
+std::uint32_t xcurl_bound_easy_begin(void*,const t6_xcurl::PrepareServices*);
 }
