@@ -4,7 +4,7 @@ project(t6_native_xcurl_research LANGUAGES CXX)
 # curl ABI or a networking implementation; never substitute it for XCurl.dll.
 add_library(t6_native_xcurl_research STATIC
     allocation.cpp duplicate_string.cpp slist.cpp easy_strerror.cpp
-    getinfo_unlocked.cpp api_profile.cpp global_lifecycle.cpp easy_setopt.cpp option_dispatch.cpp wide_string.cpp handle_lifecycle.cpp multi_queue.cpp request_engine.cpp http_status.cpp engine_scheduler.cpp request_prepare.cpp http_setup.cpp session_cache.cpp response_body.cpp transfer_callbacks.cpp header_query.cpp response_headers.cpp url_crack.cpp upload_engine.cpp upload_buffer.cpp request_start.cpp request_headers.cpp certificate.cpp gdk_interfaces.cpp gdk_runtime.cpp gdk_runtime_win32.cpp engine_lifecycle.cpp api_binding.cpp)
+    getinfo_unlocked.cpp api_profile.cpp global_lifecycle.cpp easy_setopt.cpp option_dispatch.cpp wide_string.cpp handle_lifecycle.cpp multi_queue.cpp request_engine.cpp http_status.cpp engine_scheduler.cpp request_prepare.cpp http_setup.cpp session_cache.cpp response_body.cpp transfer_callbacks.cpp header_query.cpp response_headers.cpp url_crack.cpp upload_engine.cpp upload_buffer.cpp request_start.cpp request_headers.cpp certificate.cpp gdk_interfaces.cpp gdk_runtime.cpp gdk_runtime_win32.cpp engine_lifecycle.cpp api_binding.cpp transfer_binding.cpp)
 add_library(t6::xcurl_research ALIAS t6_native_xcurl_research)
 target_compile_features(t6_native_xcurl_research PUBLIC cxx_std_20)
 target_include_directories(t6_native_xcurl_research PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
@@ -27,6 +27,14 @@ if(T6_XCURL_BUILD_TESTS)
         target_compile_options(test_xcurl_api_binding PRIVATE -UNDEBUG)
     endif()
     add_test(NAME xcurl_api_binding COMMAND test_xcurl_api_binding)
+    add_executable(test_xcurl_transfer_binding test_transfer_binding.cpp)
+    target_link_libraries(test_xcurl_transfer_binding PRIVATE t6::xcurl_research)
+    if(MSVC)
+        target_compile_options(test_xcurl_transfer_binding PRIVATE /UNDEBUG)
+    else()
+        target_compile_options(test_xcurl_transfer_binding PRIVATE -UNDEBUG)
+    endif()
+    add_test(NAME xcurl_transfer_binding COMMAND test_xcurl_transfer_binding)
 endif()
 
 if(WIN32)
