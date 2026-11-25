@@ -1,5 +1,6 @@
 // XCurl Store 13E14: WinHTTP notification dispatcher, ETW disabled.
 #include "http_status.h"
+#include "engine_lifecycle.h"
 #include <bit>
 #include <cstring>
 using namespace t6_xcurl;
@@ -21,7 +22,7 @@ extern "C" void xcurl_research_http_status(void* request,std::uint32_t status,co
     auto query=[&]{if(!s->query_available(get<P>(p,0x50),ctx))fail(0x21868,hr(r->last_error(ctx)),56);};
     auto eof=[&](unsigned site){auto received=get<std::uint64_t>(p,0xc8),expected=get<std::uint64_t>(p,0xc0);if(p[0xb8]&&get<std::uint32_t>(easy(),0x80)!=3&&!easy()[0x174]&&received<expected){diag(site,received,expected,0x8007000dU);cancel(0x8007000dU,18);}else close();};
     switch(status){
-    case 0x10:{auto h=s->sending(p,ctx);if(failed(h))fail(0x217a8,h,60);break;}
+    case 0x10:{auto h=xcurl_research_verify_server_certificate(p,s->gdk);if(failed(h))fail(0x217a8,h,60);break;}
     case 0x800:put<P>(p,0x50,nullptr);xcurl_research_request_finish(p,r);break;
     case 0x4000:{release(0x38,7);auto h=s->redirect(info,p+0x38,ctx);if(failed(h)){diag(0x219a8,reinterpret_cast<std::uintptr_t>(info));cancel(h,27);}break;}
     case 0x200000:{auto api=get<std::uint64_t>(info);auto error=get<std::uint32_t>(info,8);unsigned code=55,site=0x21ae0;

@@ -1,9 +1,10 @@
 #pragma once
 #include "request_engine.h"
+#include "gdk_interfaces.h"
 namespace t6_xcurl {
 struct StatusServices {
     const RequestServices* request;
-    std::uint32_t(*sending)(void*,void*);
+    const GdkQueryServices* gdk;
     std::uint32_t(*redirect)(const void*,void*,void*);
     std::uint32_t(*continue_upload)(void*,void*);
     std::uint32_t(*headers)(void*,void*,std::uint32_t*,void*);

@@ -1,13 +1,15 @@
 #!/usr/bin/env python3
 """Original 13E14 notification dispatch, disabled ETW; unported helpers are explicit boundaries."""
 from differential_xcurl_request import *
+from differential_xcurl_gdk_interfaces import Gdk, QUERYFN
+THREAD=A+0x5100;NET=A+0x5200;TVT=A+0x5300;NVT=A+0x5400;QUERY=A+0x5500;RELEASE=A+0x5510;ASSERT=A+0x5520;VERIFY=A+0x5530
 ONE=C.CFUNCTYPE(U,P,P);TWO=C.CFUNCTYPE(U,P,P,P);HEAD=C.CFUNCTYPE(U,P,P,C.POINTER(U),P);DATA=C.CFUNCTYPE(U,P,P,U,P);SD=C.CFUNCTYPE(None,P,U,Q,Q,U,P)
 class Status(C.Structure):
-    _fields_=[('request',C.POINTER(Services)),('sending',ONE),('redirect',TWO),('upload',ONE),('headers',HEAD),('publish_headers',ONE),('data',DATA),('schedule',TWO),('query',ONE),('diag',SD)]
+    _fields_=[('request',C.POINTER(Services)),('gdk',C.POINTER(Gdk)),('redirect',TWO),('upload',ONE),('headers',HEAD),('publish_headers',ONE),('data',DATA),('schedule',TWO),('query',ONE),('diag',SD)]
 def main():
     dll,library=map(Path,sys.argv[1:3]);assert hashlib.sha256(dll.read_bytes()).hexdigest()==SHA256
     img=Image(dll);m=Machine(img);m.mu.mem_map(A,0x10000);lib=C.CDLL(str(library.resolve()));fn=lib.xcurl_research_http_status;fn.argtypes=(P,U,P,U,C.POINTER(Status));fn.restype=None
-    rng=random.Random(0x13e14);total=0
+    rng=random.Random(0x13e14);total=0;thread_guid=bytes(m.mu.mem_read(img.base+0x20120,16))
     for status in (1,2,4,8,16,0x400,0x800,0x4000,0x10000,0x20000,0x40000,0x80000,0x100000,0x200000,0x400000,0xffffffff):
       for i in range(240):
         total+=1;oc=[];nc=[];state=bytearray(SIZE);offsets=set()
@@ -18,6 +20,7 @@ def main():
         struct.pack_into('<QQ',state,R-A+0xc0,rng.choice([0,1,20,100,2**64-1]),rng.choice([0,1,20,100,2**64-1]));api=rng.randrange(8);error=rng.choice([0,5,12002,12156,0x80004005,0xffffffff]);n=rng.choice([0,1,20,100,0xffffffff]);length=rng.choice([0,1,20,100,0xffffffff]);http=rng.choice([200,399,400,404,500]);results=[rng.choice([0,1,0x80004005,0xffffffff]) for _ in range(7)];query_ok=rng.randrange(2);receive_ok=rng.randrange(2)
         if status==0x200000:struct.pack_into('<QI',state,BUF-A,api,error)
         else:u(BUF,n)
+        q(R+0x98,0x12345000 if i%3 else 0);q(THREAD,TVT);q(NET,NVT);q(TVT+2*8,RELEASE);q(TVT+29*8,ASSERT);q(NVT+2*8,RELEASE);q(NVT+14*8,VERIFY)
         def reg(mu,k):return mu.reg_read(getattr(X,'UC_X86_REG_'+k))
         def log(mu,k):oc.append((k,reg(mu,'RCX')))
         def step(mu,k,j,count=1):oc.append((k,*[reg(mu,x) for x in ('RCX','RDX','R8D')[:count]]));return results[j]
@@ -32,8 +35,15 @@ def main():
         imports={'EnterCriticalSection':lambda mu:log(mu,'enter'),'LeaveCriticalSection':lambda mu:log(mu,'leave'),'SetEvent':lambda mu:log(mu,'event'),'WinHttpCloseHandle':lambda mu:log(mu,'close'),'WinHttpReceiveResponse':lambda mu:oscall(mu,'receive',receive_ok),'WinHttpQueryDataAvailable':lambda mu:oscall(mu,'query',query_ok),'GetLastError':err}
         for name in img.iat.values():
             if name.split('!')[-1] in imports:m.on_import(name,imports[name.split('!')[-1]])
-        fakes={img.base+k:v for k,v in {0x13d50:lambda mu:step(mu,'sending',0),0x94ac:redirect,0xbf6c:lambda mu:step(mu,'upload',2),0x12228:headers,0xbba8:lambda mu:step(mu,'publish_headers',4),0xbdb0:lambda mu:step(mu,'data',5,3),0x11fa8:lambda mu:step(mu,'schedule',6,2),0xa224:diag,0x9640:release,0x5c20:submit}.items()}
-        def setup(w):m.mu.mem_write(A,bytes(state))
+        def gdk_query(mu):
+            cls=bytes(mu.mem_read(reg(mu,'RCX'),16));iid=bytes(mu.mem_read(reg(mu,'RDX'),16));oc.append(('gdk_query',cls,iid));mu.mem_write(reg(mu,'R8'),struct.pack('<Q',THREAD if cls==thread_guid else NET));return 0
+        def iface_release(mu):oc.append(('iface_release',reg(mu,'RCX')));return 1
+        def assert_thread(mu):oc.append(('assert_thread',));return 0
+        def verify(mu):oc.append(('verify',reg(mu,'RDX'),reg(mu,'R8')));return results[0]
+        fakes={img.base+k:v for k,v in {0x94ac:redirect,0xbf6c:lambda mu:step(mu,'upload',2),0x12228:headers,0xbba8:lambda mu:step(mu,'publish_headers',4),0xbdb0:lambda mu:step(mu,'data',5,3),0x11fa8:lambda mu:step(mu,'schedule',6,2),0xa224:diag,0x9640:release,0x5c20:submit}.items()}
+        fakes.update({QUERY:gdk_query,RELEASE:iface_release,ASSERT:assert_thread,VERIFY:verify})
+        def setup(w):
+            m.mu.mem_write(A,bytes(state));m.mu.mem_write(img.base+0x289d0,bytes([1,0]));m.mu.mem_write(img.base+0x289e0,struct.pack('<Q',QUERY))
         result,_,_,_=m.call(img.base+0x13e14,[R,status,BUF,length],'void',setup=setup,fakes=fakes);assert result is None,(status,i,result,m.imports_called)
         expected=bytes(m.mu.mem_read(A,SIZE));native=C.create_string_buffer(bytes(state),SIZE);base=C.addressof(native)
         def norm(v):return A+v-base if v and base<=v<base+SIZE else v or 0
@@ -59,7 +69,20 @@ def main():
         def qu(p,c):nc.append(('query',norm(p)));return query_ok
         @SD
         def di(p,k,a,b,v,c):nc.append(('diag',norm(p),k,norm(a) if k==0x219a8 else a,b,v))
-        ss=Status(C.pointer(services),one('sending',0),two('redirect',1),one('upload',2),hd,one('publish_headers',4),dt,two('schedule',6),qu,di)
+        tv=(P*32)();nv=(P*32)();to=C.create_string_buffer(8);no=C.create_string_buffer(8)
+        @C.CFUNCTYPE(U,P)
+        def rel(p):nc.append(('iface_release',THREAD if p==C.addressof(to) else NET));return 1
+        @C.CFUNCTYPE(None,P)
+        def ast(p):nc.append(('assert_thread',))
+        @C.CFUNCTYPE(U,P,P,P)
+        def ver(p,h,meta):nc.append(('verify',norm(h),norm(meta)));return results[0]
+        tv[2]=nv[2]=C.cast(rel,P).value;tv[29]=C.cast(ast,P).value;nv[14]=C.cast(ver,P).value
+        C.memmove(to,struct.pack('<Q',C.addressof(tv)),8);C.memmove(no,struct.pack('<Q',C.addressof(nv)),8)
+        @QUERYFN
+        def nq(cls,iid,out,c):
+            a,b=C.string_at(cls,16),C.string_at(iid,16);nc.append(('gdk_query',a,b));out[0]=C.addressof(to) if a==thread_guid else C.addressof(no);return 0
+        gdk=Gdk(nq,None)
+        ss=Status(C.pointer(services),C.pointer(gdk),two('redirect',1),one('upload',2),hd,one('publish_headers',4),dt,two('schedule',6),qu,di)
         fn(host(R),status,host(BUF),length,C.byref(ss));raw=bytearray(bytes(native))
         for off in offsets:struct.pack_into('<Q',raw,off,norm(struct.unpack_from('<Q',raw,off)[0]))
         assert nc==oc,(hex(status),i,nc,oc)
