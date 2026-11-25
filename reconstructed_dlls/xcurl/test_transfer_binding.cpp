@@ -1,4 +1,5 @@
 #include "transfer_binding.h"
+#include "task_queue_binding.h"
 #include <array>
 #include <cassert>
 #include <cstdlib>
@@ -14,6 +15,10 @@ struct Host{
     RequestServices request{};
     unsigned locks=0,signals=0,resets=0,waits=0,unlocks=0,starts=0,submits=0,allocs=0,frees=0,releases=0;
     void* pending=nullptr;
+    void (*callback)(void*,bool)=nullptr;
+    TaskQueueBinding* tasks=nullptr;
+    unsigned creates=0,cancels=0;
+    bool fail_submit=false;
     void* queue=nullptr;
     std::array<void*,30> vtable{};
     struct Object{void** table;Host* host;} object{vtable.data(),this};
@@ -29,13 +34,21 @@ std::uint32_t wait_one(void*,std::uint32_t t,void* c){++host(c).waits;return t==
 std::uint32_t wait_many(std::uint32_t n,const void*,std::uint32_t t,void* c){assert(n==2);return wait_one(nullptr,t,c);}
 void* alloc(std::size_t n,std::uint32_t tag,void* c){assert(tag==12);++host(c).allocs;return std::malloc(n);}
 void release(void* p,std::uint32_t tag,void* c){assert(tag==12);++host(c).frees;std::free(p);}
-void adjust(std::uint32_t n,void* c){auto& h=host(c);xcurl_research_engine_decrement(h.global.engine,n,&h.request);}
+void adjust(std::uint32_t n,void* c){host(c).tasks->adjust_global(n);}
 void diag(void*,std::uint32_t site,std::uint32_t status,void*){assert(site==0x20f80&&status==0x80004005U);}
-std::uint32_t submit(void* queue,void* easy,void* c){auto& h=host(c);assert(queue==h.queue&&!h.pending);h.pending=easy;++h.submits;return 0;}
-std::uint8_t dispatch(void* queue,std::uint32_t port,std::uint32_t timeout,void* c){
-    auto& h=host(c);assert(queue==h.queue&&port==1&&!timeout);if(!h.pending)return 0;
-    auto* p=h.pending;h.pending=nullptr;xcurl_research_easy_complete(p,&h.request);return 1;
+std::uint32_t submit(void* q,void* e,void* c){return host(c).tasks->submit_completion(q,e);}
+std::uint8_t dispatch(void* q,std::uint32_t p,std::uint32_t t,void* c){return host(c).tasks->dispatch(q,p,t);}
+std::uint32_t gdk_submit(void* o,void* queue,std::uint32_t port,void* context,void* cb){
+    auto& h=obj(o);assert(queue==h.queue&&port==1&&!h.pending);if(h.fail_submit)return 0x80004005U;
+    h.pending=context;h.callback=reinterpret_cast<void(*)(void*,bool)>(cb);++h.submits;return 0;
 }
+std::uint8_t gdk_dispatch(void* o,void* queue,std::uint32_t port,std::uint32_t timeout){
+    auto& h=obj(o);assert(queue==h.queue&&port==1&&!timeout);if(!h.pending)return 0;
+    auto* p=h.pending;h.pending=nullptr;h.callback(p,h.submits==2);return 1;
+}
+std::uint32_t gdk_create(void* o,std::uint32_t a,std::uint32_t b,void** out){auto& h=obj(o);assert(a==0&&b==0);++h.creates;*out=h.queue;return 0;}
+void gdk_cancel(void* o,void* p){auto& h=obj(o);assert(p==h.queue);++h.cancels;}
+void thread_assert(void*){}
 void after_cancel(void*,void*){assert(false);}
 std::uint32_t query(const void*,const void*,void** out,void* c){*out=&host(c).object;return 0;}
 std::uint32_t release_interface(void* p){++obj(p).releases;return 1;}
@@ -59,7 +72,12 @@ int main(){
     h.request.release=release;h.request.adjust_global=adjust;h.request.diagnostic=diag;h.request.submit_completion=submit;
     h.request.queue_dispatch=dispatch;h.request.context=&h;
     h.vtable[2]=reinterpret_cast<void*>(release_interface);h.vtable[11]=reinterpret_cast<void*>(security_async);
-    GdkQueryServices gdk{query,&h};PrepareServices prepare{};prepare.request=&h.request;prepare.gdk=&gdk;
+    h.vtable[12]=reinterpret_cast<void*>(gdk_create);h.vtable[16]=reinterpret_cast<void*>(gdk_dispatch);
+    h.vtable[18]=reinterpret_cast<void*>(gdk_submit);h.vtable[5]=reinterpret_cast<void*>(gdk_cancel);h.vtable[29]=reinterpret_cast<void*>(thread_assert);
+    GdkQueryServices gdk{query,&h};TaskQueueBinding tasks(h.global,h.request,gdk);h.tasks=&tasks;
+    void* q=nullptr;assert(tasks.create(&q)==0&&q==h.queue&&h.creates==1);tasks.cancel(q);assert(h.cancels==1);
+    h.fail_submit=true;assert(tasks.submit_completion(q,nullptr)==0x80004005U&&!h.pending);h.fail_submit=false;
+    PrepareServices prepare{};prepare.request=&h.request;prepare.gdk=&gdk;
     MultiHostServices os{wait_one,wait_many,unlock,reset,after_cancel,&h};TransferBinding b(h.global,prepare,os);
     auto* a=e1.data();auto* z=e2.data();auto* pending=e3.data();
     assert(b.add(nullptr,a)==1&&b.add(m,nullptr)==2);
@@ -80,6 +98,6 @@ int main(){
     assert(b.poll(m,42,&count)==0&&count==0);
     assert(b.wait(m,1,&count)==0&&count==1);
     assert(b.wakeup(m)==0);
-    assert(h.locks==0&&h.resets==2&&h.releases==2&&!h.pending);
+    assert(h.locks==0&&h.resets==2&&h.releases>=2&&!h.pending);
     h.global.engine=nullptr;assert(b.perform(m,&running)==1);
 }

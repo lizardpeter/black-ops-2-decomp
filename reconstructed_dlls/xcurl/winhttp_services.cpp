@@ -47,6 +47,16 @@ using RefFn=std::uint32_t(*)(void*);
 const RefFn vtable[]{native_addref,native_release};
 std::uint32_t native_release(void* p){auto services=winhttp_session_services(nullptr);return xcurl_research_session_release(p,&services);}
 void release_session(void* p,void*){native_release(p);}
+TaskQueueBinding& tasks(void* c){return *static_cast<WinHttpHost*>(c)->tasks;}
+std::uint32_t create_queue(void** q,void* c){return tasks(c).create(q);}
+std::uint8_t dispatch_queue(void* q,std::uint32_t p,std::uint32_t t,void* c){return tasks(c).dispatch(q,p,t);}
+void cancel_task(void* p,void* c){tasks(c).cancel(p);}
+std::uint32_t submit_completion(void* q,void* e,void* c){return tasks(c).submit_completion(q,e);}
+void adjust_global(std::uint32_t n,void* c){tasks(c).adjust_global(n);}
+std::uint32_t wait_one(void* h,std::uint32_t t,void*){return ::WaitForSingleObject(h,t);}
+std::uint32_t wait_many(std::uint32_t n,const void* p,std::uint32_t t,void*){return ::WaitForMultipleObjects(n,static_cast<const HANDLE*>(p),FALSE,t);}
+void reset_event(void* h,void*){::ResetEvent(h);}
+void release_mutex(void* h,void*){::ReleaseMutex(h);}
 }
 SessionServices winhttp_session_services(WinHttpHost* host){return {enter,leave,alloc,release,session,option,error,close,diagnostic,vtable,host};}
 HttpSetupServices winhttp_setup_services(WinHttpHost* host){return {connect,open,option,timeouts,error,diagnostic,retry,host};}
@@ -56,6 +66,8 @@ UploadServices winhttp_upload_services(const RequestServices* s,std::uint32_t(*t
 void bind_winhttp_request_services(RequestServices& s,WinHttpHost* host){
     s.enter=enter;s.leave=leave;s.allocate=alloc;s.release=release;s.set_event=event;s.close_http=close;s.release_connection=release_session;
     s.create_event=create_event;s.last_error=error;s.diagnostic=diagnostic;s.read=read;s.receive=receive;s.send=send;s.set_context=set_context;s.set_callback=set_callback;s.context=host;
+    if(host->tasks){s.create_queue=create_queue;s.queue_dispatch=dispatch_queue;s.cancel_task=cancel_task;s.submit_completion=submit_completion;s.adjust_global=adjust_global;}
 }
+MultiHostServices win32_multi_host_services(EngineStep after_cancel,void* context){return {wait_one,wait_many,release_mutex,reset_event,after_cancel,context};}
 }
 #endif
