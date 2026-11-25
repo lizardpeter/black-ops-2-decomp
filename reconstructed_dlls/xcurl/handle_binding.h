@@ -14,6 +14,7 @@ public:
     HandleBinding& operator=(const HandleBinding&)=delete;
     void* easy_init();
     void easy_cleanup(void*);
+    bool try_easy_cleanup(void*);
     void* multi_init();
     std::uint32_t multi_cleanup(void*);
 private:

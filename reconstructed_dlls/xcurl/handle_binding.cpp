@@ -30,15 +30,18 @@ void* HandleBinding::easy_init(){
     auto status=api_.global.references&&!api_.global.engine?2U:xcurl_research_easy_create(&p,&api_.global.references,&handles_);
     error(status,6);return status?nullptr:p;
 }
-void HandleBinding::easy_cleanup(void* p){
+void HandleBinding::easy_cleanup(void* p){(void)try_easy_cleanup(p);}
+bool HandleBinding::try_easy_cleanup(void* p){
     record(9);if(p){
         auto* e=static_cast<std::uint8_t*>(p);auto* r=easy_.request;void* owner=nullptr;
         r->enter(e+0x10,r->context);std::memcpy(&owner,e+0x310,sizeof(owner));r->leave(e+0x10,r->context);
         // Avoid freeing an object still linked into a live multi or still
         // receiving asynchronous notifications. Original does not enforce this.
-        if(owner||xcurl_research_request_is_active(e+0x230,r)){error(2,9);return;}
+        r->enter(e+0x230,r->context);std::uint32_t state=0;std::memcpy(&state,e+0x258,sizeof(state));r->leave(e+0x230,r->context);
+        if(owner||state){error(2,9);return false;}
         xcurl_research_easy_destroy(p,&handles_);
     }
+    return true;
 }
 void* HandleBinding::multi_init(){
     record(13);void* p=nullptr;

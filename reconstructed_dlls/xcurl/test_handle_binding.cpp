@@ -1,4 +1,5 @@
 #include "handle_binding.h"
+#include "game_api.h"
 #include <array>
 #include <cassert>
 #include <cstdlib>
@@ -67,4 +68,38 @@ int main(){
     assert(b.multi_cleanup(nullptr)==1&&h.errors==4);
     assert(h.api.profile.counts[6]==2&&h.api.profile.counts[9]==3&&h.api.profile.counts[13]==1&&h.api.profile.counts[20]==2);
     assert(h.allocs==h.frees&&h.queries==h.releases&&!h.locks);
+    // Use the actual game-facing C ABI, including variadic arguments.
+    h.fail_queue=false;
+    PrepareServices prep{};prep.request=&h.request;MultiHostServices os{};
+    os.wait_one=wait;os.wait_many=[](std::uint32_t,const void*,std::uint32_t,void*)->std::uint32_t{return 0x102;};
+    os.release_mutex=event;os.reset_event=event;os.context=&h;
+    h.request.set_event=event;
+    TransferBinding transfers(h.api.global,prep,os);
+    GameApi api(h.api,b,transfers),second(h.api,b,transfers);
+    assert(api.install()&&!second.install()&&!api.uninstall());
+    auto* easy=curl_easy_init();auto* multi=curl_multi_init();assert(easy&&multi);
+    assert(curl_easy_setopt(easy,10002,"https://example.test/")==0);
+    assert(curl_easy_setopt(easy,155,500L)==0);
+    assert(curl_easy_setopt(easy,30120,std::int64_t(42))==0);
+    assert(get<std::uint32_t>(easy,0xa0)==500&&get<std::uint64_t>(easy,0xf8)==42);
+    auto writer=+[](char*,std::size_t n,std::size_t k,void*)->std::size_t{return n*k;};
+    assert(curl_easy_setopt(easy,20012,writer)==0);
+    assert(get<std::uintptr_t>(easy,0x120)==reinterpret_cast<std::uintptr_t>(writer));
+    put(easy,0x1e0,201U);std::int32_t code=0;
+    assert(curl_easy_getinfo(easy,0x200002,&code)==0&&code==201);
+    auto* list=curl_slist_append(nullptr,"X-Test: yes");assert(list);
+    assert(curl_easy_setopt(easy,10023,list)==0);
+    assert(curl_easy_strerror(0));assert(curl_multi_add_handle(multi,easy)==0);
+    curl_easy_cleanup(easy);curl_global_cleanup();assert(h.api.global.references==1);
+    assert(curl_multi_remove_handle(multi,easy)==0);
+    int n=99;assert(curl_multi_perform(multi,&n)==0&&!n);
+    assert(curl_multi_poll(multi,nullptr,0,10,&n)==0&&!n);
+    assert(!curl_multi_info_read(multi,&n)&&!n);
+    put(easy,0x258,6U);curl_easy_cleanup(easy);assert(!api.uninstall());
+    put(easy,0x258,0U);curl_easy_cleanup(easy);curl_slist_free_all(list);
+    assert(curl_multi_cleanup(multi)==0&&curl_multi_cleanup(multi)==1);
+    // Fixture borrows a synthetic engine, so do not destroy it through global cleanup.
+    h.api.global.references=0;h.api.global.engine=nullptr;
+    assert(api.uninstall()&&!curl_easy_init()&&curl_global_init(3)==2);
+    assert(h.allocs==h.frees&&!h.cs&&!h.locks);
 }
