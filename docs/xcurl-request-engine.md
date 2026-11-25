@@ -221,3 +221,7 @@ The default WinHTTP pipeline now uses native Crypt32 store open (existing/read-o
 
 ## Mutual TLS acceptance extension
 The isolated Windows TLS fixture additionally creates an ephemeral client key/certificate signed by the test CA, imports only the client PFX into the runner's personal store, and starts a separate loopback server requiring that exact client certificate. The C ABI exercises original client-certificate selector option 10025, first with a missing thumbprint (must fail without response), then with the actual imported thumbprint (must complete). The server checks the SHA-256 peer fingerprint. The temporary personal certificate/key and trust root are removed in finally; no production trust policy is changed. Results pending.
+
+
+## Recompiled game import-shaped ABI
+The optional Windows x64 target t6::xcurl_import_abi defines the sixteen compiler-generated __imp_curl_* pointer symbols in a static archive. This lets authored/recompiled Store-compatible source that retains __declspec(dllimport) declarations link directly to the reconstructed C ABI without a vendor import library. It does not redirect or rewrite any retail PE and does not affect the existing hybrid loader. The independent consumer now has a separate translation unit compiled with dllimport declarations that calls every symbol before runtime installation, verifies closed-owner behavior, and runs the production initialization probe afterward. Native link and PE checks pending for this extension.

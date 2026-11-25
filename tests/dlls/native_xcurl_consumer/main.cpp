@@ -5,12 +5,15 @@
 #include <cstdio>
 #include <cstring>
 #include <cstdint>
+bool import_probe_before_install();
 namespace {
 unsigned errors=0;
 void diag(void*,std::uint32_t site,std::uint32_t status,void*){std::printf("runtime diagnostic %x %x\n",site,status);}
 void error(std::uint32_t status,std::uint32_t api,void*){++errors;std::printf("API %u status %u\n",api,status);}
 bool check(bool ok,const char* label){if(!ok)std::fprintf(stderr,"FAIL: %s\n",label);return ok;}
 int run(bool require_live){
+    if(!check(import_probe_before_install(),"all sixteen static dllimport slots"))return 1;
+    std::puts("XCurl static dllimport ABI PASS: 16/16");
     t6_xcurl::Win32RuntimeConfig c{};c.diagnostic=diag;c.api_error=error;
     t6_xcurl::Win32Runtime runtime(c);
     if(!check(runtime.install()&&!runtime.references()&&!runtime.engine_ready(),"install production owner"))return 1;
