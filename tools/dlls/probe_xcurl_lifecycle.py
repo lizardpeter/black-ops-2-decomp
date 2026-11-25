@@ -8,8 +8,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_OP_MEM, CS_OP_IMM
 from capstone.x86_const import X86_REG_RIP
 
 SHA = "65cd27b336abecf821896611c91e8ec74d0328bd65ec11aa5ef4e2affbdd4551"
-TARGETS = (0x113B8, 0xFFA4, 0xE544, 0xCB3C, 0xDE20, 0xE0A0,
-           0x19E60, 0x19F40, 0x1A010, 0x1A0E0, 0x1A1B0, 0x1A400, 0x1A4E0)
+TARGETS = (0x19C54, 0x19B8C, 0x198E4, 0xA128, 0x14AC0, 0x1738C, 0x1CFD0, 0x1ADA4, 0x16960, 0x16B60, 0x8BC0, 0x8C50)
 def main():
     path = Path(sys.argv[1])
     assert hashlib.sha256(path.read_bytes()).hexdigest() == SHA
@@ -40,6 +39,9 @@ def main():
                     annotation.append(f"target={o.imm-base:05X}")
             print(f"{i.address-base:05X} {i.mnemonic:8} {i.op_str:40} {' '.join(annotation)}")
     for rva in TARGETS: show(rva)
+    for rva in (0x21B40,0x20D10,0x20D38,0x20D70,0x20DA8,0x20E10,0x20E50,0x20E78,0x20EB8,0x20EF0,0x20F20,0x20F48,0x20F60):
+        data=pe.get_data(rva,256)
+        print(f'DATA {rva:05X}: {data[:80].hex()} ASCII {data.split(bytes([0]),1)[0]!r}')
     print("PUBLIC EXPORT RVAS")
     for e in pe.DIRECTORY_ENTRY_EXPORT.symbols:
         if e.name and e.name.startswith(b"curl_"):
