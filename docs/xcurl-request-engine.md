@@ -229,3 +229,16 @@ The optional Windows x64 target t6::xcurl_import_abi defines the sixteen compile
 
 ## Real GDK startup diagnostics
 The independent consumer passed run 45555177309 and again with native certificate selection in 45555220766. Live GDK initialization returned CURLcode 2 on the hosted runner; failed references, blocked handles, cleanup and retry were validated. The new bound engine bootstrap records whether the failure occurred in runtime loading/initialization or engine creation, retaining the exact underlying status and frequency availability without altering the original CURLcode or reference counting. Both explicit global initialization and implicit easy initialization use that report; the consumer prints it and can require a live engine via --require-live-gdk. Original-machine bootstrap calls use the same body with no report. Source tests cover allocation, runtime and registration failures followed by successful retry.
+
+
+## Native game target link recipe
+For a future Windows x64 CMake executable target `t6_game` (not yet present), the native link contract is:
+
+```cmake
+set(T6_XCURL_BUILD_TESTS OFF CACHE BOOL "" FORCE)
+add_subdirectory(reconstructed_dlls/xcurl)
+target_link_libraries(t6_game PRIVATE t6::xcurl_research)
+# Use t6::xcurl_import_abi instead if authored source retains dllimport declarations.
+```
+
+Construct and install one `t6_xcurl::Win32Runtime` before any stateful curl call. Keep it alive until the game has removed/cleaned all easy and multi handles and balanced global initialization references. The consumer demonstrates the correct lifetime. Do not install either target together with a vendor XCurl import library. The optional import ABI is verified by a separate PE audit: all sixteen data slots must point at the exact reconstructed executable symbols, be in non-executable data sections, and have DIR64 base relocations for ASLR. This is source-link compatibility for a future native game, not an import-table rewrite of retail binaries. The current hybrid runtime is unchanged.
