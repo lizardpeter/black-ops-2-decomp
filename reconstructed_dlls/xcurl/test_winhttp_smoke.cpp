@@ -5,6 +5,7 @@
 #include "win32_url_binding.h"
 #include "win32_engine_binding.h"
 #include "win32_runtime.h"
+#include "win32_certificate.h"
 #include "allocation.h"
 #include "gdk_runtime_win32.h"
 #include "response_headers.h"
@@ -160,6 +161,11 @@ int main(int argc,char** argv){
      require(!second.install()&&!second.installed()&&!first.references()&&!first.engine_ready(),"exclusive runtime ownership before GDK initialization");
      require(first.uninstall()&&!first.installed()&&second.install()&&second.uninstall()&&first.install()&&first.uninstall(),"runtime rollback and reinstallation");}
 #endif
+    {WinHttpHost h{nullptr,diagnostic,nullptr};alignas(8) std::array<std::uint8_t,0xe0> request{};
+     require(!win32_select_client_certificate(request.data(),nullptr,h),"no client certificate requested");
+     require(win32_select_client_certificate(request.data(),u"invalid",h)==0x80092004U,"invalid certificate selector");
+     require(win32_select_client_certificate(request.data(),u"CurrentUser\\MY\\zzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzzz",h)==0x80092004U,"invalid certificate thumbprint");
+     require(win32_select_client_certificate(request.data(),u"CurrentUser\\XCurlNonexistentStore_90d9e3\\0000000000000000000000000000000000000000",h)&0x80000000U,"missing store fails closed");}
     require(argc==2,"port required");auto port=static_cast<std::uint16_t>(std::atoi(argv[1]));
     alignas(8) std::array<std::uint8_t,0x80> cache{};alignas(8) std::array<std::uint8_t,0x368> easy{};
     init_cs(cache.data());init_cs(easy.data()+0x188);init_cs(easy.data()+0x50);auto* list=cache.data()+0x28;put(list,0,list);put(list,8,list);

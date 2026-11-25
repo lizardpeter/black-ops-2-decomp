@@ -1,6 +1,7 @@
 #include "winhttp_pipeline.h"
 #ifdef _WIN32
 #include "allocation.h"
+#include "win32_certificate.h"
 #include <array>
 #include <cstring>
 namespace t6_xcurl {
@@ -45,7 +46,7 @@ std::uint32_t WinHttpPipeline::options(void* req,const void* opt,std::uint32_t s
 std::uint32_t WinHttpPipeline::add_headers(void* req,void* list,void* c){return xcurl_research_add_request_headers(req,list,&self(c).add_);}
 std::uint32_t WinHttpPipeline::select_certificate(void* req,void* selector,void* c){
     auto& b=self(c);if(!selector)return 0;
-    if(!b.certificate_)return 0x80004001U; // fail closed, never ignore requested client authentication
+    if(!b.certificate_)return win32_select_client_certificate(req,static_cast<const char16_t*>(selector),b.host_);
     return xcurl_research_select_certificate(req,static_cast<const char16_t*>(selector),b.certificate_);
 }
 std::uint32_t WinHttpPipeline::redirect(const void* text,void* slot,void* c){
