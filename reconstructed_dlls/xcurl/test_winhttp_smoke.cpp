@@ -2,6 +2,8 @@
 // harness drives callbacks; not a test of the still-incomplete production task queue.
 #include "winhttp_services.h"
 #include "winhttp_pipeline.h"
+#include "win32_url_binding.h"
+#include "allocation.h"
 #include "gdk_runtime_win32.h"
 #include "response_headers.h"
 #include "transfer_callbacks.h"
@@ -128,6 +130,15 @@ int main(int argc,char** argv){
     // a real GDK request on a CI machine without Gaming Services.
     {GlobalLifecycle g;RequestServices r{};WinHttpHost h{};UrlServices url{};
      auto* d=win32_gdk_query_services();TaskQueueBinding tasks(g,r,*d);
+     Win32UrlBinding urls(h,r,*d);require(urls.activate(),"native URL services installed");
+     char16_t* prepared=nullptr;
+     require(urls.prepare("https://example.test:443/a?b=c",nullptr,&prepared)==0&&std::u16string(prepared)==u"https://example.test:443/a?b=c","native absolute URL preparation");
+     xcurl_research_heap_free(prepared,7);prepared=nullptr;
+     require(urls.prepare("example.test",nullptr,&prepared)==0&&std::u16string(prepared)==u"https://example.test","native original HTTPS fallback");
+     xcurl_research_heap_free(prepared,7);prepared=nullptr;
+     require(urls.prepare("https://host:0",nullptr,&prepared)==0x80072ee5U&&!prepared,"native rejected URL");
+     require(urls.prepare_services().start_callback==CallbackBinding::start_token(),"native start callback token");
+     urls.deactivate();require(!h.urls,"native URL binding shutdown");
      WinHttpPipeline pipeline(g,h,r,tasks,*d,url,nullptr);
      require(pipeline.activate()&&h.status_callback&&r.create_queue&&r.submit_completion&&r.debug_data,"native composed pipeline activation");
      require(pipeline.start().request==&r&&pipeline.status().request==&r,"native pipeline service ownership");

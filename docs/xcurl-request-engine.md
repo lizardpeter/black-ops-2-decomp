@@ -165,3 +165,7 @@ The original descriptor table recovered in run 45550472340 contains only HTTPS (
 
 ## Flag-zero HTTP/HTTPS URL parsing
 Recovered the main 1C780 HTTP/HTTPS branch and the 1C744 cleanup wrapper, control character scan 1C5D4, dot-segment normalization 1AE40, port parsing 1BFB4 and username/password extraction 1C678/1BD5C. The source uses original object slots and tagged allocations, and preserves the original slash-count check and URL split ordering. The initial/full absolute setter stages the parsed object and only replaces the destination on success. Explicitly unsupported here: file://, nonzero encoding flags and relative resolution into a populated CURLU. The request coordinator uses a fresh object, flag zero, and the separate original HTTPS fallback. Source tests include valid/invalid ports, IPv6 zone, dot segments, cleanup on allocation failure and transaction preservation; original-machine differential testing of these bodies remains pending.
+
+
+## Native Win32 URL preparation binding
+Win32UrlBinding owns the reconstructed CURLU object/parse/format service composition, original 10EA4 coordinator, native WinHttpCrackUrl, UTF-16 copy and callback token. It supplies PrepareServices directly to TransferBinding, including default port retrieval and original insecure-HTTP warning reporting through the recovered GDK error interface. The Windows smoke test now exercises a real absolute URL, missing-scheme HTTPS fallback and rejection before dispatch. This is not live GDK acceptance; unsupported parser branches remain explicitly documented.
