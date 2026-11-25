@@ -10,8 +10,10 @@ namespace t6_xcurl {
 // system GDK loader. All API calls/lifetime transitions must be serialized
 // by the enclosing application; callback workers must drain before teardown.
 struct Win32RuntimeConfig {
+    // Empty selects the local, non-publishing telemetry object lifecycle.
+    // Supply both callbacks to replace that policy; partial overrides fail.
     EnginePlatformHost telemetry{};
-    std::uint32_t engine_limit=64;
+    std::uint32_t engine_limit=12;
     Diagnostic diagnostic=nullptr;
     ErrorLog api_error=nullptr;
     ActiveRequestLog active_log=nullptr;

@@ -1,7 +1,18 @@
 #include "win32_runtime.h"
 #ifdef _WIN32
 #include <exception>
+#include "telemetry_lifecycle.h"
+#include "allocation.h"
 namespace t6_xcurl {
+namespace {
+void* alloc(std::size_t n,std::uint32_t t,void*){return xcurl_research_heap_allocate(n,t);}
+void release(void* p,std::uint32_t t,void*){xcurl_research_heap_free(p,t);}
+std::uint32_t tick32(void*){return ::GetTickCount();}
+const TelemetryServices local{alloc,release,tick32,nullptr};
+std::uint32_t create(void** out,void*){return xcurl_research_telemetry_create(out,&local);}
+void destroy(void* p,void*){xcurl_research_telemetry_destroy_local(p,&local);}
+EnginePlatformHost telemetry(const EnginePlatformHost& h){if(!h.telemetry_create&&!h.telemetry_destroy)return {create,destroy,nullptr};return h;}
+}
 Win32Runtime::Win32Runtime(const Win32RuntimeConfig& c)
     :gdk_(*win32_gdk_query_services()),
      host_{nullptr,c.diagnostic,c.diagnostic_context},
@@ -10,7 +21,7 @@ Win32Runtime::Win32Runtime(const Win32RuntimeConfig& c)
      pipeline_(api_.global,host_,request_,tasks_,gdk_,urls_.crack_services(),c.certificate,c.trailers),
      os_(win32_multi_host_services(nullptr)),
      transfers_(api_.global,urls_.prepare_services(),os_),
-     engine_(gdk_,pipeline_.sessions(),transfers_.scheduler(),c.telemetry),
+     engine_(gdk_,pipeline_.sessions(),transfers_.scheduler(),telemetry(c.telemetry)),
      easy_(win32_easy_lifecycle_services(&request_,&gdk_)),
      multi_(win32_multi_lifecycle_services(&transfers_.scheduler(),&request_)),
      handles_(api_,easy_,multi_),facade_(api_,handles_,transfers_){
