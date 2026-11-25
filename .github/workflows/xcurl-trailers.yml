@@ -1,0 +1,31 @@
+name: XCurl original upload trailer differential
+on:
+  push:
+    paths:
+      - reconstructed_dlls/xcurl/upload_trailers.*
+      - tests/dlls/differential_xcurl_trailers.py
+      - .github/workflows/xcurl-trailers.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tests/differential
+            tests/dlls
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - run: python tools/dlls/fetch.py originals/dlls
+      - run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC reconstructed_dlls/xcurl/{upload_trailers,request_engine,allocation,duplicate_string,slist}.cpp -o build/xcurl_trailers.so
+          python tests/dlls/differential_xcurl_trailers.py originals/dlls/XCurl.dll build/xcurl_trailers.so

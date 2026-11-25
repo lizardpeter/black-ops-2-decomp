@@ -12,7 +12,7 @@ template<class T>T get(const void* p,unsigned o){T v;std::memcpy(&v,static_cast<
 template<class T>void put(void* p,unsigned o,T v){std::memcpy(static_cast<char*>(p)+o,&v,sizeof(v));}
 using Callback=int(*)(curl_slist**,void*);
 }
-std::uint32_t bound_append_upload_trailers(void* req,std::uint64_t* out,const RequestServices* s){
+extern "C" std::uint32_t bound_append_upload_trailers(void* req,std::uint64_t* out,const RequestServices* s){
     auto* easy=get<void*>(req,0x30);auto c=s->context;
     auto cb=get<Callback>(easy,0x140);
     *out=0;
