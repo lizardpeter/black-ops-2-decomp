@@ -26,5 +26,5 @@ int main(){
     assert(h.live.empty()&&(h.freed==std::vector<unsigned>{2,2,3}));
     std::array<std::uint8_t,16> guid{};for(unsigned i=0;i<16;++i)guid[i]=static_cast<std::uint8_t>(i);
     char16_t text[37];xcurl_research_telemetry_format_guid(guid.data(),text);
-    assert(std::u16string(text)==u"03020100-0504-0706-0809-0a0b0c0d0e0f");
+    assert(std::u16string(text)==u"03020100-0504-0706-0809-0A0B0C0D0E0F");
 }

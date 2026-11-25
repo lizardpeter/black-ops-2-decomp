@@ -14,6 +14,7 @@
 #include <deque>
 #include <mutex>
 #include <string>
+#include <vector>
 using namespace t6_xcurl;
 namespace {
 void require(bool ok,const char* label){if(!ok){std::fprintf(stderr,"FAIL %s (Win32 %lu)\n",label,GetLastError());std::exit(1);}}
@@ -114,6 +115,77 @@ void transfer(void* m,Mock& mock,unsigned port,int kind){
     require(!curl_multi_info_read(m,&n)&&!n,"message consumed");
     require(!curl_multi_remove_handle(m,e),"multi remove");curl_easy_cleanup(e);curl_slist_free_all(list);
 }
+// Exercise scheduler saturation, easy-handle reuse, failed preparation, HTTP
+// response error and active cancellation using the actual public ABI.
+void pump(void* m,Mock& mock){
+    auto until=std::chrono::steady_clock::now()+std::chrono::seconds(20);
+    int running=1;while(running){
+        require(!curl_multi_perform(m,&running),"batch multi perform");
+        require(get<std::uint32_t>(m,0x3c)<=8,"global admission limit");
+        while(dispatch(&mock.t,mock.engine,1,0)){}
+        if(!running)break;
+        int n=0;require(!curl_multi_poll(m,nullptr,0,50,&n),"batch multi poll");
+        require(std::chrono::steady_clock::now()<until,"batch timeout");
+    }
+}
+void configure(void* e,const std::string& url,curl_slist* list,std::string* output){
+    require(!curl_easy_setopt(e,10002,url.c_str())&&!curl_easy_setopt(e,10023,list),"batch URL/header");
+    require(!curl_easy_setopt(e,84,1L)&&!curl_easy_setopt(e,155,10000L),"batch timeout");
+    require(!curl_easy_setopt(e,20011,&writer)&&!curl_easy_setopt(e,10001,static_cast<void*>(output)),"batch body");
+}
+void batch(void* m,Mock& mock,unsigned port){
+    constexpr unsigned count=13;
+    std::array<void*,count> handles{};std::array<std::string,count> bodies{};std::array<bool,count> seen{};
+    auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
+    const auto base=std::string("http://127.0.0.1:")+std::to_string(port);
+    for(unsigned i=0;i<count;++i){
+        handles[i]=curl_easy_init();require(handles[i],"batch easy");
+        configure(handles[i],base+"/get",list,&bodies[i]);require(!curl_multi_add_handle(m,handles[i]),"batch add");
+    }
+    require(curl_multi_add_handle(m,handles[0])==7,"duplicate easy add rejected");
+    int running=0;require(!curl_multi_perform(m,&running)&&running==count&&get<std::uint32_t>(m,0x3c)==8,"eight admitted five pending");
+    pump(m,mock);
+    int n=0;unsigned completed=0;
+    while(auto* msg=curl_multi_info_read(m,&n)){
+        auto it=std::find(handles.begin(),handles.end(),msg->easy);require(it!=handles.end()&&msg->type==1&&!msg->data.result,"batch successful result");
+        auto i=static_cast<unsigned>(it-handles.begin());require(!seen[i]&&bodies[i]=="xcurl-native-get","batch response matched");
+        seen[i]=true;++completed;require(n==count-completed,"batch exact message count");
+        require(!curl_multi_remove_handle(m,handles[i]),"batch remove");
+    }
+    require(completed==count&&!n,"batch completed");
+    // Reuse one of the just-completed easy handles: state and metadata must reset.
+    auto* e=handles[0];bodies[0].clear();
+    configure(e,base+"/get",list,&bodies[0]);require(!curl_multi_add_handle(m,e),"reuse add");
+    pump(m,mock);auto* msg=curl_multi_info_read(m,&n);
+    require(msg&&msg->easy==e&&!msg->data.result&&!n&&bodies[0]=="xcurl-native-get","reuse completion");
+    require(!curl_multi_remove_handle(m,e),"reuse remove");
+    require(!curl_multi_info_read(m,&n),"reuse message retired");
+    // Invalid URL never reaches the modeled security service.
+    auto starts=mock.starts.load();bodies[0].clear();
+    configure(e,"https://host:0",list,&bodies[0]);require(!curl_multi_add_handle(m,e),"invalid add");
+    pump(m,mock);msg=curl_multi_info_read(m,&n);
+    std::int32_t error=0;require(msg&&msg->easy==e&&msg->data.result==3&&!n&&mock.starts==starts,"invalid URL error completion");
+    require(!curl_easy_getinfo(e,0x200019,&error)&&static_cast<std::uint32_t>(error)==0x80072ee5U,"original HRESULT getinfo");
+    require(!curl_multi_remove_handle(m,e),"invalid remove");require(!curl_multi_info_read(m,&n),"invalid message retired");
+    // The actual HTTP status notification publishes metadata before fail-on-error.
+    configure(e,base+"/missing",list,&bodies[0]);require(!curl_easy_setopt(e,45,1L)&&!curl_multi_add_handle(m,e),"HTTP error add");
+    pump(m,mock);msg=curl_multi_info_read(m,&n);
+    std::int32_t http=0;require(msg&&msg->easy==e&&msg->data.result==22&&!n,"HTTP fail-on-error result");
+    require(!curl_easy_getinfo(e,0x200002,&http)&&http==404,"HTTP error status getinfo");
+    require(!curl_multi_remove_handle(m,e),"HTTP error remove");require(!curl_multi_info_read(m,&n),"HTTP error message retired");
+    // Start a genuine slow WinHTTP request, cancel after the security worker
+    // has opened it, and require completion/drain before freeing the easy.
+    configure(e,base+"/slow",list,&bodies[0]);require(!curl_easy_setopt(e,45,0L)&&!curl_multi_add_handle(m,e),"slow add");
+    require(!curl_multi_perform(m,&running)&&running==1,"slow admission");
+    while(dispatch(&mock.t,mock.engine,1,0)){}
+    require(get<std::uint32_t>(e,0x258)==2,"active WinHTTP handle before cancellation");
+    require(!curl_multi_remove_handle(m,e)&&get<std::uint32_t>(e,0x258)==0,"active cancel drained");
+    require(!curl_multi_info_read(m,&n)&&!n,"canceled detached easy does not publish completion");
+    require(!curl_easy_getinfo(e,0x200019,&error)&&static_cast<std::uint32_t>(error)==0x80004004U,"canceled HRESULT");
+    for(auto* handle:handles)curl_easy_cleanup(handle);
+    curl_slist_free_all(list);
+    std::puts("XCurl batch PASS: admission limit, 13 parallel requests, reuse, invalid URL, HTTP error, active cancel");
+}
 }
 int main(int argc,char** argv){
     require(argc==2,"port argument");auto port=static_cast<unsigned>(std::atoi(argv[1]));
@@ -136,8 +208,9 @@ int main(int argc,char** argv){
     require(facade.install()&&!curl_global_init(3),"global init");
     auto* m=curl_multi_init();require(m,"multi init");
     for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);
+    batch(m,mock,port);
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&mock.starts==3&&mock.reports>=3,"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&mock.starts==19&&mock.reports>=19,"balanced runtime lifetime");
     require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }

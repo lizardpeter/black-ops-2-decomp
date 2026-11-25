@@ -36,7 +36,7 @@ extern "C" void xcurl_research_telemetry_destroy_local(void* p,const TelemetrySe
 }
 extern "C" void xcurl_research_telemetry_format_guid(const std::uint8_t* g,char16_t* out){
     constexpr unsigned order[]={3,2,1,0,45,5,4,45,7,6,45,8,9,45,10,11,12,13,14,15};
-    constexpr char16_t hex[]=u"0123456789abcdef";
+    constexpr char16_t hex[]=u"0123456789ABCDEF";
     for(auto i:order){if(i==45)*out++=u'-';else{*out++=hex[g[i]>>4];*out++=hex[g[i]&15];}}
     *out=0;
 }

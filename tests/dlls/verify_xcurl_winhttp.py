@@ -4,6 +4,7 @@ import http.server
 import subprocess
 import sys
 import threading
+import time
 from pathlib import Path
 import pefile
 
@@ -20,6 +21,10 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(body)
     def do_GET(self):
+        if self.path == '/slow':
+            time.sleep(0.75)
+            self.reply(b'xcurl-slow')
+            return
         if self.path != '/get':
             self.send_error(404)
             return
@@ -30,6 +35,14 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         self.reply(self.rfile.read(int(self.headers['Content-Length'])))
 
+class Server(http.server.ThreadingHTTPServer):
+    def handle_error(self, request, client_address):
+        # Connection resets are expected after WinHTTP closes the last handle
+        # or actively cancels a slow request. Other exceptions still surface.
+        if isinstance(sys.exc_info()[1], (ConnectionResetError, BrokenPipeError, ConnectionAbortedError)):
+            return
+        super().handle_error(request, client_address)
+
 def main():
     exe = Path(sys.argv[1]).resolve()
     image = pefile.PE(str(exe))
@@ -38,7 +51,7 @@ def main():
     print('PE x64 imports:', sorted(imports), flush=True)
     assert 'winhttp.dll' in imports
     assert not any('xcurl' in n or 'libcurl' in n or 'bink' in n for n in imports)
-    with http.server.ThreadingHTTPServer(('127.0.0.1', 0), Handler) as server:
+    with Server(('127.0.0.1', 0), Handler) as server:
         thread = threading.Thread(target=server.serve_forever, daemon=True)
         thread.start()
         try:
