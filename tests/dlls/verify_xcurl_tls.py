@@ -61,13 +61,16 @@ def main():
         ca_file=tmp/"root.cer";ca_file.write_bytes(root)
         thumb=hashlib.sha1(root).hexdigest()
         servers=[]
+        # The disposable hosted runner is elevated. CurrentUser Root can
+        # trigger an interactive consent dialog even with certutil -f.
+        # Use the runner's LocalMachine Root with exact-thumbprint cleanup.
         try:
-            subprocess.run(["certutil","-user","-f","-addstore","Root",str(ca_file)],check=True,timeout=30)
+            subprocess.run(["certutil","-f","-addstore","Root",str(ca_file)],check=True,timeout=30)
             for name,parts in (("trusted",trusted),("untrusted",untrusted)):
                 s=server(tmp,name,*parts);t=threading.Thread(target=s.serve_forever,daemon=True);t.start();servers.append((s,t))
             subprocess.run([str(exe),*[str(s.server_port) for s,_ in servers]],check=True,timeout=90)
         finally:
             for s,t in servers:s.shutdown();s.server_close();t.join()
-            subprocess.run(["certutil","-user","-delstore","Root",thumb],check=True,timeout=30)
+            subprocess.run(["certutil","-delstore","Root",thumb],check=True,timeout=30)
     print("XCurl isolated TLS trust fixture PASS",flush=True)
 if __name__=="__main__":main()
