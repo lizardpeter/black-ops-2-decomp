@@ -61,6 +61,7 @@ void delete_cs(void* p,void*){::DeleteCriticalSection(static_cast<CRITICAL_SECTI
 void close_handle(void* h,void*){::CloseHandle(h);}
 void* create_mutex(void*){return ::CreateMutexW(nullptr,FALSE,nullptr);}
 void* create_multi_event(std::uint8_t manual,std::uint8_t initial,void*){return ::CreateEventW(nullptr,manual,initial,nullptr);}
+void CALLBACK reconstructed_status(HINTERNET,DWORD_PTR context,DWORD status,LPVOID info,DWORD length){CallbackBinding::status_entry(context,status,info,length);}
 }
 SessionServices winhttp_session_services(WinHttpHost* host){return {enter,leave,alloc,release,session,option,error,close,diagnostic,vtable,host};}
 HttpSetupServices winhttp_setup_services(WinHttpHost* host){return {connect,open,option,timeouts,error,diagnostic,retry,host};}
@@ -73,6 +74,7 @@ void bind_winhttp_request_services(RequestServices& s,WinHttpHost* host){
     if(host->tasks){s.create_queue=create_queue;s.queue_dispatch=dispatch_queue;s.cancel_task=cancel_task;s.submit_completion=submit_completion;s.adjust_global=adjust_global;}
 }
 MultiHostServices win32_multi_host_services(void* context){return {wait_one,wait_many,release_mutex,reset_event,context};}
+WINHTTP_STATUS_CALLBACK win32_reconstructed_status_callback(){return reconstructed_status;}
 EasyLifecycleServices win32_easy_lifecycle_services(const RequestServices* r,const GdkQueryServices* g){return {r,g,delete_cs,close_handle,nullptr};}
 MultiLifecycleServices win32_multi_lifecycle_services(const SchedulerServices* s,const RequestServices* r){return {s,r,create_mutex,create_multi_event,close_handle,release_mutex,error,nullptr};}
 }

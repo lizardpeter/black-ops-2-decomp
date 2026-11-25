@@ -136,3 +136,8 @@ The pinned A544 destructor, 113B8 active predicate (request states 1 through 5),
 ## Inline completion safety at admission
 
 The original scheduler calls request start before inserting the easy into the active list. If GDK submission fails immediately, BA8C falls back to A6B0 synchronously and the completion cannot find the easy on that list. The bound scheduler now publishes the active list entry and count before invoking request start; the separately exposed faithful 0x18F68 function retains original ordering for differential tests. The regression forces security-query failure and subsequent completion-submit failure during admission, verifying the message appears and both active counters return to zero. Fixed a const-pointer typo in the new handle-binding fixture.
+
+
+## Native asynchronous entrypoints and transfer workers
+
+The 0x14A00 instruction evidence confirms the disabled-ETW WinHTTP callback forwards request context, notification, information and length directly to 0x13E14. CallbackBinding installs one process-wide native callback owner (matching the original global engine), supplies the 0x11F10 async-start token and Win32 status callback, and submits header, upload, deferred-read and body workers through the real recovered GDK task-queue wrappers. Generalized TaskQueueBinding keeps callback contexts alive until execution or failed submission. The owner must drain all callbacks before deactivation, and the source-link test models GDK queue delivery while exercising the actual worker routines, callback forwarding and ownership. The remaining request setup/status service composition and full live runtime acceptance are not complete.

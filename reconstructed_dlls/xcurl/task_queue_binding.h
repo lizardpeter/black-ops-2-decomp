@@ -12,6 +12,8 @@ public:
     std::uint32_t create(void**);
     std::uint8_t dispatch(void*,std::uint32_t,std::uint32_t);
     void cancel(void*);
+    using Worker=void(*)(void*,const void*);
+    std::uint32_t submit_worker(void* queue,void* payload,Worker,const void* services);
     std::uint32_t submit_completion(void*,void*);
     void adjust_global(std::uint32_t);
 private:
