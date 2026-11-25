@@ -24,7 +24,7 @@ Win32Runtime::Win32Runtime(const Win32RuntimeConfig& c)
      engine_(gdk_,pipeline_.sessions(),transfers_.scheduler(),telemetry(c.telemetry)),
      easy_(win32_easy_lifecycle_services(&request_,&gdk_)),
      multi_(win32_multi_lifecycle_services(&transfers_.scheduler(),&request_)),
-     handles_(api_,easy_,multi_),facade_(api_,handles_,transfers_){
+     handles_(api_,easy_,multi_),facade_(api_,handles_,transfers_,&tasks_){
     engine_.bind_api(api_,c.engine_limit);
     api_.error=c.api_error;api_.active_log=c.active_log;api_.context=c.diagnostic_context;
 }

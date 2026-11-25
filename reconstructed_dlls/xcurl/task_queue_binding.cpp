@@ -32,7 +32,29 @@ std::uint32_t TaskQueueBinding::submit_worker(void* queue,void* payload,Worker w
     if(status&0x80000000U)delete task;
     return status;
 }
+bool TaskQueueBinding::reserve(void* easy,bool& created){
+    std::lock_guard lock(reservation_lock_);created=false;
+    if(reservations_.contains(easy))return true;
+    auto* node=request_.allocate(0x28,12,request_.context);if(!node)return false;
+    try{reservations_.emplace(easy,node);}catch(const std::bad_alloc&){request_.release(node,12,request_.context);return false;}
+    created=true;return true;
+}
+void* TaskQueueBinding::take(void* easy){
+    std::lock_guard lock(reservation_lock_);auto it=reservations_.find(easy);if(it==reservations_.end())return nullptr;
+    auto* node=it->second;reservations_.erase(it);return node;
+}
+void TaskQueueBinding::discard(void* easy){if(auto* node=take(easy))request_.release(node,12,request_.context);}
+bool TaskQueueBinding::reservations_empty(){std::lock_guard lock(reservation_lock_);return reservations_.empty();}
+void TaskQueueBinding::complete_reserved(void* easy){xcurl_bound_easy_complete(easy,take(easy),&request_);}
 std::uint32_t TaskQueueBinding::submit_completion(void* queue,void* easy){
+    if(reserved_mode_){
+        auto status=submit_worker(queue,easy,[](void* p,const void* s){const_cast<TaskQueueBinding*>(static_cast<const TaskQueueBinding*>(s))->complete_reserved(p);},this);
+        if(status&0x80000000U){
+            request_.diagnostic(easy,0x20920,status,request_.context);
+            complete_reserved(easy); // BA8C inline fallback, using reserved storage
+        }
+        return 0; // completion already ran or was queued; do not invoke retail fallback twice
+    }
     return submit_worker(queue,easy,[](void* p,const void* s){xcurl_research_easy_complete(p,static_cast<const RequestServices*>(s));},&request_);
 }
 void TaskQueueBinding::adjust_global(std::uint32_t n){

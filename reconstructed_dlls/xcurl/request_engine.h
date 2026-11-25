@@ -41,6 +41,7 @@ void xcurl_research_easy_cancel(void*,std::uint32_t,std::uint32_t,const t6_xcurl
 std::uint8_t xcurl_research_easy_done(void*,const t6_xcurl::RequestServices*);
 void xcurl_research_request_reset(void*,const t6_xcurl::RequestServices*);
 void xcurl_research_easy_complete(void*,const t6_xcurl::RequestServices*);
+void xcurl_bound_easy_complete(void*,void*,const t6_xcurl::RequestServices*);
 void xcurl_research_request_close(void*,const t6_xcurl::RequestServices*);
 void xcurl_research_request_stop(void*,const t6_xcurl::RequestServices*);
 void xcurl_research_request_finish(void*,const t6_xcurl::RequestServices*);

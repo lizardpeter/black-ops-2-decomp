@@ -44,21 +44,26 @@ extern "C" void xcurl_research_request_reset(void* request,const RequestServices
     put(p,0x28,0U);put(p,0xb8,std::uint8_t(0));clear(p,0xc8);put(p,0xd0,0U);put(p,0xd4,std::uint16_t(0));put(p,0xd6,std::uint8_t(0));put(p,0xdc,0U);
     s->leave(p,s->context);
 }
-extern "C" void xcurl_research_easy_complete(void* easy,const RequestServices* s){ // A6B0
+namespace {
+void easy_complete(void* easy,const RequestServices* s,void* reserved,bool bound){ // A6B0
     auto* e=static_cast<P>(easy);s->enter(e+0x10,s->context);s->enter(e+0x188,s->context);
     free_at(e,0x340,14,s);free_at(e,0x348,14,s);auto* m=ptr(e,0x310);
     put(e,0x48,get<std::uint32_t>(e,0x220));put(e,0x40,e);put(e,0x38,1U);
     s->leave(e+0x188,s->context);xcurl_research_request_reset(e+0x230,s);s->leave(e+0x10,s->context);
+    if(bound&&!m){if(reserved)s->release(reserved,12,s->context);return;}
     s->enter(m+0x10,s->context);auto* h=m+0x50; s->enter(m+0x10,s->context);auto* n=ptr(h,0);while(n&&n!=h&&n!=e)n=ptr(n,0);
     const bool found=n==e;if(found)unlink(e);s->leave(m+0x10,s->context);
-    if(found){s->enter(m+0x10,s->context);push_front(m+0x60,e);s->leave(m+0x10,s->context);auto* msg=static_cast<P>(s->allocate(0x28,12,s->context));
+    if(found){s->enter(m+0x10,s->context);push_front(m+0x60,e);s->leave(m+0x10,s->context);auto* msg=static_cast<P>(bound?reserved:s->allocate(0x28,12,s->context));
         // Original unconditionally dereferences this allocation: non-null allocator contract for this path.
-        std::memcpy(msg+0x10,e+0x38,24);push_back(m+0x78,msg);
-        put(m,0x88,get<std::uint32_t>(m,0x88)+1);auto active=get<std::uint32_t>(m,0x3c)-1;put(m,0x3c,active);
+        if(!bound||msg){std::memcpy(msg+0x10,e+0x38,24);push_back(m+0x78,msg);put(m,0x88,get<std::uint32_t>(m,0x88)+1);}
+        auto active=get<std::uint32_t>(m,0x3c)-1;put(m,0x3c,active);
         if(!active)s->set_event(ptr(m,0xb0),s->context);
     }
-    s->leave(m+0x10,s->context);if(found)s->adjust_global(1,s->context);
+    s->leave(m+0x10,s->context);if(found)s->adjust_global(1,s->context);else if(bound&&reserved)s->release(reserved,12,s->context);
 }
+}
+extern "C" void xcurl_research_easy_complete(void* easy,const RequestServices* s){easy_complete(easy,s,nullptr,false);}
+extern "C" void xcurl_bound_easy_complete(void* easy,void* reserved,const RequestServices* s){easy_complete(easy,s,reserved,true);}
 extern "C" void xcurl_research_engine_decrement(void* engine,std::uint32_t amount,const RequestServices* s){ // 16DE4
     auto* p=static_cast<P>(engine);s->enter(p,s->context);put(p,0x40,get<std::uint32_t>(p,0x40)-amount);s->leave(p,s->context);
 }

@@ -1,4 +1,5 @@
 #include "game_api.h"
+#include "task_queue_binding.h"
 #include <atomic>
 #include <cstdarg>
 #include <cstring>
@@ -11,13 +12,13 @@ using TrailerFn=int(*)(curl_slist**,void*);
 template<class T>std::uint64_t bits(T p){return static_cast<std::uint64_t>(reinterpret_cast<std::uintptr_t>(p));}
 }
 namespace t6_xcurl {
-GameApi::GameApi(ApiBinding& a,HandleBinding& h,TransferBinding& t):api_(a),handles_(h),transfers_(t){}
+GameApi::GameApi(ApiBinding& a,HandleBinding& h,TransferBinding& t,TaskQueueBinding* reservations):api_(a),handles_(h),transfers_(t),reservations_(reservations){if(reservations_)reservations_->enable_reservations();}
 bool GameApi::install(){
     if(!easies_.empty()||!multis_.empty())return false;
     GameApi* empty=nullptr;return owner.compare_exchange_strong(empty,this);
 }
 bool GameApi::uninstall(){
-    if(!easies_.empty()||!multis_.empty()||api_.global.references)return false;
+    if(!easies_.empty()||!multis_.empty()||api_.global.references||(reservations_&&!reservations_->reservations_empty()))return false;
     auto* expected=this;return owner.compare_exchange_strong(expected,nullptr);
 }
 void GameApi::profile(std::uint32_t id){xcurl_research_record_api(&api_.profile,id,api_.profile_lock,api_.enter,api_.leave,api_.tick,api_.context);}
@@ -35,7 +36,7 @@ void* GameApi::easy_init(){
 void GameApi::easy_cleanup(void* e){
     if(!e){handles_.easy_cleanup(nullptr);return;}
     if(!easies_.contains(e)){profile(9);record(9,43);return;}
-    if(handles_.try_easy_cleanup(e))easies_.erase(e);
+    if(handles_.try_easy_cleanup(e)){if(reservations_)reservations_->discard(e);easies_.erase(e);}
 }
 std::uint32_t GameApi::setopt(void* e,int key,std::uint64_t value){
     if(e&&!easies_.contains(e)){profile(7);return record(7,43);}
@@ -56,10 +57,13 @@ std::uint32_t GameApi::multi_cleanup(void* m){
     const auto status=handles_.multi_cleanup(m);multis_.erase(m);return status;
 }
 std::uint32_t GameApi::multi_add(void* m,void* e){
-    profile(14);return record(14,!multis_.contains(m)?1:!easies_.contains(e)?2:transfers_.add(m,e));
+    profile(14);if(!multis_.contains(m))return record(14,1);if(!easies_.contains(e))return record(14,2);
+    bool created=false;if(reservations_&&!reservations_->reserve(e,created))return record(14,3);
+    auto status=transfers_.add(m,e);if(status&&created)reservations_->discard(e);return record(14,status);
 }
 std::uint32_t GameApi::multi_remove(void* m,void* e){
-    profile(15);return record(15,!multis_.contains(m)?1:!easies_.contains(e)?2:transfers_.remove(m,e));
+    profile(15);auto status=!multis_.contains(m)?1:!easies_.contains(e)?2:transfers_.remove(m,e);
+    if(!status&&reservations_)reservations_->discard(e);return record(15,status);
 }
 std::uint32_t GameApi::multi_perform(void* m,int* running){
     profile(19);if(!multis_.contains(m))return record(19,1);

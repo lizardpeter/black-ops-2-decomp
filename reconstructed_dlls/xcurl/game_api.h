@@ -4,6 +4,7 @@
 #include "xcurl_leaf_api.h"
 #include <set>
 namespace t6_xcurl {
+class TaskQueueBinding;
 // Source-link facade for the 16 imports used by the three Store clients.
 // Not a drop-in retail DLL. The application installs a fully composed owner
 // before invoking any stateful entrypoint. Calls and owner lifetime must be
@@ -11,7 +12,7 @@ namespace t6_xcurl {
 // thread but must not destroy handles or uninstall the owner.
 class GameApi {
 public:
-    GameApi(ApiBinding&,HandleBinding&,TransferBinding&);
+    GameApi(ApiBinding&,HandleBinding&,TransferBinding&,TaskQueueBinding* reservations=nullptr);
     GameApi(const GameApi&)=delete;
     GameApi& operator=(const GameApi&)=delete;
     bool install();
@@ -33,6 +34,7 @@ private:
     ApiBinding& api_;
     HandleBinding& handles_;
     TransferBinding& transfers_;
+    TaskQueueBinding* reservations_;
     std::set<void*> easies_,multis_;
     std::uint32_t record(std::uint32_t,std::uint32_t);
     void profile(std::uint32_t);

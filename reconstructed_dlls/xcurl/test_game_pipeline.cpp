@@ -370,7 +370,7 @@ int main(int argc,char** argv){
     api.engine=&services;api.shutdown_runtime=nullptr;
     auto easy=win32_easy_lifecycle_services(&request,&gdk);
     auto multi=win32_multi_lifecycle_services(&transfers.scheduler(),&request);
-    HandleBinding handles(api,easy,multi);GameApi facade(api,handles,transfers);
+    HandleBinding handles(api,easy,multi);GameApi facade(api,handles,transfers,&tasks);
     require(facade.install()&&!curl_global_init(3),"global init");
     auto* m=curl_multi_init();require(m,"multi init");
     if(mock.tls){tls_transfer(m,mock,port,true);tls_transfer(m,mock,static_cast<unsigned>(std::atoi(argv[2])),false);
@@ -380,6 +380,6 @@ int main(int argc,char** argv){
     else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);response_edges(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
     require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==34&&mock.reports>=34)),"balanced runtime lifetime");
-    require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
+    require(tasks.reservations_empty()&&facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }

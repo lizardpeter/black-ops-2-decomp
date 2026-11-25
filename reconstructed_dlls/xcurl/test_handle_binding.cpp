@@ -1,5 +1,6 @@
 #include "handle_binding.h"
 #include "game_api.h"
+#include "task_queue_binding.h"
 #include <array>
 #include <cassert>
 #include <cstdlib>
@@ -75,7 +76,8 @@ int main(){
     os.release_mutex=event;os.reset_event=event;os.context=&h;
     h.request.set_event=event;
     TransferBinding transfers(h.api.global,prep,os);
-    GameApi api(h.api,b,transfers),second(h.api,b,transfers);
+    TaskQueueBinding tasks(h.api.global,h.request,h.gdk);
+    GameApi api(h.api,b,transfers,&tasks),second(h.api,b,transfers);
     assert(api.install()&&!second.install()&&!api.uninstall());
     auto* easy=curl_easy_init();auto* multi=curl_multi_init();assert(easy&&multi);
     assert(curl_easy_setopt(easy,10002,"https://example.test/")==0);
@@ -91,7 +93,7 @@ int main(){
     assert(curl_easy_setopt(easy,10023,list)==0);
     assert(curl_easy_strerror(0));assert(curl_multi_add_handle(multi,easy)==0);
     curl_easy_cleanup(easy);curl_global_cleanup();assert(h.api.global.references==1);
-    assert(curl_multi_remove_handle(multi,easy)==0);
+    assert(curl_multi_remove_handle(multi,easy)==0&&tasks.reservations_empty());
     int n=99;assert(curl_multi_perform(multi,&n)==0&&!n);
     assert(curl_multi_poll(multi,nullptr,0,10,&n)==0&&!n);
     assert(!curl_multi_info_read(multi,&n)&&!n);
