@@ -3,6 +3,7 @@
 #include "winhttp_services.h"
 #include "winhttp_pipeline.h"
 #include "win32_url_binding.h"
+#include "win32_engine_binding.h"
 #include "allocation.h"
 #include "gdk_runtime_win32.h"
 #include "response_headers.h"
@@ -139,6 +140,15 @@ int main(int argc,char** argv){
      require(urls.prepare("https://host:0",nullptr,&prepared)==0x80072ee5U&&!prepared,"native rejected URL");
      require(urls.prepare_services().start_callback==CallbackBinding::start_token(),"native start callback token");
      urls.deactivate();require(!h.urls,"native URL binding shutdown");
+     auto sessions=winhttp_session_services(&h);SchedulerServices sched{};
+     EnginePlatformHost telemetry{[](void** p,void*)->std::uint32_t{*p=nullptr;return 0;},[](void*,void*){},nullptr};
+     Win32EngineBinding engine(*d,sessions,sched,telemetry);require(engine.activate(),"native engine services installed");
+     ApiBinding api;engine.bind_api(api,64);require(api.engine==&engine.services()&&api.engine_limit==64&&api.tick(nullptr)>0,"native engine API binding");
+     alignas(8) std::array<std::uint8_t,0xa8> storage{};
+     auto& es=engine.services();require(xcurl_research_engine_construct(storage.data(),&es)==storage.data(),"native critical sections");
+     xcurl_research_engine_set_limit(storage.data(),32,&es);require(get<std::uint32_t>(storage.data(),0x44)==32,"native engine lock");
+     es.delete_cs(storage.data()+0x50,es.context);es.delete_cs(storage.data(),es.context);
+     require(engine.deactivate(),"native engine services deactivated");
      WinHttpPipeline pipeline(g,h,r,tasks,*d,url,nullptr);
      require(pipeline.activate()&&h.status_callback&&r.create_queue&&r.submit_completion&&r.debug_data,"native composed pipeline activation");
      require(pipeline.start().request==&r&&pipeline.status().request==&r,"native pipeline service ownership");

@@ -169,3 +169,7 @@ Recovered the main 1C780 HTTP/HTTPS branch and the 1C744 cleanup wrapper, contro
 
 ## Native Win32 URL preparation binding
 Win32UrlBinding owns the reconstructed CURLU object/parse/format service composition, original 10EA4 coordinator, native WinHttpCrackUrl, UTF-16 copy and callback token. It supplies PrepareServices directly to TransferBinding, including default port retrieval and original insecure-HTTP warning reporting through the recovered GDK error interface. The Windows smoke test now exercises a real absolute URL, missing-scheme HTTPS fallback and rejection before dispatch. This is not live GDK acceptance; unsupported parser branches remain explicitly documented.
+
+
+## Native engine platform services
+Win32EngineBinding supplies real critical sections, events, mutexes, performance counters, tagged allocation, GDK runtime initialization/shutdown, native connectivity callback 16960 and app suspend/resume callback 16B60. It dynamically resolves the same original app-notification API set and keeps its module alive until unregistration. Positive Win32 registration errors are converted into HRESULTs so the recovered engine cannot incorrectly advertise success. Telemetry object construction/destruction remains explicitly injected; actual registration and live GDK are not tested by the smoke fixture, which verifies native primitive and binding ownership only.
