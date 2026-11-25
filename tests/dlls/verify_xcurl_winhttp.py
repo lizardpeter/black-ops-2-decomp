@@ -22,6 +22,23 @@ class Handler(http.server.BaseHTTPRequestHandler):
         if send_body:
             self.wfile.write(body)
     def do_GET(self):
+        if self.path == '/chunked':
+            self.send_response(200)
+            self.send_header('Transfer-Encoding', 'chunked')
+            self.send_header('Content-Type', 'text/plain')
+            self.end_headers()
+            body=bytes(ord('a')+i%26 for i in range(32783))
+            for i in range(0,len(body),3073):
+                chunk=body[i:i+3073]
+                self.wfile.write(f"{len(chunk):x}\r\n".encode()+chunk+b"\r\n")
+            self.wfile.write(b"0\r\n\r\n")
+            return
+        if self.path == '/redirect':
+            self.send_response(302)
+            self.send_header('Location', '/get')
+            self.send_header('Content-Length', '0')
+            self.end_headers()
+            return
         if self.path == '/slow':
             time.sleep(0.75)
             self.reply(b'xcurl-slow')

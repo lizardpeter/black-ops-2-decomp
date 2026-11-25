@@ -282,6 +282,46 @@ void method_transfers(void* m,Mock& mock,unsigned port){
     std::puts("XCurl Store methods PASS: HEAD, PUT, custom PATCH, debug data, header fallback");
 }
 
+// Additional real HTTP response and error paths. Each case must publish
+// one completion, balance the scheduler and permit immediate easy reuse.
+void response_edges(void* m,Mock& mock,unsigned port){
+    auto base=std::string("http://127.0.0.1:")+std::to_string(port);
+    auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
+    auto* e=curl_easy_init();require(e&&list,"response edge init");
+    std::string body;
+    auto run=[&](unsigned expected){
+        require(!curl_multi_add_handle(m,e),"response edge add");pump(m,mock);
+        int n=0;auto* msg=curl_multi_info_read(m,&n);
+        require(msg&&msg->easy==e&&msg->data.result==static_cast<int>(expected)&&!n,"response edge result");
+        require(!curl_multi_remove_handle(m,e)&&!curl_multi_info_read(m,&n),"response edge retire");
+        require(!get<std::uint32_t>(m,0x3c),"response edge scheduler drained");
+    };
+    configure(e,base+"/chunked",list,&body);run(0);
+    std::string expected;for(unsigned i=0;i<32783;++i)expected.push_back(static_cast<char>('a'+i%26));
+    require(body==expected,"chunked response exact bytes across both buffers");
+    body.clear();configure(e,base+"/redirect",list,&body);
+    require(!curl_easy_setopt(e,52,1L),"follow redirect option");run(0);
+    char* effective=nullptr;
+    require(body=="xcurl-native-get"&&!curl_easy_getinfo(e,0x100001,&effective)&&effective&&std::string(effective)==base+"/get","redirect effective URL");
+    body.clear();configure(e,base+"/get",list,&body);
+    auto short_write=+[](char*,std::size_t n,std::size_t k,void*)->std::size_t{return n*k-1;};
+    require(!curl_easy_setopt(e,20011,short_write),"short body callback");run(23);
+    std::int32_t hr=0;require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x800700eaU,"short write HRESULT");
+    auto abort_write=+[](char*,std::size_t,std::size_t,void*)->std::size_t{return 0x10000001ULL;};
+    configure(e,base+"/get",list,&body);require(!curl_easy_setopt(e,20079,abort_write),"abort header callback");run(23);
+    require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x800704c7U,"header abort HRESULT");
+    require(!curl_easy_setopt(e,20079,static_cast<decltype(abort_write)>(nullptr)),"remove abort callback");
+    configure(e,base+"/slow",list,&body);require(!curl_easy_setopt(e,155,100L),"short receive timeout");run(28);
+    require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x80072ee2U,"timeout HRESULT");
+    // No giant allocation or network upload: a DWORD overflow must fail
+    // before WinHttpSendRequest can consume the deliberately tiny payload.
+    configure(e,base+"/echo",list,&body);
+    require(!curl_easy_setopt(e,10015,"x")&&!curl_easy_setopt(e,30120,std::int64_t(0x100000000ULL)),"oversize upload option");
+    run(43);require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x80070057U,"oversize upload HRESULT");
+    curl_easy_cleanup(e);curl_slist_free_all(list);
+    std::puts("XCurl response edges PASS: chunked body, redirect, write abort, header abort, timeout, DWORD overflow");
+}
+
 // Each TLS server has a distinct certificate and the mock never accepts a
 // remote endpoint. Schannel also retains its ordinary WinHTTP verification.
 void tls_transfer(void* m,Mock& mock,unsigned port,bool valid,const char* selector=nullptr){
@@ -331,9 +371,9 @@ int main(int argc,char** argv){
         const auto mutual=static_cast<unsigned>(std::atoi(argv[3]));
         tls_transfer(m,mock,mutual,false,"CurrentUser\\MY\\0000000000000000000000000000000000000000");
         tls_transfer(m,mock,mutual,true,argv[4]);}
-    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);}
+    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);response_edges(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==28&&mock.reports>=28)),"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==34&&mock.reports>=34)),"balanced runtime lifetime");
     require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }

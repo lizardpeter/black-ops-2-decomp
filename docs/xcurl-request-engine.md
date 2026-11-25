@@ -246,3 +246,7 @@ Construct and install one `t6_xcurl::Win32Runtime` before any stateful curl call
 
 ## Native request boundary guards
 The bound start path rejects a missing URL before calling Gaming Services, and checks the GDK result buffer size, returned metadata pointer, and item-array bounds before dereferencing them. A failed second URL crack reports a transfer error instead of completing as success. These are explicit native guards; original-machine differential entrypoints preserve their prior behavior. Windows integration adds five malformed security-result cases and one missing URL case, requiring error messages and clean reuse without sending an HTTP request for these cases. The successful mutual-TLS handshake was confirmed in run 45555499568; its certificate cleanup command was unsupported on the runner and was replaced by exact-thumbprint .NET certificate/key cleanup. Relocation audit run 45555554670 verified all 16 static slots and live GDK absence 0x89240101.
+
+
+## Additional native transport edges
+The bound startup path refuses a 64-bit upload size that cannot fit WinHTTP's DWORD arguments, returning code 43 with HRESULT 0x80070057 rather than silently truncating. The raw original comparison path still uses its original narrowing. Loopback acceptance adds a 32,783-byte chunked response, relative HTTP redirect and effective-URL check, short write callback, header abort callback, receive timeout and oversized direct-upload rejection. These cases exercise actual WinHTTP and the C ABI; new acceptance results pending.

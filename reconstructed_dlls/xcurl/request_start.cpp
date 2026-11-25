@@ -63,6 +63,9 @@ void start_request(void* request,void* task,const StartServices* t,bool bound){
             // Original C070 is passed the owning easy handle, not the request.
             h=xcurl_research_buffer_upload(e,&body,&cap,&n,t->buffer);put(p,0xb0,body);put(p,0xa8,cap);if(failed(h)){cancel_close(h,55);return;}data=body;total=n;
         }else return;
+        // WinHTTP send sizes are DWORDs. The original narrows 64-bit
+        // sizes without checking. Never submit a truncated request.
+        if(bound&&(n>UINT32_MAX||total>UINT32_MAX||n>total)){cancel_close(0x80070057U,43);return;}
         h=xcurl_research_http_send(p,data,n,total,s);if(failed(h))cancel_close(h,55);
     };
     run();s->leave(p,c);if(action==1)xcurl_research_request_close(p,s);else if(action==2)xcurl_research_request_finish(p,s);
