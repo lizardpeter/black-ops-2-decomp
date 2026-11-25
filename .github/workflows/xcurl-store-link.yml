@@ -1,0 +1,38 @@
+name: XCurl Store static link contract
+on:
+  push:
+    paths:
+      - reconstructed_dlls/xcurl/**
+      - docs/xcurl-store-callers.json
+      - tools/dlls/audit_store_xcurl_link.py
+      - .github/workflows/xcurl-store-link.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tools
+            docs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install pefile==2024.8.26 capstone
+      - run: |
+          cmake -S reconstructed_dlls/xcurl -B build/xcurl -A x64
+          cmake --build build/xcurl --config Release --target test_xcurl_game_pipeline
+          python tools/fetch_originals.py t6mp_msstore originals --only exe
+          python tools/fetch_originals.py t6sp_msstore originals --only exe
+          python tools/fetch_originals.py t6zm_msstore originals --only exe
+          python tools/dlls/audit_store_xcurl_link.py --exe build/xcurl/Release/test_xcurl_game_pipeline.exe --map build/xcurl/Release/test_xcurl_game_pipeline.map --originals originals --out build/xcurl-store-link.json
+      - uses: actions/upload-artifact@v4
+        with:
+          name: xcurl-store-static-link-evidence
+          path: build/xcurl-store-link.json
+          if-no-files-found: error

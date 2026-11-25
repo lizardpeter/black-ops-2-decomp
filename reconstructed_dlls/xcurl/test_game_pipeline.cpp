@@ -166,6 +166,7 @@ void batch(void* m,Mock& mock,unsigned port){
     pump(m,mock);msg=curl_multi_info_read(m,&n);
     std::int32_t error=0;require(msg&&msg->easy==e&&msg->data.result==3&&!n&&mock.starts==starts,"invalid URL error completion");
     require(!curl_easy_getinfo(e,0x200019,&error)&&static_cast<std::uint32_t>(error)==0x80072ee5U,"original HRESULT getinfo");
+    require(curl_easy_strerror(msg->data.result)&&*curl_easy_strerror(msg->data.result),"original error string symbol linked");
     require(!curl_multi_remove_handle(m,e),"invalid remove");require(!curl_multi_info_read(m,&n),"invalid message retired");
     // The actual HTTP status notification publishes metadata before fail-on-error.
     configure(e,base+"/missing",list,&bodies[0]);require(!curl_easy_setopt(e,45,1L)&&!curl_multi_add_handle(m,e),"HTTP error add");
