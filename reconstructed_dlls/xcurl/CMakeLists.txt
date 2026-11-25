@@ -62,7 +62,7 @@ if(T6_XCURL_BUILD_TESTS)
 endif()
 
 if(WIN32)
-    target_sources(t6_native_xcurl_research PRIVATE winhttp_services.cpp)
+    target_sources(t6_native_xcurl_research PRIVATE winhttp_services.cpp winhttp_pipeline.cpp)
     target_link_libraries(t6_native_xcurl_research PUBLIC winhttp)
     if(T6_XCURL_BUILD_TESTS)
         add_executable(test_xcurl_winhttp test_winhttp_smoke.cpp)

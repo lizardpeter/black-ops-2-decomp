@@ -1,6 +1,7 @@
 // Real loopback HTTP smoke for reconstructed setup and transfer leaves. The
 // harness drives callbacks; not a test of the still-incomplete production task queue.
 #include "winhttp_services.h"
+#include "winhttp_pipeline.h"
 #include "gdk_runtime_win32.h"
 #include "response_headers.h"
 #include "transfer_callbacks.h"
@@ -123,6 +124,14 @@ std::string request(P easy,void* session,std::uint16_t port,const char16_t* meth
 int main(int argc,char** argv){
 #ifdef _WIN32
     require(win32_gdk_query_services()!=nullptr,"native GDK QueryApiImpl adapter available");
+    // Verify the composed native callback/service registration without issuing
+    // a real GDK request on a CI machine without Gaming Services.
+    {GlobalLifecycle g;RequestServices r{};WinHttpHost h{};UrlServices url{};
+     auto* d=win32_gdk_query_services();TaskQueueBinding tasks(g,r,*d);
+     WinHttpPipeline pipeline(g,h,r,tasks,*d,url,nullptr);
+     require(pipeline.activate()&&h.status_callback&&r.create_queue&&r.submit_completion,"native composed pipeline activation");
+     require(pipeline.start().request==&r&&pipeline.status().request==&r,"native pipeline service ownership");
+     pipeline.deactivate();require(!h.pipeline&&!h.status_callback,"native pipeline deactivation");}
 #endif
     require(argc==2,"port required");auto port=static_cast<std::uint16_t>(std::atoi(argv[1]));
     alignas(8) std::array<std::uint8_t,0x80> cache{};alignas(8) std::array<std::uint8_t,0x368> easy{};

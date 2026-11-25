@@ -17,6 +17,7 @@
 #include "handle_binding.h"
 #include "callback_binding.h"
 namespace t6_xcurl {
+class WinHttpPipeline;
 // Diagnostic and status callback are supplied by the caller. These services
 // bind original OS boundaries and optionally the recovered GDK task queue.
 struct WinHttpHost {
@@ -24,6 +25,7 @@ struct WinHttpHost {
     Diagnostic diagnostic;
     void* diagnostic_context;
     TaskQueueBinding* tasks=nullptr;
+    WinHttpPipeline* pipeline=nullptr;
 };
 SessionServices winhttp_session_services(WinHttpHost*);
 HttpSetupServices winhttp_setup_services(WinHttpHost*);
