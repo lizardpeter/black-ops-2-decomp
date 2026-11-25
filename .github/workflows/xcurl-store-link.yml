@@ -5,6 +5,8 @@ on:
       - reconstructed_dlls/xcurl/**
       - docs/xcurl-store-callers.json
       - tools/dlls/audit_store_xcurl_link.py
+      - tools/dlls/probe_xcurl_setopt.py
+      - tools/dlls/test_xcurl_caller_constants.py
       - .github/workflows/xcurl-store-link.yml
   workflow_dispatch:
 permissions:
@@ -25,6 +27,7 @@ jobs:
           python-version: '3.12'
       - run: python -m pip install pefile==2024.8.26 capstone
       - run: |
+          python tools/dlls/test_xcurl_caller_constants.py
           cmake -S reconstructed_dlls/xcurl -B build/xcurl -A x64
           cmake --build build/xcurl --config Release --target test_xcurl_game_pipeline
           python tools/fetch_originals.py t6mp_msstore originals --only exe

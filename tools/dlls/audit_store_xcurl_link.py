@@ -58,6 +58,7 @@ def main():
                 value=rec["option"]
                 if value is None:
                     result["unresolved"].append({"build":name,"kind":kind,"rva":rec["rva"]})
+                    print("UNRESOLVED",name,rec["rva"],"\n"+"\n".join(rec["instructions"]),flush=True)
                 else:
                     assert value in supported,(name,kind,rec["rva"],value)
                     if "option" in site:assert value==site["option"],(name,site,rec)

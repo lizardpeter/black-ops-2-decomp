@@ -39,6 +39,73 @@ def function_evidence(pe,start,ranges):
                     if i.mnemonic=="call" and i.operands[0].type==CS_OP_IMM})
     return {"rva":hex(start),"end":hex(ranges[start]),"direct_calls":[hex(t) for t in targets],
             "instructions":[format_ins(pe,i) for i in ins]},targets
+# Constant propagation through decoded control flow. Missing register values
+# represent unknown; join keeps only constants equal on all incoming paths.
+# Calls clobber Win64 volatile GPRs, and unsupported writes invalidate the
+# entire register (including partial writes). No external code is executed.
+def canonical(name):
+    families=(("rax","eax","ax","al","ah"),("rbx","ebx","bx","bl","bh"),
+              ("rcx","ecx","cx","cl","ch"),("rdx","edx","dx","dl","dh"),
+              ("rsi","esi","si","sil"),("rdi","edi","di","dil"),
+              ("rbp","ebp","bp","bpl"),("rsp","esp","sp","spl"))
+    for family in families:
+        if name in family:return family[0]
+    for i in range(8,16):
+        if name in (f"r{i}",f"r{i}d",f"r{i}w",f"r{i}b"):return f"r{i}"
+    return None
+
+VOLATILE={"rax","rcx","rdx","r8","r9","r10","r11"}
+def constant_arg(ins,k):
+    from collections import deque
+    by_addr={i.address:j for j,i in enumerate(ins)}
+    incoming={0:{}};pending=deque([0])
+    def merge(j,values):
+        if j is None or not 0<=j<len(ins):return
+        if j not in incoming:
+            incoming[j]=values.copy();pending.append(j);return
+        old=incoming[j];new={r:v for r,v in old.items() if values.get(r)==v}
+        if new!=old:incoming[j]=new;pending.append(j)
+    def value(i,operand,state):
+        if operand.type==CS_OP_IMM:return operand.imm
+        if operand.type==CS_OP_REG:
+            v=state.get(canonical(i.reg_name(operand.reg)))
+            if v is not None and operand.size in (4,8):return v&((1<<(8*operand.size))-1)
+        return None
+    while pending:
+        j=pending.popleft();i=ins[j];state=incoming[j];out=state.copy()
+        op=i.operands;mn=i.mnemonic
+        _,writes=i.regs_access()
+        for reg in writes:
+            name=canonical(i.reg_name(reg))
+            if name:out.pop(name,None)
+        if mn.startswith("call"):
+            for reg in VOLATILE:out.pop(reg,None)
+        if len(op)>=1 and op[0].type==CS_OP_REG and op[0].size in (4,8):
+            dst=canonical(i.reg_name(op[0].reg));v=None
+            if dst:
+                if mn in ("mov","movabs") and len(op)==2:v=value(i,op[1],state)
+                elif mn=="xor" and len(op)==2 and op[1].type==CS_OP_REG and op[0].reg==op[1].reg:v=0
+                elif mn=="lea" and len(op)==2 and op[1].type==CS_OP_MEM:
+                    m=op[1].mem
+                    base=state.get(canonical(i.reg_name(m.base))) if m.base else 0
+                    index=state.get(canonical(i.reg_name(m.index))) if m.index else 0
+                    if base is not None and index is not None and not m.segment:v=base+index*m.scale+m.disp
+                elif mn in ("add","sub","and","or","xor") and len(op)==2:
+                    a=value(i,op[0],state);b=value(i,op[1],state)
+                    if a is not None and b is not None:
+                        v={"add":lambda:a+b,"sub":lambda:a-b,"and":lambda:a&b,"or":lambda:a|b,"xor":lambda:a^b}[mn]()
+                if v is not None:out[dst]=v&((1<<(8*op[0].size))-1)
+        if mn.startswith(("ret","iret")) or mn in ("int3","ud2"):continue
+        if mn.startswith("j") or mn.startswith("loop"):
+            # An unknown jump target could enter any block with unknown
+            # register state. Refuse a proof instead of guessing jump tables.
+            if not op or op[0].type!=CS_OP_IMM:return None
+            merge(by_addr.get(op[0].imm),out)
+            if mn in ("jmp","ljmp"):continue
+        merge(j+1,out)
+    v=incoming.get(k,{}).get("rdx")
+    return None if v is None else v&0xffffffff
+
 def call_evidence(pe,rva,expected,iat):
     base=pe.OPTIONAL_HEADER.ImageBase
     # Decode from the containing unwind function, avoiding ambiguous backward
@@ -63,19 +130,10 @@ def call_evidence(pe,rva,expected,iat):
             target=iat.get(thunk.address+thunk.size+thunk.operands[0].mem.disp)
     assert target==expected,(hex(rva),target,expected)
     prior=ins[max(0,k-24):k]
-    # The option is the second x64 integer argument. Only accept a literal
-    # assignment to EDX/RDX after the last call/control-flow instruction.
-    option=None
-    for i in reversed(prior):
-        if i.mnemonic.startswith(("call","j","ret")):break
-        _,writes=i.regs_access()
-        if X86_REG_EDX in writes or X86_REG_RDX in writes:
-            if i.mnemonic=="mov" and len(i.operands)==2 and i.operands[1].type==CS_OP_IMM:
-                option=i.operands[1].imm
-            elif i.mnemonic=="xor" and len(i.operands)==2 and all(o.type==CS_OP_REG for o in i.operands) and i.operands[0].reg==i.operands[1].reg:
-                option=0
-            break
-    return {"rva":hex(rva),"option":option,"instructions":[format_ins(pe,i) for i in prior+[call]]}
+    option=constant_arg(ins,k)
+    return {"rva":hex(rva),"option":option,"proof":"control-flow constant" if option is not None else None,
+            "instructions":[format_ins(pe,i) for i in prior+[call]]}
+
 def main():
     p=argparse.ArgumentParser(description=__doc__)
     p.add_argument("--dll",type=Path,required=True)
