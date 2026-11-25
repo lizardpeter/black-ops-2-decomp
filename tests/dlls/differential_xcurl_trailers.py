@@ -42,8 +42,9 @@ def main():
             else:assert reg(mu,'EDX')==5
             return 0
         def fmt(mu):
-            assert m.read_cstr(reg(mu,'R8'))==b'%s\r\n'
-            data=m.read_cstr(reg(mu,'R9'))+b'\r\n'
+            fmt=m.read_cstr(reg(mu,'R8'))
+            assert fmt in (b'%s\r\n',b'%s\n',b'%s\r',b'%s'),(i,fmt,bytes(mu.mem_read(img.base+0x21b30,16)))
+            data=fmt % m.read_cstr(reg(mu,'R9'))
             assert len(data)<reg(mu,'RDX')
             mu.mem_write(reg(mu,'RCX'),data+b'\0');return len(data)
         def can(mu):
