@@ -2,9 +2,7 @@
 // that still declare the original functions __declspec(dllimport).
 // This is not a PE import table patch, nor a replacement DLL.
 #include "game_api.h"
-#if !defined(_WIN32) || !defined(_WIN64)
-#error This static import ABI is Windows x64 only.
-#endif
+#if defined(_WIN32) && defined(_WIN64)
 extern "C" {
 decltype(&curl_global_init) __imp_curl_global_init=&curl_global_init;
 decltype(&curl_global_cleanup) __imp_curl_global_cleanup=&curl_global_cleanup;
@@ -23,3 +21,5 @@ decltype(&curl_multi_perform) __imp_curl_multi_perform=&curl_multi_perform;
 decltype(&curl_multi_poll) __imp_curl_multi_poll=&curl_multi_poll;
 decltype(&curl_multi_info_read) __imp_curl_multi_info_read=&curl_multi_info_read;
 }
+
+#endif // Windows x64 static import ABI
