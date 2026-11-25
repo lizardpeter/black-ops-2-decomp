@@ -292,6 +292,7 @@ void response_edges(void* m,Mock& mock,unsigned port){
     auto run=[&](unsigned expected){
         require(!curl_multi_add_handle(m,e),"response edge add");pump(m,mock);
         int n=0;auto* msg=curl_multi_info_read(m,&n);
+        if(!msg||msg->data.result!=static_cast<int>(expected)){std::int32_t hr=0;curl_easy_getinfo(e,0x200019,&hr);std::fprintf(stderr,"response edge expected %u got %d HRESULT %08x\n",expected,msg?msg->data.result:-1,static_cast<unsigned>(hr));}
         require(msg&&msg->easy==e&&msg->data.result==static_cast<int>(expected)&&!n,"response edge result");
         require(!curl_multi_remove_handle(m,e)&&!curl_multi_info_read(m,&n),"response edge retire");
         require(!get<std::uint32_t>(m,0x3c),"response edge scheduler drained");
@@ -311,7 +312,7 @@ void response_edges(void* m,Mock& mock,unsigned port){
     configure(e,base+"/get",list,&body);require(!curl_easy_setopt(e,20079,abort_write),"abort header callback");run(23);
     require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x800704c7U,"header abort HRESULT");
     require(!curl_easy_setopt(e,20079,static_cast<decltype(abort_write)>(nullptr)),"remove abort callback");
-    configure(e,base+"/slow",list,&body);require(!curl_easy_setopt(e,155,100L),"short receive timeout");run(28);
+    configure(e,base+"/timeout",list,&body);require(!curl_easy_setopt(e,155,1000L),"short receive timeout");run(28);
     require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x80072ee2U,"timeout HRESULT");
     // No giant allocation or network upload: a DWORD overflow must fail
     // before WinHttpSendRequest can consume the deliberately tiny payload.

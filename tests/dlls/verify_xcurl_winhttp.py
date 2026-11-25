@@ -39,6 +39,11 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_header('Content-Length', '0')
             self.end_headers()
             return
+        if self.path == '/timeout':
+            # Give WinHTTP's coarse timer and retry behavior a real margin.
+            time.sleep(5)
+            self.reply(b'xcurl-timeout')
+            return
         if self.path == '/slow':
             time.sleep(0.75)
             self.reply(b'xcurl-slow')
