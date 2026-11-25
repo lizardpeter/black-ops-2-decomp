@@ -106,3 +106,8 @@ The 0xA8-byte engine constructor (0x164D4), initializer (0x16C04), destructor (0
 Request preparation (0x11780 and its caller 0xCF90) now calls the reconstructed GDK security-query wrapper (0x566C) directly, including interface acquisition and release; the 1,024-case preparation suite passes locally. Remaining URL conversion and callback entrypoints are explicit service boundaries.
 
 WinHTTP status dispatch (0x13E14) now calls the reconstructed certificate verification path (0x13D50) directly on SENDING_REQUEST, including absent metadata, thread-sensitivity assertion, real GDK interface slot and certificate rejection propagation. All 3,840 status dispatcher comparisons passed locally with this boundary removed.
+
+
+## Source-link API composition
+
+The explicit ApiBinding connects the original global init/cleanup wrappers directly to the recovered engine bootstrap/destructor, and the public setopt wrapper to the owned option dispatcher (including wide-string conversion). Getinfo shares the same profiling and lock services. Host GDK, locks, telemetry, allocations and runtime shutdown remain injectable, with separate contexts for the API and engine. Calls to global init/cleanup must be serialized by the owner and all handles drained before shutdown. Deliberate integration-only safety deviations: skip null-engine destruction after initialization failure, and report initialization failure on repeated init while no engine exists, while retaining the original reference accounting. The original differential entrypoints are unchanged. Added composed source-link success, partial-initialization failure, allocation failure, runtime failure, retry, option ownership and active-request tests. No live Gaming Services or retail ABI completion claimed.
