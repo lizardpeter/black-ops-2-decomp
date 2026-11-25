@@ -197,3 +197,7 @@ The source-link fixture emits an MSVC linker map and explicitly calls all sixtee
 
 ## Native HTTPS acceptance fixture
 Added a Windows CI-only TLS 1.2 loopback acceptance test using separate ephemeral CAs. Only the trusted CA is temporarily added to the current-user root store and removed by exact thumbprint in finally. WinHTTP/Schannel retains its normal certificate verification, and the GDK test substitute additionally queries the actual server certificate and applies Windows chain and SSL hostname policy. The native C ABI must accept a trusted IP-SAN certificate and reject a separate untrusted CA without delivering a response body. This is not live Gaming Services validation and does not change production trust policy. Also clear stale last-error before native WinHttpOpen so the original unconditional error-87 check cannot retry on a stale error. Results pending.
+
+
+## Secure session failure ownership
+The raw 15F40 differential body preserves the original unconditional GetLastError retry and secure-option failure leak. The production integration variant shares the exact cache selection and tagged object lifecycle but retries only a failed open, closes a session whose security option failed, and rejects inconsistent success codes from failed OS calls instead of dereferencing a missing entry. No security option is skipped. WinHttpPipeline uses the bound variant, with nine source-test paths for success, reuse, retry, failure, and allocation rollback. The original differential entrypoint is unchanged.

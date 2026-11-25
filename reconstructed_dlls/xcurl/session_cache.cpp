@@ -37,7 +37,8 @@ extern "C" std::uint32_t xcurl_research_cache_entry_create(std::uint32_t tls,con
     if(!failed(status)){void* session=nullptr;status=xcurl_research_session_create(handle,&session,s);put(p,0x28,session);}
     if(failed(status))xcurl_research_cache_entry_destroy(p,s);else *out=p;return status;
 }
-extern "C" std::uint32_t xcurl_research_session_acquire(void* cache,void* easy,std::uint32_t tls,std::uint32_t scheme,void** out,const SessionServices* s){
+namespace {
+std::uint32_t acquire_session(void* cache,void* easy,std::uint32_t tls,std::uint32_t scheme,void** out,const SessionServices* s,bool safe){
     auto* head=static_cast<P>(cache)+0x28;auto c=s->context;s->enter(cache,c);
     auto* agent=get<const char16_t*>(easy,0xd8);if(!agent)agent=u"XCURL/2403.2.0.0.amd64fre";
     P found=nullptr;std::uint32_t status=0;
@@ -45,20 +46,24 @@ extern "C" std::uint32_t xcurl_research_session_acquire(void* cache,void* easy,s
     if(!found){
         const bool secure=scheme!=1;
         auto* handle=s->open_session(agent,secure?0x30000000U:0x10000000U,c);
-        if(s->error(c)==87)handle=s->open_session(agent,0x10000000U,c);
+        if((!safe||!handle)&&s->error(c)==87)handle=s->open_session(agent,0x10000000U,c);
         if(handle){
-            if(secure&&!s->set_option(handle,84,tls,c)){status=hr(s->error(c));s->diagnostic(easy,0x21b90,status,c);}
+            if(secure&&!s->set_option(handle,84,tls,c)){status=hr(s->error(c));if(safe&&!failed(status))status=0x80004005U;s->diagnostic(easy,0x21b90,status,c);if(safe&&failed(status))s->close(handle,c); }
             // As in the original, option failure does not close the handle here.
             if(!failed(status)){
                 void* entry=nullptr;status=xcurl_research_cache_entry_create(tls,agent,scheme,handle,&entry,s);found=static_cast<P>(entry);
                 if(failed(status)){s->close(handle,c);s->diagnostic(easy,0x21bc0,status,c);}else push_back(head,found);
             }
-        }else{status=hr(s->error(c));s->diagnostic(easy,0x21bf0,status,c);}
+        }else{status=hr(s->error(c));if(safe&&!failed(status))status=0x80004005U;s->diagnostic(easy,0x21bf0,status,c);}
     }
-    // Original assumes a valid entry when the status is not negative.
+    // The bound path fails closed if a host has not supplied a valid entry.
+    if(safe&&!failed(status)&&!found)status=0x80004005U;
     if(!failed(status)){*out=ptr(found,0x28);xcurl_research_session_addref(*out);}
     s->leave(cache,c);return status;
 }
+}
+extern "C" std::uint32_t xcurl_research_session_acquire(void* cache,void* easy,std::uint32_t tls,std::uint32_t scheme,void** out,const SessionServices* s){return acquire_session(cache,easy,tls,scheme,out,s,false);}
+extern "C" std::uint32_t xcurl_bound_session_acquire(void* cache,void* easy,std::uint32_t tls,std::uint32_t scheme,void** out,const SessionServices* s){return acquire_session(cache,easy,tls,scheme,out,s,true);}
 extern "C" void xcurl_research_session_cache_clear(void* cache,const SessionServices* s){
     auto c=s->context;s->enter(cache,c);auto* head=static_cast<P>(cache)+0x28;
     while(auto* n=ptr(head,0)){if(n==head)break;unlink(n);xcurl_research_cache_entry_destroy(n,s);}

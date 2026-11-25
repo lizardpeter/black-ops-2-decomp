@@ -7,7 +7,7 @@ namespace t6_xcurl {
 namespace {
 template<class T>T get(const void* p,unsigned o){T v;std::memcpy(&v,static_cast<const std::uint8_t*>(p)+o,sizeof(v));return v;}
 std::uint32_t acquire(void* cache,void* easy,std::uint32_t tls,std::uint32_t scheme,void** out,void* c){
-    return xcurl_research_session_acquire(cache,easy,tls,scheme,out,static_cast<const SessionServices*>(c));
+    return xcurl_bound_session_acquire(cache,easy,tls,scheme,out,static_cast<const SessionServices*>(c));
 }
 }
 WinHttpPipeline::WinHttpPipeline(GlobalLifecycle& g,WinHttpHost& h,RequestServices& r,TaskQueueBinding& t,
