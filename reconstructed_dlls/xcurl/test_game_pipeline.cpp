@@ -213,6 +213,56 @@ void batch(void* m,Mock& mock,unsigned port){
     curl_slist_free_all(list);
     std::puts("XCurl batch PASS: admission limit, 13 parallel requests, reuse, invalid URL, HTTP error, active cancel");
 }
+// Exercise the original clients' two branch-dependent method selectors,
+// custom method, verbose callback, header-in-body fallback and input length.
+struct DebugTrace {
+    std::mutex mutex;
+    std::string headers,received,sent;
+};
+int debug_callback(void*,int type,char* p,std::size_t n,void* c){
+    auto& d=*static_cast<DebugTrace*>(c);std::lock_guard lock(d.mutex);
+    if(type==1)d.headers.append(p,n);
+    if(type==3)d.received.append(p,n);
+    if(type==4)d.sent.append(p,n);
+    return 0;
+}
+void method_transfers(void* m,Mock& mock,unsigned port){
+    auto base=std::string("http://127.0.0.1:")+std::to_string(port);
+    auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
+    auto* e=curl_easy_init();require(e&&list,"method fixture init");
+    std::string body;DebugTrace trace;Cursor upload;
+    for(unsigned i=0;i<24579;++i)upload.text.push_back(static_cast<char>('a'+i%26));
+    char error_buffer[256]{};
+    configure(e,base+"/get",list,&body);
+    require(!curl_easy_setopt(e,10010,static_cast<void*>(error_buffer)),"game error-buffer option");
+    require(!curl_easy_setopt(e,41,1L)&&!curl_easy_setopt(e,42,1L),"verbose and include headers");
+    require(!curl_easy_setopt(e,20094,&debug_callback)&&!curl_easy_setopt(e,10095,static_cast<void*>(&trace)),"debug function and userdata");
+    auto run=[&]{
+        require(!curl_multi_add_handle(m,e),"method add");pump(m,mock);
+        int n=0;auto* msg=curl_multi_info_read(m,&n);
+        std::int32_t status=0;
+        require(msg&&msg->easy==e&&!msg->data.result&&!n,"method completion");
+        require(!curl_easy_getinfo(e,0x200002,&status)&&status==200,"method HTTP status");
+        require(!curl_multi_remove_handle(m,e)&&!curl_multi_info_read(m,&n),"method remove");
+    };
+    require(!curl_easy_setopt(e,44,1L),"HEAD selection");run();
+    require(body.starts_with("HTTP/1.1 200")&&body.find("X-XCurl-Test: native")!=std::string::npos&&body.find("xcurl-native-get")==std::string::npos,"HEAD header-only body callback");
+    require(trace.headers==body&&trace.received.empty()&&trace.sent.empty(),"HEAD debug callback");
+    body.clear();trace.headers.clear();
+    require(!curl_easy_setopt(e,42,0L),"disable header fallback");
+    require(!curl_easy_setopt(e,46,1L)&&!curl_easy_setopt(e,14,static_cast<long>(upload.text.size())),"PUT method and input size");
+    require(!curl_easy_setopt(e,20012,&reader)&&!curl_easy_setopt(e,10009,static_cast<void*>(&upload))&&!curl_easy_setopt(e,280,8192L),"PUT read callback");
+    configure(e,base+"/put",list,&body);run();
+    require(body==upload.text&&upload.at==upload.text.size(),"PUT exact body and read count");
+    require(trace.received==body&&trace.sent==upload.text&&trace.headers.find("X-XCurl-Test: native")!=std::string::npos,"PUT exact debug bytes");
+    body.clear();upload.at=0;trace.headers.clear();trace.received.clear();trace.sent.clear();
+    configure(e,base+"/patch",list,&body);
+    require(!curl_easy_setopt(e,10036,"PATCH"),"custom method option");run();
+    require(body==upload.text&&upload.at==upload.text.size()&&trace.sent==upload.text&&trace.received==body,"custom PATCH exact upload and response");
+    curl_easy_cleanup(e);curl_slist_free_all(list);
+    std::puts("XCurl Store methods PASS: HEAD, PUT, custom PATCH, debug data, header fallback");
+}
+
 // Each TLS server has a distinct certificate and the mock never accepts a
 // remote endpoint. Schannel also retains its ordinary WinHTTP verification.
 void tls_transfer(void* m,Mock& mock,unsigned port,bool valid){
@@ -234,7 +284,7 @@ void tls_transfer(void* m,Mock& mock,unsigned port,bool valid){
     }
     require(!curl_multi_remove_handle(m,e),"TLS remove");require(!curl_multi_info_read(m,&n),"TLS message retired");
     curl_easy_cleanup(e);curl_slist_free_all(list);
-    std::printf("XCurl TLS %s PASS: result %s, native Schannel, GDK fixture chain policy\\n",valid?"trusted":"untrusted",valid?"success":"rejected");
+    std::printf("XCurl TLS %s PASS: result %s, native Schannel, GDK fixture chain policy\n",valid?"trusted":"untrusted",valid?"success":"rejected");
 }
 }
 int main(int argc,char** argv){
@@ -258,9 +308,9 @@ int main(int argc,char** argv){
     require(facade.install()&&!curl_global_init(3),"global init");
     auto* m=curl_multi_init();require(m,"multi init");
     if(mock.tls){tls_transfer(m,mock,port,true);tls_transfer(m,mock,static_cast<unsigned>(std::atoi(argv[2])),false);}
-    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);}
+    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==2&&!mock.reports&&mock.verifications>0):(mock.starts==19&&mock.reports>=19)),"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==2&&!mock.reports&&mock.verifications>0):(mock.starts==22&&mock.reports>=22)),"balanced runtime lifetime");
     require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }

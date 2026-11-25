@@ -10,7 +10,7 @@ import pefile
 
 class Handler(http.server.BaseHTTPRequestHandler):
     protocol_version = 'HTTP/1.1'
-    def reply(self, body):
+    def reply(self, body, send_body=True):
         if self.headers.get('X-XCurl-Request') != 'original-path':
             self.send_error(400, 'Missing reconstructed outgoing header')
             return
@@ -19,7 +19,8 @@ class Handler(http.server.BaseHTTPRequestHandler):
         self.send_header('Content-Type', 'text/plain')
         self.send_header('X-XCurl-Test', 'native')
         self.end_headers()
-        self.wfile.write(body)
+        if send_body:
+            self.wfile.write(body)
     def do_GET(self):
         if self.path == '/slow':
             time.sleep(0.75)
@@ -29,6 +30,21 @@ class Handler(http.server.BaseHTTPRequestHandler):
             self.send_error(404)
             return
         self.reply(b'xcurl-native-get')
+    def do_HEAD(self):
+        if self.path != '/get':
+            self.send_error(404)
+            return
+        self.reply(b'xcurl-native-get', send_body=False)
+    def do_PUT(self):
+        if self.path != '/put':
+            self.send_error(404)
+            return
+        self.reply(self.rfile.read(int(self.headers['Content-Length'])))
+    def do_PATCH(self):
+        if self.path != '/patch':
+            self.send_error(404)
+            return
+        self.reply(self.rfile.read(int(self.headers['Content-Length'])))
     def do_POST(self):
         if self.path != '/echo':
             self.send_error(404)
