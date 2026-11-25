@@ -1,0 +1,35 @@
+name: XCurl original remaining handle lifecycle
+on:
+  push:
+    paths:
+      - reconstructed_dlls/xcurl/multi_lifecycle.*
+      - reconstructed_dlls/xcurl/easy_lifecycle.*
+      - reconstructed_dlls/xcurl/engine_scheduler.*
+      - reconstructed_dlls/xcurl/request_engine.*
+      - reconstructed_dlls/xcurl/request_prepare.*
+      - tests/dlls/differential_xcurl_remaining_lifecycle.py
+      - .github/workflows/xcurl-remaining-lifecycle.yml
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  differential:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            reconstructed_dlls/xcurl
+            tests/differential
+            tests/dlls
+            tools/dlls
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install -q -r tests/differential/requirements.txt
+      - run: python tools/dlls/fetch.py originals/dlls
+      - run: |
+          mkdir -p build
+          clang++ -std=c++20 -O2 -shared -fPIC $(find reconstructed_dlls/xcurl -maxdepth 1 -name '*.cpp' ! -name 'test_*' | sort) -o build/xcurl_remaining.so
+          python tests/dlls/differential_xcurl_remaining_lifecycle.py originals/dlls/XCurl.dll build/xcurl_remaining.so
