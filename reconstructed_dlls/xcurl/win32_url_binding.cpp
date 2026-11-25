@@ -30,7 +30,7 @@ std::uint32_t Win32UrlBinding::crack(const char16_t* text,void* parts,void*){
     return ::WinHttpCrackUrl(reinterpret_cast<LPCWSTR>(text),0,0,static_cast<URL_COMPONENTS*>(parts));
 }
 std::uint32_t Win32UrlBinding::error(void*){return ::GetLastError();}
-void Win32UrlBinding::crack_diag(void* e,std::uint32_t site,const char16_t*,std::uint32_t code,void* c){prepare_diag(e,site,0,code,c);}
+void Win32UrlBinding::crack_diag(void* e,std::uint32_t site,const char16_t* text,std::uint32_t code,void* c){prepare_diag(e,site,reinterpret_cast<std::uintptr_t>(text),code,c);}
 char* Win32UrlBinding::format_warning(const char16_t* text,void* c){
     constexpr char prefix[]="WARNING: Insecure HTTP request \"";
     auto n=::WideCharToMultiByte(CP_UTF8,WC_ERR_INVALID_CHARS,reinterpret_cast<LPCWSTR>(text),-1,nullptr,0,nullptr,nullptr);
@@ -41,8 +41,8 @@ char* Win32UrlBinding::format_warning(const char16_t* text,void* c){
     out[sizeof(prefix)+n-2]='"';out[sizeof(prefix)+n-1]=0;return out;
 }
 void Win32UrlBinding::report(std::uint32_t code,const char* text,void* c){xcurl_research_gdk_error_report(code,text,&self(c).gdk_);}
-void Win32UrlBinding::prepare_diag(void* e,std::uint32_t site,std::uintptr_t,std::uint32_t code,void* c){
-    auto& h=*static_cast<WinHttpHost*>(c);if(h.diagnostic)h.diagnostic(e,site,code,h.diagnostic_context);
+void Win32UrlBinding::prepare_diag(void* e,std::uint32_t site,std::uintptr_t a,std::uint32_t code,void* c){
+    winhttp_report_diagnostic(e,site,a,0,code,code,static_cast<WinHttpHost*>(c));
 }
 std::uint32_t Win32UrlBinding::prepare(const char* text,void* e,void* out){
     if(host_.urls!=this||!out)return 0x8000ffffU;

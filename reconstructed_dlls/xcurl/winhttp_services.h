@@ -29,6 +29,7 @@ struct WinHttpHost {
     WinHttpPipeline* pipeline=nullptr;
     Win32UrlBinding* urls=nullptr;
 };
+void winhttp_report_diagnostic(void*,std::uint32_t,std::uint64_t,std::uint64_t,std::uint32_t,std::uint32_t,WinHttpHost*);
 SessionServices winhttp_session_services(WinHttpHost*);
 HttpSetupServices winhttp_setup_services(WinHttpHost*);
 HeaderQueryServices winhttp_header_query_services(WinHttpHost*);

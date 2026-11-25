@@ -69,8 +69,8 @@ std::uint64_t WinHttpPipeline::write_callback(void* cb,const void* data,std::uin
 std::uint32_t WinHttpPipeline::append_trailers(void* r,std::uint64_t* n,void* c){auto& b=self(c);return b.trailers_?b.trailers_(r,n,c):bound_append_upload_trailers(r,n,&b.request_);}
 void* WinHttpPipeline::reallocate(void* p,std::size_t n,std::uint32_t t,void*){return xcurl_research_heap_reallocate(p,n,t);}
 void WinHttpPipeline::diag(void* e,std::uint32_t site,std::uint32_t value,void* c){auto& r=self(c).request_;r.diagnostic(e,site,value,r.context);}
-void WinHttpPipeline::diag64(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t,void* c){diag(e,site,static_cast<std::uint32_t>(a),c);}
-void WinHttpPipeline::diag_mixed(void* e,std::uint32_t site,std::uint64_t a,std::uint32_t b,void* c){diag(e,site,b?b:static_cast<std::uint32_t>(a),c);}
+void WinHttpPipeline::diag64(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t b,void* c){winhttp_report_diagnostic(e,site,a,b,0,static_cast<std::uint32_t>(a),static_cast<WinHttpHost*>(c));}
+void WinHttpPipeline::diag_mixed(void* e,std::uint32_t site,std::uint64_t a,std::uint32_t b,void* c){winhttp_report_diagnostic(e,site,a,b,b,b?b:static_cast<std::uint32_t>(a),static_cast<WinHttpHost*>(c));}
 void WinHttpPipeline::diag_status(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t,std::uint32_t b,void* c){diag(e,site,b?b:static_cast<std::uint32_t>(a),c);}
 }
 #endif

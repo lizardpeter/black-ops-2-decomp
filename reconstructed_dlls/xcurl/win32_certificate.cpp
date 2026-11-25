@@ -13,7 +13,7 @@ template<class T>T read(const void* p,unsigned off){T v;std::memcpy(&v,static_ca
 std::uint32_t win32_select_client_certificate(void* request,const char16_t* selector,WinHttpHost& host){
     if(!selector)return 0;
     auto* easy=read<void*>(request,0x30);
-    auto diag=[&](unsigned site,std::uint32_t code){if(host.diagnostic)host.diagnostic(easy,site,code,host.diagnostic_context);};
+    auto diag=[&](unsigned site,std::uint32_t code){winhttp_report_diagnostic(easy,site,code,0,0,code,&host);};
     CertificateSelector parsed{};
     if(xcurl_research_parse_certificate(selector,&parsed)||!parsed.store_length){
         diag(0x21130,0x80092004U);return 0x80092004U;

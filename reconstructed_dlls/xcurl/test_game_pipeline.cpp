@@ -289,6 +289,8 @@ void response_edges(void* m,Mock& mock,unsigned port){
     auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
     auto* e=curl_easy_init();require(e&&list,"response edge init");
     std::string body;
+    char error_buffer[256]{};
+    require(!curl_easy_setopt(e,10010,error_buffer),"error buffer option");
     auto run=[&](unsigned expected){
         require(!curl_multi_add_handle(m,e),"response edge add");pump(m,mock);
         int n=0;auto* msg=curl_multi_info_read(m,&n);
@@ -299,7 +301,7 @@ void response_edges(void* m,Mock& mock,unsigned port){
     };
     configure(e,base+"/chunked",list,&body);run(0);
     std::string expected;for(unsigned i=0;i<32783;++i)expected.push_back(static_cast<char>('a'+i%26));
-    require(body==expected,"chunked response exact bytes across both buffers");
+    require(body==expected&&!error_buffer[0],"chunked response exact bytes and no error text");
     body.clear();configure(e,base+"/redirect",list,&body);
     require(!curl_easy_setopt(e,52,1L),"follow redirect option");run(0);
     char* effective=nullptr;
@@ -308,12 +310,15 @@ void response_edges(void* m,Mock& mock,unsigned port){
     auto short_write=+[](char*,std::size_t n,std::size_t k,void*)->std::size_t{return n*k-1;};
     require(!curl_easy_setopt(e,20011,short_write),"short body callback");run(23);
     std::int32_t hr=0;require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x800700eaU,"short write HRESULT");
+    require(std::strstr(error_buffer,"Failed writing body in write callback")!=nullptr,"short write original error text");
     auto abort_write=+[](char*,std::size_t,std::size_t,void*)->std::size_t{return 0x10000001ULL;};
     configure(e,base+"/get",list,&body);require(!curl_easy_setopt(e,20079,abort_write),"abort header callback");run(23);
     require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x800704c7U,"header abort HRESULT");
+    require(!std::strcmp(error_buffer,"Request paused/aborted from header callback"),"header abort original error text");
     require(!curl_easy_setopt(e,20079,static_cast<decltype(abort_write)>(nullptr)),"remove abort callback");
     configure(e,base+"/timeout",list,&body);require(!curl_easy_setopt(e,155,1000L),"short receive timeout");run(28);
     require(!curl_easy_getinfo(e,0x200019,&hr)&&static_cast<std::uint32_t>(hr)==0x80072ee2U,"timeout HRESULT");
+    require(!std::strcmp(error_buffer,"The request has timed out! (hr=0x80072ee2)"),"timeout original error text");
     // No giant allocation or network upload: a DWORD overflow must fail
     // before WinHttpSendRequest can consume the deliberately tiny payload.
     configure(e,base+"/echo",list,&body);
