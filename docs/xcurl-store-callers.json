@@ -1,6 +1,6 @@
 {
-  "schema": 1,
-  "source": "Pinned Store client PE import scan. MP options directly recovered from preceding argument setup; SP/ZM sites recorded in corresponding order, numeric values not independently decoded.",
+  "schema": 2,
+  "source": "Pinned Store client PE import scan and conservative decoded Win64 CFG constant/value-set propagation, independently verified for MP, SP, ZM in original instruction evidence run 45552862959. The method-select call has four possible option IDs; the set is an overapproximation of decoded control-flow values, not an observed runtime trace.",
   "imports": [
     "curl_easy_cleanup",
     "curl_easy_getinfo",
@@ -87,7 +87,12 @@
         },
         {
           "call_rva": "0x889098",
-          "option": 44
+          "options": [
+            44,
+            46,
+            47,
+            80
+          ]
         },
         {
           "call_rva": "0x889123",
@@ -195,66 +200,91 @@
       "slist_free_all_sites": 26,
       "setopt": [
         {
-          "call_rva": "0x71BA9B"
+          "call_rva": "0x71BA9B",
+          "option": 60
         },
         {
-          "call_rva": "0x71BB20"
+          "call_rva": "0x71BB20",
+          "option": 14
         },
         {
-          "call_rva": "0x71BBAA"
+          "call_rva": "0x71BBAA",
+          "option": 20012
         },
         {
-          "call_rva": "0x71BC30"
+          "call_rva": "0x71BC30",
+          "option": 10009
         },
         {
-          "call_rva": "0x71BD17"
+          "call_rva": "0x71BD17",
+          "option": 10002
         },
         {
-          "call_rva": "0x71BE48"
+          "call_rva": "0x71BE48",
+          "options": [
+            44,
+            46,
+            47,
+            80
+          ]
         },
         {
-          "call_rva": "0x71BED3"
+          "call_rva": "0x71BED3",
+          "option": 46
         },
         {
-          "call_rva": "0x71BF59"
+          "call_rva": "0x71BF59",
+          "option": 10036
         },
         {
-          "call_rva": "0x71C1A7"
+          "call_rva": "0x71C1A7",
+          "option": 10023
         },
         {
-          "call_rva": "0x71C28B"
+          "call_rva": "0x71C28B",
+          "option": 155
         },
         {
-          "call_rva": "0x71C310"
+          "call_rva": "0x71C310",
+          "option": 41
         },
         {
-          "call_rva": "0x71C395"
+          "call_rva": "0x71C395",
+          "option": 42
         },
         {
-          "call_rva": "0x71C41C"
+          "call_rva": "0x71C41C",
+          "option": 10010
         },
         {
-          "call_rva": "0x71C4A6"
+          "call_rva": "0x71C4A6",
+          "option": 20011
         },
         {
-          "call_rva": "0x71C52C"
+          "call_rva": "0x71C52C",
+          "option": 10001
         },
         {
-          "call_rva": "0x71C5B6"
+          "call_rva": "0x71C5B6",
+          "option": 20079
         },
         {
-          "call_rva": "0x71C63C"
+          "call_rva": "0x71C63C",
+          "option": 10029
         },
         {
-          "call_rva": "0x71C6C6"
+          "call_rva": "0x71C6C6",
+          "option": 20094
         }
       ],
       "getinfo": [
         {
-          "call_rva": "0x71B773"
+          "call_rva": "0x71B773",
+          "option": 2097177
         },
         {
-          "call_rva": "0x71B7EB"
+          "call_rva": "0x71B7EB",
+          "option": 2097154
         }
       ]
     },
@@ -304,66 +334,91 @@
       "slist_free_all_sites": 26,
       "setopt": [
         {
-          "call_rva": "0x8867DB"
+          "call_rva": "0x8867DB",
+          "option": 60
         },
         {
-          "call_rva": "0x886860"
+          "call_rva": "0x886860",
+          "option": 14
         },
         {
-          "call_rva": "0x8868EA"
+          "call_rva": "0x8868EA",
+          "option": 20012
         },
         {
-          "call_rva": "0x886970"
+          "call_rva": "0x886970",
+          "option": 10009
         },
         {
-          "call_rva": "0x886A57"
+          "call_rva": "0x886A57",
+          "option": 10002
         },
         {
-          "call_rva": "0x886B88"
+          "call_rva": "0x886B88",
+          "options": [
+            44,
+            46,
+            47,
+            80
+          ]
         },
         {
-          "call_rva": "0x886C13"
+          "call_rva": "0x886C13",
+          "option": 46
         },
         {
-          "call_rva": "0x886C99"
+          "call_rva": "0x886C99",
+          "option": 10036
         },
         {
-          "call_rva": "0x886EE7"
+          "call_rva": "0x886EE7",
+          "option": 10023
         },
         {
-          "call_rva": "0x886FCB"
+          "call_rva": "0x886FCB",
+          "option": 155
         },
         {
-          "call_rva": "0x887050"
+          "call_rva": "0x887050",
+          "option": 41
         },
         {
-          "call_rva": "0x8870D5"
+          "call_rva": "0x8870D5",
+          "option": 42
         },
         {
-          "call_rva": "0x88715C"
+          "call_rva": "0x88715C",
+          "option": 10010
         },
         {
-          "call_rva": "0x8871E6"
+          "call_rva": "0x8871E6",
+          "option": 20011
         },
         {
-          "call_rva": "0x88726C"
+          "call_rva": "0x88726C",
+          "option": 10001
         },
         {
-          "call_rva": "0x8872F6"
+          "call_rva": "0x8872F6",
+          "option": 20079
         },
         {
-          "call_rva": "0x88737C"
+          "call_rva": "0x88737C",
+          "option": 10029
         },
         {
-          "call_rva": "0x887406"
+          "call_rva": "0x887406",
+          "option": 20094
         }
       ],
       "getinfo": [
         {
-          "call_rva": "0x8864B3"
+          "call_rva": "0x8864B3",
+          "option": 2097177
         },
         {
-          "call_rva": "0x88652B"
+          "call_rva": "0x88652B",
+          "option": 2097154
         }
       ]
     }

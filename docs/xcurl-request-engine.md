@@ -205,3 +205,7 @@ The raw 15F40 differential body preserves the original unconditional GetLastErro
 
 ## Remaining original method selectors
 The game-facing loopback fixture now exercises the actual method-related Store setopt cases 44 (HEAD), 46 (PUT), 14 (input size), and 10036 (custom PATCH). It also covers the original verbose callback, header-in-body fallback, and exact request/response debug bytes. Results pending. Original static-link audit run 45552373910 passed all sixteen symbols; improved analysis run 45552668548 proved 57 of 60 call sites, identifying the remaining three as conditional option selections. A finite value-set propagation pass is now under validation.
+
+
+## Complete original Store option call-site evidence
+Run 45552862959 independently recovered the same 18 setopt and two getinfo value sets in each of the three original Store clients. The previously unresolved method-selection site has the conservative set {44,46,47,80}, not a single literal. All four selectors are implemented in the native dispatcher and C varargs ABI. The manifest now records the set and independent SP/ZM numeric evidence. Future static-link audits reject unresolved sites or any difference from the manifest. Source-link and request-engine differential runs 45552730617 and 45552730567 passed the secure-session integration change. Full live Gaming Services and BO2 executable integration are still outstanding.
