@@ -1,6 +1,8 @@
 #include "winhttp_services.h"
 #ifdef _WIN32
 #include "allocation.h"
+#include "debug_data.h"
+#include <cstdio>
 namespace t6_xcurl {
 namespace {
 static_assert(sizeof(wchar_t)==sizeof(char16_t));
@@ -14,6 +16,12 @@ void close(void* h,void*){::WinHttpCloseHandle(h);}
 void event(void* h,void*){::SetEvent(h);}
 void* create_event(void*){return ::CreateEventW(nullptr,FALSE,FALSE,nullptr);}
 void diagnostic(void* e,std::uint32_t site,std::uint32_t status,void* ctx){auto& h=*static_cast<WinHttpHost*>(ctx);if(h.diagnostic)h.diagnostic(e,site,status,h.diagnostic_context);}
+void debug_output(const char* text,void*){::OutputDebugStringA(text);}
+void debug_write(const void* p,std::uint64_t n,std::uint64_t k,void* stream,void*){std::fwrite(p,static_cast<std::size_t>(n),static_cast<std::size_t>(k),static_cast<std::FILE*>(stream));}
+void debug_data(void* e,std::uint32_t type,const void* p,std::uint64_t n,void* c){
+    const DebugServices services{debug_output,debug_write,c};
+    (void)xcurl_research_debug_data(e,static_cast<int>(type),p,n,&services);
+}
 void retry(void* e,void* ctx){diagnostic(e,0x21520,0,ctx);}
 void* session(const char16_t* agent,std::uint32_t flags,void*){return ::WinHttpOpen(w(agent),4,nullptr,nullptr,flags);}
 void* connect(void* h,const char16_t* hostname,std::uint16_t port,void*){return ::WinHttpConnect(h,w(hostname),port,0);}
@@ -70,7 +78,7 @@ AddHeaderServices winhttp_add_header_services(const RequestServices* s){return {
 UploadServices winhttp_upload_services(const RequestServices* s,std::uint32_t(*trailers)(void*,std::uint64_t*,void*),void(*diag)(void*,std::uint32_t,std::uint64_t,std::uint64_t,void*)){return {s,write,trailers,diag};}
 void bind_winhttp_request_services(RequestServices& s,WinHttpHost* host){
     s.enter=enter;s.leave=leave;s.allocate=alloc;s.release=release;s.set_event=event;s.close_http=close;s.release_connection=release_session;
-    s.create_event=create_event;s.last_error=error;s.diagnostic=diagnostic;s.read=read;s.receive=receive;s.send=send;s.set_context=set_context;s.set_callback=set_callback;s.context=host;
+    s.create_event=create_event;s.last_error=error;s.diagnostic=diagnostic;s.read=read;s.receive=receive;s.send=send;s.set_context=set_context;s.set_callback=set_callback;s.debug_data=debug_data;s.context=host;
     if(host->tasks){s.create_queue=create_queue;s.queue_dispatch=dispatch_queue;s.cancel_task=cancel_task;s.submit_completion=submit_completion;s.adjust_global=adjust_global;}
 }
 MultiHostServices win32_multi_host_services(void* context){return {wait_one,wait_many,release_mutex,reset_event,context};}

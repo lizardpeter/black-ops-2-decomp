@@ -129,7 +129,7 @@ int main(int argc,char** argv){
     {GlobalLifecycle g;RequestServices r{};WinHttpHost h{};UrlServices url{};
      auto* d=win32_gdk_query_services();TaskQueueBinding tasks(g,r,*d);
      WinHttpPipeline pipeline(g,h,r,tasks,*d,url,nullptr);
-     require(pipeline.activate()&&h.status_callback&&r.create_queue&&r.submit_completion,"native composed pipeline activation");
+     require(pipeline.activate()&&h.status_callback&&r.create_queue&&r.submit_completion&&r.debug_data,"native composed pipeline activation");
      require(pipeline.start().request==&r&&pipeline.status().request==&r,"native pipeline service ownership");
      pipeline.deactivate();require(!h.pipeline&&!h.status_callback,"native pipeline deactivation");}
 #endif
