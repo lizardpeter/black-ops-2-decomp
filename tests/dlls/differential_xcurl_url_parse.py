@@ -52,7 +52,7 @@ def main():
         if not match:return 0
         mu.mem_write(reg(mu,'R8'),match.group(1));mu.mem_write(reg(mu,'R9'),struct.pack('<I',len(match.group())))
         return 1
-    imports={'_stricmp':lambda mu:strcmp(mu,True),'strncmp':lambda mu:strcmp(mu,n=reg(mu,'R8')),
+    imports={'strcmp':lambda mu:strcmp(mu),'_stricmp':lambda mu:strcmp(mu,True),'strncmp':lambda mu:strcmp(mu,n=reg(mu,'R8')),
              'strcspn':lambda mu:span(mu,False),'strspn':lambda mu:span(mu,True),'strtol':strtol,
              'tolower':lambda mu:result(mu,ord(chr(reg(mu,'ECX')).lower()))}
     for n in img.iat.values():
