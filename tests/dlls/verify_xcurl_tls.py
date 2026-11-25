@@ -90,7 +90,7 @@ def main():
         password=__import__("secrets").token_hex(16)
         pfx=tmp/"client.pfx"
         pfx.write_bytes(pkcs12.serialize_key_and_certificates(b"XCurl CI client",client_key,client,None,
-                        serialization.BestAvailableEncryption(password)))
+                        serialization.BestAvailableEncryption(password.encode('ascii'))))
         client_imported=False
         # The disposable hosted runner is elevated. CurrentUser Root can
         # trigger an interactive consent dialog even with certutil -f.
