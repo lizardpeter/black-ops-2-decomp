@@ -61,8 +61,7 @@ def main():
         ret,_,writes,_=m.call(img.base+rva,args,'uint',setup=setup,fakes=fakes)
         assert isinstance(ret,int),(name,i,ret,m.imports_called)
         expected_state=bytes(writes.get(img.base+0x289d0+k,bytes([v]))[0] for k,v in enumerate(initial))
-        initial_out=struct.pack('<Q',0x77777777)
-        expected_out=struct.unpack('<Q',bytes(writes.get(OUT+k,bytes([v]))[0] for k,v in enumerate(initial_out)))[0]
+        expected_out=struct.unpack('<Q',m.mu.mem_read(OUT,8))[0]  # host callback writes bypass Unicorn's instruction journal
 
         native=Runtime.from_buffer_copy(initial);out=P(0x77777777)
         @LOCK
