@@ -330,6 +330,35 @@ void response_edges(void* m,Mock& mock,unsigned port){
     std::puts("XCurl response edges PASS: chunked body, redirect, write abort, header abort, timeout, DWORD overflow");
 }
 
+// Real chunked upload, including the original 10420 trailer callback and
+// the buffer growth path (trailer is larger than the configured upload block).
+void chunked_upload(void* m,Mock& mock,unsigned port){
+    auto* e=curl_easy_init();require(e,"chunked upload easy");
+    auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
+    require(list&&curl_slist_append(list,"Transfer-Encoding: chunked")&&curl_slist_append(list,"Trailer: X-XCurl-Trailer, X-XCurl-Large"),"chunked request headers");
+    Cursor upload;for(unsigned i=0;i<24579;++i)upload.text.push_back(static_cast<char>('a'+i%26));
+    struct Trailer{unsigned calls=0;std::string large="X-XCurl-Large: "+std::string(10000,'z');} trailer;
+    auto cb=+[](curl_slist** out,void* data)->int{
+        auto& t=*static_cast<Trailer*>(data);++t.calls;
+        *out=curl_slist_append(nullptr,"X-XCurl-Trailer: original");
+        if(!*out||!curl_slist_append(*out,t.large.c_str()))return 1;
+        return 0;
+    };
+    std::string body;configure(e,std::string("http://127.0.0.1:")+std::to_string(port)+"/chunked-upload",list,&body);
+    require(!curl_easy_setopt(e,47,1L)&&!curl_easy_setopt(e,60,-1L)&&!curl_easy_setopt(e,14,-1L)&&!curl_easy_setopt(e,280,8192L),"unknown length streamed POST");
+    require(!curl_easy_setopt(e,20012,&reader)&&!curl_easy_setopt(e,10009,static_cast<void*>(&upload)),"chunked reader");
+    require(!curl_easy_setopt(e,20283,cb)&&!curl_easy_setopt(e,10284,static_cast<void*>(&trailer)),"trailer callback options");
+    require(!curl_multi_add_handle(m,e),"chunked upload add");pump(m,mock);
+    int n=0;auto* msg=curl_multi_info_read(m,&n);
+    std::int32_t hr=0,http=0;curl_easy_getinfo(e,0x200019,&hr);curl_easy_getinfo(e,0x200002,&http);
+    if(!msg||msg->data.result||http!=200)std::fprintf(stderr,"chunked upload result=%d hr=%08x http=%d trailer calls=%u bytes=%zu\n",msg?msg->data.result:-1,static_cast<unsigned>(hr),http,trailer.calls,upload.at);
+    require(msg&&msg->easy==e&&!msg->data.result&&!n&&http==200,"chunked upload completion");
+    require(body==upload.text&&upload.at==upload.text.size()&&trailer.calls==1,"exact chunked upload and trailer");
+    require(!curl_multi_remove_handle(m,e)&&!curl_multi_info_read(m,&n),"chunked upload retire");
+    curl_easy_cleanup(e);curl_slist_free_all(list);
+    std::puts("XCurl chunked upload PASS: real wire framing, trailer callback and buffer growth");
+}
+
 // Each TLS server has a distinct certificate and the mock never accepts a
 // remote endpoint. Schannel also retains its ordinary WinHTTP verification.
 void tls_transfer(void* m,Mock& mock,unsigned port,bool valid,const char* selector=nullptr){
@@ -379,9 +408,9 @@ int main(int argc,char** argv){
         const auto mutual=static_cast<unsigned>(std::atoi(argv[3]));
         tls_transfer(m,mock,mutual,false,"CurrentUser\\MY\\0000000000000000000000000000000000000000");
         tls_transfer(m,mock,mutual,true,argv[4]);}
-    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);response_edges(m,mock,port);}
+    else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);response_edges(m,mock,port);chunked_upload(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==34&&mock.reports>=34)),"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==35&&mock.reports>=35)),"balanced runtime lifetime");
     require(tasks.reservations_empty()&&facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }

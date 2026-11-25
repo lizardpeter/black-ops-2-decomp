@@ -68,6 +68,40 @@ class Handler(http.server.BaseHTTPRequestHandler):
             return
         self.reply(self.rfile.read(int(self.headers['Content-Length'])))
     def do_POST(self):
+        if self.path == '/chunked-upload':
+            self.connection.settimeout(10)
+            if self.headers.get('Transfer-Encoding','').lower() != 'chunked':
+                self.send_error(400,'Expected chunked upload')
+                return
+            body=bytearray()
+            while True:
+                size_line=self.rfile.readline(128)
+                if not size_line:
+                    self.send_error(400,'Incomplete chunk header')
+                    return
+                size=int(size_line.strip(),16)
+                if not size:break
+                if size>32768 or len(body)+size>65536:
+                    self.send_error(400,'Oversize test payload')
+                    return
+                body.extend(self.rfile.read(size))
+                if self.rfile.read(2)!=b'\r\n':
+                    self.send_error(400,'Malformed chunk framing')
+                    return
+            trailers={}
+            for _ in range(8):
+                line=self.rfile.readline(16384)
+                if line==b'\r\n':break
+                if not line or b':' not in line:
+                    self.send_error(400,'Incomplete trailers')
+                    return
+                key,value=line.rstrip(b'\r\n').split(b':',1)
+                trailers[key.lower()]=value.strip()
+            if trailers!={b'x-xcurl-trailer':b'original',b'x-xcurl-large':b'z'*10000}:
+                self.send_error(400,'Incorrect native trailer bytes')
+                return
+            self.reply(bytes(body))
+            return
         if self.path != '/echo':
             self.send_error(404)
             return
