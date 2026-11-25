@@ -5,6 +5,9 @@
 // at RVA 0x23530. Evidence 45551835362 and 45551949569.
 #include "telemetry_lifecycle.h"
 #include <cstring>
+#include <array>
+#include <charconv>
+#include <algorithm>
 using namespace t6_xcurl;
 namespace {
 using P=std::uint8_t*;
@@ -30,6 +33,34 @@ extern "C" void xcurl_research_telemetry_destroy_records(void* p,const Telemetry
     for(;;){auto* n=get<P>(h,0);if(!n||n==h)break;
         xcurl_research_telemetry_unlink(n);s->release(n,2,s->context);
     }
+}
+// 8C50 uses a 500-code-unit buffer and 20-record batches. Formatting
+// 205B8 is L"%i,%lu,%llu;" (Win32 long is 32 bits). The original 8970
+// leaves a truncated, terminated prefix on insufficient capacity and
+// flushes that prefix before retiring the overflowing record.
+extern "C" void xcurl_research_telemetry_flush(void* p,const TelemetryFlushServices* s){
+    if(!p)return;
+    auto* lifetime=s->lifetime;auto* head=static_cast<P>(p)+0x28;
+    std::array<char16_t,500> batch{};std::size_t used=0;unsigned count=0;
+    for(auto* n=get<P>(head,0);n&&n!=head;n=get<P>(head,0)){
+        std::array<char,64> record{};auto* cur=record.data();auto* end=record.data()+record.size();
+        cur=std::to_chars(cur,end,get<std::int32_t>(n,0x10)).ptr;*cur++=',';
+        cur=std::to_chars(cur,end,get<std::uint32_t>(n,0x14)).ptr;*cur++=',';
+        cur=std::to_chars(cur,end,get<std::uint64_t>(n,0x18)).ptr;*cur++=';';
+        auto length=static_cast<std::size_t>(cur-record.data());
+        auto copied=std::min(length,batch.size()-used-1);
+        for(std::size_t i=0;i<copied;++i)batch[used+i]=static_cast<unsigned char>(record[i]);
+        used+=copied;batch[used]=0;
+        bool overflow=copied!=length;
+        if(overflow)count=0;else count=(count+1)%20;
+        auto* next=get<P>(n,0);
+        if(!count||!next||next==head){
+            if(s->publish)s->publish(batch.data(),s->context);
+            used=0;batch[0]=0;
+        }
+        xcurl_research_telemetry_unlink(n);lifetime->release(n,2,lifetime->context);
+    }
+    put(p,0x20,s->tick64(s->context));
 }
 extern "C" void xcurl_research_telemetry_destroy_local(void* p,const TelemetryServices* s){
     if(p){xcurl_research_telemetry_destroy_records(p,s);s->release(p,3,s->context);}

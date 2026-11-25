@@ -9,8 +9,10 @@ void* alloc(std::size_t n,std::uint32_t t,void*){return xcurl_research_heap_allo
 void release(void* p,std::uint32_t t,void*){xcurl_research_heap_free(p,t);}
 std::uint32_t tick32(void*){return ::GetTickCount();}
 const TelemetryServices local{alloc,release,tick32,nullptr};
+std::uint64_t tick64(void*){return ::GetTickCount64();}
+const TelemetryFlushServices flush{&local,tick64,nullptr,nullptr};
 std::uint32_t create(void** out,void*){return xcurl_research_telemetry_create(out,&local);}
-void destroy(void* p,void*){xcurl_research_telemetry_destroy_local(p,&local);}
+void destroy(void* p,void*){xcurl_research_telemetry_flush(p,&flush);xcurl_research_telemetry_destroy_local(p,&local);}
 EnginePlatformHost telemetry(const EnginePlatformHost& h){if(!h.telemetry_create&&!h.telemetry_destroy)return {create,destroy,nullptr};return h;}
 }
 Win32Runtime::Win32Runtime(const Win32RuntimeConfig& c)

@@ -267,3 +267,7 @@ python tests/dlls/native_xcurl_consumer/verify_live_loopback.py path/to/native_x
 ````
 
 The fixture uses an ephemeral 127.0.0.1 port, actual production runtime startup and actual GDK security information callbacks; no mock is installed. Missing GDK is a hard failure in this mode, and the subprocess has a timeout. Standard hosted CI continues to validate lifecycle/closed-owner behavior without network requests. Live transfer acceptance is not yet verified.
+
+
+## Original telemetry record flush
+Recovered 8C50 and 205B8 from original-machine evidence run 45559132179: records carry signed 32-bit field +10, unsigned 32-bit +14, unsigned 64-bit +18, formatted as UTF-16 `"%i,%lu,%llu;"`. The 500-code-unit buffer is emitted at 20 records, final record, or insufficient capacity; the overflowing record's partial prefix is retained and the record retired. The native flush uses this exact batch structure and local record cleanup, records GetTickCount64, and exposes provider publication as an explicit optional sink. The default native runtime remains local-only, with no fabricated ETW provider events. Original-machine comparison pending.
