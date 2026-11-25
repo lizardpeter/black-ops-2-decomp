@@ -8,7 +8,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_OP_MEM, CS_OP_IMM
 from capstone.x86_const import X86_REG_RIP
 
 SHA = "65cd27b336abecf821896611c91e8ec74d0328bd65ec11aa5ef4e2affbdd4551"
-TARGETS = (0x8018, 0x83D8, 0x8970, 0x1230, 0x1DF38, 0x7A30, 0x7DF4, 0x80B8)
+TARGETS = (0x12868, 0xC9C0, 0xB9B4, 0xCA60, 0xA6B0, 0x13B14, 0x1925C, 0x18110)
 def main():
     path = Path(sys.argv[1])
     assert hashlib.sha256(path.read_bytes()).hexdigest() == SHA
