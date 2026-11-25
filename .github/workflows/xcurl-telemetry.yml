@@ -4,6 +4,7 @@ on:
     paths:
       - reconstructed_dlls/xcurl/telemetry_lifecycle.*
       - tests/dlls/differential_xcurl_telemetry.py
+      - tests/dlls/differential_xcurl_telemetry_flush.py
       - .github/workflows/xcurl-telemetry.yml
   workflow_dispatch:
 permissions:
@@ -29,3 +30,4 @@ jobs:
           mkdir -p build
           clang++ -std=c++20 -O2 -shared -fPIC reconstructed_dlls/xcurl/telemetry_lifecycle.cpp -o build/xcurl_telemetry.so
           python tests/dlls/differential_xcurl_telemetry.py originals/dlls/XCurl.dll build/xcurl_telemetry.so
+          python tests/dlls/differential_xcurl_telemetry_flush.py originals/dlls/XCurl.dll build/xcurl_telemetry.so
