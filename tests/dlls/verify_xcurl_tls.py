@@ -110,7 +110,14 @@ def main():
             try:
                 if client_imported:
                     subprocess.run(["powershell","-NoProfile","-NonInteractive","-Command",
-                        f"Remove-Item -LiteralPath 'Cert:\\CurrentUser\\My\\{client_thumb}' -DeleteKey -ErrorAction Stop"],
+                        f"$ErrorActionPreference='Stop'; $cert=Get-Item -LiteralPath 'Cert:\\CurrentUser\\My\\{client_thumb}'; "
+                        "$key=[System.Security.Cryptography.X509Certificates.RSACertificateExtensions]::GetRSAPrivateKey($cert); "
+                        "if ($null -eq $key) { throw 'Missing imported private key' }; "
+                        "$store=[System.Security.Cryptography.X509Certificates.X509Store]::new('My','CurrentUser'); "
+                        "$store.Open('ReadWrite'); try { $store.Remove($cert) } finally { $store.Close() }; "
+                        "try { if ($key -is [System.Security.Cryptography.RSACng]) { $key.Key.Delete() } "
+                        "elseif ($key -is [System.Security.Cryptography.RSACryptoServiceProvider]) { $key.PersistKeyInCsp=$false; $key.Clear() } "
+                        "else { throw 'Unsupported test key provider' } } finally { $key.Dispose(); $cert.Dispose() }"],
                         check=True,timeout=30)
             finally:
                 subprocess.run(["certutil","-delstore","Root",thumb],check=True,timeout=30)
