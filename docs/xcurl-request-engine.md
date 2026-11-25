@@ -173,3 +173,7 @@ Win32UrlBinding owns the reconstructed CURLU object/parse/format service composi
 
 ## Native engine platform services
 Win32EngineBinding supplies real critical sections, events, mutexes, performance counters, tagged allocation, GDK runtime initialization/shutdown, native connectivity callback 16960 and app suspend/resume callback 16B60. It dynamically resolves the same original app-notification API set and keeps its module alive until unregistration. Positive Win32 registration errors are converted into HRESULTs so the recovered engine cannot incorrectly advertise success. Telemetry object construction/destruction remains explicitly injected; actual registration and live GDK are not tested by the smoke fixture, which verifies native primitive and binding ownership only.
+
+
+## Full game-facing loopback acceptance harness
+Added a second native Windows executable that drives the 16-import C facade instead of manually invoking transport leaves. It uses real WinHTTP callbacks, native locks/events/mutexes, reconstructed URL preparation, engine lifecycle, scheduling, header/body delivery and cleanup. Its in-process GDK fixture is strictly restricted to localhost; only Gaming Services and app registration are modeled. It tests GET, direct POST, streamed 24,579-byte POST, completion messages, callback bytes, HTTP status and resource balancing; CI additionally scans the test PE for forbidden XCurl/libcurl dependencies. This is a test harness, not a production security substitute. Results pending.

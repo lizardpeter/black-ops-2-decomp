@@ -26,5 +26,7 @@ jobs:
       - run: python -m pip install pefile==2024.8.26
       - run: |
           cmake -S reconstructed_dlls/xcurl -B build/xcurl -A x64
-          cmake --build build/xcurl --config Release --target test_xcurl_winhttp
+          cmake --build build/xcurl --config Release --target test_xcurl_winhttp test_xcurl_game_pipeline
           python tests/dlls/verify_xcurl_winhttp.py build/xcurl/Release/test_xcurl_winhttp.exe
+
+          python tests/dlls/verify_xcurl_winhttp.py build/xcurl/Release/test_xcurl_game_pipeline.exe
