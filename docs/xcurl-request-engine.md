@@ -217,3 +217,7 @@ The main game build is still hybrid-linked to the original EXE using tools/build
 
 ## Native client certificate selection
 The default WinHTTP pipeline now uses native Crypt32 store open (existing/read-only), exact SHA-1 thumbprint decoding, certificate lookup and WinHttpSetOption(WINHTTP_OPTION_CLIENT_CERT_CONTEXT) with the actual 40-byte CERT_CONTEXT. The raw original-machine differential selector is unchanged. The bound variant checks the option result and fails closed instead of silently continuing on client-authentication failure; it never modifies trust settings. Windows smoke tests cover absent/malformed selectors and missing stores; a successful mutual TLS handshake with an actual client key still requires dedicated validation. Optional injected certificate services remain supported.
+
+
+## Mutual TLS acceptance extension
+The isolated Windows TLS fixture additionally creates an ephemeral client key/certificate signed by the test CA, imports only the client PFX into the runner's personal store, and starts a separate loopback server requiring that exact client certificate. The C ABI exercises original client-certificate selector option 10025, first with a missing thumbprint (must fail without response), then with the actual imported thumbprint (must complete). The server checks the SHA-256 peer fingerprint. The temporary personal certificate/key and trust root are removed in finally; no production trust policy is changed. Results pending.

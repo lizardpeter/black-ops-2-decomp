@@ -269,11 +269,12 @@ void method_transfers(void* m,Mock& mock,unsigned port){
 
 // Each TLS server has a distinct certificate and the mock never accepts a
 // remote endpoint. Schannel also retains its ordinary WinHTTP verification.
-void tls_transfer(void* m,Mock& mock,unsigned port,bool valid){
+void tls_transfer(void* m,Mock& mock,unsigned port,bool valid,const char* selector=nullptr){
     auto* e=curl_easy_init();require(e,"TLS easy init");
     std::string body;auto* list=curl_slist_append(nullptr,"X-XCurl-Request: original-path");
     auto url=std::string("https://127.0.0.1:")+std::to_string(port)+"/get";
     configure(e,url,list,&body);
+    if(selector)require(!curl_easy_setopt(e,10025,selector),"client certificate selector option");
     auto before=mock.accepted.load();
     require(!curl_multi_add_handle(m,e),"TLS add");pump(m,mock);
     int n=0;auto* msg=curl_multi_info_read(m,&n);
@@ -288,12 +289,12 @@ void tls_transfer(void* m,Mock& mock,unsigned port,bool valid){
     }
     require(!curl_multi_remove_handle(m,e),"TLS remove");require(!curl_multi_info_read(m,&n),"TLS message retired");
     curl_easy_cleanup(e);curl_slist_free_all(list);
-    std::printf("XCurl TLS %s PASS: result %s, native Schannel, GDK fixture chain policy\n",valid?"trusted":"untrusted",valid?"success":"rejected");
+    std::printf("XCurl TLS %s PASS: result %s, native Schannel, GDK fixture chain policy\n",selector?(valid?"mutual TLS":"missing client certificate"):(valid?"trusted":"untrusted"),valid?"success":"rejected");
 }
 }
 int main(int argc,char** argv){
-    require(argc==2||argc==3,"HTTP port or trusted and untrusted TLS ports");auto port=static_cast<unsigned>(std::atoi(argv[1]));
-    Mock mock;mock.tls=argc==3;GdkQueryServices gdk{query,&mock};ApiBinding api{};WinHttpHost host{nullptr,diag,nullptr};RequestServices request{};
+    require(argc==2||argc==5,"HTTP port or trusted, untrusted, mTLS ports and selector");auto port=static_cast<unsigned>(std::atoi(argv[1]));
+    Mock mock;mock.tls=argc==5;GdkQueryServices gdk{query,&mock};ApiBinding api{};WinHttpHost host{nullptr,diag,nullptr};RequestServices request{};
     TaskQueueBinding tasks(api.global,request,gdk);Win32UrlBinding urls(host,request,gdk);
     WinHttpPipeline pipe(api.global,host,request,tasks,gdk,urls.crack_services(),nullptr);
     auto os=win32_multi_host_services(nullptr);TransferBinding transfers(api.global,urls.prepare_services(),os);
@@ -311,10 +312,13 @@ int main(int argc,char** argv){
     HandleBinding handles(api,easy,multi);GameApi facade(api,handles,transfers);
     require(facade.install()&&!curl_global_init(3),"global init");
     auto* m=curl_multi_init();require(m,"multi init");
-    if(mock.tls){tls_transfer(m,mock,port,true);tls_transfer(m,mock,static_cast<unsigned>(std::atoi(argv[2])),false);}
+    if(mock.tls){tls_transfer(m,mock,port,true);tls_transfer(m,mock,static_cast<unsigned>(std::atoi(argv[2])),false);
+        const auto mutual=static_cast<unsigned>(std::atoi(argv[3]));
+        tls_transfer(m,mock,mutual,false,"CurrentUser\\MY\\0000000000000000000000000000000000000000");
+        tls_transfer(m,mock,mutual,true,argv[4]);}
     else{for(int kind=0;kind<3;++kind)transfer(m,mock,port,kind);batch(m,mock,port);method_transfers(m,mock,port);}
     require(!curl_multi_cleanup(m),"multi cleanup");curl_global_cleanup();
-    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==2&&!mock.reports&&mock.verifications>0):(mock.starts==23&&mock.reports>=23)),"balanced runtime lifetime");
+    require(!api.global.engine&&!api.global.references&&!mock.queue_count&&mock.queries==mock.releases&&(mock.tls?(mock.starts==4&&!mock.reports&&mock.verifications>0):(mock.starts==23&&mock.reports>=23)),"balanced runtime lifetime");
     require(facade.uninstall()&&engine.deactivate(),"deactivate engine");pipe.deactivate();urls.deactivate();
     std::puts("XCurl full C ABI loopback PASS: actual WinHTTP callbacks, GET/direct POST/streamed POST, modeled GDK only");
 }
