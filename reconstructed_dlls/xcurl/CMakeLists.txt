@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 project(t6_native_xcurl_research LANGUAGES CXX)
-# Only the already reconstructed leaf and lifecycle source. Not a full
-# curl ABI or a networking implementation; never substitute it for XCurl.dll.
+# Static source-link research implementation for the sixteen BO2 imports.
+# Live GDK acceptance and final game integration remain unverified.
 add_library(t6_native_xcurl_research STATIC
     allocation.cpp duplicate_string.cpp slist.cpp easy_strerror.cpp
     getinfo_unlocked.cpp api_profile.cpp global_lifecycle.cpp easy_setopt.cpp option_dispatch.cpp wide_string.cpp handle_lifecycle.cpp multi_queue.cpp request_engine.cpp http_status.cpp engine_scheduler.cpp request_prepare.cpp http_setup.cpp session_cache.cpp response_body.cpp transfer_callbacks.cpp header_query.cpp response_headers.cpp url_crack.cpp upload_engine.cpp upload_buffer.cpp request_start.cpp request_headers.cpp certificate.cpp gdk_interfaces.cpp gdk_runtime.cpp gdk_runtime_win32.cpp engine_lifecycle.cpp api_binding.cpp transfer_binding.cpp task_queue_binding.cpp multi_lifecycle.cpp easy_lifecycle.cpp handle_binding.cpp callback_binding.cpp url_prepare.cpp game_api.cpp url_object.cpp debug_data.cpp url_component.cpp url_parse.cpp)
@@ -102,7 +102,7 @@ if(T6_XCURL_BUILD_TESTS)
 endif()
 
 if(WIN32)
-    target_sources(t6_native_xcurl_research PRIVATE winhttp_services.cpp winhttp_pipeline.cpp win32_url_binding.cpp win32_engine_binding.cpp)
+    target_sources(t6_native_xcurl_research PRIVATE winhttp_services.cpp winhttp_pipeline.cpp win32_url_binding.cpp win32_engine_binding.cpp win32_runtime.cpp)
     target_link_libraries(t6_native_xcurl_research PUBLIC winhttp)
     if(T6_XCURL_BUILD_TESTS)
         add_executable(test_xcurl_winhttp test_winhttp_smoke.cpp)

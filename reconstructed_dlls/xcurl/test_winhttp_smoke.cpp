@@ -4,6 +4,7 @@
 #include "winhttp_pipeline.h"
 #include "win32_url_binding.h"
 #include "win32_engine_binding.h"
+#include "win32_runtime.h"
 #include "allocation.h"
 #include "gdk_runtime_win32.h"
 #include "response_headers.h"
@@ -153,6 +154,11 @@ int main(int argc,char** argv){
      require(pipeline.activate()&&h.status_callback&&r.create_queue&&r.submit_completion&&r.debug_data,"native composed pipeline activation");
      require(pipeline.start().request==&r&&pipeline.status().request==&r,"native pipeline service ownership");
      pipeline.deactivate();require(!h.pipeline&&!h.status_callback,"native pipeline deactivation");}
+    {Win32RuntimeConfig c{};Win32Runtime invalid(c);require(!invalid.install()&&!invalid.installed(),"runtime rejects missing telemetry service");
+     c.telemetry={[](void** out,void*)->std::uint32_t{*out=nullptr;return 0;},[](void*,void*){},nullptr};
+     Win32Runtime first(c),second(c);require(first.install()&&first.installed()&&first.install(),"runtime idempotent installation");
+     require(!second.install()&&!second.installed()&&!first.references()&&!first.engine_ready(),"exclusive runtime ownership before GDK initialization");
+     require(first.uninstall()&&!first.installed()&&second.install()&&second.uninstall()&&first.install()&&first.uninstall(),"runtime rollback and reinstallation");}
 #endif
     require(argc==2,"port required");auto port=static_cast<std::uint16_t>(std::atoi(argv[1]));
     alignas(8) std::array<std::uint8_t,0x80> cache{};alignas(8) std::array<std::uint8_t,0x368> easy{};
