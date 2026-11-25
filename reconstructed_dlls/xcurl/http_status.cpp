@@ -23,7 +23,10 @@ void http_status(void* request,std::uint32_t status,const void* info,std::uint32
         if(state>=5||state==0)return;
         if(status==0x200000&&(!info||length<16))return;
         if(status==0x40000&&(!info||length<4))return;
-        if(status==0x4000&&(!info||length<2||length%2))return;
+        // WinHTTP REDIRECT supplies a NUL-terminated wide URL; its length
+        // parameter is not a reliable even byte count. Preserve the
+        // original pointer-based handling.
+        if(status==0x4000&&!info)return;
     }
     auto close=[&]{xcurl_research_request_close(p,r);};
     auto diag=[&](unsigned site,std::uint64_t a,std::uint64_t b=0,std::uint32_t c=0){s->diagnostic(easy(),site,a,b,c,ctx);};

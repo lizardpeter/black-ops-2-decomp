@@ -305,7 +305,9 @@ void response_edges(void* m,Mock& mock,unsigned port){
     body.clear();configure(e,base+"/redirect",list,&body);
     require(!curl_easy_setopt(e,52,1L),"follow redirect option");run(0);
     char* effective=nullptr;
-    require(body=="xcurl-native-get"&&!curl_easy_getinfo(e,0x100001,&effective)&&effective&&std::string(effective)==base+"/get","redirect effective URL");
+    auto info_status=curl_easy_getinfo(e,0x100001,&effective);
+    if(info_status||!effective||std::string(effective)!=base+"/get")std::fprintf(stderr,"redirect effective URL: %s (getinfo=%d)\n",effective?effective:"<null>",info_status);
+    require(body=="xcurl-native-get"&&!info_status&&effective&&std::string(effective)==base+"/get","redirect effective URL");
     body.clear();configure(e,base+"/get",list,&body);
     auto short_write=+[](char*,std::size_t n,std::size_t k,void*)->std::size_t{return n*k-1;};
     require(!curl_easy_setopt(e,20011,short_write),"short body callback");run(23);

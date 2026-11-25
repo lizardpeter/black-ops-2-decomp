@@ -18,7 +18,7 @@ struct Host{
     void (*callback)(void*,bool)=nullptr;
     TaskQueueBinding* tasks=nullptr;
     unsigned creates=0,cancels=0;
-    bool fail_submit=false;
+    bool fail_submit=false,fail_message=false;
     void* queue=nullptr;
     std::array<void*,30> vtable{};
     struct Object{void** table;Host* host;} object{vtable.data(),this};
@@ -32,7 +32,7 @@ void reset(void*,void* c){++host(c).resets;}
 void unlock(void*,void* c){++host(c).unlocks;}
 std::uint32_t wait_one(void*,std::uint32_t t,void* c){++host(c).waits;return t==42?0x102:0;}
 std::uint32_t wait_many(std::uint32_t n,const void*,std::uint32_t t,void* c){assert(n==2);return wait_one(nullptr,t,c);}
-void* alloc(std::size_t n,std::uint32_t tag,void* c){assert(tag==12||tag==7);if(tag==12)++host(c).allocs;return std::malloc(n);}
+void* alloc(std::size_t n,std::uint32_t tag,void* c){assert(tag==12||tag==7);if(tag==12){if(host(c).fail_message)return nullptr;++host(c).allocs;}return std::malloc(n);}
 void release(void* p,std::uint32_t tag,void* c){assert(tag==12||tag==7);if(tag==12)++host(c).frees;std::free(p);}
 void adjust(std::uint32_t n,void* c){host(c).tasks->adjust_global(n);}
 void diag(void*,std::uint32_t site,std::uint32_t status,void*){assert((site==0x20f80||site==0x20920)&&status==0x80004005U);}
@@ -97,14 +97,20 @@ int main(){
     assert(!b.info_read(m,&remaining)&&remaining==0&&h.allocs==2&&h.frees==2);
     assert(b.remove(m,a)==0&&b.remove(m,z)==0&&get<std::uint32_t>(m,0x38)==0);
     // Force the recovered BA8C synchronous fallback during admission.
+    tasks.enable_reservations();bool created=false;
+    h.fail_message=true;assert(!tasks.reserve(pending,created)&&!created&&tasks.reservations_empty());
+    h.fail_message=false;assert(tasks.reserve(pending,created)&&created);
+    assert(tasks.reserve(pending,created)&&!created);
     h.fail_submit=true;assert(b.add(m,pending)==0);
+    h.fail_message=true; // force allocation failure throughout completion
     assert(b.perform(m,&running)==0&&running==0&&h.starts==3);
     assert(get<std::uint32_t>(g,0x40)==0&&get<std::uint32_t>(m,0x3c)==0);
     msg=static_cast<P>(b.info_read(m,&remaining));
     assert(msg&&remaining==0&&get<void*>(msg,8)==pending&&get<std::uint32_t>(msg,16)==58);
-    assert(!b.info_read(m,&remaining)&&h.allocs==3&&h.frees==3);
+    assert(!b.info_read(m,&remaining)&&h.allocs==3&&h.frees==3&&tasks.reservations_empty());
     assert(b.remove(m,pending)==0&&get<std::uint32_t>(m,0x38)==0);
-    h.fail_submit=false;
+    h.fail_submit=false;h.fail_message=false;
+    assert(tasks.reserve(pending,created)&&created);tasks.discard(pending);assert(tasks.reservations_empty()&&h.allocs==4&&h.frees==4);
     std::uint32_t count=99;
     assert(b.poll(m,42,&count)==0&&count==0);
     assert(b.wait(m,1,&count)==0&&count==1);

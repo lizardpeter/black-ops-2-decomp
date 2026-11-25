@@ -99,7 +99,9 @@ int main(){
     assert(!curl_multi_info_read(multi,&n)&&!n);
     put(easy,0x258,6U);curl_easy_cleanup(easy);assert(!api.uninstall());
     put(easy,0x258,0U);curl_easy_cleanup(easy);curl_slist_free_all(list);
+    auto* pending=curl_easy_init();assert(pending&&curl_multi_add_handle(multi,pending)==0&&!tasks.reservations_empty());
     assert(curl_multi_cleanup(multi)==0&&curl_multi_cleanup(multi)==1);
+    curl_easy_cleanup(pending);assert(tasks.reservations_empty());
     // Fixture borrows a synthetic engine, so do not destroy it through global cleanup.
     h.api.global.references=0;h.api.global.engine=nullptr;
     assert(api.uninstall()&&!curl_easy_init()&&curl_global_init(3)==2);
