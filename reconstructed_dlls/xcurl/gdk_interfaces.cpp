@@ -6,6 +6,7 @@
 #include <type_traits>
 namespace {
 struct Guid { std::uint32_t a; std::uint16_t b,c; std::uint8_t d[8]; };
+constexpr Guid kError{0x8ca467f7,0x22e8,0x4096,{0x84,0x56,0xbb,0x8a,0xa1,0x3f,0x79,0xd8}};
 constexpr Guid kThreading{0x073b7dcb,0x1fcf,0x4030,{0x94,0xbe,0xe3,0xc9,0xeb,0x62,0x34,0x28}};
 constexpr Guid kNetworking{0x37e56907,0x2f10,0x41e8,{0xb7,0x2f,0x36,0xed,0xb1,0x85,0x33,0x1a}};
 constexpr Guid kNetworking2{0xbf2346b2,0x39af,0x4658,{0xb5,0xea,0x44,0x71,0x3c,0x7e,0x83,0xb3}};
@@ -46,6 +47,12 @@ extern "C" std::uint32_t xcurl_research_gdk_async_get_status(void* block,std::ui
 extern "C" void xcurl_research_gdk_async_cancel(void* block,const t6_xcurl::GdkQueryServices* s){
     using Fn=void(*)(void*,void*);
     invoke<Fn>(s,kThreading,kThreading,5,block);
+}
+// Original 0x54f4; this interface is distinct from the loader's XErrorReport export.
+extern "C" void xcurl_research_gdk_error_report(std::uint32_t status,const char* message,const t6_xcurl::GdkQueryServices* s){
+    xcurl_research_gdk_thread_assert_not_time_sensitive(s);
+    using Fn=void(*)(void*,std::uint32_t,const char*);
+    invoke<Fn>(s,kError,kError,3,status,message);
 }
 extern "C" std::uint32_t xcurl_research_gdk_network_get_connectivity_hint(void* out,const t6_xcurl::GdkQueryServices* s){
     using Fn=HResult(*)(void*,void*);

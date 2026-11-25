@@ -12,7 +12,7 @@ struct Host {
     GdkQueryServices query{};
     Host(){
         services={lock_exclusive,unlock_exclusive,load_library,resolve_export,initialize_runtime,
-                  query_runtime,report_runtime,debug_flags,debug_break,this};
+                  query_runtime,report_runtime,debug_flags,debug_break,this,uninitialize_runtime,unload_library};
         adapter={&runtime,&services};
         query={xcurl_research_gdk_query_adapter,&adapter};
     }
@@ -32,8 +32,13 @@ struct Host {
     }
     static std::uint8_t debug_flags(void*){return *reinterpret_cast<volatile std::uint8_t*>(0x7ffe02d4);}
     static void debug_break(void*){::DebugBreak();}
+    static void uninitialize_runtime(void* fn,void*){using Fn=void(WINAPI*)();reinterpret_cast<Fn>(fn)();}
+    static void unload_library(void* module,void*){::FreeLibrary(static_cast<HMODULE>(module));}
 };
+Host& host(){static Host instance;return instance;}
 }
-const GdkQueryServices* win32_gdk_query_services(){static Host host;return &host.query;}
+const GdkQueryServices* win32_gdk_query_services(){return &host().query;}
+std::uint32_t win32_gdk_initialize(){auto& h=host();return xcurl_research_gdk_initialize(&h.runtime,0,&h.services);}
+void win32_gdk_shutdown(){auto& h=host();xcurl_research_gdk_shutdown(&h.runtime,&h.services);}
 }
 #endif

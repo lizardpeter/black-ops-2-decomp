@@ -20,6 +20,8 @@ struct GdkRuntimeServices {
     std::uint8_t (*debug_flags)(void*);
     void (*debug_break)(void*);
     void* context;
+    void (*uninitialize)(void*,void*);
+    void (*unload)(void*,void*);
 };
 struct GdkQueryAdapter {
     GdkRuntime* runtime;
@@ -29,6 +31,7 @@ struct GdkQueryAdapter {
 extern "C" {
 std::uint32_t xcurl_research_gdk_load(t6_xcurl::GdkRuntime*,const t6_xcurl::GdkRuntimeServices*);
 std::uint32_t xcurl_research_gdk_initialize(t6_xcurl::GdkRuntime*,std::uint64_t,const t6_xcurl::GdkRuntimeServices*);
+void xcurl_research_gdk_shutdown(t6_xcurl::GdkRuntime*,const t6_xcurl::GdkRuntimeServices*);
 std::uint32_t xcurl_research_gdk_query(t6_xcurl::GdkRuntime*,const void*,const void*,void**,const t6_xcurl::GdkRuntimeServices*);
 std::uint32_t xcurl_research_gdk_query_adapter(const void*,const void*,void**,void*);
 }

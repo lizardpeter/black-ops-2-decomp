@@ -11,7 +11,7 @@ QUERY=C.CFUNCTYPE(U,P,P,P,C.POINTER(P),P)
 REPORT=C.CFUNCTYPE(None,P,U,C.c_char_p,P)
 DEBUG_FLAGS=C.CFUNCTYPE(B,P)
 class Services(C.Structure):
-    _fields_=[('lock',LOCK),('unlock',LOCK),('load',LOAD),('resolve',RESOLVE),('initialize',INIT),('query',QUERY),('report',REPORT),('debug_flags',DEBUG_FLAGS),('debug_break',LOCK),('context',P)]
+    _fields_=[('lock',LOCK),('unlock',LOCK),('load',LOAD),('resolve',RESOLVE),('initialize',INIT),('query',QUERY),('report',REPORT),('debug_flags',DEBUG_FLAGS),('debug_break',LOCK),('context',P),('uninitialize',C.CFUNCTYPE(None,P,P)),('unload',C.CFUNCTYPE(None,P,P))]
 def cstr(value):
     if isinstance(value,str):return value
     if isinstance(value,bytes):return value.decode('ascii')
@@ -23,8 +23,8 @@ def main():
     names=[b'QueryApiImpl',b'InitializeApiImpl',b'InitializeApiImplEx',b'XErrorReport',b'UninitializeApiImpl']
     funcs=[A+0x1000+i*0x100 for i in range(5)];MODULE=0x12340000;OUT=A+0x100;CLS=A+0x200;IID=A+0x220;IFACE=A+0x300
     def reg(mu,k):return mu.reg_read(getattr(X,'UC_X86_REG_'+k))
-    for name,rva,argtypes in [('load',0x5364,()),('initialize',0x5148,(Q,)),('query',0x53a4,(P,P,C.POINTER(P)))]:
-      fn=getattr(lib,'xcurl_research_gdk_'+name);fn.argtypes=(C.POINTER(Runtime),*argtypes,C.POINTER(Services));fn.restype=U
+    for name,rva,argtypes in [('load',0x5364,()),('initialize',0x5148,(Q,)),('query',0x53a4,(P,P,C.POINTER(P))),('shutdown',0x5568,())]:
+      fn=getattr(lib,'xcurl_research_gdk_'+name);fn.argtypes=(C.POINTER(Runtime),*argtypes,C.POINTER(Services));fn.restype=None if name=='shutdown' else U
       for i in range(512):
         oc=[];nc=[];init=i%4==0;restricted=i%3==0;module=MODULE if i%2 or init else 0
         pre=[f if rng.randrange(3)==0 or init else 0 for f in funcs]
@@ -53,13 +53,15 @@ def main():
         def report(mu):
             oc.append(('report',funcs[3],reg(mu,'ECX'),m.read_cstr(reg(mu,'RDX')).decode('ascii')));mu.reg_write(X.UC_X86_REG_RAX,0)
         def brk(mu):oc.append(('break',))
-        imports={'AcquireSRWLockExclusive':lock,'ReleaseSRWLockExclusive':unlock,'LoadLibraryExA':load,'GetProcAddress':resolve,'DebugBreak':brk}
+        def uninit(mu):oc.append(('uninitialize',funcs[4]))
+        def unload(mu):oc.append(('unload',reg(mu,'RCX')));mu.reg_write(X.UC_X86_REG_RAX,1)
+        imports={'FreeLibrary':unload,'AcquireSRWLockExclusive':lock,'ReleaseSRWLockExclusive':unlock,'LoadLibraryExA':load,'GetProcAddress':resolve,'DebugBreak':brk}
         for n in img.iat.values():
             if n.split('!')[-1] in imports:m.on_import(n,imports[n.split('!')[-1]])
-        fakes=dict(zip(funcs,[query,old,new,report,lambda mu:0]))
-        args=[] if name=='load' else [flags] if name=='initialize' else [CLS,IID,OUT]
-        ret,_,writes,_=m.call(img.base+rva,args,'uint',setup=setup,fakes=fakes)
-        assert isinstance(ret,int),(name,i,ret,m.imports_called)
+        fakes=dict(zip(funcs,[query,old,new,report,uninit]))
+        args=[] if name in ('load','shutdown') else [flags] if name=='initialize' else [CLS,IID,OUT]
+        ret,_,writes,_=m.call(img.base+rva,args,'void' if name=='shutdown' else 'uint',setup=setup,fakes=fakes)
+        assert ret is None if name=='shutdown' else isinstance(ret,int),(name,i,ret,m.imports_called)
         expected_state=bytes(writes.get(img.base+0x289d0+k,bytes([v]))[0] for k,v in enumerate(initial))
         expected_out=struct.unpack('<Q',m.mu.mem_read(OUT,8))[0]  # host callback writes bypass Unicorn's instruction journal
 
@@ -87,8 +89,12 @@ def main():
         def df(c):return debug
         @LOCK
         def db(c):nc.append(('break',))
-        svc=Services(nl,nu,nload,nr,ni,nq,rp,df,db,None)
-        if name=='load':got=fn(C.byref(native),C.byref(svc))
+        @C.CFUNCTYPE(None,P,P)
+        def nui(p,c):nc.append(('uninitialize',p))
+        @C.CFUNCTYPE(None,P,P)
+        def nul(p,c):nc.append(('unload',p))
+        svc=Services(nl,nu,nload,nr,ni,nq,rp,df,db,None,nui,nul)
+        if name in ('load','shutdown'):got=fn(C.byref(native),C.byref(svc))
         elif name=='initialize':got=fn(C.byref(native),flags,C.byref(svc))
         else:
             cls_buffer=C.create_string_buffer(16);iid_buffer=C.create_string_buffer(16)
@@ -96,5 +102,5 @@ def main():
         raw=bytes(native)
         assert (got,nc,raw,out.value)==(ret,oc,expected_state,expected_out),(name,i,got,ret,nc,oc,raw.hex(),expected_state.hex(),out.value,expected_out)
       print(name,'PASS 512',flush=True)
-    print('XCurl GDK runtime PASS: 1536 original-machine comparisons')
+    print('XCurl GDK runtime PASS: 2048 original-machine comparisons')
 if __name__=='__main__':main()

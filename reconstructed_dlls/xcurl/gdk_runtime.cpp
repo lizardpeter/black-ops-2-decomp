@@ -31,6 +31,15 @@ extern "C" std::uint32_t xcurl_research_gdk_initialize(GdkRuntime* r,std::uint64
     if(failed(result)&&(s->debug_flags(c)&3U)==3U)s->debug_break(c);
     s->unlock(c);return result;
 }
+// Original 0x5568: restricted lazy initialization does not own UninitializeApiImpl.
+extern "C" void xcurl_research_gdk_shutdown(GdkRuntime* r,const GdkRuntimeServices* s){
+    auto c=s->context;s->lock(c);
+    if(r->initialized&&!r->restricted&&r->exports[4])s->uninitialize(r->exports[4],c);
+    for(auto& e:r->exports)e=nullptr;
+    r->initialized=0;r->restricted=0;
+    if(r->module){s->unload(r->module,c);r->module=nullptr;}
+    s->unlock(c);
+}
 extern "C" std::uint32_t xcurl_research_gdk_query(GdkRuntime* r,const void* cls,const void* iid,void** out,const GdkRuntimeServices* s){
     if(!r->initialized){auto status=xcurl_research_gdk_initialize(r,1,s);if(failed(status))return status;}
     auto status=s->query(r->exports[0],cls,iid,out,s->context);

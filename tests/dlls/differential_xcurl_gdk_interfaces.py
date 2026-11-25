@@ -29,6 +29,9 @@ OUT2=A+0x1710
 BUFFER=A+0x1800
 
 CASES=[
+ dict(name='error_report',rva=0x54f4,fn='xcurl_research_gdk_error_report',
+      args=lambda r:[r.getrandbits(32),URL],call_kinds=['u','p'],machine_ret='void',native_ret=None,iface='net',slot=3,
+      method_kinds=['u','p'],reg_args=2,stack_args=0,method_ret=None,assert_before=True),
  dict(name='async_cancel',rva=0x5424,fn='xcurl_research_gdk_async_cancel',
       args=lambda r:[TASK],call_kinds=['p'],machine_ret='void',native_ret=None,iface='async',slot=5,
       method_kinds=['p'],reg_args=1,stack_args=0,method_ret=None,assert_before=False),
@@ -101,10 +104,11 @@ def main():
       fn=getattr(lib,case['fn'])
       fn.argtypes=[TYPE_MAP[k] for k in case['call_kinds']]+[C.POINTER(Gdk)]
       fn.restype=case['native_ret']
-      for i in range(96):
+      for i in range(192):
         total+=1;oc=[];nc=[];state=bytearray(SIZE);offsets=set()
         hr=rng.choice([0,1,0x80004005,0x89240107]);boolean=rng.randrange(2)
-        output=case.get('output')
+        output=case.get('output');query_results=[0,1,0x80004005,0x89240101]
+        def query_status(n):return query_results[(i//24+n*3)%4]
         def q(a,v):struct.pack_into('<Q',state,a-A,v&0xffffffffffffffff);offsets.add(a-A)
         def put32(a,v):struct.pack_into('<I',state,a-A,v&0xffffffff)
         q(ASYNC_IFACE,ASYNC_VT);q(NET_IFACE,NET_VT)
@@ -128,8 +132,9 @@ def main():
             elif kind=='ptr':mu.mem_write(ptr,struct.pack('<Q',value))
         def query(mu):
             cls=bytes(mu.mem_read(reg(mu,'RCX'),16));iid=bytes(mu.mem_read(reg(mu,'RDX'),16))
-            oc.append(('query',cls,iid));iface=ASYNC_IFACE if cls==async_guid else NET_IFACE
-            mu.mem_write(reg(mu,'R8'),struct.pack('<Q',iface));mu.reg_write(X.UC_X86_REG_RAX,0)
+            status=query_status(sum(t[0]=='query' for t in oc));oc.append(('query',cls,iid));iface=ASYNC_IFACE if cls==async_guid else NET_IFACE
+            if not status&0x80000000:mu.mem_write(reg(mu,'R8'),struct.pack('<Q',iface))
+            mu.reg_write(X.UC_X86_REG_RAX,status)
         def release(mu):oc.append(('release',reg(mu,'RCX')));mu.reg_write(X.UC_X86_REG_RAX,1)
         def assert_method(mu):oc.append(('method', (reg(mu,'RCX'),)))
         def method(mu):
@@ -196,9 +201,9 @@ def main():
         C.memmove(net_iface,struct.pack('<Q',C.addressof(net_vt)),8)
         @QUERYFN
         def gquery(cls,iid,out,ctx):
-            cb= C.string_at(cls,16);ib=C.string_at(iid,16);nc.append(('query',cb,ib))
-            out[0]=C.addressof(async_iface) if cb==async_guid else C.addressof(net_iface)
-            return 0
+            cb=C.string_at(cls,16);ib=C.string_at(iid,16);status=query_status(sum(t[0]=='query' for t in nc));nc.append(('query',cb,ib))
+            if not status&0x80000000:out[0]=C.addressof(async_iface) if cb==async_guid else C.addressof(net_iface)
+            return status
         gdk=Gdk(gquery,None)
         native_args=[host(v) if k=='p' else v for k,v in zip(case['call_kinds'],args)]
         got=fn(*native_args,C.byref(gdk))
@@ -207,7 +212,7 @@ def main():
             v=struct.unpack_from('<Q',raw,off)[0];struct.pack_into('<Q',raw,off,norm(v))
         assert (got,nc)==(ret,oc),(case['name'],i,got,ret,nc,oc)
         assert raw==expected,(case['name'],i,[(hex(j),a,b) for j,(a,b) in enumerate(zip(raw,expected)) if a!=b][:20])
-      print(case['name'],'PASS 96',flush=True)
+      print(case['name'],'PASS 192',flush=True)
     print('XCurl GDK interface wrappers PASS:',total,'original-machine comparisons')
 
 if __name__=='__main__':main()
