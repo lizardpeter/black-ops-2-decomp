@@ -2,6 +2,7 @@
 #ifdef _WIN32
 #include "allocation.h"
 #include "win32_certificate.h"
+#include "upload_trailers.h"
 #include <array>
 #include <cstring>
 namespace t6_xcurl {
@@ -65,7 +66,7 @@ std::uint32_t WinHttpPipeline::deliver(void* e,const void* data,std::uint32_t n,
 std::uint64_t WinHttpPipeline::write_callback(void* cb,const void* data,std::uint64_t n,void* user,void*){
     return xcurl_research_invoke_write(reinterpret_cast<TransferCallback>(cb),data,n,user);
 }
-std::uint32_t WinHttpPipeline::append_trailers(void* r,std::uint64_t* n,void* c){auto& b=self(c);return b.trailers_?b.trailers_(r,n,c):0x80004001U;}
+std::uint32_t WinHttpPipeline::append_trailers(void* r,std::uint64_t* n,void* c){auto& b=self(c);return b.trailers_?b.trailers_(r,n,c):bound_append_upload_trailers(r,n,&b.request_);}
 void* WinHttpPipeline::reallocate(void* p,std::size_t n,std::uint32_t t,void*){return xcurl_research_heap_reallocate(p,n,t);}
 void WinHttpPipeline::diag(void* e,std::uint32_t site,std::uint32_t value,void* c){auto& r=self(c).request_;r.diagnostic(e,site,value,r.context);}
 void WinHttpPipeline::diag64(void* e,std::uint32_t site,std::uint64_t a,std::uint64_t,void* c){diag(e,site,static_cast<std::uint32_t>(a),c);}

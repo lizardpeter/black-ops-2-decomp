@@ -11,3 +11,5 @@ struct UploadServices {
 }
 extern "C" void xcurl_research_upload_continue(void*,const t6_xcurl::UploadServices*);
 extern "C" void xcurl_research_upload_worker(void*,const t6_xcurl::UploadServices*);
+
+extern "C" void xcurl_bound_upload_worker(void*,const t6_xcurl::UploadServices*);

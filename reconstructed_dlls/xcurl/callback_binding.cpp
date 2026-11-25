@@ -21,7 +21,7 @@ void CallbackBinding::status_entry(std::uintptr_t request,std::uint32_t status,c
 std::uint32_t CallbackBinding::submit_header(void* queue,void* easy,std::uint32_t id,void*){
     auto* b=active_.load();if(!b)return 0x8000ffffU;
     if(id==0)return b->tasks_.submit_worker(queue,easy,[](void* p,const void* s){xcurl_research_header_worker(p,static_cast<const HeaderServices*>(s));},&b->headers_);
-    if(id==1)return b->tasks_.submit_worker(queue,easy,[](void* p,const void* s){xcurl_research_upload_worker(p,static_cast<const UploadServices*>(s));},&b->upload_);
+    if(id==1)return b->tasks_.submit_worker(queue,easy,[](void* p,const void* s){xcurl_bound_upload_worker(p,static_cast<const UploadServices*>(s));},&b->upload_);
     return 0x80070057U;
 }
 std::uint32_t CallbackBinding::submit_body(void* queue,void* data,std::uint32_t id,void*){

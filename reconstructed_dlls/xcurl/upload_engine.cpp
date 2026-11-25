@@ -12,7 +12,8 @@ P ptr(void* p,unsigned o){return get<P>(p,o);}
 std::uint32_t hr(std::uint32_t x){return std::bit_cast<std::int32_t>(x)>0?(x&0xffffU)|0x80070000U:x;}
 bool failed(std::uint32_t n){return (n&0x80000000U)!=0;}
 }
-extern "C" void xcurl_research_upload_continue(void* request,const UploadServices* u){
+namespace {
+void upload_continue(void* request,const UploadServices* u,bool bound){
     auto* p=static_cast<P>(request);auto* s=u->request;auto c=s->context;
     s->enter(p,c);bool active=get<std::uint32_t>(p,0x28)==2;s->leave(p,c);if(!active)return;
     auto* e=ptr(p,0x30);
@@ -26,7 +27,7 @@ extern "C" void xcurl_research_upload_continue(void* request,const UploadService
     if(n>capacity){fail(0x21378,n,capacity,0x8007006fU,42);return;}
     auto mode=get<std::uint32_t>(p,0xd0);auto* data=payload;bool done=false;std::uint32_t status=0;
     if(!n){data=buffer;done=true;
-        if(ptr(e,0x140)){status=u->trailers(p,&n,c);if(failed(status))xcurl_research_request_close(p,s);}
+        if(ptr(e,0x140)){status=u->trailers(p,&n,c);if(bound){data=ptr(p,0xb0);if(failed(status))xcurl_research_easy_cancel(e,status,55,s);}if(failed(status))xcurl_research_request_close(p,s);}
         else if(mode==2){std::memcpy(buffer,"0\r\n\r\n",5);n=5;}
     }else if(mode==2){
         // Original formats "%zx%s" followed by CRLF, with up to 8 hex digits
@@ -40,4 +41,7 @@ extern "C" void xcurl_research_upload_continue(void* request,const UploadService
     if(e[0x176]&&data)s->debug_data(e,4,data,n,c);
     if(!u->write(ptr(p,0x50),n?data:nullptr,static_cast<std::uint32_t>(n),c)){auto h=hr(s->last_error(c));fail(0x213b0,h,0,h,55);}
 }
-extern "C" void xcurl_research_upload_worker(void* easy,const UploadServices* u){xcurl_research_upload_continue(static_cast<P>(easy)+0x230,u);}
+}
+extern "C" void xcurl_research_upload_continue(void* request,const UploadServices* u){upload_continue(request,u,false);}
+extern "C" void xcurl_research_upload_worker(void* easy,const UploadServices* u){upload_continue(static_cast<P>(easy)+0x230,u,false);}
+extern "C" void xcurl_bound_upload_worker(void* easy,const UploadServices* u){upload_continue(static_cast<P>(easy)+0x230,u,true);}

@@ -6,8 +6,8 @@
 #include "response_headers.h"
 namespace t6_xcurl {
 // Composes the recovered native WinHTTP request-start and status chains.
-// URL reporting and optional trailer services remain explicit. Client
-// certificate selection defaults to native read-only Crypt32/WinHTTP.
+// Native client certificate selection and upload trailer formatting are
+// default services; explicit overrides remain available.
 class WinHttpPipeline {
 public:
     using Trailers=std::uint32_t(*)(void*,std::uint64_t*,void*);
