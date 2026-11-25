@@ -47,7 +47,7 @@ extern "C" void xcurl_research_request_begin(void* request,const PrepareServices
     auto* p=static_cast<P>(request);auto* r=s->request;auto c=r->context;
     r->enter(p,c);auto state=get<std::uint32_t>(p,0x28);bool finish=state==3;
     if(!state){std::memset(p+0x58,0,0x38);put(p,0x58,s->engine_queue);put(p,0x60,p);put(p,0x68,s->start_callback);put(p,0x28,1U);
-        auto status=s->queue_start(ptr(p,0x38),p+0x58,c);
+        auto status=xcurl_research_gdk_network_security_async(reinterpret_cast<const char16_t*>(ptr(p,0x38)),p+0x58,s->gdk);
         if(failed(status)){r->diagnostic(ptr(p,0x30),0x20f80,status,c);xcurl_research_easy_cancel(ptr(p,0x30),status,58,r);finish=true;}
     }
     r->leave(p,c);if(finish)xcurl_research_request_finish(p,r);

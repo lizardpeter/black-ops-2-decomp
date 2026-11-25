@@ -84,20 +84,23 @@ Original 0x10CA0 and 0x11478: 2,048 passing local original-machine comparisons (
 
 ## GDK interface wrappers
 
-The three interface data objects at original RVAs 0x20120, 0x20130 and 0x20140 were read directly from the hash-pinned Store XCurl.dll. Code references in the original binary establish the provider/IID pairs and byte offsets in the COM-style vtables. The method names/signatures are cross-checked against the public IXThreadingImpl and IXNetworkingImpl layouts; the original RVAs and vtable offsets are independently observed in XCurl machine code.
+The four interface data objects at original RVAs 0x20110, 0x20120, 0x20130 and 0x20140 were read directly from the hash-pinned Store XCurl.dll. Code references in the original binary establish the provider/IID pairs and byte offsets in the COM-style vtables. The method names/signatures are cross-checked against the public IXThreadingImpl and IXNetworkingImpl layouts; the original RVAs and vtable offsets are independently observed in XCurl machine code.
 
+- Error-report provider and IID: `8ca467f7-22e8-4096-8456-bb8aa13f79d8`.
 - XThreading / XAsync provider and IID: `073b7dcb-1fcf-4030-94be-e3c9eb623428`.
 - XNetworking provider: `37e56907-2f10-41e8-b72f-36edb185331a`.
 - XNetworking interface IID: `bf2346b2-39af-4658-b5ea-44713c7e83b3`.
 
 All offsets include the three IUnknown entries; each successful QueryApiImpl result is released through vtable slot 2. Methods that the original calls only after XThreadAssertNotTimeSensitive retain that ordering.
 
-The new `gdk_interfaces.cpp` implements all 15 wrappers in the table in `xcurl-gdk-interface-map.md`. CI compares all 15 wrappers against the original machine code: 1,440 passing cases (96 per entry), including query GUID bytes, interface lifetime, vtable slot, argument widths/order, stack arguments, return values and output writes. The original request-start functions also pass 1,024 cases with the actual three GDK wrappers wired in.
+The new `gdk_interfaces.cpp` implements all 16 wrappers in the table in `xcurl-gdk-interface-map.md`. Local differential tests compare all 16 wrappers against the original machine code: 3,072 passing cases (192 per entry), including query GUID bytes, interface lifetime, vtable slot, argument widths/order, stack arguments, return values and output writes. The original request-start functions also pass 1,024 cases with the actual three GDK wrappers wired in.
 
-Important boundary: `GdkQueryServices.query` represents QueryApiImpl after runtime initialization. This work does not yet claim to load or initialize a real XGameRuntime module. The original lazy loader and initialization entrypoints at 0x5364 and 0x5148, including the exact package/module resolution behavior, remain to be bound to a native Windows host. No XGameRuntime runtime was loaded in these differential tests.
+Important boundary: `GdkQueryServices.query` represents QueryApiImpl after runtime initialization. This work does not yet claim to load or initialize a real XGameRuntime module. The original loader, initialization, query and shutdown paths are now reconstructed and pass 2,048 local differential comparisons; a native Windows adapter binds the loader and lock operations. No XGameRuntime runtime was loaded in these differential tests.
 
 Evidence generator: `tools/dlls/probe_xcurl_gdk.py`. Public interface-layout cross-checks: [IXThreadingImpl](https://github.com/xodus-gaming/xgameruntime-docs/blob/main/COM/XThreadingImpl/IXThreadingImpl.md) and [IXNetworkingImpl](https://github.com/xodus-gaming/xgameruntime-docs/blob/main/COM/XNetworkingImpl/IXNetworkingImpl.md).
 
 ## Original engine lifecycle
 
 The 0xA8-byte engine constructor (0x164D4), initializer (0x16C04), destructor (0x165D0), connectivity handler (0x166EC), limit setter (0x17044), suspend (0x170F4), resume (0x16EC4), app state notification (0x16B60), allocator (0x169FC), bootstrap (0x9BA0), and certificate verification (0x13D50) are reconstructed in engine_lifecycle.cpp. Local original-machine differential testing passed 2,816 cases (256 per function), including allocation/initialization failures, nested lock order, GDK interface acquisition/release, session-cache cleanup, and insertion of a new multi during the suspend wait. The bootstrap deliberately rejects a null engine on positive allocation error 27 rather than reproducing the original null dereference. Telemetry creation/destruction, OS handles, app registration and callback entrypoints remain explicit service boundaries; this is not the completed public XCurl ABI.
+
+Request preparation (0x11780 and its caller 0xCF90) now calls the reconstructed GDK security-query wrapper (0x566C) directly, including interface acquisition and release; the 1,024-case preparation suite passes locally. Remaining URL conversion and callback entrypoints are explicit service boundaries.

@@ -1,5 +1,6 @@
 #pragma once
 #include "request_engine.h"
+#include "gdk_interfaces.h"
 namespace t6_xcurl {
 // Original URL conversion and asynchronous start boundaries. The callback token
 // must be the actual native translation of 0x11F10 when integrated.
@@ -10,7 +11,7 @@ struct PrepareServices {
     std::uint32_t(*parse_port)(const void*,void*);
     void(*url_diagnostic)(void*,std::uint32_t,std::uintptr_t,std::uint32_t,void*);
     std::uint32_t(*copy_url)(const void*,void*,void*);
-    std::uint32_t(*queue_start)(void*,void*,void*);
+    const GdkQueryServices* gdk;
     void* engine_queue;
     void* start_callback;
 };

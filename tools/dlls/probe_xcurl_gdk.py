@@ -17,8 +17,8 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_OP_IMM, CS_OP_MEM
 from capstone.x86_const import X86_REG_RIP
 
 SHA256 = "65cd27b336abecf821896611c91e8ec74d0328bd65ec11aa5ef4e2affbdd4551"
-TARGETS = (0x20120, 0x20130, 0x20140)
-KNOWN = (0x5148, 0x5364, 0x53A4, 0x11978, 0x11F10)
+TARGETS = (0x20110, 0x20120, 0x20130, 0x20140)
+KNOWN = (0x5148, 0x5364, 0x53A4, 0x5568, 0x11978, 0x11F10)
 EXPORTS = (
     "QueryApiImpl", "InitializeApiImpl", "InitializeApiImplEx",
     "XErrorReport", "UninitializeApiImpl",
@@ -76,12 +76,12 @@ def target_references(pe, table, md):
 
 def read_cstring(pe, rva, limit=256):
     blob = pe.get_data(rva, limit)
-    return blob.split(b"\\0", 1)[0].decode("utf-8", "backslashreplace")
+    return blob.split(b"\0", 1)[0].decode("utf-8", "backslashreplace")
 
 def read_wstring(pe, rva, limit=512):
     blob = pe.get_data(rva, limit)
     blob = blob[:len(blob) - (len(blob) % 2)]
-    end = next((i for i in range(0, len(blob), 2) if blob[i:i+2] == b"\\0\\0"), len(blob))
+    end = next((i for i in range(0, len(blob), 2) if blob[i:i+2] == b"\0\0"), len(blob))
     return blob[:end].decode("utf-16le", "backslashreplace")
 
 def raw_strings(data, pe, needles):
