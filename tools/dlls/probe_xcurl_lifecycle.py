@@ -8,7 +8,7 @@ from capstone import Cs, CS_ARCH_X86, CS_MODE_64, CS_OP_MEM, CS_OP_IMM
 from capstone.x86_const import X86_REG_RIP
 
 SHA = "65cd27b336abecf821896611c91e8ec74d0328bd65ec11aa5ef4e2affbdd4551"
-TARGETS = (0x1C390, 0x1C610, 0x1C744, 0x1BCA4, 0x1C110, 0x1BC4C, 0x1C46C, 0x1B178, 0x1ADA4, 0x1D170, 0x1D740)
+TARGETS = (0x1C780, 0x1C110, 0x1B178, 0x1B068, 0x7DF4, 0x16960, 0x16B60, 0x16C04, 0x1D740)
 def main():
     path = Path(sys.argv[1])
     assert hashlib.sha256(path.read_bytes()).hexdigest() == SHA
@@ -42,6 +42,14 @@ def main():
     for rva in (0x20660,0x206B0,0x206C8,0x23304,0x23388,0x2338C,0x23390,0x233A0,0x233A8,0x233AC,0x233B0,0x233B4,0x233B8,0x232DC,0x21B40,0x20D10,0x20D38,0x20D70,0x20DA8,0x20E10,0x20E50,0x20E78,0x20EB8,0x20EF0,0x20F20,0x20F48,0x20F60):
         data=pe.get_data(rva,256)
         print(f'DATA {rva:05X}: {data[:80].hex()} ASCII {data.split(bytes([0]),1)[0]!r}')
+    print("SCHEME TABLE")
+    import struct
+    for i in range(128):
+        ptr=struct.unpack("<Q",pe.get_data(0x1f1c0+i*8,8))[0]
+        if not ptr: break
+        if not base <= ptr < base+pe.OPTIONAL_HEADER.SizeOfImage: break
+        name=struct.unpack("<Q",pe.get_data(ptr-base,8))[0]
+        print(i,hex(ptr-base),pe.get_string_at_rva(name-base),pe.get_data(ptr-base+0x78,12).hex())
     print("PUBLIC EXPORT RVAS")
     for e in pe.DIRECTORY_ENTRY_EXPORT.symbols:
         if e.name and e.name.startswith(b"curl_"):
