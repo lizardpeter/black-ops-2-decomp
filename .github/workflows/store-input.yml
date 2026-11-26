@@ -33,6 +33,8 @@ jobs:
           python tools/inventory/store_input.py originals/t6mp_msstore.exe input-evidence
       - name: Replay complete Store input support bodies
         run: python tests/verify_store_input_support.py originals/t6mp_msstore.exe
+      - name: Replay complete Store input command bodies
+        run: python tests/verify_store_input_commands.py originals/t6mp_msstore.exe
       - uses: actions/upload-artifact@v4
         if: always()
         with:
