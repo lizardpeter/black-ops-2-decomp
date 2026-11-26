@@ -13,6 +13,9 @@ on:
       - 'src/cgame_mp/cg_extra_camera_store.cpp'
       - 'src/cgame/cg_camera_support_store.cpp'
       - 'src/cgame_mp/cg_main_view_store.cpp'
+      - 'src/cgame/cg_camera_motion_store.cpp'
+      - 'tests/store_camera_motion_probe.cpp'
+      - 'tests/verify_store_camera_motion.py'
       - 'tests/store_main_view_probe.cpp'
       - 'tests/verify_store_main_view.py'
       - 'tests/store_camera_support_probe.cpp'
@@ -154,6 +157,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_main_view.py originals/t6mp_msstore.exe | tee camera-main-view.log
+      - name: Replay Store angle axes velocity perturbation and tween
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_motion.py originals/t6mp_msstore.exe | tee camera-motion.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -180,4 +187,5 @@ jobs:
             camera-extra.log
             camera-support.log
             camera-main-view.log
+            camera-motion.log
           if-no-files-found: warn
