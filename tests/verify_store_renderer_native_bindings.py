@@ -38,7 +38,18 @@ def main():
             assert sec.Characteristics&0x20000000,name
             assert va==(int(evidence["start"],16) if role=="entry" else va) and (role=="entry" or va in calls),name
         else:
-            assert va in refs,name
+            # The worker loop uses image-base + index + displacement,
+            # not RIP-relative operands. Independently check those exact
+            # instructions rather than pretending the RIP inventory covers them.
+            if name in ("Store_Renderer_WorkerNames","store_r_smp_worker_thread"):
+                offset,expected={
+                    "Store_Renderer_WorkerNames":(0x70fa93,"4b8b8c2ff0d39a00"),
+                    "store_r_smp_worker_thread":(0x70fabd,"4b89842fb06e7e02"),
+                }[name]
+                assert pe.get_data(offset,len(bytes.fromhex(expected)))==bytes.fromhex(expected),name
+                assert int.from_bytes(bytes.fromhex(expected)[4:],"little")==va-base,name
+            else:
+                assert va in refs,name
             data.add(name)
             if role=="result":
                 assert sec.Characteristics&0x80000000,name
