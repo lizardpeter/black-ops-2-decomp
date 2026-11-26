@@ -122,3 +122,43 @@ bounded caller-owned buffer API, not a complete native live integrity
 implementation. Original finalization, SP code parity and the Windows
 integration build have not been differentially validated. No remote
 challenge logic or runtime integrity hooks were changed.
+
+## Original-style authored lifecycle (2026-11-26, supersedes offline source layout)
+
+The bounded buffer model has moved to `tests/live_checksum_model.h`.
+`src/live/live_anticheat.cpp` now contains the recovered Store-target
+source functions with the original reference signatures: both CRC
+helpers, StartHash, ContinueHash and CompleteHash. The last three
+are compiled for T6_STORE. HashInfo is defined in the corresponding
+production header, with all seven offsets and its 32-byte size
+checked at compile time.
+
+The authored lifecycle preserves the observed Store MP/ZM semantics,
+including the accepted but non-computing mode 2, fixed Store chunk
+size, first-free-slot allocation, original 32-bit address field and
+record clearing even on early completion. This is a native source
+reconstruction, not a remote challenge implementation. CompleteHash
+uses the reference prototype and observed inlined finalization
+behavior, not a claimed standalone Store entry. Mode 2 is not a
+reconstructed SHA algorithm. No live integrity service or runtime
+hook is installed; native pool storage has not been bound to the
+original hybrid-build global. SP equivalence remains unresolved.
+
+Linux x86-64 native and differential test (owned low-address input
+buffers only; optional original replay fixtures are generated locally):
+
+```sh
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -DT6_STORE -Iinclude src/live/live_anticheat.cpp tests/live_checksum_native_test.cpp -o /tmp/t6-native-lifecycle
+/tmp/t6-native-lifecycle
+```
+
+The native test also accepts two local replay fixtures for the startup
+and continuation bodies. All native and optional MP/ZM replay runs
+were executed successfully. Each original build passed 1,088 startup
+comparisons and 2,520 continuation calls across 1,680 lifecycle cases,
+with the entire context compared at each step. Finalization was tested
+against expected state/output behavior, not independently executed
+original finalization. Prior 1,542 arithmetic, 216 lifecycle and 512
+interleaved model tests pass after moving the adapter into tests.
+Original fixture extraction and Windows hybrid integration are not
+part of this commit; no function registry or runtime binding was added.

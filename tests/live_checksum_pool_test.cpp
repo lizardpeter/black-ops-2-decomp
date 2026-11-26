@@ -1,5 +1,5 @@
 // Offline buffer model regression; never attaches to a game or service.
-#include "live/live_anticheat.h"
+#include "live_checksum_model.h"
 #include <array>
 #include <cassert>
 #include <cstdint>

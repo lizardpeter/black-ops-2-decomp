@@ -1,5 +1,5 @@
 // Offline checksum arithmetic and bounded lifecycle regression.
-#include "live/live_anticheat.h"
+#include "live_checksum_model.h"
 #include <cassert>
 #include <cstdint>
 #include <initializer_list>
@@ -42,7 +42,7 @@ int main() {
     }
     assert(cases == 1542);
     unsigned int crc = 0xffffffffu;
-    const unsigned char sample[] = "123456789";
+    unsigned char sample[] = "123456789";
     LiveAntiCheat_GenerateCRC32Checksum(sample, 9, &crc);
     assert((crc ^ 0xffffffffu) == 0xcbf43926u);
     using namespace t6::checksum;
