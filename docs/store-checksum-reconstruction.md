@@ -235,3 +235,29 @@ independently repeat the previous manual disassembly observations.
 Only authored comments and documentation changed. No generated
 analysis, compiled declarations, function registry, runtime
 integration, or original integrity behavior changed.
+
+## Original Store PE declaration audit (2026-11-26)
+
+The three original Store executables were available locally following
+R2 handoff run 45864908875, artifact 15140655781. SHA-256 was
+recomputed for all three files and matched the existing PE inventory.
+
+Read-only MP inspection independently supports the existing success
+callback candidate's pointer-sized first input and 8-bit true return
+at its only normal exit. The original C++ pointer type remains
+unverified. A short normalized body search has two candidates in
+each executable, so it does not establish a unique ZM/SP identity.
+
+The caller-based dispatcher candidate accepts a 32-bit first input.
+Its initial x64 runtime-function record has two directly chained
+unwind ranges. A unique matching short prologue and the same
+three-range grouping occur in each Store executable; the SP
+grouping differs slightly in length. Structural matching alone
+does not establish equivalent behavior, exact C++ parameter types,
+or a return contract. The separate source identities remain
+unresolved.
+
+This pass updates the noncompiled declaration evidence only.
+It does not implement online challenge handling, alter integrity
+checks, create runtime bindings, or claim differential equivalence.
+No original executable or extracted instruction bytes are committed.
