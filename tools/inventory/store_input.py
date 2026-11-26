@@ -27,6 +27,7 @@ TARGETS={
     0x1401A3350:"CL_FinishMove",0x1400F1E90:"CG_ShouldUpdateViewAngles",
     0x140499A10:"IN_MouseMove",0x14049A0A0:"IN_Frame",
     0x1403946A0:"Com_LocalClient_LastInput_Set",0x1406AC5D0:"Store_LUIMouseEvent",
+    0x1405F8550:"DemoViewAngleGate",0x140499460:"GamepadFrame",
 }
 def main():
     p=argparse.ArgumentParser(description=__doc__)

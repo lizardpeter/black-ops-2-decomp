@@ -9,3 +9,7 @@ The enhanced raw input and MW2019 sensitivity paths already exist, including red
 ## Enhanced registration failure
 
 Fixed the enhanced-only IN_MouseMove path to fall back to original cursor deltas when IN_StartRawInput returns false. The raw counters are still drained; successfully registered raw input retains its original enhanced behavior, including a true zero-count frame. A failed GetCursorPos now uses the prior cursor position, and IN_StartRawInput handles failed event/thread creation without waiting on an invalid event or leaking it. Added 32 direct source-body combinations and 200 hybrid emulator fallback comparisons (the latter require the broad build). No changes to faithful mouse behavior.
+
+## First new source bodies
+
+Run 45900149646 succeeded: 22 exact instruction listings. Three new enclosing candidates in src/client/cl_input_support_store.cpp: CG_ShouldUpdateViewAngles 1400F1E90 (40 instructions), CL_FinishMove 1401A3350 (42), IN_Frame 14049A0A0 (67). These preserve demo/menu early exits, x64 command layout and angle truncation, pending-button mask consumption, input frame ordering, type-aware dvar reads, cursor count restoration and foreground gamepad dispatch. The reference IN_Frame already exists in src/win32/win_input.cpp; this is a separate Store-specific comparison candidate, not a competing live binding. 24576 original-PE comparisons pending. Two new dependency bodies requested in evidence extraction. No runtime redirects added.
