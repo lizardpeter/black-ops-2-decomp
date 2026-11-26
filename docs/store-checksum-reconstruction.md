@@ -3,25 +3,45 @@
 The primary target is t6mp_msstore (x64), not the x86 dedicated server.
 The original PC server source unit is named by its PDB and exported in
 analysis/CoDMPServer_PC/pseudocode/live/live_anticheat.cpp.c. The Store MP
-export in analysis/t6mp_msstore/pseudocode/_unattributed/14050000.c
-contains the two CRC recurrence loops within the hash continuation
-body. This is consistent with LTCG inlining; do not assign the helper
-functions fictitious standalone Store entry points.
+pseudocode and disassembly contain both CRC recurrence loops inlined
+into the hash continuation body, and show hash initialization and
+finalization logic. Do not assign fictitious standalone Store entries
+to inlined functions.
 
-Authored buffer arithmetic is in src/live/live_anticheat.cpp. The
-generated IEEE reflected CRC table follows the reference implementation;
-the Store table bytes still need independent binary comparison. The
-source does not replace any live integrity or challenge service and is
-not registered as a Store runtime override.
+## Authored code and scope
 
-Standalone arithmetic test:
+src/live/live_anticheat.cpp contains the CRC arithmetic and a bounded,
+caller-owned buffer model of the CRC lifecycle. The record layout
+matches the observed 32-byte Store MP context accesses and has
+compile-time size and offset checks. Allocation, incremental processing,
+completion and slot reuse are represented. The model uses buffer offsets,
+rejects unsupported modes and invalid ranges, and rejects premature
+completion. These are deliberate offline API constraints, not claims
+about the original ABI or all its edge cases. No remote challenge
+processing or runtime override is implemented.
+
+## Verification
+
 ```sh
 g++ -std=c++17 -O2 -Wall -Wextra -Werror -Iinclude src/live/live_anticheat.cpp tests/live_checksum_test.cpp -o /tmp/t6checksum-test
 /tmp/t6checksum-test
 ```
 
-1,542 cases (two alignments, lengths 0–256, three seeds), plus a
-standard CRC test vector, passed on Linux x86-64. This is not a
-Windows build, an original-binary differential pass, or a claim of
-Store SP/ZM parity. Hash lifecycle and service integration remain
-unreconstructed. No generated analysis or runtime hooks changed.
+Executed in Linux x86-64: 1,542 arithmetic cases and 216 lifecycle
+cases passed, plus pool exhaustion/reuse, invalid bounds and standard
+CRC test vector checks. A separate isolated replay of the 237-byte
+Store MP continuation body extracted from the repository's Ghidra
+instruction listing passed 216 differential cases (360 original
+calls) over owned input buffers. The replay supplied an independently
+generated reflected CRC32 table; the original table bytes were not
+available. Thus this is evidence for valid-input continuation behavior,
+not complete binary parity, not a Windows build, and not validation
+of startup, finalization or network/service logic.
+
+SP and ZM have PE/unwind inventories only in the current repository,
+without comparable full disassembly. No shared-code parity claim is
+made. Fetching the Store executable from the configured R2 host failed
+with a DNS error in the execution environment.
+
+No generated analysis, runtime hooks, or function-status claims
+were changed.
