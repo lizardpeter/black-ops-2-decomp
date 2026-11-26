@@ -21,6 +21,10 @@ def main():
         lib.CoreSetterSize.restype=C.c_uint
         lib.CoreLatchRun.argtypes=[C.c_void_p,C.c_int,*([C.c_uint]*5),C.c_void_p]
         lib.CoreFloatRun.argtypes=[C.c_void_p,C.c_int,C.c_uint,C.c_uint,C.c_int,C.c_void_p]
+        lib.CoreEqualRun.argtypes=[C.c_void_p,C.c_int,C.c_void_p,C.c_void_p]
+        lib.CoreEqualRun.restype=C.c_int
+        lib.CoreEqualStringRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint]
+        lib.CoreEqualStringRun.restype=C.c_int
         old=C.create_string_buffer(lib.CoreSetterSize())
         new=C.create_string_buffer(lib.CoreSetterSize())
         with map_image(pathlib.Path(sys.argv[1])) as mem:
@@ -52,5 +56,19 @@ def main():
                 assert old.raw==new.raw,(args,old.raw.hex(),new.raw.hex())
                 count+=1
             print(f"{count} original SetFloat comparisons; type, null/name, source, float bits and formatting call")
+            count=0
+            words=[0,1,0x80000000,0x3f800000,0xbf800000,0x7f800000,0xff800000,0x7fc00000,0x7f800001,0x12345678,0xffffffff]
+            for kind,lane,a,b in itertools.product([*range(8),9,10,11,12,-1,99],range(4),words,words):
+                x=(C.c_uint32*4)(0x3f800000,0x3f800000,0x3f800000,0x3f800000)
+                y=(C.c_uint32*4)(*x)
+                x[lane]=a;y[lane]=b
+                old_eq=lib.CoreEqualRun(base,kind,x,y)
+                new_eq=lib.CoreEqualRun(None,kind,x,y)
+                assert old_eq==new_eq,(kind,lane,hex(a),hex(b),old_eq,new_eq)
+                count+=1
+            for a,b in itertools.product(range(1,9),repeat=2):
+                assert lib.CoreEqualStringRun(base,a,b)==lib.CoreEqualStringRun(None,a,b),(a,b)
+                count+=1
+            print(f"{count} original ValuesEqual comparisons; signed zero, NaN, infinity, lane counts and strings")
 if __name__=="__main__":
     main()

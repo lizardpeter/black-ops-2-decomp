@@ -120,6 +120,28 @@ void CopyResetString(Record *d,Value *out,const char *s) {
     else out->string=Intern(s);
 }
 
+// 14046B010. The original UCOMISS+JE/JNE compares ZF without checking
+// PF, so an unordered comparison is considered equal. Do not normalize
+// that surprising NaN behavior to ordinary C++ equality.
+static bool FloatEqual(U32 a,U32 b) {
+    float x,y; std::memcpy(&x,&a,4);std::memcpy(&y,&b,4);
+    return x==y || x!=x || y!=y;
+}
+int ValuesEqual(int type,const Value *a,const Value *b) {
+    switch(type) {
+    case 1: return (a->words[0]&255u)==(b->words[0]&255u);
+    case 6: case 7: case 9: return a->words[0]==b->words[0];
+    case 10: return a->words[0]==b->words[0] && a->words[1]==b->words[1];
+    case 8: return std::strcmp(a->string,b->string)==0;
+    case 2: case 3: case 4: case 5: case 11: case 12: {
+        const int n=type<=5?type-1:3;
+        for(int i=0;i<n;++i) if(!FloatEqual(a->words[i],b->words[i])) return 0;
+        return 1;
+    }
+    default: return 0;
+    }
+}
+
 // 14046B150 -- current/reset alias sharing, then intern; release a
 // unique previous latched string only after the new pointer is published.
 // Non-string types copy exactly their original lane counts.

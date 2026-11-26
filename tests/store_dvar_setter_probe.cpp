@@ -18,7 +18,10 @@ static Trace trace{};
 static Record d{};
 alignas(16) static Value input;
 static char pool[4096];
-static const char *const strings[]={nullptr,"old","current","reset","current","reset","new","old",""};
+// Distinct arrays with identical contents exercise content-based reuse,
+// not just identical pointers (which pooled literals could otherwise hide).
+static char oldCopy[]="old",currentCopy[]="current",resetCopy[]="reset";
+static const char *const strings[]={nullptr,"old","current","reset",currentCopy,resetCopy,"new",oldCopy,""};
 static unsigned returnIndex;
 static U Hash(const char *s) {
     if(!s) return 0;
@@ -92,6 +95,14 @@ void CoreLatchRun(void *base,int type,unsigned cur,unsigned lat,unsigned reset,u
     std::memcpy(trace.latched,&d.latched,16);std::memcpy(trace.current,&d.current,16);
     std::memcpy(trace.reset,&d.reset,16);trace.modified=d.modified;
     std::memcpy(out,&trace,sizeof(trace));
+}
+int CoreEqualRun(void *base,int type,const Value *a,const Value *b) {
+    if(base)return reinterpret_cast<int(MS *)(int,const Value *,const Value *)>(static_cast<char *>(base)+0x46b010)(type,a,b);
+    return ValuesEqual(type,a,b);
+}
+int CoreEqualStringRun(void *base,unsigned a,unsigned b) {
+    Value x{},y{};x.string=strings[a];y.string=strings[b];
+    return CoreEqualRun(base,8,&x,&y);
 }
 void CoreFloatRun(void *base,int type,unsigned named,U32 bits,int source,void *out) {
     trace={};d={};d.type=type;d.name=named==0?nullptr:named==1?"":"test";
