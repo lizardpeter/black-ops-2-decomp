@@ -11,13 +11,14 @@ from store_dvar_next import ROOT,DIGEST,HEADER,INSN
 SEEDS={0x1403FCD20:"UI_DefaultFont",0x1403FCE40:"UI_GetFontHandle",
        0x14071A780:"R_RegisterFont",0x14071A7A0:"R_TextWidth",
        0x1403FC6D0:"UI_DrawTextPadding",0x140215300:"DB_ResolutionZoneNames",
-       0x1407203B0:"RendererInit",0x1403FBAF0:"UI_AssetCache"}
+       0x1407203B0:"RendererInit",0x1403FBAF0:"UI_AssetCache",
+       0x14071C880:"AddBaseDrawTextCmd",0x1400F2040:"ConvertColor",0x140723340:"FontIconLookup"}
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument("exe",type=Path);p.add_argument("out",type=Path);a=p.parse_args()
     raw=a.exe.read_bytes();assert hashlib.sha256(raw).hexdigest()==DIGEST
     pe=pefile.PE(data=raw,fast_load=True);base=pe.OPTIONAL_HEADER.ImageBase
     md=cs.Cs(cs.CS_ARCH_X86,cs.CS_MODE_64);md.detail=True
-    addresses=defaultdict(list);glyph=set()
+    addresses=defaultdict(list);glyph=set();incoming=set()
     for shard in sorted((ROOT/"analysis/t6mp_msstore/disasm/_unattributed").glob("*.asm")):
         owner=None;tokens=set()
         with shard.open(encoding="utf-8") as f:
@@ -29,6 +30,7 @@ def main():
                 m=INSN.match(line)
                 if not m or owner is None:continue
                 addresses[owner].append(int(m[1],16))
+                if re.search(r"\bCALL\s+(?:0x)?0*14071a6e0\b",line,re.I):incoming.add(owner)
                 tokens.update(re.findall(r"(?<![0-9a-f])0x(?:5f|60|20)(?![0-9a-f])",line.lower()))
             if owner is not None and {"0x5f","0x60","0x20"}<=tokens:glyph.add(owner)
     assert set(SEEDS)<=set(addresses)
@@ -56,13 +58,14 @@ def main():
         return rows
     chosen=dict(SEEDS)
     # Only discover direct calls from font/draw entrypoints, not the entire renderer initialization tree.
-    for owner in list(SEEDS)[:5]:
+    for owner in list(SEEDS)[:5]+[0x14071C880]:
         for row in body(owner):
             if not row["target"]:continue
             t=int(row["target"],16)
             if t!=owner and t in addresses:chosen.setdefault(t,"dependency_"+hex(t))
     # The x86 reference uses ASCII 0x20..0x7f and starts its non-ASCII search at 0x60.
     # This is candidate evidence only, never a semantic identity assignment.
+    for owner in incoming:chosen.setdefault(owner,"glyph_caller_"+hex(owner))
     for owner in glyph:
         if len(addresses[owner])<=150:chosen.setdefault(owner,"glyph_candidate_"+hex(owner))
     a.out.mkdir(parents=True,exist_ok=True);index=[]

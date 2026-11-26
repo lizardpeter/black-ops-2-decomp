@@ -21,6 +21,7 @@ extern "C" {
 const Byte *Font_Language,*Font_Resolution;
 void *Font_Assets[21];
 int Font_Capture;float Font_CaptureX,Font_CaptureY,Font_HudScale;
+unsigned Font_CaptureWidth,Font_CaptureHeight;float Font_CaptureOffsetX,Font_CaptureOffsetY;
 const Byte *Font_ClientTable=table,*Font_Placements=placements+0x7c,*Font_ViewSizes=views;
 int Font_Atoi(const char*s){Log(1,Hash(s));return std::atoi(s);}
 const char*Font_Format(const char*f,int i,const char*s){Log(2,Hash(f),U(std::uint32_t(i)),Hash(s));std::snprintf(formatted,sizeof(formatted),f,i,s);return formatted;}
