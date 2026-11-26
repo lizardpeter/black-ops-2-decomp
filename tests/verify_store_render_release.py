@@ -10,7 +10,7 @@ SPECS={
 }
 def reader(path,digest):
     b=path.read_bytes();assert hashlib.sha256(b).hexdigest()==digest,path
-    h,=struct.unpack_from('<I',b,60);n=struct.unpack_from('<H',b,h+6);opt=struct.unpack_from('<H',b,h+20)
+    h,=struct.unpack_from('<I',b,60);n,=struct.unpack_from('<H',b,h+6);opt,=struct.unpack_from('<H',b,h+20)
     sections=[struct.unpack_from('<4I',b,h+24+opt+40*i+8) for i in range(n)]
     def read(a,size):
         for vs,va,rs,raw in sections:
