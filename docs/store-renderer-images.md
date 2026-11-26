@@ -357,3 +357,33 @@ ordering. All corresponding normalized instruction bodies match.
 Actual GPU allocation, combined end-to-end Windows hybrid execution and
 terminal resource failure are not validated. No enhanced redirect or
 standard differential ledger promotion is introduced.
+
+## Paired color/depth targets and extra-camera lifecycle
+
+| Function | MP | ZM | SP |
+| --- | --- | --- | --- |
+| Store_InitSizedTargetWithDepth | 140752660 | 1407501A0 | 1405F8F80 |
+| R_InitExtraCamRenderTargets | 140753700 | 140751240 | 1405FA020 |
+| R_ShutdownExtraCamRenderTargets | 140753840 | 140751380 | 1405FA160 |
+
+All three return void. The first retains the seven-slot Store call ABI
+with unused fourth and sixth slots. Color dimensions are signed-clamped
+to at least one, then narrowed to 16 bits; the dedicated depth resource
+uses the original untruncated width and height. Both creation calls
+repeat on the shared retry flag, then the temporary resource is released.
+The initializer updates a 24-byte settings record and creates six pairs
+at target indices 19–24, with program image indices 29–34 and formats
+28,41,28,28,28,28. Teardown clears the enabled byte, releases both views
+and the image for each target, then zeros each complete target record.
+
+    python tests/verify_store_extra_cam.py /path/to/store/files
+
+Executed on Linux x86-64 with pinned MP/ZM/SP binaries and GNU objdump:
+6,144 comparisons per build, 18,432 total. The original bodies match
+after relocating only enumerated references. The initializer executes
+the actual original paired-target helper; the test captures its color
+setup boundary, COM creation/release and image release. It checks all
+72 records, settings, call arguments and order, including signed and
+truncated dimensions and one to three retries. No actual GPU execution,
+terminal COM failure, or full Windows hybrid build is claimed.
+The standard differential ledger is unchanged.
