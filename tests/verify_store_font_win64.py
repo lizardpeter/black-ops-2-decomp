@@ -2,7 +2,10 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/gfx_d3d/r_matrix_display_store.cpp":["UpdateMatrixBase","GetMatrixConstant","MonitorRect","SelectDesktopResolution","SetFullscreenOutput","BeginRendererSync","EndRendererSync"],
+UNITS={"src/ui/lui_inline_icon_store.cpp":["DrawInlineIcon"],
+       "src/ui/ui_text_wrappers_store.cpp":["DrawTextScaled","DrawTextRotated","DrawTextNormalized","ItemFont","DecimalSeparator","DrawTextGlow","DrawHudText","DrawDistance"],
+       "src/qcommon/localize_bindings_store.cpp":["Lookup","BindingText","ReplaceBinding"],
+       "src/gfx_d3d/r_matrix_display_store.cpp":["UpdateMatrixBase","GetMatrixConstant","MonitorRect","SelectDesktopResolution","SetFullscreenOutput","BeginRendererSync","EndRendererSync"],
        "src/gfx_d3d/r_display_resources_store.cpp":["SetUI3DViewport","BuildSwapChainDesc","UpdateVideoConfig","SetWindowMode","ResetClientQueries","CreateQueryPairs","InitDynamicBuffer","AllocateResourceSlot","RegisterTargetName","ResetTextureCache"],
        "src/ui/lui_text_util_store.cpp":["DecodeCharacter","ColorForCode","TransformPoint","RectVertices","FontHeight","AnimatedY","SubmitQuadChain","ReleaseQuadChain"],
        "src/gfx_d3d/r_material_target_store.cpp":["ApplyMaterialState","SetRenderTarget","ApplyPassArgs"],
