@@ -45,3 +45,30 @@ with a DNS error in the execution environment.
 
 No generated analysis, runtime hooks, or function-status claims
 were changed.
+
+## Additional offline pool regression (2026-11-26)
+
+`tests/live_checksum_pool_test.cpp` exercises 32 rounds of 16
+simultaneously active contexts against an independent bitwise CRC
+reference, with deterministic generated buffer contents, lengths,
+offsets and seeds. It also checks rejection of foreign handles,
+short/null buffers, invalid progress, invalid block size and premature
+completion, and verifies input preservation.
+
+Build and execute locally:
+```sh
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -Iinclude src/live/live_anticheat.cpp tests/live_checksum_pool_test.cpp -o /tmp/t6checksum-pool
+/tmp/t6checksum-pool
+```
+
+Observed: 512 interleaved lifecycles and 2,127 continuation calls passed.
+The same test and the initial regression also passed AddressSanitizer
+and UndefinedBehaviorSanitizer (GCC, Linux x86-64, -O1 -g
+-fsanitize=address,undefined -fno-omit-frame-pointer). These are
+offline model tests, not original-binary differential counts.
+
+The R2 runner's BO2 handoff workflow succeeded on November 24
+(run 45422971734), but its one-day artifact is no longer listed.
+The existing isolated MP replay passed again (216 cases, 360 calls).
+No new original executable was obtained and SP/ZM parity remains
+unverified. No live integrity behavior or runtime hooks changed.
