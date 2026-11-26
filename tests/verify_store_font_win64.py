@@ -2,7 +2,9 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/gfx_d3d/r_font_store.cpp":["DefaultFont","FontHandle","CharacterGlyph","RegisterFont","TextWidth"],
+UNITS={"src/ui/ui_font_draw_store.cpp":["BlinkText","DrawTextPadding"],
+       "src/gfx_d3d/r_fonticon_store.cpp":["GetFontIconEntryInfo"],
+       "src/gfx_d3d/r_font_store.cpp":["DefaultFont","FontHandle","CharacterGlyph","RegisterFont","TextWidth"],
        "src/ui/ui_font_assets_store.cpp":["AssetCache","ResolutionScale"],
        "src/client/screen_placement_store.cpp":["HudViewX","HudViewY","VirtualFromRealWidth","VirtualFromRealHeight"]}
 def main():

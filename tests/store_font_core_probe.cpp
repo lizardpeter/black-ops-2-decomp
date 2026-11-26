@@ -18,7 +18,8 @@ const Byte *Core_Small,*Core_Big,*Core_ExtraBig;void *Core_Assets[21];
 int Core_Capture;float Core_CaptureY,Core_HudScale;
 double Core_Atof(const char*s){Log(1,Hash(s));return std::atof(s);}
 void *Core_FindAsset(int t,const char*s,bool b,int n){Log(2,t,Hash(s),b,U(U32(n)));return reinterpret_cast<void*>(0x123456);}
-void Core_Icon(int client,const char*s,int h,void**m,float*w,float*y){Log(3,U(U32(client)),Hash(s),U(U32(h)));*m=reinterpret_cast<void*>(0x543210);*w=1.25f;*y=0.5f;}
+// 140723450 never consumes RCX; LTCG callers do not initialize it.
+void Core_Icon(int,const char*s,int h,void**m,float*w,float*y){Log(3,0,Hash(s),U(U32(h)));*m=reinterpret_cast<void*>(0x543210);*w=1.25f;*y=0.5f;}
 }
 static double MS MAtof(const char*s){return Core_Atof(s);}
 static void* MS MFind(int t,const char*s,bool b,int n){return Core_FindAsset(t,s,b,n);}
