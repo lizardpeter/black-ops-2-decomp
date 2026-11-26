@@ -49,3 +49,7 @@ Entry source extended to 14070F91E, immediately before the independently recover
 ## Verified entry and worker results; continuous replay
 
 Run 45889760392 passed 2086 entry cases (102 events, 58 globals), 1400 isolated worker cases, and the enum evidence extractor. All 13 recovered renderer enum table strings are now defined in source; validation compares the original initial table entries and terminators. The re-registration probe now checks all meaningful vector default lanes, not only the first. The continuous replay runs the original instructions from 14070E230 through 140710BFF without a fragment-entry stub, comparing 153..161 events and 92 global slots in 512 mixed cases. This is pending CI; it still mocks the external functions and cuts before the remaining original body.
+
+## Shadow and stereo continuation
+
+Run 45889971187 passed 512 continuous replays of the prior prefix. New source extends through 1407126CF with 51 additional registrations, 33 inlined lookup paths and 32 new global assignments. r_forceLod uses a null-terminated five-entry enum table with default index 4. The new continuous test compares 237..245 events and 124 result slots across 512 cases. Pending CI; no native activation or full-function claim.

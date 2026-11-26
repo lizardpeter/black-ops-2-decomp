@@ -34,6 +34,38 @@ const Dvar *store_r_lockPvs=nullptr;
 const Dvar *store_r_lockPvsInCode=nullptr;
 const Dvar *store_r_skipPvs=nullptr;
 const Dvar *store_r_singleCell=nullptr;
+const Dvar *store_r_portalWalkLimit=nullptr;
+const Dvar *store_r_portalMinRecurseDepth=nullptr;
+const Dvar *store_r_enableOccluders=nullptr;
+const Dvar *store_r_highLodDist=nullptr;
+const Dvar *store_r_mediumLodDist=nullptr;
+const Dvar *store_r_lowLodDist=nullptr;
+const Dvar *store_r_lowestLodDist=nullptr;
+const Dvar *store_r_forceLod=nullptr;
+const Dvar *store_r_modelVertColor=nullptr;
+const Dvar *store_sm_sunEnable=nullptr;
+const Dvar *store_sm_sunQuality=nullptr;
+const Dvar *store_sm_spotQuality=nullptr;
+const Dvar *store_sm_spotEnable=nullptr;
+const Dvar *store_sm_maxLights=nullptr;
+const Dvar *store_sm_spotShadowFadeTime=nullptr;
+const Dvar *store_sm_sunAlwaysCastsShadow=nullptr;
+const Dvar *store_sm_polygonOffsetBias=nullptr;
+const Dvar *store_sm_sunSampleSizeNear=nullptr;
+const Dvar *store_sm_sunShadowCenter=nullptr;
+const Dvar *store_sm_sunShadowScale=nullptr;
+const Dvar *store_sm_sunShadowSmall=nullptr;
+const Dvar *store_sm_sunShadowSmallEnable=nullptr;
+const Dvar *store_r_flameScaler=nullptr;
+const Dvar *store_r_zombieNameAllowFriendsList=nullptr;
+const Dvar *store_r_zombieNameAllowDevList=nullptr;
+const Dvar *store_sm_strictCull=nullptr;
+const Dvar *store_sm_fastSunShadow=nullptr;
+const Dvar *store_r_noipak=nullptr;
+const Dvar *store_r_dualPlayEnable=nullptr;
+const Dvar *store_r_dualPlayActive=nullptr;
+const Dvar *store_r_blur=nullptr;
+const Dvar *store_r_flame_allowed=nullptr;
 unsigned char Store_Renderer_ModeByte=0;
 const Dvar *store_r_texFilterMipBias=nullptr;
 const Dvar *store_r_fullbright=nullptr;
@@ -99,7 +131,7 @@ const Dvar *store_r_ssaoIntensity=nullptr;
 }
 namespace {
 struct Event { U kind,name,type,flags,value,min,max,y,z,w; };
-struct Trace { U count; Event events[256]; };
+struct Trace { U count; Event events[384]; };
 Trace trace{};
 unsigned mask;
 void *mapped_image;
@@ -107,9 +139,11 @@ bool worker_mode=false;
 bool post_worker_mode=false;
 bool integrated_mode=false;
 unsigned integrated_worker_exists,integrated_post_mask;
+bool extended_mode=false, visibility_mode=false;
+U visibility_mask;
 unsigned worker_type;
 int worker_value;
-Dvar slots[256]{};
+Dvar slots[384]{};
 unsigned used;
 U Hash(const char *s) {
     U h=14695981039346656037ull;
@@ -117,13 +151,13 @@ U Hash(const char *s) {
     return h;
 }
 void Push(U k,U n=0,U t=0,U f=0,U v=0,U lo=0,U hi=0,U y=0,U z=0,U w=0) {
-    assert(trace.count<256);
+    assert(trace.count<384);
     trace.events[trace.count++]={k,n,t,f,v,lo,hi,y,z,w};
 }
 Dvar *Slot(const char *n) {
     U h=Hash(n);
     for (unsigned i=0;i<used;++i) if(slots[i].tag==h) return &slots[i];
-    assert(used<256); slots[used].tag=h; return &slots[used++];
+    assert(used<384); slots[used].tag=h; return &slots[used++];
 }
 template<class T> void Write(Dvar *d,unsigned off,T v) { std::memcpy(d->bytes+off,&v,sizeof(v)); }
 Dvar *WorkerSlot(const char *n) {
@@ -148,6 +182,16 @@ void Empty(const char *s) { assert(s && !*s); }
 extern "C" {
 void Store_Renderer_Init() { Push(0); }
 const Dvar *Store_Renderer_Find(const char *n) {
+    if(extended_mode && !std::strcmp(n,"r_showForcedInvisibleCells")) {
+        visibility_mode=true; worker_mode=false; post_worker_mode=false;
+    }
+    if(visibility_mode) {
+        const char *names[]={"r_showForcedInvisibleCells","r_portalWalkLimit","r_portalMinRecurseDepth","r_enableOccluders","r_forceLod","r_modelVertColor","sm_sunEnable","sm_sunQuality","sm_spotQuality","sm_spotEnable","sm_maxLights","sm_sunAlwaysCastsShadow","sm_polygonOffsetBias","sm_sunShadowSmall","sm_sunShadowSmallEnable","r_zombieDisableSlideEffect","r_zombieDisableEarthEffect","r_zombieNameAllowFriendsList","r_zombieNameAllowDevList","sm_strictCull","sm_fastSunShadow","r_noipak","r_stereo3DAvailable","r_stereo3DOn","r_stereo3DMode","r_dualPlayEnable","r_dualPlayActive","r_dualPlayTestCount","r_flame_allowed","r_filmTweakLut","r_forceCameraNode","r_forceCameraHdg","r_forceCamerarecord"};
+        unsigned i=0; while(i<sizeof(names)/sizeof(names[0]) && std::strcmp(n,names[i])) ++i;
+        assert(i<sizeof(names)/sizeof(names[0]));
+        bool exists=(visibility_mask&(U(1)<<i))!=0;
+        Push(1,Hash(n),0,0,exists); return exists?Slot(n):nullptr;
+    }
     if(integrated_mode) {
         if(!std::strcmp(n,"r_smp_worker_threads")) {
             worker_mode=true; post_worker_mode=false; mask=integrated_worker_exists;
@@ -175,11 +219,29 @@ const Dvar *Store_Renderer_Find(const char *n) {
     Push(1,Hash(n),0,0,exists);
     return exists?Slot(n):nullptr;
 }
+static void PushInline(U k,const char *n,int t,U32 f,const Value *v,const Domain *d) {
+    if(t==7) {
+        assert(!std::strcmp(n,"r_forceLod"));
+        assert(d->words[0]==5);
+        const char *const *ptr; std::memcpy(&ptr,&d->words[2],sizeof(ptr));
+        if(mapped_image) {
+            auto *base=static_cast<unsigned char *>(mapped_image);
+            assert(reinterpret_cast<const void *>(ptr)==base+0xd3a0e0);
+            for(unsigned i=0;i<5;++i) {
+                U va; std::memcpy(&va,base+0xd3a0e0+8*i,8);
+                assert(va>=0x140000000ull && va<0x141000000ull);
+                assert(!std::strcmp(reinterpret_cast<const char *>(base+va-0x140000000ull),Store_Renderer_ForceLod[i]));
+            }
+            U terminator; std::memcpy(&terminator,base+0xd3a0e0+40,8); assert(!terminator);
+        } else assert(ptr==Store_Renderer_ForceLod);
+        Push(k,Hash(n),t,f,v->words[0],d->words[0],0xd3a0e0);
+    } else Push(k,Hash(n),t,f,v->words[0],d->words[0],d->words[1],t==11||t==12?v->words[1]:0,t==11||t==12?v->words[2]:0);
+}
 const Dvar *Store_Renderer_New(const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
-    Empty(s); Push(2,Hash(n),t,f,v->words[0],d->words[0],d->words[1],t==11||t==12?v->words[1]:0,t==11||t==12?v->words[2]:0); return worker_mode?WorkerSlot(n):Slot(n);
+    Empty(s); PushInline(2,n,t,f,v,d); return worker_mode?WorkerSlot(n):Slot(n);
 }
 void Store_Renderer_Reregister(const Dvar *old,const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
-    Empty(s); assert(old==Slot(n)); Push(3,Hash(n),t,f,v->words[0],d->words[0],d->words[1],t==11||t==12?v->words[1]:0,t==11||t==12?v->words[2]:0);
+    Empty(s); assert(old==Slot(n)); PushInline(3,n,t,f,v,d);
 }
 const Dvar *Store_Renderer_Bool(const char *n,bool v,U32 f,const char *s) {
     Empty(s); Push(4,Hash(n),1,f,v); return Slot(n);
@@ -233,7 +295,7 @@ void *RendererPrefixMock(unsigned i) {
 }
 unsigned RendererPrefixSize() { return sizeof(Trace); }
 void RendererPrefixRun(void *image,unsigned state,void *out) {
-    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
     if(image) {
         using Entry=void(MS *)();
         reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
@@ -241,7 +303,7 @@ void RendererPrefixRun(void *image,unsigned state,void *out) {
     std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererWorkerRun(void *image,unsigned exists,unsigned hardware,unsigned type,int value,void *out) {
-    trace={}; used=0; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false; integrated_mode=false;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false; integrated_mode=false;
     worker_type=type; worker_value=value; Store_Renderer_HardwareCount=hardware;
     store_r_smp_worker_threads=nullptr;
     for(auto &d:store_r_smp_worker_thread) d=nullptr;
@@ -256,7 +318,7 @@ void RendererWorkerGlobals(U *out) {
     for(unsigned i=0;i<8;++i) out[i+1]=reinterpret_cast<U>(store_r_smp_worker_thread[i]);
 }
 void RendererPostWorkerRun(void *image,unsigned state,unsigned mode,void *out) {
-    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true; integrated_mode=false;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true; integrated_mode=false;
     Store_Renderer_ModeByte=mode;
     if(image) {
         using Entry=void(MS *)();
@@ -269,7 +331,7 @@ void RendererPostWorkerGlobals(U *out) {
     for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
 }
 void RendererIntegratedRun(void *image,unsigned early,unsigned later,unsigned exists,unsigned hardware,unsigned type,int value,unsigned mode,void *out) {
-    trace={}; used=0; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
     integrated_worker_exists=exists; integrated_post_mask=later; worker_type=type; worker_value=value;
     Store_Renderer_HardwareCount=hardware; Store_Renderer_ModeByte=mode;
     store_r_smp_worker_threads=nullptr;
@@ -279,6 +341,23 @@ void RendererIntegratedRun(void *image,unsigned early,unsigned later,unsigned ex
         reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
     } else RegisterRendererRecoveredPrefix();
     std::memcpy(out,&trace,sizeof(trace));
+}
+void RendererExtendedRun(void *image,unsigned early,unsigned later,unsigned exists,unsigned hardware,unsigned type,int value,unsigned mode,U vis,void *out) {
+    trace={}; used=0; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
+    extended_mode=true; visibility_mode=false; visibility_mask=vis;
+    integrated_worker_exists=exists; integrated_post_mask=later; worker_type=type; worker_value=value;
+    Store_Renderer_HardwareCount=hardware; Store_Renderer_ModeByte=mode;
+    store_r_smp_worker_threads=nullptr;
+    for(auto &d:store_r_smp_worker_thread) d=nullptr;
+    if(image) {
+        using Entry=void(MS *)();
+        reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
+    } else RegisterRendererExtendedPrefix();
+    std::memcpy(out,&trace,sizeof(trace));
+}
+void RendererVisibilityGlobals(U *out) {
+    const Dvar *values[]={store_r_portalWalkLimit,store_r_portalMinRecurseDepth,store_r_enableOccluders,store_r_highLodDist,store_r_mediumLodDist,store_r_lowLodDist,store_r_lowestLodDist,store_r_forceLod,store_r_modelVertColor,store_sm_sunEnable,store_sm_sunQuality,store_sm_spotQuality,store_sm_spotEnable,store_sm_maxLights,store_sm_spotShadowFadeTime,store_sm_sunAlwaysCastsShadow,store_sm_polygonOffsetBias,store_sm_sunSampleSizeNear,store_sm_sunShadowCenter,store_sm_sunShadowScale,store_sm_sunShadowSmall,store_sm_sunShadowSmallEnable,store_r_flameScaler,store_r_zombieNameAllowFriendsList,store_r_zombieNameAllowDevList,store_sm_strictCull,store_sm_fastSunShadow,store_r_noipak,store_r_dualPlayEnable,store_r_dualPlayActive,store_r_blur,store_r_flame_allowed};
+    for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
 }
 void RendererPrefixGlobals(U *out) {
     const Dvar *slots_[]={store_r_fontResolution,store_r_resolution,store_r_ssao,store_r_ssaoScale,

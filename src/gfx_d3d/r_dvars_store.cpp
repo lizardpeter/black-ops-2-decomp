@@ -38,6 +38,38 @@ extern const Dvar *store_r_lockPvs; // 14266D4C8
 extern const Dvar *store_r_lockPvsInCode; // 14266D4B0
 extern const Dvar *store_r_skipPvs; // 1427E6BE8
 extern const Dvar *store_r_singleCell; // 1427E6B88
+extern const Dvar *store_r_portalWalkLimit; // 1427E6BD0
+extern const Dvar *store_r_portalMinRecurseDepth; // 1427E6BC8
+extern const Dvar *store_r_enableOccluders; // 1427E6B58
+extern const Dvar *store_r_highLodDist; // 1427E7140
+extern const Dvar *store_r_mediumLodDist; // 1427E6F58
+extern const Dvar *store_r_lowLodDist; // 1427E6FC8
+extern const Dvar *store_r_lowestLodDist; // 1427E6FD8
+extern const Dvar *store_r_forceLod; // 1427E7250
+extern const Dvar *store_r_modelVertColor; // 1427E71A0
+extern const Dvar *store_sm_sunEnable; // 1427E6DD8
+extern const Dvar *store_sm_sunQuality; // 1427E6C78
+extern const Dvar *store_sm_spotQuality; // 1427E6F80
+extern const Dvar *store_sm_spotEnable; // 1427E6DF8
+extern const Dvar *store_sm_maxLights; // 1427E7038
+extern const Dvar *store_sm_spotShadowFadeTime; // 1427E7088
+extern const Dvar *store_sm_sunAlwaysCastsShadow; // 1427E6D38
+extern const Dvar *store_sm_polygonOffsetBias; // 1427E6E90
+extern const Dvar *store_sm_sunSampleSizeNear; // 1427E6E60
+extern const Dvar *store_sm_sunShadowCenter; // 1427E7040
+extern const Dvar *store_sm_sunShadowScale; // 1427E6D90
+extern const Dvar *store_sm_sunShadowSmall; // 1427E6C98
+extern const Dvar *store_sm_sunShadowSmallEnable; // 1427E6DA0
+extern const Dvar *store_r_flameScaler; // 1427E6EA8
+extern const Dvar *store_r_zombieNameAllowFriendsList; // 1427E7268
+extern const Dvar *store_r_zombieNameAllowDevList; // 1427E7270
+extern const Dvar *store_sm_strictCull; // 1427E6BF0
+extern const Dvar *store_sm_fastSunShadow; // 1427E6F30
+extern const Dvar *store_r_noipak; // 14265F2B8
+extern const Dvar *store_r_dualPlayEnable; // 1427E6E50
+extern const Dvar *store_r_dualPlayActive; // 1427E6D70
+extern const Dvar *store_r_blur; // 1427E7060
+extern const Dvar *store_r_flame_allowed; // 1427E6FF8
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -327,6 +359,77 @@ void RegisterRendererRecoveredPrefix() {
     RegisterRendererEntryPrefix();
     RegisterRendererWorkerFragment();
     RegisterRendererPostWorkerFragment();
+}
+
+extern const char *const Store_Renderer_ForceLod[]={"high","medium","low","lowest","none",nullptr};
+static const Dvar *InlineForceLod(int value) {
+    Domain domain{};
+    const char *const *table=Store_Renderer_ForceLod;
+    U32 count=0;
+    while(table[count]) ++count;
+    domain.words[0]=count;
+    std::memcpy(&domain.words[2],&table,sizeof(table));
+    return InlineVec("r_forceLod",7,0x80,Value{{U32(value),0,0,0}},domain);
+}
+
+// 140710C00..1407126CF: portal visibility, shadow maps, stereo and camera.
+// r_forceLod uses an inlined enum registration, not the enum wrapper.
+void RegisterRendererVisibilityShadowFragment() {
+    InlineBool("r_showForcedInvisibleCells",false,0x80);
+    store_r_portalWalkLimit=InlineInt("r_portalWalkLimit",0,0,100,0x80);
+    store_r_portalMinRecurseDepth=InlineInt("r_portalMinRecurseDepth",2,0,100,0x80);
+    store_r_enableOccluders=InlineBool("r_enableOccluders",true,0x80);
+    store_r_highLodDist=Store_Renderer_Float("r_highLodDist",F(0xbf800000),F(0xbf800000),F(0x7f7fffff),0x80,"");
+    store_r_mediumLodDist=Store_Renderer_Float("r_mediumLodDist",F(0xbf800000),F(0xbf800000),F(0x7f7fffff),0x80,"");
+    store_r_lowLodDist=Store_Renderer_Float("r_lowLodDist",F(0xbf800000),F(0xbf800000),F(0x7f7fffff),0x80,"");
+    store_r_lowestLodDist=Store_Renderer_Float("r_lowestLodDist",F(0xbf800000),F(0xbf800000),F(0x7f7fffff),0x80,"");
+    store_r_forceLod=InlineForceLod(4);
+    store_r_modelVertColor=InlineBool("r_modelVertColor",true,0xa0);
+    store_sm_sunEnable=InlineBool("sm_sunEnable",true,0x1000);
+    store_sm_sunQuality=InlineInt("sm_sunQuality",0,0,2,1);
+    store_sm_spotQuality=InlineInt("sm_spotQuality",0,0,2,1);
+    store_sm_spotEnable=InlineBool("sm_spotEnable",true,0x1000);
+    store_sm_maxLights=InlineInt("sm_maxLights",4,0,4,1);
+    store_sm_spotShadowFadeTime=Store_Renderer_Float("sm_spotShadowFadeTime",F(0x3f800000),F(0x3c23d70a),F(0x40a00000),0,"");
+    store_sm_sunAlwaysCastsShadow=InlineBool("sm_sunAlwaysCastsShadow",false,0x1080);
+    store_sm_polygonOffsetBias=InlineInt("sm_polygonOffsetBias",8192,0,65536,0x10a0);
+    store_sm_sunSampleSizeNear=Store_Renderer_Float("sm_sunSampleSizeNear",F(0x3f000000),F(0x3d800000),F(0x40800000),0x5000,"");
+    store_sm_sunShadowCenter=Store_Renderer_Vec3("sm_sunShadowCenter",F(0),F(0),F(0),F(0xff7fffff),F(0x7f7fffff),0x1080);
+    store_sm_sunShadowScale=Store_Renderer_Float("sm_sunShadowScale",F(0x3f800000),F(0x3e800000),F(0x3f800000),0x1080,"");
+    store_sm_sunShadowSmall=InlineBool("sm_sunShadowSmall",false,0x1000);
+    store_sm_sunShadowSmallEnable=InlineBool("sm_sunShadowSmallEnable",false,0x5000);
+    store_r_flameScaler=Store_Renderer_Float("r_flameScaler",F(0x3f800000),F(0),F(0x3f800000),0x1000,"");
+    InlineBool("r_zombieDisableSlideEffect",false,0x5000);
+    InlineBool("r_zombieDisableEarthEffect",false,0x5000);
+    store_r_zombieNameAllowFriendsList=InlineBool("r_zombieNameAllowFriendsList",true,0x5000);
+    store_r_zombieNameAllowDevList=InlineBool("r_zombieNameAllowDevList",true,0x5000);
+    Store_Renderer_Float("sm_spotShadowLargeRadiusScale",F(0x3f800000),F(0),F(0x40a00000),0x1080,"");
+    store_sm_strictCull=InlineBool("sm_strictCull",false,0x80);
+    store_sm_fastSunShadow=InlineBool("sm_fastSunShadow",true,0x80);
+    store_r_noipak=InlineBool("r_noipak",false,0x10);
+    InlineBool("r_stereo3DAvailable",false,1);
+    InlineBool("r_stereo3DOn",false,0x201);
+    InlineInt("r_stereo3DMode",0,0,1,1);
+    Store_Renderer_Float("r_stereo3DEyeSeparation",F(0x3e99999a),F(0),F(0x42c80000),0x1000,"");
+    Store_Renderer_Float("r_stereo3DEyeSeparationScaler",F(0x3f800000),F(0),F(0x3f800000),0x1000,"");
+    Store_Renderer_Float("r_stereoFocusDepth",F(0x41a00000),F(0x41a00000),F(0x428c0000),1,"");
+    Store_Renderer_Float("r_stereoGunShift",F(0x3f19999a),F(0),F(0x3f6b851f),1,"");
+    Store_Renderer_Float("r_stereoTurretShift",F(0),F(0),F(0x461c4000),0x1000,"");
+    Store_Renderer_Float("r_stereo3DIPD",F(0x3d94c947),F(0),F(0x3f800000),0x1000,"");
+    store_r_dualPlayEnable=InlineBool("r_dualPlayEnable",false,1);
+    store_r_dualPlayActive=InlineBool("r_dualPlayActive",false,0x1000);
+    InlineBool("r_dualPlayTestCount",true,0x20000);
+    store_r_blur=Store_Renderer_Float("r_blur",F(0),F(0),F(0x42000000),0x80,"");
+    store_r_flame_allowed=InlineBool("r_flame_allowed",true,1);
+    Store_Renderer_Float("r_filmLut",F(0xbf800000),F(0xbf800000),F(0x41100000),0,"");
+    InlineInt("r_filmTweakLut",-1,-1,9,0x1000);
+    InlineInt("r_forceCameraNode",-1,-1,3000,0x80);
+    InlineInt("r_forceCameraHdg",0,0,3,0x80);
+    InlineBool("r_forceCamerarecord",false,0x80);
+}
+void RegisterRendererExtendedPrefix() {
+    RegisterRendererRecoveredPrefix();
+    RegisterRendererVisibilityShadowFragment();
 }
 } // namespace store_renderer_dvar
 #endif
