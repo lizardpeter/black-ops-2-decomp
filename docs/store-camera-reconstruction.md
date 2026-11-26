@@ -75,3 +75,7 @@ Two additional complete candidates: AxisToAngles 140462D70..140462EBD, and linke
 ## Vehicle camera offset
 
 Full 180-instruction body at 1400C66D0..1400C69EF preserves six cleared offset fields, seat-specific entity jitter gate, dvar conversion, weapon selection/fallback, random angle perturbation, demo timestamp discontinuities, vehicle type exclusions, shortest-turn pitch smoothing and +/-30-degree correction limit. 32768 full-function cases queued. This is not the separate 1140-instruction vehicle view routine.
+
+## Camera basis and remote motion
+
+Latest prior run 45898978967 passed vehicle offset and all 33 public Win64 functions. Four new complete source candidates: VectorToAngles 140461020 (58 instructions), tag quaternion-to-axis conversion 1400DE970 (70), CG_CalcCubemapViewValues 14016BDA0 (74), remote oscillation 1400C33F0 (129). Cubemap face order checked directly against the Store jump table, tag scale comes from the original record rather than imposing normalization, remote motion reads two sets of raw dvar lanes and preserves speed window and waveform order. 32768 comparisons and updated Win64 audit pending. The remote boundary in the earlier remote-eye body is not yet replaced. No live activation.
