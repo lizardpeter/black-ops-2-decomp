@@ -6,6 +6,10 @@ on:
       - 'src/cgame_mp/cg_register_dvars_store.cpp'
       - 'src/cgame_mp/cg_fov_mode_store.cpp'
       - 'src/cgame_mp/cg_view_fov_store.cpp'
+      - 'src/cgame/cg_fov_defaults_store.cpp'
+      - 'src/cgame/cg_camera_projection_store.cpp'
+      - 'tests/store_camera_pipeline_probe.cpp'
+      - 'tests/verify_store_camera_pipeline.py'
       - 'tests/store_camera_fov_probe.cpp'
       - 'tests/verify_store_camera_fov.py'
       - 'tests/store_cg_fov_mode_probe.cpp'
@@ -109,6 +113,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_fov.py originals/t6mp_msstore.exe | tee camera-fov.log
+      - name: Replay Store default FOV and complete projection functions
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_pipeline.py originals/t6mp_msstore.exe | tee camera-pipeline.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -129,4 +137,5 @@ jobs:
             dvar-setters.log
             fov-mode.log
             camera-fov.log
+            camera-pipeline.log
           if-no-files-found: warn
