@@ -49,6 +49,15 @@ U32 Store_DvarIntern(const char *, unsigned, unsigned); // 14050ABE0
 // Original capacity error path releases the writer first. The engine error
 // must not return for this out-of-pool condition; the replay mock traps it.
 [[noreturn]] void Store_DvarCapacityError(int,const char *,const char *,int); // 14039AEB0
+extern Record *Store_DvarCheats;              // 1441B24F0
+extern U32 Store_DvarModifiedFlags;            // 142161684
+extern unsigned char Store_DvarCallbacksActive; // 14413FEED
+void Store_DvarRelease(const char *);         // 140465C70
+const char *Store_DvarFormat(Record *,const Value *); // 14046A6A0
+Value *Store_DvarParse(Value *,int,const Limits *,const char *); // 14046ABD0
+Value *Store_DvarConstrain(Value *,int,const Value *,const Value *,const Limits *); // 14046AD80
+void Store_DvarSetVariant(Record *,const Value *,int); // 14046B300
+void Store_DvarSetLatched(Record *,const Value *); // 14046B150
 void Store_DvarReregister(Record *,const char *,int,U32,const Value *,const Limits *,const char *); // 14046BF10
 }
 
@@ -79,10 +88,7 @@ static const char *Intern(const char *s) {
     return index ? reinterpret_cast<const char *>(Store_DvarStringPool+4+static_cast<U32>(index*24u)) : nullptr;
 }
 
-// 14046C1A0 -- original Store allocation, publication and lock protocol.
-// Reregister and string ownership helpers remain external original boundaries.
-Record *RegisterNew(const char *name,int type,U32 flags,const Value *value,
-                    const Limits *limits,const char *description) {
+static void AcquireWriter() {
     for (;;) {
         if (!Load(&Store_DvarReaders)) {
             if (Add(&Store_DvarWriters,1)==1 && !Load(&Store_DvarReaders)) break;
@@ -90,6 +96,175 @@ Record *RegisterNew(const char *name,int type,U32 flags,const Value *value,
         }
         Store_DvarSleep(0);
     }
+}
+
+static unsigned ValueBytes(int type) {
+    if (type==3) return 8;
+    if (type==4 || type==11 || type==12) return 12;
+    return 16;
+}
+static bool SameString(const char *existing,const char *incoming) {
+    return existing && (existing==incoming || std::strcmp(existing,incoming)==0);
+}
+// 14046A440 -- current-string storage shares latched/reset before interning.
+void CopyCurrentString(Record *d,Value *out,const char *s) {
+    if (SameString(d->latched.string,s)) out->string=d->latched.string;
+    else if (SameString(d->reset.string,s)) out->string=d->reset.string;
+    else out->string=Intern(s);
+}
+// 14046A520 -- reset-string storage shares current/latched before interning.
+void CopyResetString(Record *d,Value *out,const char *s) {
+    if (SameString(d->current.string,s)) out->string=d->current.string;
+    else if (SameString(d->latched.string,s)) out->string=d->latched.string;
+    else out->string=Intern(s);
+}
+
+// 14046BAB0 -- preserves unused vector lanes and releases unique old reset strings.
+void SetReset(Record *d,const Value *v) {
+    if (d->type!=8) {
+        std::memcpy(&d->reset,v,ValueBytes(d->type));
+        return;
+    }
+    const char *old=d->reset.string;
+    if (old==v->string) return;
+    const bool release=old && old!=d->current.string && old!=d->latched.string;
+    Value tmp{};
+    CopyResetString(d,&tmp,v->string);
+    d->reset.string=tmp.string;
+    if (release) Store_DvarRelease(old);
+}
+
+static bool CheatsDisabled() {
+    return Store_DvarCheats && (Store_DvarCheats->current.words[0]&0xffu)==0;
+}
+
+// 14046BBD0 -- reinterpret existing value in a new type/domain.
+// RDX is unused. The original sets type before testing it in the release path;
+// do not silently replace this order with an old-type test.
+void Reinterpret(Record *d,int type,U32 flags,const Value *v,const Limits *limits) {
+    d->type=type;
+    d->domain=*limits;
+    alignas(16) Value chosen=*v;
+    if (!(flags&0x40) && !((flags&0x80) && CheatsDisabled())) {
+        alignas(16) Limits parseLimits=*limits;
+        alignas(16) Value parsed{}, constrained{}, reset=*v;
+        parsed=*Store_DvarParse(&parsed,type,&parseLimits,d->current.string);
+        parseLimits=*limits;
+        chosen=*Store_DvarConstrain(&constrained,type,&parsed,&reset,&parseLimits);
+    }
+    const bool temporary=d->type==8 && chosen.string;
+    if (temporary) chosen.string=Intern(chosen.string);
+    const char *old=d->current.string;
+    if (d->type!=8 && old && old!=d->latched.string && old!=d->reset.string)
+        Store_DvarRelease(old);
+    d->current.string=nullptr;
+    old=d->latched.string;
+    if (old && old!=d->reset.string) Store_DvarRelease(old);
+    d->latched.string=nullptr;
+    old=d->reset.string;
+    if (old && old!=d->current.string) Store_DvarRelease(old);
+    d->reset.string=nullptr;
+    alignas(16) Value reset=*v;
+    SetReset(d,&reset);
+    if (d->type!=8) {
+        std::memcpy(&d->current,&chosen,ValueBytes(d->type));
+        std::memcpy(&d->latched,&chosen,ValueBytes(d->type));
+    } else if (chosen.string!=d->current.string) {
+        old=d->current.string;
+        const bool release=old && old!=d->latched.string && old!=d->reset.string;
+        Value tmp{};
+        CopyCurrentString(d,&tmp,chosen.string);
+        const char *latched=d->latched.string;
+        d->current.string=tmp.string;
+        if (latched && latched!=d->current.string && latched!=d->reset.string)
+            Store_DvarRelease(latched);
+        d->latched.string=d->current.string;
+        if (release) Store_DvarRelease(old);
+    }
+    Store_DvarModifiedFlags|=flags;
+    if (temporary) Store_DvarRelease(chosen.string);
+}
+
+// 14046BF10 -- complete enclosing re-registration control flow.
+// External original boundaries: formatter, parse/constrain and value setters.
+extern "C" void Store_DvarReregister(Record *d,const char *name,int type,U32 flags,
+                                     const Value *v,const Limits *limits,const char *desc) {
+    U32 oldFlags=d->flags;
+    if ((oldFlags&0x4000) && !(flags&0x4000)) {
+        alignas(16) Value value=*v;
+        alignas(16) Limits domain=*limits;
+        if (d->type!=8) {
+            alignas(16) Value tmp=d->latched;
+            const char *s=Intern(Store_DvarFormat(d,&tmp));
+            const char *old=d->latched.string;
+            d->current.string=s;
+            if (old && old!=s && old!=d->reset.string) Store_DvarRelease(old);
+            d->latched.string=d->current.string;
+            old=d->reset.string;
+            if (old && old!=d->latched.string) Store_DvarRelease(old);
+            d->reset.string=nullptr;
+            tmp=d->reset;
+            const char *formatted=Store_DvarFormat(d,&tmp);
+            CopyResetString(d,&tmp,formatted);
+            d->reset.string=tmp.string;
+            d->type=8;
+        }
+        Store_DvarRelease(d->name);
+        d->flags&=~0x4000u;
+        d->name=name;
+        Reinterpret(d,type,flags,&value,&domain);
+    }
+    if ((d->flags&0x4000) && d->type!=type) {
+        alignas(16) Value value=*v;
+        alignas(16) Limits domain=*limits;
+        Reinterpret(d,type,flags,&value,&domain);
+    }
+    d->flags|=flags;
+    if (desc) d->description=desc;
+    if ((d->flags&0x80) && CheatsDisabled()) {
+        alignas(16) Value tmp=d->reset;
+        Store_DvarSetVariant(d,&tmp,0);
+        tmp=d->reset;
+        Store_DvarSetLatched(d,&tmp);
+    }
+    if (d->flags&0x20) {
+        alignas(16) Value tmp=d->latched;
+        Store_DvarSetVariant(d,&tmp,0);
+    }
+}
+
+// 14046B990 -- shutdown walks the physical pool, not the sorted pointer list.
+void Shutdown() {
+    AcquireWriter();
+    Store_DvarCallbacksActive=0;
+    for (int i=0;i<Store_DvarCount;++i) {
+        Record *d=&Store_DvarPool[i];
+        if (d->type==8) {
+            const char *old=d->current.string;
+            if (old && old!=d->latched.string && old!=d->reset.string)
+                Store_DvarRelease(old);
+            d->current.string=nullptr;
+            old=d->reset.string;
+            if (old && old!=d->latched.string) Store_DvarRelease(old);
+            d->reset.string=nullptr;
+            old=d->latched.string;
+            if (old && old!=d->current.string) Store_DvarRelease(old);
+            d->latched.string=nullptr;
+        }
+        if (d->flags&0x4000) Store_DvarRelease(d->name);
+    }
+    Store_DvarCount=0;
+    Store_DvarCheats=nullptr;
+    Store_DvarModifiedFlags=0;
+    std::memset(Store_DvarBuckets,0,sizeof(Store_DvarBuckets));
+    Add(&Store_DvarWriters,-1);
+}
+
+// 14046C1A0 -- original Store allocation, publication and lock protocol.
+// String-pool allocation and release remain external original boundaries.
+Record *RegisterNew(const char *name,int type,U32 flags,const Value *value,
+                    const Limits *limits,const char *description) {
+    AcquireWriter();
     if (Store_DvarCount>=4096) {
         Add(&Store_DvarWriters,-1);
         Store_DvarCapacityError(0,"Can't create dvar '%s': %i dvars already exist",name,4096);

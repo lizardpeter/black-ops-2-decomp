@@ -17,11 +17,12 @@ Record *Store_DvarList[4096]{},*Store_DvarBuckets[1024]{};
 static unsigned char storage[4096]{};
 unsigned char *Store_DvarStringPool=storage;
 static unsigned nextIndex=1;
-static int reregisterCount=0;
-static Value seenValue{};
-static Limits seenDomain{};
-static U32 seenFlags=0;
-static int seenType=0;
+Record *Store_DvarCheats=nullptr;
+U32 Store_DvarModifiedFlags=0;
+unsigned char Store_DvarCallbacksActive=1;
+static int releaseCount=0, setCount=0, latchCount=0;
+static const char *released[128]{};
+static Value seenSet{}, seenLatch{};
 void Store_DvarSleep(unsigned ms) { assert(ms==0); std::abort(); }
 int Store_DvarLowercase(int c) { return std::tolower(static_cast<unsigned char>(c)); }
 U32 Store_DvarIntern(const char *s,unsigned user,unsigned len) {
@@ -31,21 +32,32 @@ U32 Store_DvarIntern(const char *s,unsigned user,unsigned len) {
     return index;
 }
 [[noreturn]] void Store_DvarCapacityError(int,const char *,const char *,int) { std::abort(); }
-void Store_DvarReregister(Record *,const char *,int type,U32 flags,const Value *v,const Limits *l,const char *) {
-    ++reregisterCount; seenType=type; seenFlags=flags; seenValue=*v; seenDomain=*l;
-}
+void Store_DvarRelease(const char *s) { assert(releaseCount<128); released[releaseCount++]=s; }
+const char *Store_DvarFormat(Record *,const Value *) { return "0"; }
+Value *Store_DvarParse(Value *out,int,const Limits *,const char *) { *out=Value{{17}}; return out; }
+Value *Store_DvarConstrain(Value *out,int,const Value *parsed,const Value *,const Limits *) { *out=*parsed; return out; }
+void Store_DvarSetVariant(Record *,const Value *v,int source) { assert(source==0); ++setCount; seenSet=*v; }
+void Store_DvarSetLatched(Record *,const Value *v) { ++latchCount; seenLatch=*v; }
 }
 }
 int main() {
     assert(FindByName(nullptr)==nullptr && FindByName("")==nullptr);
-    auto *f=RegisterFloat("cg_fov_default",65,65,90,0x84000,"");
+    auto *f=RegisterFloat("cg_fov_default",65,65,90,0x80000,"");
     assert(f==&Store_DvarPool[0] && f==Store_DvarList[0] && f==FindByName("CG_FOV_DEFAULT"));
-    assert(f->type==2 && f->flags==0x84000 && f->domain.words[1]==Bits(90));
+    assert(f->type==2 && f->flags==0x80000 && f->domain.words[1]==Bits(90));
     assert(f->current.words[0]==Bits(65) && f->latched.words[0]==Bits(65) && f->reset.words[0]==Bits(65));
     assert(!Store_DvarSorted && Store_DvarCount==1 && !Store_DvarWriters && !Store_DvarReaders);
     auto *same=RegisterFloat("CG_FOV_DEFAULT",70,65,120,0x80,"");
-    assert(same==f && reregisterCount==1 && Store_DvarCount==1 && seenType==2 && seenFlags==0x80);
-    assert(seenValue.words[0]==Bits(70) && seenDomain.words[1]==Bits(120));
+    assert(same==f && Store_DvarCount==1 && f->type==2 && f->flags==0x80080);
+    assert(f->reset.words[0]==Bits(65) && f->domain.words[1]==Bits(90));
+    assert(setCount==0 && latchCount==0);
+    Record cheats{};
+    Store_DvarCheats=&cheats;
+    f->latched.words[0]=Bits(75);
+    RegisterFloat("cg_fov_default",80,65,150,0x20,nullptr);
+    assert(setCount==2 && latchCount==1 && seenLatch.words[0]==Bits(65));
+    assert(seenSet.words[0]==Bits(75)); // setters are mocked: original order matters
+    Store_DvarCheats=nullptr;
     auto *b=RegisterBool("bool",true,1,"desc");
     assert(b->type==1 && b->current.words[0]==1 && !std::strcmp(b->description,"desc"));
     auto *n=RegisterInt("integer",-7,-100,100,0,"");
@@ -72,4 +84,31 @@ int main() {
     assert(FindByHash(0x1234)==&fake && FindByHash(0x5234)==nullptr);
     bucket=old;
     assert(!Store_DvarReaders && !Store_DvarWriters && Store_DvarCount==9);
+    Value reset{}; reset.string="abc";
+    auto original=s->reset.string;
+    SetReset(s,&reset);
+    assert(s->reset.string==original && releaseCount==0);
+    Value copy{}; CopyCurrentString(s,&copy,"abc"); assert(copy.string==original);
+    CopyResetString(s,&copy,"abc"); assert(copy.string==original);
+    reset.string="other";
+    SetReset(s,&reset);
+    assert(std::strcmp(s->reset.string,"other")==0 && releaseCount==0);
+    reset.string="abc"; SetReset(s,&reset);
+    assert(s->reset.string==original && releaseCount==1);
+    const char *ownedName=s->name;
+    auto *converted=RegisterInt("external",9,0,20,0x40,"new description");
+    assert(converted==s && s->type==6 && s->current.words[0]==9 && s->reset.words[0]==9);
+    assert(s->domain.words[1]==20 && s->flags==0x40 && !std::strcmp(s->description,"new description"));
+    assert(released[1]==ownedName && released[2]==original && Store_DvarModifiedFlags==0x40);
+    auto *owned=RegisterString("shutdown_owned","shared",0x4000);
+    const char *ownedValue=owned->current.string;
+    const char *shutdownName=owned->name;
+    Store_DvarCheats=&cheats;
+    Shutdown();
+    assert(Store_DvarCount==0 && !Store_DvarReaders && !Store_DvarWriters);
+    assert(!Store_DvarCallbacksActive && !Store_DvarCheats && !Store_DvarModifiedFlags);
+    assert(releaseCount==5 && released[3]==ownedValue && released[4]==shutdownName);
+    assert(FindByName("shutdown_owned")==nullptr && owned->current.string==nullptr);
+    assert(owned->latched.string==nullptr && owned->reset.string==nullptr);
+    assert(RegisterBool("restart",true,0,"")==&Store_DvarPool[0]);
 }
