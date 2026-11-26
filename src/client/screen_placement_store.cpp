@@ -31,5 +31,40 @@ float VirtualFromRealHeight(const Byte*placement,float value){
     const float scaled=value/Font_HudScale;
     return (scaled/(Font_Capture?Font_CaptureY:1.0f))*At<float>(placement,0x14);
 }
+extern "C" {
+extern unsigned Font_CaptureWidth,Font_CaptureHeight;
+extern float Font_CaptureOffsetX,Font_CaptureOffsetY;
+}
+// Store MP ScrPlace_ApplyRect 1401F65E0; align 4 retains the original
+// (viewportBase + fullScale) multiplication, not an affine translation.
+static void ApplyAxis(const Byte*p,float&v,float&size,int align,unsigned axis){
+    const unsigned o=axis*4;const auto f=[&](unsigned n){return At<float>(p,n+o);};
+    const float s=f(0);
+    switch(align){
+    case 1:v=s*v+f(0x50);break;
+    case 2:v=s*v+f(0x40)*0.5f+f(0x38);break;
+    case 3:v=s*v+f(0x58);break;
+    case 4:v=(f(0x38)+f(8))*v;size=f(8)*size;return;
+    case 5:return;
+    case 6:v=v*f(0x10);size=size*f(0x10);return;
+    case 7:v=(f(0x58)+f(0x50))*0.5f+s*v;break;
+    case 8:v=s*v+f(0x60);break;
+    case 9:v=(f(0x68)+f(0x60))*0.5f+s*v;break;
+    case 10:v=s*v+f(0x68);break;
+    default:v=s*v+f(0x70);break;
+    }
+    size=s*size;
+}
+void ApplyRect(const Byte*p,float*x,float*y,float*w,float*h,int ha,int va){
+    const float scale=At<float>(p,0x78);
+    *x=scale**x;*y=scale**y;*w=scale**w;*h=scale**h;
+    ApplyAxis(p,*x,*w,ha,0);ApplyAxis(p,*y,*h,va,1);
+    if(Font_Capture){
+        *x=Font_CaptureX**x;*y=Font_CaptureY**y;
+        *w=Font_CaptureX**w;*h=Font_CaptureY**h;
+        *x=*x-(float(Font_CaptureWidth)*Font_CaptureOffsetX)*Font_CaptureX;
+        *y=*y-(float(Font_CaptureHeight)*Font_CaptureOffsetY)*Font_CaptureY;
+    }
+}
 }
 #endif
