@@ -45,3 +45,7 @@ Entry source extended to 14070F91E, immediately before the independently recover
 ## Post-worker continuation
 
 14070FACE..140710BFF: 32 additional ordered registrations, including MSAA, vsync, clear colors, renderer limits, spot/flashlight shadows and visibility controls. The two flashlight branches are represented as one common sequence with the original mode-dependent flags. A recovered-prefix entry composes all three adjacent fragments (not yet tested as one continuous original execution). Isolated differential replay covers 17 lookup sites and two flashlight modes, pending CI; 25 result slots. No enhanced behavior changed.
+
+## Verified entry and worker results; continuous replay
+
+Run 45889760392 passed 2086 entry cases (102 events, 58 globals), 1400 isolated worker cases, and the enum evidence extractor. All 13 recovered renderer enum table strings are now defined in source; validation compares the original initial table entries and terminators. The re-registration probe now checks all meaningful vector default lanes, not only the first. The continuous replay runs the original instructions from 14070E230 through 140710BFF without a fragment-entry stub, comparing 153..161 events and 92 global slots in 512 mixed cases. This is pending CI; it still mocks the external functions and cuts before the remaining original body.

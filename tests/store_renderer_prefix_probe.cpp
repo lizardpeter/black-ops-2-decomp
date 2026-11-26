@@ -71,8 +71,6 @@ const Dvar *store_r_lightTweakSunDiffuseColor=nullptr;
 const Dvar *store_r_lightTweakSunDirection=nullptr;
 const Dvar *store_r_norefresh=nullptr;
 const Dvar *store_r_scaleViewport=nullptr;
-const char *const Store_Renderer_Penetration[]={nullptr};
-const char *const Store_Renderer_ReflectionProbe[]={nullptr};
 U32 Store_Renderer_HardwareCount=0;
 const Dvar *store_r_smp_worker_threads=nullptr;
 const Dvar *store_r_smp_worker_thread[8]{};
@@ -101,15 +99,17 @@ const Dvar *store_r_ssaoIntensity=nullptr;
 }
 namespace {
 struct Event { U kind,name,type,flags,value,min,max,y,z,w; };
-struct Trace { U count; Event events[128]; };
+struct Trace { U count; Event events[256]; };
 Trace trace{};
 unsigned mask;
 void *mapped_image;
 bool worker_mode=false;
 bool post_worker_mode=false;
+bool integrated_mode=false;
+unsigned integrated_worker_exists,integrated_post_mask;
 unsigned worker_type;
 int worker_value;
-Dvar slots[128]{};
+Dvar slots[256]{};
 unsigned used;
 U Hash(const char *s) {
     U h=14695981039346656037ull;
@@ -117,13 +117,13 @@ U Hash(const char *s) {
     return h;
 }
 void Push(U k,U n=0,U t=0,U f=0,U v=0,U lo=0,U hi=0,U y=0,U z=0,U w=0) {
-    assert(trace.count<128);
+    assert(trace.count<256);
     trace.events[trace.count++]={k,n,t,f,v,lo,hi,y,z,w};
 }
 Dvar *Slot(const char *n) {
     U h=Hash(n);
     for (unsigned i=0;i<used;++i) if(slots[i].tag==h) return &slots[i];
-    assert(used<128); slots[used].tag=h; return &slots[used++];
+    assert(used<256); slots[used].tag=h; return &slots[used++];
 }
 template<class T> void Write(Dvar *d,unsigned off,T v) { std::memcpy(d->bytes+off,&v,sizeof(v)); }
 Dvar *WorkerSlot(const char *n) {
@@ -148,6 +148,13 @@ void Empty(const char *s) { assert(s && !*s); }
 extern "C" {
 void Store_Renderer_Init() { Push(0); }
 const Dvar *Store_Renderer_Find(const char *n) {
+    if(integrated_mode) {
+        if(!std::strcmp(n,"r_smp_worker_threads")) {
+            worker_mode=true; post_worker_mode=false; mask=integrated_worker_exists;
+        } else if(!std::strcmp(n,"r_aaSamples")) {
+            worker_mode=false; post_worker_mode=true; mask=integrated_post_mask;
+        }
+    }
     if(post_worker_mode) {
         const char *names[]={"r_aaSamples","r_aaSamplesMax","r_vsync","r_vsyncThreshold","r_dlightLimit","r_dobjLimit","r_modelLimit","r_brushLimit","r_spotLightShadows","r_spotLightSModelShadows","r_spotLightEntityShadows","r_flashLightShadows","r_drawWater","r_lockPvs","r_lockPvsInCode","r_skipPvs","r_singleCell"};
         unsigned i=0; while(i<sizeof(names)/sizeof(names[0]) && std::strcmp(n,names[i])) ++i;
@@ -172,7 +179,7 @@ const Dvar *Store_Renderer_New(const char *n,int t,U32 f,const Value *v,const Do
     Empty(s); Push(2,Hash(n),t,f,v->words[0],d->words[0],d->words[1],t==11||t==12?v->words[1]:0,t==11||t==12?v->words[2]:0); return worker_mode?WorkerSlot(n):Slot(n);
 }
 void Store_Renderer_Reregister(const Dvar *old,const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
-    Empty(s); assert(old==Slot(n)); Push(3,Hash(n),t,f,v->words[0],d->words[0],d->words[1]);
+    Empty(s); assert(old==Slot(n)); Push(3,Hash(n),t,f,v->words[0],d->words[0],d->words[1],t==11||t==12?v->words[1]:0,t==11||t==12?v->words[2]:0);
 }
 const Dvar *Store_Renderer_Bool(const char *n,bool v,U32 f,const char *s) {
     Empty(s); Push(4,Hash(n),1,f,v); return Slot(n);
@@ -184,7 +191,7 @@ const Dvar *Store_Renderer_Enum(const char *n,const char *const *o,int v,U32 f) 
     const char *names[]={"r_clipCodec","r_clipSize","r_texFilterMipMode","r_debugShader","r_debugPerformance","r_lightMapSecondary","r_colorMap","r_alphaMap","r_specularMap","r_glossMap","r_occlusionMap","r_showPenetration","r_showReflectionProbeSelection"};
     const char *const *tables[]={Store_Renderer_ClipCodec,Store_Renderer_ClipSize,Store_Renderer_MipMode,Store_Renderer_DebugShader,Store_Renderer_DebugPerformance,Store_Renderer_LightMapSecondary,Store_Renderer_ColorMap,Store_Renderer_AlphaMap,Store_Renderer_SpecularMap,Store_Renderer_GlossMap,Store_Renderer_OcclusionMap,Store_Renderer_Penetration,Store_Renderer_ReflectionProbe};
     const unsigned rvas[]={0xd39f30,0xd3a1e0,0xd3a138,0xd3a1a8,0xd3a230,0xd39f50,0xd3a088,0xd3a0b8,0xd3a250,0xd3a270,0xd3a208,0xd3a160,0xd3a110};
-    const unsigned counts[]={2,4,4,6,3,33,5,4,3,7,4,0,0};
+    const unsigned counts[]={2,4,4,6,3,33,5,4,3,7,4,3,4};
     unsigned i=0; while(i<13 && std::strcmp(n,names[i])) ++i;
     assert(i<13);
     if(mapped_image) {
@@ -226,7 +233,7 @@ void *RendererPrefixMock(unsigned i) {
 }
 unsigned RendererPrefixSize() { return sizeof(Trace); }
 void RendererPrefixRun(void *image,unsigned state,void *out) {
-    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
+    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
     if(image) {
         using Entry=void(MS *)();
         reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
@@ -234,7 +241,7 @@ void RendererPrefixRun(void *image,unsigned state,void *out) {
     std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererWorkerRun(void *image,unsigned exists,unsigned hardware,unsigned type,int value,void *out) {
-    trace={}; used=0; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false;
+    trace={}; used=0; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false; integrated_mode=false;
     worker_type=type; worker_value=value; Store_Renderer_HardwareCount=hardware;
     store_r_smp_worker_threads=nullptr;
     for(auto &d:store_r_smp_worker_thread) d=nullptr;
@@ -249,7 +256,7 @@ void RendererWorkerGlobals(U *out) {
     for(unsigned i=0;i<8;++i) out[i+1]=reinterpret_cast<U>(store_r_smp_worker_thread[i]);
 }
 void RendererPostWorkerRun(void *image,unsigned state,unsigned mode,void *out) {
-    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true;
+    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true; integrated_mode=false;
     Store_Renderer_ModeByte=mode;
     if(image) {
         using Entry=void(MS *)();
@@ -260,6 +267,18 @@ void RendererPostWorkerRun(void *image,unsigned state,unsigned mode,void *out) {
 void RendererPostWorkerGlobals(U *out) {
     const Dvar *values[]={store_r_aaSamples,store_r_aaSamplesMax,store_r_vsync,store_r_clearColor,store_r_clearColor2,store_r_viewportBackingColor,store_r_dlightLimit,store_r_dobjLimit,store_r_modelLimit,store_r_brushLimit,store_r_flashLightFovInnerFraction,store_r_flashLightStartRadius,store_r_flashLightEndRadius,store_r_flashLightBrightness,store_r_flashLightOffset,store_r_flashLightRange,store_r_flashLightColor,store_r_flashLightBobAmount,store_r_flashLightBobRate,store_r_flashLightFlickerAmount,store_r_flashLightFlickerRate,store_r_lockPvs,store_r_lockPvsInCode,store_r_skipPvs,store_r_singleCell};
     for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
+}
+void RendererIntegratedRun(void *image,unsigned early,unsigned later,unsigned exists,unsigned hardware,unsigned type,int value,unsigned mode,void *out) {
+    trace={}; used=0; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
+    integrated_worker_exists=exists; integrated_post_mask=later; worker_type=type; worker_value=value;
+    Store_Renderer_HardwareCount=hardware; Store_Renderer_ModeByte=mode;
+    store_r_smp_worker_threads=nullptr;
+    for(auto &d:store_r_smp_worker_thread) d=nullptr;
+    if(image) {
+        using Entry=void(MS *)();
+        reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
+    } else RegisterRendererRecoveredPrefix();
+    std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererPrefixGlobals(U *out) {
     const Dvar *slots_[]={store_r_fontResolution,store_r_resolution,store_r_ssao,store_r_ssaoScale,

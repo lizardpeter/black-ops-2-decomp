@@ -49,8 +49,8 @@ extern const char *const Store_Renderer_AlphaMap[]={"Unchanged","255","192","128
 extern const char *const Store_Renderer_SpecularMap[]={"Non metal (sRGB 56)","Unchanged","Metal (sRGB 255)",nullptr}; // 140D3A250
 extern const char *const Store_Renderer_GlossMap[]={"0","Unchanged","255","204","153","102","51",nullptr}; // 140D3A270
 extern const char *const Store_Renderer_OcclusionMap[]={"0","Unchanged","255","128",nullptr}; // 140D3A208
-extern const char *const Store_Renderer_Penetration[]; // 140D3A160
-extern const char *const Store_Renderer_ReflectionProbe[]; // 140D3A110
+extern const char *const Store_Renderer_Penetration[]={"off","flash penetrable materials","flash non-penetrable materials",nullptr}; // 140D3A160
+extern const char *const Store_Renderer_ReflectionProbe[]={"off","bsp","static models","ents",nullptr}; // 140D3A110
 extern const Dvar *store_r_texFilterMipBias; // 1427E7098
 extern const Dvar *store_r_fullbright; // 1427E70D0
 extern const Dvar *store_r_debugShader; // 1427E6FC0
