@@ -8,6 +8,9 @@ on:
       - 'src/cgame_mp/cg_view_fov_store.cpp'
       - 'src/cgame/cg_fov_defaults_store.cpp'
       - 'src/cgame/cg_camera_projection_store.cpp'
+      - 'src/cgame/cg_turret_fov_store.cpp'
+      - 'tests/store_turret_fov_probe.cpp'
+      - 'tests/verify_store_turret_fov.py'
       - 'tests/store_camera_pipeline_probe.cpp'
       - 'tests/verify_store_camera_pipeline.py'
       - 'tests/store_camera_fov_probe.cpp'
@@ -117,6 +120,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_pipeline.py originals/t6mp_msstore.exe | tee camera-pipeline.log
+      - name: Replay complete Store turret FOV function
+        run: |
+          set -o pipefail
+          python tests/verify_store_turret_fov.py originals/t6mp_msstore.exe | tee camera-turret.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -138,4 +145,5 @@ jobs:
             fov-mode.log
             camera-fov.log
             camera-pipeline.log
+            camera-turret.log
           if-no-files-found: warn
