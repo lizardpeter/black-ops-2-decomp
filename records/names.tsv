@@ -146,7 +146,7 @@ t6mp_msstore	140736950	function	RB_RenderThreadFrame	?RB_RenderThreadFrame@@YAXX
 t6mp_msstore	140736BA0	function	RB_UploadDynamicBuffers	?RB_UploadDynamicBuffers@@YAXPEAX@Z	gfx_d3d/rb_backend.cpp	structure	name made up: maps (WRITE_DISCARD, retried while 142155DFC is set) and fills a buffer pair's index data (16-bit) and vertex data; RB_RenderThread calls it for three parts of the frame	medium
 t6mp_msstore	140721570	function	sub_140721570	?sub_140721570@@YAXXZ	gfx_d3d/rb_backend.cpp	unnamed	name unknown: RB_RenderThread calls it when the event at 144070008 is set, then waits on that event and resets it	low
 t6mp_msstore	140721860	function	sub_140721860	?sub_140721860@@YAXXZ	gfx_d3d/rb_backend.cpp	unnamed	name unknown: RB_RenderThread calls it when the event at 144070048 is set, then resets it	low
-t6mp_msstore	140753660	function	sub_140753660	?sub_140753660@@YAXXZ	gfx_d3d/rb_backend.cpp	unnamed	name unknown: the first thing RB_RenderThread's resize of the swap chain's buffers does	low
+t6mp_msstore	140753660	function	sub_140753660	?sub_140753660@@YAXXZ	gfx_d3d/rb_backend.cpp	semantic+differential	complete original body replay across MP/ZM/SP; tests/verify_store_render_release.py; shutdown releases 72 target records and three images; original name unresolved	high
 t6mp_msstore	140752AA0	function	sub_140752AA0	?sub_140752AA0@@YAXXZ	gfx_d3d/rb_backend.cpp	unnamed	name unknown: after ResizeBuffers in RB_RenderThread; gets the swap chain's buffer (GetBuffer, +0x48)	low
 t6mp_msstore	1407370D0	function	sub_1407370D0	?sub_1407370D0@@YAXXZ	gfx_d3d/rb_backend.cpp	unnamed	name unknown: after ResizeBuffers and sub_140752AA0 in RB_RenderThread	low
 t6mp_msstore	14039AE90	function	sub_14039AE90	?sub_14039AE90@@YAXXZ	gfx_d3d/rb_backend.cpp	unnamed	name unknown: does not return (RB_RenderThread calls it, then int3) when an error reaches the render thread while it draws a frame	low
@@ -714,3 +714,29 @@ t6sp_msstore	1405DEA80	function	Image_Create3DTexture_PC	?Image_Create3DTexture_
 t6sp_msstore	1405DEB90	function	Image_CreateCubeTexture_PC	?Image_CreateCubeTexture_PC@@YAXPEAUGfxImage@@IIIPEBX@Z	gfx_d3d/r_image.cpp	semantic+differential	complete resource constructor; original descriptors, retry loops, writes and release compared via tests/verify_store_image_create.py; source name inferred from reference	high
 t6sp_msstore	142369C18	data	store_imageCreateDvar	?store_imageCreateDvar@@3PEBUdvar_t@@EB	gfx_d3d/r_image.cpp	structure	setup reads dvar pointer and type/current at +0x18/+0x20; original dvar name unresolved	high
 t6sp_msstore	141CCE070	data	store_142155DFC	?store_142155DFC@@3HA	gfx_d3d/r_image.cpp	structure	same retry flag checked by both original resource creation loops	high
+t6mp_msstore	14073B6B0	function	Image_Release	?Image_Release@@YAXPEAUGfxImage@@@Z	gfx_d3d/r_image.cpp	semantic+differential	complete original body replay across MP/ZM/SP; tests/verify_store_render_release.py; matches reference Image_Release	high
+t6mp_msstore	14444D21C	data	store_imageTotalMemory	store_imageTotalMemory	gfx_d3d/r_image.cpp	structure	two uint32 counters at adjacent addresses; provisional name	high
+t6mp_msstore	142C64194	data	store_imageLoadedBytes	store_imageLoadedBytes	gfx_d3d/r_image.cpp	structure	loaded bytes counter decremented at release; provisional name	high
+t6mp_msstore	142C3F790	data	store_renderTargets	store_renderTargets	gfx_d3d/r_image.cpp	structure	72 records of 32 bytes; provisional name	high
+t6mp_msstore	14444DBF0	data	store_extraImageA	store_extraImageA	gfx_d3d/r_image.cpp	structure	first standalone image released; provisional name	high
+t6mp_msstore	14444D6A8	data	store_extraImageB	store_extraImageB	gfx_d3d/r_image.cpp	structure	second standalone image released; provisional name	high
+t6mp_msstore	14444E138	data	store_extraImageC	store_extraImageC	gfx_d3d/r_image.cpp	structure	third standalone image released; provisional name	high
+t6mp_msstore	14282E548	data	store_renderTargetShutdownState	store_renderTargetShutdownState	gfx_d3d/r_image.cpp	structure	eight-byte state cleared after release; provisional name	high
+t6zm_msstore	1407391E0	function	Image_Release	?Image_Release@@YAXPEAUGfxImage@@@Z	gfx_d3d/r_image.cpp	semantic+differential	complete original body replay across MP/ZM/SP; tests/verify_store_render_release.py; matches reference Image_Release	high
+t6zm_msstore	1407511A0	function	sub_140753660	?sub_140753660@@YAXXZ	gfx_d3d/rb_backend.cpp	semantic+differential	complete original body replay across MP/ZM/SP; tests/verify_store_render_release.py; name provisional	high
+t6zm_msstore	14444B29C	data	store_imageTotalMemory	store_imageTotalMemory	gfx_d3d/r_image.cpp	structure	two uint32 counters at adjacent addresses; provisional name	high
+t6zm_msstore	142C62214	data	store_imageLoadedBytes	store_imageLoadedBytes	gfx_d3d/r_image.cpp	structure	loaded bytes counter decremented at release; provisional name	high
+t6zm_msstore	142C3D810	data	store_renderTargets	store_renderTargets	gfx_d3d/r_image.cpp	structure	72 records of 32 bytes; provisional name	high
+t6zm_msstore	14444BC70	data	store_extraImageA	store_extraImageA	gfx_d3d/r_image.cpp	structure	first standalone image released; provisional name	high
+t6zm_msstore	14444B728	data	store_extraImageB	store_extraImageB	gfx_d3d/r_image.cpp	structure	second standalone image released; provisional name	high
+t6zm_msstore	14444C1B8	data	store_extraImageC	store_extraImageC	gfx_d3d/r_image.cpp	structure	third standalone image released; provisional name	high
+t6zm_msstore	14282C5C8	data	store_renderTargetShutdownState	store_renderTargetShutdownState	gfx_d3d/r_image.cpp	structure	eight-byte state cleared after release; provisional name	high
+t6sp_msstore	1405DE7A0	function	Image_Release	?Image_Release@@YAXPEAUGfxImage@@@Z	gfx_d3d/r_image.cpp	semantic+differential	complete original body replay across MP/ZM/SP; tests/verify_store_render_release.py; matches reference Image_Release	high
+t6sp_msstore	1405F9F80	function	sub_140753660	?sub_140753660@@YAXXZ	gfx_d3d/rb_backend.cpp	semantic+differential	complete original body replay across MP/ZM/SP; tests/verify_store_render_release.py; name provisional	high
+t6sp_msstore	144085B5C	data	store_imageTotalMemory	store_imageTotalMemory	gfx_d3d/r_image.cpp	structure	two uint32 counters at adjacent addresses; provisional name	high
+t6sp_msstore	1427F4214	data	store_imageLoadedBytes	store_imageLoadedBytes	gfx_d3d/r_image.cpp	structure	loaded bytes counter decremented at release; provisional name	high
+t6sp_msstore	1427CFA60	data	store_renderTargets	store_renderTargets	gfx_d3d/r_image.cpp	structure	72 records of 32 bytes; provisional name	high
+t6sp_msstore	144086530	data	store_extraImageA	store_extraImageA	gfx_d3d/r_image.cpp	structure	first standalone image released; provisional name	high
+t6sp_msstore	144085FE8	data	store_extraImageB	store_extraImageB	gfx_d3d/r_image.cpp	structure	second standalone image released; provisional name	high
+t6sp_msstore	144086A78	data	store_extraImageC	store_extraImageC	gfx_d3d/r_image.cpp	structure	third standalone image released; provisional name	high
+t6sp_msstore	1423BDCC8	data	store_renderTargetShutdownState	store_renderTargetShutdownState	gfx_d3d/r_image.cpp	structure	eight-byte state cleared after release; provisional name	high

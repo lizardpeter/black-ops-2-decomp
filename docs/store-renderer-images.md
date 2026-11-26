@@ -282,3 +282,37 @@ compilation passed against the isolated test headers, not the complete
 hybrid build. Actual GPU allocation and terminal COM failures remain
 unvalidated. No enhanced redirects installed, no standard ledger
 promotion before its runner supports these tests.
+
+## Complete image release and render-target shutdown
+
+| Function | MP | ZM | SP |
+| --- | --- | --- | --- |
+| Image_Release | 14073B6B0 | 1407391E0 | 1405DE7A0 |
+| sub_140753660 (render-target shutdown) | 140753660 | 1407511A0 | 1405F9F80 |
+
+Both complete bodies normalize identically across the three pinned
+originals after relocation. Image_Release subtracts two unsigned
+memory counters when the track byte is greater than one and not four,
+releases the view if present, clears its pointer and both card-memory
+fields only if the view existed, subtracts loaded bytes, and resets
+loaded size and map type. The original retains a string conversion
+call in the no-view, non-delayed, non-boolean dvar branch. Its result
+is ignored. The reference identifies the dvar as r_loadForRenderer;
+the exact Store registration is not verified here.
+
+Shutdown iterates 72 32-byte records, releases color then depth view
+then image when non-null, zeroes the complete record, releases three
+additional images in fixed order, and zeros an eight-byte state field.
+The original source name of shutdown and the semantic names of the
+three additional images and state are not yet recovered.
+
+    python tests/verify_store_render_release.py /path/to/store/files
+
+Executed successfully on Linux x86-64: 5,120 isolated image-release
+cases and 1,280 complete shutdown cases per executable, 19,200 total.
+Tests compare original and authored complete image bytes, counters,
+ordered release/conversion calls, and zeroed target records.
+COM Release and atoi are mocked; no actual GPU, full hybrid build,
+or runtime redirects are claimed. The standard ledger is unchanged
+until its runner supports the separate replay tests. No original
+instruction bytes are committed.
