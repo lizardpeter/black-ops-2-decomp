@@ -1,4 +1,4 @@
-// Store MP renderer registration: recovered entry prefix 14070E2B5..14070E516.
+// Store MP renderer registration: recovered entry prefix 14070E2B5..14070ECCF.
 // This is NOT the complete 14070E230 function. Replay-only until all paths are recovered.
 #define T6_SOURCE "gfx_d3d/r_dvars.cpp"
 #if defined(T6_STORE) && defined(T6_STORE_RENDERER_DVAR_REPLAY)
@@ -17,6 +17,25 @@ const Dvar *Store_Renderer_New(const char *,int,U32,const Value *,const Domain *
 void Store_Renderer_Reregister(const Dvar *,const char *,int,U32,const Value *,const Domain *,const char *);
 const Dvar *Store_Renderer_Bool(const char *,bool,U32,const char *);
 const Dvar *Store_Renderer_Float(const char *,float,float,float,U32,const char *);
+const Dvar *Store_Renderer_Enum(const char *,const char *const *,int,U32);
+extern const char *const Store_Renderer_ClipCodec[]; // 140D39F30
+extern const char *const Store_Renderer_ClipSize[]; // 140D3A1E0
+extern const char *const Store_Renderer_MipMode[]; // 140D3A138
+extern const Dvar *store_r_txaa; // 1427E7188
+extern const Dvar *store_r_txaaSupported; // 1427E6EF8
+extern const Dvar *store_r_txaaDepth1; // 1427E6F10
+extern const Dvar *store_r_txaaDepth2; // 1427E6FE0
+extern const Dvar *store_r_txaaMotion1; // 1427E6F68
+extern const Dvar *store_r_txaaMotion2; // 1427E6EA0
+extern const Dvar *store_vid_xpos; // 1427E7288
+extern const Dvar *store_vid_ypos; // 1427E7278
+extern const Dvar *store_r_fullscreen; // 1427E7230
+extern const Dvar *store_r_previousFullscreen; // 1427E7280
+extern const Dvar *store_r_convergence; // 1427E71C8
+extern const Dvar *store_r_ignorehwgamma; // 1427E7118
+extern const Dvar *store_r_texFilterAnisoMax; // 1427E7170
+extern const Dvar *store_r_texFilterAnisoMin; // 1427E7080
+extern const Dvar *store_r_texFilterMipMode; // 1427E6F00
 extern const Dvar *store_r_fontResolution; // 1427E71D0
 extern const Dvar *store_r_resolution; // 1427E6F88
 extern const Dvar *store_r_ssao; // 1427E6FA0
@@ -54,8 +73,35 @@ void RegisterRendererEntryPrefix() {
     store_r_ssaoBias=Store_Renderer_Float("r_ssaoBias",F(0x3f0ccccd),F(0),F(0x40a00000),0,"");
     // 14070E4F7..14070E4FF
     store_r_ssaoIntensity=Store_Renderer_Float("r_ssaoIntensity",F(0x3f07ae14),F(0),F(0x3f800000),0,"");
-    // 14070E512; end before the next instruction (14070E517).
+    // 14070E512
     Store_Renderer_Bool("r_ssaoDebug",false,0,"");
+    // 14070E526..14070E6A3: TXAA.
+    store_r_txaa=Store_Renderer_Bool("r_txaa",false,0,"");
+    store_r_txaaSupported=Store_Renderer_Bool("r_txaaSupported",false,0,"");
+    InlineInt("r_txaaMode",-1,-1,7,0);
+    store_r_txaaDepth1=Store_Renderer_Float("r_txaaDepth1",F(0x3ca3d70a),F(0),F(0x3f800000),0,"");
+    store_r_txaaDepth2=Store_Renderer_Float("r_txaaDepth2",F(0x3f800000),F(0),F(0x3f800000),0,"");
+    store_r_txaaMotion1=Store_Renderer_Float("r_txaaMotion1",F(0x42000000),F(0),F(0x43000000),0,"");
+    store_r_txaaMotion2=Store_Renderer_Float("r_txaaMotion2",F(0x3c23d70a),F(0),F(0x43000000),0,"");
+    // 14070E6B6..14070E77F: clip settings; no global result assignment.
+    Store_Renderer_Enum("r_clipCodec",Store_Renderer_ClipCodec,1,0);
+    Store_Renderer_Enum("r_clipSize",Store_Renderer_ClipSize,1,0);
+    InlineInt("r_clipFPS",30,10,60,0);
+    // 14070E79E..14070EAF7: window placement, fullscreen and stereo convergence.
+    store_vid_xpos=InlineInt("vid_xpos",3,-4096,4096,1);
+    store_vid_ypos=InlineInt("vid_ypos",22,-4096,4096,1);
+    Store_Renderer_Bool("r_autopriority",false,1,"");
+    store_r_fullscreen=InlineInt("r_fullscreen",1,0,2,0x21);
+    store_r_previousFullscreen=InlineInt("r_previousFullscreen",1,0,2,1);
+    store_r_convergence=Store_Renderer_Float("r_convergence",F(0x40c00000),F(0x3dcccccd),F(0x42c80000),0,"");
+    store_r_ignorehwgamma=Store_Renderer_Bool("r_ignorehwgamma",false,0x21,"");
+    // 14070EB0F..14070ECA5: texture filtering. Mip enum result is stored
+    // at 14070ECC9, so the replay prefix stops after that store, before the
+    // next float call rather than at the enum's return.
+    store_r_texFilterAnisoMax=InlineInt("r_texFilterAnisoMax",16,1,16,1);
+    Store_Renderer_Bool("r_texFilterDisable",false,0x80,"");
+    store_r_texFilterAnisoMin=InlineInt("r_texFilterAnisoMin",1,1,16,1);
+    store_r_texFilterMipMode=Store_Renderer_Enum("r_texFilterMipMode",Store_Renderer_MipMode,0,1);
 }
 } // namespace store_renderer_dvar
 #endif

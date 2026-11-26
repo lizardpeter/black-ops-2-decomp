@@ -29,3 +29,7 @@ The source evidence includes the full 408,388-character disassembly section, 0x2
 Run 45888511169 verified 37,800 bytes, 6,916 instructions, 496 block leaders, 672 calls, 665 exact inventory matches and 724 RIP-relative references. The original bytes at 14093C480 read `vc_LIB`. The first eight pointers at 1409AD3F0 resolve to r_smp_worker_thread0 through r_smp_worker_thread7; the loop bound remains unresolved. The output artifact contains annotated instructions and JSON with exact constant bits and branch/call boundaries.
 
 `src/gfx_d3d/r_dvars_store.cpp` reconstructs only 14070E2B5..14070E516, including the initial subroutine, two inline integer registration branches and six SSAO settings. It is replay-only, not a complete renderer registration body. `tests/verify_store_renderer_prefix.py` cuts the original routine at 14070E517 and compares all four lookup branch combinations, ordered calls and seven global assignments. The new prefix test is pending CI; unused stack lanes are normalized and initialization is mocked.
+
+## Extended entry reconstruction
+
+The initial eight registrations passed differential replay (run 45888692737). The source now extends through 14070ECCF, including TXAA, clip encoding, window placement/fullscreen, convergence, hardware gamma and texture filtering. The three enum arguments are modeled as external original-table boundaries; the mock verifies their exact PE addresses, not their contents. The new test exhausts all 1024 lookup branch combinations; pending CI. No full-function or runtime claim.
