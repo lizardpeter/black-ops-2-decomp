@@ -19,6 +19,9 @@ on:
       - 'src/cgame_mp/cg_third_person_store.cpp'
       - 'src/cgame/cg_camera_detail_store.cpp'
       - 'src/bgame/bg_camera_bob_store.cpp'
+      - 'src/cgame/cg_third_person_trace_store.cpp'
+      - 'tests/store_camera_trace_probe.cpp'
+      - 'tests/verify_store_camera_trace.py'
       - 'tests/store_camera_bob_probe.cpp'
       - 'tests/verify_store_camera_bob.py'
       - 'tests/store_camera_detail_probe.cpp'
@@ -196,6 +199,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_bob.py originals/t6mp_msstore.exe | tee camera-bob.log
+      - name: Replay complete Store third-person collision trace wrapper
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_trace.py originals/t6mp_msstore.exe | tee camera-trace.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -228,4 +235,5 @@ jobs:
             camera-third.log
             camera-detail.log
             camera-bob.log
+            camera-trace.log
           if-no-files-found: warn

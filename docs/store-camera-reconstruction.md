@@ -55,3 +55,7 @@ Complete bodies at 1400C72B0 (shake attenuation), 140472FE0 (nonlinear view offs
 ## Bob waveform helpers
 
 Run 45898185322 passed third-person and detail helpers (57344 comparisons). New full bodies for vertical bob 1406602A0..14066046C and horizontal bob 140660470..1406605EE, preserving state precedence, raw vec2 dvar lanes, ADS interpolation, speed scaling exception for high-state path, type-aware max dvar and original MINSS behavior, exact waveform constants. 32768 original differential comparisons pending; sine and atof remain external boundaries.
+
+## Third-person collision wrapper
+
+Complete candidate at 1400C69F0..1400C6D28, including ignore-entity precedence, original +/-6 bounds, trace context sentinels, inverse-square-root fallback, threshold interpolation, optional second trace with raised endpoint, and original fraction return. The trace result/context types are provisional byte layouts, not claimed full engine structure definitions. Underlying engine collision query 140190530 is still external. 32768 comparisons pending, with aliased output/start and second-query context persistence.
