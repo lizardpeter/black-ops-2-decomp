@@ -64,3 +64,68 @@ Vulkan should reuse the built-in image payload semantics, but replace
 the setup/upload implementation with native VkImage allocation, staging
 and explicit transitions once the underlying resource contracts are recovered.
 No Vulkan implementation or renderer migration is claimed here.
+
+## Image memory accounting and resource creation
+
+Two further functions have been reconstructed, with provisional Store ABI
+names (not claims of recovered original source identifiers):
+
+| Function | MP VA | ZM VA | SP VA |
+| --- | --- | --- | --- |
+| Store_ImageTrackMemory | 140776EA0 | 1407749E0 | 14061C790 |
+| Store_ImageMipBytes | 140776FF0 | 140774B30 | 14061C8E0 |
+
+Their contiguous code and full jump table match across the three originals
+after normalizing only image-relative address operands. The mip-size
+routine uses unsigned 32-bit arithmetic and returns zero for unsupported
+formats. The caller reads picmip bytes at +0xC and +0xD and writes two
+32-bit memory counters at +0x10 and +0x14. Flags 1, 2 and 4 respectively
+bypass picmip, suppress the mip chain, and multiply total size by six.
+The full record has not yet been recovered; the implementation touches
+only the observed fields. These values are engine accounting values, not
+actual Vulkan allocation sizes.
+
+    python tests/verify_store_image_memory.py /path/to/store/files
+
+Executed on Linux x86-64 with the original jump tables intact:
+13,500 mip-byte comparisons and 8,000 whole-buffer accounting comparisons
+per executable, 64,500 total. Windows x64 COFF object compilation also
+passed. No GPU calls or service calls are involved. These tests are not
+registered in the standard differential runner and do not assert full
+engine integration.
+
+The regular upload format-switch index table (76 entries) and all six
+relative destination offsets are identical across MP/ZM/SP. The original
+mip-size table differs from this upload-pitch table: formats 10 and 11
+account for eight bytes per texel but the regular upload path uses four
+bytes per width unit. Do not use the accounting or upload switch as a
+universal Vulkan format-size table.
+
+The setup callee's three resource creation destinations are also identified
+by branch flags, the image type byte written at +8, and D3D11 device
+vtable slots (verified in all three PEs):
+
+| Candidate role | Image type | MP VA | ZM VA | SP VA |
+| --- | --- | --- | --- | --- |
+| Image_Create2DTexture_PC | 3 | 14073B7D0 | 140739300 | 1405DE8C0 |
+| Image_Create3DTexture_PC | 4 | 14073B990 | 1407394C0 | 1405DEA80 |
+| Image_CreateCubeTexture_PC | 5 | 14073BAA0 | 1407395D0 | 1405DEB90 |
+
+Each uses CreateShaderResourceView (+0x38) following CreateTexture2D
+(+0x28) or CreateTexture3D (+0x30). They have equal corresponding unwind
+body lengths (437/258/248 bytes respectively) and the same type writes.
+No full descriptor, error, or resource lifetime parity is claimed yet;
+these are not bound by this commit.
+
+Two propagated MP matcher labels also merit review: R_SetViewportStruct
+at 1407645E0 initializes a 0x1B70-byte source-state object and copies
+0xF30 bytes of input before resetting constant data, unlike the
+reference's small viewport setter; R_GetClearColor at 140719390 performs
+render-target/state operations and takes a second input, unlike the
+reference's simple clear-color getter. Do not adopt the current generated
+labels as verified ABI mappings. The generated analysis is unchanged.
+
+The next native renderer work is descriptor extraction and exact texture
+upload semantics, then render-target lifecycle, shader bindings and
+command submission. Keep original memory accounting separate from Vulkan
+device memory requirements and allocation alignment.
