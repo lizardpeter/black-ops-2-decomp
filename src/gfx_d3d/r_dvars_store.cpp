@@ -4,6 +4,8 @@
 #define T6_SOURCE "gfx_d3d/r_dvars.cpp"
 #if defined(T6_STORE) && (defined(T6_STORE_RENDERER_DVAR_REPLAY) || defined(T6_STORE_RENDERER_NATIVE))
 #if defined(T6_STORE_RENDERER_DVAR_REPLAY)
+#include <cstdint>
+#include <cstring>
 #include <cstdlib>
 #include <xmmintrin.h>
 #endif
