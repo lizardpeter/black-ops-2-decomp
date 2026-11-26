@@ -23,6 +23,7 @@
 
 #include "enhanced/dxgi_flip.h"
 #include "enhanced/frame_timing.h"
+#include "enhanced/custom_games.h"
 
 #include "client/client.h"
 #include "qcommon/qcommon.h"
@@ -119,6 +120,7 @@ int Com_FrameWaitPrecise(int maxFps)
 // reads its input the wait for the render thread (P0009) and the frame-latency wait (P0007); the stage timing.
 void Com_Frame_Try_Block_Function()
 {
+	CustomGames_UpdateStartup();
 	LocalClientNum_t localClientNum = Com_LocalClients_GetPrimary();
 	sub_1403A2FF0(localClientNum);
 	store_14226A120 = 0;

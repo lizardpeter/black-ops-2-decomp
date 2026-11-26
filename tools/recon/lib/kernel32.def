@@ -5,3 +5,13 @@ SetProcessInformation
 CreateWaitableTimerExW
 SetWaitableTimer
 WaitForMultipleObjects
+LoadLibraryExA
+GetModuleHandleExA
+OutputDebugStringA
+GetLastError
+GetEnvironmentVariableW
+CreateDirectoryW
+WideCharToMultiByte
+GetFileAttributesW
+GetCommandLineW
+LocalFree

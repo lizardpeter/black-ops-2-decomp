@@ -245,6 +245,8 @@ def main():
             flags.append("-DT6_NO_ASSERTS")  # retail and ship builds compiled their asserts out
         if symbols.build_spec(build).get("store"):
             flags.append("-DT6_STORE")  # the Store builds' source revision: its own structure layouts and changes
+        if build == "t6zm_msstore":
+            flags.append("-DT6_STORE_ZM")
         if enhanced and arch == "x64":
             # one section per function: the src/ copies an exe-first thunk replaces are dropped from the DLL
             # (tools/runtime_link.py), not left as unnamed code
@@ -355,7 +357,8 @@ def main():
             hybrid.append(f"{u}\t{kind}\t{va:08X}")
     else:
         import pefile
-        pe = pefile.PE(str(original_exe(build)), fast_load=True)
+        exe_path = original_exe(build)
+        pe = pefile.PE(str(exe_path), fast_load=True)
         exe_base, exe_size = pe.OPTIONAL_HEADER.ImageBase, pe.OPTIONAL_HEADER.SizeOfImage
         iat = import_slots(pe)
         exe_slots, exe_data, traps = [], set(), []
@@ -410,7 +413,7 @@ def main():
                     asm += [f"\t.globl {q}", f"{q}:", f"\tjmpq *{slot(hit[0])}(%rip)"]
                     hybrid.append(f"{u}\texe-first\t{hit[0]:08X}")
             redirects = [(where(u)[0], u) for u in sorted(enhanced_defs) if where(u) and where(u)[1] == "function"]
-            runtime_link.check_targets(build, pe, redirects)
+            runtime_link.check_targets(build, exe_path, pe, redirects)
             asm += runtime_link.redirect_asm(pe, redirects)
             asm += ["\t.text"]
         asm += hybrid_entry(exe_base)
@@ -445,7 +448,7 @@ def main():
     ordered = ([o for o in objs if o not in src_objs] + [BUILD / "hybrid.obj"] + src_objs if exe_first
                else objs + [BUILD / "hybrid.obj"])
     run("lld-link", "/dll", "/nodefaultlib", *link, f"/out:{dll}", *[f"/export:{e}" for e in names],
-        *(["/export:t6_redirects,DATA"] if exe_first else []),
+        *(["/export:t6_redirects,DATA", "/export:t6_redirects_identity,DATA"] if exe_first else []),
         *(["/force:multiple"] if enhanced else []), f"/map:{BUILD / 'recon.map'}",
         *ordered, *env_objs, *import_libs, quiet_duplicates=enhanced)
     if arch == "x64":

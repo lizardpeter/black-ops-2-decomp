@@ -256,3 +256,55 @@ CoDMPServer_PC	006DFA60	matches	src/qcommon/threads.cpp	Sys_IsServerThread; test
 CoDMPServer_PC	006DFBD0	matches	src/qcommon/threads.cpp	Sys_IsRenderThread; tests/differential/test_threads.py
 CoDMPServer_PC	006DFC50	matches	src/qcommon/threads.cpp	Sys_IsMainThread; tests/differential/test_threads.py
 CoDMPServer_PC	0076FBA0	matches	src/universal/com_workercmds.cpp	R_FinishedFrontendWorkerCmds (inlined in the Store's R_ToggleSmpFrameCmd); tests/differential/test_threads.py
+t6mp_msstore	140787868	integrated	src/win32/win_gdk.cpp	GdkLoadRuntime; tests/differential/test_vendor_services.py and P0010 runtime redirect
+t6mp_msstore	140788004	integrated	src/win32/win_gdk.cpp	GdkSavePath; tests/differential/test_vendor_services.py and P0010 runtime redirect
+t6mp_msstore	14049BD40	integrated	src/win32/win_gdk.cpp	Sys_ReportUnhandledException; tests/differential/test_vendor_services.py and P0010 runtime redirect
+t6mp_msstore	1407D0990	integrated	src/demonware/bd_platform_socket.cpp	BdGetHostByName; tests/differential/test_vendor_services.py and P0010 runtime redirect
+t6mp_msstore	1407D0DA0	integrated	src/demonware/bd_platform_socket.cpp	BdSendTo; tests/differential/test_vendor_services.py and P0010 runtime redirect
+t6mp_msstore	1404740C0	integrated	src/win32/win_vendor_network.cpp	Sys_ProbeTimeServer; tests/differential/test_vendor_transport.py and P0010 runtime redirect
+t6mp_msstore	140871040	integrated	src/win32/win_vendor_network.cpp	BdConnectStream; tests/differential/test_vendor_transport.py and P0010 runtime redirect
+t6mp_msstore	140491220	integrated	src/win32/win_vendor_network.cpp	WinInetOpenConnection; tests/differential/test_vendor_transport.py and P0010 runtime redirect
+t6mp_msstore	140874870	integrated	src/win32/win_vendor_network.cpp	BdBeginWinHttpRequest; tests/differential/test_vendor_transport.py and P0010 runtime redirect
+t6mp_msstore	14088A0D0	integrated	src/win32/win_http_client.cpp	XCurlAddRequest; tests/differential/test_vendor_transport.py and P0010 runtime redirect
+t6mp_msstore	14088C600	integrated	src/win32/win_http_client.cpp	WinHttpInitializeRequest; tests/differential/test_vendor_transport.py and P0010 runtime redirect
+t6mp_msstore	14078764C	matches	src/win32/win_gdk.cpp	GdkInitializeRuntime; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407878A8	matches	src/win32/win_gdk.cpp	GdkQueryApi; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140787EE0	matches	src/win32/win_gdk.cpp	GdkUninitializeRuntime; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407897E8	matches	src/win32/win_gdk.cpp	GdkUserAddAsync; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140789860	matches	src/win32/win_gdk.cpp	GdkUserAddResult; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140789988	matches	src/win32/win_gdk.cpp	GdkUserCloseHandle; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407899E4	matches	src/win32/win_gdk.cpp	GdkUserDuplicateHandle; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140789794	matches	src/win32/win_gdk.cpp	GdkPrepareThreading; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407892A8	matches	src/win32/win_gdk.cpp	GdkTaskQueueCreate; tests/differential/test_service_lifecycle.py
+t6mp_msstore	14078924C	matches	src/win32/win_gdk.cpp	GdkTaskQueueClose; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407893BC	matches	src/win32/win_gdk.cpp	XThreading task queue dispatch (sub_1407893BC); tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407895B0	matches	src/win32/win_gdk.cpp	HttpQueueCallback; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140873440	matches	src/demonware/bd_http_response.cpp	BdCompleteWinHttpRequest; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140878750	matches	src/demonware/bd_http_response.cpp	BdHttpErrorName; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1408787E0	matches	src/demonware/bd_http_response.cpp	BdHttpStatusName; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407D13A0	matches	src/demonware/bd_http_response.cpp	BdReleaseReference; tests/differential/test_service_lifecycle.py
+t6mp_msstore	14080FEF0	matches	src/demonware/bd_http_response.cpp	BdStopwatchElapsed; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140870C00	matches	src/demonware/bd_http_response.cpp	BdElapsedSeconds; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140870C40	matches	src/demonware/bd_http_response.cpp	BdClockMicroseconds; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140874EE0	matches	src/win32/win_vendor_network.cpp	BdSendWinHttpRequest; tests/differential/test_service_lifecycle.py
+t6mp_msstore	14088A9B0	matches	src/win32/win_http_client.cpp	XCurlProcessQueue; tests/differential/test_service_lifecycle.py
+t6mp_msstore	14080FCE0	matches	src/demonware/bd_remote_task.cpp	BdBytePackerRemoveBuffer; tests/differential/test_service_lifecycle.py
+t6mp_msstore	14080D310	matches	src/demonware/bd_remote_task.cpp	BdByteBufferRead; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407EC0B0	matches	src/demonware/bd_remote_task.cpp	BdRemoteTaskAcceptReply; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407F8D20	matches	src/demonware/bd_remote_task.cpp	BdPendingTaskPop; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407F8710	matches	src/demonware/bd_remote_task.cpp	BdRemoteTaskHandleReply; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140789B08	matches	src/win32/win_gdk.cpp	GdkUserGetId; tests/differential/test_service_lifecycle.py
+t6mp_msstore	1407ECB90	matches	src/demonware/bd_lobby_service.cpp	BdLobbyServiceConnect; tests/differential/test_service_lifecycle.py
+t6mp_msstore	140075F50	compiles	src/gfx_d3d/r_nvapi.cpp	NvAPI_D3D11_CreateDevice
+t6mp_msstore	1401B3FB0	integrated	src/client/cl_main_mp.cpp	CL_MapLoading_SetupDevmapParty; P0012 pairs the normal fallback with the Custom Games override. Stock behavior compared in tests/enhanced/test_custom_games.py.
+t6mp_msstore	1405723B0	compiles	src/demonware/live_connect.cpp	Live_InitiateDemonWareConnect_f forwards controller zero to the Store connection entry.
+t6mp_msstore	1407EF7A0	matches	src/demonware/bd_rich_presence.cpp	BdRichPresenceGetInfo; tests/differential/test_demonware_presence.py
+t6mp_msstore	1407EF940	matches	src/demonware/bd_rich_presence.cpp	BdRichPresenceSetInfo; tests/differential/test_demonware_presence.py
+t6mp_msstore	1408022F0	matches	src/demonware/bd_http_auth.cpp	BdHandleGdkAuthTask; tests/differential/test_demonware_auth.py
+t6mp_msstore	1407898DC	matches	src/win32/win_gdk.cpp	GdkUserCheckPrivilege; tests/differential/test_demonware_auth.py
+t6mp_msstore	1407E6F10	matches	src/demonware/bd_net_start.cpp	BdInitNetStartParams; tests/differential/test_demonware_net_start.py
+t6zm_msstore	1407E4A50	matches	src/demonware/bd_net_start.cpp	BdInitNetStartParams; tests/differential/test_demonware_net_start.py
+t6zm_msstore	1407ED2E0	matches	src/demonware/bd_rich_presence.cpp	BdRichPresenceGetInfo; tests/differential/test_demonware_presence.py
+t6zm_msstore	1407ED480	matches	src/demonware/bd_rich_presence.cpp	BdRichPresenceSetInfo; tests/differential/test_demonware_presence.py
+t6zm_msstore	1407FFE30	matches	src/demonware/bd_http_auth.cpp	BdHandleGdkAuthTask; tests/differential/test_demonware_auth.py
+t6zm_msstore	14078741C	matches	src/win32/win_gdk.cpp	GdkUserCheckPrivilege; tests/differential/test_demonware_auth.py

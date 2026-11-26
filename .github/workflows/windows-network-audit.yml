@@ -1,0 +1,77 @@
+name: Windows network audit
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - .github/workflows/windows-network-audit.yml
+      - tools/windows_network_audit.ps1
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  package:
+    runs-on: ubuntu-latest
+    env:
+      T6_ORIGINALS: originals
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: services/demonware/go.mod
+          cache: false
+      - run: |
+          sudo apt-get update
+          sudo apt-get install -y clang-19 lld-19 llvm-19
+          export PATH="/usr/lib/llvm-19/bin:$PATH"
+          pip install -r tests/differential/requirements.txt
+          for mode in mp zm; do
+            python tools/fetch_originals.py "t6${mode}_msstore" originals --only exe
+            python tools/build_runtime.py --build "t6${mode}_msstore"
+            mkdir -p "audit-runtime/$mode"
+            cp build/"t6${mode}_msstore"/runtime/*.dll "audit-runtime/$mode/"
+          done
+          (cd services/demonware && GOOS=windows GOARCH=amd64 go build -o ../../audit-runtime/t6_demonware.exe .)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: audit-runtime
+          path: audit-runtime/
+          retention-days: 3
+
+  capture:
+    runs-on: windows-2025
+    needs: package
+    timeout-minutes: 35
+    strategy:
+      fail-fast: false
+      matrix:
+        mode: [mp, zm]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          sparse-checkout: |
+            target.toml
+            tools/fetch_originals.py
+            tools/windows_network_audit.ps1
+          sparse-checkout-cone-mode: false
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/download-artifact@v4
+        with:
+          name: audit-runtime
+          path: audit-runtime
+      - name: Audit Store executable
+        shell: pwsh
+        run: ./tools/windows_network_audit.ps1 -Mode '${{ matrix.mode }}'
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: windows-network-${{ matrix.mode }}
+          path: audit-results/
+          retention-days: 7

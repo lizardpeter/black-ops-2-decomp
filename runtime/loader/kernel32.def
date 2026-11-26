@@ -8,6 +8,8 @@ GetModuleFileNameW
 GetSystemDirectoryW
 VirtualProtect
 GetCurrentProcess
+TerminateProcess
+OutputDebugStringA
 FlushInstructionCache
 DisableThreadLibraryCalls
 CreateFileW

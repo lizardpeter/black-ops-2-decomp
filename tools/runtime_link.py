@@ -28,12 +28,14 @@ def redirect_asm(pe, redirects):
     for va, sym in redirects:
         head = pe.get_data(va - base, PROLOGUE)
         asm += [f"\t.quad {va - base:#x}", f'\t.quad "{sym}"', "\t.byte " + ", ".join(f"{b:#x}" for b in head)]
+    asm += ["\t.globl t6_redirects_identity", "t6_redirects_identity:",
+            f"\t.long {pe.FILE_HEADER.TimeDateStamp:#x}, {pe.OPTIONAL_HEADER.SizeOfImage:#x}"]
     return asm
 
 
-def check_targets(build, pe, redirects):
+def check_targets(build, exe_path, pe, redirects):
     """Each replaced exe function is at least PATCH_SIZE bytes (its .pdata entry) and no branch in the exe lands in
-    its first PATCH_SIZE bytes past the entry (the Ghidra disassembly, analysis/<build>/disasm)."""
+    its first PATCH_SIZE bytes past the entry."""
     import pefile
     pe.parse_data_directories(directories=[pefile.DIRECTORY_ENTRY["IMAGE_DIRECTORY_ENTRY_EXCEPTION"]])
     base = pe.OPTIONAL_HEADER.ImageBase
@@ -59,15 +61,34 @@ def check_targets(build, pe, redirects):
         while end in sizes and root(end) == va:
             end += sizes[end]
         return end - va
+    disasm = ROOT / "analysis" / build / "disasm"
     problems = []
+    interiors = set()
     for va, sym in redirects:
         if extent(va) < PATCH_SIZE:
             problems.append(f"{sym} {va:X}: not a function entry of at least {PATCH_SIZE} bytes in .pdata")
-        inside = "|".join(f"0x{a:x}" for a in range(va + 1, va + PATCH_SIZE))
-        hits = subprocess.run(["grep", "-rhiE", rf"(J[A-Z]*|CALL)\s+({inside})\b", str(ROOT / "analysis" / build / "disasm")],
-                              capture_output=True, text=True).stdout.strip()
-        if hits:
-            problems.append(f"{sym} {va:X}: the exe branches into its first {PATCH_SIZE} bytes:\n    {hits[:300]}")
+        interiors.update(range(va + 1, va + PATCH_SIZE))
+    hits = []
+    if interiors and disasm.is_dir():
+        inside = "|".join(f"0x{a:x}" for a in interiors)
+        scan = subprocess.run(["grep", "-rhiE", rf"(J[A-Z]*|CALL)\s+({inside})\b", str(disasm)],
+                              capture_output=True, text=True)
+        if scan.returncode not in (0, 1):
+            sys.exit(scan.stderr)
+        hits = scan.stdout.splitlines()
+    elif interiors:
+        branch = re.compile(r"\b(?:j\w+|callq?)\s+0x([0-9a-f]+)\b", re.IGNORECASE)
+        with subprocess.Popen(["llvm-objdump", "-d", "--no-show-raw-insn", "--section=.text", str(exe_path)],
+                              stdout=subprocess.PIPE, text=True) as scan:
+            for line in scan.stdout:
+                match = branch.search(line)
+                if match and int(match[1], 16) in interiors:
+                    hits.append(line.strip())
+            if scan.wait():
+                sys.exit(f"could not disassemble {exe_path} to check redirect targets")
+    if hits:
+        problems.append(f"the exe branches into the first {PATCH_SIZE} bytes of a redirect target:\n    "
+                        + "\n    ".join(hits[:10]))
     if problems:
         sys.exit("enhanced replacements can't be patched in:\n  " + "\n  ".join(problems))
 

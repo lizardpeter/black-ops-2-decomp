@@ -51,6 +51,10 @@ typedef struct D3D11_BUFFER_DESC
 #define D3D11_CPU_ACCESS_WRITE 0x10000
 
 extern "C" __declspec(dllimport) HRESULT WINAPI CreateDXGIFactory1(const IID *riid, void **factory);
+extern "C" __declspec(dllimport) HRESULT WINAPI D3D11CreateDevice(
+	IDXGIAdapter1 *adapter, D3D_DRIVER_TYPE driverType, void *software, UINT flags,
+	const D3D_FEATURE_LEVEL *featureLevels, UINT featureLevelCount, UINT sdkVersion,
+	ID3D11Device **device, D3D_FEATURE_LEVEL *featureLevel, ID3D11DeviceContext **immediateContext);
 extern "C" __declspec(dllimport) HRESULT WINAPI D3D11CreateDeviceAndSwapChain(
 	IDXGIAdapter1 *adapter, D3D_DRIVER_TYPE driverType, void *software, UINT flags,
 	const D3D_FEATURE_LEVEL *featureLevels, UINT featureLevelCount, UINT sdkVersion,

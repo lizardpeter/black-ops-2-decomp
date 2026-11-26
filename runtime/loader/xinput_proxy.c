@@ -1,13 +1,14 @@
-// runtime/loader/xinput_proxy.c: XINPUT1_4.dll in the game folder, which loads the enhanced build into t6mp.exe.
+// runtime/loader/xinput_proxy.c: XINPUT1_4.dll in the game folder, which loads the enhanced build.
 //
-// t6mp.exe imports XInputGetState, XInputSetState and XInputGetCapabilities from XINPUT1_4.dll by ordinal (2, 3,
+// t6mp.exe and t6zm.exe import XInputGetState, XInputSetState and XInputGetCapabilities by ordinal (2, 3,
 // 4), and Windows looks in the game's folder before the system folder for it. This DLL forwards those (and the rest
 // of xinput1_4's exports) to the system's xinput1_4.dll, so controllers work as before. When the process is the
-// Store t6mp.exe the enhanced build was made for (checked by its PE timestamp and image size), it also loads
-// t6_enhanced.dll from the same folder and points each exe function the enhanced build replaces at its replacement
+// supported Store executables (checked by PE timestamp and image size), it loads the matching enhanced DLL
+// from the same folder and points each exe function the enhanced build replaces at its replacement
 // (the DLL's t6_redirects table, tools/runtime_link.py): a 14-byte jump at the function's entry, written only if
-// every replaced function still starts with the bytes the build saw. Any other exe (t6sp.exe, t6zm.exe, another
-// version) only gets the forwarding. Nothing on disk is changed; deleting the two DLLs restores the game.
+// every replaced function still starts with the bytes the build saw. MP and ZM
+// stop if their enhanced build cannot be installed. Other executables only get forwarding.
+// Nothing on disk is changed; deleting the two DLLs restores the game.
 //
 // What happened is written to t6_enhanced.log next to the DLL.
 typedef unsigned char BYTE;
@@ -37,16 +38,14 @@ __declspec(dllimport) DWORD WINAPI GetModuleFileNameW(HMODULE module, WCHAR *pat
 __declspec(dllimport) DWORD WINAPI GetSystemDirectoryW(WCHAR *path, DWORD size);
 __declspec(dllimport) BOOL WINAPI VirtualProtect(void *address, SIZE_T size, DWORD protect, DWORD *old);
 __declspec(dllimport) HANDLE WINAPI GetCurrentProcess(void);
+__declspec(dllimport) BOOL WINAPI TerminateProcess(HANDLE process, DWORD exitCode);
+__declspec(dllimport) void WINAPI OutputDebugStringA(const char *text);
 __declspec(dllimport) BOOL WINAPI FlushInstructionCache(HANDLE process, const void *address, SIZE_T size);
 __declspec(dllimport) BOOL WINAPI DisableThreadLibraryCalls(HMODULE module);
 __declspec(dllimport) HANDLE WINAPI CreateFileW(const WCHAR *name, DWORD access, DWORD share, void *security,
                                                DWORD disposition, DWORD flags, HANDLE templ);
 __declspec(dllimport) BOOL WINAPI WriteFile(HANDLE file, const void *data, DWORD size, DWORD *written, void *overlapped);
 __declspec(dllimport) BOOL WINAPI CloseHandle(HANDLE handle);
-
-// The build this loader patches: t6mp.exe 1.1.8.0 from the Store (docs/store-build.md)
-#define T6MP_TIMESTAMP 0x6758BF4Fu
-#define T6MP_IMAGE_SIZE 0x045AC000u
 
 // -- the system xinput1_4.dll's exports, by ordinal; each export of this DLL jumps through its slot (xinput_stubs.s)
 FARPROC xinput_slots[7];
@@ -105,46 +104,125 @@ struct Redirects
 	struct Redirect entries[1];
 };
 
-static void Install(HMODULE self)
+struct RedirectIdentity
+{
+	DWORD timestamp;
+	DWORD imageSize;
+};
+
+static BOOL Fail(const char *message)
+{
+	Log(message);
+	OutputDebugStringA(message);
+	if (s_log != INVALID_HANDLE_VALUE)
+		CloseHandle(s_log);
+	// Terminate even if the proxy was loaded dynamically or some jumps were already written.
+	TerminateProcess(GetCurrentProcess(), 1114);  // ERROR_DLL_INIT_FAILED
+	return 0;
+}
+
+static BOOL SameName(const WCHAR *path, const char *name)
+{
+	while (*name)
+	{
+		WCHAR ch = *path++;
+		if (ch >= 'A' && ch <= 'Z')
+			ch += 'a' - 'A';
+		if (ch != (WCHAR)*name++)
+			return 0;
+	}
+	return *path == 0;
+}
+
+static BOOL Install(HMODULE self)
 {
 	BYTE *exe = (BYTE *)GetModuleHandleW(0);
 	const BYTE *nt = exe + *(const DWORD *)(exe + 0x3C);
 	DWORD timestamp = *(const DWORD *)(nt + 8);
 	DWORD imageSize = *(const DWORD *)(nt + 0x18 + 0x38);
-	if (timestamp != T6MP_TIMESTAMP || imageSize != T6MP_IMAGE_SIZE)
-		return;  // not the Store t6mp.exe 1.1.8.0: forwarding only, no log
+	const char *dllName;
+	const char *logName;
+	const char *banner;
+	if (timestamp == 0x6758BF4Fu && imageSize == 0x045AC000u)
+	{
+		dllName = "t6_enhanced.dll";
+		logName = "t6_enhanced.log";
+		banner = "t6_enhanced: t6mp.exe 1.1.8.0\r\n";
+	}
+	else if (timestamp == 0x6758BC50u && imageSize == 0x045AA000u)
+	{
+		dllName = "t6_enhanced_zm.dll";
+		logName = "t6_enhanced_zm.log";
+		banner = "t6_enhanced: t6zm.exe 1.1.8.0\r\n";
+	}
+	else
+	{
+		WCHAR exePath[MAX_PATH];
+		DWORD end = GetModuleFileNameW(0, exePath, MAX_PATH);
+		if (!end || end >= MAX_PATH)
+			return Fail("T6 loader: could not identify the executable.\r\n");
+		DWORD start = end;
+		while (start && exePath[start - 1] != '\\')
+			--start;
+		if (!SameName(exePath + start, "t6mp.exe") && !SameName(exePath + start, "t6zm.exe"))
+			return 1;
+		return Fail("T6 loader: unsupported multiplayer or Zombies executable version.\r\n");
+	}
 
 	WCHAR path[MAX_PATH + 32];
 	DWORD n = GetModuleFileNameW(self, path, MAX_PATH);
+	if (!n || n >= MAX_PATH)
+		return Fail("T6 loader: could not find the proxy DLL directory.\r\n");
 	while (n && path[n - 1] != '\\')
 		--n;
-	const char *logName = "t6_enhanced.log";
-	for (DWORD i = 0; logName[i]; ++i)
-		path[n + i] = (WCHAR)logName[i];
-	path[n + 15] = 0;
-	s_log = CreateFileW(path, GENERIC_WRITE, 1, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
-	Log("t6_enhanced: t6mp.exe 1.1.8.0\r\n");
-
-	const char *dllName = "t6_enhanced.dll";
-	for (DWORD i = 0; dllName[i]; ++i)
-		path[n + i] = (WCHAR)dllName[i];
-	path[n + 15] = 0;
-	HMODULE enhanced = LoadLibraryW(path);
-	const struct Redirects *table = enhanced ? (const struct Redirects *)GetProcAddress(enhanced, "t6_redirects") : 0;
-	if (!table)
+	for (DWORD i = 0; ; ++i)
 	{
-		Log("t6_enhanced.dll is missing or has no redirect table: the game runs unchanged\r\n");
-		goto done;
+		path[n + i] = (WCHAR)logName[i];
+		if (!logName[i])
+			break;
 	}
-	// all or nothing: every replaced function must still be what the build saw
+	s_log = CreateFileW(path, GENERIC_WRITE, 1, 0, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, 0);
+	Log(banner);
+
+	for (DWORD i = 0; ; ++i)
+	{
+		path[n + i] = (WCHAR)dllName[i];
+		if (!dllName[i])
+			break;
+	}
+	HMODULE enhanced = LoadLibraryW(path);
+	if (!enhanced)
+		return Fail("T6 loader: could not load the enhanced DLL.\r\n");
+	const struct Redirects *table = (const struct Redirects *)GetProcAddress(enhanced, "t6_redirects");
+	const struct RedirectIdentity *identity =
+		(const struct RedirectIdentity *)GetProcAddress(enhanced, "t6_redirects_identity");
+	if (!table || !identity)
+		return Fail("T6 loader: the enhanced DLL has no compatible redirect table.\r\n");
+
+	const BYTE *dll = (const BYTE *)enhanced;
+	const BYTE *dllNt = dll + *(const DWORD *)(dll + 0x3C);
+	DWORD dllSize = *(const DWORD *)(dllNt + 0x18 + 0x38);
+	ULONG_PTR tableOffset = (ULONG_PTR)table - (ULONG_PTR)dll;
+	ULONG_PTR identityOffset = (ULONG_PTR)identity - (ULONG_PTR)dll;
+	if (dllSize < sizeof(*identity) || identityOffset > dllSize - sizeof(*identity) ||
+	    tableOffset > identityOffset || identityOffset - tableOffset < sizeof(table->count))
+		return Fail("T6 loader: invalid enhanced DLL redirect table.\r\n");
+	ULONG_PTR entriesSize = identityOffset - tableOffset - sizeof(table->count);
+	if (!table->count || entriesSize % sizeof(struct Redirect) ||
+	    table->count != entriesSize / sizeof(struct Redirect))
+		return Fail("T6 loader: invalid enhanced DLL redirect table.\r\n");
+	if (identity->timestamp != timestamp || identity->imageSize != imageSize)
+		return Fail("T6 loader: the enhanced DLL does not match this executable.\r\n");
+
+	// Check every entry before writing any jumps.
 	for (unsigned long long i = 0; i < table->count; ++i)
 	{
 		const struct Redirect *r = &table->entries[i];
-		if (r->rva >= imageSize)
-			goto mismatch;
+		if (r->rva > imageSize - sizeof(r->prologue) || r->target - (ULONG_PTR)dll >= dllSize)
+			return Fail("T6 loader: invalid enhanced DLL redirect address.\r\n");
 		for (int b = 0; b < 16; ++b)
 			if (exe[r->rva + b] != r->prologue[b])
-				goto mismatch;
+				return Fail("T6 loader: the enhanced DLL does not match this executable.\r\n");
 	}
 	for (unsigned long long i = 0; i < table->count; ++i)
 	{
@@ -152,28 +230,24 @@ static void Install(HMODULE self)
 		BYTE *code = exe + r->rva;
 		DWORD old;
 		if (!VirtualProtect(code, 14, PAGE_EXECUTE_READWRITE, &old))
-		{
-			Log("VirtualProtect failed: stopping\r\n");  // the ones before stay patched; each is complete
-			goto done;
-		}
+			return Fail("T6 loader: could not make a redirect writable.\r\n");
 		BYTE jump[14] = {0xFF, 0x25, 0, 0, 0, 0};  // jmp qword ptr [rip + 0]
 		for (int b = 0; b < 8; ++b)
 			jump[6 + b] = (BYTE)(r->target >> (8 * b));
 		for (int b = 0; b < 14; ++b)
 			code[b] = jump[b];
-		VirtualProtect(code, 14, old, &old);
-		FlushInstructionCache(GetCurrentProcess(), code, 14);
+		if (!VirtualProtect(code, 14, old, &old))
+			return Fail("T6 loader: could not restore executable page protection.\r\n");
+		if (!FlushInstructionCache(GetCurrentProcess(), code, 14))
+			return Fail("T6 loader: could not flush the instruction cache.\r\n");
 		Log("replaced ");
 		LogHex((unsigned long long)(ULONG_PTR)code);
 		Log("\r\n");
 	}
 	Log("enhanced build active\r\n");
-	goto done;
-mismatch:
-	Log("t6_enhanced.dll doesn't match this t6mp.exe: nothing replaced, the game runs unchanged\r\n");
-done:
 	if (s_log != INVALID_HANDLE_VALUE)
 		CloseHandle(s_log);
+	return 1;
 }
 
 BOOL WINAPI ProxyMain(HMODULE self, DWORD reason, void *reserved)
@@ -183,7 +257,7 @@ BOOL WINAPI ProxyMain(HMODULE self, DWORD reason, void *reserved)
 	{
 		DisableThreadLibraryCalls(self);
 		LoadSystemXInput();
-		Install(self);
+		return Install(self);
 	}
 	return 1;
 }

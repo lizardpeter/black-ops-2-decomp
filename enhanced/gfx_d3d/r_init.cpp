@@ -18,6 +18,7 @@
 #include "enhanced/dxgi_flip.h"
 
 #include "gfx_d3d/r_dx.h"
+#include "gfx_d3d/r_nvapi.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
 #include "win32/win_local.h"
@@ -49,10 +50,16 @@ T6_STATIC const UINT s_constBufferSizes[4] T6_AT("", "s_constBufferSizes");
 static const IID IID_IDXGISwapChain2_Enhanced = {0xA8BE2AC4, 0x199F, 0x4946, {0xB3, 0x31, 0x79, 0x59, 0x9F, 0xB9, 0x8D, 0xE7}};
 static const IID IID_IDXGIFactory5_Enhanced = {0x7632E1F5, 0xEE65, 0x4DCA, {0x87, 0xFD, 0x84, 0xCD, 0x75, 0xF8, 0x83, 0x8D}};
 
+#ifdef T6_STORE_ZM
+// The Zombies render loop uses the original blit-model presentation.
+bool r_flipModel = false;
+#else
 bool r_flipModel = true;
+#endif
 bool r_allowTearing;
 bool r_latencyWaitable = true;
 static bool s_tearingChecked;
+static bool s_nvapiFallback;
 
 // Whether DXGI can present with tearing (IDXGIFactory5::CheckFeatureSupport(PRESENT_ALLOW_TEARING)); false with a
 // factory older than DXGI 1.5. Asked once.
@@ -104,7 +111,7 @@ void R_UseBlitModel(DXGI_SWAP_CHAIN_DESC *swapChainDesc)
 // supports it. Used for the swap chain's creation and for every resize of its buffers.
 void sub_14071E360(DXGI_SWAP_CHAIN_DESC *swapChainDesc, const GfxWindowParms *wndParms)
 {
-	DX(multiSampleType) = Dvar_GetInt(r_aaSamples);
+	DX(multiSampleType) = s_nvapiFallback ? 1 : Dvar_GetInt(r_aaSamples);
 	DX(multiSampleQuality) = 0;
 	if (DX(multiSampleType) == 16)
 	{
@@ -237,6 +244,7 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 	IUnknown_Release(factory);
 
 	D3D_FEATURE_LEVEL featureLevel;
+	bool nvDeviceCreated = false;
 	if (DX(vendorId) == 0x10DE)
 	{
 		if (!DX(nvInitialized))
@@ -245,7 +253,8 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 		int status = NvAPI_D3D11_CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
 		                                                  D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain),
 		                                                  &DX(device), &featureLevel, &DX(context), &supportedLevel);
-		while (status != 0 && swapChainDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
+		while (status != 0 && !R_NvAPIUnavailable(status)
+		       && swapChainDesc->SwapEffect == DXGI_SWAP_EFFECT_FLIP_DISCARD)
 		{
 			R_FallBack(swapChainDesc);
 			status = NvAPI_D3D11_CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
@@ -253,25 +262,33 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 			                                              &DX(device), &featureLevel, &DX(context),
 			                                              &supportedLevel);
 		}
-		if (status != 0 || supportedLevel < 1)
+		if (status == 0)
+		{
+			if (supportedLevel < 1)
+				return -1;
+			nvDeviceCreated = true;
+			if (NvAPI_Stereo_CreateHandleFromIUnknown(DX(device), &DX(nvStereoHandle)) == 0)
+			{
+				NvAPI_Stereo_IsActivated(DX(nvStereoHandle), (unsigned char *)&behaviorFlags);
+				DX(nvStereoActivated) = *(unsigned char *)&behaviorFlags != 0;
+			}
+			else
+			{
+				DX(nvStereoActivated) = false;
+			}
+			UINT qualityLevels;
+			ID3D11Device_CheckMultisampleQualityLevels(DX(device), swapChainDesc->BufferDesc.Format, 4, &qualityLevels);
+			if (qualityLevels > 16)
+				Dvar_SetInt(r_aaSamplesMax, 16);
+			if (TxaaOpenDX(&DX(txaaCtx), DX(device), DX(context)) == 0)
+				Dvar_SetBool(r_txaaSupported, true);
+		}
+		else if (!R_NvAPIUnavailable(status))
+		{
 			return -1;
-		if (NvAPI_Stereo_CreateHandleFromIUnknown(DX(device), &DX(nvStereoHandle)) == 0)
-		{
-			NvAPI_Stereo_IsActivated(DX(nvStereoHandle), (unsigned char *)&behaviorFlags);
-			DX(nvStereoActivated) = *(unsigned char *)&behaviorFlags != 0;
 		}
-		else
-		{
-			DX(nvStereoActivated) = false;
-		}
-		UINT qualityLevels;
-		ID3D11Device_CheckMultisampleQualityLevels(DX(device), swapChainDesc->BufferDesc.Format, 4, &qualityLevels);
-		if (qualityLevels > 16)
-			Dvar_SetInt(r_aaSamplesMax, 16);
-		if (TxaaOpenDX(&DX(txaaCtx), DX(device), DX(context)) == 0)
-			Dvar_SetBool(r_txaaSupported, true);
 	}
-	else
+	if (!nvDeviceCreated)
 	{
 		HRESULT created = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
 		                                                D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain),
@@ -282,6 +299,16 @@ HRESULT R_CreateDeviceInternal(HWND hwnd, int behaviorFlags, DXGI_SWAP_CHAIN_DES
 			created = D3D11CreateDeviceAndSwapChain(0, D3D_DRIVER_TYPE_HARDWARE, 0, 0, s_featureLevels, 3,
 			                                        D3D11_SDK_VERSION, swapChainDesc, &DX(swapChain), &DX(device),
 			                                        &featureLevel, &DX(context));
+		}
+		if (created < 0)
+			return created;
+		if (DX(vendorId) == 0x10DE)
+		{
+			// The settings selected for the NVIDIA path can request unsupported multisampled render targets.
+			s_nvapiFallback = true;
+			DX(multiSampleType) = 1;
+			DX(multiSampleQuality) = 0;
+			DX(nvStereoActivated) = false;
 		}
 	}
 

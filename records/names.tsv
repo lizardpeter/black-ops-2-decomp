@@ -215,7 +215,7 @@ t6mp_msstore	140498A50	function	sub_140498A50	?sub_140498A50@@YAXW4ControllerInd
 t6mp_msstore	1405B5DB0	function	sub_1405B5DB0	?sub_1405B5DB0@@YAXW4ControllerIndex_t@@H@Z	qcommon/common.cpp	unnamed	name unknown: called after the first frame with the primary controller and the msec (Com_Frame_Try_Block_Function 1403A4010)	low
 t6mp_msstore	1405B7C10	function	sub_1405B7C10	?sub_1405B7C10@@YAXHPEAX@Z	qcommon/common.cpp	unnamed	name unknown: called with 0 and 143ED0570 (Com_Frame_Try_Block_Function 1403A4010)	low
 t6mp_msstore	1405B83D0	function	sub_1405B83D0	?sub_1405B83D0@@YAXH@Z	qcommon/common.cpp	unnamed	name unknown: called with 0 after the first frame (Com_Frame_Try_Block_Function 1403A4010)	low
-t6mp_msstore	1407893BC	function	sub_1407893BC	?sub_1407893BC@@YA_NPEAXHH@Z	qcommon/common.cpp	unnamed	name unknown: polled with (141EF8518, 1, 0) until it returns false (Com_Frame_Try_Block_Function 1403A4010)	low
+t6mp_msstore	1407893BC	function	sub_1407893BC	?sub_1407893BC@@YA_NPEAXHH@Z	win32/win_gdk.cpp	callee	Task queue dispatch via XThreading slot 16; Com_Frame_Try_Block_Function polls the completion port until it returns false.	high
 t6mp_msstore	14082AEF0	function	sub_14082AEF0	?sub_14082AEF0@@YAHPEAXPEAUStoreFrameTask@@@Z	qcommon/common.cpp	unnamed	name unknown: queues the online task; negative on failure (Com_Frame_Try_Block_Function 1403A4010)	low
 t6mp_msstore	141F04908	data	com_dedicated	?com_dedicated@@3PEBUdvar_t@@EB	qcommon/common.cpp	string	registered as "dedicated" (stored at 14039E3D3 and 14039E436); the frame stops after the server when it is set	high
 t6mp_msstore	141F04920	data	com_statmon	?com_statmon@@3PEBUdvar_t@@EB	qcommon/common.cpp	string	registered as "com_statmon" (bool, stored at 14039EABE); with it set the frame shows code_warning_fps after a frame over 33 ms	high
@@ -251,3 +251,339 @@ t6mp_msstore	140D3A590	data	r_model_skinModule	?r_model_skinModule@@3UjqModule@@
 t6mp_msstore	140A6C350	data	nuge_physicsModule	?nuge_physicsModule@@3UjqModule@@A	win32/win_workercmds.cpp	structure	a jqModule (0x30 bytes on x64) whose Name points to "nuge_physics"; its Group (+0x18) is polled in the server's position by R_ToggleSmpFrameCmd 14071B880	high
 t6mp_msstore	140D39F00	data	r_add_draw_callsModule	?r_add_draw_callsModule@@3UjqModule@@A	gfx_d3d/r_scene.cpp	structure	a jqModule (0x30 bytes on x64) whose Name points to "r_add_draw_calls"; its Group (+0x18) is polled in the server's position by R_ToggleSmpFrameCmd 14071B880	high
 t6mp_msstore	143043BC8	data	r_sceneentGroup	?r_sceneentGroup@@3UjqBatchGroup@@A	gfx_d3d/r_dpvs.cpp	structure	the 13th group R_ToggleSmpFrameCmd 14071B880 polls (.bss, no module): the server's R_FinishedFrontendWorkerCmds polls r_sceneentGroup there	high
+t6mp_msstore	140788004	function	GdkSavePath	GdkSavePath	win32/win_gdk.cpp	caller	14034ECC0 passes the 260-byte save path buffer and sets the initialized flag on HRESULT success. The wrapper resolves the XGameSave class (704c3f58-e629-4cc2-b197-30511b996fe2) and forwards context, capacity and buffer to vtable slot 31.	high
+t6mp_msstore	143ED0420	data	t6_store_save_path	t6_store_save_path	win32/win_gdk.cpp	caller	14034ECCA passes this address with length 260 to the persistent-storage wrapper. 14045F8CD uses the same buffer for fs_gameUserDataPath.	high
+t6mp_msstore	143E33FF1	data	t6_store_save_ready	t6_store_save_ready	win32/win_gdk.cpp	caller	14034ECEF sets this byte after obtaining the storage path. 14045F8B6 checks it before opening the save path.	high
+t6mp_msstore	140787868	function	GdkLoadRuntime	GdkLoadRuntime	win32/win_gdk.cpp	callee	Loads xgameruntime.dll via LoadLibraryExA with LOAD_LIBRARY_SEARCH_SYSTEM32 and caches the module in 140D450A8.	high
+t6mp_msstore	1407878A8	function	GdkQueryApi	GdkQueryApi	win32/win_gdk.cpp	callee	Calls the cached QueryApiImpl export with the two interface IDs and an output pointer.	high
+t6mp_msstore	140D450A8	data	t6_gdk_module	t6_gdk_module	win32/win_gdk.cpp	caller	140787868 stores the xgameruntime.dll handle. 14078764C reads it to resolve the runtime exports.	high
+t6mp_msstore	14049BD40	function	Sys_ReportUnhandledException	Sys_ReportUnhandledException	win32/win_gdk.cpp	callee	Calls ReportFault with the exception pointer and zero, then Com_Error with the unhandled exception string.	high
+t6mp_msstore	1407D0990	function	BdGetHostByName	BdGetHostByName	demonware/bd_platform_socket.cpp	string	Calls getaddrinfo and names itself bdPlatformSocket::getHostByName in the failure log.	high
+t6mp_msstore	1407D0DA0	function	BdSendTo	BdSendTo	demonware/bd_platform_socket.cpp	string	Demonware bdPlatformSocket::sendTo logs its name and calls sendto for IPv4 and WSASendTo for IPv6.	high
+t6mp_msstore	1407D0300	function	BdPlatformLog	BdPlatformLog	demonware/bd_platform_socket.cpp	caller	Demonware socket callers pass severity, channel, source path, function, line, and format strings.	high
+t6mp_msstore	140D542A0	data	bdDatagramBytesSent	bdDatagramBytesSent	demonware/bd_platform_socket.cpp	caller	1407D0DA0 adds payload length plus 28 or 48 bytes on a successful IPv4 or IPv6 send.	high
+t6mp_msstore	140D542A8	data	bdDatagramsSent	bdDatagramsSent	demonware/bd_platform_socket.cpp	caller	1407D0DA0 increments this counter once per successful send.	high
+t6mp_msstore	1404740C0	function	Sys_ProbeTimeServer	Sys_ProbeTimeServer	win32/win_vendor_network.cpp	caller	Builds a 48-byte NTP request to port 123 and retries four times.	high
+t6mp_msstore	1441FB410	data	t6_timeProbeEpoch	t6_timeProbeEpoch	win32/win_vendor_network.cpp	caller	1404740C0 caches the NTP fixed-point epoch from _time64.	high
+t6mp_msstore	1441FB418	data	t6_timeProbeStart	t6_timeProbeStart	win32/win_vendor_network.cpp	caller	1404740C0 caches the millisecond clock at epoch initialization.	high
+t6mp_msstore	140871040	function	BdConnectStream	BdConnectStream	win32/win_vendor_network.cpp	caller	Demonware stream socket caller 1408115EA marshals a socket handle, IPv4 address, and port.	high
+t6mp_msstore	140491220	function	WinInetOpenConnection	WinInetOpenConnection	win32/win_vendor_network.cpp	callee	Claims a 0x140-byte pool slot, then uses InternetOpenA and InternetConnectA.	high
+t6mp_msstore	140491160	function	WinInetReleaseConnection	WinInetReleaseConnection	win32/win_vendor_network.cpp	caller	140491220 invokes the cleanup routine on a partially opened slot.	high
+t6mp_msstore	1441FC943	data	t6_winInetReady	t6_winInetReady	win32/win_vendor_network.cpp	caller	140491220 checks this byte before parsing the URL.	high
+t6mp_msstore	1441FCA04	data	t6_winInetStopping	t6_winInetStopping	win32/win_vendor_network.cpp	caller	140491220 rejects new connections while this flag is set; 140491160 clears it after the last slot is released.	high
+t6mp_msstore	1441FCA10	data	t6_winInetSlots	t6_winInetSlots	win32/win_vendor_network.cpp	caller	140491220 returns one of four 0x140-byte slots starting here.	high
+t6mp_msstore	140874870	function	BdBeginWinHttpRequest	BdBeginWinHttpRequest	win32/win_vendor_network.cpp	string	The function logs bdHTTPWorkerWinHTTPImpl::BeginHttpRequest and calls WinHttpConnect.	high
+t6mp_msstore	140873440	function	BdCompleteWinHttpRequest	BdCompleteWinHttpRequest	demonware/bd_http_response.cpp	caller	140874870 calls this routine with an HRESULT on failures; 140874B80 calls it with zero for successful completion.	high
+t6mp_msstore	140874EE0	function	BdSendWinHttpRequest	BdSendWinHttpRequest	win32/win_vendor_network.cpp	caller	140874870 calls after storing the connection.	high
+t6mp_msstore	14080C5C0	function	BdAllocate	BdAllocate	win32/win_vendor_network.cpp	caller	140874870 allocates the formatted request path here.	high
+t6mp_msstore	14080C600	function	BdFree	BdFree	win32/win_vendor_network.cpp	caller	140874870 releases the previous request path here.	high
+t6mp_msstore	140873ED0	function	BdFormatHttpHost	BdFormatHttpHost	win32/win_vendor_network.cpp	caller	140874870 calls the wide host formatter with a 256-character buffer.	high
+t6mp_msstore	1408779B0	function	BdFormatHttpPath	BdFormatHttpPath	win32/win_vendor_network.cpp	caller	140874870 formats the path and extra URL components into the allocated buffer.	high
+t6mp_msstore	14088A0D0	function	XCurlAddRequest	XCurlAddRequest	win32/win_http_client.cpp	string	XCurlMulti::AddRequest error string and curl_multi_add_handle call.	high
+t6mp_msstore	14088C600	function	WinHttpInitializeRequest	WinHttpInitializeRequest	win32/win_http_client.cpp	string	WinHttpConnection connection and request initialization logs.	high
+t6mp_msstore	1408708EB	function	HttpMutexLock	HttpMutexLock	win32/win_http_client.cpp	caller	XCurlAddRequest locks the mutex at multi+0x10 before updating its requests.	high
+t6mp_msstore	1408708F7	function	HttpMutexUnlock	HttpMutexUnlock	win32/win_http_client.cpp	caller	XCurlAddRequest unlocks the mutex before disposing the incoming request or queuing a callback.	high
+t6mp_msstore	1408708DF	function	HttpThrowMutexError	HttpThrowMutexError	win32/win_http_client.cpp	caller	XCurlAddRequest calls this on a nonzero mutex-lock result.	high
+t6mp_msstore	1408350B0	function	HttpThrowRuntimeError	HttpThrowRuntimeError	win32/win_http_client.cpp	caller	XCurlAddRequest calls this on its null-mutex error branch.	high
+t6mp_msstore	1401BF9C0	function	HttpThrowTreeSize	HttpThrowTreeSize	win32/win_http_client.cpp	caller	XCurlAddRequest calls this at the size limit for its 0x38-byte tree nodes.	high
+t6mp_msstore	14087A630	function	HttpAllocate	HttpAllocate	win32/win_http_client.cpp	caller	XCurlAddRequest allocates the map node at size 0x38.	high
+t6mp_msstore	14078B018	function	HttpConstructBadAlloc	HttpConstructBadAlloc	win32/win_http_client.cpp	caller	XCurlAddRequest constructs the exception object after a failed allocation.	high
+t6mp_msstore	140870A9C	function	HttpThrowException	HttpThrowException	win32/win_http_client.cpp	caller	XCurlAddRequest passes the constructed exception and its metadata.	high
+t6mp_msstore	140A442A8	data	httpBadAllocInfo	httpBadAllocInfo	win32/win_http_client.cpp	caller	XCurlAddRequest passes this address to the exception throw helper.	high
+t6mp_msstore	140807A60	function	XCurlEasyHandle	XCurlEasyHandle	win32/win_http_client.cpp	caller	XCurlAddRequest queries the owned easy handle for libcurl and for the request tree key.	high
+t6mp_msstore	1401C33A0	function	XCurlInsertNode	XCurlInsertNode	win32/win_http_client.cpp	caller	XCurlAddRequest passes the map, search result and newly constructed node.	high
+t6mp_msstore	14088A9B0	function	XCurlProcessQueue	XCurlProcessQueue	win32/win_http_client.cpp	caller	XCurlAddRequest uses this address as the scheduled callback.	high
+t6mp_msstore	1407895B0	function	HttpQueueCallback	HttpQueueCallback	win32/win_gdk.cpp	caller	XCurlAddRequest submits the multi handle as callback context.	high
+t6mp_msstore	14087A980	function	HttpClientLog	HttpClientLog	win32/win_http_client.cpp	caller	XCurl and WinHTTP pass the HTTPCLIENT category, severity and format string.	high
+t6mp_msstore	140A4B980	data	httpClientCategory	httpClientCategory	win32/win_http_client.cpp	caller	Address of HTTPCLIENT category supplied to the log function.	high
+t6mp_msstore	1408887F0	function	HttpDestroyEasyRequest	HttpDestroyEasyRequest	win32/win_http_client.cpp	caller	XCurlAddRequest tears down the easy request before releasing its memory.	high
+t6mp_msstore	14087A650	function	HttpFree	HttpFree	win32/win_http_client.cpp	caller	XCurlAddRequest releases the request allocation and WinHttpInitializeRequest releases heap strings.	high
+t6mp_msstore	140885120	function	XCurlResult	XCurlResult	win32/win_http_client.cpp	caller	XCurlAddRequest maps a libcurl error to an HRESULT.	high
+t6mp_msstore	14087B930	function	HttpGetRequestMethodAndUrl	HttpGetRequestMethodAndUrl	win32/win_http_client.cpp	caller	WinHttpInitializeRequest reads the request verb and URL.	high
+t6mp_msstore	14087B2B0	function	HttpAssignNarrowString	HttpAssignNarrowString	win32/win_http_client.cpp	caller	WinHttpInitializeRequest copies URL bytes into a narrow string.	high
+t6mp_msstore	14088AA20	function	HttpParseUrl	HttpParseUrl	win32/win_http_client.cpp	caller	WinHttpInitializeRequest constructs a URL from the string.	high
+t6mp_msstore	14088C130	function	HttpMoveUrl	HttpMoveUrl	win32/win_http_client.cpp	caller	WinHttpInitializeRequest moves the parsed URL into the connection.	high
+t6mp_msstore	140885C60	function	HttpDestroyUrl	HttpDestroyUrl	win32/win_http_client.cpp	caller	WinHttpInitializeRequest destroys its temporary URL.	high
+t6mp_msstore	14088AF40	function	HttpUrlHost	HttpUrlHost	win32/win_http_client.cpp	caller	WinHttpInitializeRequest reads the URL host string.	high
+t6mp_msstore	14088B480	function	HttpUrlPort	HttpUrlPort	win32/win_http_client.cpp	caller	WinHttpInitializeRequest reads a 16-bit port.	high
+t6mp_msstore	14088D430	function	HttpUrlSecure	HttpUrlSecure	win32/win_http_client.cpp	caller	WinHttpInitializeRequest tests whether to set secure request flags.	high
+t6mp_msstore	14088B490	function	HttpUrlResource	HttpUrlResource	win32/win_http_client.cpp	caller	WinHttpInitializeRequest reads the path and query as a narrow string.	high
+t6mp_msstore	14088B550	function	HttpToWideString	HttpToWideString	win32/win_http_client.cpp	caller	WinHttpInitializeRequest converts a narrow string for WinHTTP.	high
+t6mp_msstore	14088B580	function	HttpWidenMethod	HttpWidenMethod	win32/win_http_client.cpp	caller	WinHttpInitializeRequest converts the request method to wide characters.	high
+t6mp_msstore	14087B770	function	HttpGetTimeout	HttpGetTimeout	win32/win_http_client.cpp	caller	WinHttpInitializeRequest reads the request timeout in seconds.	high
+t6mp_msstore	14087B530	function	HttpGetBody	HttpGetBody	win32/win_http_client.cpp	caller	WinHttpInitializeRequest obtains body data before configuring its read cursor.	high
+t6mp_msstore	14087B4B0	function	HttpGetHeaderCount	HttpGetHeaderCount	win32/win_http_client.cpp	caller	WinHttpInitializeRequest checks whether the request has headers.	high
+t6mp_msstore	140890080	function	HttpFormatHeaders	HttpFormatHeaders	win32/win_http_client.cpp	caller	WinHttpInitializeRequest formats headers for WinHttpAddRequestHeaders.	high
+t6mp_msstore	14087B030	function	HttpRequestId	HttpRequestId	win32/win_http_client.cpp	caller	WinHttpInitializeRequest reads the ID for diagnostics.	high
+t6mp_msstore	14078764C	function	GdkInitializeRuntime	GdkInitializeRuntime	win32/win_gdk.cpp	callee	Caches five GDK exports under the SRW lock and selects legacy or extended initialization.	high
+t6mp_msstore	140787EE0	function	GdkUninitializeRuntime	GdkUninitializeRuntime	win32/win_gdk.cpp	callee	Calls the explicit runtime shutdown export when applicable, clears its dispatch cache and releases the module.	high
+t6mp_msstore	140D45098	data	t6_gdk_dispatch	t6_gdk_dispatch	win32/win_gdk.cpp	callee	Beginning at the SRW lock, 14078764C and 140787EE0 share this block of flags, module and five cached exports.	high
+t6mp_msstore	140878750	function	BdHttpErrorName	BdHttpErrorName	demonware/bd_http_response.cpp	callee	Maps error bytes to BD_SUCCESS through BD_DNS_LOOKUP_ERROR for the finalizer.	high
+t6mp_msstore	1408787E0	function	BdHttpStatusName	BdHttpStatusName	demonware/bd_http_response.cpp	callee	Maps four HTTP states to BD_READY, BD_PENDING, BD_FAILED and BD_DONE.	high
+t6mp_msstore	1407D13A0	function	BdReleaseReference	BdReleaseReference	demonware/bd_http_response.cpp	callee	Decrements the reference count, invokes the virtual destructor at zero, and clears the pointer.	high
+t6mp_msstore	14080FEF0	function	BdStopwatchElapsed	BdStopwatchElapsed	demonware/bd_http_response.cpp	callee	HTTP finalizer uses this stopwatch accessor at request offset 0x68.	high
+t6mp_msstore	1407897E8	function	GdkUserAddAsync	GdkUserAddAsync	win32/win_gdk.cpp	caller	14034DF40 passes the add-user options and async block, then 14034EB8B retrieves the completed user handle.	high
+t6mp_msstore	140789860	function	GdkUserAddResult	GdkUserAddResult	win32/win_gdk.cpp	caller	14034EB8B passes the completed async block and the address of the cached user handle.	high
+t6mp_msstore	140789988	function	GdkUserCloseHandle	GdkUserCloseHandle	win32/win_gdk.cpp	caller	14034EBBB releases the cached user handle through XUser slot 4 after startup fails.	high
+t6mp_msstore	1407899E4	function	GdkUserDuplicateHandle	GdkUserDuplicateHandle	win32/win_gdk.cpp	caller	14085543C passes an existing user handle and writes a second owned handle via XUser slot 3.	high
+t6mp_msstore	140870945	function	BdPerformanceCounter	BdPerformanceCounter	demonware/bd_http_response.cpp	callee	140870C40 calls this MSVC performance counter thunk after querying the frequency.	high
+t6mp_msstore	14087094B	function	BdPerformanceFrequency	BdPerformanceFrequency	demonware/bd_http_response.cpp	callee	140870C40 calls this MSVC performance frequency thunk before the counter.	high
+t6mp_msstore	140870C40	function	BdClockMicroseconds	BdClockMicroseconds	demonware/bd_http_response.cpp	callee	Scales the performance counter to microseconds with a fast path for a 10 MHz frequency.	high
+t6mp_msstore	140870C00	function	BdElapsedSeconds	BdElapsedSeconds	demonware/bd_http_response.cpp	callee	Subtracts ordered microsecond timestamps and converts the difference to float seconds.	high
+t6mp_msstore	140789794	function	GdkPrepareThreading	GdkPrepareThreading	win32/win_gdk.cpp	callee	Queries XThreading and calls slot 29 before queue creation.	high
+t6mp_msstore	1407892A8	function	GdkTaskQueueCreate	GdkTaskQueueCreate	win32/win_gdk.cpp	caller	14034DE83 passes work and completion modes and storage for a task queue handle.	high
+t6mp_msstore	14078924C	function	GdkTaskQueueClose	GdkTaskQueueClose	win32/win_gdk.cpp	caller	14034E1CC closes the queue at 141EF8518; XThreading slot 17.	high
+t6mp_msstore	14088A750	function	XCurlPerform	XCurlPerform	win32/win_http_client.cpp	caller	The XCurl task callback calls the perform routine and logs its failed HRESULT.	high
+t6mp_msstore	14088A440	function	XCurlFailAll	XCurlFailAll	win32/win_http_client.cpp	caller	The XCurl task callback sends E_ABORT or the perform error to this active-request cleanup routine.	high
+t6mp_msstore	14080FCE0	function	BdBytePackerRemoveBuffer	BdBytePackerRemoveBuffer	demonware/bd_remote_task.cpp	string	Logs bdBytePacker::removeBuffer and copies the requested bytes with memmove.	high
+t6mp_msstore	14080D310	function	BdByteBufferRead	BdByteBufferRead	demonware/bd_remote_task.cpp	string	Logs bdByteBuffer::read on insufficient bytes and advances the read cursor after copying.	high
+t6mp_msstore	1407EC0B0	function	BdRemoteTaskAcceptReply	BdRemoteTaskAcceptReply	demonware/bd_remote_task.cpp	caller	The pending-task reply handler passes its owned reply buffer and transaction ID; the callee marks task state 2.	high
+t6mp_msstore	1407F8D20	function	BdPendingTaskPop	BdPendingTaskPop	demonware/bd_remote_task.cpp	caller	Unlinks the pending head, releases its task, and decrements the queue count.	high
+t6mp_msstore	1407F8710	function	BdRemoteTaskHandleReply	BdRemoteTaskHandleReply	demonware/bd_remote_task.cpp	string	Identifies itself as bdRemoteTaskManager::handleTaskReply and extracts the transaction ID.	high
+t6mp_msstore	140789B08	function	GdkUserGetId	GdkUserGetId	win32/win_gdk.cpp	caller	140855DBE passes the user handle and an eight-byte output slot; the failure log at 1408D7F20 identifies User ID.	high
+t6mp_msstore	1407ECB90	function	BdLobbyServiceConnect	BdLobbyServiceConnect	demonware/bd_lobby_service.cpp	string	Logs bdLobbyService::connect and copies a 0xA0-byte auth record before starting the replacement connection.	high
+t6mp_msstore	140803BB0	function	BdLobbyDisconnectConnection	BdLobbyDisconnectConnection	demonware/bd_lobby_service.cpp	caller	1407ECC1D calls the disconnect thunk before resetting an existing lobby service.	high
+t6mp_msstore	1407EC6C0	function	BdLobbyResetService	BdLobbyResetService	demonware/bd_lobby_service.cpp	caller	1407ECC25 resets service-side state after disconnecting the previous connection.	high
+t6mp_msstore	14080B140	function	BdConstructCommonAddr	BdConstructCommonAddr	demonware/bd_lobby_service.cpp	caller	1407ECCC9 passes 0xB8 bytes of new storage to the constructor that sets the bdCommonAddr vtable.	high
+t6mp_msstore	140803540	function	BdConstructLobbyConnection	BdConstructLobbyConnection	demonware/bd_lobby_service.cpp	caller	1407ECD17 passes new storage, an owned address and the service to the constructor that sets the bdLobbyConnection vtable.	high
+t6mp_msstore	140803A20	function	BdStartLobbyConnection	BdStartLobbyConnection	demonware/bd_lobby_service.cpp	caller	1407ECD6A passes the replacement connection and the cached authentication data.	high
+t6mp_msstore	14080BD90	function	BdDestroyLobbyAddress	BdDestroyLobbyAddress	demonware/bd_lobby_service.cpp	caller	The lobby connect routine calls this address destructor at its common exit.	high
+t6mp_msstore	140075F50	function	NvAPI_D3D11_CreateDevice	_NvAPI_D3D11_CreateDevice	gfx_d3d/r_nvapi.cpp	constant	Resolves NVAPI function ID 0x6A16D3A0 and is called from the adapter probe with Direct3D device arguments plus a supported-level output.	high
+t6mp_msstore	140050320	function	NvAPI_AcquireInterface	_NvAPI_AcquireInterface	gfx_d3d/r_nvapi.cpp	callee	Initializes the NVAPI interface, returns its context through the first argument, and counts active calls.	high
+t6mp_msstore	140D58D60	data	nvapiQueryInterface	_nvapiQueryInterface	gfx_d3d/r_nvapi.cpp	structure	Function pointer invoked with the requested NVAPI function ID to resolve its entry.	high
+t6mp_msstore	140D58D70	data	nvapiBeforeCall	_nvapiBeforeCall	gfx_d3d/r_nvapi.cpp	structure	Optional function pointer invoked with the ID and a callback context output before the API call.	high
+t6mp_msstore	140D58D78	data	nvapiAfterCall	_nvapiAfterCall	gfx_d3d/r_nvapi.cpp	structure	Optional function pointer invoked with the ID, callback context and status after the API call.	high
+t6mp_msstore	140D58DA8	data	nvapiActiveCalls	_nvapiActiveCalls	gfx_d3d/r_nvapi.cpp	structure	Incremented by the acquisition routine and decremented when the acquired call completes or lacks an entry.	high
+t6mp_msstore	140D58DB8	data	nvapiInterfaceGeneration	_nvapiInterfaceGeneration	gfx_d3d/r_nvapi.cpp	structure	Compared with the cached function's generation and copied when resolving a new entry.	high
+t6mp_msstore	140D5A560	data	nvapiCreateDeviceEntry	_nvapiCreateDeviceEntry	gfx_d3d/r_nvapi.cpp	structure	Cached function pointer for the 0x6A16D3A0 call.	high
+t6mp_msstore	140D5A568	data	nvapiCreateDeviceGeneration	_nvapiCreateDeviceGeneration	gfx_d3d/r_nvapi.cpp	structure	Saved interface generation for the cached function pointer.	high
+t6mp_msstore	140391530	function	Cbuf_InsertText	?Cbuf_InsertText@@YAXW4LocalClientNum_t@@PEBD@Z	qcommon/cmd.cpp	structure	Prepends text and a newline to the indexed local client command buffer under its lock. The map command calls it to requeue commands after wait. Server counterpart 006B1B70.	high
+t6mp_msstore	140406DC0	function	StoreLuiTransitionToMenu	StoreLuiTransitionToMenu	ui/lui.cpp	string	Dispatches the native open_menu event to the LUI root with menuName and controller. The MainLobby transition at 14040749B names the same arguments.	high
+t6mp_msstore	140492660	function	StoreHksGetField	StoreHksGetField	ui/lui.cpp	structure	Resolves the HKS stack or pseudo-index and pushes the named field. The native open_menu dispatch uses it to fetch LUI.roots and processEvent.	high
+t6mp_msstore	14069DA90	function	StoreHksProtectedCall	StoreHksProtectedCall	ui/lui.cpp	caller	Native LUI root dispatch passes argument count 2, result count 0, error-handler index 0, and reports nonzero results as script errors.	high
+t6mp_msstore	14265E878	data	store_luiLuaState	store_luiLuaState	ui/lui.cpp	structure	Shared HKS state used by the root event dispatcher and native Engine bindings.	high
+t6mp_msstore	1441FBA60	data	store_luiLock	store_luiLock	ui/lui.cpp	structure	Win32 critical section held by the LUI root event dispatcher across HKS stack operations.	high
+t6mp_msstore	1401B3FB0	function	CL_MapLoading_SetupDevmapParty	?CL_MapLoading_SetupDevmapParty@@YAXPEBD@Z	client/cl_main_mp.cpp	caller	Called by CL_MapLoading and SV_SpawnServer with the map name. Configures controller zero and starts the devmap party when the online and System Link flags are clear. PC server counterpart 005072C0.	high
+t6mp_msstore	140394320	function	StoreSetControllerInUse	StoreSetControllerInUse	client/cl_main_mp.cpp	caller	The registered setclientbeingusedandprimaryandactive command calls this with controller zero and true. Updates the controller in-use flag and emits the controller event.	high
+t6mp_msstore	1406F52E0	function	sub_1406F52E0	sub_1406F52E0	client/cl_main_mp.cpp	caller	CL_MapLoading_SetupDevmapParty calls this with controller zero and true immediately after activating the controller.	medium
+t6mp_msstore	1405A68D0	function	sub_1405A68D0	sub_1405A68D0	client/cl_main_mp.cpp	caller	CL_MapLoading_SetupDevmapParty calls this with controller zero after assigning client zero.	medium
+t6mp_msstore	1401B3900	function	sub_1401B3900	sub_1401B3900	client/cl_main_mp.cpp	caller	Map setup tail-calls this party initialization routine with the original map name after selecting System Link.	medium
+t6mp_msstore	143ED9A14	data	store_sessionModeFlags	store_sessionModeFlags	client/cl_main_mp.cpp	structure	The native Engine SessionMode setters toggle offline 1, System Link 2, online 4 and private 8 in this word.	high
+t6mp_msstore	143ED8224	data	store_143ED8224	store_143ED8224	client/cl_main_mp.cpp	structure	CL_MapLoading_SetupDevmapParty tests bit 2 before changing session mode.	high
+t6mp_msstore	141EF91E8	data	store_141EF91E8	store_141EF91E8	client/cl_main_mp.cpp	structure	Local client assignment for the first controller. The LUI open_menu dispatch reads the same field.	high
+t6mp_msstore	141EF8675	data	store_141EF8675	store_141EF8675	client/cl_main_mp.cpp	structure	When set the native session-mode setters issue the backup-block error before changing modes.	high
+t6mp_msstore	14059A800	function	StoreLiveStatsReset	StoreLiveStatsReset	demonware/live_stats.cpp	string	LiveStats_ResetStats source label, reset reason parameter and primary stats initialization including mp/stats_init.cfg. PC server counterpart 008DEC10.	high
+t6mp_msstore	1405A4700	function	StoreLiveStatsAreFetched	StoreLiveStatsAreFetched	demonware/live_stats.cpp	caller	Engine.GetPlayerStats tests this before returning the DDL object. Source 0 reads the same byte that the native reset enables.	high
+t6mp_msstore	1425A1BF0	data	store_playerStatsSchema	store_playerStatsSchema	demonware/live_stats.cpp	structure	Primary player-stats DDL schema used by the native stats reset and required by Engine.GetPlayerStats.	high
+t6mp_msstore	1405723B0	function	Live_InitiateDemonWareConnect_f	Live_InitiateDemonWareConnect_f	demonware/live_connect.cpp	string	The initiateDemonWareConnect registration at 140575E53 assigns this entry. It forwards controller zero to 1401A8480.	high
+t6mp_msstore	1401A8480	function	StoreRequestDemonwareConnect	StoreRequestDemonwareConnect	demonware/live_connect.cpp	caller	The initiateDemonWareConnect command tail-calls this entry with controller zero.	high
+t6mp_msstore	1407EF940	function	BdRichPresenceSetInfo	BdRichPresenceSetInfo	demonware/bd_rich_presence.cpp	string	bdRichPresenceService::setInfo names itself in the buffer and task error logs and submits service 0x44 task 1.	high
+t6mp_msstore	1407EF7A0	function	BdRichPresenceGetInfo	BdRichPresenceGetInfo	demonware/bd_rich_presence.cpp	string	bdRichPresenceService::getInfo names itself in the buffer and task error logs and submits service 0x44 task 2.	high
+t6mp_msstore	1408031F0	function	BdConstructTaskByteBuffer	BdConstructTaskByteBuffer	demonware/bd_rich_presence.cpp	callee	Matched to bdTaskByteBuffer constructor at PC server 009D3E30. Both presence callers pass 0x50 bytes of allocated storage.	high
+t6mp_msstore	1407F8890	function	BdInitializeTaskBuffer	BdInitializeTaskBuffer	demonware/bd_rich_presence.cpp	callee	Matched to bdRemoteTaskManager::initTaskBuffer at PC server 009CA380. Initializes the service and task IDs in the presence buffer.	high
+t6mp_msstore	14080E8A0	function	BdByteBufferWriteUInt64	BdByteBufferWriteUInt64	demonware/bd_rich_presence.cpp	callee	Matched to bdByteBuffer::writeUInt64 at PC server 009BCC20. Presence get calls this once per requested user ID.	high
+t6mp_msstore	14080E0E0	function	BdByteBufferWriteBlob	BdByteBufferWriteBlob	demonware/bd_rich_presence.cpp	callee	Matched to bdByteBuffer::writeBlob at PC server 009BD2B0. Presence set passes its data pointer and byte count.	high
+t6mp_msstore	1407F9040	function	BdStartRemoteTask	BdStartRemoteTask	demonware/bd_rich_presence.cpp	callee	Matched to bdRemoteTaskManager::startTask at PC server 009CB430. Returns a nonzero Demonware error on start failure.	high
+t6mp_msstore	1407EC030	function	BdSetRemoteTaskResult	BdSetRemoteTaskResult	demonware/bd_rich_presence.cpp	callee	Matched to bdRemoteTask::setTaskResult at PC server 009C2F10. Presence get attaches a result array to the submitted task.	high
+t6mp_msstore	1408022F0	function	BdHandleGdkAuthTask	?BdHandleGdkAuthTask@@YAXPEAUBdHttpAuthService@@@Z	demonware/bd_http_auth.cpp	string	bdHTTPAuthService::handleGdkAsyncTask finishes XUser and token tasks and dispatches HTTP auth.	high
+t6mp_msstore	140807A80	function	BdGdkAuthTaskIsPending	BdGdkAuthTaskIsPending	demonware/bd_http_auth.cpp	caller	Auth handler returns early when this task pump reports pending.	high
+t6mp_msstore	1407D3CA0	function	BdGdkAuthTaskError	BdGdkAuthTaskError	demonware/bd_http_auth.cpp	caller	Auth task failure log reads the code by reference.	high
+t6mp_msstore	140807A70	function	BdGdkAuthTaskUser	BdGdkAuthTaskUser	demonware/bd_http_auth.cpp	caller	The first successful task result is passed into the user owner.	high
+t6mp_msstore	1407D3D40	function	BdGdkAuthTaskToken	BdGdkAuthTaskToken	demonware/bd_http_auth.cpp	caller	The second successful task result is copied into the token string.	high
+t6mp_msstore	140807780	function	BdSetGdkAuthUser	BdSetGdkAuthUser	demonware/bd_http_auth.cpp	caller	Sets the owned GDK user after the first task and clears it after HTTP dispatch.	high
+t6mp_msstore	140807670	function	BdConstructTokenTask	BdConstructTokenTask	demonware/bd_http_auth.cpp	caller	Constructs the token task in 0x60 bytes of new storage with the owned user handle.	high
+t6mp_msstore	14080C710	function	BdCopyAuthString	BdCopyAuthString	demonware/bd_http_auth.cpp	caller	Copies the auth token into a local Demonware string.	high
+t6mp_msstore	14080C8C0	function	BdDestroyAuthString	BdDestroyAuthString	demonware/bd_http_auth.cpp	caller	Destroys the temporary auth token string.	high
+t6mp_msstore	140802A90	function	BdSendAuthRequest	BdSendAuthRequest	demonware/bd_http_auth.cpp	string	Builds the auth JSON and submits the request to the Demonware HTTP worker.	high
+t6mp_msstore	1408718C0	function	BdInitHttpRequest	BdInitHttpRequest	demonware/bd_http_auth.cpp	caller	Constructs a bdHTTPRequest with a method code and URL.	high
+t6mp_msstore	140871AE0	function	BdDestroyHttpRequest	BdDestroyHttpRequest	demonware/bd_http_auth.cpp	caller	Releases request header and body references when the builder leaves scope.	high
+t6mp_msstore	1408721B0	function	BdHttpSetUpload	BdHttpSetUpload	demonware/bd_http_auth.cpp	caller	Configures the auth JSON upload pointer and size.	high
+t6mp_msstore	140872170	function	BdHttpSetDownload	BdHttpSetDownload	demonware/bd_http_auth.cpp	caller	Configures the auth reply buffer pointer and size.	high
+t6mp_msstore	1407D0580	function	BdFormatAuthRequest	BdFormatAuthRequest	demonware/bd_http_auth.cpp	callee	Demonware snprintf wrapper builds the original auth URL at 140802CD1.	high
+t6mp_msstore	140872B90	function	BdConstructWinHttpResponse	BdConstructWinHttpResponse	demonware/bd_http_auth.cpp	caller	Original queue constructs a bdHTTPResponseWinHTTP from its request descriptor in 0xA0E8 bytes.	high
+t6mp_msstore	1407898DC	function	GdkUserCheckPrivilege	?GdkUserCheckPrivilege@@YAJPEAXIIPEA_NPEAI@Z	win32/win_gdk.cpp	caller	XUser slot 20 dispatches the user, options, privilege id and two result pointers. The multiplayer menu passes privilege 0xFE.	high
+t6mp_msstore	143051570	data	store_primaryDemonwareState	store_primaryDemonwareState	demonware/bd_lobby_service.cpp	structure	Controller zero state read by the native IsSignedInToDemonware Lua binding. State 6 is lobby connected.	high
+t6mp_msstore	1407E6F10	function	BdInitNetStartParams	BdInitNetStartParams	demonware/bd_net_start.cpp	semantic+differential	Initializes bdNetStartParams, including game and discovery ports, default STUN hosts, socket router and UPnP.	high
+t6mp_msstore	14080C210	function	BdInitAddress	BdInitAddress	demonware/bd_net_start.cpp	caller	Constructs the address and clears its port in the params constructor.	high
+t6mp_msstore	1407E87B0	function	BdInitSocketRouterConfig	BdInitSocketRouterConfig	demonware/bd_net_start.cpp	caller	Constructs native router configuration at params offset C8.	high
+t6mp_msstore	1405B2610	function	BdInitUpnpConfig	BdInitUpnpConfig	demonware/bd_net_start.cpp	caller	Initializes the UPnP option block at params offset 170.	high
+t6mp_msstore	14080C720	function	BdInitStringFromCString	BdInitStringFromCString	demonware/bd_net_start.cpp	caller	Constructs each default STUN hostname as a temporary native string.	high
+t6mp_msstore	140220240	function	BdAppendDiscoveryHost	BdAppendDiscoveryHost	demonware/bd_net_start.cpp	caller	Appends each default STUN hostname to the native array.	high
+t6mp_msstore	14080BCF0	function	BdParseSocketAddress	BdParseSocketAddress	demonware/bd_net_start.cpp	caller	The calling network bootstrap constructs the fallback local address from 127.0.0.1.	high
+t6zm_msstore	140786EFC	function	sub_1407893BC	?sub_1407893BC@@YA_NPEAXHH@Z	win32/win_gdk.cpp	behaviour	Store MP 1407893BC: unique normalized body.	high
+t6zm_msstore	140785B44	function	GdkSavePath	GdkSavePath	win32/win_gdk.cpp	behaviour	Store MP 140788004: unique normalized body.	high
+t6zm_msstore	143ECE4A0	data	t6_store_save_path	t6_store_save_path	win32/win_gdk.cpp	caller	Store MP 143ED0420: 2 references from matched functions.	high
+t6zm_msstore	143E32071	data	t6_store_save_ready	t6_store_save_ready	win32/win_gdk.cpp	caller	Store MP 143E33FF1: 2 references from matched functions.	high
+t6zm_msstore	1407853A8	function	GdkLoadRuntime	GdkLoadRuntime	win32/win_gdk.cpp	behaviour	Store MP 140787868: unique normalized body.	high
+t6zm_msstore	1407853E8	function	GdkQueryApi	GdkQueryApi	win32/win_gdk.cpp	behaviour	Store MP 1407878A8: unique normalized body.	high
+t6zm_msstore	140D43128	data	t6_gdk_module	t6_gdk_module	win32/win_gdk.cpp	caller	Store MP 140D450A8: 10 references from matched functions.	high
+t6zm_msstore	14049C9B0	function	Sys_ReportUnhandledException	Sys_ReportUnhandledException	win32/win_gdk.cpp	behaviour	Store MP 14049BD40: unique normalized body.	high
+t6zm_msstore	1407CE4D0	function	BdGetHostByName	BdGetHostByName	demonware/bd_platform_socket.cpp	behaviour	Store MP 1407D0990: unique normalized body.	high
+t6zm_msstore	1407CE8E0	function	BdSendTo	BdSendTo	demonware/bd_platform_socket.cpp	caller	Store MP 1407D0DA0: 1 references from matched functions.	medium
+t6zm_msstore	1407CDE40	function	BdPlatformLog	BdPlatformLog	demonware/bd_platform_socket.cpp	behaviour	Store MP 1407D0300: unique normalized body.	high
+t6zm_msstore	140474DB0	function	Sys_ProbeTimeServer	Sys_ProbeTimeServer	win32/win_vendor_network.cpp	behaviour	Store MP 1404740C0: unique normalized body.	high
+t6zm_msstore	1441F9490	data	t6_timeProbeEpoch	t6_timeProbeEpoch	win32/win_vendor_network.cpp	caller	Store MP 1441FB410: 3 references from matched functions.	high
+t6zm_msstore	1441F9498	data	t6_timeProbeStart	t6_timeProbeStart	win32/win_vendor_network.cpp	caller	Store MP 1441FB418: 2 references from matched functions.	high
+t6zm_msstore	14086EB30	function	BdConnectStream	BdConnectStream	win32/win_vendor_network.cpp	caller	Store MP 140871040: 1 references from matched functions.	medium
+t6zm_msstore	140491F10	function	WinInetOpenConnection	WinInetOpenConnection	win32/win_vendor_network.cpp	behaviour	Store MP 140491220: unique normalized body.	high
+t6zm_msstore	140491E50	function	WinInetReleaseConnection	WinInetReleaseConnection	win32/win_vendor_network.cpp	behaviour	Store MP 140491160: unique normalized body.	high
+t6zm_msstore	1441FA9C3	data	t6_winInetReady	t6_winInetReady	win32/win_vendor_network.cpp	caller	Store MP 1441FC943: 2 references from matched functions.	high
+t6zm_msstore	1441FAA84	data	t6_winInetStopping	t6_winInetStopping	win32/win_vendor_network.cpp	caller	Store MP 1441FCA04: 16 references from matched functions.	high
+t6zm_msstore	1441FAA90	data	t6_winInetSlots	t6_winInetSlots	win32/win_vendor_network.cpp	caller	Store MP 1441FCA10: 1 references from matched functions.	medium
+t6zm_msstore	140872360	function	BdBeginWinHttpRequest	BdBeginWinHttpRequest	win32/win_vendor_network.cpp	behaviour	Store MP 140874870: unique normalized body.	high
+t6zm_msstore	140870F30	function	BdCompleteWinHttpRequest	BdCompleteWinHttpRequest	demonware/bd_http_response.cpp	behaviour	Store MP 140873440: unique normalized body.	high
+t6zm_msstore	1408729D0	function	BdSendWinHttpRequest	BdSendWinHttpRequest	win32/win_vendor_network.cpp	behaviour	Store MP 140874EE0: unique normalized body.	high
+t6zm_msstore	14080A100	function	BdAllocate	BdAllocate	win32/win_vendor_network.cpp	caller	Store MP 14080C5C0: 302 references from matched functions.	high
+t6zm_msstore	14080A140	function	BdFree	BdFree	win32/win_vendor_network.cpp	caller	Store MP 14080C600: 377 references from matched functions.	high
+t6zm_msstore	1408719C0	function	BdFormatHttpHost	BdFormatHttpHost	win32/win_vendor_network.cpp	behaviour	Store MP 140873ED0: unique normalized body.	high
+t6zm_msstore	1408754A0	function	BdFormatHttpPath	BdFormatHttpPath	win32/win_vendor_network.cpp	caller	Store MP 1408779B0: 1 references from matched functions.	medium
+t6zm_msstore	140887BC0	function	XCurlAddRequest	XCurlAddRequest	win32/win_http_client.cpp	behaviour	Store MP 14088A0D0: unique normalized body.	high
+t6zm_msstore	14088A0F0	function	WinHttpInitializeRequest	WinHttpInitializeRequest	win32/win_http_client.cpp	behaviour	Store MP 14088C600: unique normalized body.	high
+t6zm_msstore	14086E3DB	function	HttpMutexLock	HttpMutexLock	win32/win_http_client.cpp	caller	Store MP 1408708EB: 57 references from matched functions.	high
+t6zm_msstore	14086E3E7	function	HttpMutexUnlock	HttpMutexUnlock	win32/win_http_client.cpp	caller	Store MP 1408708F7: 77 references from matched functions.	high
+t6zm_msstore	14086E3CF	function	HttpThrowMutexError	HttpThrowMutexError	win32/win_http_client.cpp	caller	Store MP 1408708DF: 56 references from matched functions.	high
+t6zm_msstore	140832BA0	function	HttpThrowRuntimeError	HttpThrowRuntimeError	win32/win_http_client.cpp	behaviour	Store MP 1408350B0: unique normalized body.	high
+t6zm_msstore	1401C1420	function	HttpThrowTreeSize	HttpThrowTreeSize	win32/win_http_client.cpp	caller	Store MP 1401BF9C0: 19 references from matched functions.	high
+t6zm_msstore	140878120	function	HttpAllocate	HttpAllocate	win32/win_http_client.cpp	behaviour	Store MP 14087A630: unique normalized body.	high
+t6zm_msstore	140788B58	function	HttpConstructBadAlloc	HttpConstructBadAlloc	win32/win_http_client.cpp	caller	Store MP 14078B018: 291 references from matched functions.	high
+t6zm_msstore	14086E58C	function	HttpThrowException	HttpThrowException	win32/win_http_client.cpp	caller	Store MP 140870A9C: 344 references from matched functions.	high
+t6zm_msstore	140A42258	data	httpBadAllocInfo	httpBadAllocInfo	win32/win_http_client.cpp	caller	Store MP 140A442A8: 291 references from matched functions.	high
+t6zm_msstore	1408055A0	function	XCurlEasyHandle	XCurlEasyHandle	win32/win_http_client.cpp	caller	Store MP 140807A60: 11 references from matched functions.	high
+t6zm_msstore	1401C4E00	function	XCurlInsertNode	XCurlInsertNode	win32/win_http_client.cpp	behaviour	Store MP 1401C33A0: unique normalized body.	high
+t6zm_msstore	1408884A0	function	XCurlProcessQueue	XCurlProcessQueue	win32/win_http_client.cpp	caller	Store MP 14088A9B0: 2 references from matched functions.	high
+t6zm_msstore	1407870F0	function	HttpQueueCallback	HttpQueueCallback	win32/win_gdk.cpp	behaviour	Store MP 1407895B0: unique normalized body.	high
+t6zm_msstore	140878470	function	HttpClientLog	HttpClientLog	win32/win_http_client.cpp	behaviour	Store MP 14087A980: unique normalized body.	high
+t6zm_msstore	140A49980	data	httpClientCategory	httpClientCategory	win32/win_http_client.cpp	caller	Store MP 140A4B980: 166 references from matched functions.	high
+t6zm_msstore	1408862E0	function	HttpDestroyEasyRequest	HttpDestroyEasyRequest	win32/win_http_client.cpp	behaviour	Store MP 1408887F0: unique normalized body.	high
+t6zm_msstore	140878140	function	HttpFree	HttpFree	win32/win_http_client.cpp	behaviour	Store MP 14087A650: unique normalized body.	high
+t6zm_msstore	140882C10	function	XCurlResult	XCurlResult	win32/win_http_client.cpp	caller	Store MP 140885120: 3 references from matched functions.	high
+t6zm_msstore	140879420	function	HttpGetRequestMethodAndUrl	HttpGetRequestMethodAndUrl	win32/win_http_client.cpp	behaviour	Store MP 14087B930: unique normalized body.	high
+t6zm_msstore	140878DA0	function	HttpAssignNarrowString	HttpAssignNarrowString	win32/win_http_client.cpp	behaviour	Store MP 14087B2B0: unique normalized body.	high
+t6zm_msstore	140888510	function	HttpParseUrl	HttpParseUrl	win32/win_http_client.cpp	behaviour	Store MP 14088AA20: unique normalized body.	high
+t6zm_msstore	140889C20	function	HttpMoveUrl	HttpMoveUrl	win32/win_http_client.cpp	behaviour	Store MP 14088C130: unique normalized body.	high
+t6zm_msstore	140883750	function	HttpDestroyUrl	HttpDestroyUrl	win32/win_http_client.cpp	behaviour	Store MP 140885C60: unique normalized body.	high
+t6zm_msstore	140888A30	function	HttpUrlHost	HttpUrlHost	win32/win_http_client.cpp	caller	Store MP 14088AF40: 4 references from matched functions.	high
+t6zm_msstore	140888F70	function	HttpUrlPort	HttpUrlPort	win32/win_http_client.cpp	caller	Store MP 14088B480: 5 references from matched functions.	high
+t6zm_msstore	14088AF20	function	HttpUrlSecure	HttpUrlSecure	win32/win_http_client.cpp	behaviour	Store MP 14088D430: unique normalized body.	high
+t6zm_msstore	140888F80	function	HttpUrlResource	HttpUrlResource	win32/win_http_client.cpp	behaviour	Store MP 14088B490: unique normalized body.	high
+t6zm_msstore	140889040	function	HttpToWideString	HttpToWideString	win32/win_http_client.cpp	behaviour	Store MP 14088B550: unique normalized body.	high
+t6zm_msstore	140889070	function	HttpWidenMethod	HttpWidenMethod	win32/win_http_client.cpp	behaviour	Store MP 14088B580: unique normalized body.	high
+t6zm_msstore	140879260	function	HttpGetTimeout	HttpGetTimeout	win32/win_http_client.cpp	behaviour	Store MP 14087B770: unique normalized body.	high
+t6zm_msstore	140879020	function	HttpGetBody	HttpGetBody	win32/win_http_client.cpp	behaviour	Store MP 14087B530: unique normalized body.	high
+t6zm_msstore	140878FA0	function	HttpGetHeaderCount	HttpGetHeaderCount	win32/win_http_client.cpp	behaviour	Store MP 14087B4B0: unique normalized body.	high
+t6zm_msstore	14088DB70	function	HttpFormatHeaders	HttpFormatHeaders	win32/win_http_client.cpp	behaviour	Store MP 140890080: unique normalized body.	high
+t6zm_msstore	140878B20	function	HttpRequestId	HttpRequestId	win32/win_http_client.cpp	behaviour	Store MP 14087B030: unique normalized body.	high
+t6zm_msstore	14078518C	function	GdkInitializeRuntime	GdkInitializeRuntime	win32/win_gdk.cpp	behaviour	Store MP 14078764C: unique normalized body.	high
+t6zm_msstore	140785A20	function	GdkUninitializeRuntime	GdkUninitializeRuntime	win32/win_gdk.cpp	behaviour	Store MP 140787EE0: unique normalized body.	high
+t6zm_msstore	140D43118	data	t6_gdk_dispatch	t6_gdk_dispatch	win32/win_gdk.cpp	caller	Store MP 140D45098: 4 references from matched functions.	high
+t6zm_msstore	140876240	function	BdHttpErrorName	BdHttpErrorName	demonware/bd_http_response.cpp	caller	Store MP 140878750: 2 references from matched functions.	high
+t6zm_msstore	1408762D0	function	BdHttpStatusName	BdHttpStatusName	demonware/bd_http_response.cpp	caller	Store MP 1408787E0: 2 references from matched functions.	high
+t6zm_msstore	1407CEEE0	function	BdReleaseReference	BdReleaseReference	demonware/bd_http_response.cpp	behaviour	Store MP 1407D13A0: unique normalized body.	high
+t6zm_msstore	14080D9E0	function	BdStopwatchElapsed	BdStopwatchElapsed	demonware/bd_http_response.cpp	behaviour	Store MP 14080FEF0: unique normalized body.	high
+t6zm_msstore	140787328	function	GdkUserAddAsync	GdkUserAddAsync	win32/win_gdk.cpp	behaviour	Store MP 1407897E8: unique normalized body.	high
+t6zm_msstore	1407873A0	function	GdkUserAddResult	GdkUserAddResult	win32/win_gdk.cpp	caller	Store MP 140789860: 2 references from matched functions.	high
+t6zm_msstore	1407874C8	function	GdkUserCloseHandle	GdkUserCloseHandle	win32/win_gdk.cpp	caller	Store MP 140789988: 9 references from matched functions.	high
+t6zm_msstore	140787524	function	GdkUserDuplicateHandle	GdkUserDuplicateHandle	win32/win_gdk.cpp	behaviour	Store MP 1407899E4: unique normalized body.	high
+t6zm_msstore	14086E435	function	BdPerformanceCounter	BdPerformanceCounter	demonware/bd_http_response.cpp	caller	Store MP 140870945: 8 references from matched functions.	high
+t6zm_msstore	14086E43B	function	BdPerformanceFrequency	BdPerformanceFrequency	demonware/bd_http_response.cpp	caller	Store MP 14087094B: 8 references from matched functions.	high
+t6zm_msstore	14086E730	function	BdClockMicroseconds	BdClockMicroseconds	demonware/bd_http_response.cpp	behaviour	Store MP 140870C40: unique normalized body.	high
+t6zm_msstore	14086E6F0	function	BdElapsedSeconds	BdElapsedSeconds	demonware/bd_http_response.cpp	caller	Store MP 140870C00: 2 references from matched functions.	high
+t6zm_msstore	1407872D4	function	GdkPrepareThreading	GdkPrepareThreading	win32/win_gdk.cpp	behaviour	Store MP 140789794: unique normalized body.	high
+t6zm_msstore	140786DE8	function	GdkTaskQueueCreate	GdkTaskQueueCreate	win32/win_gdk.cpp	behaviour	Store MP 1407892A8: unique normalized body.	high
+t6zm_msstore	140786D8C	function	GdkTaskQueueClose	GdkTaskQueueClose	win32/win_gdk.cpp	behaviour	Store MP 14078924C: unique normalized body.	high
+t6zm_msstore	140888240	function	XCurlPerform	XCurlPerform	win32/win_http_client.cpp	behaviour	Store MP 14088A750: unique normalized body.	high
+t6zm_msstore	140887F30	function	XCurlFailAll	XCurlFailAll	win32/win_http_client.cpp	behaviour	Store MP 14088A440: unique normalized body.	high
+t6zm_msstore	14080D7D0	function	BdBytePackerRemoveBuffer	BdBytePackerRemoveBuffer	demonware/bd_remote_task.cpp	behaviour	Store MP 14080FCE0: unique normalized body.	high
+t6zm_msstore	14080AE50	function	BdByteBufferRead	BdByteBufferRead	demonware/bd_remote_task.cpp	behaviour	Store MP 14080D310: unique normalized body.	high
+t6zm_msstore	1407E9BF0	function	BdRemoteTaskAcceptReply	BdRemoteTaskAcceptReply	demonware/bd_remote_task.cpp	behaviour	Store MP 1407EC0B0: unique normalized body.	high
+t6zm_msstore	1407F6860	function	BdPendingTaskPop	BdPendingTaskPop	demonware/bd_remote_task.cpp	behaviour	Store MP 1407F8D20: unique normalized body.	high
+t6zm_msstore	1407F6250	function	BdRemoteTaskHandleReply	BdRemoteTaskHandleReply	demonware/bd_remote_task.cpp	behaviour	Store MP 1407F8710: unique normalized body.	high
+t6zm_msstore	140787648	function	GdkUserGetId	GdkUserGetId	win32/win_gdk.cpp	caller	Store MP 140789B08: 2 references from matched functions.	high
+t6zm_msstore	1407EA6D0	function	BdLobbyServiceConnect	BdLobbyServiceConnect	demonware/bd_lobby_service.cpp	behaviour	Store MP 1407ECB90: unique normalized body.	high
+t6zm_msstore	1408016F0	function	BdLobbyDisconnectConnection	BdLobbyDisconnectConnection	demonware/bd_lobby_service.cpp	caller	Store MP 140803BB0: 2 references from matched functions.	high
+t6zm_msstore	1407EA200	function	BdLobbyResetService	BdLobbyResetService	demonware/bd_lobby_service.cpp	behaviour	Store MP 1407EC6C0: unique normalized body.	high
+t6zm_msstore	140808C80	function	BdConstructCommonAddr	BdConstructCommonAddr	demonware/bd_lobby_service.cpp	behaviour	Store MP 14080B140: unique normalized body.	high
+t6zm_msstore	140801080	function	BdConstructLobbyConnection	BdConstructLobbyConnection	demonware/bd_lobby_service.cpp	behaviour	Store MP 140803540: unique normalized body.	high
+t6zm_msstore	140801560	function	BdStartLobbyConnection	BdStartLobbyConnection	demonware/bd_lobby_service.cpp	behaviour	Store MP 140803A20: unique normalized body.	high
+t6zm_msstore	1408098D0	function	BdDestroyLobbyAddress	BdDestroyLobbyAddress	demonware/bd_lobby_service.cpp	caller	Store MP 14080BD90: 185 references from matched functions.	high
+t6zm_msstore	140075F50	function	NvAPI_D3D11_CreateDevice	_NvAPI_D3D11_CreateDevice	gfx_d3d/r_nvapi.cpp	behaviour	Store MP 140075F50: unique normalized body.	high
+t6zm_msstore	140050320	function	NvAPI_AcquireInterface	_NvAPI_AcquireInterface	gfx_d3d/r_nvapi.cpp	behaviour	Store MP 140050320: unique normalized body.	high
+t6zm_msstore	140D56DE0	data	nvapiQueryInterface	_nvapiQueryInterface	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D58D60: 1104 references from matched functions.	high
+t6zm_msstore	140D56DF0	data	nvapiBeforeCall	_nvapiBeforeCall	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D58D70: 1099 references from matched functions.	high
+t6zm_msstore	140D56DF8	data	nvapiAfterCall	_nvapiAfterCall	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D58D78: 1099 references from matched functions.	high
+t6zm_msstore	140D56E28	data	nvapiActiveCalls	_nvapiActiveCalls	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D58DA8: 2199 references from matched functions.	high
+t6zm_msstore	140D56E38	data	nvapiInterfaceGeneration	_nvapiInterfaceGeneration	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D58DB8: 1096 references from matched functions.	high
+t6zm_msstore	140D585E0	data	nvapiCreateDeviceEntry	_nvapiCreateDeviceEntry	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D5A560: 7 references from matched functions.	high
+t6zm_msstore	140D585E8	data	nvapiCreateDeviceGeneration	_nvapiCreateDeviceGeneration	gfx_d3d/r_nvapi.cpp	caller	Store MP 140D5A568: 2 references from matched functions.	high
+t6zm_msstore	140573710	function	Live_InitiateDemonWareConnect_f	Live_InitiateDemonWareConnect_f	demonware/live_connect.cpp	caller	Store MP 1405723B0: 1 references from matched functions.	medium
+t6zm_msstore	1401AB320	function	StoreRequestDemonwareConnect	StoreRequestDemonwareConnect	demonware/live_connect.cpp	behaviour	Store MP 1401A8480: unique normalized body.	high
+t6zm_msstore	1407ED480	function	BdRichPresenceSetInfo	BdRichPresenceSetInfo	demonware/bd_rich_presence.cpp	behaviour	Store MP 1407EF940: unique normalized body.	high
+t6zm_msstore	1407ED2E0	function	BdRichPresenceGetInfo	BdRichPresenceGetInfo	demonware/bd_rich_presence.cpp	behaviour	Store MP 1407EF7A0: unique normalized body.	high
+t6zm_msstore	140800D30	function	BdConstructTaskByteBuffer	BdConstructTaskByteBuffer	demonware/bd_rich_presence.cpp	behaviour	Store MP 1408031F0: unique normalized body.	high
+t6zm_msstore	1407F63D0	function	BdInitializeTaskBuffer	BdInitializeTaskBuffer	demonware/bd_rich_presence.cpp	behaviour	Store MP 1407F8890: unique normalized body.	high
+t6zm_msstore	14080C3E0	function	BdByteBufferWriteUInt64	BdByteBufferWriteUInt64	demonware/bd_rich_presence.cpp	behaviour	Store MP 14080E8A0: unique normalized body.	high
+t6zm_msstore	14080BC20	function	BdByteBufferWriteBlob	BdByteBufferWriteBlob	demonware/bd_rich_presence.cpp	behaviour	Store MP 14080E0E0: unique normalized body.	high
+t6zm_msstore	1407F6B80	function	BdStartRemoteTask	BdStartRemoteTask	demonware/bd_rich_presence.cpp	behaviour	Store MP 1407F9040: unique normalized body.	high
+t6zm_msstore	1407E9B70	function	BdSetRemoteTaskResult	BdSetRemoteTaskResult	demonware/bd_rich_presence.cpp	caller	Store MP 1407EC030: 53 references from matched functions.	high
+t6zm_msstore	1407FFE30	function	BdHandleGdkAuthTask	?BdHandleGdkAuthTask@@YAXPEAUBdHttpAuthService@@@Z	demonware/bd_http_auth.cpp	behaviour	Store MP 1408022F0: unique normalized body.	high
+t6zm_msstore	1408055C0	function	BdGdkAuthTaskIsPending	BdGdkAuthTaskIsPending	demonware/bd_http_auth.cpp	behaviour	Store MP 140807A80: unique normalized body.	high
+t6zm_msstore	1407D17E0	function	BdGdkAuthTaskError	BdGdkAuthTaskError	demonware/bd_http_auth.cpp	caller	Store MP 1407D3CA0: 7 references from matched functions.	high
+t6zm_msstore	1408055B0	function	BdGdkAuthTaskUser	BdGdkAuthTaskUser	demonware/bd_http_auth.cpp	caller	Store MP 140807A70: 1 references from matched functions.	medium
+t6zm_msstore	1407D1880	function	BdGdkAuthTaskToken	BdGdkAuthTaskToken	demonware/bd_http_auth.cpp	caller	Store MP 1407D3D40: 3 references from matched functions.	high
+t6zm_msstore	1408052C0	function	BdSetGdkAuthUser	BdSetGdkAuthUser	demonware/bd_http_auth.cpp	behaviour	Store MP 140807780: unique normalized body.	high
+t6zm_msstore	1408051B0	function	BdConstructTokenTask	BdConstructTokenTask	demonware/bd_http_auth.cpp	behaviour	Store MP 140807670: unique normalized body.	high
+t6zm_msstore	14080A250	function	BdCopyAuthString	BdCopyAuthString	demonware/bd_http_auth.cpp	caller	Store MP 14080C710: 6 references from matched functions.	high
+t6zm_msstore	14080A400	function	BdDestroyAuthString	BdDestroyAuthString	demonware/bd_http_auth.cpp	behaviour	Store MP 14080C8C0: unique normalized body.	high
+t6zm_msstore	1408005D0	function	BdSendAuthRequest	BdSendAuthRequest	demonware/bd_http_auth.cpp	behaviour	Store MP 140802A90: unique normalized body.	high
+t6zm_msstore	14086F3B0	function	BdInitHttpRequest	BdInitHttpRequest	demonware/bd_http_auth.cpp	behaviour	Store MP 1408718C0: unique normalized body.	high
+t6zm_msstore	14086F5D0	function	BdDestroyHttpRequest	BdDestroyHttpRequest	demonware/bd_http_auth.cpp	behaviour	Store MP 140871AE0: unique normalized body.	high
+t6zm_msstore	14086FCA0	function	BdHttpSetUpload	BdHttpSetUpload	demonware/bd_http_auth.cpp	caller	Store MP 1408721B0: 3 references from matched functions.	high
+t6zm_msstore	14086FC60	function	BdHttpSetDownload	BdHttpSetDownload	demonware/bd_http_auth.cpp	caller	Store MP 140872170: 5 references from matched functions.	high
+t6zm_msstore	1407CE0C0	function	BdFormatAuthRequest	BdFormatAuthRequest	demonware/bd_http_auth.cpp	caller	Store MP 1407D0580: 41 references from matched functions.	high
+t6zm_msstore	140870680	function	BdConstructWinHttpResponse	BdConstructWinHttpResponse	demonware/bd_http_auth.cpp	behaviour	Store MP 140872B90: unique normalized body.	high
+t6zm_msstore	14078741C	function	GdkUserCheckPrivilege	?GdkUserCheckPrivilege@@YAJPEAXIIPEA_NPEAI@Z	win32/win_gdk.cpp	behaviour	Store MP 1407898DC: unique normalized body.	high
+t6zm_msstore	14304F5F0	data	store_primaryDemonwareState	store_primaryDemonwareState	demonware/bd_lobby_service.cpp	caller	Store MP 143051570: 44 references from matched functions.	high
+t6zm_msstore	1407E4A50	function	BdInitNetStartParams	BdInitNetStartParams	demonware/bd_net_start.cpp	behaviour	Store MP 1407E6F10: unique normalized body.	high
+t6zm_msstore	140809D50	function	BdInitAddress	BdInitAddress	demonware/bd_net_start.cpp	behaviour	Store MP 14080C210: unique normalized body.	high
+t6zm_msstore	1407E62F0	function	BdInitSocketRouterConfig	BdInitSocketRouterConfig	demonware/bd_net_start.cpp	behaviour	Store MP 1407E87B0: unique normalized body.	high
+t6zm_msstore	1405B14D0	function	BdInitUpnpConfig	BdInitUpnpConfig	demonware/bd_net_start.cpp	caller	Store MP 1405B2610: 2 references from matched functions.	high
+t6zm_msstore	14080A260	function	BdInitStringFromCString	BdInitStringFromCString	demonware/bd_net_start.cpp	behaviour	Store MP 14080C720: unique normalized body.	high
+t6zm_msstore	140221CA0	function	BdAppendDiscoveryHost	BdAppendDiscoveryHost	demonware/bd_net_start.cpp	caller	Store MP 140220240: 8 references from matched functions.	high
+t6zm_msstore	140809830	function	BdParseSocketAddress	BdParseSocketAddress	demonware/bd_net_start.cpp	caller	Store MP 14080BCF0: 4 references from matched functions.	high
+t6zm_msstore	1409C3720	data	g_dwTlsIndex	t6s@qcommon/threads.cpp@@g_dwTlsIndex	qcommon/threads.cpp	structure	Matching instruction in Sys_WaitRenderer and unchanged TLS offset from Store MP; ZM PE TLS template at 1409C3670.	high
+t6zm_msstore	1409C36AC	data	g_currentThreadId	?g_currentThreadId@@3KA	qcommon/threads.cpp	structure	Matching instruction in Sys_WaitRenderer and unchanged TLS offset from Store MP; ZM PE TLS template at 1409C3670.	high
+t6zm_msstore	14039B150	function	Com_Error	?Com_Error@@YAXW4errorParm_t@@PBDZZ	qcommon/common.cpp	behaviour	Store MP 14039AEB0: unique normalized body.	high
+t6zm_msstore	14046C600	function	Dvar_GetBool	?Dvar_GetBool@@YA_NPBUdvar_t@@@Z	universal/dvar.cpp	behaviour	Store MP 14046B910: unique normalized body.	high
+t6zm_msstore	1427E52B0	data	r_fullscreen	?r_fullscreen@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E7230: 17 references from matched functions.	high
+t6zm_msstore	14046D340	function	_Dvar_RegisterFloat	?_Dvar_RegisterFloat@@YAPBUdvar_t@@PBDMMMI0@Z	universal/dvar.cpp	behaviour	Store MP 14046C650: unique normalized body.	high
+t6zm_msstore	1427E5148	data	r_vsync	?r_vsync@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E70C8: 1 references from matched functions.	medium
+t6zm_msstore	14071BF10	function	sub_14071E360	?sub_14071E360@@YAXPEAUDXGI_SWAP_CHAIN_DESC@@PEBUGfxWindowParms@@@Z	gfx_d3d/r_init.cpp	behaviour	Store MP 14071E360: unique normalized body.	high
+t6zm_msstore	1427E51D8	data	r_aaSamples	?r_aaSamples@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E7158: 3 references from matched functions.	high
+t6zm_msstore	1427E5038	data	r_loadingScreen	?r_loadingScreen@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E6FB8: 1 references from matched functions.	medium
+t6zm_msstore	1427E5228	data	r_texFilterQuality	?r_texFilterQuality@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E71A8: 1 references from matched functions.	medium
+t6zm_msstore	1427E52A8	data	r_warmShaders	?r_warmShaders@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E7228: 3 references from matched functions.	high
+t6zm_msstore	1427E5248	data	r_convergence	?r_convergence@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E71C8: 1 references from matched functions.	medium
+t6zm_msstore	14046BD00	function	Dvar_ValuesEqual	?Dvar_ValuesEqual@@YAHW4dvarType_t@@TDvarValue@@1@Z	universal/dvar.cpp	caller	Store MP 14046B010: 12 references from matched functions.	high
+t6zm_msstore	14046BFF0	function	Dvar_SetVariant	?Dvar_SetVariant@@YAXPAUdvar_t@@TDvarValue@@W4DvarSetSource@@@Z	universal/dvar.cpp	behaviour	Store MP 14046B300: unique normalized body.	high
+t6zm_msstore	14071DA50	function	R_CreateDeviceInternal	?R_CreateDeviceInternal@@YAJPEAUHWND__@@HPEAUDXGI_SWAP_CHAIN_DESC@@PEBUGfxWindowParms@@@Z	gfx_d3d/r_init.cpp	behaviour	Store MP 14071FEA0: unique normalized body.	high
+t6zm_msstore	14071E9B0	function	R_SetFullscreenOutput	?R_SetFullscreenOutput@@YAXXZ	gfx_d3d/r_init.cpp	behaviour	Store MP 140720E00: unique normalized body.	high
+t6zm_msstore	14046D1B0	function	_Dvar_RegisterBool	?_Dvar_RegisterBool@@YAPBUdvar_t@@PBD_NI0@Z	universal/dvar.cpp	behaviour	Store MP 14046C4C0: unique normalized body.	high
+t6zm_msstore	14046DAE0	function	Dvar_SetIntFromSource	?Dvar_SetIntFromSource@@YAXPBUdvar_t@@HW4DvarSetSource@@@Z	universal/dvar.cpp	behaviour	Store MP 14046CDF0: unique normalized body.	high
+t6zm_msstore	1427E52A0	data	r_shaderWarming	?r_shaderWarming@@3PBUdvar_t@@B	gfx_d3d/r_init.cpp	caller	Store MP 1427E7220: 1 references from matched functions.	medium
+t6zm_msstore	1427E51D0	data	r_aaSamplesMax	?r_aaSamplesMax@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E7150: 1 references from matched functions.	medium
+t6zm_msstore	1427E4F78	data	r_txaaSupported	?r_txaaSupported@@3PBUdvar_t@@B	gfx_d3d/r_dvars.cpp	caller	Store MP 1427E6EF8: 1 references from matched functions.	medium
+t6zm_msstore	140D38330	data	s_featureLevels	t6s@gfx_d3d/r_init.cpp@@s_featureLevels	gfx_d3d/r_init.cpp	caller	Store MP 140D3A2B0: 4 references from matched functions.	high
+t6zm_msstore	140916D30	data	s_constBufferSizes	t6s@gfx_d3d/r_init.cpp@@s_constBufferSizes	gfx_d3d/r_init.cpp	caller	Store MP 140918D30: 2 references from matched functions.	high
+t6zm_msstore	14071E690	function	R_SetWndParms	?R_SetWndParms@@YAXPEAUGfxWindowParms@@@Z	gfx_d3d/r_init.cpp	behaviour	Store MP 140720AE0: unique normalized body.	high
+t6zm_msstore	14071BFF0	function	R_StoreWindowSettings	?R_StoreWindowSettings@@YAXPEBUGfxWindowParms@@@Z	gfx_d3d/r_init.cpp	behaviour	Store MP 14071E440: unique normalized body.	high
+t6zm_msstore	14282C640	data	vidConfig	?vidConfig@@3UvidConfig_t@@A	gfx_d3d/r_init.cpp	caller	Store MP 14282E5C0: 5 references from matched functions.	high
+t6zm_msstore	1427E53B0	data	r_glob	?r_glob@@3UGfxGlobals@@A	gfx_d3d/r_init.cpp	caller	Store MP 1427E7330: 4 references from matched functions.	high
+t6zm_msstore	1427EFE00	data	dx	?dx@@3UDxGlobals@@A	gfx_d3d/r_dx.cpp	caller	Store MP 1427F1D80: 7 references from matched functions.	high
+t6zm_msstore	14007C830	function	NvAPI_Stereo_IsActivated	_NvAPI_Stereo_IsActivated	_external/nvapi	behaviour	Store MP 14007C830: unique normalized body.	high
+t6zm_msstore	1409770B0	data	IID_IDXGIFactory1	_IID_IDXGIFactory1	_external/dxguid	caller	Store MP 1409790C0: 3 references from matched functions.	high
+t6zm_msstore	1409ABD48	data	IID_IDXGIDevice1	_IID_IDXGIDevice1	_external/dxguid	caller	Store MP 1409ADF68: 3 references from matched functions.	high
+t6zm_msstore	1409ABD38	data	IID_IDXGIAdapter1	_IID_IDXGIAdapter1	_external/dxguid	caller	Store MP 1409ADF58: 3 references from matched functions.	high
+t6zm_msstore	14004FFB0	function	NvAPI_Initialize	_NvAPI_Initialize	_external/nvapi	behaviour	Store MP 14004FFB0: unique normalized body.	high
+t6zm_msstore	140076160	function	NvAPI_D3D11_CreateDeviceAndSwapChain	_NvAPI_D3D11_CreateDeviceAndSwapChain	_external/nvapi	behaviour	Store MP 140076160: unique normalized body.	high
+t6zm_msstore	14007C220	function	NvAPI_Stereo_CreateHandleFromIUnknown	_NvAPI_Stereo_CreateHandleFromIUnknown	_external/nvapi	behaviour	Store MP 14007C220: unique normalized body.	high
+t6zm_msstore	1400038A0	function	TxaaOpenDX	_TxaaOpenDX	_external/txaa	behaviour	Store MP 1400038A0: unique normalized body.	high
