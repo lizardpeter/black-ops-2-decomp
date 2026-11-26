@@ -35,3 +35,7 @@ Main-view differential replay added: 16384 deterministic inputs, 29 original dir
 ## Camera motion and orientation
 
 Four full source-body candidates: AnglesToAxis 140464D00 (77 instructions), CG_UpdateCameraVelocity 14016C380 (77), CG_PerturbCamera 140157BC0 (73), CG_UpdateCameraTween 1400BF940 (171). Preserve exact original float constants, time wrapping, packed sin/cos return lanes, normalization and matrix boundary, pitch and yaw wrapping, cosine easing, entity-based tween origin/angles and final frame-state copies. The velocity routine scales displacement by elapsed time as observed, rather than substituting a conventional derivative. 16384 original-body comparisons pending; the test substitutes CRT trig and engine matrix/entity boundaries. Main view compile passed 45896635987, independent full-body validation still pending. No runtime redirection.
+
+## First-person and shake
+
+Full source candidates at 14016BA40..14016BD96 and 1400C7540..1400C7713. The first-person body retains the bob input stack structure, original bob/angle boundaries, height, sideways bob, 150/450 ms step smoothing and minimum height. Shake body retains four slots, strongest amplitude/frequency selection, random phase refresh and three independent sine rates. 16384 differential comparisons pending. Camera motion CI 45896899398 passed axes and velocity (8192 comparisons), but failed perturbation on NaN sign propagation. Ordered SSE multiplication/subtraction correction is committed; remaining motion tests pending. No live activation.

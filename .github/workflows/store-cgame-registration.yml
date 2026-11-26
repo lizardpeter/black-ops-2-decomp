@@ -14,6 +14,9 @@ on:
       - 'src/cgame/cg_camera_support_store.cpp'
       - 'src/cgame_mp/cg_main_view_store.cpp'
       - 'src/cgame/cg_camera_motion_store.cpp'
+      - 'src/cgame_mp/cg_camera_effects_store.cpp'
+      - 'tests/store_camera_effects_probe.cpp'
+      - 'tests/verify_store_camera_effects.py'
       - 'tests/store_camera_motion_probe.cpp'
       - 'tests/verify_store_camera_motion.py'
       - 'tests/store_main_view_probe.cpp'
@@ -161,6 +164,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_motion.py originals/t6mp_msstore.exe | tee camera-motion.log
+      - name: Replay complete first person view and camera shake
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_effects.py originals/t6mp_msstore.exe | tee camera-effects.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -188,4 +195,5 @@ jobs:
             camera-support.log
             camera-main-view.log
             camera-motion.log
+            camera-effects.log
           if-no-files-found: warn
