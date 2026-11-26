@@ -12,6 +12,7 @@ on:
       - 'src/cgame/cg_weapon_fov_store.cpp'
       - 'src/cgame_mp/cg_extra_camera_store.cpp'
       - 'src/cgame/cg_camera_support_store.cpp'
+      - 'src/cgame_mp/cg_main_view_store.cpp'
       - 'tests/store_camera_support_probe.cpp'
       - 'tests/verify_store_camera_support.py'
       - 'tests/store_extra_camera_probe.cpp'
@@ -145,6 +146,8 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_support.py originals/t6mp_msstore.exe | tee camera-support.log
+      - name: Compile complete Store main view source candidate
+        run: g++ -std=c++17 -O2 -ffp-contract=off -Wall -Wextra -Werror -DT6_STORE -DT6_STORE_CAMERA_REPLAY -c src/cgame_mp/cg_main_view_store.cpp -o /tmp/store-main-view.o
       - uses: actions/upload-artifact@v4
         if: always()
         with:

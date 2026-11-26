@@ -31,7 +31,13 @@ CORE = {0x14046B300:"SetVariant",0x14046B150:"SetLatched",0x14046CEF0:"SetFloat"
         0x14016C510:"MainView",0x1401721E0:"ExtraViewWrapper",0x1400C2740:"VehicleGunner",
         0x1400C1240:"ExtraMode",0x140173ED0:"ExtraUpdate",0x14016BDA0:"SpecialView",
         0x140100FC0:"LinkedView",0x1400C3AE0:"ExtraMode6A",0x1400C3E10:"ExtraMode6B",
-        0x1400C3390:"ExtraMode7",0x140464D00:"AnglesToAxis",0x14065B060:"AdsTransitionA",0x14065B120:"AdsTransitionB"}
+        0x1400C3390:"ExtraMode7",0x140464D00:"AnglesToAxis",0x14065B060:"AdsTransitionA",0x14065B120:"AdsTransitionB",
+        0x1400C0E20:"MainCameraMode",0x14016B450:"LastStandSway",0x14016BA40:"FirstPersonView",
+        0x14016A940:"ThirdPersonView",0x14016C380:"CameraVelocity",0x1400BF940:"CameraTween",
+        0x1400C7540:"CameraShake",0x140157BC0:"CameraPerturb",0x14016BFB0:"TurretView",
+        0x1400C4490:"VehicleView",0x1400C5FA0:"VehicleThirdPerson",0x1400C66D0:"VehicleOffset",
+        0x1400C3950:"RemoteEyes",0x140621C10:"LinkedAngleTransform",0x1400DE970:"TagAxis",
+        0x140462D70:"AxisToAngles"}
 HEADER = re.compile(r"^; ([0-9a-fA-F]+)\s")
 INSN = re.compile(r"^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+")
 
