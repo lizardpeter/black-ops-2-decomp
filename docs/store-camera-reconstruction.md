@@ -71,3 +71,7 @@ Full candidate for CG_OffsetChaseCamView 14016A5D0..14016A930 preserves mode-spe
 ## Orientation and linked view roll
 
 Two additional complete candidates: AxisToAngles 140462D70..140462EBD, and linked roll transformation 140621C10..140621E33. Preserve packed trig call, original special vertical-axis roll branches, sign/quadrant handling, transposed 3x3 row dot products and roll adjustment condition. 32768 original-body comparisons pending. Vector-to-angle and demo update callee evidence added to extraction.
+
+## Vehicle camera offset
+
+Full 180-instruction body at 1400C66D0..1400C69EF preserves six cleared offset fields, seat-specific entity jitter gate, dvar conversion, weapon selection/fallback, random angle perturbation, demo timestamp discontinuities, vehicle type exclusions, shortest-turn pitch smoothing and +/-30-degree correction limit. 32768 full-function cases queued. This is not the separate 1140-instruction vehicle view routine.

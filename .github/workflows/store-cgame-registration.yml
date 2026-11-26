@@ -23,6 +23,9 @@ on:
       - 'tests/verify_store_camera_win64_objects.py'
       - 'src/cgame_mp/cg_chase_camera_store.cpp'
       - 'src/cgame/cg_camera_angles_store.cpp'
+      - 'src/cgame/cg_vehicle_offset_store.cpp'
+      - 'tests/store_vehicle_offset_probe.cpp'
+      - 'tests/verify_store_vehicle_offset.py'
       - 'tests/store_camera_angles_probe.cpp'
       - 'tests/verify_store_camera_angles.py'
       - 'tests/store_chase_camera_probe.cpp'
@@ -218,6 +221,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_angles.py originals/t6mp_msstore.exe | tee camera-angles.log
+      - name: Replay complete Store vehicle view offset
+        run: |
+          set -o pipefail
+          python tests/verify_store_vehicle_offset.py originals/t6mp_msstore.exe | tee camera-vehicle-offset.log
       - name: Compile all recovered camera bodies to Windows x64 objects
         run: |
           set -o pipefail
@@ -258,4 +265,5 @@ jobs:
             camera-win64-objects.log
             camera-chase.log
             camera-angles.log
+            camera-vehicle-offset.log
           if-no-files-found: warn
