@@ -63,3 +63,7 @@ Complete candidate at 1400C69F0..1400C6D28, including ignore-entity precedence, 
 ## Windows-target object audit
 
 The camera replay builds use host C++ with explicit MS x64 call bridges. A separate Win64 COFF audit now compiles all 16 camera source translation units with build_recon.compile_unit and the production x64 flags, checking the machine identifier and every expected public decorated function symbol. The audit supplies only isolated cstdint/cstddef/cstring compatibility adapters (builtin memcpy); it does not change the normal build headers. This is compilation, not a DLL link, rebased binding audit or live replacement. Pending CI.
+
+## Chase camera
+
+Full candidate for CG_OffsetChaseCamView 14016A5D0..14016A930 preserves mode-specific yaw, demo update, original floor-based turn normalization, two packed trig calls, atan2, chase collision mask and original angle-axis boundary. 32768 original comparisons pending. Windows compilation audit initially failed because llvm-nm was missing after successful first object compilation; use available GNU nm fallback (COFF support) without relaxing symbol assertions.

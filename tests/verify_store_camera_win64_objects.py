@@ -6,6 +6,7 @@ standard-header adapters provide the tiny subset used by these source files;
 they do not modify the runtime or the repository's global standard headers.
 """
 import pathlib
+import shutil
 import subprocess
 import sys
 import tempfile
@@ -24,6 +25,7 @@ UNITS={
     "src/cgame/cg_third_person_trace_store.cpp":("T6_STORE_CAMERA_REPLAY",["ThirdPersonViewTrace"]),
     "src/cgame/cg_turret_fov_store.cpp":("T6_STORE_CAMERA_REPLAY",["GetTurretViewFov"]),
     "src/cgame/cg_weapon_fov_store.cpp":("T6_STORE_CAMERA_REPLAY",["GetWeaponViewFov"]),
+    "src/cgame_mp/cg_chase_camera_store.cpp":("T6_STORE_CAMERA_REPLAY",["OffsetChaseCamView"]),
     "src/cgame_mp/cg_camera_effects_store.cpp":("T6_STORE_CAMERA_REPLAY",["OffsetFirstPersonView","ShakeCamera"]),
     "src/cgame_mp/cg_extra_camera_store.cpp":("T6_STORE_CAMERA_REPLAY",["CalcExtraView"]),
     "src/cgame_mp/cg_fov_mode_store.cpp":("T6_STORE_CG_FOV_MODE_REPLAY",["SetHudAndFovMode"]),
@@ -59,7 +61,7 @@ def main():
             build_recon.compile_unit(ROOT/path,obj,"x64",["-DT6_STORE","-D"+macro,"-isystem"+str(headers),"-ffunction-sections"])
             raw=obj.read_bytes()
             assert raw[:2]==b"\x64\x86",(path,raw[:2].hex())
-            syms=subprocess.check_output(["llvm-nm","--defined-only",str(obj)],text=True)
+            syms=subprocess.check_output([shutil.which("llvm-nm") or shutil.which("nm") or "llvm-nm","--defined-only",str(obj)],text=True)
             for f in functions:
                 # Match public function names in MSVC decorated symbols.
                 assert "?"+f+"@" in syms,(path,f)
