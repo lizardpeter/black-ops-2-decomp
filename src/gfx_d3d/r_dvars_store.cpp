@@ -4,6 +4,8 @@
 #if defined(T6_STORE) && defined(T6_STORE_RENDERER_DVAR_REPLAY)
 #include <cstdint>
 #include <cstring>
+#include <cstdlib>
+#include <xmmintrin.h>
 
 namespace store_renderer_dvar {
 using U32 = std::uint32_t;
@@ -11,6 +13,9 @@ struct Dvar;
 struct alignas(16) Value { U32 words[4]; };
 struct alignas(16) Domain { U32 words[4]; };
 extern "C" {
+extern U32 Store_Renderer_HardwareCount; // 14406FC3C (semantic name provisional)
+extern const Dvar *store_r_smp_worker_threads; // 1427E71E0
+extern const Dvar *store_r_smp_worker_thread[8]; // 1427E6EB0
 void Store_Renderer_Init(); // 140763730
 const Dvar *Store_Renderer_Find(const char *);
 const Dvar *Store_Renderer_New(const char *,int,U32,const Value *,const Domain *,const char *);
@@ -102,6 +107,40 @@ void RegisterRendererEntryPrefix() {
     Store_Renderer_Bool("r_texFilterDisable",false,0x80,"");
     store_r_texFilterAnisoMin=InlineInt("r_texFilterAnisoMin",1,1,16,1);
     store_r_texFilterMipMode=Store_Renderer_Enum("r_texFilterMipMode",Store_Renderer_MipMode,0,1);
+}
+
+// Independent recovered fragment 14070F91F..14070FACD. The hardware
+// value is unsigned (JA), but the loop bound uses signed JGE.
+static int HardwareWorkers(U32 hardware) {
+    if (hardware<=2) return 1;
+    if (hardware<=4) return 2;
+    if (hardware<=10) return int(hardware)-2;
+    return 8;
+}
+template<class T> static T Read(const Dvar *d,unsigned offset) {
+    T v; std::memcpy(&v,reinterpret_cast<const unsigned char *>(d)+offset,sizeof(T)); return v;
+}
+static int WorkerCount(const Dvar *d) {
+    if (!d) return 0;
+    const int type=Read<int>(d,0x18);
+    if (type==6 || type==7) return Read<int>(d,0x20);
+    if (type==1) return Read<unsigned char>(d,0x20)!=0;
+    if (type==2) return _mm_cvttss_si32(_mm_set_ss(Read<float>(d,0x20)));
+    return std::atoi(Read<const char *>(d,0x20));
+}
+void RegisterRendererWorkerFragment() {
+    static const char *const names[]={
+        "r_smp_worker_thread0","r_smp_worker_thread1","r_smp_worker_thread2","r_smp_worker_thread3",
+        "r_smp_worker_thread4","r_smp_worker_thread5","r_smp_worker_thread6","r_smp_worker_thread7"};
+    store_r_smp_worker_threads=InlineInt("r_smp_worker_threads",
+                                          HardwareWorkers(Store_Renderer_HardwareCount),2,8,0);
+    // Original reloads both the dvar pointer and hardware value on each
+    // iteration. Do not silently clamp or replace its current-value bound.
+    // Isolated replay requires valid original registry state (count <= 8).
+    for (int i=0;i<WorkerCount(store_r_smp_worker_threads);++i) {
+        const bool enabled=i<HardwareWorkers(Store_Renderer_HardwareCount);
+        store_r_smp_worker_thread[i]=Store_Renderer_Bool(names[i],enabled,enabled?0x4000:0x40,"");
+    }
 }
 } // namespace store_renderer_dvar
 #endif

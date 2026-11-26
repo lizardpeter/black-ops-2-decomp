@@ -7,8 +7,11 @@
 using U=std::uint64_t;
 #define MS __attribute__((ms_abi))
 namespace store_renderer_dvar {
-struct Dvar { U tag; };
+struct Dvar { alignas(8) unsigned char bytes[104]; U tag; };
 extern "C" {
+U32 Store_Renderer_HardwareCount=0;
+const Dvar *store_r_smp_worker_threads=nullptr;
+const Dvar *store_r_smp_worker_thread[8]{};
 const Dvar *store_r_txaa=nullptr;
 const Dvar *store_r_txaaSupported=nullptr;
 const Dvar *store_r_txaaDepth1=nullptr;
@@ -41,6 +44,9 @@ struct Trace { U count; Event events[64]; };
 Trace trace{};
 unsigned mask;
 void *mapped_image;
+bool worker_mode=false;
+unsigned worker_type;
+int worker_value;
 Dvar slots[64]{};
 unsigned used;
 U Hash(const char *s) {
@@ -57,12 +63,35 @@ Dvar *Slot(const char *n) {
     for (unsigned i=0;i<used;++i) if(slots[i].tag==h) return &slots[i];
     assert(used<64); slots[used].tag=h; return &slots[used++];
 }
+template<class T> void Write(Dvar *d,unsigned off,T v) { std::memcpy(d->bytes+off,&v,sizeof(v)); }
+Dvar *WorkerSlot(const char *n) {
+    auto *d=Slot(n);
+    if (!std::strcmp(n,"r_smp_worker_threads")) {
+        Write(d,0x18,int(worker_type));
+        switch(worker_type) {
+        case 1: Write(d,0x20,static_cast<unsigned char>(worker_value!=0)); break;
+        case 2: Write(d,0x20,float(worker_value)+0.25f); break;
+        case 6: case 7: Write(d,0x20,worker_value); break;
+        default: {
+            static const char *const nums[]={"0","1","2","3","4","5","6","7","8"};
+            Write(d,0x20,worker_value<0?"-1":nums[worker_value]); break;
+        }
+        }
+    }
+    return d;
+}
 U32 Bits(float f) { U32 v; std::memcpy(&v,&f,4); return v; }
 void Empty(const char *s) { assert(s && !*s); }
 }
 extern "C" {
 void Store_Renderer_Init() { Push(0); }
 const Dvar *Store_Renderer_Find(const char *n) {
+    if(worker_mode) {
+        assert(!std::strcmp(n,"r_smp_worker_threads"));
+        const bool exists=(mask&1)!=0;
+        Push(1,Hash(n),0,0,exists);
+        return exists?WorkerSlot(n):nullptr;
+    }
     const char *names[]={"r_fontResolution","r_resolution","r_txaaMode","r_clipFPS","vid_xpos","vid_ypos","r_fullscreen","r_previousFullscreen","r_texFilterAnisoMax","r_texFilterAnisoMin"};
     unsigned index=0; while(index<10 && std::strcmp(n,names[index])) ++index;
     assert(index<10); const unsigned bit=1u<<index;
@@ -71,7 +100,7 @@ const Dvar *Store_Renderer_Find(const char *n) {
     return exists?Slot(n):nullptr;
 }
 const Dvar *Store_Renderer_New(const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
-    Empty(s); Push(2,Hash(n),t,f,v->words[0],d->words[0],d->words[1]); return Slot(n);
+    Empty(s); Push(2,Hash(n),t,f,v->words[0],d->words[0],d->words[1]); return worker_mode?WorkerSlot(n):Slot(n);
 }
 void Store_Renderer_Reregister(const Dvar *old,const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
     Empty(s); assert(old==Slot(n)); Push(3,Hash(n),t,f,v->words[0],d->words[0],d->words[1]);
@@ -94,6 +123,7 @@ const Dvar *Store_Renderer_Enum(const char *n,const char *const *o,int v,U32 f) 
 }
 }
 static const Dvar *MS MEnum(const char *n,const char *const *o,int v,U32 f) { return Store_Renderer_Enum(n,o,v,f); }
+static int MS MAtoi(const char *n) { return std::atoi(n); }
 static void MS MInit() { Store_Renderer_Init(); }
 static const Dvar *MS MFind(const char *n) { return Store_Renderer_Find(n); }
 static const Dvar *MS MNew(const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) { return Store_Renderer_New(n,t,f,v,d,s); }
@@ -103,17 +133,32 @@ static const Dvar *MS MFloat(const char *n,float v,float lo,float hi,U32 f,const
 extern "C" {
 void *RendererPrefixMock(unsigned i) {
     void *m[]={reinterpret_cast<void *>(MInit),reinterpret_cast<void *>(MFind),reinterpret_cast<void *>(MNew),
-               reinterpret_cast<void *>(MReg),reinterpret_cast<void *>(MBool),reinterpret_cast<void *>(MFloat),reinterpret_cast<void *>(MEnum)};
-    assert(i<7); return m[i];
+               reinterpret_cast<void *>(MReg),reinterpret_cast<void *>(MBool),reinterpret_cast<void *>(MFloat),reinterpret_cast<void *>(MEnum),reinterpret_cast<void *>(MAtoi)};
+    assert(i<8); return m[i];
 }
 unsigned RendererPrefixSize() { return sizeof(Trace); }
 void RendererPrefixRun(void *image,unsigned state,void *out) {
-    trace={}; used=0; mask=state; mapped_image=image;
+    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false;
     if(image) {
         using Entry=void(MS *)();
         reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
     } else RegisterRendererEntryPrefix();
     std::memcpy(out,&trace,sizeof(trace));
+}
+void RendererWorkerRun(void *image,unsigned exists,unsigned hardware,unsigned type,int value,void *out) {
+    trace={}; used=0; mask=exists; mapped_image=image; worker_mode=true;
+    worker_type=type; worker_value=value; Store_Renderer_HardwareCount=hardware;
+    store_r_smp_worker_threads=nullptr;
+    for(auto &d:store_r_smp_worker_thread) d=nullptr;
+    if(image) {
+        using Entry=void(MS *)();
+        reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
+    } else RegisterRendererWorkerFragment();
+    std::memcpy(out,&trace,sizeof(trace));
+}
+void RendererWorkerGlobals(U *out) {
+    out[0]=reinterpret_cast<U>(store_r_smp_worker_threads);
+    for(unsigned i=0;i<8;++i) out[i+1]=reinterpret_cast<U>(store_r_smp_worker_thread[i]);
 }
 void RendererPrefixGlobals(U *out) {
     const Dvar *slots_[]={store_r_fontResolution,store_r_resolution,store_r_ssao,store_r_ssaoScale,

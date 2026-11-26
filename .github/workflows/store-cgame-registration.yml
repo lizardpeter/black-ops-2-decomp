@@ -14,6 +14,7 @@ on:
       - 'src/gfx_d3d/r_dvars_store.cpp'
       - 'tests/store_renderer_prefix_probe.cpp'
       - 'tests/verify_store_renderer_prefix.py'
+      - 'tests/verify_store_renderer_workers.py'
       - 'tools/inventory/store_renderer_registration.py'
       - 'docs/store-renderer-dvar-registration.tsv'
       - '.github/workflows/store-cgame-registration.yml'
@@ -49,6 +50,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_renderer_prefix.py originals/t6mp_msstore.exe | tee renderer-prefix-replay.log
+      - name: Replay recovered worker registration fragment
+        run: |
+          set -o pipefail
+          python tests/verify_store_renderer_workers.py originals/t6mp_msstore.exe | tee renderer-worker-replay.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -58,4 +63,5 @@ jobs:
             common-registration-replay.log
             renderer-evidence/
             renderer-prefix-replay.log
+            renderer-worker-replay.log
           if-no-files-found: warn

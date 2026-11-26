@@ -33,3 +33,7 @@ Run 45888511169 verified 37,800 bytes, 6,916 instructions, 496 block leaders, 67
 ## Extended entry reconstruction
 
 The initial eight registrations passed differential replay (run 45888692737). The source now extends through 14070ECCF, including TXAA, clip encoding, window placement/fullscreen, convergence, hardware gamma and texture filtering. The three enum arguments are modeled as external original-table boundaries; the mock verifies their exact PE addresses, not their contents. The new test exhausts all 1024 lookup branch combinations; pending CI. No full-function or runtime claim.
+
+## Worker registration fragment
+
+14070F91F..14070FACD independently reconstructed. Hardware value at 14406FC3C is compared unsigned: <=2 => 1, <=4 => 2, <=10 => hardware-2, otherwise 8. The integer dvar r_smp_worker_threads has that default, domain 2..8, flags 0. The loop reads the current dvar with original type conversions and uses signed comparison, not the hardware-derived default; each worker gets default true and flags 0x4000 below the hardware threshold, otherwise false and 0x40. The original re-reads the global dvar pointer and hardware value each iteration. The source retains that behavior, assumes a valid registry count <=8, and is not connected to the entry prefix until the intervening code is recovered. Independent PE replay covers 1400 combinations, pending CI. No assumption about the precise producer of the hardware global.
