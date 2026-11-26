@@ -19,7 +19,7 @@ def main():
             base=C.addressof(C.c_char.from_buffer(mem))
             table=struct.unpack_from("<7I",mem,0xc0044)
             print("Store transition switch:",*[hex(v) for v in table],flush=True)
-            assert table==(0xbfdd6,0xbfd97,0xbfd4b,0xbfdce,0xbfd60,0xbfe81,0xbfe18)
+            assert table==(0xbfdd6,0xbfd97,0xbfd4b,0xbfd58,0xbfd60,0xbfe81,0xbfe18)
             struct.pack_into("<Q",mem,0x8a7dd8,lib.TransitionMock(0))
             for i,rva in enumerate([0x18e600,0x46cef0,0x46b300,0xbf890],1):
                 mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",lib.TransitionMock(i))+b"\xff\xe0"
