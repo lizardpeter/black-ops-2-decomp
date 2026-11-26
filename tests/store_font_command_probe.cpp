@@ -2,6 +2,10 @@
 #define T6_STORE_FONT_REPLAY
 #include "../src/gfx_d3d/r_text_commands_store.cpp"
 #undef T6_SOURCE
+#define T6_STORE_CMD_VARIANTS_IN_BASE
+#include "../src/gfx_d3d/r_text_command_variants_store.cpp"
+#undef T6_STORE_CMD_VARIANTS_IN_BASE
+#undef T6_SOURCE
 #include "../src/client/screen_placement_store.cpp"
 #include <cstdlib>
 #include <cstdio>
@@ -25,6 +29,8 @@ const void*Text_DefaultMaterial;
 int Text_Atoi(const char*s){return std::atoi(s);}
 void Text_Color(const float*c,Byte*out){for(unsigned i=0;i<4;++i)out[i]=static_cast<Byte>(c[i]*255);}
 }
+extern "C" float Text_EncodeAngle(float a){return a+0.125f;}
+static float MS MAngle(float a){return Text_EncodeAngle(a);}
 static int MS MAtoi(const char*s){return Text_Atoi(s);}
 static void MS MColor(const float*c,Byte*out){Text_Color(c,out);}
 static void* MS MCopy(void*d,const void*s,std::size_t n){return std::memcpy(d,s,n);}
@@ -34,13 +40,13 @@ static char text[320];
 static CommandList list;
 static int offset(const Byte*p){return p?int(p-storage):-1;}
 extern "C" {
-void* CmdMock(unsigned i){void*m[]={reinterpret_cast<void*>(MAtoi),reinterpret_cast<void*>(MColor),reinterpret_cast<void*>(MCopy)};return m[i];}
+void* CmdMock(unsigned i){void*m[]={reinterpret_cast<void*>(MAtoi),reinterpret_cast<void*>(MColor),reinterpret_cast<void*>(MCopy),reinterpret_cast<void*>(MAngle)};return m[i];}
 unsigned CmdSize(){return sizeof(Capture);}
 void CmdRun(void*image,unsigned op,unsigned seed,void*output){
     Capture cap{};auto*b=static_cast<Byte*>(image);
     unsigned state=seed+1;auto next=[&](){state=state*1664525u+1013904223u;return state;};
     auto f=[&](){return float(int(next()%2048)-1024)*0.125f;};
-    if(op==0){
+    if(op!=1){
         std::memset(storage,0xa7,sizeof(storage));std::memset(Text_UI3DStats,0x21,sizeof(Text_UI3DStats));std::memset(dvar,0,sizeof(dvar));
         unsigned len=next()%300;if(seed&0x40)len=0;
         for(unsigned i=0;i<len;++i)text[i]=char(32+next()%95);
@@ -55,7 +61,11 @@ void CmdRun(void*image,unsigned op,unsigned seed,void*output){
         float color[4]={0.25f,0.5f,0.75f,1.0f};int styles[]={0,1,3,6,0x80,-1};
         const int style=styles[next()%6],cursor=int(next()%5)-2,max=int(next()%100)-10;
         Byte letter=Byte(next());const void*font=reinterpret_cast<void*>(0x12345678);
-        Byte*result;
+        Byte*result=nullptr;
+        float glow[4]={0.5f,0.25f,0.125f,seed&1?0.5f:0.0f};
+        const void*mat=reinterpret_cast<void*>(0x13570000);const void*gmat=seed&4?mat:nullptr;
+        int birth=seed&2?17:0;
+        Byte vertices[96]={},uv[64]={},colors[8]={};for(auto&v:vertices)v=Byte(next());for(auto&v:uv)v=Byte(next());for(auto&v:colors)v=Byte(next());
         if(b){
             W(b,0x27e7290,&list);W(b,0x2838ae0,Text_UI3DDepth);W(b,0x27e6d70,Text_DualPlay);
             // Stack storage overlaps depth at index 3; use the real ordering and valid depth range.
@@ -63,9 +73,25 @@ void CmdRun(void*image,unsigned op,unsigned seed,void*output){
             W(b,0x2838ae0,Text_UI3DDepth);
             for(int i=0;i<6;++i)std::memcpy(b+0x283879c+i*0xa4,Text_UI3DStats+i*0xa4,8);
             using Fn=Byte*(MS*)(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,Byte,float);
-            result=reinterpret_cast<Fn>(b+0x71c880)(text,max,font,x,y,w,sx,sy,rot,color,style,cursor,letter,pad);
+            if(op==0)result=reinterpret_cast<Fn>(b+0x71c880)(text,max,font,x,y,w,sx,sy,rot,color,style,cursor,letter,pad);
+            else if(op==2)reinterpret_cast<void(MS*)()>(b+0x71bf10)();
+            else if(op==3)reinterpret_cast<void(MS*)()>(b+0x71dfb0)();
+            else if(op==4)reinterpret_cast<void(MS*)(const char*,int,const void*,float,float,float,float,float,float,const float*,int,const float*,const void*,const void*,int,int,int,int)>(b+0x71caa0)(text,max,font,x,y,w,sx,sy,rot,color,style,glow,mat,gmat,birth,7,100,80);
+            else if(op==5)reinterpret_cast<void(MS*)(const char*,int,const void*,float,float,float,float,const void*,const float*,int,const float*,const void*,const void*,int,int,int,int)>(b+0x71cc10)(text,max,font,x,y,sx,sy,nullptr,color,style,glow,mat,gmat,birth,7,100,80);
+            else if(op==6)reinterpret_cast<void(MS*)(const char*,int,const void*,float,float,float,float,const void*,const float*,int,const float*,const void*,const void*,int,int,int,int,int,int)>(b+0x71cd70)(text,max,font,x,y,sx,sy,nullptr,color,style,glow,mat,gmat,birth,7,100,80,30,50);
+            else if(op==7)reinterpret_cast<void(MS*)(float,float,float,float,float,float,float,float,float,float,const float*,const void*)>(b+0x71c740)(x,y,w,sx,sy,rot,pad,1,2,3,color,mat);
+            else if(op==8)reinterpret_cast<void(MS*)(const void*,short,const void*,const void*,const void*,int)>(b+0x71dd30)(mat,2,vertices,uv,colors,int(seed%800)-400);
             for(int i=0;i<6;++i)std::memcpy(Text_UI3DStats+i*0xa4,b+0x283879c+i*0xa4,8);
-        }else result=AddBaseDrawTextCmd(text,max,font,x,y,w,sx,sy,rot,color,style,cursor,letter,pad);
+        }else{
+            if(op==0)result=AddBaseDrawTextCmd(text,max,font,x,y,w,sx,sy,rot,color,style,cursor,letter,pad);
+            else if(op==2)AddCmdEndOfList();
+            else if(op==3)AddCmdUI3DMarker();
+            else if(op==4)AddCmdDrawTextEffects(text,max,font,x,y,w,sx,sy,rot,color,style,glow,mat,gmat,birth,7,100,80);
+            else if(op==5)AddCmdDrawTextDecode(text,max,font,x,y,sx,sy,nullptr,color,style,glow,mat,gmat,birth,7,100,80);
+            else if(op==6)AddCmdDrawTextRedact(text,max,font,x,y,sx,sy,nullptr,color,style,glow,mat,gmat,birth,7,100,80,30,50);
+            else if(op==7)AddCmdStretchPicRotate(x,y,w,sx,sy,rot,pad,1,2,3,color,mat);
+            else if(op==8)AddCmdUIQuadArray(mat,2,vertices,uv,colors,int(seed%800)-400);
+        }
         cap.used=list.usedTotal;cap.last=offset(list.lastCmd);cap.result=offset(result);
         std::memcpy(cap.command,storage,sizeof(storage));std::memcpy(cap.stats,Text_UI3DStats,sizeof(Text_UI3DStats));
     }else{

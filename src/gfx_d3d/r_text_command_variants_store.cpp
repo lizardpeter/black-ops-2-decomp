@@ -5,6 +5,7 @@
 #include <cstring>
 namespace store_text_cmd {
 using Byte=unsigned char;
+#ifndef T6_STORE_CMD_VARIANTS_IN_BASE
 struct CommandList {Byte*cmds;int usedTotal,usedCritical;Byte*lastCmd;int byteSize;};
 extern "C" {
 extern CommandList*Text_CommandList;
@@ -18,6 +19,7 @@ extern const void*Text_DefaultMaterial;
 }
 template<class T>static T R(const void*p,unsigned n){T v;std::memcpy(&v,static_cast<const Byte*>(p)+n,sizeof(v));return v;}
 template<class T>static void W(void*p,unsigned n,T v){std::memcpy(static_cast<Byte*>(p)+n,&v,sizeof(v));}
+#endif
 Byte* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,Byte,float);
 // Shared allocator semantics inlined at each original command producer.
 static Byte* AllocateCommand(int bytes,Byte id,bool critical,bool draw){
@@ -57,19 +59,22 @@ static void ApplyEffect(Byte*p,unsigned flag,const void*material,const void*glow
 }
 void AddCmdDrawTextEffects(const char*text,int maxChars,const void*font,float x,float y,float w,float sx,float sy,float rotation,const float*color,int style,const float*glow,const void*material,const void*glowMaterial,int birth,int letter,int decayStart,int duration){
     Byte*p=AddBaseDrawTextCmd(text,maxChars,font,x,y,w,sx,sy,rotation,color,style,-1,0,0);
-    if(!p)return;ApplyGlow(p,color,glow);
+    if(!p)return;
+    ApplyGlow(p,color,glow);
     if(material&&glowMaterial&&birth)ApplyEffect(p,0x880u,material,glowMaterial,birth,letter,decayStart,duration);
 }
 void AddCmdDrawTextDecode(const char*text,int maxChars,const void*font,float x,float y,float sx,float sy,const void*unused,const float*color,int style,const float*glow,const void*material,const void*glowMaterial,int birth,int letter,int decayStart,int duration){
     (void)unused;
     Byte*p=AddBaseDrawTextCmd(text,maxChars,font,x,y,1,sx,sy,0,color,style,-1,0,0);
-    if(!p)return;ApplyGlow(p,color,glow);
+    if(!p)return;
+    ApplyGlow(p,color,glow);
     if(birth)ApplyEffect(p,0x1000u,material,glowMaterial,birth,letter,decayStart,duration);
 }
 void AddCmdDrawTextRedact(const char*text,int unusedLength,const void*font,float x,float y,float sx,float sy,const void*unused,const float*color,int style,const float*glow,const void*material,const void*glowMaterial,int birth,int letter,int decayStart,int duration,int redactStart,int redactDuration){
     (void)unusedLength;(void)unused;
     Byte*p=AddBaseDrawTextCmd(text,0x7fffffff,font,x,y,1,sx,sy,0,color,style,-1,0,0);
-    if(!p)return;ApplyGlow(p,color,glow);
+    if(!p)return;
+    ApplyGlow(p,color,glow);
     if(birth){ApplyEffect(p,0x4000u,material,glowMaterial,birth,letter,decayStart,duration);W(p,0x58,redactStart);W(p,0x5c,redactDuration);}
 }
 // 14071C5F0: original material fallback predicate and stretch command.
@@ -89,7 +94,7 @@ void AddCmdStretchPic(float x,float y,float w,float h,float s0,float t0,float s1
     }
 }
 // 14071C740: rotated stretch command; angle encoding remains a separate original callee.
-extern "C" unsigned Text_EncodeAngle(float);
+extern "C" float Text_EncodeAngle(float);
 void AddCmdStretchPicRotate(float x,float y,float unused,float h,float s0,float t0,float s1,float t1,float z,float angle,const float*color,const void*material){
     (void)unused;
     if(auto*p=AllocateCommand(0x40,0xd,false,true)){

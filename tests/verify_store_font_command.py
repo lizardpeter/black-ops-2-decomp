@@ -12,11 +12,11 @@ def main():
         a=C.create_string_buffer(lib.CmdSize());b=C.create_string_buffer(lib.CmdSize());rng=random.Random(0x71c880)
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base=C.addressof(C.c_char.from_buffer(mem))
-            for i,rva in enumerate([0x8a7dc0,0xf2040,0x870aa2]):
+            for i,rva in enumerate([0x8a7dc0,0xf2040,0x870aa2,0x462cc0]):
                 ptr=lib.CmdMock(i)
                 if i==0:struct.pack_into("<Q",mem,rva,ptr)
                 else:mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",ptr)+b"\xff\xe0"
-            for op in range(2):
+            for op in range(9):
                 for n in range(8192):
                     seed=rng.getrandbits(32)
                     lib.CmdRun(base,op,seed,a);lib.CmdRun(None,op,seed,b)
