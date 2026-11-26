@@ -65,3 +65,7 @@ Run 45890504379 passed continuous replay through 140712E97. New source extends t
 ## Water and depth-of-field continuation
 
 22 further registration operations through 140713DA0, including signed/unbounded script shader vector domains and depth of field. The continuous replay now expects 318..326 events and 181 global slots. Pending CI.
+
+## Screen-effects continuation
+
+Run 45891017028 passed 512 continuous replays (318..326 events, 181 globals) through the water/DOF section. New body extends through 14071478A, covering 30 additional flame, water-sheeting, anaglyph, rim, generic scene, revive and poison effect registrations and 23 result slots. The original three mode-dependent float setter calls are preserved with source 0 and their actual destination pointers; they are not folded into defaults. Replay now compares their order and argument values. Pending CI; not activated in the live game.

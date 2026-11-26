@@ -128,6 +128,30 @@ extern const Dvar *store_r_dof_farStart; // 1427E6E20
 extern const Dvar *store_r_dof_farEnd; // 1427E6C08
 extern const Dvar *store_r_dof_bias; // 1427E6E70
 extern const Dvar *store_r_dof_showdebug; // 1427E6E00
+extern const Dvar *store_r_flameFX_distortionScaleFactor; // 14266D4C0
+extern const Dvar *store_r_flameFX_magnitude; // 14266D4A0
+extern const Dvar *store_r_flameFX_FPS; // 14266D498
+extern const Dvar *store_r_flameFX_fadeDuration; // 14266D4A8
+extern const Dvar *store_r_waterSheetingFX_allowed; // 1427E6F60
+extern const Dvar *store_r_waterSheetingFX_enable; // 1427E6D40
+extern const Dvar *store_r_waterSheetingFX_distortionScaleFactor; // 14266D4B8
+extern const Dvar *store_r_waterSheetingFX_magnitude; // 1427E7260
+extern const Dvar *store_r_waterSheetingFX_radius; // 14266D4D0
+extern const Dvar *store_r_anaglyphFX_enable; // 1427E7020
+extern const Dvar *store_r_reviveFX_debug; // 1427E6E10
+extern const Dvar *store_r_reviveFX_edgeColorTemp; // 1427E6C70
+extern const Dvar *store_r_reviveFX_edgeSaturation; // 1427E6C00
+extern const Dvar *store_r_reviveFX_edgeScale; // 1427E6DC8
+extern const Dvar *store_r_reviveFX_edgeContrast; // 1427E6DD0
+extern const Dvar *store_r_reviveFX_edgeOffset; // 1427E6BF8
+extern const Dvar *store_r_reviveFX_edgeAmount; // 1427E6CF0
+extern const Dvar *store_r_reviveFX_edgeMaskAdjust; // 1427E6DB8
+extern const Dvar *store_r_poisonFX_debug_enable; // 1427E7240
+extern const Dvar *store_r_poisonFX_pulse; // 1427E6D20
+extern const Dvar *store_r_poisonFX_dvisionX; // 1427E70E0
+extern const Dvar *store_r_poisonFX_blurMin; // 1427E6C50
+extern const Dvar *store_r_poisonFX_blurMax; // 1427E6DE8
+void Store_Renderer_SetFloat(const Dvar *,float,U32); // 14046CEF0
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -559,12 +583,53 @@ void RegisterRendererWaterDofFragment() {
     store_r_dof_bias=Store_Renderer_Float("r_dof_bias",F(0x3f000000),F(0x3dcccccd),F(0x40400000),0x4080,"");
     store_r_dof_showdebug=InlineBool("r_dof_showdebug",false,0x80);
 }
+// 140713DA1..14071478A. Includes the original conditional post-registration
+// writes, not just the defaults. These setters target pulse, dvisionX and
+// blurMin (NOT blurMax); the flag byte is read again after registration.
+void RegisterRendererScreenEffectsFragment() {
+    store_r_flameFX_distortionScaleFactor=Store_Renderer_Vec4("r_flameFX_distortionScaleFactor",F(0),F(0x3f800000),F(0x3f800000),F(0x3f030d0f),F(0),F(0x3f800000),0x1081);
+    store_r_flameFX_magnitude=Store_Renderer_Float("r_flameFX_magnitude",F(0x3cb03f99),F(0),F(0x3f800000),0x1081,"");
+    store_r_flameFX_FPS=InlineInt("r_flameFX_FPS",15,1,60,0x1081);
+    store_r_flameFX_fadeDuration=Store_Renderer_Float("r_flameFX_fadeDuration",F(0x3f000000),F(0),F(0x41700000),0x1001,"");
+    store_r_waterSheetingFX_allowed=InlineBool("r_waterSheetingFX_allowed",true,1);
+    store_r_waterSheetingFX_enable=InlineBool("r_waterSheetingFX_enable",false,0);
+    store_r_waterSheetingFX_distortionScaleFactor=Store_Renderer_Vec4("r_waterSheetingFX_distortionScaleFactor",F(0x3cb3e78e),F(0x3f800000),F(0),F(0),F(0),F(0x3f800000),0);
+    store_r_waterSheetingFX_magnitude=Store_Renderer_Float("r_waterSheetingFX_magnitude",F(0x3d863935),F(0),F(0x3f800000),0,"");
+    store_r_waterSheetingFX_radius=Store_Renderer_Float("r_waterSheetingFX_radius",F(0x408e18a8),F(0),F(0x42000000),0,"");
+    store_r_anaglyphFX_enable=InlineBool("r_anaglyphFX_enable",false,1);
+    InlineBool("r_rimIntensity_debug",false,0x5000);
+    Store_Renderer_Float("r_rimIntensity",F(0),F(0),F(0x42480000),0x5000,"");
+    InlineBool("r_genericSceneVector_debug",false,0x5000);
+    Store_Renderer_Vec4("r_genericSceneVector0",F(0),F(0),F(0),F(0),F(0),F(0x42c80000),0x5000);
+    Store_Renderer_Vec4("r_genericSceneVector1",F(0),F(0),F(0),F(0),F(0),F(0x42c80000),0x5000);
+    Store_Renderer_Vec4("r_genericSceneVector2",F(0),F(0),F(0),F(0),F(0),F(0x42c80000),0x5000);
+    Store_Renderer_Vec4("r_genericSceneVector3",F(0),F(0),F(0),F(0),F(0),F(0x42c80000),0x5000);
+    store_r_reviveFX_debug=InlineBool("r_reviveFX_debug",false,0x80);
+    store_r_reviveFX_edgeColorTemp=Store_Renderer_Float("r_reviveFX_edgeColorTemp",F(0x45cb2000),F(0x44ce4000),F(0x46c35000),0x5000,"");
+    store_r_reviveFX_edgeSaturation=Store_Renderer_Float("r_reviveFX_edgeSaturation",F(0x3f800000),F(0),F(0x40000000),0x5000,"");
+    store_r_reviveFX_edgeScale=Store_Renderer_Vec3("r_reviveFX_edgeScale",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0),F(0x40000000),0x5000);
+    store_r_reviveFX_edgeContrast=Store_Renderer_Vec3("r_reviveFX_edgeContrast",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0),F(0x40000000),0x5000);
+    store_r_reviveFX_edgeOffset=Store_Renderer_Vec3("r_reviveFX_edgeOffset",F(0),F(0),F(0),F(0xc0000000),F(0x40000000),0x5000);
+    store_r_reviveFX_edgeAmount=Store_Renderer_Float("r_reviveFX_edgeAmount",F(0),F(0),F(0x3f800000),0x5000,"");
+    store_r_reviveFX_edgeMaskAdjust=Store_Renderer_Float("r_reviveFX_edgeMaskAdjust",F(0),F(0xbf800000),F(0x3f800000),0x5000,"");
+    store_r_poisonFX_debug_enable=InlineBool("r_poisonFX_debug_enable",false,0x5000);
+    store_r_poisonFX_pulse=Store_Renderer_Float("r_poisonFX_pulse",F(0x3f8ccccd),F(0x3f800000),F(0x40000000),0x4000,"");
+    store_r_poisonFX_dvisionX=Store_Renderer_Float("r_poisonFX_dvisionX",F(0),F(0xc1a00000),F(0x41a00000),0x4000,"");
+    store_r_poisonFX_blurMin=Store_Renderer_Float("r_poisonFX_blurMin",F(0),F(0),F(0x41a00000),0x5000,"");
+    store_r_poisonFX_blurMax=Store_Renderer_Float("r_poisonFX_blurMax",F(0x40800000),F(0),F(0x41a00000),Store_Renderer_ModeByte?0x5080:0x5000,"");
+    if(Store_Renderer_ModeByte) {
+        Store_Renderer_SetFloat(store_r_poisonFX_pulse,F(0x40000000),0);
+        Store_Renderer_SetFloat(store_r_poisonFX_dvisionX,F(0x41a00000),0);
+        Store_Renderer_SetFloat(store_r_poisonFX_blurMin,F(0x3fc00000),0);
+    }
+}
 void RegisterRendererExtendedPrefix() {
     RegisterRendererRecoveredPrefix();
     RegisterRendererVisibilityShadowFragment();
     RegisterRendererFilmColorFragment();
     RegisterRendererBloomColorMatrixFragment();
     RegisterRendererWaterDofFragment();
+    RegisterRendererScreenEffectsFragment();
 }
 } // namespace store_renderer_dvar
 #endif
