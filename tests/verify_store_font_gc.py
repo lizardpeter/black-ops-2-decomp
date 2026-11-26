@@ -12,7 +12,7 @@ def main():
         a=C.create_string_buffer(lib.GCSize());b=C.create_string_buffer(lib.GCSize());rng=random.Random(0x692140)
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base=C.addressof(C.c_char.from_buffer(mem))
-            for i,rva in enumerate([0x6918c0,0x68f6c0,0x69d7a0]):
+            for i,rva in enumerate([0x6918c0,0x68f6c0,0x69d7a0,0x870aa2]):
                 mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",lib.GCMock(i))+b"\xff\xe0"
             errors=[]
             for op in range(7):

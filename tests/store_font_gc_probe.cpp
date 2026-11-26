@@ -34,13 +34,14 @@ static void*MS MAlloc(void*a,void*p,Q o,Q n){return Alloc(a,p,o,n);}
 static int MS MInterrupt(void*p){return Interrupt(p);}
 static U MS MAdvance(B*p,void*v){return store_lui_gc::GC_Advance(p,v);}
 static bool MS MCheck(B*p){return store_lui_gc::GC_Check(p);}
+static void*MS MCopy(void*d,const void*s,Q n){return std::memcpy(d,s,n);}
 static void MS MCall(void*p,int a,int b,Q m){store_lui_meta::Meta_Call(p,a,b,m);}
 static void Entry(unsigned table,store_lui_meta::Value k,store_lui_meta::Value val){
     auto*n=nodes[table]+32;Q h=(((k.payload>>3^k.payload)>>5)^U(k.payload))&3;
     Write(n,unsigned(h*32),k);Write(n,unsigned(h*32+16),val);
 }
 extern "C"{
-void*GCMock(unsigned i){void*p[]={reinterpret_cast<void*>(MAdvance),reinterpret_cast<void*>(MCheck),reinterpret_cast<void*>(MCall)};return p[i];}
+void*GCMock(unsigned i){void*p[]={reinterpret_cast<void*>(MAdvance),reinterpret_cast<void*>(MCheck),reinterpret_cast<void*>(MCall),reinterpret_cast<void*>(MCopy)};return p[i];}
 unsigned GCSize(){return sizeof(Capture);}
 void GCRun(void*image,unsigned op,unsigned seed,void*out){
     auto*b=static_cast<B*>(image);Capture cap{};c=&cap;U st=seed;auto next=[&](){st=st*1664525u+1013904223u;return st;};
