@@ -26,6 +26,7 @@ on:
       - 'tools/build_runtime.py'
       - 'tools/symbols.py'
       - 'tools/inventory/store_renderer_registration.py'
+      - 'tools/inventory/store_dvar_next.py'
       - 'docs/store-renderer-dvar-registration.tsv'
       - '.github/workflows/store-cgame-registration.yml'
 permissions:
@@ -84,6 +85,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_renderer_native_bindings.py originals/t6mp_msstore.exe renderer-evidence/renderer-evidence.json | tee renderer-native-bindings.log
+      - name: Extract exact Store MP FOV references and dvar core bodies
+        run: |
+          set -o pipefail
+          python tools/inventory/store_dvar_next.py originals/t6mp_msstore.exe dvar-next-evidence | tee dvar-next.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -99,4 +104,6 @@ jobs:
             renderer-extended-replay.log
             renderer-complete-replay.log
             renderer-native-bindings.log
+            dvar-next-evidence/
+            dvar-next.log
           if-no-files-found: warn
