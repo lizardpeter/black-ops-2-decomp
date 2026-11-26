@@ -26,6 +26,9 @@ on:
       - 'src/cgame/cg_vehicle_offset_store.cpp'
       - 'src/cgame/cg_camera_basis_store.cpp'
       - 'src/cgame_mp/cg_turret_view_store.cpp'
+      - 'src/cgame/cg_camera_transition_store.cpp'
+      - 'tests/store_camera_transition_probe.cpp'
+      - 'tests/verify_store_camera_transition.py'
       - 'tests/store_turret_view_probe.cpp'
       - 'tests/verify_store_turret_view.py'
       - 'tests/store_camera_basis_probe.cpp'
@@ -239,6 +242,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_turret_view.py originals/t6mp_msstore.exe | tee camera-turret-view.log
+      - name: Replay complete Store camera transition
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_transition.py originals/t6mp_msstore.exe | tee camera-transition.log
       - name: Compile all recovered camera bodies to Windows x64 objects
         run: |
           set -o pipefail
@@ -282,4 +289,5 @@ jobs:
             camera-vehicle-offset.log
             camera-basis.log
             camera-turret-view.log
+            camera-transition.log
           if-no-files-found: warn

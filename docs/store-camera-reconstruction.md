@@ -83,3 +83,7 @@ Latest prior run 45898978967 passed vehicle offset and all 33 public Win64 funct
 ## Turret view positioning
 
 Complete candidate at 14016BFB0..14016C374. Includes entity and model map resolution, player tag, missing tag error, weapon first-person offset, original random angular jitter, history reset outside 300 ms window, view offset helper and local-axis translation. Original engine helper 1400C23C0 is an explicit call boundary; extractor captures it next. 16384 original-body comparisons pending. No live activation.
+
+## Camera mode transition
+
+Run 45899353063 passed the prior five function bodies and all 38 Windows public functions. Complete transition candidate at 1400BFCC0..1400C0040 (176 instructions). Store jump table checked by replay, duration and seat branches, remote turret reset, missile state and original highlight dvar writes/reset, tag view angle restoration, and client view-angle delta writes. 32768 differential comparisons pending. The LTCG tween boundary passes duration in XMM1 with no prepared RCX and preserves live R8/R9/R10; mock retains those lanes. StartCameraTween and water-query internals added to extraction. No runtime activation.
