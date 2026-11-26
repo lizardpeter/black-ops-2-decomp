@@ -129,3 +129,48 @@ The next native renderer work is descriptor extraction and exact texture
 upload semantics, then render-target lifecycle, shader bindings and
 command submission. Keep original memory accounting separate from Vulkan
 device memory requirements and allocation alignment.
+
+## Exact resource descriptor reconstruction
+
+The three resource creation candidates have identical contiguous code
+across MP/ZM/SP after relocating 15 verified RIP-relative global
+references. Isolated replay captures the texture and SRV descriptors,
+the initial-data pointer, writes to the image type/dimensions and
+resource creation/view/release order. The retry flag is zero in this
+test; failure/retry behavior is not reconstructed.
+
+| Constructor | 2D | Volume | Cube |
+| --- | --- | --- | --- |
+| Image type | 3 | 4 | 5 |
+| Texture descriptor size | 44 | 36 | 44 |
+| Array layers | 1 | n/a | 6 |
+| Usage | DEFAULT | DYNAMIC | DEFAULT |
+| CPU access | 0 | WRITE | 0 |
+| SRV dimension | 2D or 2DMS | 3D | CUBE |
+
+2D flags 0x20000 and 0x40000 control attachment bind flags and
+multisampling respectively. Formats 20/40/45 use typeless resource
+formats 19/39/44 and SRV formats 21/41/46; format 27 uses SRV 28.
+The other 2D formats keep their original format, and 3D/cube use
+their given format without remapping. All dimensions are truncated to
+16 bits, exactly as in the original. Mip count is passed through.
+The cube path sets the texture-cube misc flag. The 3D path has an
+unused sixth argument slot (caller setup leaves it unspecified).
+
+The new Store_DescribeImage2D/3D/Cube helpers reproduce only the
+descriptor and image-metadata construction portion, not the original
+COM functions themselves. They intentionally have no executable symbol
+binding or runtime redirect. Vulkan will use the recovered intent rather
+than creating D3D11 descriptors or emulating COM.
+
+    python tests/verify_store_image_descriptor.py /path/to/store/files
+
+Executed successfully on Linux x86-64: 6,000 comparisons per executable
+(18,000 total), covering 100 format values, four flag combinations,
+five sample counts, random dimensions, mip levels and sample quality.
+Original resource creation calls are mocked, so this includes invalid
+descriptor combinations and does not establish actual GPU acceptance.
+The previous 67,662 constructor and memory-accounting comparisons also
+passed again. No actual GPU, full hybrid build or resource-error replay
+has been performed. The source tree and generated analysis layout are
+unchanged.
