@@ -1,0 +1,36 @@
+name: Store input reconstruction evidence
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'tools/inventory/store_input.py'
+      - '.github/workflows/store-input.yml'
+      - 'src/client/*_store.cpp'
+      - 'src/client_mp/*_store.cpp'
+      - 'src/cgame_mp/cg_gamepad_store.cpp'
+      - 'tests/verify_store_input*.py'
+      - 'tests/store_input*.cpp'
+      - 'enhanced/win32/win_input.cpp'
+      - 'enhanced/win32/win_rawinput.cpp'
+      - 'tests/enhanced/test_mouse_fallback.py'
+permissions:
+  contents: read
+jobs:
+  input:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch hash-pinned Store MP original
+        run: python tools/fetch_originals.py t6mp_msstore originals --only exe
+      - name: Extract exact input function bodies
+        run: |
+          python -m pip install capstone==5.0.6 pefile==2024.8.26
+          python tools/inventory/store_input.py originals/t6mp_msstore.exe input-evidence
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: store-input-evidence
+          path: input-evidence
