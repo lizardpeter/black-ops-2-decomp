@@ -177,6 +177,7 @@ def extract(path, out):
         "r_colorMap": 0x140D3A088, "r_alphaMap": 0x140D3A0B8,
         "r_specularMap": 0x140D3A250, "r_glossMap": 0x140D3A270,
         "r_occlusionMap": 0x140D3A208,
+        "r_showPenetration": 0x140D3A160, "r_showReflectionProbeSelection": 0x140D3A110,
     }
     evidence["enum_table_arguments"] = {
         name: reference(va, 0) for name, va in table_vas.items()

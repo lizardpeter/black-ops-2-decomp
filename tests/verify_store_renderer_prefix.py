@@ -70,7 +70,11 @@ def main():
                 lib.RendererPrefixRun(base, mask, old)
                 lib.RendererPrefixRun(None, mask, new)
                 assert struct.unpack_from("<Q", old.raw)[0] == 102
-                assert old.raw == new.raw, (mask, old.raw.hex(), new.raw.hex())
+                if old.raw != new.raw:
+                    pos=next(i for i,(x,y) in enumerate(zip(old.raw,new.raw)) if x!=y)
+                    if pos<8: raise AssertionError((mask,"event count",struct.unpack_from("<Q",old.raw),struct.unpack_from("<Q",new.raw)))
+                    idx=(pos-8)//80
+                    raise AssertionError((mask,idx,struct.unpack_from("<10Q",old.raw,8+80*idx),struct.unpack_from("<10Q",new.raw,8+80*idx)))
                 lib.RendererPrefixGlobals(globals_)
                 assert list(globals_) == [struct.unpack_from("<Q", mem, rva)[0] for rva in GLOBALS], mask
         print(f"{len(masks)*2} renderer prefix cases; 102 ordered events and 58 result slots per case")

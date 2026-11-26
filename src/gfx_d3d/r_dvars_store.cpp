@@ -16,14 +16,14 @@ extern "C" {
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
-extern const char *const Store_Renderer_DebugShader[]; // 140D3A1A8
-extern const char *const Store_Renderer_DebugPerformance[]; // 140D3A230
-extern const char *const Store_Renderer_LightMapSecondary[]; // 140D39F50
-extern const char *const Store_Renderer_ColorMap[]; // 140D3A088
-extern const char *const Store_Renderer_AlphaMap[]; // 140D3A0B8
-extern const char *const Store_Renderer_SpecularMap[]; // 140D3A250
-extern const char *const Store_Renderer_GlossMap[]; // 140D3A270
-extern const char *const Store_Renderer_OcclusionMap[]; // 140D3A208
+extern const char *const Store_Renderer_DebugShader[]={"none","normal","basisTangent","basisBinormal","basisNormal","lmapDir",nullptr}; // 140D3A1A8
+extern const char *const Store_Renderer_DebugPerformance[]={"none","current","average",nullptr}; // 140D3A230
+extern const char *const Store_Renderer_LightMapSecondary[]={"Black","Unchanged","Intensity 1","Intensity 2","Intensity 3","Intensity 4","Intensity 5","Intensity 6","Intensity 7","Intensity 8","Intensity 9","Intensity 10","Intensity 11","Intensity 12","Intensity 13","Intensity 14","Intensity 15","Intensity 16","Intensity 17","Intensity 18","Intensity 19","Intensity 20","Intensity 21","Intensity 22","Intensity 23","Intensity 24","Intensity 25","Intensity 26","Intensity 27","Intensity 28","Intensity 29","Intensity 30","Intensity 31",nullptr}; // 140D39F50
+extern const char *const Store_Renderer_ColorMap[]={"Black","Unchanged","White","Gray Linear","Gray sRGB",nullptr}; // 140D3A088
+extern const char *const Store_Renderer_AlphaMap[]={"Unchanged","255","192","128",nullptr}; // 140D3A0B8
+extern const char *const Store_Renderer_SpecularMap[]={"Non metal (sRGB 56)","Unchanged","Metal (sRGB 255)",nullptr}; // 140D3A250
+extern const char *const Store_Renderer_GlossMap[]={"0","Unchanged","255","204","153","102","51",nullptr}; // 140D3A270
+extern const char *const Store_Renderer_OcclusionMap[]={"0","Unchanged","255","128",nullptr}; // 140D3A208
 extern const char *const Store_Renderer_Penetration[]; // 140D3A160
 extern const char *const Store_Renderer_ReflectionProbe[]; // 140D3A110
 extern const Dvar *store_r_texFilterMipBias; // 1427E7098
@@ -72,9 +72,9 @@ void Store_Renderer_Reregister(const Dvar *,const char *,int,U32,const Value *,c
 const Dvar *Store_Renderer_Bool(const char *,bool,U32,const char *);
 const Dvar *Store_Renderer_Float(const char *,float,float,float,U32,const char *);
 const Dvar *Store_Renderer_Enum(const char *,const char *const *,int,U32);
-extern const char *const Store_Renderer_ClipCodec[]; // 140D39F30
-extern const char *const Store_Renderer_ClipSize[]; // 140D3A1E0
-extern const char *const Store_Renderer_MipMode[]; // 140D3A138
+extern const char *const Store_Renderer_ClipCodec[]={"MJPEG","VP8",nullptr}; // 140D39F30
+extern const char *const Store_Renderer_ClipSize[]={"360","480","720","1080",nullptr}; // 140D3A1E0
+extern const char *const Store_Renderer_MipMode[]={"Unchanged","Force Trilinear","Force Bilinear","Force Mipmaps Off",nullptr}; // 140D3A138
 extern const Dvar *store_r_txaa; // 1427E7188
 extern const Dvar *store_r_txaaSupported; // 1427E6EF8
 extern const Dvar *store_r_txaaDepth1; // 1427E6F10
