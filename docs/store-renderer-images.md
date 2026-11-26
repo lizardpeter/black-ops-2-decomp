@@ -387,3 +387,45 @@ setup boundary, COM creation/release and image release. It checks all
 truncated dimensions and one to three retries. No actual GPU execution,
 terminal COM failure, or full Windows hybrid build is claimed.
 The standard differential ledger is unchanged.
+
+## Static and dynamic vertex/index buffer lifecycle
+
+| Function | MP | ZM | SP |
+| --- | --- | --- | --- |
+| Load_IndexBuffer | 140738A80 | 140736630 | 1405DF580 |
+| Load_VertexBuffer | 140738B30 | 1407366E0 | 1405DF630 |
+| R_InitDynamicVertexBufferState | 140738C00 | 1407367B0 | 1405DF700 |
+| R_InitSkinnedVertexBuffers | 140738CB0 | 140736860 | 1405DF7B0 |
+| R_ShutdownSkinnedVertexBuffers | 140738D30 | 1407368E0 | 1405DF830 |
+
+All five return void. The static index loader multiplies the element
+count by two, uses immutable usage and index binding, and leaves the
+output unchanged when loading is disabled. The vertex loader uses the
+byte count directly, immutable usage and vertex binding, and clears
+the output when loading is disabled or input data is null. The dynamic
+state uses a 24-byte record (used, total, buffer, verts) and a two-slot
+Store ABI, creates a CPU-write dynamic vertex buffer when enabled, and
+clears verts regardless of the gate. Skinned initialization iterates two
+states, computes bytes from maxSkinnedVerts at definition offset 8
+times 32, allocates backing memory and calls a nonreturning failure
+handler if allocation fails. That general allocator and fatal handler
+are still original-engine boundaries, not reconstructed here.
+Shutdown releases non-null buffers and VirtualFree's their backing
+memory using MEM_RELEASE, preserving other state fields. The original
+retry loop clears the buffer before repeating; a nonzero retry flag
+after release would dereference null. This original quirk is retained
+but not executed by the test.
+
+    python tests/verify_store_buffer.py /path/to/store/files
+
+Executed against the three SHA-256-pinned originals: 23,520 cases per
+build, 70,560 total. The test compares complete state records, exact
+D3D buffer and initial-data descriptors, output pointers, event order,
+signed/overflowing sizes, null data, disabled/boolean/string dvars,
+one to three creation retries, and both allocation-failure branches.
+COM, virtual memory and the fatal handler are mocked; fatal control
+flow is tested by escaping the isolated invocation. Terminal COM
+failure, real GPU allocation, real virtual allocation and full
+Windows hybrid integration are not verified. The Win32 import
+declaration for VirtualFree is added to the reconstruction SDK shim.
+No runtime redirects or standard ledger promotions are introduced.

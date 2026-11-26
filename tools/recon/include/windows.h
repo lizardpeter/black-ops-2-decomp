@@ -172,6 +172,7 @@ typedef struct _PROCESS_POWER_THROTTLING_STATE
 #define INFINITE 0xFFFFFFFF
 #define THREAD_PRIORITY_HIGHEST 2
 #define WINBASEAPI extern "C" __declspec(dllimport)
+WINBASEAPI BOOL WINAPI VirtualFree(void *address, __SIZE_TYPE__ size, DWORD freeType);
 
 WINUSERAPI USHORT WINAPI RegisterClassA(const WNDCLASSA *lpWndClass);
 WINUSERAPI HWND WINAPI CreateWindowExA(DWORD dwExStyle, const char *lpClassName, const char *lpWindowName,
