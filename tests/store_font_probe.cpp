@@ -1,6 +1,7 @@
 #define T6_STORE
 #define T6_STORE_FONT_REPLAY
 #include "../src/ui/ui_font_assets_store.cpp"
+#undef T6_SOURCE
 #include "../src/client/screen_placement_store.cpp"
 #include <cassert>
 #include <cstdio>
