@@ -9,7 +9,7 @@ extern "C"{
 extern B* Static_BufferBase;
 extern B* Static_Pointers;
 extern B* Static_Sizes;
-extern U Static_Ready;
+extern B Static_Ready;
 }
 void InitializeWorkTables(){
     // Address deltas relative to original 14266D500, 14274D3A0 and 14274D210.
