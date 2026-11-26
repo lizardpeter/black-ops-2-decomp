@@ -40,3 +40,12 @@ jobs:
         with:
           name: store-input-evidence
           path: input-evidence
+  win64-input:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Compile Store input functions to Windows x64 COFF objects
+        run: python tests/verify_store_input_win64.py
