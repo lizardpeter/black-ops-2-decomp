@@ -316,3 +316,44 @@ COM Release and atoi are mocked; no actual GPU, full hybrid build,
 or runtime redirects are claimed. The standard ledger is unchanged
 until its runner supports the separate replay tests. No original
 instruction bytes are committed.
+
+## Program image allocation and complete render-target setup
+
+| Function | MP | ZM | SP |
+| --- | --- | --- | --- |
+| Image_AllocProg | 14073B740 | 140739270 | 1405DE830 |
+| Store_ImageSetupRenderTarget | 140752470 | 14074FFB0 | 1405F8D90 |
+
+Image_AllocProg returns a pointer to a 0x68-byte program-image record,
+sets its category, semantic, name and track, and inserts it into the
+2048-entry image hash table. The original hash is a signed-byte XOR
+with a multiply-by-33 accumulator, then linear probing. A completely
+full table overwrites the slot reached on the 2049th advance; this
+original quirk is retained. Index bounds are assumed as in the original.
+
+Store_ImageSetupRenderTarget merges the reference render-target image
+setup with allocation and view creation. It truncates dimensions,
+allocates the program image, applies name-specific flags for $scene,
+$ssao_csz and $dof_scene_fp16, creates the resource through Store_ImageSetup,
+then creates the color or depth view. Color views use a 20-byte
+descriptor, depth views 24 bytes. Color format 27 remaps to 28;
+the special target at array index 4 uses a multisampled view for
+sample counts above one. Color creation repeats on the original
+retry flag, depth creation does not. The temporary resource is
+released and the target dimensions written. The exact Store source
+name is provisional (the reference Image_SetupRenderTarget has a
+different signature).
+
+    python tests/verify_store_image_prog.py /path/to/store/files
+    python tests/verify_store_render_target_create.py /path/to/store/files
+
+Executed on Linux x86-64 against all three pinned Store originals:
+4,608 allocator comparisons and 12,800 complete target-setup comparisons
+per executable (52,224 combined). The allocator test executes its entire
+original body and compares image records, return identity and the hash
+table; the target test captures allocation, resource setup and COM
+calls and compares descriptor contents, flags, target metadata and
+ordering. All corresponding normalized instruction bodies match.
+Actual GPU allocation, combined end-to-end Windows hybrid execution and
+terminal resource failure are not validated. No enhanced redirect or
+standard differential ledger promotion is introduced.

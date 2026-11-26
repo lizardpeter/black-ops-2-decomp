@@ -740,3 +740,18 @@ t6sp_msstore	144086530	data	store_extraImageA	store_extraImageA	gfx_d3d/r_image.
 t6sp_msstore	144085FE8	data	store_extraImageB	store_extraImageB	gfx_d3d/r_image.cpp	structure	second standalone image released; provisional name	high
 t6sp_msstore	144086A78	data	store_extraImageC	store_extraImageC	gfx_d3d/r_image.cpp	structure	third standalone image released; provisional name	high
 t6sp_msstore	1423BDCC8	data	store_renderTargetShutdownState	store_renderTargetShutdownState	gfx_d3d/r_image.cpp	structure	eight-byte state cleared after release; provisional name	high
+t6mp_msstore	14073B740	function	Image_AllocProg	?Image_AllocProg@@YAPEAUGfxImage@@HEE@Z	gfx_d3d/r_image.cpp	semantic+differential	complete body compared across all Store builds; tests/verify_store_image_prog.py	high
+t6mp_msstore	140752470	function	Store_ImageSetupRenderTarget	Store_ImageSetupRenderTarget	gfx_d3d/r_image.cpp	semantic+differential	complete merged setup and view creation body; tests/verify_store_render_target_create.py; provisional Store ABI name	high
+t6mp_msstore	14091D800	data	store_imageProgNames	store_imageProgNames	gfx_d3d/r_image.cpp	structure	program image name pointer table	high
+t6mp_msstore	14444D230	data	store_imageProgs	store_imageProgs	gfx_d3d/r_image.cpp	structure	program images at 0x68 stride	high
+t6mp_msstore	144449210	data	store_imageHashTable	store_imageHashTable	gfx_d3d/r_image.cpp	structure	2048-entry pointer hash table	high
+t6zm_msstore	140739270	function	Image_AllocProg	?Image_AllocProg@@YAPEAUGfxImage@@HEE@Z	gfx_d3d/r_image.cpp	semantic+differential	complete body compared across all Store builds; tests/verify_store_image_prog.py	high
+t6zm_msstore	14074FFB0	function	Store_ImageSetupRenderTarget	Store_ImageSetupRenderTarget	gfx_d3d/r_image.cpp	semantic+differential	complete merged setup and view creation body; tests/verify_store_render_target_create.py; provisional Store ABI name	high
+t6zm_msstore	14091B800	data	store_imageProgNames	store_imageProgNames	gfx_d3d/r_image.cpp	structure	program image name pointer table	high
+t6zm_msstore	14444B2B0	data	store_imageProgs	store_imageProgs	gfx_d3d/r_image.cpp	structure	program images at 0x68 stride	high
+t6zm_msstore	144447290	data	store_imageHashTable	store_imageHashTable	gfx_d3d/r_image.cpp	structure	2048-entry pointer hash table	high
+t6sp_msstore	1405DE830	function	Image_AllocProg	?Image_AllocProg@@YAPEAUGfxImage@@HEE@Z	gfx_d3d/r_image.cpp	semantic+differential	complete body compared across all Store builds; tests/verify_store_image_prog.py	high
+t6sp_msstore	1405F8D90	function	Store_ImageSetupRenderTarget	Store_ImageSetupRenderTarget	gfx_d3d/r_image.cpp	semantic+differential	complete merged setup and view creation body; tests/verify_store_render_target_create.py; provisional Store ABI name	high
+t6sp_msstore	140798E30	data	store_imageProgNames	store_imageProgNames	gfx_d3d/r_image.cpp	structure	program image name pointer table	high
+t6sp_msstore	144085B70	data	store_imageProgs	store_imageProgs	gfx_d3d/r_image.cpp	structure	program images at 0x68 stride	high
+t6sp_msstore	144081B50	data	store_imageHashTable	store_imageHashTable	gfx_d3d/r_image.cpp	structure	2048-entry pointer hash table	high
