@@ -13,6 +13,31 @@ struct Dvar;
 struct alignas(16) Value { U32 words[4]; };
 struct alignas(16) Domain { U32 words[4]; };
 extern "C" {
+extern const Dvar *store_r_aaSamples; // 1427E7158
+extern const Dvar *store_r_aaSamplesMax; // 1427E7150
+extern const Dvar *store_r_vsync; // 1427E70C8
+extern const Dvar *store_r_clearColor; // 1427E6E78
+extern const Dvar *store_r_clearColor2; // 1427E7128
+extern const Dvar *store_r_viewportBackingColor; // 1427E7198
+extern const Dvar *store_r_dlightLimit; // 1427E6C18
+extern const Dvar *store_r_dobjLimit; // 1427E6E38
+extern const Dvar *store_r_modelLimit; // 1427E6C90
+extern const Dvar *store_r_brushLimit; // 1427E6DC0
+extern const Dvar *store_r_flashLightFovInnerFraction; // 1427E6D00
+extern const Dvar *store_r_flashLightStartRadius; // 1427E6D58
+extern const Dvar *store_r_flashLightEndRadius; // 1427E6C88
+extern const Dvar *store_r_flashLightBrightness; // 1427E6E08
+extern const Dvar *store_r_flashLightOffset; // 1427E7218
+extern const Dvar *store_r_flashLightRange; // 1427E6C68
+extern const Dvar *store_r_flashLightColor; // 1427E6DA8
+extern const Dvar *store_r_flashLightBobAmount; // 1427E71E8
+extern const Dvar *store_r_flashLightBobRate; // 1427E71F8
+extern const Dvar *store_r_flashLightFlickerAmount; // 1427E71F0
+extern const Dvar *store_r_flashLightFlickerRate; // 1427E7210
+extern const Dvar *store_r_lockPvs; // 14266D4C8
+extern const Dvar *store_r_lockPvsInCode; // 14266D4B0
+extern const Dvar *store_r_skipPvs; // 1427E6BE8
+extern const Dvar *store_r_singleCell; // 1427E6B88
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -253,6 +278,55 @@ void RegisterRendererWorkerFragment() {
         const bool enabled=i<HardwareWorkers(Store_Renderer_HardwareCount);
         store_r_smp_worker_thread[i]=Store_Renderer_Bool(names[i],enabled,enabled?0x4000:0x40,"");
     }
+}
+
+static const Dvar *InlineBool(const char *name,bool value,U32 flags) {
+    return InlineVec(name,1,flags,Value{{value?1u:0u,0,0,0}},Domain{});
+}
+
+// 14070FACE..140710BFF. The two original flashlight paths differ in
+// flags; their ordered registrations and result slots are identical.
+void RegisterRendererPostWorkerFragment() {
+    store_r_aaSamples=InlineInt("r_aaSamples",1,1,16,0x21);
+    store_r_aaSamplesMax=InlineInt("r_aaSamplesMax",8,1,16,0);
+    store_r_vsync=InlineBool("r_vsync",true,1);
+    InlineInt("r_vsyncThreshold",10,0,100,0);
+    store_r_clearColor=Store_Renderer_Color("r_clearColor",F(0),F(0),F(0),F(0),0);
+    store_r_clearColor2=Store_Renderer_Color("r_clearColor2",F(0),F(0),F(0),F(0),0);
+    store_r_viewportBackingColor=Store_Renderer_Color("r_viewportBackingColor",F(0x3da3d70a),F(0x3da3d70a),F(0x3da3d70a),F(0x3f800000),0);
+    store_r_dlightLimit=InlineInt("r_dlightLimit",4,0,4,0);
+    store_r_dobjLimit=InlineInt("r_dobjLimit",512,0,1024,0x80);
+    store_r_modelLimit=InlineInt("r_modelLimit",1024,0,1024,0x80);
+    store_r_brushLimit=InlineInt("r_brushLimit",512,0,1024,0x80);
+    InlineBool("r_spotLightShadows",true,0x80);
+    InlineBool("r_spotLightSModelShadows",true,0x80);
+    InlineBool("r_spotLightEntityShadows",true,0x80);
+    const U32 flashFlags=Store_Renderer_ModeByte?0x5000:0x1000;
+    store_r_flashLightFovInnerFraction=Store_Renderer_Float("r_flashLightFovInnerFraction",F(0x3f333333),F(0),F(0x3f7d70a4),flashFlags,"");
+    store_r_flashLightStartRadius=Store_Renderer_Float("r_flashLightStartRadius",F(0),F(0),F(0x44960000),flashFlags,"");
+    store_r_flashLightEndRadius=Store_Renderer_Float("r_flashLightEndRadius",F(0x43960000),F(0x3f800000),F(0x44960000),flashFlags,"");
+    InlineBool("r_flashLightShadows",true,flashFlags);
+    store_r_flashLightBrightness=Store_Renderer_Float("r_flashLightBrightness",F(0x41200000),F(0),F(0x41c80000),flashFlags,"");
+    store_r_flashLightOffset=Store_Renderer_Vec3("r_flashLightOffset",F(0),F(0x40000000),F(0x3f800000),F(0xc2c80000),F(0x42c80000),flashFlags);
+    store_r_flashLightRange=Store_Renderer_Float("r_flashLightRange",F(0x43af0000),F(0x3f800000),F(0x44960000),flashFlags,"");
+    store_r_flashLightColor=Store_Renderer_Vec3("r_flashLightColor",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0),F(0x3f800000),flashFlags);
+    store_r_flashLightBobAmount=Store_Renderer_Vec3("r_flashLightBobAmount",F(0),F(0),F(0),F(0),F(0x42480000),flashFlags);
+    store_r_flashLightBobRate=Store_Renderer_Vec3("r_flashLightBobRate",F(0),F(0x3e4ccccd),F(0x3e99999a),F(0),F(0x40000000),flashFlags);
+    Store_Renderer_Float("r_flashLightSpecularScale",F(0x3f800000),F(0),F(0x41200000),flashFlags,"");
+    store_r_flashLightFlickerAmount=Store_Renderer_Float("r_flashLightFlickerAmount",F(0),F(0),F(0x3f800000),flashFlags,"");
+    store_r_flashLightFlickerRate=Store_Renderer_Float("r_flashLightFlickerRate",F(0x42820000),F(0x3dcccccd),F(0x42820000),flashFlags,"");
+    InlineBool("r_drawWater",true,0x80);
+    store_r_lockPvs=InlineBool("r_lockPvs",false,0x80);
+    store_r_lockPvsInCode=InlineBool("r_lockPvsInCode",false,0x80);
+    store_r_skipPvs=InlineBool("r_skipPvs",false,0x80);
+    store_r_singleCell=InlineBool("r_singleCell",false,0x80);
+}
+
+// Contiguous recovered body so far, not the original function's final return.
+void RegisterRendererRecoveredPrefix() {
+    RegisterRendererEntryPrefix();
+    RegisterRendererWorkerFragment();
+    RegisterRendererPostWorkerFragment();
 }
 } // namespace store_renderer_dvar
 #endif

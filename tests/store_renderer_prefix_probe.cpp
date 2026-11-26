@@ -9,6 +9,31 @@ using U=std::uint64_t;
 namespace store_renderer_dvar {
 struct Dvar { alignas(8) unsigned char bytes[104]; U tag; };
 extern "C" {
+const Dvar *store_r_aaSamples=nullptr;
+const Dvar *store_r_aaSamplesMax=nullptr;
+const Dvar *store_r_vsync=nullptr;
+const Dvar *store_r_clearColor=nullptr;
+const Dvar *store_r_clearColor2=nullptr;
+const Dvar *store_r_viewportBackingColor=nullptr;
+const Dvar *store_r_dlightLimit=nullptr;
+const Dvar *store_r_dobjLimit=nullptr;
+const Dvar *store_r_modelLimit=nullptr;
+const Dvar *store_r_brushLimit=nullptr;
+const Dvar *store_r_flashLightFovInnerFraction=nullptr;
+const Dvar *store_r_flashLightStartRadius=nullptr;
+const Dvar *store_r_flashLightEndRadius=nullptr;
+const Dvar *store_r_flashLightBrightness=nullptr;
+const Dvar *store_r_flashLightOffset=nullptr;
+const Dvar *store_r_flashLightRange=nullptr;
+const Dvar *store_r_flashLightColor=nullptr;
+const Dvar *store_r_flashLightBobAmount=nullptr;
+const Dvar *store_r_flashLightBobRate=nullptr;
+const Dvar *store_r_flashLightFlickerAmount=nullptr;
+const Dvar *store_r_flashLightFlickerRate=nullptr;
+const Dvar *store_r_lockPvs=nullptr;
+const Dvar *store_r_lockPvsInCode=nullptr;
+const Dvar *store_r_skipPvs=nullptr;
+const Dvar *store_r_singleCell=nullptr;
 unsigned char Store_Renderer_ModeByte=0;
 const Dvar *store_r_texFilterMipBias=nullptr;
 const Dvar *store_r_fullbright=nullptr;
@@ -81,6 +106,7 @@ Trace trace{};
 unsigned mask;
 void *mapped_image;
 bool worker_mode=false;
+bool post_worker_mode=false;
 unsigned worker_type;
 int worker_value;
 Dvar slots[128]{};
@@ -122,6 +148,13 @@ void Empty(const char *s) { assert(s && !*s); }
 extern "C" {
 void Store_Renderer_Init() { Push(0); }
 const Dvar *Store_Renderer_Find(const char *n) {
+    if(post_worker_mode) {
+        const char *names[]={"r_aaSamples","r_aaSamplesMax","r_vsync","r_vsyncThreshold","r_dlightLimit","r_dobjLimit","r_modelLimit","r_brushLimit","r_spotLightShadows","r_spotLightSModelShadows","r_spotLightEntityShadows","r_flashLightShadows","r_drawWater","r_lockPvs","r_lockPvsInCode","r_skipPvs","r_singleCell"};
+        unsigned i=0; while(i<sizeof(names)/sizeof(names[0]) && std::strcmp(n,names[i])) ++i;
+        assert(i<sizeof(names)/sizeof(names[0]));
+        const bool exists=(mask&(1u<<i))!=0;
+        Push(1,Hash(n),0,0,exists); return exists?Slot(n):nullptr;
+    }
     if(worker_mode) {
         assert(!std::strcmp(n,"r_smp_worker_threads"));
         const bool exists=(mask&1)!=0;
@@ -193,7 +226,7 @@ void *RendererPrefixMock(unsigned i) {
 }
 unsigned RendererPrefixSize() { return sizeof(Trace); }
 void RendererPrefixRun(void *image,unsigned state,void *out) {
-    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
+    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
     if(image) {
         using Entry=void(MS *)();
         reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
@@ -201,7 +234,7 @@ void RendererPrefixRun(void *image,unsigned state,void *out) {
     std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererWorkerRun(void *image,unsigned exists,unsigned hardware,unsigned type,int value,void *out) {
-    trace={}; used=0; mask=exists; mapped_image=image; worker_mode=true;
+    trace={}; used=0; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false;
     worker_type=type; worker_value=value; Store_Renderer_HardwareCount=hardware;
     store_r_smp_worker_threads=nullptr;
     for(auto &d:store_r_smp_worker_thread) d=nullptr;
@@ -214,6 +247,19 @@ void RendererWorkerRun(void *image,unsigned exists,unsigned hardware,unsigned ty
 void RendererWorkerGlobals(U *out) {
     out[0]=reinterpret_cast<U>(store_r_smp_worker_threads);
     for(unsigned i=0;i<8;++i) out[i+1]=reinterpret_cast<U>(store_r_smp_worker_thread[i]);
+}
+void RendererPostWorkerRun(void *image,unsigned state,unsigned mode,void *out) {
+    trace={}; used=0; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true;
+    Store_Renderer_ModeByte=mode;
+    if(image) {
+        using Entry=void(MS *)();
+        reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
+    } else RegisterRendererPostWorkerFragment();
+    std::memcpy(out,&trace,sizeof(trace));
+}
+void RendererPostWorkerGlobals(U *out) {
+    const Dvar *values[]={store_r_aaSamples,store_r_aaSamplesMax,store_r_vsync,store_r_clearColor,store_r_clearColor2,store_r_viewportBackingColor,store_r_dlightLimit,store_r_dobjLimit,store_r_modelLimit,store_r_brushLimit,store_r_flashLightFovInnerFraction,store_r_flashLightStartRadius,store_r_flashLightEndRadius,store_r_flashLightBrightness,store_r_flashLightOffset,store_r_flashLightRange,store_r_flashLightColor,store_r_flashLightBobAmount,store_r_flashLightBobRate,store_r_flashLightFlickerAmount,store_r_flashLightFlickerRate,store_r_lockPvs,store_r_lockPvsInCode,store_r_skipPvs,store_r_singleCell};
+    for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
 }
 void RendererPrefixGlobals(U *out) {
     const Dvar *slots_[]={store_r_fontResolution,store_r_resolution,store_r_ssao,store_r_ssaoScale,

@@ -41,3 +41,7 @@ The initial eight registrations passed differential replay (run 45888692737). Th
 ## Contiguous texture, lighting and material registration extension
 
 Entry source extended to 14070F91E, immediately before the independently recovered worker fragment. 83 contiguous registrations, 58 global assignments and 102 ordered events expected. Includes the conditional near-plane flags, color and vector registrations, and exact initial strings for 11 original enum tables. The penetration and reflection-probe table contents still require recovery; their original address arguments are checked. New prefix replay samples both mode-byte states and each lookup branch plus deterministic mixed patterns, rather than claiming exhaustive combinations. No live renderer integration. Pending CI.
+
+## Post-worker continuation
+
+14070FACE..140710BFF: 32 additional ordered registrations, including MSAA, vsync, clear colors, renderer limits, spot/flashlight shadows and visibility controls. The two flashlight branches are represented as one common sequence with the original mode-dependent flags. A recovered-prefix entry composes all three adjacent fragments (not yet tested as one continuous original execution). Isolated differential replay covers 17 lookup sites and two flashlight modes, pending CI; 25 result slots. No enhanced behavior changed.
