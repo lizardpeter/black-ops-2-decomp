@@ -51,3 +51,7 @@ Run 45897672565 passed all 49152 first-person/shake/mode comparisons. Complete t
 ## Camera detail helpers
 
 Complete bodies at 1400C72B0 (shake attenuation), 140472FE0 (nonlinear view offset), and 1400C3950 (remote eyes tag resolution). Shake temporal/spatial branches, original packed trig lanes, signed time arithmetic and tag fallback/remote mode boundaries retained. 24576 full-function cases pending. Further extraction includes remote special/fallback, camera transition and vehicle updates. No live activation.
+
+## Bob waveform helpers
+
+Run 45898185322 passed third-person and detail helpers (57344 comparisons). New full bodies for vertical bob 1406602A0..14066046C and horizontal bob 140660470..1406605EE, preserving state precedence, raw vec2 dvar lanes, ADS interpolation, speed scaling exception for high-state path, type-aware max dvar and original MINSS behavior, exact waveform constants. 32768 original differential comparisons pending; sine and atof remain external boundaries.

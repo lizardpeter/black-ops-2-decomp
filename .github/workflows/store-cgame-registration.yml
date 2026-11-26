@@ -18,6 +18,9 @@ on:
       - 'src/cgame/cg_camera_mode_store.cpp'
       - 'src/cgame_mp/cg_third_person_store.cpp'
       - 'src/cgame/cg_camera_detail_store.cpp'
+      - 'src/bgame/bg_camera_bob_store.cpp'
+      - 'tests/store_camera_bob_probe.cpp'
+      - 'tests/verify_store_camera_bob.py'
       - 'tests/store_camera_detail_probe.cpp'
       - 'tests/verify_store_camera_detail.py'
       - 'tests/store_third_person_probe.cpp'
@@ -189,6 +192,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_detail.py originals/t6mp_msstore.exe | tee camera-detail.log
+      - name: Replay Store vertical and horizontal camera bob
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_bob.py originals/t6mp_msstore.exe | tee camera-bob.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -220,4 +227,5 @@ jobs:
             camera-mode.log
             camera-third.log
             camera-detail.log
+            camera-bob.log
           if-no-files-found: warn
