@@ -21,6 +21,7 @@ CommandList*Text_CommandList;
 int Text_UI3DDepth,Text_UI3DStack[8];
 Byte Text_UI3DStats[6*0xa4];
 const Byte*Text_DualPlay;
+const void*Text_DefaultMaterial;
 int Text_Atoi(const char*s){return std::atoi(s);}
 void Text_Color(const float*c,Byte*out){for(unsigned i=0;i<4;++i)out[i]=static_cast<Byte>(c[i]*255);}
 }

@@ -2,7 +2,9 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/gfx_d3d/rb_font_geometry_store.cpp":["BeginSurface","StretchPic","StretchPicRotate","GlyphQuad3D"],
+UNITS={"src/gfx_d3d/rb_font_world_store.cpp":["DrawTextInSpace"],
+       "src/gfx_d3d/r_font_state_store.cpp":["GetViewport","SetViewportConstants","SetWorldTextTransform","SetVertexBuffer"],
+       "src/gfx_d3d/rb_font_geometry_store.cpp":["BeginSurface","StretchPic","StretchPicRotate","GlyphQuad3D"],
        "src/gfx_d3d/rb_font_effects_store.cpp":["PrintLength","DrawEffectSlice","DrawNamedIcon","DrawLegacyIcon"],
        "src/gfx_d3d/r_font_aux_store.cpp":["WrapPosition","RingTextWidth","ReplaceText","DrawBorder"],
        "src/gfx_d3d/rb_font_store.cpp":["DrawCursor","LookupIcon","ConvertColor"],

@@ -11,6 +11,8 @@ on:
       - 'src/gfx_d3d/r_font_store.cpp'
       - 'src/gfx_d3d/r_text_commands_store.cpp'
       - 'src/gfx_d3d/rb_font_store.cpp'
+      - 'src/gfx_d3d/rb_font_world_store.cpp'
+      - 'src/gfx_d3d/r_font_state_store.cpp'
       - 'src/gfx_d3d/rb_font_geometry_store.cpp'
       - 'src/gfx_d3d/rb_font_effects_store.cpp'
       - 'src/gfx_d3d/r_font_aux_store.cpp'
