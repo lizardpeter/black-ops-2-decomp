@@ -50,10 +50,11 @@ void RectVertices(float x0,float y0,float x1,float y1,float*out){
     for(unsigned i=0;i<12;i+=3)TransformPoint(out+i,out+i+1,out+i+2);
 }
 static U32 IntDvar(const Byte*d){
-    if(!d)return 0;int type=R<int>(d,0x18);
+    if(!d)return 0;
+    int type=R<int>(d,0x18);
     if(unsigned(type-6)<2)return R<U32>(d,0x20);
     if(type==1)return R<Byte>(d,0x20)!=0;
-    if(type==2)return U32(R<float>(d,0x20));
+    if(type==2)return U32(int(R<float>(d,0x20)));
     return U32(Lui_Atoi(R<const char*>(d,0x20)));
 }
 // 1406AE330: original language-specific nominal font height.

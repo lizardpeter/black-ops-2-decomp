@@ -53,6 +53,8 @@ jobs:
         if: always()
       - run: python tests/verify_store_font_loop.py originals/t6mp_msstore.exe
         if: always()
+      - run: python tests/verify_store_font_lui.py originals/t6mp_msstore.exe
+        if: always()
       - run: python tests/verify_store_font_win64.py
         if: always()
       - uses: actions/upload-artifact@v4
