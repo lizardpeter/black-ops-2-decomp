@@ -57,3 +57,7 @@ Run 45889971187 passed 512 continuous replays of the prior prefix. New source ex
 ## Film and color-vector continuation
 
 Source extends to 140712E97, with 21 further registrations and 15 global assignments, including the conditional player-shadow and flashlight branches, film controls, exp_softclip and nine vec4 controls. The continuous test now includes the original vec4 ABI with all four default lanes and both bounds. Pending CI; the full renderer body is still incomplete.
+
+## Bloom and color-matrix continuation
+
+Run 45890504379 passed continuous replay through 140712E97. New source extends through 14071376E with 22 additional registrations and 20 result slots, covering bloom, HDR depth of field, zombie darkness, color matrices and flare controls. The extended replay covers 293..301 events and 159 result slots. Pending CI. This is source reconstruction under a test guard, not runtime integration.

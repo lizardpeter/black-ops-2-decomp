@@ -86,6 +86,26 @@ extern const Dvar *store_vc_RGBL; // 1427E6B50
 extern const Dvar *store_vc_YH; // 14266D4E8
 extern const Dvar *store_vc_YL; // 1427E6BA0
 const Dvar *Store_Renderer_Vec4(const char *,float,float,float,float,float,float,U32);
+extern const Dvar *store_r_bloomTweaks; // 1427E7238
+extern const Dvar *store_r_bloomHiQuality; // 1427E6F40
+extern const Dvar *store_r_dofHDR; // 14266D4D8
+extern const Dvar *store_r_zombieDarkness; // 1427E6F20
+extern const Dvar *store_vc_RS; // 1427E6B40
+extern const Dvar *store_vc_RE; // 1427E6B90
+extern const Dvar *store_vc_SMR; // 1427E6B10
+extern const Dvar *store_vc_SMG; // 1427E6BC0
+extern const Dvar *store_vc_SMB; // 1427E6B30
+extern const Dvar *store_vc_MMR; // 1427E6B20
+extern const Dvar *store_vc_MMG; // 1427E6BE0
+extern const Dvar *store_vc_MMB; // 1427E6B70
+extern const Dvar *store_vc_HMR; // 14266D4F8
+extern const Dvar *store_vc_HMG; // 14266D4E0
+extern const Dvar *store_vc_HMB; // 1427E6B68
+extern const Dvar *store_vc_FGM; // 1427E6B18
+extern const Dvar *store_vc_FSM; // 14266D4F0
+extern const Dvar *store_vc_FBM; // 1427E6B60
+extern const Dvar *store_vc_LUT; // 1427E6FB0
+extern const Dvar *store_r_superFlareDraw; // 1427E7248
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -467,10 +487,36 @@ void RegisterRendererFilmColorFragment() {
     store_vc_YH=Store_Renderer_Vec4("vc_YH",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
     store_vc_YL=Store_Renderer_Vec4("vc_YL",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
 }
+// 140712E98..14071376E: bloom, DOF HDR, color matrices, flare controls.
+void RegisterRendererBloomColorMatrixFragment() {
+    store_r_bloomTweaks=InlineBool("r_bloomTweaks",false,0x5000);
+    store_r_bloomHiQuality=InlineBool("r_bloomHiQuality",false,0x4001);
+    store_r_dofHDR=InlineInt("r_dofHDR",0,0,2,0x4001);
+    store_r_zombieDarkness=InlineBool("r_zombieDarkness",false,0x5000);
+    store_vc_RS=Store_Renderer_Vec4("vc_RS",F(0),F(0x3f000000),F(0),F(0x3f400000),F(0),F(0x3f800000),0x5000);
+    store_vc_RE=Store_Renderer_Vec4("vc_RE",F(0x3f000000),F(0x3f800000),F(0x3e800000),F(0x3f800000),F(0),F(0x3f800000),0x5000);
+    store_vc_SMR=Store_Renderer_Vec4("vc_SMR",F(0x3f800000),F(0),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_SMG=Store_Renderer_Vec4("vc_SMG",F(0),F(0x3f800000),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_SMB=Store_Renderer_Vec4("vc_SMB",F(0),F(0),F(0x3f800000),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_MMR=Store_Renderer_Vec4("vc_MMR",F(0x3f800000),F(0),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_MMG=Store_Renderer_Vec4("vc_MMG",F(0),F(0x3f800000),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_MMB=Store_Renderer_Vec4("vc_MMB",F(0),F(0),F(0x3f800000),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_HMR=Store_Renderer_Vec4("vc_HMR",F(0x3f800000),F(0),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_HMG=Store_Renderer_Vec4("vc_HMG",F(0),F(0x3f800000),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_HMB=Store_Renderer_Vec4("vc_HMB",F(0),F(0),F(0x3f800000),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_FGM=Store_Renderer_Vec4("vc_FGM",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_FSM=Store_Renderer_Vec4("vc_FSM",F(0),F(0),F(0),F(0x3f800000),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_FBM=Store_Renderer_Vec4("vc_FBM",F(0),F(0),F(0),F(0),F(0xc2c80000),F(0x42c80000),0x5000);
+    store_vc_LUT=InlineInt("vc_LUT",0,-32,32,0x5000);
+    InlineInt("vc_SNAP",0,0,32,0x5000);
+    Store_Renderer_Vec4("r_sunFlareTint",F(0),F(0),F(0x3f800000),F(0x3f800000),F(0),F(0x3f800000),0x1000);
+    store_r_superFlareDraw=InlineBool("r_superFlareDraw",true,0x5000);
+}
 void RegisterRendererExtendedPrefix() {
     RegisterRendererRecoveredPrefix();
     RegisterRendererVisibilityShadowFragment();
     RegisterRendererFilmColorFragment();
+    RegisterRendererBloomColorMatrixFragment();
 }
 } // namespace store_renderer_dvar
 #endif

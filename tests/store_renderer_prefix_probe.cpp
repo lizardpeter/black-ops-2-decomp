@@ -81,6 +81,26 @@ const Dvar *store_vc_RGBH=nullptr;
 const Dvar *store_vc_RGBL=nullptr;
 const Dvar *store_vc_YH=nullptr;
 const Dvar *store_vc_YL=nullptr;
+const Dvar *store_r_bloomTweaks=nullptr;
+const Dvar *store_r_bloomHiQuality=nullptr;
+const Dvar *store_r_dofHDR=nullptr;
+const Dvar *store_r_zombieDarkness=nullptr;
+const Dvar *store_vc_RS=nullptr;
+const Dvar *store_vc_RE=nullptr;
+const Dvar *store_vc_SMR=nullptr;
+const Dvar *store_vc_SMG=nullptr;
+const Dvar *store_vc_SMB=nullptr;
+const Dvar *store_vc_MMR=nullptr;
+const Dvar *store_vc_MMG=nullptr;
+const Dvar *store_vc_MMB=nullptr;
+const Dvar *store_vc_HMR=nullptr;
+const Dvar *store_vc_HMG=nullptr;
+const Dvar *store_vc_HMB=nullptr;
+const Dvar *store_vc_FGM=nullptr;
+const Dvar *store_vc_FSM=nullptr;
+const Dvar *store_vc_FBM=nullptr;
+const Dvar *store_vc_LUT=nullptr;
+const Dvar *store_r_superFlareDraw=nullptr;
 unsigned char Store_Renderer_ModeByte=0;
 const Dvar *store_r_texFilterMipBias=nullptr;
 const Dvar *store_r_fullbright=nullptr;
@@ -201,7 +221,7 @@ const Dvar *Store_Renderer_Find(const char *n) {
         visibility_mode=true; worker_mode=false; post_worker_mode=false;
     }
     if(visibility_mode) {
-        const char *names[]={"r_showForcedInvisibleCells","r_portalWalkLimit","r_portalMinRecurseDepth","r_enableOccluders","r_forceLod","r_modelVertColor","sm_sunEnable","sm_sunQuality","sm_spotQuality","sm_spotEnable","sm_maxLights","sm_sunAlwaysCastsShadow","sm_polygonOffsetBias","sm_sunShadowSmall","sm_sunShadowSmallEnable","r_zombieDisableSlideEffect","r_zombieDisableEarthEffect","r_zombieNameAllowFriendsList","r_zombieNameAllowDevList","sm_strictCull","sm_fastSunShadow","r_noipak","r_stereo3DAvailable","r_stereo3DOn","r_stereo3DMode","r_dualPlayEnable","r_dualPlayActive","r_dualPlayTestCount","r_flame_allowed","r_filmTweakLut","r_forceCameraNode","r_forceCameraHdg","r_forceCamerarecord","r_enablePlayerShadow","r_enableFlashlight","r_waterFogTest","r_filmTweakInvert","r_filmUseTweaks","r_filmTweakEnable"};
+        const char *names[]={"r_showForcedInvisibleCells","r_portalWalkLimit","r_portalMinRecurseDepth","r_enableOccluders","r_forceLod","r_modelVertColor","sm_sunEnable","sm_sunQuality","sm_spotQuality","sm_spotEnable","sm_maxLights","sm_sunAlwaysCastsShadow","sm_polygonOffsetBias","sm_sunShadowSmall","sm_sunShadowSmallEnable","r_zombieDisableSlideEffect","r_zombieDisableEarthEffect","r_zombieNameAllowFriendsList","r_zombieNameAllowDevList","sm_strictCull","sm_fastSunShadow","r_noipak","r_stereo3DAvailable","r_stereo3DOn","r_stereo3DMode","r_dualPlayEnable","r_dualPlayActive","r_dualPlayTestCount","r_flame_allowed","r_filmTweakLut","r_forceCameraNode","r_forceCameraHdg","r_forceCamerarecord","r_enablePlayerShadow","r_enableFlashlight","r_waterFogTest","r_filmTweakInvert","r_filmUseTweaks","r_filmTweakEnable","r_bloomTweaks","r_bloomHiQuality","r_dofHDR","r_zombieDarkness","vc_LUT","vc_SNAP","r_superFlareDraw"};
         unsigned i=0; while(i<sizeof(names)/sizeof(names[0]) && std::strcmp(n,names[i])) ++i;
         assert(i<sizeof(names)/sizeof(names[0]));
         bool exists=(visibility_mask&(U(1)<<i))!=0;
@@ -375,7 +395,7 @@ void RendererExtendedRun(void *image,unsigned early,unsigned later,unsigned exis
     std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererVisibilityGlobals(U *out) {
-    const Dvar *values[]={store_r_portalWalkLimit,store_r_portalMinRecurseDepth,store_r_enableOccluders,store_r_highLodDist,store_r_mediumLodDist,store_r_lowLodDist,store_r_lowestLodDist,store_r_forceLod,store_r_modelVertColor,store_sm_sunEnable,store_sm_sunQuality,store_sm_spotQuality,store_sm_spotEnable,store_sm_maxLights,store_sm_spotShadowFadeTime,store_sm_sunAlwaysCastsShadow,store_sm_polygonOffsetBias,store_sm_sunSampleSizeNear,store_sm_sunShadowCenter,store_sm_sunShadowScale,store_sm_sunShadowSmall,store_sm_sunShadowSmallEnable,store_r_flameScaler,store_r_zombieNameAllowFriendsList,store_r_zombieNameAllowDevList,store_sm_strictCull,store_sm_fastSunShadow,store_r_noipak,store_r_dualPlayEnable,store_r_dualPlayActive,store_r_blur,store_r_flame_allowed,store_r_enablePlayerShadow,store_r_enableFlashlight,store_r_brightness,store_r_filmUseTweaks,store_r_filmTweakEnable,store_exp_softclip,store_vc_LIB,store_vc_LIG,store_vc_LIW,store_vc_LOB,store_vc_LOW,store_vc_RGBH,store_vc_RGBL,store_vc_YH,store_vc_YL};
+    const Dvar *values[]={store_r_portalWalkLimit,store_r_portalMinRecurseDepth,store_r_enableOccluders,store_r_highLodDist,store_r_mediumLodDist,store_r_lowLodDist,store_r_lowestLodDist,store_r_forceLod,store_r_modelVertColor,store_sm_sunEnable,store_sm_sunQuality,store_sm_spotQuality,store_sm_spotEnable,store_sm_maxLights,store_sm_spotShadowFadeTime,store_sm_sunAlwaysCastsShadow,store_sm_polygonOffsetBias,store_sm_sunSampleSizeNear,store_sm_sunShadowCenter,store_sm_sunShadowScale,store_sm_sunShadowSmall,store_sm_sunShadowSmallEnable,store_r_flameScaler,store_r_zombieNameAllowFriendsList,store_r_zombieNameAllowDevList,store_sm_strictCull,store_sm_fastSunShadow,store_r_noipak,store_r_dualPlayEnable,store_r_dualPlayActive,store_r_blur,store_r_flame_allowed,store_r_enablePlayerShadow,store_r_enableFlashlight,store_r_brightness,store_r_filmUseTweaks,store_r_filmTweakEnable,store_exp_softclip,store_vc_LIB,store_vc_LIG,store_vc_LIW,store_vc_LOB,store_vc_LOW,store_vc_RGBH,store_vc_RGBL,store_vc_YH,store_vc_YL,store_r_bloomTweaks,store_r_bloomHiQuality,store_r_dofHDR,store_r_zombieDarkness,store_vc_RS,store_vc_RE,store_vc_SMR,store_vc_SMG,store_vc_SMB,store_vc_MMR,store_vc_MMG,store_vc_MMB,store_vc_HMR,store_vc_HMG,store_vc_HMB,store_vc_FGM,store_vc_FSM,store_vc_FBM,store_vc_LUT,store_r_superFlareDraw};
     for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
 }
 void RendererPrefixGlobals(U *out) {
