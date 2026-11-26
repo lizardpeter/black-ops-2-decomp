@@ -41,3 +41,20 @@ Five further original source candidates: world-space text loop 140735340 (187), 
 Eight complete GPU dependency candidates: index upload 1407743E0 (84), vertex upload 140774700 (64), constant-buffer upload/draw 1407664D0 (64), vertex shader 140774530 (54), material pass 140774620 (53), code constants 140773B90 (82), stable arguments 140773CF0 (98), material arguments 140773EA0 (118). These are dependencies of the same Store tessellation flush; D3D calls, resource mapping, warnings and material state remain explicit external boundaries. Preserve dynamic buffer lock and mapping retry, cache keys, dirty flags, original pass offsets and code/material argument ordering. Not differential validated; no new GPU features.
 
 Four further original body candidates: full tessellation flush 14073D680 (256 instructions), material registration 14071A4E0 (3), localization 1403FF450 (150), text field drawing 1401A43A0 (138). EndTessSurface preserves cached viewport/scissor, original target dimensions, clip bounds, dynamic index and vertex uploads, per-pass shader/argument setup and indexed submission; both counters clear at exit. This completes source candidates for the direct glyph quad-to-D3D submission chain, not live integration. Thirty new candidates in this larger pass. Still need replay coverage and the main 2D text loop.
+
+
+## Extended Store renderer pass
+
+The verified snapshot is 18fe3c5067321e875d0247ab39efb52d604f2409, workflow run 45905542195. The dedicated font/HUD job compiled 89 named Store function bodies into Win64 COFF objects. Its nine replay suites completed 401,408 original-PE comparisons, including the prior suites. These are controlled fixture comparisons (including mocked external dependencies), not proof of full branch or live-game equivalence.
+
+This pass added 40 new source candidates, grouped as follows:
+
+- `rb_text_loop_store.cpp`: DrawTeleType 140734690 (600 instructions); DrawText2D 140732480 (1834). Ordinary text and mixed formatting, icon, cursor, shadow and padding fixtures pass. Timed decode/fade/redaction, glow and jitter branches remain to be exhaustively replayed. Helpers inside these original functions do not count as separate recovered addresses.
+- `r_text_command_variants_store.cpp`: 14071BF10, 14071DFB0, 14071CAA0, 14071CC10, 14071CD70, 14071C5F0, 14071C740, 14071DD30. Seven producer operations replayed; the stretch-picture path remains compile-only.
+- `rb_text_dispatch_store.cpp`: 1407356A0, 140735840. Compile-only; original sine/cosine dependency returns packed SSE lanes.
+- `lui_text_util_store.cpp`: 1403E9880, 14019E3B0, 1406F24D0, 1406AEFD0, 1406AE330, 1400F3370, 1406AEF40, 1406AA560. First six utility functions replayed; quad-cache submit/release remain compile-only.
+- `r_material_target_store.cpp`: 14072B330, 140766F00, 140774090. Compile-only state and shader-argument candidates.
+- `r_display_resources_store.cpp`: 140723A90, 14071E360, 14071E440, 1407206E0, 140724F40, 140724FE0, 140738C00, 140740BE0, 14073B740, 1407619E0. Six replay operations cover UI3D placement, swap-chain descriptor, video configuration, window mode, query reset and resource slot allocation. Fourth resource-slot argument is an XMM3 float, verified against the original instruction stream. Query creation, dynamic buffer initialization, render-target registry and sampler/texture reset remain compile-only.
+- `r_matrix_display_store.cpp`: 140765F10, 1407660F0, 14071F190, 14071F3E0, 140720E00, 14071E160, 14071E200. Compile-only; matrix inversion and other callee/COM/thread boundaries remain explicit.
+
+The renderer closure workflow 45904386342 separately extracted 283 unique original functions (40,721 instructions; 277 existing pseudocode bodies). These are dependency evidence, not additional newly reconstructed functions. The LUI main text path at 1406AF8F0 and its inline-icon cache path are still open. Full native linking, real GPU execution and live-game replacement are not verified; the broader Reconstruction checks workflow also has an independent freestanding x86 `cstdint` header failure in `live_anticheat.h`. No enhanced HUD behavior or runtime redirects were introduced.
