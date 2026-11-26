@@ -9,6 +9,9 @@ on:
       - 'src/cgame/cg_fov_defaults_store.cpp'
       - 'src/cgame/cg_camera_projection_store.cpp'
       - 'src/cgame/cg_turret_fov_store.cpp'
+      - 'src/cgame/cg_weapon_fov_store.cpp'
+      - 'tests/store_weapon_fov_probe.cpp'
+      - 'tests/verify_store_weapon_fov.py'
       - 'tests/store_turret_fov_probe.cpp'
       - 'tests/verify_store_turret_fov.py'
       - 'tests/store_camera_pipeline_probe.cpp'
@@ -124,6 +127,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_turret_fov.py originals/t6mp_msstore.exe | tee camera-turret.log
+      - name: Replay complete Store weapon and ADS FOV function
+        run: |
+          set -o pipefail
+          python tests/verify_store_weapon_fov.py originals/t6mp_msstore.exe | tee camera-weapon.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -146,4 +153,5 @@ jobs:
             camera-fov.log
             camera-pipeline.log
             camera-turret.log
+            camera-weapon.log
           if-no-files-found: warn

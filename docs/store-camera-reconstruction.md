@@ -13,3 +13,7 @@ Five more enclosing source-body candidates: 1400F9280 (CG_GetDefaultFovForView),
 ## Turret FOV
 
 Store 1400C1A00..1400C1B8B (106 instructions) matches CG_GetTurretViewFov. The incoming FOV lane is unused: original baseline is 55 degrees. Preserve both weapon selection calls, independent weapon property gate, packed attachment selection/first-null termination, original unordered comparisons, mode-dependent transition lookup and exact ADS fraction math. The original LTCG callees at 14065B060 and 14065B120 preserve live XMM1..4; the boundary mocks explicitly preserve those registers. New 16384-case original-PE replay pending. No live runtime activation.
+
+## Weapon and ADS FOV
+
+Store 1400C12F0..1400C19F0 (460 instructions) matches CG_GetWeaponViewFov. Its first ABI lane is confirmed unused. Source recovers the early weapon state 44 interpolation, weapon property gate, cg_useWeaponBasedVariableZoom, two attachment-specific duration scans (first non-sentinel before first null), three zoom values (last non-sentinel before first null), original 100ms maximum frame interval, progress and timer writes, 15-slot weapon zoom-mode lookup, signed remainder, previous zoom blend for elapsed <125ms, and final ADS transition. Candidate test observes original result bits, persistent progress/time and six boundary calls; 32768 cases pending. Some internal LTCG calls preserve volatile registers used by their callers; mocks preserve those lanes explicitly. No native activation yet.
