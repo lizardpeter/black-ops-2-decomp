@@ -86,10 +86,11 @@ void UpdateVideoConfig(const B*in){
     U a=DvarInt(Display_AspectDvar);float aspect=R<float>(p,0x28);
     if(a==0){U aw=rw,ah=rh;if(full&&Display_OverrideFullscreen){aw=Display_OverrideWidth;ah=Display_OverrideHeight;}int ratio=Trunc(FloorOriginal((float(int(ah))*16.0f)/float(int(aw))+0.5f));aspect=ratio<10?1.7777778f:ratio==10?1.6f:1.3333334f;}
     else if(a==1)aspect=1.3333334f;else if(a==2)aspect=1.6f;else if(a==3)aspect=1.7777778f;
-    W(p,0x28,aspect);W(p,0x20,U(rh*rw>479999));bool wide=aspect!=1.3333334f;W(p,0x1c,U(wide));
+    W(p,0x28,aspect);W(p,0x20,U(rh*rw>479999));bool wide=aspect<1.3333334f||aspect>1.3333334f;W(p,0x1c,U(wide));
     Display_Clear(Display_ClearDvar);
-    if(Display_WideDvar&&R<Q>(Display_WideDvar,0)){Q val=0;if(R<int>(Display_WideDvar,0x18)==1)val=wide;else val=reinterpret_cast<Q>(wide?Display_True:Display_False);Display_SetDvar(Display_WideDvar,&val,0);}
-    W(p,0x18,U(0));W(p,0x2c,(float(h)*aspect)/float(w));W(p,0x30,full?(float(rh)*aspect)/float(rw):1.0f);
+    aspect=R<float>(p,0x28);wide=aspect<1.3333334f||aspect>1.3333334f;
+    if(Display_WideDvar&&R<Q>(Display_WideDvar,0)){Q val[2]={0,0};if(R<int>(Display_WideDvar,0x18)==1)val[0]=wide;else val[0]=reinterpret_cast<Q>(wide?Display_True:Display_False);Display_SetDvar(Display_WideDvar,val,0);}
+    p[0x18]=0;aspect=R<float>(p,0x28);W(p,0x2c,(float(R<U>(p,4))*aspect)/float(R<U>(p,0)));W(p,0x30,R<U>(p,0x24)?(float(R<U>(p,12))*aspect)/float(R<U>(p,8)):1.0f);
 }
 // 1407206E0
 void SetWindowMode(const B*in){
