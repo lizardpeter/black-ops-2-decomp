@@ -15,7 +15,7 @@ extern const Byte*Lui_Language;
 int Lui_Atoi(const char*);
 extern float Lui_AlignFactors[4];
 extern int Lui_Layer;
-void Lui_PushRegistry(void*,int);
+void Lui_PushRegistry(void*,int,int);
 void*Lui_ToUserData(void*,int);
 void Lui_Unref(void*,int,int);
 void Lui_AddQuadArray(const void*,short,const void*,const void*,const void*,int);
@@ -84,19 +84,19 @@ void SubmitQuadChain(void*lua,Byte*node){
         short n=R<short>(node,0x20);
         if(n>0)Lui_AddQuadArray(R<const void*>(node,0x18),n,R<const void*>(node,0),R<const void*>(node,8),R<const void*>(node,0x10),layer);
         if(R<int>(node,0x24)==-2)break;
-        Lui_PushRegistry(lua,-10000);node=static_cast<Byte*>(Lui_ToUserData(lua,-1));
+        Lui_PushRegistry(lua,-10000,R<int>(node,0x24));node=static_cast<Byte*>(Lui_ToUserData(lua,-1));
         W(lua,0x48,R<Byte*>(lua,0x48)-16);
     }
 }
 // 1406AA560: release registry references in the original linked cache.
 void ReleaseQuadChain(void*lua,Byte*node){
     if(!node||R<int>(node,0x24)==-2)return;
-    Lui_PushRegistry(lua,-10000);
+    Lui_PushRegistry(lua,-10000,R<int>(node,0x24));
     Byte*next=static_cast<Byte*>(Lui_ToUserData(lua,-1));W(lua,0x48,R<Byte*>(lua,0x48)-16);
     while(next){
         Lui_Unref(lua,-10000,R<int>(node,0x24));W(node,0x24,-2);
         if(R<int>(next,0x24)==-2)return;
-        Lui_PushRegistry(lua,-10000);node=next;next=static_cast<Byte*>(Lui_ToUserData(lua,-1));W(lua,0x48,R<Byte*>(lua,0x48)-16);
+        node=next;Lui_PushRegistry(lua,-10000,R<int>(node,0x24));next=static_cast<Byte*>(Lui_ToUserData(lua,-1));W(lua,0x48,R<Byte*>(lua,0x48)-16);
     }
 }
 }

@@ -12,6 +12,7 @@ on:
       - 'src/gfx_d3d/r_text_commands_store.cpp'
       - 'src/ui/lui_text_util_store.cpp'
       - 'src/ui/lui_inline_icon_store.cpp'
+      - 'src/ui/lui_text_render_store.cpp'
       - 'src/ui/ui_text_wrappers_store.cpp'
       - 'src/qcommon/localize_bindings_store.cpp'
       - 'src/gfx_d3d/r_material_target_store.cpp'

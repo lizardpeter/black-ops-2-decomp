@@ -10,7 +10,7 @@ float Lui_ColorTable[8][4],Lui_Color8[4],Lui_Color9[4];
 int Lui_TransformDepth;float Lui_TransformStack[4][16];const Byte*Lui_Language;
 float Lui_AlignFactors[4];int Lui_Layer;
 int Lui_Atoi(const char*s){return std::atoi(s);}
-void Lui_PushRegistry(void*,int){}
+void Lui_PushRegistry(void*,int,int){}
 void*Lui_ToUserData(void*,int){return nullptr;}
 void Lui_Unref(void*,int,int){}
 void Lui_AddQuadArray(const void*,short,const void*,const void*,const void*,int){}
