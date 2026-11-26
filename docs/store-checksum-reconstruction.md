@@ -162,3 +162,47 @@ original finalization. Prior 1,542 arithmetic, 216 lifecycle and 512
 interleaved model tests pass after moving the adapter into tests.
 Original fixture extraction and Windows hybrid integration are not
 part of this commit; no function registry or runtime binding was added.
+
+## Finalization verification and service boundary (2026-11-26)
+
+The three original PE hashes were independently rechecked. An identical
+inlined CRC finalization instruction fragment occurs once in each of
+MP and ZM, and has no exact match in SP. This is a byte-pattern finding,
+not proof of the absence of equivalent SP behavior.
+
+A local isolated replay of the original MP and ZM finalization
+fragments, using synthetic contexts and no original service or game
+process, passed 450 CRC comparisons per build (900 total). Output,
+return success and all 32 cleared context bytes were compared with
+the authored helper. Cases include early completion, boundary lengths,
+multiple seed values and both CRC modes. Non-CRC caller observations
+(225 per build) establish that the inlined caller's output behavior
+is not equivalent to the standalone helper's non-CRC output contract.
+Those observations are not counted as differential passes or as a
+reconstructed SHA implementation. No equivalence is asserted for
+unspecified non-CRC caller output.
+
+The original fragment replay was local only; no extracted original
+code or service-facing replay fixture is committed. The new portable
+native regression in tests/live_checksum_finalization_test.cpp passed
+450 CRC and 225 standalone non-CRC cases, including slot reuse,
+with both optimized compilation and ASan/UBSan on Linux x86-64.
+
+```sh
+g++ -std=c++17 -O2 -Wall -Wextra -Werror -DT6_STORE -Iinclude src/live/live_anticheat.cpp tests/live_checksum_finalization_test.cpp -o /tmp/t6-finalization-test
+/tmp/t6-finalization-test
+```
+
+At subsystem level, the existing generated MP match inventory identifies
+candidate challenge deserialization, response serialization, submission,
+and completion handling in the Demonware and live layers. The evidence
+is string, registration, and call-graph matching (confidence 0.75-0.89),
+not proof of their complete signatures or online behavior. CRC helper
+validation must not be interpreted as validation of the service protocol,
+authenticity, server acceptance, or the complete challenge lifecycle.
+No remote endpoint was contacted; no service-facing implementation,
+runtime binding or integrity behavior changed.
+
+All three builds contain the same CRC table; SP has no exact normalized
+MP startup or continuation match and no identical inlined finalization
+fragment. SP function-level equivalence remains unresolved.
