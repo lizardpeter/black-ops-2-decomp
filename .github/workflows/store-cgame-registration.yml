@@ -10,6 +10,9 @@ on:
       - 'src/cgame/cg_camera_projection_store.cpp'
       - 'src/cgame/cg_turret_fov_store.cpp'
       - 'src/cgame/cg_weapon_fov_store.cpp'
+      - 'src/cgame_mp/cg_extra_camera_store.cpp'
+      - 'tests/store_extra_camera_probe.cpp'
+      - 'tests/verify_store_extra_camera.py'
       - 'tests/store_weapon_fov_probe.cpp'
       - 'tests/verify_store_weapon_fov.py'
       - 'tests/store_turret_fov_probe.cpp'
@@ -131,6 +134,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_weapon_fov.py originals/t6mp_msstore.exe | tee camera-weapon.log
+      - name: Replay complete Store extra-camera view function
+        run: |
+          set -o pipefail
+          python tests/verify_store_extra_camera.py originals/t6mp_msstore.exe | tee camera-extra.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -154,4 +161,5 @@ jobs:
             camera-pipeline.log
             camera-turret.log
             camera-weapon.log
+            camera-extra.log
           if-no-files-found: warn

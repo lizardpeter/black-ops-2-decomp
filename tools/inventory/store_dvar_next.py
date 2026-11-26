@@ -27,7 +27,11 @@ CORE = {0x14046B300:"SetVariant",0x14046B150:"SetLatched",0x14046CEF0:"SetFloat"
         0x14046A6A0:"Format",0x1400C1B90:"FovCamera",0x140101410:"FovPostRegistration",
         0x1400C12F0:"CameraWeaponFov",0x1400C1A00:"CameraAdjustFov",0x1400C2060:"CameraNextView",
         0x1400F9280:"FovDefaultSelect",0x1400F92F0:"FovDefaultUpdate",0x1400F93E0:"FovConsumerA",
-        0x1400F9470:"FovConsumerB",0x1400F98D0:"FovDefaultConsumer",0x14016CE80:"ExtraCameraFov"}
+        0x1400F9470:"FovConsumerB",0x1400F98D0:"FovDefaultConsumer",0x14016CE80:"ExtraCameraFov",
+        0x14016C510:"MainView",0x1401721E0:"ExtraViewWrapper",0x1400C2740:"VehicleGunner",
+        0x1400C1240:"ExtraMode",0x140173ED0:"ExtraUpdate",0x14016BDA0:"SpecialView",
+        0x140100FC0:"LinkedView",0x1400C3AE0:"ExtraMode6A",0x1400C3E10:"ExtraMode6B",
+        0x1400C3390:"ExtraMode7",0x140464D00:"AnglesToAxis",0x14065B060:"AdsTransitionA",0x14065B120:"AdsTransitionB"}
 HEADER = re.compile(r"^; ([0-9a-fA-F]+)\s")
 INSN = re.compile(r"^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+")
 
