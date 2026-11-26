@@ -11,6 +11,9 @@ on:
       - 'src/cgame/cg_turret_fov_store.cpp'
       - 'src/cgame/cg_weapon_fov_store.cpp'
       - 'src/cgame_mp/cg_extra_camera_store.cpp'
+      - 'src/cgame/cg_camera_support_store.cpp'
+      - 'tests/store_camera_support_probe.cpp'
+      - 'tests/verify_store_camera_support.py'
       - 'tests/store_extra_camera_probe.cpp'
       - 'tests/verify_store_extra_camera.py'
       - 'tests/store_weapon_fov_probe.cpp'
@@ -138,6 +141,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_extra_camera.py originals/t6mp_msstore.exe | tee camera-extra.log
+      - name: Replay Store camera mode and ADS transition accessors
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_support.py originals/t6mp_msstore.exe | tee camera-support.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -162,4 +169,5 @@ jobs:
             camera-turret.log
             camera-weapon.log
             camera-extra.log
+            camera-support.log
           if-no-files-found: warn

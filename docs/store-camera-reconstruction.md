@@ -21,3 +21,7 @@ Store 1400C12F0..1400C19F0 (460 instructions) matches CG_GetWeaponViewFov. Its f
 ## Extra-camera view continuation
 
 Run 45895409738 passed 32768 complete weapon FOV comparisons. Extra-camera full body candidate at 14016CE80..14016D269 preserves separate extra-camera aspect and FOV overrides, original tangent scale, viewport setup (including unsigned viewport dimensions), scripted camera selection, linked/demo camera dispatch, player view copies, view-height offset and final angle-to-axis boundary. New differential replay compares 30 output words and ordered calls in 16384 cases; pending CI. Next extractor adds main CG_CalcViewValues, extra wrapper, vehicle gunner, surrounding dispatch helpers, angle-to-axis and both ADS transition helpers. No live activation.
+
+## Camera support functions
+
+Run 45895664126 passed all 16384 extra-camera body comparisons. Four new full bodies: CG_GetExtraCamMode 1400C1240 (49 instructions), saved spike camera view 1400C3390 (19), and the two ADS transition accessors 14065B060 and 14065B120 (51 each). Exact packed attachment extraction, first-null termination and original unordered comparison preserved. 24576 original body comparisons queued. The attachment accessors have no external function calls; the extra-mode replay controls missile-active boundary. Main view evidence (538 instructions) now available. No runtime redirect.
