@@ -11,3 +11,6 @@ bool LocalDemonware_SendAuthRequest(void *request);
 void LocalDemonware_Enable();
 bool LocalDemonware_IsEnabled();
 void LocalDemonware_Trace(const char *event);
+void IdentityAudit_Enable();
+bool IdentityAudit_IsEnabled();
+void IdentityAudit_Trace(const char *event);

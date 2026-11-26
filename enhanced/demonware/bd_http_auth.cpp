@@ -17,9 +17,11 @@ void BdHandleGdkAuthTask(BdHttpAuthService *auth)
 {
 	if (!LocalDemonware_IsEnabled())
 	{
+		IdentityAudit_Trace("Demonware GDK auth delegated to original handler\n");
 		BdHandleGdkAuthTaskImpl(auth);
 		return;
 	}
+	IdentityAudit_Trace("Demonware GDK auth handled by loopback path\n");
 
 	auto *task = auth->asyncTask;
 	auth->asyncTask = nullptr;
@@ -64,6 +66,8 @@ void BdHandleGdkAuthTask(BdHttpAuthService *auth)
 		return;
 	}
 	const bool received = LocalDemonware_SendAuthRequest(auth->httpResponse);
+	IdentityAudit_Trace(received ? "Demonware loopback auth HTTP response received\n"
+	                           : "Demonware loopback auth HTTP request failed\n");
 	LocalDemonware_Trace(received ? "T6 Demonware: local auth HTTP response received\n"
 	                             : "T6 Demonware: local auth HTTP request failed\n");
 	BdCompleteWinHttpRequest(auth->httpResponse, received ? 0 : 0x80072efdu);

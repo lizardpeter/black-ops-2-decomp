@@ -7,6 +7,7 @@
 #include "universal/dvar.h"
 #endif
 #include <windows.h>
+#include <string.h>
 
 WINBASEAPI BOOL WINAPI GetModuleHandleExA(DWORD, const char *, HINSTANCE *);
 WINBASEAPI DWORD WINAPI GetLastError();
@@ -20,6 +21,7 @@ extern "C" unsigned store_primaryDemonwareState;
 
 long GdkUserCheckPrivilege(void *user, unsigned options, unsigned privilege, bool *hasPrivilege, unsigned *reason)
 {
+	IdentityAudit_Trace("XUserCheckPrivilege entered\n");
 	constexpr unsigned multiplayer = 0xfe;
 	constexpr unsigned lobbyConnected = 6;
 	if (!LocalDemonware_IsEnabled() || user || options || privilege != multiplayer ||
@@ -37,6 +39,7 @@ long GdkUserCheckPrivilege(void *user, unsigned options, unsigned privilege, boo
 		*hasPrivilege = true;
 	if (reason)
 		*reason = 0;
+	IdentityAudit_Trace("XUserCheckPrivilege granted by local lobby\n");
 	return 0;
 }
 
@@ -48,6 +51,7 @@ extern "C" long GdkLoadRuntime()
 	if (!GetModuleHandleExA(fromAddress, reinterpret_cast<const char *>(&GdkLoadRuntime), &t6_gdk_module))
 		return static_cast<long>(0x89240101u);
 	CustomGames_ReadStartupOptions();
+	IdentityAudit_Trace("XGameRuntime resolved to enhanced DLL\n");
 	return 0;
 }
 
@@ -56,6 +60,7 @@ extern "C" unsigned char t6_store_save_ready;
 
 extern "C" long InitializeApiImpl(unsigned long long, unsigned long long)
 {
+	IdentityAudit_Trace("XGameRuntime initialization handled locally\n");
 	if (t6_store_save_ready)
 		return 0;
 
@@ -74,10 +79,19 @@ extern "C" long InitializeApiImplEx(unsigned long long version, unsigned long lo
 
 extern "C" void UninitializeApiImpl() {}
 extern "C" void XErrorReport(unsigned int, const char *) {}
-extern "C" long QueryApiImpl(const void *, const void *, void **result)
+extern "C" long QueryApiImpl(const void *classId, const void *, void **result)
 {
 	if (!result)
 		return static_cast<long>(0x80004003u); // E_POINTER
+	if (IdentityAudit_IsEnabled())
+	{
+		// The Store client's XUser wrappers query this GDK class before calling a method.
+		constexpr unsigned char userClass[] =
+			{0x77, 0xd1, 0xac, 0x01, 0xf9, 0x91, 0x63, 0x47, 0xa3, 0x8e, 0xcc, 0xbb, 0x55, 0xce, 0x32, 0xe0};
+		IdentityAudit_Trace(classId && !memcmp(classId, userClass, sizeof(userClass))
+			? "GDK XUser interface query rejected locally (E_NOINTERFACE)\n"
+			: "GDK interface query rejected locally (E_NOINTERFACE)\n");
+	}
 	*result = nullptr;
 	return static_cast<long>(0x80004002u); // E_NOINTERFACE
 }
