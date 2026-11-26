@@ -11,6 +11,9 @@ on:
       - 'tests/verify_store_common_registration.py'
       - 'tests/store_cgame_registration_probe.cpp'
       - 'tests/verify_store_cgame_registration.py'
+      - 'src/gfx_d3d/r_dvars_store.cpp'
+      - 'tests/store_renderer_prefix_probe.cpp'
+      - 'tests/verify_store_renderer_prefix.py'
       - 'tools/inventory/store_renderer_registration.py'
       - 'docs/store-renderer-dvar-registration.tsv'
       - '.github/workflows/store-cgame-registration.yml'
@@ -42,6 +45,10 @@ jobs:
         run: |
           python -m pip install capstone==5.0.6 pefile==2024.8.26
           python tools/inventory/store_renderer_registration.py originals/t6mp_msstore.exe renderer-evidence
+      - name: Replay recovered renderer entry prefix
+        run: |
+          set -o pipefail
+          python tests/verify_store_renderer_prefix.py originals/t6mp_msstore.exe | tee renderer-prefix-replay.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -50,4 +57,5 @@ jobs:
             registration-replay.log
             common-registration-replay.log
             renderer-evidence/
+            renderer-prefix-replay.log
           if-no-files-found: warn

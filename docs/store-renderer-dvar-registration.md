@@ -23,3 +23,9 @@ Unresolved name operands:
 Branch-carried names: 140710593 uses 1409AC200 from 14071034E (conditional branch at 140710373); 140712822 uses r_enableFlashlight at 1409AC7E0 from 140712796 (branch 1407127B6).
 
 The source evidence includes the full 408,388-character disassembly section, 0x2bb0-byte stack allocation, conditional renderer mode paths, indexed registration loop and global result stores. Reconstruct the entire body in its source file rather than flattening into a list; recover the original PE float constants, enum tables, conditional flags and setter/subroutine boundaries first. This TSV is an evidence inventory only; no renderer runtime changes or body claim.
+
+## Original PE extraction and entry-prefix candidate
+
+Run 45888511169 verified 37,800 bytes, 6,916 instructions, 496 block leaders, 672 calls, 665 exact inventory matches and 724 RIP-relative references. The original bytes at 14093C480 read `vc_LIB`. The first eight pointers at 1409AD3F0 resolve to r_smp_worker_thread0 through r_smp_worker_thread7; the loop bound remains unresolved. The output artifact contains annotated instructions and JSON with exact constant bits and branch/call boundaries.
+
+`src/gfx_d3d/r_dvars_store.cpp` reconstructs only 14070E2B5..14070E516, including the initial subroutine, two inline integer registration branches and six SSAO settings. It is replay-only, not a complete renderer registration body. `tests/verify_store_renderer_prefix.py` cuts the original routine at 14070E517 and compares all four lookup branch combinations, ordered calls and seven global assignments. The new prefix test is pending CI; unused stack lanes are normalized and initialization is mocked.
