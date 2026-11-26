@@ -22,6 +22,9 @@ on:
       - 'src/cgame/cg_third_person_trace_store.cpp'
       - 'tests/verify_store_camera_win64_objects.py'
       - 'src/cgame_mp/cg_chase_camera_store.cpp'
+      - 'src/cgame/cg_camera_angles_store.cpp'
+      - 'tests/store_camera_angles_probe.cpp'
+      - 'tests/verify_store_camera_angles.py'
       - 'tests/store_chase_camera_probe.cpp'
       - 'tests/verify_store_chase_camera.py'
       - 'tests/store_camera_trace_probe.cpp'
@@ -211,6 +214,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_chase_camera.py originals/t6mp_msstore.exe | tee camera-chase.log
+      - name: Replay axis to angles and linked roll
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_angles.py originals/t6mp_msstore.exe | tee camera-angles.log
       - name: Compile all recovered camera bodies to Windows x64 objects
         run: |
           set -o pipefail
@@ -250,4 +257,5 @@ jobs:
             camera-trace.log
             camera-win64-objects.log
             camera-chase.log
+            camera-angles.log
           if-no-files-found: warn

@@ -67,3 +67,7 @@ The camera replay builds use host C++ with explicit MS x64 call bridges. A separ
 ## Chase camera
 
 Full candidate for CG_OffsetChaseCamView 14016A5D0..14016A930 preserves mode-specific yaw, demo update, original floor-based turn normalization, two packed trig calls, atan2, chase collision mask and original angle-axis boundary. 32768 original comparisons pending. Windows compilation audit initially failed because llvm-nm was missing after successful first object compilation; use available GNU nm fallback (COFF support) without relaxing symbol assertions.
+
+## Orientation and linked view roll
+
+Two additional complete candidates: AxisToAngles 140462D70..140462EBD, and linked roll transformation 140621C10..140621E33. Preserve packed trig call, original special vertical-axis roll branches, sign/quadrant handling, transposed 3x3 row dot products and roll adjustment condition. 32768 original-body comparisons pending. Vector-to-angle and demo update callee evidence added to extraction.

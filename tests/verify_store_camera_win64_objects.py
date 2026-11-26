@@ -16,6 +16,7 @@ import build_recon
 
 UNITS={
     "src/bgame/bg_camera_bob_store.cpp":("T6_STORE_CAMERA_REPLAY",["VerticalBob","HorizontalBob"]),
+    "src/cgame/cg_camera_angles_store.cpp":("T6_STORE_CAMERA_REPLAY",["AxisToAngles","TransformLinkedRoll"]),
     "src/cgame/cg_camera_detail_store.cpp":("T6_STORE_CAMERA_REPLAY",["UpdateShake","OffsetOrigin","CalcRemoteEyesView"]),
     "src/cgame/cg_camera_mode_store.cpp":("T6_STORE_CAMERA_REPLAY",["UpdateCameraMode"]),
     "src/cgame/cg_camera_motion_store.cpp":("T6_STORE_CAMERA_REPLAY",["AnglesToAxis","UpdateCameraVelocity","PerturbCamera","UpdateCameraTween"]),
