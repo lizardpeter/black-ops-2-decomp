@@ -46,7 +46,7 @@ function Get-AuditFields($event) {
 
 function Get-IdentityServices {
     Get-CimInstance -ClassName Win32_Service -Filter @"
-Name LIKE 'Xbl%' OR Name LIKE 'Xbox%' OR Name LIKE 'GamingServices%' OR
+Name LIKE 'Xbl%' OR Name LIKE 'Xbox%' OR Name LIKE 'GamingServices%' OR Name LIKE 'GamePlatform%' OR
 Name LIKE 'TokenBroker%' OR Name LIKE 'wlidsvc%' OR Name LIKE 'MicrosoftAccount%' OR Name LIKE 'ClipSVC%'
 "@ | Select-Object Name, State, ProcessId
 }
@@ -59,7 +59,7 @@ $dnsProvider = 'Microsoft-Windows-DNS-Client'
 $providers = @(
     'Microsoft-Windows-XboxLive-AuthManager', 'Microsoft-Windows-XboxLive',
     'Microsoft-Windows-XboxLiveCore', 'Microsoft-Windows-Xbox-Identity-Provider',
-    'Microsoft-Windows-GamingServices', 'Microsoft-Windows-GameRuntime',
+    'Microsoft-Windows-GamingServices', 'Microsoft-Windows-GamePlatformServices', 'Microsoft-Windows-GameRuntime',
     'Microsoft-Windows-AAD', 'Microsoft-Windows-WebAuth', 'Microsoft-Windows-TokenBroker',
     'Microsoft-Windows-LiveId', 'Microsoft-Windows-WinHttp', 'Microsoft-Windows-WinINet'
 )
@@ -87,7 +87,7 @@ try {
         if ($_ -match '^\s*(.+?)\s+\{[0-9a-f-]{36}\}\s*$') { $Matches[1] }
     })
     $providers = @($providers + @($registeredProviders | Where-Object {
-        $_ -match 'Xbox|XblAuth|GamingServices|GameRuntime|GameSave|Microsoft-Account|WebAuth|TokenBroker|LiveId'
+        $_ -match 'Xbox|XblAuth|GamingServices|GamePlatform|GameRuntime|GameSave|Microsoft-Account|WebAuth|TokenBroker|LiveId'
     }) | Sort-Object -Unique)
     $enabledProviders = @($dnsProvider) + @($providers | Where-Object { $_ -in $registeredProviders })
     @{
@@ -120,9 +120,7 @@ try {
         $client.Refresh()
         if ($client.MainWindowTitle) { $windowTitle = $client.MainWindowTitle }
         foreach ($module in $client.Modules) {
-            if ($module.ModuleName -match 'xbox|xgameruntime|gamingservices|tokenbroker|wlid|webauth|winhttp|wininet|xcurl') {
-                [void]$modules.Add($module.ModuleName)
-            }
+            [void]$modules.Add($module.ModuleName)
         }
         foreach ($identityService in Get-IdentityServices) {
             $key = "$($identityService.Name)/$($identityService.ProcessId)/$($identityService.State)"
@@ -161,9 +159,14 @@ $services.during = @($runtimeServices.Values | Sort-Object Name, ProcessId, Stat
 $servicePids = @($services.before + $services.during + $services.after |
     Where-Object ProcessId -gt 0 | Select-Object -ExpandProperty ProcessId -Unique)
 ConvertTo-Json -InputObject $services -Depth 5 | Set-Content (Join-Path $results 'windows-identity-services.json')
-ConvertTo-Json -InputObject @($modules | Sort-Object) | Set-Content (Join-Path $results 'identity-modules.json')
+$sampledModules = @($modules | Sort-Object)
+ConvertTo-Json -InputObject $sampledModules | Set-Content (Join-Path $results 'sampled-game-modules.json')
+$identityModules = @($sampledModules | Where-Object {
+    $_ -match 'xbox|xgameruntime|gamingservices|gameplatform|tokenbroker|wlid|webauth|winhttp|wininet|xcurl'
+})
+ConvertTo-Json -InputObject $identityModules | Set-Content (Join-Path $results 'identity-modules.json')
 
-$programs = '\\(t6mp|t6zm|t6_demonware|GamingServices|GamingServicesNet|XboxPcAppFT|XboxIdentityProvider|GameBar|XboxAppServices)\.exe$'
+$programs = '\\(t6mp|t6zm|t6_demonware|GamingServices\w*|GamePlatform\w*|Xbox\w*|GameBar\w*)\.exe$'
 $wfp = @(try {
     Get-WinEvent -FilterHashtable @{ LogName = 'Security'; Id = 5156, 5157; StartTime = $begin; EndTime = $end } | ForEach-Object {
         $fields = Get-AuditFields $_
@@ -200,7 +203,7 @@ ConvertTo-Json -InputObject $authEvents -Depth 5 | Set-Content (Join-Path $resul
 Write-Host "Captured $($wfp.Count) connection events and $($dns.Count) DNS events in scope."
 $authEvents | Group-Object { $_.provider } | ForEach-Object { Write-Host "$($_.Name) emitted $($_.Count) events." }
 Get-Content (Join-Path $results 'observation.json') | Write-Host
-$modules | Sort-Object | ForEach-Object { Write-Host "Observed module $_" }
+$identityModules | ForEach-Object { Write-Host "Observed module $_" }
 if (Test-Path $env:T6_IDENTITY_AUDIT_FILE) { Get-Content $env:T6_IDENTITY_AUDIT_FILE | Write-Host }
 
 $loaderActive = Get-ChildItem $results -Filter 't6_enhanced*.log' |
