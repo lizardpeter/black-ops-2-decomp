@@ -14,6 +14,11 @@ static Event& E(U tag,const void*m=nullptr,U32 color=0){
 }
 extern "C"{
 int Loop_GameTime;U32 Loop_Palette[8],Loop_Color8,Loop_Color9;
+int Loop_TimerInitialized,Loop_BlinkBase,Loop_BlinkElapsed;U32 Loop_TimerOrigin;Byte Loop_BlinkVisible,Loop_JitterPattern[176];float Loop_GlowOffsets[8];const Byte*Loop_RedactionMaterials[3];
+U32 Loop_Tick(){return 1000;}
+int Loop_PrintLength(const Byte*p){int n=0;while(*p++){++n;}return n;}
+void Loop_Stretch(const Byte*m,float x,float y,float w,float h,float s0,float t0,float s1,float t1,U32 c){Loop_Quad(m,x,y,1,w,h,s0,t0,s1,t1,0,1,c);}
+void Loop_Slice(const Byte*m,int n,float x,float y,float w,float a,float b,float sn,float cs,U32 c){float s=float(n%16)*0.0625f;Loop_Quad(m,x,y,w,a,b,s,0,s+0.0625f,1,sn,cs,c);}
 const Byte*Loop_Glyph(const Byte*f,U32 c){return R<const Byte*>(f,0x28)+24*((c-32u)<=95u?c-32u:14u);}
 int Loop_Width(int,const char*,int n,const Byte*){auto&e=E(4);e.extra=U(n);return n*5;}
 void Loop_Quad(const Byte*m,float x,float y,float z,float w,float h,float s0,float t0,float s1,float t1,float sn,float cs,U32 color){
