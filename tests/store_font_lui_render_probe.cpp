@@ -8,6 +8,11 @@
 #include <cassert>
 #include <cstdlib>
 #include <cctype>
+#include <csignal>
+#include <cstdio>
+#include <cstdlib>
+#include <ucontext.h>
+#include <unistd.h>
 #define MS __attribute__((ms_abi))
 namespace {
 using B=unsigned char;using U=std::uint32_t;using Q=std::uint64_t;
@@ -16,6 +21,12 @@ template<class T>T Get(const void*p,unsigned o){T v;std::memcpy(&v,static_cast<c
 struct Event{Q material;int count,layer;float pos[32*12],uv[32*8];U color[32];};
 struct Trace{unsigned count;float x;int result;Event events[128];};
 static Trace trace;
+static volatile unsigned diagOp,diagSeed;static const B*diagBase;static volatile int diagOriginal;
+static void Crash(int, siginfo_t*si,void*ctx){
+    const auto*uc=static_cast<ucontext_t*>(ctx);const auto*g=uc->uc_mcontext.gregs;
+    char message[512];int n=std::snprintf(message,sizeof(message),"LUI replay fault op=%u seed=%08x original=%d address=%p RIP=%llx mappedRVA=%llx RAX=%llx RBX=%llx RCX=%llx RDX=%llx R8=%llx R9=%llx R10=%llx R11=%llx\n",unsigned(diagOp),unsigned(diagSeed),int(diagOriginal),si->si_addr,(unsigned long long)g[REG_RIP],(unsigned long long)(g[REG_RIP]-reinterpret_cast<std::uintptr_t>(diagBase)),(unsigned long long)g[REG_RAX],(unsigned long long)g[REG_RBX],(unsigned long long)g[REG_RCX],(unsigned long long)g[REG_RDX],(unsigned long long)g[REG_R8],(unsigned long long)g[REG_R9],(unsigned long long)g[REG_R10],(unsigned long long)g[REG_R11]);
+    if(n>0)write(2,message,unsigned(n)<sizeof(message)?unsigned(n):sizeof(message)-1);_exit(139);
+}
 static B font[64],glyphs[96*24],pairs[16*8],element[0x140],node[0x28+32*84],lua[128];
 static B node2[0x7c],luaStack[64];
 static char text[1024];
@@ -104,9 +115,10 @@ void*LuiRenderMock(unsigned i){
     return p[i];
 }
 unsigned LuiRenderSize(){return sizeof(Trace);}
+void LuiRenderDiagnostics(){struct sigaction a{};a.sa_sigaction=Crash;a.sa_flags=SA_SIGINFO;sigemptyset(&a.sa_mask);sigaction(SIGSEGV,&a,nullptr);sigaction(SIGBUS,&a,nullptr);}
 void LuiRenderRun(void*image,unsigned op,unsigned seed,void*out){
     using namespace store_lui_text;using namespace store_lui_icon;using namespace store_lui_render;
-    trace={};auto*b=static_cast<B*>(image);U st=seed+1;
+    trace={};auto*b=static_cast<B*>(image);diagOp=op;diagSeed=seed;diagOriginal=image!=nullptr;if(image)diagBase=b;U st=seed+1;
     auto next=[&](){st=st*1664525u+1013904223u;return st;};
     auto f=[&](){return float(int(next()%2048)-1024)*0.125f;};
     Lui_TransformDepth=0;Lui_Language=nullptr;

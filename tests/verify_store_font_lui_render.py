@@ -9,7 +9,7 @@ def main():
         subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_lui_render_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.LuiRenderMock.argtypes=[C.c_uint];lib.LuiRenderMock.restype=C.c_void_p;lib.LuiRenderSize.restype=C.c_uint
         lib.LuiRenderRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.LuiRenderRun.restype=None
-        a=C.create_string_buffer(lib.LuiRenderSize());b=C.create_string_buffer(lib.LuiRenderSize());rng=random.Random(0x6af8f0)
+        lib.LuiRenderDiagnostics();a=C.create_string_buffer(lib.LuiRenderSize());b=C.create_string_buffer(lib.LuiRenderSize());rng=random.Random(0x6af8f0)
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base=C.addressof(C.c_char.from_buffer(mem))
             for i,rva in enumerate([0x8a7dc0,0x8a82b0,0xf2040,0x71dd30,0x723450,0x71a4e0,0x71a7a0,0x3e91a0,0x69ea10,0x69bb00,0x69bd00,0x663840,0x662630]):
