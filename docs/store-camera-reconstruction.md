@@ -87,3 +87,7 @@ Complete candidate at 14016BFB0..14016C374. Includes entity and model map resolu
 ## Camera mode transition
 
 Run 45899353063 passed the prior five function bodies and all 38 Windows public functions. Complete transition candidate at 1400BFCC0..1400C0040 (176 instructions). Store jump table checked by replay, duration and seat branches, remote turret reset, missile state and original highlight dvar writes/reset, tag view angle restoration, and client view-angle delta writes. 32768 differential comparisons pending. The LTCG tween boundary passes duration in XMM1 with no prepared RCX and preserves live R8/R9/R10; mock retains those lanes. StartCameraTween and water-query internals added to extraction. No runtime activation.
+
+## Water height query
+
+Complete wrapper candidate 14038BAD0..14038BCDB preserves type-aware geometry-count read, vertical ray endpoints, original 64-byte ray and provisional geometry result layout, inverse delta, table end address, surface fraction and sentinel, brush trace and rounded height comparison. 16384 cases compare the initial query payloads and return values. Two lower-level queries remain external; the wrapper does not reproduce the collision engine. CI pending.

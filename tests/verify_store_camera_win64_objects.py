@@ -16,6 +16,7 @@ import build_recon
 
 UNITS={
     "src/bgame/bg_camera_bob_store.cpp":("T6_STORE_CAMERA_REPLAY",["VerticalBob","HorizontalBob"]),
+    "src/cgame/cg_camera_water_store.cpp":("T6_STORE_CAMERA_REPLAY",["WaterHeight"]),
     "src/cgame/cg_camera_transition_store.cpp":("T6_STORE_CAMERA_REPLAY",["UpdateCameraTransition"]),
     "src/cgame/cg_camera_basis_store.cpp":("T6_STORE_CAMERA_REPLAY",["VectorToAngles","TagAxis","CalcCubemapViewValues","RemoteViewMotion"]),
     "src/cgame/cg_vehicle_offset_store.cpp":("T6_STORE_CAMERA_REPLAY",["OffsetVehicleView"]),
