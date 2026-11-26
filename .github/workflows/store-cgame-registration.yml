@@ -4,6 +4,11 @@ on:
   push:
     paths:
       - 'src/cgame_mp/cg_register_dvars_store.cpp'
+      - 'src/qcommon/common_register_dvars_store.cpp'
+      - 'src/universal/dvar_registration_store.cpp'
+      - 'tests/store_dvar_core_test.cpp'
+      - 'tests/store_common_registration_probe.cpp'
+      - 'tests/verify_store_common_registration.py'
       - 'tests/store_cgame_registration_probe.cpp'
       - 'tests/verify_store_cgame_registration.py'
       - '.github/workflows/store-cgame-registration.yml'
@@ -17,15 +22,25 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Core dvar source-body regression (no PE)
+        run: |
+          g++ -std=c++17 -O2 -Wall -Wextra -Werror tests/store_dvar_core_test.cpp -o /tmp/store_dvar_core
+          /tmp/store_dvar_core
       - name: Fetch hash-pinned Store MP original
         run: python tools/fetch_originals.py t6mp_msstore originals --only exe
       - name: Replay full registration body
         run: |
           set -o pipefail
           python tests/verify_store_cgame_registration.py originals/t6mp_msstore.exe | tee registration-replay.log
+      - name: Replay common registration body
+        run: |
+          set -o pipefail
+          python tests/verify_store_common_registration.py originals/t6mp_msstore.exe | tee common-registration-replay.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
           name: store-cgame-registration-replay
-          path: registration-replay.log
+          path: |
+            registration-replay.log
+            common-registration-replay.log
           if-no-files-found: warn
