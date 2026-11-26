@@ -39,3 +39,7 @@ Four full source-body candidates: AnglesToAxis 140464D00 (77 instructions), CG_U
 ## First-person and shake
 
 Full source candidates at 14016BA40..14016BD96 and 1400C7540..1400C7713. The first-person body retains the bob input stack structure, original bob/angle boundaries, height, sideways bob, 150/450 ms step smoothing and minimum height. Shake body retains four slots, strongest amplitude/frequency selection, random phase refresh and three independent sine rates. 16384 differential comparisons pending. Camera motion CI 45896899398 passed axes and velocity (8192 comparisons), but failed perturbation on NaN sign propagation. Ordered SSE multiplication/subtraction correction is committed; remaining motion tests pending. No live activation.
+
+## Main camera mode
+
+Full candidate at 1400C0E20..1400C1235, 252 instructions. Preserves demo mode gate, vehicle seat and definition checks, independent entity lookups, turret and missile modes, prior/current transition state comparisons, vehicle exit pitch handling, sound futz selection and original mode-state writes. 32768 original differential comparisons pending. Camera motion NaN correction passed full replay run 45897504478. First-person/shake CI pending. No live redirect.
