@@ -13,7 +13,8 @@ extern "C" {
 extern Vertex*Geom_Vertices; // 14283E660
 extern U16*Geom_Indices; // 142A3E620
 extern int Geom_IndexCount,Geom_VertexCount; // 142C3E628,142C3E62C
-extern int Geom_Stage,Geom_VertexDecl; // 142C3E630,142C3E63C
+extern std::uint64_t Geom_Stage;
+extern int Geom_VertexDecl; // 142C3E630,142C3E63C
 extern int Geom_PrimState; // 142C41500
 extern const Byte*Geom_Material; // 142C425E0
 extern Byte Geom_TechniqueType; // 142C425E8
