@@ -121,7 +121,7 @@ void InitDynamicBuffer(B*p,U size){
     W(p,16,Q(0));
 }
 // 140740BE0
-short AllocateResourceSlot(U a,Q /*unused*/,B kind,U count){
+short AllocateResourceSlot(U a,Q /*unused*/,B kind,float count){
     Display_LockResources();short result=-1;
     for(short i=0;i<40;++i){B*p=Display_ResourceSlots[i];if(!p[0]){p[2]=kind;W(p,0x10,count);p[0]=1;p[1]=0;p[3]=0;W(p,0x14,U(0));W(p,0x18,a);W(p,0x1c,U(0));W(p,0x20,std::uint16_t(0));result=i;break;}}
     Display_UnlockResources();return result;

@@ -83,8 +83,8 @@ void DisplayRun(void*image,U op,U seed,void*out){
         if(b){W(b,0x27e73a8,Display_ClientCount);std::memcpy(b+0x2838af0,Display_ClientQueries,sizeof(Display_ClientQueries));reinterpret_cast<void(MS*)()>(b+0x724f40)();std::memcpy(cap.data,b+0x2838af0,sizeof(Display_ClientQueries));}
         else{ResetClientQueries();std::memcpy(cap.data,Display_ClientQueries,sizeof(Display_ClientQueries));}
     }else{
-        std::memset(Display_ResourceSlots,0xa5,sizeof(Display_ResourceSlots));U used=next()%41;for(unsigned i=used;i<40;++i)Display_ResourceSlots[i][0]=0;U a=next();B k=B(next());U c=next();
-        if(b){std::memcpy(b+0x2c3edd0,Display_ResourceSlots,sizeof(Display_ResourceSlots));cap.result=reinterpret_cast<short(MS*)(U,Q,B,U)>(b+0x740be0)(a,0,k,c);std::memcpy(cap.data,b+0x2c3edd0,sizeof(Display_ResourceSlots));}
+        std::memset(Display_ResourceSlots,0xa5,sizeof(Display_ResourceSlots));U used=next()%41;for(unsigned i=used;i<40;++i)Display_ResourceSlots[i][0]=0;U a=next();B k=B(next());float c=f();
+        if(b){std::memcpy(b+0x2c3edd0,Display_ResourceSlots,sizeof(Display_ResourceSlots));cap.result=reinterpret_cast<short(MS*)(U,Q,B,float)>(b+0x740be0)(a,0,k,c);std::memcpy(cap.data,b+0x2c3edd0,sizeof(Display_ResourceSlots));}
         else{cap.result=AllocateResourceSlot(a,0,k,c);std::memcpy(cap.data,Display_ResourceSlots,sizeof(Display_ResourceSlots));}
     }
     std::memcpy(cap.calls,trace,sizeof(trace));std::memcpy(out,&cap,sizeof(cap));
