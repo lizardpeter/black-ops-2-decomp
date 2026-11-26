@@ -51,6 +51,26 @@ Name LIKE 'TokenBroker%' OR Name LIKE 'wlidsvc%' OR Name LIKE 'MicrosoftAccount%
 "@ | Select-Object Name, State, ProcessId
 }
 
+function Get-LiveIdEndpointHosts($event) {
+    foreach ($field in ([xml]$event.ToXml()).Event.EventData.Data) {
+        if ($field -isnot [System.Xml.XmlElement]) { continue }
+        $value = $field.InnerText
+        $name = $field.GetAttribute('Name')
+        if ($name -match '^(Host(Name)?|ServerName|DestinationHost|TargetHost)$' -and
+            $value -match '^[a-z0-9.-]+(:[0-9]+)?$') {
+            $value = "https://$value"
+        } elseif (($name -and $name -notmatch '^(Url|Uri|RequestUrl|RequestUri|FullUrl|Endpoint|EndpointUrl)$') -or
+            $value -notmatch '^https?://') {
+            continue
+        }
+        $uri = $null
+        if ([uri]::TryCreate($value, [UriKind]::Absolute, [ref]$uri) -and
+            $uri.HostNameType -ne [UriHostNameType]::Unknown -and !$uri.UserInfo) {
+            $uri.IdnHost
+        }
+    }
+}
+
 $rule = "T6 outbound audit $Mode"
 $session = "T6ServiceAudit-$Mode"
 $trace = Join-Path $env:RUNNER_TEMP "$session.etl"
@@ -171,8 +191,11 @@ try {
 }
 
 $services.during = @($runtimeServices.Values | Sort-Object Name, ProcessId, State)
-$servicePids = @($services.before + $services.during + $services.after |
+$observedServices = $services.before + $services.during + $services.after
+$servicePids = @($observedServices |
     Where-Object ProcessId -gt 0 | Select-Object -ExpandProperty ProcessId -Unique)
+$liveIdPids = @($observedServices | Where-Object { $_.Name -eq 'wlidsvc' -and $_.ProcessId -gt 0 } |
+    Select-Object -ExpandProperty ProcessId -Unique)
 ConvertTo-Json -InputObject $services -Depth 5 | Set-Content (Join-Path $results 'windows-identity-services.json')
 $sampledModules = @($modules | Sort-Object)
 ConvertTo-Json -InputObject $sampledModules | Set-Content (Join-Path $results 'sampled-game-modules.json')
@@ -197,6 +220,7 @@ ConvertTo-Json -InputObject $wfp -Depth 6 | Set-Content (Join-Path $results 'con
 $vendorDomains = '(demonware\.net|xboxlive\.com|xboxservices\.com|xbox\.com|gamingservices\.microsoft\.com|login\.live\.com|login\.microsoftonline\.com|msauth\.net|msftauth\.net|activision\.com|callofduty\.com)'
 $dns = [System.Collections.Generic.List[object]]::new()
 $authEvents = [System.Collections.Generic.List[object]]::new()
+$liveIdEndpoints = [System.Collections.Generic.List[object]]::new()
 Get-WinEvent -Path $trace -Oldest | ForEach-Object {
     $entry = [ordered]@{ time = $_.TimeCreated.ToUniversalTime().ToString('o'); eventId = $_.Id
         processId = $_.ProcessId; provider = $_.ProviderName }
@@ -212,12 +236,27 @@ Get-WinEvent -Path $trace -Oldest | ForEach-Object {
         $entry.activityId = $_.ActivityId
         $entry.relatedActivityId = $_.RelatedActivityId
         $authEvents.Add($entry)
+        if ($_.ProcessId -in $liveIdPids -and
+            $_.ProviderName -in @('Microsoft-Windows-LiveId', 'Microsoft-Windows-WinHttp', 'Microsoft-Windows-WinINet')) {
+            foreach ($endpointHost in @(Get-LiveIdEndpointHosts $_ | Sort-Object -Unique)) {
+                $liveIdEndpoints.Add([ordered]@{
+                    time = $entry.time
+                    processId = $entry.processId
+                    provider = $entry.provider
+                    eventId = $entry.eventId
+                    activityId = $entry.activityId
+                    destinationHost = $endpointHost
+                })
+            }
+        }
     }
 }
 ConvertTo-Json -InputObject $dns -Depth 6 | Set-Content (Join-Path $results 'dns.json')
 ConvertTo-Json -InputObject $authEvents -Depth 5 | Set-Content (Join-Path $results 'windows-auth-events.json')
+ConvertTo-Json -InputObject $liveIdEndpoints -Depth 5 | Set-Content (Join-Path $results 'windows-live-id-endpoints.json')
 
 Write-Host "Captured $($wfp.Count) connection events and $($dns.Count) DNS events in scope."
+Write-Host "Decoded $($liveIdEndpoints.Count) Live ID hostname observations."
 $authEvents | Group-Object { $_.provider } | ForEach-Object { Write-Host "$($_.Name) emitted $($_.Count) events." }
 Get-Content (Join-Path $results 'observation.json') | Write-Host
 $identityModules | ForEach-Object { Write-Host "Observed module $_" }
