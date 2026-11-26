@@ -17,9 +17,11 @@ void Image_LoadWhiteTransparent(GfxImage *);
 template<int N> void Image_LoadLightmapIntensity(GfxImage *);
 
 // Store-specialized callee ABI, not the legacy source prototypes. Names
-// are provisional; implementations remain in the original renderer.
+// are provisional; upload is reconstructed, setup remains in the original renderer.
 extern "C" void Store_ImageSetup(GfxImage *, int width, int height, int depth,
                                  unsigned flags, unsigned format, void *data);
 extern "C" void Store_ImageUploadData(GfxImage *, unsigned format, int face,
                                       int mip, const unsigned char *pixels);
+extern "C" void Store_ImageUploadVolume(GfxImage *, unsigned format, unsigned mip,
+                                        const unsigned char *pixels);
 #endif

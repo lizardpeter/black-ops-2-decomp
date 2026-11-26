@@ -212,3 +212,37 @@ dispatch. Captured GPU arguments and ordering are compared with the
 C++ upload plan; actual data transfer, locks and volume copy are
 mocked. No runtime binding is installed. The descriptor helpers from
 the previous commit also compiled successfully as Windows x64 COFF.
+
+## Full upload bodies (regular and volume)
+
+The earlier Store_PlanImageUpload helper is not a reconstruction of a
+complete original function. This pass adds the full Store_ImageUploadData
+and Store_ImageUploadVolume bodies in src/gfx_d3d/r_image_upload_native.cpp.
+Both have void return; the volume ABI is (image, format, mip, pixels).
+The ordinary path obtains/releases the view resource, reads the actual
+resource mip count, locks the context, and calls UpdateSubresource.
+The volume path maps each slice with WRITE_DISCARD, copies tightly packed
+or padded rows, unmaps, advances the source, and releases the resource
+after leaving the context lock. It reads the image mip count at +0x1E.
+The volume source-slice size and row pitch use distinct format switches:
+45,55,83 can advance the source without copying; 10,11,35 can copy rows
+without advancing the slice source. Preserve this original behavior.
+Unsupported volume formats still Map/Unmap. Original Map HRESULT is
+ignored; failed maps are not safe to exercise and are not validated.
+
+    python tests/verify_store_image_full_upload.py /path/to/store/files
+
+Executed against SHA-256-pinned MP, ZM and SP originals on Linux x86-64:
+15,000 full-path comparisons per build (45,000 total), with 100 formats,
+five dimension triples, five mip indices and tight/padded mapped rows.
+Mocked COM calls capture exact destination bytes including padding,
+subresource numbers, pitch and call order. The real original dispatch
+and both original jump tables execute. Successful Map is mocked, as are
+GetResource, GetDesc, UpdateSubresource, lock, release and the CRT copy.
+No GPU, complete Windows hybrid build or runtime integration is claimed.
+These results supersede the upload-plan-only status. Descriptor-only
+helpers and the original setup body remain incomplete.
+
+For the standard reconstruction ledger, the full upload bodies remain
+outside records/functions.tsv until the standard differential runner
+supports this test. The symbol names are provisional Store ABI labels.
