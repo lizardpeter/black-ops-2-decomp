@@ -69,6 +69,7 @@ $auditStarted = $false
 $services = [ordered]@{ before = @(); during = @(); after = @() }
 $runtimeServices = @{}
 $modules = [System.Collections.Generic.HashSet[string]]::new([System.StringComparer]::OrdinalIgnoreCase)
+$observationSeconds = 150
 try {
     # Block direct non-loopback traffic from the game and the local service on the disposable runner.
     auditpol.exe /set '/subcategory:Filtering Platform Connection' /success:enable /failure:enable
@@ -111,10 +112,22 @@ try {
         Start-Sleep -Milliseconds 250
     }
 
+    # Keep the emulator and runner setup the same for an equal-length no-game control.
+    $baselineStarted = Get-Date
+    $deadline = $baselineStarted.AddSeconds($observationSeconds)
+    while ((Get-Date) -lt $deadline) {
+        foreach ($identityService in Get-IdentityServices) {
+            $key = "$($identityService.Name)/$($identityService.ProcessId)/$($identityService.State)"
+            $runtimeServices[$key] = $identityService
+        }
+        Start-Sleep -Seconds 2
+    }
+    if ($service.HasExited) { throw 'Loopback service stopped during the no-game control' }
+
     $launched = Get-Date
     $client = Start-Process -FilePath $exe -ArgumentList '--local-demonware', '--audit-identity' -WorkingDirectory $game -PassThru
     $clientPid = $client.Id
-    $deadline = (Get-Date).AddSeconds(150)
+    $deadline = $launched.AddSeconds($observationSeconds)
     $windowTitle = ''
     while (-not $client.HasExited -and (Get-Date) -lt $deadline) {
         $client.Refresh()
@@ -132,6 +145,8 @@ try {
     @{
         phase = 'startup and unattended runtime'
         captureStartedUtc = $begin.ToUniversalTime().ToString('o')
+        baselineStartedUtc = $baselineStarted.ToUniversalTime().ToString('o')
+        baselineSeconds = [int]($launched - $baselineStarted).TotalSeconds
         launchedUtc = $launched.ToUniversalTime().ToString('o')
         observedSeconds = [int]((Get-Date) - $launched).TotalSeconds
         windowTitle = $windowTitle
@@ -194,6 +209,8 @@ Get-WinEvent -Path $trace -Oldest | ForEach-Object {
     } elseif ($_.ProviderName -notin @('Microsoft-Windows-WinHttp', 'Microsoft-Windows-WinINet') -or
         $_.ProcessId -eq $clientPid -or $_.ProcessId -in $servicePids) {
         # Event metadata identifies providers and processes without exposing account data.
+        $entry.activityId = $_.ActivityId
+        $entry.relatedActivityId = $_.RelatedActivityId
         $authEvents.Add($entry)
     }
 }
