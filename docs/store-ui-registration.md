@@ -35,3 +35,23 @@ UI_Refresh is not yet fully authored, and the existing P0017 loader
 patch remains the active enhanced implementation until the source
 replacement can be validated in a full runtime build. No standard
 differential status promotion is made.
+
+## UI_Refresh and the inlined overlay
+
+The complete enclosing Store refresh bodies are authored in `src/ui/ui_refresh_store.cpp`.
+MP entry 0x1403FD090 (1694 bytes); ZM entry 0x1403FDA60 (1763 bytes).
+The Store compiler inlined the version overlay, so the internal DrawBuildNumber helper
+is a source decomposition, not an additional original function. The recovered behavior
+includes LUI locking, transition timing, focus and catcher flags, delayed refresh,
+font scaling, version formatting, text width and drawing parameters, and the Zombies-only
+controller lookup. External UI callee aliases remain provisional; their bodies are not
+reconstructed by this change.
+
+Run `python tests/verify_store_ui_refresh.py /path/to/pinned/store/executables` on Linux x86-64.
+4096 seeded comparisons per mode passed (8192 total), comparing ordered external calls,
+draw arguments and selected state changes. Each mode exercised 87 actual draw-call
+boundaries. Original callees and the platform timing/TLS environment are modeled.
+Both source variants compiled to x64 Windows COFF objects with isolated SDK declarations.
+This is not a full Windows hybrid link, real rendered-menu test or Campaign validation.
+The enhanced default remains implemented by the existing loader patch until source
+replacement is validated in the live runtime.
