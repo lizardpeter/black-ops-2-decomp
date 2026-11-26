@@ -129,6 +129,22 @@ bool LiveAntiCheat_CompleteHash(void *handle, unsigned long long *result)
 //
 // Evidence: analysis/t6mp_msstore/{pseudocode,disasm}/_unattributed/14050000.*
 // and analysis/t6mp_msstore/match/functions.tsv. ZM/SP not verified here.
+// Inventory completeness: the PDB-attributed x86 reference contains 23
+// distinct LiveAntiCheat_* names. This file accounts for all 23 as five
+// authored definitions, eight noncompiled candidate declarations, three
+// inline candidates and seven unresolved standalone declarations.
+// This is name coverage, not Store signature or implementation coverage.
+//
+// The generated Store MP matcher independently associates only two entries
+// from this source unit with reference names: AnswerChallengesSuccess
+// (named/registration, confidence 0.89) and AnswerChallenges (caller,
+// confidence 0.75). All other proposed identifications in this block are
+// manual candidates, not independently corroborated matcher results.
+// An unused return register does not prove a void source return type;
+// likewise, integer/pointer-width arguments alone do not establish the
+// original C++ type, reference qualifiers, or eliminated arguments.
+// No candidate is promoted to a compiled declaration or a registry entry
+// on the strength of these observations alone.
 #if 0
 // Candidate: Store body has no arguments or returned value; name based on
 // ban/disconnect string references. Separate player-ban callback unresolved.
@@ -151,6 +167,7 @@ bool LiveAntiCheat_GetChallengeResponse(ControllerIndex_t, unsigned short,
 // LiveAntiCheat_AnswerExpressionRequest: inline candidate.
 
 // Store candidates: one 32-bit argument, no consumed return value.
+// The void return types are placeholders, not independently proven.
 void LiveAntiCheat_AnswerChallengesRetry(ControllerIndex_t);
 void LiveAntiCheat_ResetChallengeResponse(ControllerIndex_t);
 
