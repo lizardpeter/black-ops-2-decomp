@@ -171,9 +171,14 @@ bool LiveAntiCheat_GetChallengeResponse(ControllerIndex_t, unsigned short,
 void LiveAntiCheat_AnswerChallengesRetry(ControllerIndex_t);
 void LiveAntiCheat_ResetChallengeResponse(ControllerIndex_t);
 
-// The success callback is matched by registration; the failure callback
-// has the corresponding single-pointer/Boolean machine-level shape.
-// TaskRecord is a reference-derived semantic type, not a verified x64 layout.
+// The success callback is matched by registration. A read-only inspection
+// of the SHA-256-pinned original Store MP PE independently confirms a
+// pointer-sized first input and an explicit 8-bit true return at its only
+// normal exit. This supports a bool callback prototype; TaskRecord remains
+// a reference-derived semantic type, not a verified x64 layout.
+// The short callback body has multiple normalized matches in each Store
+// executable; no individual ZM/SP identity is asserted on this basis.
+// The failure callback retains its prior candidate status.
 bool LiveAntiCheat_AnswerChallengesSuccess(TaskRecord *);
 bool LiveAntiCheat_AnswerChallengesFailure(TaskRecord *);
 
@@ -183,8 +188,12 @@ void LiveAntiCheat_OnChallengesReceived(unsigned long long,
     bdReference<bdAntiCheatChallenges>);
 
 // The generated matcher labels a Store candidate AnswerChallenges (0.75).
-// Its observed interface has one 32-bit argument, no consumed return value,
-// and includes processing logic. This may be a merged/inlined body.
+// The original MP PE confirms a 32-bit first input. Its initial unwind
+// range is not the complete function: two further ranges chain to it.
+// A matching prologue and unwind grouping are present in ZM and SP, but
+// this is structural correspondence, not a proven semantic match.
+// No consumed return value has been established; that does not prove void.
+// This may be a merged/inlined body.
 // LiveAntiCheat_AnswerChallenges: separate Store signature unresolved.
 // LiveAntiCheat_ProcessChallenges: candidate void(ControllerIndex_t);
 // do not assert a separate entry for both names.
