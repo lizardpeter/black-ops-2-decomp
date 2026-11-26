@@ -2,7 +2,8 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/ui/lui_gc_store.cpp":["BarrierValue","BarrierObject","CollectStep","CollectFull"],
+UNITS={"src/gfx_d3d/r_renderer_start_store.cpp":["InitializeMeshResources","InitializeDeviceResources","InitializeRenderer"],
+       "src/ui/lui_gc_store.cpp":["BarrierValue","BarrierObject","CollectStep","CollectFull"],
        "src/ui/lui_metatable_store.cpp":["IndexNonTable","ResolveIndex","GetTable"],
        "src/cgame/cg_hud_clients_store.cpp":["HudEnabled","FindHudClient","ClientColor","DrawChatPrompt"],
        "src/gfx_d3d/r_static_tables_store.cpp":["InitializeWorkTables"],

@@ -18,6 +18,7 @@ on:
       - 'src/gfx_d3d/r_static_tables_store.cpp'
       - 'src/ui/lui_registry_store.cpp'
       - 'src/ui/lui_gc_store.cpp'
+      - 'src/gfx_d3d/r_renderer_start_store.cpp'
       - 'src/ui/lui_metatable_store.cpp'
       - 'src/gfx_d3d/r_resource_init_store.cpp'
       - 'src/gfx_d3d/r_init_state_store.cpp'
