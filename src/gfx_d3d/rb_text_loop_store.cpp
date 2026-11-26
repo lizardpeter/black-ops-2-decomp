@@ -198,7 +198,7 @@ static void UpdateBlink(){
 }
 static void Jitter(float&x,float&y){
     U32 seed=U32(Loop_GameTime>>5);
-    Byte kind=Loop_JitterPattern[static_cast<std::uint64_t>(static_cast<std::int64_t>(int(seed)))%176u];
+    Byte kind=Loop_JitterPattern[static_cast<std::uint64_t>(static_cast<long long>(int(seed)))%176u];
     if(kind==1){x+=float(Rand(seed)%7-3);y+=float(Rand(seed)%11-5);}
     else if(kind==2){x+=float(Rand(seed)%10+45);int delta=Rand(seed)%10+45;y+=float((Rand(seed)&1)?-delta:delta);}
 }
