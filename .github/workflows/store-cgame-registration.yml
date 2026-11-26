@@ -19,6 +19,12 @@ on:
       - 'tests/verify_store_renderer_integrated.py'
       - 'tests/verify_store_renderer_extended.py'
       - 'tests/verify_store_renderer_complete.py'
+      - 'tests/verify_store_renderer_native_bindings.py'
+      - 'records/store-renderer-bindings.tsv'
+      - 'enhanced/gfx_d3d/r_dvars.cpp'
+      - 'tools/build_recon.py'
+      - 'tools/build_runtime.py'
+      - 'tools/symbols.py'
       - 'tools/inventory/store_renderer_registration.py'
       - 'docs/store-renderer-dvar-registration.tsv'
       - '.github/workflows/store-cgame-registration.yml'
@@ -74,6 +80,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_renderer_complete.py originals/t6mp_msstore.exe | tee renderer-complete-replay.log
+      - name: Audit native renderer bindings and compile Windows x64 objects
+        run: |
+          set -o pipefail
+          python tests/verify_store_renderer_native_bindings.py originals/t6mp_msstore.exe renderer-evidence/renderer-evidence.json | tee renderer-native-bindings.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -88,4 +98,5 @@ jobs:
             renderer-integrated-replay.log
             renderer-extended-replay.log
             renderer-complete-replay.log
+            renderer-native-bindings.log
           if-no-files-found: warn

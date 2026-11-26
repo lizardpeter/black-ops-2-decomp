@@ -225,6 +225,9 @@ def check_no_exe_addresses(dll, exe_base, exe_size):
 def main():
     build = sys.argv[sys.argv.index("--build") + 1] if "--build" in sys.argv else symbols.reference_build()
     enhanced = "--enhanced" in sys.argv
+    native_renderer = "--renderer-native" in sys.argv
+    if native_renderer and (build != "t6mp_msstore" or not enhanced):
+        sys.exit("--renderer-native requires --build t6mp_msstore --enhanced")
     arch = symbols.architecture(build)
     triple = ARCH[arch]["triple"]
     reference = symbols.has_map(build)
@@ -245,6 +248,8 @@ def main():
             flags.append("-DT6_NO_ASSERTS")  # retail and ship builds compiled their asserts out
         if symbols.build_spec(build).get("store"):
             flags.append("-DT6_STORE")  # the Store builds' source revision: its own structure layouts and changes
+        if native_renderer:
+            flags.append("-DT6_STORE_RENDERER_NATIVE")
         if build == "t6zm_msstore":
             flags.append("-DT6_STORE_ZM")
         if enhanced and arch == "x64":

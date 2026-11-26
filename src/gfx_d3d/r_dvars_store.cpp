@@ -1,14 +1,16 @@
-// Store MP renderer registration: recovered entry prefix 14070E2B5..14070F91E.
-// This is NOT the complete 14070E230 function. Replay-only until all paths are recovered.
+// Store MP renderer registration: complete 14070E230..1407175D7 body.
+// Differential replay passed with the genuine original epilogue. Native hybrid
+// binding is explicitly opt-in and MP-only until link and live tests pass.
 #define T6_SOURCE "gfx_d3d/r_dvars.cpp"
-#if defined(T6_STORE) && defined(T6_STORE_RENDERER_DVAR_REPLAY)
-#include <cstdint>
-#include <cstring>
+#if defined(T6_STORE) && (defined(T6_STORE_RENDERER_DVAR_REPLAY) || defined(T6_STORE_RENDERER_NATIVE))
+#if defined(T6_STORE_RENDERER_DVAR_REPLAY)
 #include <cstdlib>
 #include <xmmintrin.h>
+#endif
 
 namespace store_renderer_dvar {
-using U32 = std::uint32_t;
+using U32 = unsigned int;
+static_assert(sizeof(U32)==4);
 struct Dvar;
 struct alignas(16) Value { U32 words[4]; };
 struct alignas(16) Domain { U32 words[4]; };
@@ -208,16 +210,56 @@ void Store_Renderer_SetVariant(const Dvar *,const Value *,U32); // 14046B300
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_DebugShader[]; // 140D3A1A8
+#else
 extern const char *const Store_Renderer_DebugShader[]={"none","normal","basisTangent","basisBinormal","basisNormal","lmapDir",nullptr}; // 140D3A1A8
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_DebugPerformance[]; // 140D3A230
+#else
 extern const char *const Store_Renderer_DebugPerformance[]={"none","current","average",nullptr}; // 140D3A230
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_LightMapSecondary[]; // 140D39F50
+#else
 extern const char *const Store_Renderer_LightMapSecondary[]={"Black","Unchanged","Intensity 1","Intensity 2","Intensity 3","Intensity 4","Intensity 5","Intensity 6","Intensity 7","Intensity 8","Intensity 9","Intensity 10","Intensity 11","Intensity 12","Intensity 13","Intensity 14","Intensity 15","Intensity 16","Intensity 17","Intensity 18","Intensity 19","Intensity 20","Intensity 21","Intensity 22","Intensity 23","Intensity 24","Intensity 25","Intensity 26","Intensity 27","Intensity 28","Intensity 29","Intensity 30","Intensity 31",nullptr}; // 140D39F50
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_ColorMap[]; // 140D3A088
+#else
 extern const char *const Store_Renderer_ColorMap[]={"Black","Unchanged","White","Gray Linear","Gray sRGB",nullptr}; // 140D3A088
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_AlphaMap[]; // 140D3A0B8
+#else
 extern const char *const Store_Renderer_AlphaMap[]={"Unchanged","255","192","128",nullptr}; // 140D3A0B8
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_SpecularMap[]; // 140D3A250
+#else
 extern const char *const Store_Renderer_SpecularMap[]={"Non metal (sRGB 56)","Unchanged","Metal (sRGB 255)",nullptr}; // 140D3A250
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_GlossMap[]; // 140D3A270
+#else
 extern const char *const Store_Renderer_GlossMap[]={"0","Unchanged","255","204","153","102","51",nullptr}; // 140D3A270
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_OcclusionMap[]; // 140D3A208
+#else
 extern const char *const Store_Renderer_OcclusionMap[]={"0","Unchanged","255","128",nullptr}; // 140D3A208
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_Penetration[]; // 140D3A160
+#else
 extern const char *const Store_Renderer_Penetration[]={"off","flash penetrable materials","flash non-penetrable materials",nullptr}; // 140D3A160
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_ReflectionProbe[]; // 140D3A110
+#else
 extern const char *const Store_Renderer_ReflectionProbe[]={"off","bsp","static models","ents",nullptr}; // 140D3A110
+#endif
 extern const Dvar *store_r_texFilterMipBias; // 1427E7098
 extern const Dvar *store_r_fullbright; // 1427E70D0
 extern const Dvar *store_r_debugShader; // 1427E6FC0
@@ -254,6 +296,8 @@ extern const Dvar *store_r_lightTweakSunDiffuseColor; // 1427E6F18
 extern const Dvar *store_r_lightTweakSunDirection; // 1427E6CC8
 extern const Dvar *store_r_norefresh; // 1427E6D88
 extern const Dvar *store_r_scaleViewport; // 1427E7018
+extern const char *const Store_Renderer_WorkerNames[];
+extern int (*Store_Renderer_Atoi)(const char *);
 extern U32 Store_Renderer_HardwareCount; // 14406FC3C (semantic name provisional)
 extern const Dvar *store_r_smp_worker_threads; // 1427E71E0
 extern const Dvar *store_r_smp_worker_thread[8]; // 1427E6EB0
@@ -264,9 +308,21 @@ void Store_Renderer_Reregister(const Dvar *,const char *,int,U32,const Value *,c
 const Dvar *Store_Renderer_Bool(const char *,bool,U32,const char *);
 const Dvar *Store_Renderer_Float(const char *,float,float,float,U32,const char *);
 const Dvar *Store_Renderer_Enum(const char *,const char *const *,int,U32);
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_ClipCodec[]; // 140D39F30
+#else
 extern const char *const Store_Renderer_ClipCodec[]={"MJPEG","VP8",nullptr}; // 140D39F30
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_ClipSize[]; // 140D3A1E0
+#else
 extern const char *const Store_Renderer_ClipSize[]={"360","480","720","1080",nullptr}; // 140D3A1E0
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern const char *const Store_Renderer_MipMode[]; // 140D3A138
+#else
 extern const char *const Store_Renderer_MipMode[]={"Unchanged","Force Trilinear","Force Bilinear","Force Mipmaps Off",nullptr}; // 140D3A138
+#endif
 extern const Dvar *store_r_txaa; // 1427E7188
 extern const Dvar *store_r_txaaSupported; // 1427E6EF8
 extern const Dvar *store_r_txaaDepth1; // 1427E6F10
@@ -290,7 +346,7 @@ extern const Dvar *store_r_ssaoRadius; // 1427E6F70
 extern const Dvar *store_r_ssaoBias; // 1427E7190
 extern const Dvar *store_r_ssaoIntensity; // 1427E7090
 }
-static float F(U32 bits) { float result; std::memcpy(&result,&bits,4); return result; }
+static float F(U32 bits) { float result; __builtin_memcpy(&result,&bits,4); return result; }
 static const Dvar *InlineInt(const char *name,int value,int minimum,int maximum,U32 flags) {
     // Unused stack lanes normalized as in the common replay. Only meaningful
     // integer and domain words are compared against original call boundaries.
@@ -422,20 +478,37 @@ static int HardwareWorkers(U32 hardware) {
     return 8;
 }
 template<class T> static T Read(const Dvar *d,unsigned offset) {
-    T v; std::memcpy(&v,reinterpret_cast<const unsigned char *>(d)+offset,sizeof(T)); return v;
+    T v; __builtin_memcpy(&v,reinterpret_cast<const unsigned char *>(d)+offset,sizeof(T)); return v;
 }
 static int WorkerCount(const Dvar *d) {
     if (!d) return 0;
     const int type=Read<int>(d,0x18);
     if (type==6 || type==7) return Read<int>(d,0x20);
     if (type==1) return Read<unsigned char>(d,0x20)!=0;
-    if (type==2) return _mm_cvttss_si32(_mm_set_ss(Read<float>(d,0x20)));
+    if (type==2) {
+#if defined(T6_STORE_RENDERER_NATIVE)
+        int converted;
+        const float value=Read<float>(d,0x20);
+        __asm__("cvttss2si %1, %0" : "=r"(converted) : "x"(value));
+        return converted;
+#else
+        return _mm_cvttss_si32(_mm_set_ss(Read<float>(d,0x20)));
+#endif
+    }
+#if defined(T6_STORE_RENDERER_NATIVE)
+    return Store_Renderer_Atoi(Read<const char *>(d,0x20));
+#else
     return std::atoi(Read<const char *>(d,0x20));
+#endif
 }
 void RegisterRendererWorkerFragment() {
+#if defined(T6_STORE_RENDERER_NATIVE)
+    const char *const *names=Store_Renderer_WorkerNames;
+#else
     static const char *const names[]={
         "r_smp_worker_thread0","r_smp_worker_thread1","r_smp_worker_thread2","r_smp_worker_thread3",
         "r_smp_worker_thread4","r_smp_worker_thread5","r_smp_worker_thread6","r_smp_worker_thread7"};
+#endif
     store_r_smp_worker_threads=InlineInt("r_smp_worker_threads",
                                           HardwareWorkers(Store_Renderer_HardwareCount),2,8,0);
     // Original reloads both the dvar pointer and hardware value on each
@@ -496,14 +569,18 @@ void RegisterRendererRecoveredPrefix() {
     RegisterRendererPostWorkerFragment();
 }
 
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern "C" const char *const Store_Renderer_ForceLod[]; // 140D3A0E0
+#else
 extern const char *const Store_Renderer_ForceLod[]={"high","medium","low","lowest","none",nullptr};
+#endif
 static const Dvar *InlineForceLod(int value) {
     Domain domain{};
     const char *const *table=Store_Renderer_ForceLod;
     U32 count=0;
     while(table[count]) ++count;
     domain.words[0]=count;
-    std::memcpy(&domain.words[2],&table,sizeof(table));
+    __builtin_memcpy(&domain.words[2],&table,sizeof(table));
     return InlineVec("r_forceLod",7,0x80,Value{{U32(value),0,0,0}},domain);
 }
 
@@ -676,15 +753,23 @@ void RegisterRendererScreenEffectsFragment() {
         Store_Renderer_SetFloat(store_r_poisonFX_blurMin,F(0x3fc00000),0);
     }
 }
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern "C" const char *const Store_Renderer_AspectRatio[]; // 140D3A180
+#else
 extern const char *const Store_Renderer_AspectRatio[]={"auto","standard","wide 16:10","wide 16:9",nullptr};
+#endif
+#if defined(T6_STORE_RENDERER_NATIVE)
+extern "C" const char *const Store_Renderer_Superflare[]; // 140D3A060
+#else
 extern const char *const Store_Renderer_Superflare[]={"off(with fx)","pre viewmodel","post viewmodel","post blur",nullptr};
+#endif
 static const Dvar *InlineRendererString(const char *name,const char *str,U32 flags) {
-    Value v{}; std::memcpy(v.words,&str,sizeof(str));
+    Value v{}; __builtin_memcpy(v.words,&str,sizeof(str));
     return InlineVec(name,8,flags,v,Domain{});
 }
 static const Dvar *InlineRendererEnum(const char *name,int value,const char *const *table,U32 flags) {
     Domain d{}; while(table[d.words[0]]) ++d.words[0];
-    std::memcpy(&d.words[2],&table,sizeof(table));
+    __builtin_memcpy(&d.words[2],&table,sizeof(table));
     return InlineVec(name,7,flags,Value{{U32(value),0,0,0}},d);
 }
 // 14071478B..14071757E: final registration sequence before the genuine
@@ -767,7 +852,7 @@ void RegisterRendererFinalFragment() {
         Value value{};
         const bool enabled=!Store_Renderer_ModeByte;
         if(Read<int>(d,0x18)==1) value.words[0]=enabled;
-        else { const char *str=enabled?"1":"0"; std::memcpy(value.words,&str,sizeof(str)); }
+        else { const char *str=enabled?"1":"0"; __builtin_memcpy(value.words,&str,sizeof(str)); }
         Store_Renderer_SetVariant(d,&value,0);
     }
     store_r_tension_enable=InlineBool("r_tension_enable",true,0x1080);

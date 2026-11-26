@@ -92,11 +92,16 @@ def main():
     from harness import original_exe
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--build", choices=TARGETS, default="t6mp_msstore")
-    build = parser.parse_args().build
+    parser.add_argument("--renderer-native", action="store_true", help="opt-in complete Store MP renderer registration replacement")
+    args = parser.parse_args()
+    build = args.build
+    if args.renderer_native and build != "t6mp_msstore":
+        parser.error("--renderer-native is only available for t6mp_msstore")
     exe = pefile.PE(str(original_exe(build)), fast_load=True)
     out = ROOT / "build" / build / "runtime"
     dll_name = TARGETS[build]
-    run(sys.executable, ROOT / "tools" / "build_recon.py", "--build", build, "--enhanced")
+    run(sys.executable, ROOT / "tools" / "build_recon.py", "--build", build, "--enhanced",
+        *(["--renderer-native"] if args.renderer_native else []))
     out.mkdir(parents=True, exist_ok=True)
     work = out / "obj"
     work.mkdir(exist_ok=True)

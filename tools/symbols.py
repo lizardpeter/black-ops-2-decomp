@@ -119,7 +119,12 @@ def table(build: str) -> dict:
         for name, vas in targets.items():
             if len(vas) == 1:
                 out[name] = (vas.pop(), "function")
-    for r in read_tsv(ROOT / "records" / "names.tsv"):
+    # Store MP renderer aliases are ABI boundary names, not claimed original
+    # symbols. They are independently audited against the exact PE and replay.
+    authored = read_tsv(ROOT / "records" / "names.tsv")
+    if build == "t6mp_msstore":
+        authored += read_tsv(ROOT / "records" / "store-renderer-bindings.tsv")
+    for r in authored:
         if r["build"] == build:
             out[r["symbol"] or r["name"]] = (int(r["va"], 16), r["kind"])
     return out
