@@ -14,6 +14,8 @@ on:
       - 'src/ui/lui_inline_icon_store.cpp'
       - 'src/ui/lui_text_render_store.cpp'
       - 'src/ui/ui_text_wrappers_store.cpp'
+      - 'src/cgame/cg_hud_clients_store.cpp'
+      - 'src/gfx_d3d/r_static_tables_store.cpp'
       - 'src/ui/lui_registry_store.cpp'
       - 'src/gfx_d3d/r_resource_init_store.cpp'
       - 'src/gfx_d3d/r_init_state_store.cpp'

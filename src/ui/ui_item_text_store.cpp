@@ -11,7 +11,7 @@ template<class T>static T R(const void*p,unsigned off){T v;std::memcpy(&v,static
 template<class T>static void W(void*p,unsigned off,T v){std::memcpy(static_cast<B*>(p)+off,&v,sizeof(v));}
 extern "C"{
 int Item_Width(int,const char*,int,const B*);
-int Item_BindingWidth(int,const void*,const B*,float);
+int Item_BindingWidth(int,int,const B*,float);
 const B*Item_FindDvar(const char*);
 const char*Item_DvarText(const B*,const void*);
 }
@@ -41,7 +41,7 @@ void CalculateTextExtents(void* /*unused*/,int client,B*item,const char*text){
     U ha=R<U>(item,0x18),va=R<U>(item,0x1c);
     if(align){
         float space=R<float>(item,0x10)-float(Width(text,font,scale));
-        if(mode==6)space-=float(Item_BindingWidth(client,item+0x4c,font,R<float>(d,0x30)));
+        if(mode==6)space-=float(Item_BindingWidth(client,R<int>(item,0x4c),font,R<float>(d,0x30)));
         else if(dynamic&&(mode==5||mode==7||mode==13||mode==14||mode==30)){
             const char*t="";
             if(dvar&&*dvar)if(const B*v=Item_FindDvar(dvar)){B value[16];std::memcpy(value,v+0x20,16);t=Item_DvarText(v,value);}
