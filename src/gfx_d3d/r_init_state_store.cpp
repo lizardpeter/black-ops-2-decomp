@@ -43,7 +43,7 @@ void Frame_Reconfigure();
 void Frame_End();
 extern B Init_MeshEnabled;
 extern B*Init_DrawWorld;
-extern Q Init_DrawCount;
+extern U Init_DrawCount;
 extern B Init_DrawReady,Init_DrawDirty,Init_DrawEnabled;
 void Init_DrawPrepare();
 void Init_DrawBegin();
@@ -53,7 +53,7 @@ extern const B* Init_ImageEnabled;
 void Init_Image2D(B*,H,H,U,U,U,void*);
 void Init_ImageCube(B*,H,U,U,void*);
 void Init_Image3D(B*,H,H,U,U,U,void*);
-void Init_ImageVolume(B*);
+void Init_ImageVolume(B*,H,H,H,U,U,U,void*);
 void Init_ImageFinalize(B*,U,U,U,U,U);
 }
 static bool Bool(const B*d){return d&&(R<int>(d,0x18)==1?d[0x20]!=0:State_Atoi(R<const char*>(d,0x20))!=0);}
@@ -145,7 +145,7 @@ void SetupImage(B*image,U width,U height,U depth,U flags,U format,void*data){
     if(Bool(Init_ImageEnabled)){
         U mip=(flags>>1)&1;
         if(flags&4)Init_ImageCube(image,R<H>(image,0x18),mip,format,data);
-        else if(flags&8)Init_ImageVolume(image);
+        else if(flags&8)Init_ImageVolume(image,R<H>(image,0x18),R<H>(image,0x1a),R<H>(image,0x1c),mip,flags,format,data);
         else Init_Image2D(image,R<H>(image,0x18),R<H>(image,0x1a),mip,flags,format,data);
         Init_ImageFinalize(image,flags,format,width,height,depth);
     }

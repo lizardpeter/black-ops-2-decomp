@@ -184,8 +184,9 @@ void DrawText(int client,B*element,float x,float y,float r,float g,float b,float
                     lineWidth=wrapWidth-available;available=wrapWidth;
                     const B*skip=word;NextToken(skip,nullptr,rgba);word=skip;--wordChars;
                 }else{
-                    lineChars+=wordChars;available-=measured;
+                    lineChars+=wordChars;
                 }
+                available-=measured;
                 if(hardBreak){
                     if(overflow){cursor=boundary;available=wrapWidth;}
                     else{lineWidth=wrapWidth-available;word=cursor;wordChars=0;available=wrapWidth;}
