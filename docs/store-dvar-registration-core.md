@@ -51,3 +51,7 @@ Source-body test (no PE required):
     /tmp/store_dvar_core
 
 The test exercises all nine typed wrappers, ordinary re-registration, flag/setter ordering with mocks, reset-string sharing and release, external string-to-integer conversion, shutdown and restart. It does not validate original execution, original helper semantics, or thread contention.
+
+## Executed validation
+
+GitHub Actions run 45883561059 (commit b0b133758dc4ba1a3d37ea0134dec217fc935bfa) successfully compiled and executed `tests/store_dvar_core_test.cpp` with g++ C++17, -O2, -Wall, -Wextra, -Werror. This is source-body validation with mocked helpers, not original-PE core differential validation.
