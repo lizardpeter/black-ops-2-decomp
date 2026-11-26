@@ -10,6 +10,7 @@ on:
       - 'tests/store_font*probe.cpp'
       - 'src/gfx_d3d/r_font_store.cpp'
       - 'src/gfx_d3d/r_text_commands_store.cpp'
+      - 'src/gfx_d3d/rb_font_store.cpp'
       - 'src/ui/ui_font_draw_store.cpp'
       - 'src/gfx_d3d/r_fonticon_store.cpp'
       - 'tests/verify_store_font*.py'

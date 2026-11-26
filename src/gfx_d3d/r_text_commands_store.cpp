@@ -21,7 +21,7 @@ Byte* AddBaseDrawTextCmd(const char*text,int maxChars,const void*font,float x,fl
                          float sx,float sy,float rotation,const float*color,int style,int cursor,
                          Byte cursorLetter,float padding){
     if(!*text&&cursor<0)return nullptr;
-    const int len=static_cast<int>(std::strlen(text));
+    int len=0;while(text[len])++len;
     const int bytes=(len+0x78)&~3;
     auto*c=Text_CommandList;
     if(bytes>c->byteSize+c->usedCritical-c->usedTotal-0x2000){c->lastCmd=nullptr;return nullptr;}
