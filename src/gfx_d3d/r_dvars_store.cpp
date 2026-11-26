@@ -106,6 +106,28 @@ extern const Dvar *store_vc_FSM; // 14266D4F0
 extern const Dvar *store_vc_FBM; // 1427E6B60
 extern const Dvar *store_vc_LUT; // 1427E6FB0
 extern const Dvar *store_r_superFlareDraw; // 1427E7248
+extern const Dvar *store_r_waterWaveAngle; // 1427E6E28
+extern const Dvar *store_r_waterWaveWavelength; // 1427E6E30
+extern const Dvar *store_r_waterWaveAmplitude; // 1427E6C60
+extern const Dvar *store_r_waterWavePhase; // 1427E6D80
+extern const Dvar *store_r_waterWaveSteepness; // 1427E6C40
+extern const Dvar *store_r_waterWaveSpeed; // 1427E6C48
+extern const Dvar *store_r_waterWaveBase; // 1427E6E48
+extern const Dvar *store_r_waterWaveNormalScale; // 1427E6CD0
+extern const Dvar *store_r_waterWaveScriptShader0; // 1427E6D28
+extern const Dvar *store_r_waterWaveScriptShader1; // 1427E6C30
+extern const Dvar *store_r_dof_enable; // 1427E6C10
+extern const Dvar *store_r_dof_tweak; // 1427E6D78
+extern const Dvar *store_r_dof_nearBlur; // 1427E6C38
+extern const Dvar *store_r_dof_farBlur; // 1427E6DB0
+extern const Dvar *store_r_dof_viewModelStart; // 1427E6CE0
+extern const Dvar *store_r_dof_viewModelEnd; // 1427E6CC0
+extern const Dvar *store_r_dof_nearStart; // 1427E6CA0
+extern const Dvar *store_r_dof_nearEnd; // 1427E6C28
+extern const Dvar *store_r_dof_farStart; // 1427E6E20
+extern const Dvar *store_r_dof_farEnd; // 1427E6C08
+extern const Dvar *store_r_dof_bias; // 1427E6E70
+extern const Dvar *store_r_dof_showdebug; // 1427E6E00
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -512,11 +534,37 @@ void RegisterRendererBloomColorMatrixFragment() {
     Store_Renderer_Vec4("r_sunFlareTint",F(0),F(0),F(0x3f800000),F(0x3f800000),F(0),F(0x3f800000),0x1000);
     store_r_superFlareDraw=InlineBool("r_superFlareDraw",true,0x5000);
 }
+// 14071376F..140713DA0: water surface parameters and depth of field.
+void RegisterRendererWaterDofFragment() {
+    store_r_waterWaveAngle=Store_Renderer_Vec4("r_waterWaveAngle",F(0),F(0),F(0),F(0),F(0),F(0x43b40000),0x5000);
+    store_r_waterWaveWavelength=Store_Renderer_Vec4("r_waterWaveWavelength",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x44800000),0x5000);
+    store_r_waterWaveAmplitude=Store_Renderer_Vec4("r_waterWaveAmplitude",F(0),F(0),F(0),F(0),F(0),F(0x43800000),0x5000);
+    store_r_waterWavePhase=Store_Renderer_Vec4("r_waterWavePhase",F(0),F(0),F(0),F(0),F(0),F(0x40c90fda),0x5000);
+    store_r_waterWaveSteepness=Store_Renderer_Vec4("r_waterWaveSteepness",F(0),F(0),F(0),F(0),F(0),F(0x3f800000),0x5000);
+    store_r_waterWaveSpeed=Store_Renderer_Vec4("r_waterWaveSpeed",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0),F(0x40000000),0x5000);
+    store_r_waterWaveBase=Store_Renderer_Float("r_waterWaveBase",F(0),F(0xc2400000),F(0x42400000),0x5000,"");
+    store_r_waterWaveNormalScale=Store_Renderer_Float("r_waterWaveNormalScale",F(0x3f800000),F(0x3e800000),F(0x40800000),0x5000,"");
+    store_r_waterWaveScriptShader0=Store_Renderer_Vec4("r_waterWaveScriptShader0",F(0),F(0),F(0),F(0),F(0xff7fffff),F(0x7f7fffff),0x5000);
+    store_r_waterWaveScriptShader1=Store_Renderer_Vec4("r_waterWaveScriptShader1",F(0),F(0),F(0),F(0),F(0xff7fffff),F(0x7f7fffff),0x5000);
+    store_r_dof_enable=InlineBool("r_dof_enable",true,0);
+    store_r_dof_tweak=InlineBool("r_dof_tweak",false,0x4080);
+    store_r_dof_nearBlur=Store_Renderer_Float("r_dof_nearBlur",F(0x40c00000),F(0x40800000),F(0x41200000),0x4080,"");
+    store_r_dof_farBlur=Store_Renderer_Float("r_dof_farBlur",F(0x3fe66666),F(0),F(0x41200000),0x4080,"");
+    store_r_dof_viewModelStart=Store_Renderer_Float("r_dof_viewModelStart",F(0x40000000),F(0),F(0x43000000),0x4080,"");
+    store_r_dof_viewModelEnd=Store_Renderer_Float("r_dof_viewModelEnd",F(0x41000000),F(0),F(0x43000000),0x4080,"");
+    store_r_dof_nearStart=Store_Renderer_Float("r_dof_nearStart",F(0x41200000),F(0),F(0x447a0000),0x4080,"");
+    store_r_dof_nearEnd=Store_Renderer_Float("r_dof_nearEnd",F(0x42700000),F(0),F(0x447a0000),0x4080,"");
+    store_r_dof_farStart=Store_Renderer_Float("r_dof_farStart",F(0x447a0000),F(0),F(0x469c4000),0x4080,"");
+    store_r_dof_farEnd=Store_Renderer_Float("r_dof_farEnd",F(0x45dac000),F(0),F(0x469c4000),0x4080,"");
+    store_r_dof_bias=Store_Renderer_Float("r_dof_bias",F(0x3f000000),F(0x3dcccccd),F(0x40400000),0x4080,"");
+    store_r_dof_showdebug=InlineBool("r_dof_showdebug",false,0x80);
+}
 void RegisterRendererExtendedPrefix() {
     RegisterRendererRecoveredPrefix();
     RegisterRendererVisibilityShadowFragment();
     RegisterRendererFilmColorFragment();
     RegisterRendererBloomColorMatrixFragment();
+    RegisterRendererWaterDofFragment();
 }
 } // namespace store_renderer_dvar
 #endif

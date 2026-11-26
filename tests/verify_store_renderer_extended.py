@@ -11,8 +11,8 @@ from verify_store_renderer_prefix import epilogue, TARGETS, GLOBALS as EARLY
 from verify_store_renderer_workers import GLOBALS as WORKERS
 from verify_store_renderer_post_worker import GLOBALS as LATE
 
-END=0x71376f
-VIS=[0x27e6bd0, 0x27e6bc8, 0x27e6b58, 0x27e7140, 0x27e6f58, 0x27e6fc8, 0x27e6fd8, 0x27e7250, 0x27e71a0, 0x27e6dd8, 0x27e6c78, 0x27e6f80, 0x27e6df8, 0x27e7038, 0x27e7088, 0x27e6d38, 0x27e6e90, 0x27e6e60, 0x27e7040, 0x27e6d90, 0x27e6c98, 0x27e6da0, 0x27e6ea8, 0x27e7268, 0x27e7270, 0x27e6bf0, 0x27e6f30, 0x265f2b8, 0x27e6e50, 0x27e6d70, 0x27e7060, 0x27e6ff8, 0x266d490, 0x27e7200, 0x27e7050, 0x27e6c80, 0x27e6b48, 0x27e6fe8, 0x27e6b00, 0x27e6ba8, 0x27e6b28, 0x27e6bb8, 0x27e6b78, 0x27e6b38, 0x27e6b50, 0x266d4e8, 0x27e6ba0, 0x27e7238, 0x27e6f40, 0x266d4d8, 0x27e6f20, 0x27e6b40, 0x27e6b90, 0x27e6b10, 0x27e6bc0, 0x27e6b30, 0x27e6b20, 0x27e6be0, 0x27e6b70, 0x266d4f8, 0x266d4e0, 0x27e6b68, 0x27e6b18, 0x266d4f0, 0x27e6b60, 0x27e6fb0, 0x27e7248]
+END=0x713da1
+VIS=[0x27e6bd0, 0x27e6bc8, 0x27e6b58, 0x27e7140, 0x27e6f58, 0x27e6fc8, 0x27e6fd8, 0x27e7250, 0x27e71a0, 0x27e6dd8, 0x27e6c78, 0x27e6f80, 0x27e6df8, 0x27e7038, 0x27e7088, 0x27e6d38, 0x27e6e90, 0x27e6e60, 0x27e7040, 0x27e6d90, 0x27e6c98, 0x27e6da0, 0x27e6ea8, 0x27e7268, 0x27e7270, 0x27e6bf0, 0x27e6f30, 0x265f2b8, 0x27e6e50, 0x27e6d70, 0x27e7060, 0x27e6ff8, 0x266d490, 0x27e7200, 0x27e7050, 0x27e6c80, 0x27e6b48, 0x27e6fe8, 0x27e6b00, 0x27e6ba8, 0x27e6b28, 0x27e6bb8, 0x27e6b78, 0x27e6b38, 0x27e6b50, 0x266d4e8, 0x27e6ba0, 0x27e7238, 0x27e6f40, 0x266d4d8, 0x27e6f20, 0x27e6b40, 0x27e6b90, 0x27e6b10, 0x27e6bc0, 0x27e6b30, 0x27e6b20, 0x27e6be0, 0x27e6b70, 0x266d4f8, 0x266d4e0, 0x27e6b68, 0x27e6b18, 0x266d4f0, 0x27e6b60, 0x27e6fb0, 0x27e7248, 0x27e6e28, 0x27e6e30, 0x27e6c60, 0x27e6d80, 0x27e6c40, 0x27e6c48, 0x27e6e48, 0x27e6cd0, 0x27e6d28, 0x27e6c30, 0x27e6c10, 0x27e6d78, 0x27e6c38, 0x27e6db0, 0x27e6ce0, 0x27e6cc0, 0x27e6ca0, 0x27e6c28, 0x27e6e20, 0x27e6c08, 0x27e6e70, 0x27e6e00]
 
 
 def main():
@@ -39,7 +39,7 @@ def main():
             mem[0x46c930:0x46c93c]=b"\x48\xb8"+struct.pack("<Q",lib.RendererPrefixMock(10))+b"\xff\xe0"
             mem[0x8706c0:0x8706c1]=b"\xc3"
             struct.pack_into("<Q",mem,0x8a7dc0,lib.RendererPrefixMock(7))
-            assert mem[END:END+5]==bytes.fromhex("e8 bc 91 d5 ff")
+            assert mem[END:END+5]==bytes.fromhex("e8 8a 8b d5 ff")
             tail=epilogue()
             mem[END:END+len(tail)]=tail
             for i in range(8):
@@ -58,12 +58,12 @@ def main():
                     for rva in rvas: struct.pack_into("<Q",mem,rva,0)
                 mem[0x27e7331]=mode
                 struct.pack_into("<I",mem,0x406fc3c,hardware)
-                vis=(seed*0xd6e8feb86659fd93)&((1<<46)-1)
+                vis=(seed*0xd6e8feb86659fd93)&((1<<49)-1)
                 args=(early,late,exists,hardware,kind,value,mode,vis)
                 lib.RendererExtendedRun(base,*args,old)
                 lib.RendererExtendedRun(None,*args,new)
                 workers=int(value!=0) if kind==1 else max(0,value)
-                assert struct.unpack_from("<Q",old.raw)[0]==293+workers
+                assert struct.unpack_from("<Q",old.raw)[0]==318+workers
                 if old.raw!=new.raw:
                     pos=next(i for i,(x,y) in enumerate(zip(old.raw,new.raw)) if x!=y)
                     idx=(pos-8)//80
@@ -72,6 +72,6 @@ def main():
                     values=(C.c_uint64*len(rvas))()
                     get(values)
                     assert list(values)==[struct.unpack_from("<Q",mem,rva)[0] for rva in rvas],(seed,args,rvas)
-            print("512 extended continuous renderer prefix replays; 293..301 ordered events, 159 global slots")
+            print("512 extended continuous renderer prefix replays; 318..326 ordered events, 181 global slots")
 if __name__=="__main__":
     main()

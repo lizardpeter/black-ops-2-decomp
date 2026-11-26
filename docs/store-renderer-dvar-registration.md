@@ -61,3 +61,7 @@ Source extends to 140712E97, with 21 further registrations and 15 global assignm
 ## Bloom and color-matrix continuation
 
 Run 45890504379 passed continuous replay through 140712E97. New source extends through 14071376E with 22 additional registrations and 20 result slots, covering bloom, HDR depth of field, zombie darkness, color matrices and flare controls. The extended replay covers 293..301 events and 159 result slots. Pending CI. This is source reconstruction under a test guard, not runtime integration.
+
+## Water and depth-of-field continuation
+
+22 further registration operations through 140713DA0, including signed/unbounded script shader vector domains and depth of field. The continuous replay now expects 318..326 events and 181 global slots. Pending CI.
