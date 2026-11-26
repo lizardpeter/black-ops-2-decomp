@@ -145,11 +145,28 @@ bool LiveAntiCheat_CompleteHash(void *handle, unsigned long long *result)
 // original C++ type, reference qualifiers, or eliminated arguments.
 // No candidate is promoted to a compiled declaration or a registry entry
 // on the strength of these observations alone.
+//
+// Complete return-type inventory from the PDB-attributed x86 reference:
+//   void: BanDoConnected, DWPlayerBanned, GenerateCRC32Checksum,
+//         AnswerChallengesRetry, ResetChallengeResponse,
+//         OnChallengesReceived, ProcessChallenges, ClearGameReport,
+//         SetThresholdExceeded, ReportLaggedDamage, SetGameReportTags.
+//   bool: ContinueHash, CompleteHash, AnswerChecksumRequest,
+//         AnswerDvarRequest, AnswerDvarFloatRequest,
+//         AnswerExpressionRequest, GetChallengeResponse,
+//         AnswerChallengesSuccess, AnswerChallengesFailure.
+//   unsigned long long: GenerateCRC32ChecksumSplit.
+//   void *: StartHash.
+//   TaskRecord *: AnswerChallenges.
+// Source: analysis/CoDMPServer_PC/pseudocode/live/live_anticheat.cpp.c.
+// These are reference return types, not blanket Store ABI declarations.
+// Store evidence and inline/unresolved status remain as specified below
+// and in docs/store-checksum-reconstruction.md.
 #if 0
 // Candidate: Store body has no arguments or returned value; name based on
 // ban/disconnect string references. Separate player-ban callback unresolved.
 void LiveAntiCheat_BanDoConnected(); // Store candidate
-// LiveAntiCheat_DWPlayerBanned: standalone Store entry/signature unresolved.
+// LiveAntiCheat_DWPlayerBanned: reference void; Store entry/return unresolved.
 
 // Store pseudocode and caller analysis support a Boolean result for the
 // following two retained functions. Argument widths are visible, but exact
@@ -162,9 +179,9 @@ bool LiveAntiCheat_GetChallengeResponse(ControllerIndex_t, unsigned short,
 
 // The dispatcher contains the other three reference request handlers'
 // behavior. No distinct Store entries or standalone signatures established.
-// LiveAntiCheat_AnswerDvarRequest: inline candidate.
-// LiveAntiCheat_AnswerDvarFloatRequest: inline candidate.
-// LiveAntiCheat_AnswerExpressionRequest: inline candidate.
+// LiveAntiCheat_AnswerDvarRequest: reference bool; inline candidate.
+// LiveAntiCheat_AnswerDvarFloatRequest: reference bool; inline candidate.
+// LiveAntiCheat_AnswerExpressionRequest: reference bool; inline candidate.
 
 // Store candidates: one 32-bit argument, no consumed return value.
 // The void return types are placeholders, not independently proven.
@@ -194,15 +211,15 @@ void LiveAntiCheat_OnChallengesReceived(unsigned long long,
 // this is structural correspondence, not a proven semantic match.
 // No consumed return value has been established; that does not prove void.
 // This may be a merged/inlined body.
-// LiveAntiCheat_AnswerChallenges: separate Store signature unresolved.
+// LiveAntiCheat_AnswerChallenges: reference TaskRecord *; Store return unresolved.
 // LiveAntiCheat_ProcessChallenges: candidate void(ControllerIndex_t);
 // do not assert a separate entry for both names.
 
 // Reporting:
-// LiveAntiCheat_ClearGameReport: separate Store signature unresolved.
-// LiveAntiCheat_SetThresholdExceeded: separate Store signature unresolved.
-// LiveAntiCheat_ReportLaggedDamage: separate Store signature unresolved.
+// LiveAntiCheat_ClearGameReport: reference void; Store return unresolved.
+// LiveAntiCheat_SetThresholdExceeded: reference void; Store return unresolved.
+// LiveAntiCheat_ReportLaggedDamage: reference void; Store return unresolved.
 // LiveAntiCheat_SetGameReportTags: Store candidate accepts two pointer-sized
 // arguments; the reference's third argument is not established in this build.
-// Exact source prototype and return contract remain unresolved.
+// Reference return is void; exact Store return contract remains unresolved.
 #endif // noncompiled Store MP signature inventory
