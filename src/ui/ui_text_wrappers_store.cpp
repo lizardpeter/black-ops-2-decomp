@@ -119,7 +119,7 @@ void DrawDistance(int client,float distance,float center,float y,float offset,co
     if(!(threshold>distance))Wrap_FormatInt(label,64,"%im",_mm_cvttss_si32(_mm_set_ss(distance)));
     else Wrap_FormatDouble(label,64,"%.1fm",double(float(_mm_cvttss_si32(_mm_set_ss(distance*10.0f)))*0.1f));
     float sx=(scale*48.0f)/float(R<int>(font,8)),sy=sx;
-    int width=Wrap_TextWidth(client,label,0x7fffffff,font);
+    int width=Wrap_TextWidth(client,label,20,font);
     float x=center-float(_mm_cvttss_si32(_mm_set_ss(RoundPixel(float(width)*sx))))*0.5f;
     y=y+offset+2.0f;
     ApplyRect(Placement(client),&x,&y,&sx,&sy,R<int>(pos,16),R<int>(pos,20));
