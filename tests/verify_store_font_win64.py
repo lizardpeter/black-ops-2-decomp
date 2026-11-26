@@ -2,7 +2,8 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/gfx_d3d/rb_font_flush_store.cpp":["EndTessSurface"],
+UNITS={"src/gfx_d3d/rb_text_loop_store.cpp":["DrawTeleType"],
+       "src/gfx_d3d/rb_font_flush_store.cpp":["EndTessSurface"],
        "src/ui/ui_font_support_store.cpp":["RegisterMaterial","SafeTranslate","DrawTextField"],
        "src/gfx_d3d/r_font_gpu_state_store.cpp":["UploadIndices","UploadVertices","DrawIndexed","BindVertexShader","SetPass","SetCodeConstant","SetStableArgs","SetMaterialArgs"],
        "src/gfx_d3d/rb_font_world_store.cpp":["DrawTextInSpace"],
