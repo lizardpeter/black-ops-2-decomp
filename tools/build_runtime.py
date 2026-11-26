@@ -81,7 +81,7 @@ def check(exe, out, dll_name):
         redirects.update(scoped_name(name) for name in names)
     for name in ("GdkSavePath", "GdkLoadRuntime", "Sys_ReportUnhandledException", "BdGetHostByName",
                  "BdSendTo", "Sys_ProbeTimeServer", "BdConnectStream", "WinInetOpenConnection",
-                 "BdBeginWinHttpRequest", "XCurlAddRequest", "WinHttpInitializeRequest",
+                 "BdBeginWinHttpRequest", "XCurlCreateProvider", "XCurlAddRequest", "WinHttpInitializeRequest",
                  "BdHandleGdkAuthTask", "GdkUserCheckPrivilege", "BdInitNetStartParams"):
         assert name in redirects, f"service redirect {name} missing"
     return lines

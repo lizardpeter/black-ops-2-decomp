@@ -221,7 +221,11 @@ Write-Host "Captured $($wfp.Count) connection events and $($dns.Count) DNS event
 $authEvents | Group-Object { $_.provider } | ForEach-Object { Write-Host "$($_.Name) emitted $($_.Count) events." }
 Get-Content (Join-Path $results 'observation.json') | Write-Host
 $identityModules | ForEach-Object { Write-Host "Observed module $_" }
-if (Test-Path $env:T6_IDENTITY_AUDIT_FILE) { Get-Content $env:T6_IDENTITY_AUDIT_FILE | Write-Host }
+if (Test-Path $env:T6_IDENTITY_AUDIT_FILE) {
+    Get-Content $env:T6_IDENTITY_AUDIT_FILE | Group-Object | ForEach-Object {
+        Write-Host "$($_.Name) ($($_.Count) events)"
+    }
+}
 
 $loaderActive = Get-ChildItem $results -Filter 't6_enhanced*.log' |
     Select-String -Pattern 'enhanced build active' -Quiet

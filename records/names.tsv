@@ -587,3 +587,5 @@ t6zm_msstore	14004FFB0	function	NvAPI_Initialize	_NvAPI_Initialize	_external/nva
 t6zm_msstore	140076160	function	NvAPI_D3D11_CreateDeviceAndSwapChain	_NvAPI_D3D11_CreateDeviceAndSwapChain	_external/nvapi	behaviour	Store MP 140076160: unique normalized body.	high
 t6zm_msstore	14007C220	function	NvAPI_Stereo_CreateHandleFromIUnknown	_NvAPI_Stereo_CreateHandleFromIUnknown	_external/nvapi	behaviour	Store MP 14007C220: unique normalized body.	high
 t6zm_msstore	1400038A0	function	TxaaOpenDX	_TxaaOpenDX	_external/txaa	behaviour	Store MP 1400038A0: unique normalized body.	high
+t6mp_msstore	140885140	function	XCurlCreateProvider	XCurlCreateProvider	win32/win_http_client.cpp	callee	Calls curl_global_init(3) before constructing the CurlProvider or returning its native failure result.	high
+t6zm_msstore	140882C30	function	XCurlCreateProvider	XCurlCreateProvider	win32/win_http_client.cpp	callee	Calls curl_global_init(3) before constructing the CurlProvider or returning its native failure result.	high
