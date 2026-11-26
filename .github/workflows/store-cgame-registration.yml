@@ -1,0 +1,31 @@
+name: Store client-game dvar registration replay
+on:
+  workflow_dispatch:
+  push:
+    paths:
+      - 'src/cgame_mp/cg_register_dvars_store.cpp'
+      - 'tests/store_cgame_registration_probe.cpp'
+      - 'tests/verify_store_cgame_registration.py'
+      - '.github/workflows/store-cgame-registration.yml'
+permissions:
+  contents: read
+jobs:
+  mp:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Fetch hash-pinned Store MP original
+        run: python tools/fetch_originals.py t6mp_msstore originals --only exe
+      - name: Replay full registration body
+        run: |
+          set -o pipefail
+          python tests/verify_store_cgame_registration.py originals/t6mp_msstore.exe | tee registration-replay.log
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: store-cgame-registration-replay
+          path: registration-replay.log
+          if-no-files-found: warn
