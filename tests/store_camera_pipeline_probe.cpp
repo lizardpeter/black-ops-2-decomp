@@ -1,6 +1,7 @@
 #define T6_STORE
 #define T6_STORE_CAMERA_REPLAY
 #include "../src/cgame/cg_fov_defaults_store.cpp"
+#undef T6_SOURCE
 #include "../src/cgame/cg_camera_projection_store.cpp"
 #include <cassert>
 #include <cmath>
