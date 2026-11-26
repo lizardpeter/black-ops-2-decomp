@@ -18,6 +18,7 @@ on:
       - 'tests/verify_store_renderer_post_worker.py'
       - 'tests/verify_store_renderer_integrated.py'
       - 'tests/verify_store_renderer_extended.py'
+      - 'tests/verify_store_renderer_complete.py'
       - 'tools/inventory/store_renderer_registration.py'
       - 'docs/store-renderer-dvar-registration.tsv'
       - '.github/workflows/store-cgame-registration.yml'
@@ -69,6 +70,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_renderer_extended.py originals/t6mp_msstore.exe | tee renderer-extended-replay.log
+      - name: Replay complete renderer registration body
+        run: |
+          set -o pipefail
+          python tests/verify_store_renderer_complete.py originals/t6mp_msstore.exe | tee renderer-complete-replay.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -82,4 +87,5 @@ jobs:
             renderer-post-worker-replay.log
             renderer-integrated-replay.log
             renderer-extended-replay.log
+            renderer-complete-replay.log
           if-no-files-found: warn

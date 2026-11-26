@@ -69,3 +69,7 @@ Run 45890504379 passed continuous replay through 140712E97. New source extends t
 ## Screen-effects continuation
 
 Run 45891017028 passed 512 continuous replays (318..326 events, 181 globals) through the water/DOF section. New body extends through 14071478A, covering 30 additional flame, water-sheeting, anaglyph, rim, generic scene, revive and poison effect registrations and 23 result slots. The original three mode-dependent float setter calls are preserved with source 0 and their actual destination pointers; they are not folded into defaults. Replay now compares their order and argument values. Pending CI; not activated in the live game.
+
+## Full body candidate
+
+The screen-effects replay passed (run 45891360881). The final 98 registrations, 53 inlined lookup paths and 52 global assignments through 14071757E have now been authored. The final section includes the actual r_defaultMode and r_customMode empty string defaults, monitor and aspect ratio registration, both enum table scans, and the original type-dependent see-through decal setter with null-pointer/name checks. The complete replay executes the genuine original epilogue and RET instead of an artificial cut. The candidate compares 507..519 events and 256 global result slots; validation pending. It is not yet connected to the live registry. The earlier fragment tests remain in place.

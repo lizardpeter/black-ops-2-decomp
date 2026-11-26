@@ -146,6 +146,58 @@ const Dvar *store_r_poisonFX_pulse=nullptr;
 const Dvar *store_r_poisonFX_dvisionX=nullptr;
 const Dvar *store_r_poisonFX_blurMin=nullptr;
 const Dvar *store_r_poisonFX_blurMax=nullptr;
+const Dvar *store_r_exposureTweak=nullptr;
+const Dvar *store_r_exposureValue=nullptr;
+const Dvar *store_r_primaryLightUseTweaks=nullptr;
+const Dvar *store_r_primaryLightTweakDiffuseStrength=nullptr;
+const Dvar *store_r_primaryLightTweakSpecularStrength=nullptr;
+const Dvar *store_r_lightGridEnableTweaks=nullptr;
+const Dvar *store_r_lightGridIntensity=nullptr;
+const Dvar *store_r_lightGridContrast=nullptr;
+const Dvar *store_r_heroLighting=nullptr;
+const Dvar *store_r_heroLightScale=nullptr;
+const Dvar *store_r_num_viewports=nullptr;
+const Dvar *store_r_outdoorAwayBias=nullptr;
+const Dvar *store_r_outdoorDownBias=nullptr;
+const Dvar *store_r_outdoorFeather=nullptr;
+const Dvar *store_r_sun_from_dvars=nullptr;
+const Dvar *store_developer=nullptr;
+const Dvar *store_sv_cheats=nullptr;
+const Dvar *store_r_defaultMode=nullptr;
+const Dvar *store_r_monitor=nullptr;
+const Dvar *store_r_currentMonitor=nullptr;
+const Dvar *store_r_monitorCount=nullptr;
+const Dvar *store_r_aspectRatio=nullptr;
+const Dvar *store_r_aspectRatioWindow=nullptr;
+const Dvar *store_r_customMode=nullptr;
+const Dvar *store_r_superflare_drawlist=nullptr;
+const Dvar *store_r_grassEnable=nullptr;
+const Dvar *store_r_skyTransition=nullptr;
+const Dvar *store_r_skyRotation=nullptr;
+const Dvar *store_r_shaderDebugA=nullptr;
+const Dvar *store_r_shaderDebugB=nullptr;
+const Dvar *store_r_shaderDebugC=nullptr;
+const Dvar *store_r_skyColorTemp=nullptr;
+const Dvar *store_r_fullPrepass=nullptr;
+const Dvar *store_r_lightmapOnlyBspSurfs=nullptr;
+const Dvar *store_r_lightmapOnlySModelSurfs=nullptr;
+const Dvar *store_r_lightmapOnlyEntSurfs=nullptr;
+const Dvar *store_r_sortDrawSurfsBsp=nullptr;
+const Dvar *store_r_sortDrawSurfsStaticModel=nullptr;
+const Dvar *store_r_swrk_override_characterDissolveColor=nullptr;
+const Dvar *store_r_debugShowPrimaryLights=nullptr;
+const Dvar *store_r_seethru_decal_enable=nullptr;
+const Dvar *store_r_tension_enable=nullptr;
+const Dvar *store_r_missile_cam_debug_display=nullptr;
+const Dvar *store_r_extracam_custom_aspectratio=nullptr;
+const Dvar *store_r_extracam_lod_scale=nullptr;
+const Dvar *store_r_shader_constant_set_enable=nullptr;
+const Dvar *store_r_sky_intensity_showDebugDisplay=nullptr;
+const Dvar *store_r_sky_intensity_angle0=nullptr;
+const Dvar *store_r_sky_intensity_angle1=nullptr;
+const Dvar *store_r_sky_intensity_factor0=nullptr;
+const Dvar *store_r_sky_intensity_factor1=nullptr;
+const Dvar *store_r_vc_compile=nullptr;
 unsigned char Store_Renderer_ModeByte=0;
 const Dvar *store_r_texFilterMipBias=nullptr;
 const Dvar *store_r_fullbright=nullptr;
@@ -211,7 +263,7 @@ const Dvar *store_r_ssaoIntensity=nullptr;
 }
 namespace {
 struct Event { U kind,name,type,flags,value,min,max,y,z,w; };
-struct Trace { U count; Event events[384]; };
+struct Trace { U count; Event events[768]; };
 Trace trace{};
 unsigned mask;
 void *mapped_image;
@@ -221,9 +273,12 @@ bool integrated_mode=false;
 unsigned integrated_worker_exists,integrated_post_mask;
 bool extended_mode=false, visibility_mode=false;
 U visibility_mask;
+bool complete_mode=false, tail_mode=false;
+U tail_mask;
+unsigned setter_case;
 unsigned worker_type;
 int worker_value;
-Dvar slots[384]{};
+Dvar slots[768]{};
 unsigned used;
 U Hash(const char *s) {
     U h=14695981039346656037ull;
@@ -231,13 +286,13 @@ U Hash(const char *s) {
     return h;
 }
 void Push(U k,U n=0,U t=0,U f=0,U v=0,U lo=0,U hi=0,U y=0,U z=0,U w=0) {
-    assert(trace.count<384);
+    assert(trace.count<768);
     trace.events[trace.count++]={k,n,t,f,v,lo,hi,y,z,w};
 }
 Dvar *Slot(const char *n) {
     U h=Hash(n);
     for (unsigned i=0;i<used;++i) if(slots[i].tag==h) return &slots[i];
-    assert(used<384); slots[used].tag=h; return &slots[used++];
+    assert(used<768); slots[used].tag=h; return &slots[used++];
 }
 template<class T> void Write(Dvar *d,unsigned off,T v) { std::memcpy(d->bytes+off,&v,sizeof(v)); }
 Dvar *WorkerSlot(const char *n) {
@@ -261,7 +316,23 @@ void Empty(const char *s) { assert(s && !*s); }
 }
 extern "C" {
 void Store_Renderer_Init() { Push(0); }
+static Dvar *TailSlot(const char *n,bool existing) {
+    if(std::strcmp(n,"r_seethru_decal_enable")) return Slot(n);
+    if(setter_case==3 && !existing) return nullptr;
+    auto *d=Slot(n);
+    const char *name=setter_case==2?nullptr:"r_seethru_decal_enable";
+    Write(d,0,name); Write(d,0x18,setter_case==1?8:1);
+    return d;
+}
 const Dvar *Store_Renderer_Find(const char *n) {
+    if(complete_mode && !std::strcmp(n,"r_zbufferDebug")) tail_mode=true;
+    if(tail_mode) {
+        const char *names[]={"r_zbufferDebug","r_fogTweak","r_exposureTweak","r_primaryLightUseTweaks","r_lightGridEnableTweaks","r_heroLighting","r_num_viewports","r_sun_from_dvars","developer","sv_cheats","r_defaultMode","r_monitor","r_currentMonitor","r_monitorCount","r_aspectRatio","r_customMode","r_open_automate","r_superflare_drawlist","r_grassEnable","r_shaderDebugA","r_shaderDebugB","r_enableCubicUpsample","r_blinkLitQuasiOpaque","r_blinkTrans","r_blinkLayers","r_blinkCullNone","r_fullPrepass","r_lightmapOnlyBspSurfs","r_lightmapOnlySModelSurfs","r_lightmapOnlyEntSurfs","r_sortDrawSurfsBsp","r_sortDrawSurfsStaticModel","r_sortBackToFront","r_debugShowPrimaryLights","r_debugShowDynamicLights","r_debugShowCoronas","r_debugMetalStorm","r_disableGenericFilter","r_drawDebugFogParams","r_seethru_decal_enable","r_tension_enable","r_ui3d_debug_display","r_ui3d_use_debug_values","r_multi_extracam_debug","r_missile_cam_debug_display","r_qrcode_debug_display","r_shader_constant_set_enable","r_sky_intensity_showDebugDisplay","r_fog_disable","r_grassWindForceEnable","r_dpvs_useCellForceInvisibleBits","r_remotescreen_renderlastframe","r_vc_compile"};
+        unsigned i=0; while(i<sizeof(names)/sizeof(names[0]) && std::strcmp(n,names[i])) ++i;
+        assert(i<sizeof(names)/sizeof(names[0]));
+        const bool exists=(tail_mask&(U(1)<<i))!=0;
+        Push(1,Hash(n),0,0,exists); return exists?TailSlot(n,true):nullptr;
+    }
     if(extended_mode && !std::strcmp(n,"r_showForcedInvisibleCells")) {
         visibility_mode=true; worker_mode=false; post_worker_mode=false;
     }
@@ -301,24 +372,31 @@ const Dvar *Store_Renderer_Find(const char *n) {
 }
 static void PushInline(U k,const char *n,int t,U32 f,const Value *v,const Domain *d) {
     if(t==7) {
-        assert(!std::strcmp(n,"r_forceLod"));
-        assert(d->words[0]==5);
+        const char *const *expected=nullptr; unsigned rva=0,count=0;
+        if(!std::strcmp(n,"r_forceLod")) {expected=Store_Renderer_ForceLod;rva=0xd3a0e0;count=5;}
+        else if(!std::strcmp(n,"r_aspectRatio")) {expected=Store_Renderer_AspectRatio;rva=0xd3a180;count=4;}
+        else if(!std::strcmp(n,"r_superflare_drawlist")) {expected=Store_Renderer_Superflare;rva=0xd3a060;count=4;}
+        assert(expected && d->words[0]==count);
         const char *const *ptr; std::memcpy(&ptr,&d->words[2],sizeof(ptr));
         if(mapped_image) {
             auto *base=static_cast<unsigned char *>(mapped_image);
-            assert(reinterpret_cast<const void *>(ptr)==base+0xd3a0e0);
-            for(unsigned i=0;i<5;++i) {
-                U va; std::memcpy(&va,base+0xd3a0e0+8*i,8);
+            assert(reinterpret_cast<const void *>(ptr)==base+rva);
+            for(unsigned i=0;i<count;++i) {
+                U va; std::memcpy(&va,base+rva+8*i,8);
                 assert(va>=0x140000000ull && va<0x141000000ull);
-                assert(!std::strcmp(reinterpret_cast<const char *>(base+va-0x140000000ull),Store_Renderer_ForceLod[i]));
+                assert(!std::strcmp(reinterpret_cast<const char *>(base+va-0x140000000ull),expected[i]));
             }
-            U terminator; std::memcpy(&terminator,base+0xd3a0e0+40,8); assert(!terminator);
-        } else assert(ptr==Store_Renderer_ForceLod);
-        Push(k,Hash(n),t,f,v->words[0],d->words[0],0xd3a0e0);
+            U terminator; std::memcpy(&terminator,base+rva+8*count,8); assert(!terminator);
+        } else assert(ptr==expected);
+        Push(k,Hash(n),t,f,v->words[0],d->words[0],rva);
+    } else if(t==8) {
+        const char *str; std::memcpy(&str,v->words,sizeof(str));
+        assert(str && !*str);
+        Push(k,Hash(n),t,f,Hash(str),0,0);
     } else Push(k,Hash(n),t,f,v->words[0],d->words[0],d->words[1],t==11||t==12?v->words[1]:0,t==11||t==12?v->words[2]:0);
 }
 const Dvar *Store_Renderer_New(const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
-    Empty(s); PushInline(2,n,t,f,v,d); return worker_mode?WorkerSlot(n):Slot(n);
+    Empty(s); PushInline(2,n,t,f,v,d); return worker_mode?WorkerSlot(n):tail_mode?TailSlot(n,false):Slot(n);
 }
 void Store_Renderer_Reregister(const Dvar *old,const char *n,int t,U32 f,const Value *v,const Domain *d,const char *s) {
     Empty(s); assert(old==Slot(n)); PushInline(3,n,t,f,v,d);
@@ -363,7 +441,16 @@ void Store_Renderer_SetFloat(const Dvar *d,float value,U32 source) {
     assert(d);
     Push(10,d->tag,2,source,Bits(value));
 }
+void Store_Renderer_SetVariant(const Dvar *d,const Value *v,U32 source) {
+    int t; std::memcpy(&t,d->bytes+0x18,sizeof(t));
+    if(t==1) Push(11,d->tag,t,source,v->words[0]&0xff);
+    else {
+        const char *str; std::memcpy(&str,v->words,sizeof(str));
+        Push(11,d->tag,t,source,Hash(str));
+    }
 }
+}
+static void MS MSetVariant(const Dvar *d,const Value *v,U32 source) { Store_Renderer_SetVariant(d,v,source); }
 static void MS MSetFloat(const Dvar *d,float v,U32 source) { Store_Renderer_SetFloat(d,v,source); }
 static const Dvar *MS MVec4(const char *n,float a,float b,float c,float d,float lo,float hi,U32 f) { return Store_Renderer_Vec4(n,a,b,c,d,lo,hi,f); }
 static const Dvar *MS MColor(const char *n,float a,float b,float c,float d,U32 f) { return Store_Renderer_Color(n,a,b,c,d,f); }
@@ -379,12 +466,12 @@ static const Dvar *MS MFloat(const char *n,float v,float lo,float hi,U32 f,const
 extern "C" {
 void *RendererPrefixMock(unsigned i) {
     void *m[]={reinterpret_cast<void *>(MInit),reinterpret_cast<void *>(MFind),reinterpret_cast<void *>(MNew),
-               reinterpret_cast<void *>(MReg),reinterpret_cast<void *>(MBool),reinterpret_cast<void *>(MFloat),reinterpret_cast<void *>(MEnum),reinterpret_cast<void *>(MAtoi),reinterpret_cast<void *>(MColor),reinterpret_cast<void *>(MVec3),reinterpret_cast<void *>(MVec4),reinterpret_cast<void *>(MSetFloat)};
-    assert(i<12); return m[i];
+               reinterpret_cast<void *>(MReg),reinterpret_cast<void *>(MBool),reinterpret_cast<void *>(MFloat),reinterpret_cast<void *>(MEnum),reinterpret_cast<void *>(MAtoi),reinterpret_cast<void *>(MColor),reinterpret_cast<void *>(MVec3),reinterpret_cast<void *>(MVec4),reinterpret_cast<void *>(MSetFloat),reinterpret_cast<void *>(MSetVariant)};
+    assert(i<13); return m[i];
 }
 unsigned RendererPrefixSize() { return sizeof(Trace); }
 void RendererPrefixRun(void *image,unsigned state,void *out) {
-    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; complete_mode=false; tail_mode=false; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=false; Store_Renderer_ModeByte=(state>>18)&1;
     if(image) {
         using Entry=void(MS *)();
         reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
@@ -392,7 +479,7 @@ void RendererPrefixRun(void *image,unsigned state,void *out) {
     std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererWorkerRun(void *image,unsigned exists,unsigned hardware,unsigned type,int value,void *out) {
-    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false; integrated_mode=false;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; complete_mode=false; tail_mode=false; mask=exists; mapped_image=image; worker_mode=true; post_worker_mode=false; integrated_mode=false;
     worker_type=type; worker_value=value; Store_Renderer_HardwareCount=hardware;
     store_r_smp_worker_threads=nullptr;
     for(auto &d:store_r_smp_worker_thread) d=nullptr;
@@ -407,7 +494,7 @@ void RendererWorkerGlobals(U *out) {
     for(unsigned i=0;i<8;++i) out[i+1]=reinterpret_cast<U>(store_r_smp_worker_thread[i]);
 }
 void RendererPostWorkerRun(void *image,unsigned state,unsigned mode,void *out) {
-    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true; integrated_mode=false;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; complete_mode=false; tail_mode=false; mask=state; mapped_image=image; worker_mode=false; post_worker_mode=true; integrated_mode=false;
     Store_Renderer_ModeByte=mode;
     if(image) {
         using Entry=void(MS *)();
@@ -420,7 +507,7 @@ void RendererPostWorkerGlobals(U *out) {
     for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
 }
 void RendererIntegratedRun(void *image,unsigned early,unsigned later,unsigned exists,unsigned hardware,unsigned type,int value,unsigned mode,void *out) {
-    trace={}; used=0; extended_mode=false; visibility_mode=false; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
+    trace={}; used=0; extended_mode=false; visibility_mode=false; complete_mode=false; tail_mode=false; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
     integrated_worker_exists=exists; integrated_post_mask=later; worker_type=type; worker_value=value;
     Store_Renderer_HardwareCount=hardware; Store_Renderer_ModeByte=mode;
     store_r_smp_worker_threads=nullptr;
@@ -432,7 +519,7 @@ void RendererIntegratedRun(void *image,unsigned early,unsigned later,unsigned ex
     std::memcpy(out,&trace,sizeof(trace));
 }
 void RendererExtendedRun(void *image,unsigned early,unsigned later,unsigned exists,unsigned hardware,unsigned type,int value,unsigned mode,U vis,void *out) {
-    trace={}; used=0; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
+    trace={}; used=0; complete_mode=false; tail_mode=false; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
     extended_mode=true; visibility_mode=false; visibility_mask=vis;
     integrated_worker_exists=exists; integrated_post_mask=later; worker_type=type; worker_value=value;
     Store_Renderer_HardwareCount=hardware; Store_Renderer_ModeByte=mode;
@@ -446,6 +533,24 @@ void RendererExtendedRun(void *image,unsigned early,unsigned later,unsigned exis
 }
 void RendererVisibilityGlobals(U *out) {
     const Dvar *values[]={store_r_portalWalkLimit,store_r_portalMinRecurseDepth,store_r_enableOccluders,store_r_highLodDist,store_r_mediumLodDist,store_r_lowLodDist,store_r_lowestLodDist,store_r_forceLod,store_r_modelVertColor,store_sm_sunEnable,store_sm_sunQuality,store_sm_spotQuality,store_sm_spotEnable,store_sm_maxLights,store_sm_spotShadowFadeTime,store_sm_sunAlwaysCastsShadow,store_sm_polygonOffsetBias,store_sm_sunSampleSizeNear,store_sm_sunShadowCenter,store_sm_sunShadowScale,store_sm_sunShadowSmall,store_sm_sunShadowSmallEnable,store_r_flameScaler,store_r_zombieNameAllowFriendsList,store_r_zombieNameAllowDevList,store_sm_strictCull,store_sm_fastSunShadow,store_r_noipak,store_r_dualPlayEnable,store_r_dualPlayActive,store_r_blur,store_r_flame_allowed,store_r_enablePlayerShadow,store_r_enableFlashlight,store_r_brightness,store_r_filmUseTweaks,store_r_filmTweakEnable,store_exp_softclip,store_vc_LIB,store_vc_LIG,store_vc_LIW,store_vc_LOB,store_vc_LOW,store_vc_RGBH,store_vc_RGBL,store_vc_YH,store_vc_YL,store_r_bloomTweaks,store_r_bloomHiQuality,store_r_dofHDR,store_r_zombieDarkness,store_vc_RS,store_vc_RE,store_vc_SMR,store_vc_SMG,store_vc_SMB,store_vc_MMR,store_vc_MMG,store_vc_MMB,store_vc_HMR,store_vc_HMG,store_vc_HMB,store_vc_FGM,store_vc_FSM,store_vc_FBM,store_vc_LUT,store_r_superFlareDraw,store_r_waterWaveAngle,store_r_waterWaveWavelength,store_r_waterWaveAmplitude,store_r_waterWavePhase,store_r_waterWaveSteepness,store_r_waterWaveSpeed,store_r_waterWaveBase,store_r_waterWaveNormalScale,store_r_waterWaveScriptShader0,store_r_waterWaveScriptShader1,store_r_dof_enable,store_r_dof_tweak,store_r_dof_nearBlur,store_r_dof_farBlur,store_r_dof_viewModelStart,store_r_dof_viewModelEnd,store_r_dof_nearStart,store_r_dof_nearEnd,store_r_dof_farStart,store_r_dof_farEnd,store_r_dof_bias,store_r_dof_showdebug,store_r_flameFX_distortionScaleFactor,store_r_flameFX_magnitude,store_r_flameFX_FPS,store_r_flameFX_fadeDuration,store_r_waterSheetingFX_allowed,store_r_waterSheetingFX_enable,store_r_waterSheetingFX_distortionScaleFactor,store_r_waterSheetingFX_magnitude,store_r_waterSheetingFX_radius,store_r_anaglyphFX_enable,store_r_reviveFX_debug,store_r_reviveFX_edgeColorTemp,store_r_reviveFX_edgeSaturation,store_r_reviveFX_edgeScale,store_r_reviveFX_edgeContrast,store_r_reviveFX_edgeOffset,store_r_reviveFX_edgeAmount,store_r_reviveFX_edgeMaskAdjust,store_r_poisonFX_debug_enable,store_r_poisonFX_pulse,store_r_poisonFX_dvisionX,store_r_poisonFX_blurMin,store_r_poisonFX_blurMax};
+    for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
+}
+void RendererCompleteRun(void *image,unsigned early,unsigned later,unsigned exists,unsigned hardware,unsigned type,int value,unsigned mode,U vis,U tail,unsigned setcase,void *out) {
+    trace={}; used=0; mask=early; mapped_image=image; worker_mode=false; post_worker_mode=false; integrated_mode=true;
+    extended_mode=true; visibility_mode=false; visibility_mask=vis;
+    complete_mode=true; tail_mode=false; tail_mask=tail; setter_case=setcase;
+    integrated_worker_exists=exists; integrated_post_mask=later; worker_type=type; worker_value=value;
+    Store_Renderer_HardwareCount=hardware; Store_Renderer_ModeByte=mode;
+    store_r_smp_worker_threads=nullptr;
+    for(auto &d:store_r_smp_worker_thread) d=nullptr;
+    if(image) {
+        using Entry=void(MS *)();
+        reinterpret_cast<Entry>(static_cast<unsigned char *>(image)+0x70e230)();
+    } else RegisterRendererComplete();
+    std::memcpy(out,&trace,sizeof(trace));
+}
+void RendererFinalGlobals(U *out) {
+    const Dvar *values[]={store_r_exposureTweak,store_r_exposureValue,store_r_primaryLightUseTweaks,store_r_primaryLightTweakDiffuseStrength,store_r_primaryLightTweakSpecularStrength,store_r_lightGridEnableTweaks,store_r_lightGridIntensity,store_r_lightGridContrast,store_r_heroLighting,store_r_heroLightScale,store_r_num_viewports,store_r_outdoorAwayBias,store_r_outdoorDownBias,store_r_outdoorFeather,store_r_sun_from_dvars,store_developer,store_sv_cheats,store_r_defaultMode,store_r_monitor,store_r_currentMonitor,store_r_monitorCount,store_r_aspectRatio,store_r_aspectRatioWindow,store_r_customMode,store_r_superflare_drawlist,store_r_grassEnable,store_r_skyTransition,store_r_skyRotation,store_r_shaderDebugA,store_r_shaderDebugB,store_r_shaderDebugC,store_r_skyColorTemp,store_r_fullPrepass,store_r_lightmapOnlyBspSurfs,store_r_lightmapOnlySModelSurfs,store_r_lightmapOnlyEntSurfs,store_r_sortDrawSurfsBsp,store_r_sortDrawSurfsStaticModel,store_r_swrk_override_characterDissolveColor,store_r_debugShowPrimaryLights,store_r_seethru_decal_enable,store_r_tension_enable,store_r_missile_cam_debug_display,store_r_extracam_custom_aspectratio,store_r_extracam_lod_scale,store_r_shader_constant_set_enable,store_r_sky_intensity_showDebugDisplay,store_r_sky_intensity_angle0,store_r_sky_intensity_angle1,store_r_sky_intensity_factor0,store_r_sky_intensity_factor1,store_r_vc_compile};
     for(unsigned i=0;i<sizeof(values)/sizeof(values[0]);++i) out[i]=reinterpret_cast<U>(values[i]);
 }
 void RendererPrefixGlobals(U *out) {

@@ -152,6 +152,59 @@ extern const Dvar *store_r_poisonFX_dvisionX; // 1427E70E0
 extern const Dvar *store_r_poisonFX_blurMin; // 1427E6C50
 extern const Dvar *store_r_poisonFX_blurMax; // 1427E6DE8
 void Store_Renderer_SetFloat(const Dvar *,float,U32); // 14046CEF0
+extern const Dvar *store_r_exposureTweak; // 1427E6CD8
+extern const Dvar *store_r_exposureValue; // 1427E6D68
+extern const Dvar *store_r_primaryLightUseTweaks; // 1427E6B08
+extern const Dvar *store_r_primaryLightTweakDiffuseStrength; // 1427E6B80
+extern const Dvar *store_r_primaryLightTweakSpecularStrength; // 1427E6B98
+extern const Dvar *store_r_lightGridEnableTweaks; // 1427E6F38
+extern const Dvar *store_r_lightGridIntensity; // 1427E6F48
+extern const Dvar *store_r_lightGridContrast; // 1427E70F0
+extern const Dvar *store_r_heroLighting; // 1427E6CB0
+extern const Dvar *store_r_heroLightScale; // 1427E6CB8
+extern const Dvar *store_r_num_viewports; // 1427E71C0
+extern const Dvar *store_r_outdoorAwayBias; // 1427E70A8
+extern const Dvar *store_r_outdoorDownBias; // 1427E7180
+extern const Dvar *store_r_outdoorFeather; // 1427E6E80
+extern const Dvar *store_r_sun_from_dvars; // 1427E70B8
+extern const Dvar *store_developer; // 1427E71D8
+extern const Dvar *store_sv_cheats; // 1420FA628
+extern const Dvar *store_r_defaultMode; // 1427E7120
+extern const Dvar *store_r_monitor; // 1427E6FF0
+extern const Dvar *store_r_currentMonitor; // 1427E6F08
+extern const Dvar *store_r_monitorCount; // 1427E7008
+extern const Dvar *store_r_aspectRatio; // 1427E6F90
+extern const Dvar *store_r_aspectRatioWindow; // 1427E7100
+extern const Dvar *store_r_customMode; // 1427E6E98
+extern const Dvar *store_r_superflare_drawlist; // 1427E7010
+extern const Dvar *store_r_grassEnable; // 1427E71B8
+extern const Dvar *store_r_skyTransition; // 1427E6C58
+extern const Dvar *store_r_skyRotation; // 1427E7110
+extern const Dvar *store_r_shaderDebugA; // 1427E6D60
+extern const Dvar *store_r_shaderDebugB; // 1427E6D50
+extern const Dvar *store_r_shaderDebugC; // 1427E6DF0
+extern const Dvar *store_r_skyColorTemp; // 1427E6D30
+extern const Dvar *store_r_fullPrepass; // 1427E6F78
+extern const Dvar *store_r_lightmapOnlyBspSurfs; // 1427E6F50
+extern const Dvar *store_r_lightmapOnlySModelSurfs; // 1427E7160
+extern const Dvar *store_r_lightmapOnlyEntSurfs; // 1427E6BD8
+extern const Dvar *store_r_sortDrawSurfsBsp; // 1427E6E88
+extern const Dvar *store_r_sortDrawSurfsStaticModel; // 1427E7068
+extern const Dvar *store_r_swrk_override_characterDissolveColor; // 1427E70C0
+extern const Dvar *store_r_debugShowPrimaryLights; // 1427E6C20
+extern const Dvar *store_r_seethru_decal_enable; // 1427E70D8
+extern const Dvar *store_r_tension_enable; // 1427E7130
+extern const Dvar *store_r_missile_cam_debug_display; // 1427E6DE0
+extern const Dvar *store_r_extracam_custom_aspectratio; // 1427E6E58
+extern const Dvar *store_r_extracam_lod_scale; // 1427E7138
+extern const Dvar *store_r_shader_constant_set_enable; // 1427E6D08
+extern const Dvar *store_r_sky_intensity_showDebugDisplay; // 1427E6D18
+extern const Dvar *store_r_sky_intensity_angle0; // 1427E6D48
+extern const Dvar *store_r_sky_intensity_angle1; // 1427E6E18
+extern const Dvar *store_r_sky_intensity_factor0; // 1427E6CF8
+extern const Dvar *store_r_sky_intensity_factor1; // 1427E6CE8
+extern const Dvar *store_r_vc_compile; // 1427E7208
+void Store_Renderer_SetVariant(const Dvar *,const Value *,U32); // 14046B300
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -623,6 +676,126 @@ void RegisterRendererScreenEffectsFragment() {
         Store_Renderer_SetFloat(store_r_poisonFX_blurMin,F(0x3fc00000),0);
     }
 }
+extern const char *const Store_Renderer_AspectRatio[]={"auto","standard","wide 16:10","wide 16:9",nullptr};
+extern const char *const Store_Renderer_Superflare[]={"off(with fx)","pre viewmodel","post viewmodel","post blur",nullptr};
+static const Dvar *InlineRendererString(const char *name,const char *str,U32 flags) {
+    Value v{}; std::memcpy(v.words,&str,sizeof(str));
+    return InlineVec(name,8,flags,v,Domain{});
+}
+static const Dvar *InlineRendererEnum(const char *name,int value,const char *const *table,U32 flags) {
+    Domain d{}; while(table[d.words[0]]) ++d.words[0];
+    std::memcpy(&d.words[2],&table,sizeof(table));
+    return InlineVec(name,7,flags,Value{{U32(value),0,0,0}},d);
+}
+// 14071478B..14071757E: final registration sequence before the genuine
+// epilogue. Keep the see-through decal setter and its type/name checks.
+void RegisterRendererFinalFragment() {
+    InlineBool("r_zbufferDebug",false,0x80);
+    Store_Renderer_Float("r_zbufferDebugRange",F(0x461c4000),F(0x3f800000),F(0x466a6000),0x80,"");
+    InlineBool("r_fogTweak",false,0x80);
+    Store_Renderer_Float("r_fogBaseDist",F(0x0),F(0x0),F(0x469c4000),0x80,"");
+    Store_Renderer_Float("r_fogHalfDist",F(0x3f800000),F(0x3f800000),F(0x471c4000),0x80,"");
+    Store_Renderer_Float("r_fogBaseHeight",F(0x0),F(0xc7435000),F(0x47435000),0x80,"");
+    Store_Renderer_Float("r_fogHalfHeight",F(0x3f800000),F(0x3f800000),F(0x47435000),0x80,"");
+    Store_Renderer_Vec3("r_fogColor",F(0x3f000000),F(0x3f000000),F(0x3f000000),F(0x0),F(0x42000000),0x80);
+    Store_Renderer_Float("r_fogOpacity",F(0x3e800000),F(0x0),F(0x3f800000),0x80,"");
+    Store_Renderer_Vec3("r_fogSunColor",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x0),F(0x42000000),0x80);
+    Store_Renderer_Float("r_fogSunOpacity",F(0x3f000000),F(0x0),F(0x3f800000),0x80,"");
+    Store_Renderer_Float("r_fogSunPitch",F(0xc2340000),F(0xc3b40000),F(0x43b40000),0x80,"");
+    Store_Renderer_Float("r_fogSunYaw",F(0x0),F(0xc3b40000),F(0x43b40000),0x80,"");
+    Store_Renderer_Float("r_fogSunInner",F(0x0),F(0x0),F(0x43340000),0x80,"");
+    Store_Renderer_Float("r_fogSunOuter",F(0x0),F(0x0),F(0x43340000),0x80,"");
+    store_r_exposureTweak=InlineBool("r_exposureTweak",false,0x5000);
+    store_r_exposureValue=Store_Renderer_Float("r_exposureValue",F(0x40400000),F(0xc0c00000),F(0x41800000),0x5000,"");
+    Store_Renderer_Vec3("r_finalShiftX",F(0x0),F(0x0),F(0x0),F(0xc0a00000),F(0x40a00000),0x5000);
+    Store_Renderer_Vec3("r_finalShiftY",F(0x0),F(0x0),F(0x0),F(0xc0a00000),F(0x40a00000),0x5000);
+    store_r_primaryLightUseTweaks=InlineBool("r_primaryLightUseTweaks",false,0x80);
+    store_r_primaryLightTweakDiffuseStrength=Store_Renderer_Float("r_primaryLightTweakDiffuseStrength",F(0x3f800000),F(0x0),F(0x41200000),0x80,"");
+    store_r_primaryLightTweakSpecularStrength=Store_Renderer_Float("r_primaryLightTweakSpecularStrength",F(0x3f800000),F(0x0),F(0x41200000),0x80,"");
+    store_r_lightGridEnableTweaks=InlineBool("r_lightGridEnableTweaks",false,0x1000);
+    store_r_lightGridIntensity=Store_Renderer_Float("r_lightGridIntensity",F(0x3f800000),F(0x0),F(0x40000000),0x1000,"");
+    store_r_lightGridContrast=Store_Renderer_Float("r_lightGridContrast",F(0x0),F(0xbf800000),F(0x3f800000),0x1000,"");
+    store_r_heroLighting=InlineBool("r_heroLighting",true,0x0);
+    store_r_heroLightScale=Store_Renderer_Vec3("r_heroLightScale",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x0),F(0x40000000),Store_Renderer_ModeByte?0x5080:0x5000);
+    store_r_num_viewports=InlineInt("r_num_viewports",0,0,4,0x0);
+    store_r_outdoorAwayBias=Store_Renderer_Float("r_outdoorAwayBias",F(0x42000000),F(0xff7fffff),F(0x7f7fffff),0x1000,"");
+    store_r_outdoorDownBias=Store_Renderer_Float("r_outdoorDownBias",F(0x0),F(0xff7fffff),F(0x7f7fffff),0x1000,"");
+    store_r_outdoorFeather=Store_Renderer_Float("r_outdoorFeather",F(0x41000000),F(0xff7fffff),F(0x7f7fffff),0x1000,"");
+    store_r_sun_from_dvars=InlineBool("r_sun_from_dvars",false,0x80);
+    store_developer=InlineInt("developer",0,0,2,0x0);
+    store_sv_cheats=InlineBool("sv_cheats",false,0x48);
+    store_r_defaultMode=InlineRendererString("r_defaultMode","",0x0);
+    store_r_monitor=InlineInt("r_monitor",0,0,8,0x21);
+    store_r_currentMonitor=InlineInt("r_currentMonitor",0,0,8,0x0);
+    store_r_monitorCount=InlineInt("r_monitorCount",0,0,8,0x0);
+    store_r_aspectRatio=InlineRendererEnum("r_aspectRatio",0,Store_Renderer_AspectRatio,0x21);
+    store_r_aspectRatioWindow=Store_Renderer_Float("r_aspectRatioWindow",F(0x3fe38e39),F(0x0),F(0x41200000),0x0,"");
+    store_r_customMode=InlineRendererString("r_customMode","",0x21);
+    InlineBool("r_open_automate",false,0x0);
+    store_r_superflare_drawlist=InlineRendererEnum("r_superflare_drawlist",2,Store_Renderer_Superflare,0x0);
+    store_r_grassEnable=InlineBool("r_grassEnable",true,0x0);
+    store_r_skyTransition=Store_Renderer_Float("r_skyTransition",F(0x0),F(0x0),F(0x3f800000),0x1000,"");
+    store_r_skyRotation=Store_Renderer_Float("r_skyRotation",F(0x0),F(0xc3b40000),F(0x43b40000),0x1000,"");
+    store_r_shaderDebugA=InlineInt("r_shaderDebugA",0,0,1,0x1000);
+    store_r_shaderDebugB=InlineInt("r_shaderDebugB",0,0,1,0x1000);
+    store_r_shaderDebugC=Store_Renderer_Float("r_shaderDebugC",F(0x0),F(0x0),F(0x3f800000),0x1000,"");
+    InlineBool("r_enableCubicUpsample",true,0x1000);
+    Store_Renderer_Float("r_cubicUpsampleParam",F(0xbf000000),F(0xbf800000),F(0x3f800000),0x1000,"");
+    store_r_skyColorTemp=Store_Renderer_Float("r_skyColorTemp",F(0x45cb2000),F(0x44ce4000),F(0x46c35000),0x1000,"");
+    InlineInt("r_blinkLitQuasiOpaque",0,0,2,0x80);
+    InlineInt("r_blinkTrans",0,0,2,0x80);
+    InlineInt("r_blinkLayers",0,0,4,0x80);
+    InlineInt("r_blinkCullNone",0,0,2,0x80);
+    store_r_fullPrepass=InlineBool("r_fullPrepass",false,0x80);
+    store_r_lightmapOnlyBspSurfs=InlineBool("r_lightmapOnlyBspSurfs",true,0x80);
+    store_r_lightmapOnlySModelSurfs=InlineBool("r_lightmapOnlySModelSurfs",true,0x80);
+    store_r_lightmapOnlyEntSurfs=InlineBool("r_lightmapOnlyEntSurfs",true,0x80);
+    store_r_sortDrawSurfsBsp=InlineBool("r_sortDrawSurfsBsp",false,0x80);
+    store_r_sortDrawSurfsStaticModel=InlineBool("r_sortDrawSurfsStaticModel",true,0x80);
+    InlineBool("r_sortBackToFront",true,0x80);
+    Store_Renderer_Float("r_swrk_override_characterCharredAmount",F(0x0),F(0x0),F(0x3f800000),0x80,"");
+    store_r_swrk_override_characterDissolveColor=Store_Renderer_Vec4("r_swrk_override_characterDissolveColor",F(0x0),F(0x0),F(0x0),F(0x0),F(0x0),F(0x41200000),0x80);
+    Store_Renderer_Float("r_swrk_override_wetness",F(0x0),F(0x0),F(0x3f800000),0x80,"");
+    store_r_debugShowPrimaryLights=InlineBool("r_debugShowPrimaryLights",false,0x80);
+    InlineBool("r_debugShowDynamicLights",false,0x80);
+    InlineBool("r_debugShowCoronas",false,0x80);
+    InlineBool("r_debugMetalStorm",false,0x80);
+    InlineBool("r_disableGenericFilter",false,0x80);
+    InlineBool("r_drawDebugFogParams",false,0x80);
+    store_r_seethru_decal_enable=InlineBool("r_seethru_decal_enable",!Store_Renderer_ModeByte,0x1080);
+    if(const auto *d=store_r_seethru_decal_enable; d && Read<const char *>(d,0)) {
+        Value value{};
+        const bool enabled=!Store_Renderer_ModeByte;
+        if(Read<int>(d,0x18)==1) value.words[0]=enabled;
+        else { const char *str=enabled?"1":"0"; std::memcpy(value.words,&str,sizeof(str)); }
+        Store_Renderer_SetVariant(d,&value,0);
+    }
+    store_r_tension_enable=InlineBool("r_tension_enable",true,0x1080);
+    InlineBool("r_ui3d_debug_display",false,0x80);
+    InlineInt("r_ui3d_use_debug_values",-1,-1,8,0x80);
+    Store_Renderer_Float("r_ui3d_x",F(0x0),F(0x0),F(0x3f800000),0x80,"");
+    Store_Renderer_Float("r_ui3d_y",F(0x0),F(0x0),F(0x3f800000),0x80,"");
+    Store_Renderer_Float("r_ui3d_w",F(0x3f800000),F(0x0),F(0x3f800000),0x80,"");
+    Store_Renderer_Float("r_ui3d_h",F(0x3f800000),F(0x0),F(0x3f800000),0x80,"");
+    InlineInt("r_multi_extracam_debug",-1,-1,10,0x80);
+    store_r_missile_cam_debug_display=InlineInt("r_missile_cam_debug_display",0,0,10,0x80);
+    store_r_extracam_custom_aspectratio=Store_Renderer_Float("r_extracam_custom_aspectratio",F(0xbf800000),F(0xbf800000),F(0x40a00000),0x1000,"");
+    store_r_extracam_lod_scale=Store_Renderer_Float("r_extracam_lod_scale",F(0x40000000),F(0x3dcccccd),F(0x42c80000),0x1000,"");
+    InlineInt("r_qrcode_debug_display",-1,-1,12,0x80);
+    Store_Renderer_Float("r_qrcode_debug_display_size",F(0x43c80000),F(0x0),F(0x44fa0000),0x80,"");
+    Store_Renderer_Float("r_shader_constant_set_debug_range",F(0xbf800000),F(0xc0000000),F(0x44fa0000),0x80,"");
+    store_r_shader_constant_set_enable=InlineBool("r_shader_constant_set_enable",true,0x80);
+    store_r_sky_intensity_showDebugDisplay=InlineBool("r_sky_intensity_showDebugDisplay",false,0x80);
+    store_r_sky_intensity_angle0=Store_Renderer_Float("r_sky_intensity_angle0",F(0x42b40000),F(0xc2b40000),F(0x42b40000),0x1000,"");
+    store_r_sky_intensity_angle1=Store_Renderer_Float("r_sky_intensity_angle1",F(0x42b40000),F(0xc2b40000),F(0x42b40000),0x1000,"");
+    store_r_sky_intensity_factor0=Store_Renderer_Float("r_sky_intensity_factor0",F(0x3f800000),F(0x0),F(0x41200000),0x1000,"");
+    store_r_sky_intensity_factor1=Store_Renderer_Float("r_sky_intensity_factor1",F(0x3f800000),F(0x0),F(0x41200000),0x1000,"");
+    InlineBool("r_fog_disable",false,0x80);
+    InlineBool("r_grassWindForceEnable",true,0x80);
+    InlineBool("r_dpvs_useCellForceInvisibleBits",true,0x80);
+    InlineBool("r_remotescreen_renderlastframe",true,0x80);
+    store_r_vc_compile=InlineInt("r_vc_compile",0,0,2147483647,0x0);
+}
 void RegisterRendererExtendedPrefix() {
     RegisterRendererRecoveredPrefix();
     RegisterRendererVisibilityShadowFragment();
@@ -630,6 +803,12 @@ void RegisterRendererExtendedPrefix() {
     RegisterRendererBloomColorMatrixFragment();
     RegisterRendererWaterDofFragment();
     RegisterRendererScreenEffectsFragment();
+}
+
+// Whole original body candidate, from the initial call to the final return.
+void RegisterRendererComplete() {
+    RegisterRendererExtendedPrefix();
+    RegisterRendererFinalFragment();
 }
 } // namespace store_renderer_dvar
 #endif
