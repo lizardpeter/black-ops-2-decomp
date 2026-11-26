@@ -25,6 +25,10 @@ template<class T>static void W(void*p,unsigned o,T v){std::memcpy(static_cast<By
 static float F(U32 b){float f;std::memcpy(&f,&b,4);return f;}
 static U32 Bits(float f){U32 b;std::memcpy(&b,&f,4);return b;}
 static float Neg(float f){return F(Bits(f)^0x80000000u);}
+// Preserve the destination operand of scalar SSE arithmetic when both
+// operands carry NaNs. C++ commutative multiplication may swap operands.
+static float MulOrdered(float a,float b){__asm__("mulss %1,%0":"+x"(a):"x"(b));return a;}
+static float SubOrdered(float a,float b){__asm__("subss %1,%0":"+x"(a):"x"(b));return a;}
 static float Abs(float f){return F(Bits(f)&0x7fffffffu);}
 static int Diff(int a,int b){U32 v=U32(a)-U32(b);int i;std::memcpy(&i,&v,4);return i;}
 static float Sqrt(float f){return _mm_cvtss_f32(_mm_sqrt_ss(_mm_set_ss(f)));}
@@ -68,7 +72,7 @@ void PerturbCamera(Byte*cg){
     float horiz=Sqrt(ny*ny+x*x);
     if(!(horiz>0.0f))horiz=1.0f;
     const float inv=1.0f/horiz,lx=Neg(inv*ny),ly=x*inv;
-    const float perturb[9]={x,ny,nz,lx,ly,0.0f,Neg(ly*nz),nz*lx,ly*x-ny*lx};
+    const float perturb[9]={x,ny,nz,lx,ly,0.0f,Neg(ly*nz),MulOrdered(nz,lx),SubOrdered(MulOrdered(ly,x),MulOrdered(ny,lx))};
     float axis[9];std::memcpy(axis,cg+0x4d934,sizeof(axis));
     Motion_MatrixMultiply(perturb,axis,reinterpret_cast<float*>(cg+0x4d934));
 }
