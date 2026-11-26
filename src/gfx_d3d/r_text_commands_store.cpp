@@ -14,6 +14,7 @@ extern Byte Text_UI3DStats[];
 extern const Byte*Text_DualPlay;
 int Text_Atoi(const char*);
 void Text_Color(const float*,Byte*);
+extern const void*Text_DefaultMaterial;
 }
 template<class T>static T R(const void*p,unsigned n){T v;std::memcpy(&v,static_cast<const Byte*>(p)+n,sizeof(v));return v;}
 template<class T>static void W(void*p,unsigned n,T v){std::memcpy(static_cast<Byte*>(p)+n,&v,sizeof(v));}
@@ -52,6 +53,20 @@ Byte* AddBaseDrawTextCmd(const char*text,int maxChars,const void*font,float x,fl
     if(cursor>-1){flags|=2;W(out,0x38,flags);W(out,0x40,cursorLetter);W(out,0x3c,cursor);}
     std::memcpy(out+0x74,text,static_cast<unsigned>(len));out[0x74+len]=0;
     return out;
+}
+// 14071D0D0: original 0x0f, 56-byte untextured quad command.
+void AddCmdDrawQuad(const float*points,float z,const float*color,const void*material){
+    auto*c=Text_CommandList;
+    if(c->byteSize+c->usedCritical-c->usedTotal-0x2000<0x38){c->lastCmd=nullptr;return;}
+    Byte*out=c->cmds+c->usedTotal;c->usedTotal+=0x38;c->lastCmd=out;
+    out[2]=0xf;out[3]=0;
+    if(Text_UI3DDepth){
+        const int i=Text_UI3DStack[Text_UI3DDepth];
+        if(i>=0)out[3]=Byte(i|0x80);
+        if(static_cast<unsigned>(i)<6){auto*p=Text_UI3DStats+i*0xa4;W(p,0,R<unsigned>(p,0)+1);W(p,4,R<unsigned>(p,4)+1);}
+    }
+    W(out,0,std::uint16_t(0x38));W(out,8,material?material:Text_DefaultMaterial);
+    std::memcpy(out+16,points,32);W(out,0x30,z);Text_Color(color,out+0x34);
 }
 }
 #endif
