@@ -17,6 +17,9 @@ on:
       - 'src/cgame_mp/cg_camera_effects_store.cpp'
       - 'src/cgame/cg_camera_mode_store.cpp'
       - 'src/cgame_mp/cg_third_person_store.cpp'
+      - 'src/cgame/cg_camera_detail_store.cpp'
+      - 'tests/store_camera_detail_probe.cpp'
+      - 'tests/verify_store_camera_detail.py'
       - 'tests/store_third_person_probe.cpp'
       - 'tests/verify_store_third_person.py'
       - 'tests/store_camera_mode_probe.cpp'
@@ -182,6 +185,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_third_person.py originals/t6mp_msstore.exe | tee camera-third.log
+      - name: Replay shake attenuation origin offset and remote eyes
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_detail.py originals/t6mp_msstore.exe | tee camera-detail.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -212,4 +219,5 @@ jobs:
             camera-effects.log
             camera-mode.log
             camera-third.log
+            camera-detail.log
           if-no-files-found: warn

@@ -37,7 +37,7 @@ CORE = {0x14046B300:"SetVariant",0x14046B150:"SetLatched",0x14046CEF0:"SetFloat"
         0x1400C7540:"CameraShake",0x140157BC0:"CameraPerturb",0x14016BFB0:"TurretView",
         0x1400C4490:"VehicleView",0x1400C5FA0:"VehicleThirdPerson",0x1400C66D0:"VehicleOffset",
         0x1400C3950:"RemoteEyes",0x140621C10:"LinkedAngleTransform",0x1400DE970:"TagAxis",
-        0x140462D70:"AxisToAngles",0x1400C72B0:"UpdateShake",0x140660B40:"BobAngles",0x1406602A0:"VerticalBob",0x140660470:"HorizontalBob",0x140472FE0:"OffsetOrigin",0x14016A5D0:"ChaseView",0x1400C69F0:"ThirdPersonTrace",0x14038BAD0:"WaterHeight"}
+        0x140462D70:"AxisToAngles",0x1400C72B0:"UpdateShake",0x140660B40:"BobAngles",0x1406602A0:"VerticalBob",0x140660470:"HorizontalBob",0x140472FE0:"OffsetOrigin",0x14016A5D0:"ChaseView",0x1400C69F0:"ThirdPersonTrace",0x14038BAD0:"WaterHeight",0x1400C33F0:"RemoteSpecial",0x1400C3650:"RemoteFallback",0x1400BFCC0:"CameraTransition",0x1400C07D0:"UpdateVehicleBindings"}
 HEADER = re.compile(r"^; ([0-9a-fA-F]+)\s")
 INSN = re.compile(r"^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+")
 

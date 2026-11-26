@@ -47,3 +47,7 @@ Full candidate at 1400C0E20..1400C1235, 252 instructions. Preserves demo mode ga
 ## Third-person view
 
 Run 45897672565 passed all 49152 first-person/shake/mode comparisons. Complete third-person candidate at 14016A940..14016B04B preserves player/death camera tag resolution, corpse camera horizontal capsule constraint and vertical clamp, chase camera dispatch, original 45-degree pitch ceiling, focus point and collision trace, water-height adjustment, and final angle-to-axis conversion. 32768 original-body comparisons queued; collision trace and tag transform are explicit external boundaries. No runtime redirect.
+
+## Camera detail helpers
+
+Complete bodies at 1400C72B0 (shake attenuation), 140472FE0 (nonlinear view offset), and 1400C3950 (remote eyes tag resolution). Shake temporal/spatial branches, original packed trig lanes, signed time arithmetic and tag fallback/remote mode boundaries retained. 24576 full-function cases pending. Further extraction includes remote special/fallback, camera transition and vehicle updates. No live activation.
