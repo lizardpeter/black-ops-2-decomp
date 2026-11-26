@@ -1,0 +1,21 @@
+#!/usr/bin/env python3
+"""Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
+import pathlib, shutil, subprocess, tempfile
+from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
+UNITS={"src/ui/ui_font_assets_store.cpp":["AssetCache","ResolutionScale"],
+       "src/client/screen_placement_store.cpp":["HudViewX","HudViewY","VirtualFromRealWidth","VirtualFromRealHeight"]}
+def main():
+    with tempfile.TemporaryDirectory() as tmp:
+        tmp=pathlib.Path(tmp);headers=tmp/"headers";headers.mkdir()
+        for name,body in HEADERS.items():(headers/name).write_text(body)
+        total=0
+        for path,funcs in UNITS.items():
+            obj=tmp/(pathlib.Path(path).stem+".obj")
+            build_recon.compile_unit(ROOT/path,obj,"x64",["-DT6_STORE","-DT6_STORE_FONT_REPLAY","-isystem"+str(headers),"-ffunction-sections"])
+            assert obj.read_bytes()[:2]==b"\x64\x86"
+            syms=subprocess.check_output([shutil.which("llvm-nm") or shutil.which("nm"),"--defined-only",str(obj)],text=True)
+            for f in funcs:assert "?"+f+"@" in syms,(path,f)
+            total+=len(funcs)
+            print(path,len(funcs),"Win64 public bodies")
+        print(total,"Store font functions compiled; external references not linked.")
+if __name__=="__main__":main()
