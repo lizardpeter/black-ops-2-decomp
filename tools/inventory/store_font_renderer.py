@@ -12,7 +12,15 @@ SEEDS={0x1403FCD20:"UI_DefaultFont",0x1403FCE40:"UI_GetFontHandle",
        0x14071A780:"R_RegisterFont",0x14071A7A0:"R_TextWidth",
        0x1403FC6D0:"UI_DrawTextPadding",0x140215300:"DB_ResolutionZoneNames",
        0x1407203B0:"RendererInit",0x1403FBAF0:"UI_AssetCache",
-       0x14071C880:"AddBaseDrawTextCmd",0x1400F2040:"ConvertColor",0x140723340:"FontIconLookup"}
+       0x14071C880:"AddBaseDrawTextCmd",0x1400F2040:"ConvertColor",0x140723340:"FontIconLookup",
+       0x140732480:"DrawText2D",0x140734690:"DrawTextVariant",0x140735340:"DrawText3D",
+       0x14071a9c0:"TextWrapPosition",0x14071abe0:"TextMeasureVariant",
+       0x14072bfe0:"DrawStretchPicRotate",0x14072b8f0:"DrawQuadDependency",
+       0x140731e00:"TextEffectDependencyA",0x1407320e0:"TextEffectDependencyB",0x1407323b0:"TextEffectDependencyC",
+       0x140735080:"Text3DDependency",0x14073d680:"Text3DGeometry",0x140764fc0:"Text3DDependencyB",
+       0x14071d0d0:"AddCmdDrawQuad",0x1403fc430:"DrawBorder",0x1401a43a0:"DebugText",
+       0x1400f27a0:"TextReplaceHelper",0x1400f2a90:"TextReplace",0x1403e9910:"TextDependency",
+       0x1406af8f0:"AlternateTextRenderer"}
 def main():
     p=argparse.ArgumentParser(description=__doc__);p.add_argument("exe",type=Path);p.add_argument("out",type=Path);a=p.parse_args()
     raw=a.exe.read_bytes();assert hashlib.sha256(raw).hexdigest()==DIGEST
@@ -58,7 +66,7 @@ def main():
         return rows
     chosen=dict(SEEDS)
     # Only discover direct calls from font/draw entrypoints, not the entire renderer initialization tree.
-    for owner in list(SEEDS)[:5]+[0x14071C880]:
+    for owner in list(SEEDS)[:5]+[0x14071C880,0x140732480,0x140734690,0x140735340,0x14072bfe0,0x14072b8f0,0x140731e00,0x1407320e0,0x1407323b0,0x140735080,0x14073d680,0x140764fc0,0x14071d0d0,0x1400f27a0]:
         for row in body(owner):
             if not row["target"]:continue
             t=int(row["target"],16)
@@ -69,6 +77,21 @@ def main():
     for owner in glyph:
         if len(addresses[owner])<=150:chosen.setdefault(owner,"glyph_candidate_"+hex(owner))
     a.out.mkdir(parents=True,exist_ok=True);index=[]
+    pseudo={}
+    # Existing Ghidra output is separate from manually reconstructed source.
+    for shard in sorted((ROOT/"analysis/t6mp_msstore/pseudocode/_unattributed").glob("*.c")):
+        owner=None;buf=[]
+        with shard.open(encoding="utf-8") as f:
+            for line in f:
+                h=re.match(r"^//\s+([0-9a-fA-F]{9,16})\s+",line)
+                if h:
+                    if owner in chosen:pseudo[owner]="".join(buf)
+                    owner=int(h[1],16);buf=[]
+                if owner in chosen:buf.append(line)
+        if owner in chosen:pseudo[owner]="".join(buf)
+    for owner,bodytext in pseudo.items():
+        (a.out/(f"{owner:x}.c")).write_text(bodytext)
+    print("Existing Ghidra pseudocode bodies:",len(pseudo))
     for owner,name in sorted(chosen.items()):
         rows=body(owner)
         (a.out/(f"{owner:x}.json")).write_text(json.dumps(rows,indent=2)+"\n")
