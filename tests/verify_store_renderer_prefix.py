@@ -15,9 +15,9 @@ import tempfile
 
 from verify_store_cgame_registration import map_image, ROOT
 
-TARGETS = [0x763730, 0x46b8b0, 0x46c1a0, 0x46bf10, 0x46c4c0, 0x46c650, 0x46caf0]
-GLOBALS = [0x27e71d0, 0x27e6f88, 0x27e6fa0, 0x27e6fd0, 0x27e6f70, 0x27e7190, 0x27e7090, 0x27e7188, 0x27e6ef8, 0x27e6f10, 0x27e6fe0, 0x27e6f68, 0x27e6ea0, 0x27e7288, 0x27e7278, 0x27e7230, 0x27e7280, 0x27e71c8, 0x27e7118, 0x27e7170, 0x27e7080, 0x27e6f00]
-CUT = 0x70ecd0
+TARGETS = [0x763730, 0x46b8b0, 0x46c1a0, 0x46bf10, 0x46c4c0, 0x46c650, 0x46caf0, 0x46cbd0, 0x46c840]
+GLOBALS = [0x27e71d0, 0x27e6f88, 0x27e6fa0, 0x27e6fd0, 0x27e6f70, 0x27e7190, 0x27e7090, 0x27e7188, 0x27e6ef8, 0x27e6f10, 0x27e6fe0, 0x27e6f68, 0x27e6ea0, 0x27e7288, 0x27e7278, 0x27e7230, 0x27e7280, 0x27e71c8, 0x27e7118, 0x27e7170, 0x27e7080, 0x27e6f00, 0x27e7098, 0x27e70d0, 0x27e6fc0, 0x27e70f8, 0x27e6fb8, 0x27e7030, 0x27e71a8, 0x27e7258, 0x27e6e40, 0x27e6d10, 0x27e6d98, 0x27e6ca8, 0x27e6f28, 0x27e6bb0, 0x27e7108, 0x27e6e68, 0x27e7058, 0x27e6ef0, 0x27e7048, 0x27e7078, 0x27e6fa8, 0x27e7000, 0x27e70b0, 0x27e70e8, 0x27e7228, 0x27e7070, 0x27e71b0, 0x27e7148, 0x27e7178, 0x27e7028, 0x27e7168, 0x27e70a0, 0x27e6f18, 0x27e6cc8, 0x27e6d88, 0x27e7018]
+CUT = 0x70f91f
 
 
 def epilogue():
@@ -52,23 +52,28 @@ def main():
         globals_ = (C.c_uint64 * len(GLOBALS))()
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base = C.addressof(C.c_char.from_buffer(mem))
-            assert mem[CUT:CUT+4] == b"\xc7\x44\x24\x20"
+            assert mem[CUT:CUT+6] == bytes.fromhex("8b 05 17 03 96 03")
             assert mem[0x70e250:0x70e25d] == bytes.fromhex("b8 b0 2b 00 00 e8 66 24 16 00 48 2b e0")
             for i, rva in enumerate(TARGETS):
-                mem[rva:rva+12] = b"\x48\xb8" + struct.pack("<Q", lib.RendererPrefixMock(i)) + b"\xff\xe0"
+                mem[rva:rva+12] = b"\x48\xb8" + struct.pack("<Q", lib.RendererPrefixMock(i if i<7 else i+1)) + b"\xff\xe0"
             mem[0x8706c0:0x8706c1] = b"\xc3"
             tail = epilogue()
             mem[CUT:CUT+len(tail)] = tail
-            for mask in range(1024):
+            # Cover each lookup independently plus deterministic mixed patterns,
+            # with both mode-byte values. Not exhaustive over 18 bits.
+            masks = sorted({0, (1<<18)-1, *[1<<i for i in range(18)],
+                            *[((i*0x9e3779b9) & ((1<<18)-1)) for i in range(1024)]})
+            for mask in [m | (mode<<18) for m in masks for mode in range(2)]:
+                mem[0x27e7331]=mask>>18
                 for rva in GLOBALS:
                     struct.pack_into("<Q", mem, rva, 0)
                 lib.RendererPrefixRun(base, mask, old)
                 lib.RendererPrefixRun(None, mask, new)
-                assert struct.unpack_from("<Q", old.raw)[0] == 40
+                assert struct.unpack_from("<Q", old.raw)[0] == 102
                 assert old.raw == new.raw, (mask, old.raw.hex(), new.raw.hex())
                 lib.RendererPrefixGlobals(globals_)
                 assert list(globals_) == [struct.unpack_from("<Q", mem, rva)[0] for rva in GLOBALS], mask
-        print("1024 renderer prefix branch combinations; 40 ordered events and 22 result slots per case")
+        print(f"{len(masks)*2} renderer prefix cases; 102 ordered events and 58 result slots per case")
 
 
 if __name__ == "__main__":

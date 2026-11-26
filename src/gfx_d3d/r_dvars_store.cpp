@@ -1,4 +1,4 @@
-// Store MP renderer registration: recovered entry prefix 14070E2B5..14070ECCF.
+// Store MP renderer registration: recovered entry prefix 14070E2B5..14070F91E.
 // This is NOT the complete 14070E230 function. Replay-only until all paths are recovered.
 #define T6_SOURCE "gfx_d3d/r_dvars.cpp"
 #if defined(T6_STORE) && defined(T6_STORE_RENDERER_DVAR_REPLAY)
@@ -13,6 +13,55 @@ struct Dvar;
 struct alignas(16) Value { U32 words[4]; };
 struct alignas(16) Domain { U32 words[4]; };
 extern "C" {
+extern unsigned char Store_Renderer_ModeByte; // 1427E7331
+const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
+const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
+extern const char *const Store_Renderer_DebugShader[]; // 140D3A1A8
+extern const char *const Store_Renderer_DebugPerformance[]; // 140D3A230
+extern const char *const Store_Renderer_LightMapSecondary[]; // 140D39F50
+extern const char *const Store_Renderer_ColorMap[]; // 140D3A088
+extern const char *const Store_Renderer_AlphaMap[]; // 140D3A0B8
+extern const char *const Store_Renderer_SpecularMap[]; // 140D3A250
+extern const char *const Store_Renderer_GlossMap[]; // 140D3A270
+extern const char *const Store_Renderer_OcclusionMap[]; // 140D3A208
+extern const char *const Store_Renderer_Penetration[]; // 140D3A160
+extern const char *const Store_Renderer_ReflectionProbe[]; // 140D3A110
+extern const Dvar *store_r_texFilterMipBias; // 1427E7098
+extern const Dvar *store_r_fullbright; // 1427E70D0
+extern const Dvar *store_r_debugShader; // 1427E6FC0
+extern const Dvar *store_r_debugPerformance; // 1427E70F8
+extern const Dvar *store_r_loadingScreen; // 1427E6FB8
+extern const Dvar *store_r_multiGpu; // 1427E7030
+extern const Dvar *store_r_texFilterQuality; // 1427E71A8
+extern const Dvar *store_r_lodScaleRigid; // 1427E7258
+extern const Dvar *store_r_lodBiasRigid; // 1427E6E40
+extern const Dvar *store_r_lodScaleSkinned; // 1427E6D10
+extern const Dvar *store_r_lodBiasSkinned; // 1427E6D98
+extern const Dvar *store_r_skinnedCacheOverflowLodMaxScale; // 1427E6CA8
+extern const Dvar *store_r_znear; // 1427E6F28
+extern const Dvar *store_r_zfar; // 1427E6BB0
+extern const Dvar *store_r_picmip_manual; // 1427E7108
+extern const Dvar *store_r_picmip; // 1427E6E68
+extern const Dvar *store_r_picmip_bump; // 1427E7058
+extern const Dvar *store_r_picmip_spec; // 1427E6EF0
+extern const Dvar *store_r_colorMap; // 1427E7048
+extern const Dvar *store_r_normalMap; // 1427E7078
+extern const Dvar *store_r_alphaMap; // 1427E6FA8
+extern const Dvar *store_r_specularMap; // 1427E7000
+extern const Dvar *store_r_glossMap; // 1427E70B0
+extern const Dvar *store_r_occlusionMap; // 1427E70E8
+extern const Dvar *store_r_warmShaders; // 1427E7228
+extern const Dvar *store_r_loadForRenderer; // 1427E7070
+extern const Dvar *store_r_shaderWarmingPerFrame; // 1427E71B0
+extern const Dvar *store_r_showMissingLightGrid; // 1427E7148
+extern const Dvar *store_r_lightTweakAmbient; // 1427E7178
+extern const Dvar *store_r_lightTweakSunLight; // 1427E7028
+extern const Dvar *store_r_lightTweakAmbientColor; // 1427E7168
+extern const Dvar *store_r_lightTweakSunColor; // 1427E70A0
+extern const Dvar *store_r_lightTweakSunDiffuseColor; // 1427E6F18
+extern const Dvar *store_r_lightTweakSunDirection; // 1427E6CC8
+extern const Dvar *store_r_norefresh; // 1427E6D88
+extern const Dvar *store_r_scaleViewport; // 1427E7018
 extern U32 Store_Renderer_HardwareCount; // 14406FC3C (semantic name provisional)
 extern const Dvar *store_r_smp_worker_threads; // 1427E71E0
 extern const Dvar *store_r_smp_worker_thread[8]; // 1427E6EB0
@@ -62,6 +111,13 @@ static const Dvar *InlineInt(const char *name,int value,int minimum,int maximum,
     return Store_Renderer_New(name,6,flags,&v,&d,"");
 }
 
+static const Dvar *InlineVec(const char *name,int type,U32 flags,const Value &v,const Domain &d) {
+    if(const auto *old=Store_Renderer_Find(name)) {
+        Store_Renderer_Reregister(old,name,type,flags,&v,&d,"");
+        return old;
+    }
+    return Store_Renderer_New(name,type,flags,&v,&d,"");
+}
 void RegisterRendererEntryPrefix() {
     Store_Renderer_Init();
     // 14070E2D8..14070E365
@@ -107,6 +163,62 @@ void RegisterRendererEntryPrefix() {
     Store_Renderer_Bool("r_texFilterDisable",false,0x80,"");
     store_r_texFilterAnisoMin=InlineInt("r_texFilterAnisoMin",1,1,16,1);
     store_r_texFilterMipMode=Store_Renderer_Enum("r_texFilterMipMode",Store_Renderer_MipMode,0,1);
+    // 14070ECD8..14070F91A: texture, LOD, clipping, material overrides, lighting.
+    store_r_texFilterMipBias=Store_Renderer_Float("r_texFilterMipBias",F(0),F(0xc1800000),F(0x417fd70a),0x80,"");
+    store_r_fullbright=Store_Renderer_Bool("r_fullbright",false,0x80,"");
+    store_r_debugShader=Store_Renderer_Enum("r_debugShader",Store_Renderer_DebugShader,0,0x80);
+    store_r_debugPerformance=Store_Renderer_Enum("r_debugPerformance",Store_Renderer_DebugPerformance,0,0x80);
+    Store_Renderer_Bool("r_lightConflicts",false,0x80,"");
+    InlineInt("r_zebrastripe",0,0,3,0x80);
+    store_r_loadingScreen=Store_Renderer_Bool("r_loadingScreen",false,0x4000,"");
+    store_r_multiGpu=Store_Renderer_Bool("r_multiGpu",true,1,"");
+    store_r_texFilterQuality=InlineInt("r_texFilterQuality",1,0,2,0x21);
+    store_r_lodScaleRigid=Store_Renderer_Float("r_lodScaleRigid",F(0x3f800000),F(0x3f800000),F(0x40800000),0x80,"");
+    store_r_lodBiasRigid=Store_Renderer_Float("r_lodBiasRigid",F(0),F(0xc47a0000),F(0),0x80,"");
+    store_r_lodScaleSkinned=Store_Renderer_Float("r_lodScaleSkinned",F(0x3f800000),F(0x3f800000),F(0x40800000),0x80,"");
+    store_r_lodBiasSkinned=Store_Renderer_Float("r_lodBiasSkinned",F(0),F(0xc47a0000),F(0),0x80,"");
+    store_r_skinnedCacheOverflowLodMaxScale=Store_Renderer_Float("r_skinnedCacheOverflowLodMaxScale",F(0x40800000),F(0x3f800000),F(0x41200000),0,"");
+    Store_Renderer_Float("r_skinnedCacheOverflowLodScaleDecay",F(0x40400000),F(0x3c23d70a),F(0x41200000),0,"");
+    Store_Renderer_Bool("r_autoLodScale",false,0x80,"");
+    store_r_znear=Store_Renderer_Float("r_znear",F(0x40800000),F(0x3f800000),F(0x461c4000),Store_Renderer_ModeByte?0x5080:0x5000,"");
+    store_r_zfar=Store_Renderer_Float("r_zfar",F(0),F(0),F(0x7f7fffff),0x80,"");
+    Store_Renderer_Bool("r_fog",true,0x80,"");
+    store_r_picmip_manual=Store_Renderer_Bool("r_picmip_manual",false,1,"");
+    store_r_picmip=InlineInt("r_picmip",0,0,3,1);
+    store_r_picmip_bump=InlineInt("r_picmip_bump",0,0,3,1);
+    store_r_picmip_spec=InlineInt("r_picmip_spec",0,0,3,1);
+    Store_Renderer_Enum("r_lightMapSecondary",Store_Renderer_LightMapSecondary,1,0x80);
+    Store_Renderer_Bool("r_lightMapFilterDisable",false,0x80,"");
+    store_r_colorMap=Store_Renderer_Enum("r_colorMap",Store_Renderer_ColorMap,1,0x80);
+    store_r_normalMap=Store_Renderer_Float("r_normalMap",F(0),F(0),F(0x3f800000),0x80,"");
+    Store_Renderer_Bool("r_drawLitDrawlists",true,0x80,"");
+    Store_Renderer_Bool("r_drawLightmapDrawlists",true,0x80,"");
+    store_r_alphaMap=Store_Renderer_Enum("r_alphaMap",Store_Renderer_AlphaMap,0,0x80);
+    store_r_specularMap=Store_Renderer_Enum("r_specularMap",Store_Renderer_SpecularMap,1,0x80);
+    store_r_glossMap=Store_Renderer_Enum("r_glossMap",Store_Renderer_GlossMap,1,0x80);
+    store_r_occlusionMap=Store_Renderer_Enum("r_occlusionMap",Store_Renderer_OcclusionMap,1,0x80);
+    store_r_warmShaders=Store_Renderer_Bool("r_warmShaders",false,0,"");
+    store_r_loadForRenderer=Store_Renderer_Bool("r_loadForRenderer",true,0x20,"");
+    store_r_shaderWarmingPerFrame=InlineInt("r_shaderWarmingPerFrame",5,1,50,0);
+    Store_Renderer_Bool("r_resampleScene",true,0x80,"");
+    Store_Renderer_Enum("r_showPenetration",Store_Renderer_Penetration,0,0x80);
+    Store_Renderer_Bool("r_showLightGrid",false,0x80,"");
+    Store_Renderer_Bool("r_showLightingOrigins",false,0x80,"");
+    store_r_showMissingLightGrid=Store_Renderer_Bool("r_showMissingLightGrid",false,0x80,"");
+    Store_Renderer_Enum("r_showReflectionProbeSelection",Store_Renderer_ReflectionProbe,0,0x80);
+    store_r_lightTweakAmbient=Store_Renderer_Float("r_lightTweakAmbient",F(0x3dcccccd),F(0),F(0x40800000),0x240,"");
+    store_r_lightTweakSunLight=Store_Renderer_Float("r_lightTweakSunLight",F(0x3f800000),F(0),F(0x42000000),0x1200,"");
+    store_r_lightTweakAmbientColor=Store_Renderer_Color("r_lightTweakAmbientColor",F(0x3f800000),F(0),F(0),F(0x3f800000),0x240);
+    store_r_lightTweakSunColor=InlineVec("r_lightTweakSunColor",11,0x1200,Value{{0x3f800000,0x3f800000,0,0}},Domain{{0,0x3f800000,0,0}});
+    store_r_lightTweakSunDiffuseColor=Store_Renderer_Color("r_lightTweakSunDiffuseColor",F(0),F(0),F(0x3f800000),F(0x3f800000),0x240);
+    store_r_lightTweakSunDirection=Store_Renderer_Vec3("r_lightTweakSunDirection",F(0),F(0),F(0),F(0xc3b40000),F(0x43b40000),0x1200);
+    Store_Renderer_Bool("r_showSunDirectionDebug",false,0x80,"");
+    Store_Renderer_Bool("r_showOutdoorVolumeDebug",false,0x80,"");
+    InlineVec("r_materialXYZ",12,0,Value{{0x40770a3d,0x407eb852,0x4091999a,0}},Domain{{0,0x42c80000,0,0}});
+    store_r_norefresh=Store_Renderer_Bool("r_norefresh",false,0x80,"");
+    store_r_scaleViewport=Store_Renderer_Float("r_scaleViewport",F(0x3f800000),F(0),F(0x3f800000),0x80,"");
+    Store_Renderer_Bool("r_smp_worker",true,0,"");
+
 }
 
 // Independent recovered fragment 14070F91F..14070FACD. The hardware

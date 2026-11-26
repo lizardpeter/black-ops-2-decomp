@@ -35,7 +35,7 @@ def main():
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base=C.addressof(C.c_char.from_buffer(mem))
             for i,rva in enumerate(TARGETS):
-                mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",lib.RendererPrefixMock(i))+b"\xff\xe0"
+                mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",lib.RendererPrefixMock(i if i<7 else i+1))+b"\xff\xe0"
             mem[0x8706c0:0x8706c1]=b"\xc3"
             struct.pack_into("<Q",mem,0x8a7dc0,lib.RendererPrefixMock(7))
             # Initialize RBX to the original empty string, R12D to zero;
