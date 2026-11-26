@@ -3,6 +3,7 @@
 #if defined(T6_STORE) && defined(T6_STORE_FONT_REPLAY)
 #include <cstdint>
 #include <cstring>
+#include <xmmintrin.h>
 namespace store_text_loop {
 using Byte=unsigned char;using U32=std::uint32_t;
 void DrawTeleType(const Byte*,float,float,float,float,const Byte*,float,float,U32,U32,int,Byte,int,int,int);
@@ -12,13 +13,12 @@ namespace store_font_world {void DrawTextInSpace(const unsigned char*,const unsi
 namespace store_text_dispatch {
 using Byte=unsigned char;using U32=std::uint32_t;
 template<class T>static T R(const Byte*p,unsigned n){T v;std::memcpy(&v,p+n,sizeof(v));return v;}
-extern "C" std::uint64_t Text_SinCos(float); // original packed return: sin low lane, cos high lane.
+extern "C" __m128 Text_SinCos(float); // original packed return: sin low lane, cos high lane.
 void DrawText2DCmd(const Byte**exec){
     const Byte*p=*exec;
     const int type=R<int>(p,4);
     if(type==0){
-        std::uint64_t packed=Text_SinCos(R<float>(p,0x18)*0.017453292f);
-        float sc[2];std::memcpy(sc,&packed,8);
+        float sc[4];_mm_storeu_ps(sc,Text_SinCos(R<float>(p,0x18)*0.017453292f));
         store_text_loop::DrawText2D(p+0x74,R<float>(p,8),R<float>(p,0xc),R<float>(p,0x10),R<const Byte*>(p,0x20),R<float>(p,0x28),R<float>(p,0x2c),sc[0],sc[1],R<U32>(p,0x30),R<int>(p,0x34),R<U32>(p,0x38),R<int>(p,0x3c),p[0x40],R<float>(p,0x70),R<U32>(p,0x44),R<int>(p,0x48),R<int>(p,0x4c),R<int>(p,0x50),R<int>(p,0x54),R<int>(p,0x58),R<int>(p,0x5c),R<const Byte*>(p,0x60),R<const Byte*>(p,0x68));
     }else if(type==1){
         store_text_loop::DrawTeleType(p+0x74,R<float>(p,8),R<float>(p,0xc),R<float>(p,0x10),0,R<const Byte*>(p,0x20),R<float>(p,0x28),R<float>(p,0x2c),R<U32>(p,0x30),R<U32>(p,0x38),R<int>(p,0x3c),p[0x40],0,R<int>(p,0x48),R<int>(p,0x4c));
