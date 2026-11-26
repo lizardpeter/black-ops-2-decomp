@@ -16,6 +16,7 @@ def main():
                 ptr=lib.LuiRenderMock(i)
                 if i<2:struct.pack_into("<Q",mem,rva,ptr)
                 else:mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",ptr)+b"\xff\xe0"
+            struct.pack_into("<Q",mem,0x8a7a60,lib.LuiRenderMock(13))
             errors=[]
             for op in range(6):
                 for n in range(1024):

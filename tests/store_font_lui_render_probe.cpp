@@ -51,6 +51,7 @@ static int Ref(void*,int){return 99;}
 static void Unref(void*,int,int){}
 static void RawGet(void*,int,int){}
 static void* UserData(void*,int){return node2;}
+static void* MS MCopy(void*d,const void*s,std::size_t n){return std::memcpy(d,s,n);}
 static int MS MAtoi(const char*s){return std::atoi(s);}
 static int MS MSpace(int c){return std::isspace(c);}
 static void MS MPack(const float*c,B*out){Pack(c,out);}
@@ -112,7 +113,7 @@ void LuiRender_Submit(const void*m,short n,const void*p,const void*u,const void*
 }
 extern "C"{
 void*LuiRenderMock(unsigned i){
-    void*p[]={reinterpret_cast<void*>(MAtoi),reinterpret_cast<void*>(MSpace),reinterpret_cast<void*>(MPack),reinterpret_cast<void*>(MSubmit),reinterpret_cast<void*>(MInfo),reinterpret_cast<void*>(MMaterial),reinterpret_cast<void*>(MWidth),reinterpret_cast<void*>(MReplace),reinterpret_cast<void*>(MAlloc),reinterpret_cast<void*>(MRef),reinterpret_cast<void*>(MUnref),reinterpret_cast<void*>(MRawGet),reinterpret_cast<void*>(MUserData)};
+    void*p[]={reinterpret_cast<void*>(MAtoi),reinterpret_cast<void*>(MSpace),reinterpret_cast<void*>(MPack),reinterpret_cast<void*>(MSubmit),reinterpret_cast<void*>(MInfo),reinterpret_cast<void*>(MMaterial),reinterpret_cast<void*>(MWidth),reinterpret_cast<void*>(MReplace),reinterpret_cast<void*>(MAlloc),reinterpret_cast<void*>(MRef),reinterpret_cast<void*>(MUnref),reinterpret_cast<void*>(MRawGet),reinterpret_cast<void*>(MUserData),reinterpret_cast<void*>(MCopy)};
     return p[i];
 }
 unsigned LuiRenderSize(){return sizeof(Trace);}
