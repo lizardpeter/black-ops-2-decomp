@@ -23,14 +23,15 @@ T6_STATIC int window_center_y T6_AT("", "window_center_y");
 
 void IN_MouseMove()
 {
-	IN_StartRawInput();
+	const bool rawActive = IN_StartRawInput();
 	IN_TimeWindowMessages();
 	int rawDx, rawDy;
 	IN_TakeRawMouse(&rawDx, &rawDy);  // always: counts never wait for a later frame
 	if (GetForegroundWindow() != g_wv.hWnd)
 		return;
 	POINT curPos;
-	GetCursorPos(&curPos);
+	if (!GetCursorPos(&curPos))
+		curPos = s_wmv.oldPos;  // never consume an uninitialized cursor position
 	if (Dvar_GetInt(r_fullscreen) == 1)
 		IN_ClampMouseMove(&curPos);
 	int dx = curPos.x - s_wmv.oldPos.x;
@@ -40,6 +41,12 @@ void IN_MouseMove()
 	s_wmv.oldPos.x = curPos.x;
 	s_wmv.oldPos.y = curPos.y;
 	ScreenToClient(g_wv.hWnd, &curPos);
+	// If registration failed, preserve the original cursor-delta input rather than disabling mouse movement.
+	if (!rawActive)
+	{
+		rawDx = dx;
+		rawDy = dy;
+	}
 	// menus use the cursor's position (and only whether the mouse moved); the game adds the counts to mouseIn
 	g_wv.recenterMouse = CL_MouseEvent(LOCAL_CLIENT_0, curPos.x, curPos.y, rawDx, rawDy);
 	if (g_wv.recenterMouse && (dx || dy))

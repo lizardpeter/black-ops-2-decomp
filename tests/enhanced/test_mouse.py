@@ -263,12 +263,12 @@ def check_zero_ms_frame_keeps_the_movement(ctx):
         assert any(a in want[2] for a in MOUSE_IN), f"input {i}: the original didn't take it either (no test)"
 
 
-def raw_fakes(ctx, counts):
+def raw_fakes(ctx, counts, active=1):
     def take(mu):
         rcx, rdx = tw.arg(mu, 0), tw.arg(mu, 1)
         mu.mem_write(rcx, struct.pack("<i", counts[0]))
         mu.mem_write(rdx, struct.pack("<i", counts[1]))
-    return ctx.hooks(dict(tw.STORE_FAKES, IN_StartRawInput=lambda mu: 1, IN_TakeRawMouse=take))
+    return ctx.hooks(dict(tw.STORE_FAKES, IN_StartRawInput=lambda mu: active, IN_TakeRawMouse=take))
 
 
 def check_in_mouse_move_turns_by_raw_counts(ctx):
@@ -427,7 +427,18 @@ def check_loader_redirects_reach_the_replacements(ctx):
             ctx.m.mu.ctl_remove_cache(va, va + 14)
 
 
+def check_raw_registration_failure_falls_back(ctx):
+    ctx.imports(tw.IMPORTS)
+    ob = ctx.hooks(tw.STORE_SEEN)
+    for i, inp in enumerate(tw.store_mouse_inputs(200)):
+        fk = raw_fakes(ctx, (12345, -6789), active=0)
+        want = ctx.m.call(ctx.original("IN_MouseMove"), [], "void", inp["setup"], fk, ob)
+        got = ctx.m.call(ctx.enhanced("IN_MouseMove"), [], "void", inp["setup"], fk, ob)
+        assert not isinstance(got[0], str), (i, got[0])
+        assert want[:3] == got[:3] and canon(ctx, want[3], tw.STORE_SEEN) == canon(ctx, got[3], tw.STORE_SEEN), (i, "registration-failure fallback differs from Store")
+
 CHECKS = [check_mouse_move_is_the_original_at_equivalent_settings, check_turn_is_mw2019_units,
           check_split_frames_turn_the_same, check_sens_is_registered_on_first_use, check_accel_and_filter_do_nothing,
           check_zero_ms_frame_keeps_the_movement, check_in_mouse_move_turns_by_raw_counts,
-          check_raw_counters, check_window_procedure, check_loader_redirects_reach_the_replacements]
+          check_raw_counters, check_window_procedure, check_loader_redirects_reach_the_replacements,
+          check_raw_registration_failure_falls_back]

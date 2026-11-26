@@ -23,6 +23,8 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Test enhanced mouse registration fallback
+        run: python tests/enhanced/test_mouse_fallback.py
       - name: Fetch hash-pinned Store MP original
         run: python tools/fetch_originals.py t6mp_msstore originals --only exe
       - name: Extract exact input function bodies

@@ -97,9 +97,15 @@ bool IN_StartRawInput()
 	                                             PROCESS_POWER_THROTTLING_IGNORE_TIMER_RESOLUTION, 0};
 	SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &throttling, sizeof(throttling));
 	s_rawInputReady = CreateEventA(nullptr, TRUE, FALSE, nullptr);
+	if (!s_rawInputReady)
+		return false;
 	HANDLE thread = CreateThread(nullptr, 0, IN_RawInputThread, nullptr, 0, nullptr);
 	if (!thread)
+	{
+		CloseHandle(s_rawInputReady);
+		s_rawInputReady = nullptr;
 		return false;
+	}
 	// above the game's threads, so a burst of reports is taken as it comes (the thread mostly sleeps in GetMessage)
 	SetThreadPriority(thread, THREAD_PRIORITY_HIGHEST);
 	WaitForSingleObject(s_rawInputReady, INFINITE);
