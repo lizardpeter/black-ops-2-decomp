@@ -174,3 +174,41 @@ The previous 67,662 constructor and memory-accounting comparisons also
 passed again. No actual GPU, full hybrid build or resource-error replay
 has been performed. The source tree and generated analysis layout are
 unchanged.
+
+## Regular texture upload contract
+
+Store_PlanImageUpload reproduces the decision and arguments of the
+regular upload boundary (Store_ImageUploadData), not the actual device
+call. The exact switch index and target tables match across all three
+pinned originals, as does the body after normalizing image-relative
+addresses and the five global references.
+
+| Image type | Behavior |
+| --- | --- |
+| 3 (2D) | UpdateSubresource if format supported |
+| 4 (3D) | Delegate to volume uploader, ignoring face argument |
+| 5 (cube) | UpdateSubresource if format supported |
+
+Width is read as uint16, shifted by the x86 masked mip count and
+clamped to at least 1. The subresource index is face * actual resource
+descriptor mip count + mip, with 32-bit wrap. Row-pitch cases are
+10/11/28/35/41 = 4*width, 65 = width, 71 = 8*ceil(width/4),
+74/77 = 16*ceil(width/4), 85 = 2*width. Other formats skip the GPU
+call altogether. The original supplies a null destination box and zero
+depth pitch, obtains/releases the resource from its SRV, and enters
+and leaves the context critical section around the update.
+
+The volume delegate is at MP 1407770F0, ZM 140774C30, SP 14061C9E0.
+Its internal Map/Unmap and per-slice copying have not been reconstructed
+yet. Do not use the regular 2D row-pitch table as a volume layout or
+a universal Vulkan format table.
+
+    python tests/verify_store_image_upload.py /path/to/store/files
+
+Executed successfully on Linux x86-64: 18,900 comparisons per build
+(56,700 total), including unsupported formats, boundary dimensions,
+masked shifts, randomized face and descriptor mip counts, and volume
+dispatch. Captured GPU arguments and ordering are compared with the
+C++ upload plan; actual data transfer, locks and volume copy are
+mocked. No runtime binding is installed. The descriptor helpers from
+the previous commit also compiled successfully as Windows x64 COFF.
