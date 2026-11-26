@@ -75,6 +75,6 @@ void AssetCache(){
     Material(0x60,"ui_line_graph");
 }
 // 1400D0050: original resolution scale helper, not dynamic font rasterization.
-float ResolutionScale(){return Font_Resolution?720.0f/float(Int(Font_Resolution)):1.0f;}
+float ResolutionScale(){return Font_Resolution?504.0f/float(Int(Font_Resolution)):0.7f;}
 }
 #endif
