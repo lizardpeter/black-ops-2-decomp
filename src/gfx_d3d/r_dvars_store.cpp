@@ -70,6 +70,22 @@ extern const Dvar *store_r_dualPlayEnable; // 1427E6E50
 extern const Dvar *store_r_dualPlayActive; // 1427E6D70
 extern const Dvar *store_r_blur; // 1427E7060
 extern const Dvar *store_r_flame_allowed; // 1427E6FF8
+extern const Dvar *store_r_enablePlayerShadow; // 14266D490
+extern const Dvar *store_r_enableFlashlight; // 1427E7200
+extern const Dvar *store_r_brightness; // 1427E7050
+extern const Dvar *store_r_filmUseTweaks; // 1427E6C80
+extern const Dvar *store_r_filmTweakEnable; // 1427E6B48
+extern const Dvar *store_exp_softclip; // 1427E6FE8
+extern const Dvar *store_vc_LIB; // 1427E6B00
+extern const Dvar *store_vc_LIG; // 1427E6BA8
+extern const Dvar *store_vc_LIW; // 1427E6B28
+extern const Dvar *store_vc_LOB; // 1427E6BB8
+extern const Dvar *store_vc_LOW; // 1427E6B78
+extern const Dvar *store_vc_RGBH; // 1427E6B38
+extern const Dvar *store_vc_RGBL; // 1427E6B50
+extern const Dvar *store_vc_YH; // 14266D4E8
+extern const Dvar *store_vc_YL; // 1427E6BA0
+const Dvar *Store_Renderer_Vec4(const char *,float,float,float,float,float,float,U32);
 extern unsigned char Store_Renderer_ModeByte; // 1427E7331
 const Dvar *Store_Renderer_Color(const char *,float,float,float,float,U32);
 const Dvar *Store_Renderer_Vec3(const char *,float,float,float,float,float,U32);
@@ -427,9 +443,34 @@ void RegisterRendererVisibilityShadowFragment() {
     InlineInt("r_forceCameraHdg",0,0,3,0x80);
     InlineBool("r_forceCamerarecord",false,0x80);
 }
+// 1407126D0..140712E97: film, exposure and color-vector controls.
+void RegisterRendererFilmColorFragment() {
+    store_r_enablePlayerShadow=InlineBool("r_enablePlayerShadow",false,Store_Renderer_ModeByte?0x5080:0x5000);
+    store_r_enableFlashlight=InlineInt("r_enableFlashlight",0,0,2,Store_Renderer_ModeByte?0x5000:0x1000);
+    InlineBool("r_waterFogTest",false,0x80);
+    Store_Renderer_Float("r_contrast",F(0x3f800000),F(0),F(0x40800000),0x80,"");
+    store_r_brightness=Store_Renderer_Float("r_brightness",F(0),F(0x3f000000),F(0x3fc00000),0x80,"");
+    Store_Renderer_Float("r_desaturation",F(0x3f800000),F(0),F(0x40800000),0x80,"");
+    Store_Renderer_Float("r_filmTweakBrightness",F(0),F(0xbf800000),F(0x3f800000),0x1000,"");
+    Store_Renderer_Float("r_filmTweakDesaturation",F(0x3e4ccccd),F(0),F(0x3f800000),0x1000,"");
+    InlineBool("r_filmTweakInvert",false,0x1000);
+    store_r_filmUseTweaks=InlineBool("r_filmUseTweaks",false,0x80);
+    store_r_filmTweakEnable=InlineBool("r_filmTweakEnable",false,0x1000);
+    store_exp_softclip=Store_Renderer_Float("exp_softclip",F(0x3e800000),F(0),F(0x3f800000),0x5000,"");
+    store_vc_LIB=Store_Renderer_Vec4("vc_LIB",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
+    store_vc_LIG=Store_Renderer_Vec4("vc_LIG",F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x3f800000),F(0x3c23d70a),F(0x41200000),0x5000);
+    store_vc_LIW=Store_Renderer_Vec4("vc_LIW",F(0x42000000),F(0x42000000),F(0x42000000),F(0x42000000),F(0),F(0x42000000),0x5000);
+    store_vc_LOB=Store_Renderer_Vec4("vc_LOB",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
+    store_vc_LOW=Store_Renderer_Vec4("vc_LOW",F(0x42000000),F(0x42000000),F(0x42000000),F(0x42000000),F(0),F(0x42000000),0x5000);
+    store_vc_RGBH=Store_Renderer_Vec4("vc_RGBH",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
+    store_vc_RGBL=Store_Renderer_Vec4("vc_RGBL",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
+    store_vc_YH=Store_Renderer_Vec4("vc_YH",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
+    store_vc_YL=Store_Renderer_Vec4("vc_YL",F(0),F(0),F(0),F(0),F(0),F(0x42000000),0x5000);
+}
 void RegisterRendererExtendedPrefix() {
     RegisterRendererRecoveredPrefix();
     RegisterRendererVisibilityShadowFragment();
+    RegisterRendererFilmColorFragment();
 }
 } // namespace store_renderer_dvar
 #endif

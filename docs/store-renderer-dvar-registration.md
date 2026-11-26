@@ -53,3 +53,7 @@ Run 45889760392 passed 2086 entry cases (102 events, 58 globals), 1400 isolated 
 ## Shadow and stereo continuation
 
 Run 45889971187 passed 512 continuous replays of the prior prefix. New source extends through 1407126CF with 51 additional registrations, 33 inlined lookup paths and 32 new global assignments. r_forceLod uses a null-terminated five-entry enum table with default index 4. The new continuous test compares 237..245 events and 124 result slots across 512 cases. Pending CI; no native activation or full-function claim.
+
+## Film and color-vector continuation
+
+Source extends to 140712E97, with 21 further registrations and 15 global assignments, including the conditional player-shadow and flashlight branches, film controls, exp_softclip and nine vec4 controls. The continuous test now includes the original vec4 ABI with all four default lanes and both bounds. Pending CI; the full renderer body is still incomplete.
