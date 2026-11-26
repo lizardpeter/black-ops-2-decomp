@@ -2,12 +2,15 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/ui/ui_font_assets_store.cpp":["AssetCache","ResolutionScale"],
+UNITS={"src/gfx_d3d/r_font_store.cpp":["DefaultFont","FontHandle","CharacterGlyph","RegisterFont","TextWidth"],
+       "src/ui/ui_font_assets_store.cpp":["AssetCache","ResolutionScale"],
        "src/client/screen_placement_store.cpp":["HudViewX","HudViewY","VirtualFromRealWidth","VirtualFromRealHeight"]}
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         tmp=pathlib.Path(tmp);headers=tmp/"headers";headers.mkdir()
-        for name,body in HEADERS.items():(headers/name).write_text(body)
+        adapters=dict(HEADERS)
+        adapters["cstdint"]+="\nnamespace std { using ::uint16_t; }\n"
+        for name,body in adapters.items():(headers/name).write_text(body)
         total=0
         for path,funcs in UNITS.items():
             obj=tmp/(pathlib.Path(path).stem+".obj")

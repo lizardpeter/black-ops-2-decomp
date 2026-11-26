@@ -7,7 +7,8 @@ on:
       - '.github/workflows/store-hud-resolution.yml'
       - 'src/ui/ui_font_assets_store.cpp'
       - 'src/client/screen_placement_store.cpp'
-      - 'tests/store_font_probe.cpp'
+      - 'tests/store_font*probe.cpp'
+      - 'src/gfx_d3d/r_font_store.cpp'
       - 'tests/verify_store_font*.py'
 permissions:
   contents: read
@@ -23,7 +24,10 @@ jobs:
       - run: python tools/fetch_originals.py t6mp_msstore originals --only exe
       - run: python tools/inventory/store_hud_resolution.py originals/t6mp_msstore.exe hud-evidence
       - run: python tests/verify_store_font.py originals/t6mp_msstore.exe
+      - run: python tests/verify_store_font_core.py originals/t6mp_msstore.exe
+        if: always()
       - run: python tests/verify_store_font_win64.py
+        if: always()
       - uses: actions/upload-artifact@v4
         if: always()
         with:
