@@ -11,6 +11,8 @@
 // Nothing on disk is changed; deleting the two DLLs restores the game.
 //
 // What happened is written to t6_enhanced.log next to the DLL.
+#include "ui_build_default.h"
+
 typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
@@ -214,12 +216,21 @@ static BOOL Install(HMODULE self)
 	if (identity->timestamp != timestamp || identity->imageSize != imageSize)
 		return Fail("T6 loader: the enhanced DLL does not match this executable.\r\n");
 
+	// P0017: the UI dvar registration was inlined, so there is no standalone function redirect.
+	const struct BuildNumberDefaultSite *buildNumber = T6_BuildNumberDefaultSite(timestamp, imageSize);
+	if (!buildNumber || buildNumber->rva > imageSize - sizeof(buildNumber->expected) ||
+	    !T6_BuildNumberDefaultMatches(exe + buildNumber->rva, buildNumber))
+		return Fail("T6 loader: unexpected UI build-number registration bytes.\r\n");
+
 	// Check every entry before writing any jumps.
 	for (unsigned long long i = 0; i < table->count; ++i)
 	{
 		const struct Redirect *r = &table->entries[i];
 		if (r->rva > imageSize - sizeof(r->prologue) || r->target - (ULONG_PTR)dll >= dllSize)
 			return Fail("T6 loader: invalid enhanced DLL redirect address.\r\n");
+		if (r->rva < buildNumber->rva + sizeof(buildNumber->expected) &&
+		    buildNumber->rva < r->rva + 14)
+			return Fail("T6 loader: overlapping UI default and function redirect.\r\n");
 		for (int b = 0; b < 16; ++b)
 			if (exe[r->rva + b] != r->prologue[b])
 				return Fail("T6 loader: the enhanced DLL does not match this executable.\r\n");
@@ -244,6 +255,16 @@ static BOOL Install(HMODULE self)
 		LogHex((unsigned long long)(ULONG_PTR)code);
 		Log("\r\n");
 	}
+	// Change just the bool default from 1 to 0 before any game initialization.
+	BYTE *defaultByte = exe + buildNumber->rva + T6_BUILD_NUMBER_DEFAULT_OFFSET;
+	DWORD oldDefaultProtect;
+	if (!VirtualProtect(defaultByte, 1, PAGE_EXECUTE_READWRITE, &oldDefaultProtect))
+		return Fail("T6 loader: could not make UI default writable.\r\n");
+	*defaultByte = 0;
+	if (!VirtualProtect(defaultByte, 1, oldDefaultProtect, &oldDefaultProtect) ||
+	    !FlushInstructionCache(GetCurrentProcess(), defaultByte, 1))
+		return Fail("T6 loader: could not finalize UI default.\r\n");
+	Log("ui_drawBuildNumber default: 0\r\n");
 	Log("enhanced build active\r\n");
 	if (s_log != INVALID_HANDLE_VALUE)
 		CloseHandle(s_log);

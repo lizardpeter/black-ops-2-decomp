@@ -3,6 +3,10 @@
 The enhanced Store build loads into the original Store 1.1.8.0 executables. Multiplayer uses
 `t6_enhanced.dll` and Zombies uses `t6_enhanced_zm.dll`. Both use the same `XINPUT1_4.dll` loader.
 
+## Shared MP and Zombies UI enhancement (P0017)
+
+The enhanced loader changes the inlined `ui_drawBuildNumber` registration default from true to false, before game initialization. It checks the supported PE identity and all 19 original instruction bytes before applying the single-byte change in memory. The underlying dvar and drawing behavior are retained, so setting it to 1 still enables the overlay. Internal build/protocol metadata is unchanged. Campaign is not supported by this loader. This is an interim enhanced-only patch, not a complete reconstruction of `UI_Refresh` or UI dvar registration.
+
 ## Multiplayer enhancements
 
 **P0002, mouse input** (`records/patches.tsv`):
