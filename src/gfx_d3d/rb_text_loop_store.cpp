@@ -371,7 +371,7 @@ void DrawText2D(const Byte*text,float baseX,float baseY,float w,const Byte*font,
                     if(rx<minX)minX=rx;
                     if(right>maxX)maxX=right;
                     if((flags&2)&&count==cursor){
-                        float cx,cy;Rotate(x,y,baseX,baseY,sn,cs,cx,cy);
+                        float cx,cy;Rotate(ox+x,y,baseX,baseY,sn,cs,cx,cy);
                         Loop_Cursor(material,cursorLetter,cx,cy,sn,cs,font,sx,sy,packed);
                     }
                 }else if(!(flags&0x100)||specialColor){
