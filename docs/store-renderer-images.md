@@ -246,3 +246,39 @@ helpers and the original setup body remain incomplete.
 For the standard reconstruction ledger, the full upload bodies remain
 outside records/functions.tsv until the standard differential runner
 supports this test. The symbol names are provisional Store ABI labels.
+
+## Complete resource constructors and setup
+
+This pass supersedes the descriptor-only status. The three resource
+constructors and Store_ImageSetup now have full C++ bodies in
+src/gfx_d3d/r_image_create.cpp. All four return void; the 3D constructor
+has an unused sixth argument slot, retained for its Store ABI. Resource
+creation and SRV creation each loop until the shared engine retry flag
+is clear (not based on HRESULT), then release the temporary resource.
+The original does not handle a failed final creation that leaves an
+invalid resource pointer; this is not claimed safe.
+
+Setup writes truncated dimensions even when disabled. It reads a dvar
+pointer (original name not yet recovered) with Dvar_GetBool semantics,
+selects cube before volume before 2D, derives mip levels from bit 1,
+and calls the reconstructed memory-accounting function using the original
+untruncated dimensions. The unused volume argument is explicitly zero in
+the authored body; no observable effect was found.
+
+    python tests/verify_store_image_create.py /path/to/store/files
+
+Executed on Linux x86-64 with the three SHA-256-pinned original PEs:
+20,000 comparisons per build, 60,000 total. The four original bodies
+execute together with mocked D3D11 COM calls, atoi and accounting
+boundary; native and original image bytes, descriptor words, initial
+data pointer, accounting arguments and order/count of calls are checked.
+The test exercises null/bool/string dvars, 100 formats, ten flag sets,
+random dimensions and multisample values, null/non-null initial data
+and one to three calls per retry loop. Original bodies normalize
+identically across builds after verified address relocation. The native
+test uses a local equivalent copy of the existing descriptor helpers;
+the checked-in test uses the repository helpers. Windows x64 COFF
+compilation passed against the isolated test headers, not the complete
+hybrid build. Actual GPU allocation and terminal COM failures remain
+unvalidated. No enhanced redirects installed, no standard ledger
+promotion before its runner supports these tests.
