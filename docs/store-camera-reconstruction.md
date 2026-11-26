@@ -91,3 +91,7 @@ Run 45899353063 passed the prior five function bodies and all 38 Windows public 
 ## Water height query
 
 Complete wrapper candidate 14038BAD0..14038BCDB preserves type-aware geometry-count read, vertical ray endpoints, original 64-byte ray and provisional geometry result layout, inverse delta, table end address, surface fraction and sentinel, brush trace and rounded height comparison. 16384 cases compare the initial query payloads and return values. Two lower-level queries remain external; the wrapper does not reproduce the collision engine. CI pending.
+
+## Alternate remote-eye view
+
+Full candidate 1400C3650..1400C3935, 164 instructions, preserves string-index and fallback-tag lookup, original tag pose, remote stored angles, command ring index and 128-command range, input angular update boundary, oscillation and type-aware cull state. The two original reads of the command sequence are represented without inventing concurrency guarantees. The replay supplies stable client memory, mocks both error boundaries and preserves R8 across the original tag-axis call. 16384 comparisons pending. No live activation.
