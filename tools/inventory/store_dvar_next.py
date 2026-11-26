@@ -24,7 +24,10 @@ CORE = {0x14046B300:"SetVariant",0x14046B150:"SetLatched",0x14046CEF0:"SetFloat"
         0x14046B950:"GetInt",0x14046B830:"FindByHash",0x14046B8B0:"FindByName",
         0x14046C1A0:"RegisterNew",0x14046BF10:"Reregister",0x14061BAF0:"SharedGameplay",
         0x14046B010:"ValuesEqual",0x14046AD80:"Constrain",0x14046ABD0:"Parse",
-        0x14046A6A0:"Format",0x1400C1B90:"FovCamera",0x140101410:"FovPostRegistration"}
+        0x14046A6A0:"Format",0x1400C1B90:"FovCamera",0x140101410:"FovPostRegistration",
+        0x1400C12F0:"CameraWeaponFov",0x1400C1A00:"CameraAdjustFov",0x1400C2060:"CameraNextView",
+        0x1400F9280:"FovDefaultSelect",0x1400F92F0:"FovDefaultUpdate",0x1400F93E0:"FovConsumerA",
+        0x1400F9470:"FovConsumerB",0x1400F98D0:"FovDefaultConsumer",0x14016CE80:"ExtraCameraFov"}
 HEADER = re.compile(r"^; ([0-9a-fA-F]+)\s")
 INSN = re.compile(r"^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+")
 

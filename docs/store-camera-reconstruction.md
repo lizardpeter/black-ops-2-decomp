@@ -1,0 +1,5 @@
+# Store MP camera reconstruction
+
+First complete enclosing-body candidate: 1400C1B90..1400C2057 (309 instructions). The implementation preserves weapon selection, override dvar conversions, packed attachment indices, the attachment sentinel and first-null termination, 45-degree fallback, default-FOV and mode early returns, weapon and entity overrides, minimum and scale computation. Several early returns bypass the final scale. The original pointer at 140E4F8E0 is indexed by client, but the adjacent address 140E4F8E8 is also cg_fov; only client zero is asserted in the test. The first ABI lane to 1400C12F0 and original error boundary need further callee evidence. The differential harness controls original external calls and compares ordered events and float bits. It does not validate callees, launch the game or activate a replacement. CI pending.
+
+Next evidence extraction captures the neighboring weapon-FOV calculation, its adjustment helper, following view function, default-FOV selection/update and extra-camera consumer. These are not yet reconstructed. Original defaults unchanged. Store MP only.

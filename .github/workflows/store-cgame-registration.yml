@@ -5,6 +5,9 @@ on:
     paths:
       - 'src/cgame_mp/cg_register_dvars_store.cpp'
       - 'src/cgame_mp/cg_fov_mode_store.cpp'
+      - 'src/cgame_mp/cg_view_fov_store.cpp'
+      - 'tests/store_camera_fov_probe.cpp'
+      - 'tests/verify_store_camera_fov.py'
       - 'tests/store_cg_fov_mode_probe.cpp'
       - 'tests/verify_store_cg_fov_mode.py'
       - 'src/qcommon/common_register_dvars_store.cpp'
@@ -102,6 +105,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_cg_fov_mode.py originals/t6mp_msstore.exe | tee fov-mode.log
+      - name: Replay complete Store camera FOV calculation
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_fov.py originals/t6mp_msstore.exe | tee camera-fov.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -121,4 +128,5 @@ jobs:
             dvar-next.log
             dvar-setters.log
             fov-mode.log
+            camera-fov.log
           if-no-files-found: warn
