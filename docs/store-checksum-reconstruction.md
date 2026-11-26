@@ -206,3 +206,32 @@ runtime binding or integrity behavior changed.
 All three builds contain the same CRC table; SP has no exact normalized
 MP startup or continuation match and no identical inlined finalization
 fragment. SP function-level equivalence remains unresolved.
+
+## Store declaration inventory audit (2026-11-26)
+
+The PDB-attributed x86 reference export contains 23 distinct
+LiveAntiCheat_* names. The authored translation unit accounts for
+all 23 (five existing definitions, eight noncompiled candidate
+declarations, three inline candidates, seven unresolved standalone
+declarations). This is name coverage only.
+
+The generated MP matcher contains two direct identifications for this
+source unit: one registration/name match (0.89) and one caller-based
+match (0.75). The remaining candidate declarations are manual
+observations from the previous pass, not additional generated matcher
+results. No new machine-level signature or C++ type was verified in
+this audit. A discarded return value is not proof of a void return
+type; machine-width arguments are not sufficient to infer original
+C++ type names or qualifiers.
+
+The repository currently contains full Ghidra exports for Store MP
+and PE/unwind inventories for Store ZM and SP. Existing local replay
+results documented above are not equivalent to complete disassembly
+coverage for ZM/SP. The current repository connector did not return
+the large MP pseudocode export, including a line-range request;
+the raw-file request also failed. This audit therefore did not
+independently repeat the previous manual disassembly observations.
+
+Only authored comments and documentation changed. No generated
+analysis, compiled declarations, function registry, runtime
+integration, or original integrity behavior changed.
