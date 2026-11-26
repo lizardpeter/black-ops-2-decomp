@@ -25,7 +25,8 @@ static volatile unsigned diagOp,diagSeed;static const B*diagBase;static volatile
 static void Crash(int, siginfo_t*si,void*ctx){
     const auto*uc=static_cast<ucontext_t*>(ctx);const auto*g=uc->uc_mcontext.gregs;
     char message[512];int n=std::snprintf(message,sizeof(message),"LUI replay fault op=%u seed=%08x original=%d address=%p RIP=%llx mappedRVA=%llx RAX=%llx RBX=%llx RCX=%llx RDX=%llx R8=%llx R9=%llx R10=%llx R11=%llx\n",unsigned(diagOp),unsigned(diagSeed),int(diagOriginal),si->si_addr,(unsigned long long)g[REG_RIP],(unsigned long long)(g[REG_RIP]-reinterpret_cast<std::uintptr_t>(diagBase)),(unsigned long long)g[REG_RAX],(unsigned long long)g[REG_RBX],(unsigned long long)g[REG_RCX],(unsigned long long)g[REG_RDX],(unsigned long long)g[REG_R8],(unsigned long long)g[REG_R9],(unsigned long long)g[REG_R10],(unsigned long long)g[REG_R11]);
-    if(n>0)write(2,message,unsigned(n)<sizeof(message)?unsigned(n):sizeof(message)-1);_exit(139);
+    if(n>0){const auto ignored=write(2,message,unsigned(n)<sizeof(message)?unsigned(n):sizeof(message)-1);(void)ignored;}
+    _exit(139);
 }
 static B font[64],glyphs[96*24],pairs[16*8],element[0x140],node[0x28+32*84],lua[128];
 static B node2[0x7c],luaStack[64];
