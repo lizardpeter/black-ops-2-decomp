@@ -78,7 +78,10 @@ def extract(path, out):
                 result["f32_repr"] = repr(struct.unpack("<f", data)[0])
         if not result["writable"]:
             result["string_candidate"] = string(va)
-            # Pointer arrays are candidates, not proven enum tables.
+        # Several renderer enum arrays are initialized .data, not .rdata.
+        # Recover file-backed pointer tables regardless of section flags.
+        # This is initial image evidence, not proof of unchanged runtime data.
+        if width == 0:
             entries = []
             for i in range(128):
                 qword = read(va + i * 8, 8)
@@ -165,6 +168,22 @@ def extract(path, out):
                 "instructions": rows, "calls": calls, "branches": branches,
                 "block_leaders": [hex(a) for a in sorted(leaders)],
                 "references": list(refs.values()), "unresolved_operands": unresolved}
+    # Explicit table arguments recovered from the contiguous source prefix
+    # and subsequent renderer debug/material registration instructions.
+    table_vas = {
+        "r_clipCodec": 0x140D39F30, "r_clipSize": 0x140D3A1E0,
+        "r_texFilterMipMode": 0x140D3A138, "r_debugShader": 0x140D3A1A8,
+        "r_debugPerformance": 0x140D3A230, "r_lightMapSecondary": 0x140D39F50,
+        "r_colorMap": 0x140D3A088, "r_alphaMap": 0x140D3A0B8,
+        "r_specularMap": 0x140D3A250, "r_glossMap": 0x140D3A270,
+        "r_occlusionMap": 0x140D3A208,
+    }
+    evidence["enum_table_arguments"] = {
+        name: reference(va, 0) for name, va in table_vas.items()
+    }
+    (out / "renderer-enum-tables.json").write_text(
+        json.dumps(evidence["enum_table_arguments"], indent=2) + "\n")
+    print("Renderer enum table evidence:", json.dumps(evidence["enum_table_arguments"]))
     (out / "renderer-evidence.json").write_text(json.dumps(evidence, indent=2) + "\n")
     lookup = {(r["va"], r["width"]): r for r in refs.values()}
     lines = []
