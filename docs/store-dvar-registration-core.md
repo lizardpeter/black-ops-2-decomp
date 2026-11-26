@@ -55,3 +55,7 @@ The test exercises all nine typed wrappers, ordinary re-registration, flag/sette
 ## Executed validation
 
 GitHub Actions run 45883561059 (commit b0b133758dc4ba1a3d37ea0134dec217fc935bfa) successfully compiled and executed `tests/store_dvar_core_test.cpp` with g++ C++17, -O2, -Wall, -Wextra, -Werror. This is source-body validation with mocked helpers, not original-PE core differential validation.
+
+## Setter continuation
+
+Run 45893707622 recovered original instructions at 14046B150 (121), 14046B300 (311) and 14046CEF0 (33), plus the exact GetInt body. New complete source candidates SetLatched (14046B150) and SetFloat (14046CEF0) preserve partial vector stores, string sharing, release after publication, null/name checks, the 32-byte %g formatter boundary and source argument. SetVariant still needs its own body and the TLS, domain, equality and callback boundaries. The isolated original-PE setter replay compares memory and helper calls; pending CI. It does not activate a native registry. The new extractor also covers the original equality, constrain, parse, format and both FOV consumer bodies.

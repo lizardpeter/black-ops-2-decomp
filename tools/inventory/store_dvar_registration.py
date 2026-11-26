@@ -13,7 +13,7 @@ from pathlib import Path
 import re
 import sys
 
-ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(__file__).resolve().parents[2]
 TARGETS = {
     "14046B8B0": "find", "14046C1A0": "new", "14046BF10": "reregister",
     "14046C4C0": "bool", "14046C580": "int", "14046C650": "float",

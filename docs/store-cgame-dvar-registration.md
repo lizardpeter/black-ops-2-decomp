@@ -37,3 +37,7 @@ Enum table and global addresses are alongside declarations in the candidate. Val
 ## FOV ownership
 
 MP CG_RegisterDvars_Project stores cg_fov at 140E4F8E8 (65/1/160), cg_fovScale at 140D78658 (1/0.2/2), cg_fovMin at 140D78648 (10/1/160), and cg_fovExtraCam at 140D78638 (30/1/160), all flags 0x80. The user-facing cg_fov_default (65/65/90, flags 0x84000, global 142161688) and cg_fov_default_thirdperson (40/1/160, flags 0x84000, global 142161678) are registered in the much larger Windows startup routine 14049BFC0, not in CG_RegisterDvars_Project. The reference client code confirms a modified callback, third-person view selection and camera-specific FOV paths; those must be traced in the Store image before claiming persistence or raising the cap in enhanced. No startup or enhanced runtime change is made here.
+
+## Direct FOV global reference scan
+
+Run 45893707622 scanned the pinned original and confirmed three cg_fovScale RIP-relative references: 140101898 (write in registration 140101580), 140101562 (read in 140101410), and 1400C1FDA (read in 1400C1B90). cg_fovMin has two references and cg_fov has 16. This is a direct reference inventory, not a claim of all indirect consumers or complete camera math. The next extraction captures both cg_fovScale consumer bodies.

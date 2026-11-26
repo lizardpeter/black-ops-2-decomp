@@ -7,6 +7,8 @@ on:
       - 'src/qcommon/common_register_dvars_store.cpp'
       - 'src/universal/dvar_registration_store.cpp'
       - 'tests/store_dvar_core_test.cpp'
+      - 'tests/store_dvar_setter_probe.cpp'
+      - 'tests/verify_store_dvar_setters.py'
       - 'tests/store_common_registration_probe.cpp'
       - 'tests/verify_store_common_registration.py'
       - 'tests/store_cgame_registration_probe.cpp'
@@ -89,6 +91,10 @@ jobs:
         run: |
           set -o pipefail
           python tools/inventory/store_dvar_next.py originals/t6mp_msstore.exe dvar-next-evidence | tee dvar-next.log
+      - name: Replay original Store latched and float setters
+        run: |
+          set -o pipefail
+          python tests/verify_store_dvar_setters.py originals/t6mp_msstore.exe | tee dvar-setters.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -106,4 +112,5 @@ jobs:
             renderer-native-bindings.log
             dvar-next-evidence/
             dvar-next.log
+            dvar-setters.log
           if-no-files-found: warn

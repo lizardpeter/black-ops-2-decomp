@@ -58,6 +58,7 @@ Value *Store_DvarParse(Value *,int,const Limits *,const char *); // 14046ABD0
 Value *Store_DvarConstrain(Value *,int,const Value *,const Value *,const Limits *); // 14046AD80
 void Store_DvarSetVariant(Record *,const Value *,int); // 14046B300
 void Store_DvarSetLatched(Record *,const Value *); // 14046B150
+int Store_DvarFormatBuffer(char *,unsigned,const char *,double); // 140471EC0 (%g call ABI)
 void Store_DvarReregister(Record *,const char *,int,U32,const Value *,const Limits *,const char *); // 14046BF10
 }
 
@@ -117,6 +118,40 @@ void CopyResetString(Record *d,Value *out,const char *s) {
     if (SameString(d->current.string,s)) out->string=d->current.string;
     else if (SameString(d->latched.string,s)) out->string=d->latched.string;
     else out->string=Intern(s);
+}
+
+// 14046B150 -- current/reset alias sharing, then intern; release a
+// unique previous latched string only after the new pointer is published.
+// Non-string types copy exactly their original lane counts.
+void SetLatched(Record *d,const Value *v) {
+    if(d->type!=8) {
+        std::memcpy(&d->latched,v,ValueBytes(d->type));
+        return;
+    }
+    const char *old=d->latched.string;
+    if(old==v->string) return;
+    const bool release=old && old!=d->current.string && old!=d->reset.string;
+    const char *next;
+    if(SameString(d->current.string,v->string)) next=d->current.string;
+    else if(SameString(d->reset.string,v->string)) next=d->reset.string;
+    else next=Intern(v->string);
+    d->latched.string=next;
+    if(release) Store_DvarRelease(old);
+}
+
+// 14046CEF0 -- no operation for null dvar or null name; the name need
+// not be nonempty here (SetVariant has a separate empty-name check).
+// Non-float types use a 32-byte temporary formatted with original %g.
+void SetFloat(Record *d,float value,int source) {
+    if(!d || !d->name) return;
+    alignas(16) Value v{};
+    char buffer[32];
+    if(d->type==2) std::memcpy(&v.words[0],&value,4);
+    else {
+        Store_DvarFormatBuffer(buffer,sizeof(buffer),"%g",double(value));
+        v.string=buffer;
+    }
+    Store_DvarSetVariant(d,&v,source);
 }
 
 // 14046BAB0 -- preserves unused vector lanes and releases unique old reset strings.

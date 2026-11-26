@@ -22,7 +22,9 @@ FOV = {0x140E4F8E8:"cg_fov",0x140D78658:"cg_fovScale",0x140D78648:"cg_fovMin",
        0x140D78638:"cg_fovExtraCam",0x142161688:"cg_fov_default",0x142161678:"cg_fov_default_thirdperson"}
 CORE = {0x14046B300:"SetVariant",0x14046B150:"SetLatched",0x14046CEF0:"SetFloat",
         0x14046B950:"GetInt",0x14046B830:"FindByHash",0x14046B8B0:"FindByName",
-        0x14046C1A0:"RegisterNew",0x14046BF10:"Reregister",0x14061BAF0:"SharedGameplay"}
+        0x14046C1A0:"RegisterNew",0x14046BF10:"Reregister",0x14061BAF0:"SharedGameplay",
+        0x14046B010:"ValuesEqual",0x14046AD80:"Constrain",0x14046ABD0:"Parse",
+        0x14046A6A0:"Format",0x1400C1B90:"FovCamera",0x140101410:"FovPostRegistration"}
 HEADER = re.compile(r"^; ([0-9a-fA-F]+)\s")
 INSN = re.compile(r"^\s*([0-9a-fA-F]+)\s+([0-9a-fA-F]+)\s+")
 

@@ -7,6 +7,7 @@
 #include <cctype>
 #include <cmath>
 #include <limits>
+#include <cstdio>
 using namespace store_dvar;
 namespace store_dvar {
 extern "C" {
@@ -38,6 +39,7 @@ Value *Store_DvarParse(Value *out,int,const Limits *,const char *) { *out=Value{
 Value *Store_DvarConstrain(Value *out,int,const Value *parsed,const Value *,const Limits *) { *out=*parsed; return out; }
 void Store_DvarSetVariant(Record *,const Value *v,int source) { assert(source==0); ++setCount; seenSet=*v; }
 void Store_DvarSetLatched(Record *,const Value *v) { ++latchCount; seenLatch=*v; }
+int Store_DvarFormatBuffer(char *s,unsigned n,const char *fmt,double v) { return std::snprintf(s,n,fmt,v); }
 }
 }
 int main() {
