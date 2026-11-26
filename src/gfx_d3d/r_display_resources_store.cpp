@@ -74,7 +74,7 @@ void SetUI3DViewport(U slot,float x,float y,float w,float h){
 void BuildSwapChainDesc(B*out,const B*in){
     U msaa=DvarInt(Display_MSAADvar);
     Display_SampleDesc=msaa==16?Q(0x1000000004ull):Q(msaa);
-    std::memset(out,0,72);
+    for(unsigned i=0;i<72;++i)out[i]=0;
     W(out,0,R<U>(in,32));W(out,4,R<U>(in,36));W(out,16,U(0x1c));
     W(out,0x1c,U(1));W(out,0x24,U(0x20));W(out,0x28,U(2));
     W(out,0x30,R<Q>(in,0));W(out,0x38,U(1));W(out,0x40,U(2));
