@@ -429,3 +429,41 @@ failure, real GPU allocation, real virtual allocation and full
 Windows hybrid integration are not verified. The Win32 import
 declaration for VirtualFree is added to the reconstruction SDK shim.
 No runtime redirects or standard ledger promotions are introduced.
+
+## Render-target switching, clears and view state
+
+| Function | MP | ZM | SP |
+| --- | --- | --- | --- |
+| Store_ResetWorldMatrix | 140764F20 | 140762A60 | 14060AC80 |
+| Store_Set3DView | 140764FC0 | 140762B00 | 14060AD20 |
+| R_SetRenderTarget | 140766F00 | 140764A40 | 14060CD20 |
+| Store_ClearScreen | 1407670F0 | 140764C30 | 14060CF10 |
+
+All four complete bodies return void (no caller-consumed return).
+Three names are provisional. The target-switch reference is
+R_SetRenderTarget; Store passes the two-pointer context indirectly.
+The clear body merges the reference's clear wrapper/internal path
+and does not read a viewport argument. Mask bit 4 clears color if its
+view exists; mask bits 0/1 clear depth/stencil even if the depth view
+is null. Switching the current target is a no-op. Otherwise the
+shader-image cache is scanned, aliases are unbound via PSSetShaderResources,
+and color/depth attachments are compared by view identity. A changed
+color view resets viewport bounds and depth range; a changed color
+or depth view triggers OMSetRenderTargets and RSSetViewports. The
+target ID, view mode and viewport-dirty byte are then updated.
+The matrix reset increments seven 16-bit versions, copies identity,
+and subtracts camera-relative origin. The view setter copies 0x150
+bytes and calls that reset after interpreting the flag with UCOMISS/JE
+(including unordered values).
+
+    python tests/verify_store_state.py /path/to/store/files
+
+Executed successfully on Linux x86-64: 18,432 comparisons per build,
+55,296 total. The test checks full source/state byte snapshots and
+mocked COM arguments, including target equality, alias removal,
+attachment changes, viewport state, clear masks and view-mode changes.
+All four normalized bodies and the original identity matrix agree
+across the SHA-256-pinned MP/ZM/SP executables. The current tests use
+valid target indices and bounded slot counts, and do not assert actual
+GPU behavior, a full command-buffer layout or a Windows hybrid build.
+No runtime redirects or standard-ledger promotions are introduced.
