@@ -75,7 +75,7 @@ static void Run(void*image,unsigned seed,void*out,unsigned mode){
         if(image){
             auto*b=static_cast<Byte*>(image);
             W(b,0x2c48354,Loop_GameTime);std::memcpy(b+0x9b0138,Loop_Palette,sizeof(Loop_Palette));W(b,0x27f18cc,Loop_Color8);W(b,0x27f18c8,Loop_Color9);
-            W(b,0x4449e974,Loop_TimerInitialized);W(b,0x21e448c,Loop_TimerOrigin);W(b,0x4449ed10,Loop_BlinkBase);W(b,0x4449ed0c,Loop_BlinkElapsed);W(b,0xd3af68,Loop_BlinkVisible);
+            W(b,0x449e974,Loop_TimerInitialized);W(b,0x21e448c,Loop_TimerOrigin);W(b,0x449ed10,Loop_BlinkBase);W(b,0x449ed0c,Loop_BlinkElapsed);W(b,0xd3af68,Loop_BlinkVisible);
             using F=void(MS*)(const Byte*,float,float,float,const Byte*,float,float,float,float,U32,int,U32,int,Byte,float,U32,int,int,int,int,int,int,const Byte*,const Byte*);
             reinterpret_cast<F>(b+0x732480)(text,x,y,width,font,sx,sy,0,1,color,100,flags,cursor,ch,0.25f,0,birth,interval,2000,300,50,100,nullptr,nullptr);
         }else DrawText2D(text,x,y,width,font,sx,sy,0,1,color,100,flags,cursor,ch,0.25f,0,birth,interval,2000,300,50,100,nullptr,nullptr);
