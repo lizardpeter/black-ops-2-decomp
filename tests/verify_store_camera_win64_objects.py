@@ -34,6 +34,7 @@ UNITS={
     "src/cgame_mp/cg_fov_mode_store.cpp":("T6_STORE_CG_FOV_MODE_REPLAY",["SetHudAndFovMode"]),
     "src/cgame_mp/cg_main_view_store.cpp":("T6_STORE_CAMERA_REPLAY",["CalcViewValues"]),
     "src/cgame_mp/cg_third_person_store.cpp":("T6_STORE_CAMERA_REPLAY",["OffsetThirdPersonView"]),
+    "src/cgame_mp/cg_turret_view_store.cpp":("T6_STORE_CAMERA_REPLAY",["CalcTurretViewValues"]),
     "src/cgame_mp/cg_view_fov_store.cpp":("T6_STORE_CAMERA_REPLAY",["CalculateFov"]),
 }
 HEADERS={

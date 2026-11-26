@@ -79,3 +79,7 @@ Full 180-instruction body at 1400C66D0..1400C69EF preserves six cleared offset f
 ## Camera basis and remote motion
 
 Latest prior run 45898978967 passed vehicle offset and all 33 public Win64 functions. Four new complete source candidates: VectorToAngles 140461020 (58 instructions), tag quaternion-to-axis conversion 1400DE970 (70), CG_CalcCubemapViewValues 14016BDA0 (74), remote oscillation 1400C33F0 (129). Cubemap face order checked directly against the Store jump table, tag scale comes from the original record rather than imposing normalization, remote motion reads two sets of raw dvar lanes and preserves speed window and waveform order. 32768 comparisons and updated Win64 audit pending. The remote boundary in the earlier remote-eye body is not yet replaced. No live activation.
+
+## Turret view positioning
+
+Complete candidate at 14016BFB0..14016C374. Includes entity and model map resolution, player tag, missing tag error, weapon first-person offset, original random angular jitter, history reset outside 300 ms window, view offset helper and local-axis translation. Original engine helper 1400C23C0 is an explicit call boundary; extractor captures it next. 16384 original-body comparisons pending. No live activation.
