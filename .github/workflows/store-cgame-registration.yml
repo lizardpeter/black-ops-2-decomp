@@ -16,6 +16,9 @@ on:
       - 'src/cgame/cg_camera_motion_store.cpp'
       - 'src/cgame_mp/cg_camera_effects_store.cpp'
       - 'src/cgame/cg_camera_mode_store.cpp'
+      - 'src/cgame_mp/cg_third_person_store.cpp'
+      - 'tests/store_third_person_probe.cpp'
+      - 'tests/verify_store_third_person.py'
       - 'tests/store_camera_mode_probe.cpp'
       - 'tests/verify_store_camera_mode.py'
       - 'tests/store_camera_effects_probe.cpp'
@@ -175,6 +178,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_mode.py originals/t6mp_msstore.exe | tee camera-mode.log
+      - name: Replay complete Store third-person camera body
+        run: |
+          set -o pipefail
+          python tests/verify_store_third_person.py originals/t6mp_msstore.exe | tee camera-third.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -204,4 +211,5 @@ jobs:
             camera-motion.log
             camera-effects.log
             camera-mode.log
+            camera-third.log
           if-no-files-found: warn

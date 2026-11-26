@@ -43,3 +43,7 @@ Full source candidates at 14016BA40..14016BD96 and 1400C7540..1400C7713. The fir
 ## Main camera mode
 
 Full candidate at 1400C0E20..1400C1235, 252 instructions. Preserves demo mode gate, vehicle seat and definition checks, independent entity lookups, turret and missile modes, prior/current transition state comparisons, vehicle exit pitch handling, sound futz selection and original mode-state writes. 32768 original differential comparisons pending. Camera motion NaN correction passed full replay run 45897504478. First-person/shake CI pending. No live redirect.
+
+## Third-person view
+
+Run 45897672565 passed all 49152 first-person/shake/mode comparisons. Complete third-person candidate at 14016A940..14016B04B preserves player/death camera tag resolution, corpse camera horizontal capsule constraint and vertical clamp, chase camera dispatch, original 45-degree pitch ceiling, focus point and collision trace, water-height adjustment, and final angle-to-axis conversion. 32768 original-body comparisons queued; collision trace and tag transform are explicit external boundaries. No runtime redirect.
