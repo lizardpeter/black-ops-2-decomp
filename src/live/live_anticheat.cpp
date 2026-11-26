@@ -121,42 +121,62 @@ bool LiveAntiCheat_CompleteHash(void *handle, unsigned long long *result)
 }
 #endif
 
-// Remaining original translation-unit functions -- declaration inventory only.
-// Prototypes below are from the named CoDMPServer_PC reference. They are kept
-// disabled until their Store x64 ABI is independently established. No bodies,
-// placeholder return values, linkage, or runtime overrides are supplied.
-// In particular, LTCG may change the emitted Store signature or inline a body.
+// Remaining translation-unit functions: Store MP signature evidence only.
+// No implementation, executable declarations, or runtime binding is supplied.
+// Store LTCG can inline source functions or combine their callers. A source
+// prototype is not necessarily a standalone x64 ABI. The following inventory
+// distinguishes observed return/argument shapes from proposed semantic types.
+//
+// Evidence: analysis/t6mp_msstore/{pseudocode,disasm}/_unattributed/14050000.*
+// and analysis/t6mp_msstore/match/functions.tsv. ZM/SP not verified here.
 #if 0
-// Ban notification (reference lines 375, 385).
-void LiveAntiCheat_BanDoConnected();
-void LiveAntiCheat_DWPlayerBanned(unsigned long long userID);
+// Candidate: Store body has no arguments or returned value; name based on
+// ban/disconnect string references. Separate player-ban callback unresolved.
+void LiveAntiCheat_BanDoConnected(); // Store candidate
+// LiveAntiCheat_DWPlayerBanned: standalone Store entry/signature unresolved.
 
-// Challenge request handlers (reference lines 723, 831, 852, 896, 992).
+// Store pseudocode and caller analysis support a Boolean result for the
+// following two retained functions. Argument widths are visible, but exact
+// original C++ parameter types and qualifiers are not independently proven.
+// Keep reference semantic types provisional; no definition is supplied.
 bool LiveAntiCheat_AnswerChecksumRequest(ControllerIndex_t,
     bdArray<bdAntiCheatChallengeParam> *, long long *, challengeTest_t);
-bool LiveAntiCheat_AnswerDvarRequest(ControllerIndex_t,
-    bdArray<bdAntiCheatChallengeParam> *, long long *);
-bool LiveAntiCheat_AnswerDvarFloatRequest(ControllerIndex_t,
-    bdArray<bdAntiCheatChallengeParam> *, long long *);
-bool LiveAntiCheat_AnswerExpressionRequest(ControllerIndex_t,
-    bdArray<bdAntiCheatChallengeParam> *, long long *);
 bool LiveAntiCheat_GetChallengeResponse(ControllerIndex_t, unsigned short,
     bdArray<bdAntiCheatChallengeParam> *, long long *);
 
-// Challenge lifecycle (reference lines 1038--1228).
+// The dispatcher contains the other three reference request handlers'
+// behavior. No distinct Store entries or standalone signatures established.
+// LiveAntiCheat_AnswerDvarRequest: inline candidate.
+// LiveAntiCheat_AnswerDvarFloatRequest: inline candidate.
+// LiveAntiCheat_AnswerExpressionRequest: inline candidate.
+
+// Store candidates: one 32-bit argument, no consumed return value.
 void LiveAntiCheat_AnswerChallengesRetry(ControllerIndex_t);
-// Reference returns TaskRecord*; Store candidate return ABI not verified.
-TaskRecord *LiveAntiCheat_AnswerChallenges(ControllerIndex_t);
+void LiveAntiCheat_ResetChallengeResponse(ControllerIndex_t);
+
+// The success callback is matched by registration; the failure callback
+// has the corresponding single-pointer/Boolean machine-level shape.
+// TaskRecord is a reference-derived semantic type, not a verified x64 layout.
 bool LiveAntiCheat_AnswerChallengesSuccess(TaskRecord *);
 bool LiveAntiCheat_AnswerChallengesFailure(TaskRecord *);
-void LiveAntiCheat_ResetChallengeResponse(ControllerIndex_t);
+
+// Store candidate has two 64-bit argument slots and no recovered result.
+// The by-value reference wrapper's precise x64 ABI remains unverified.
 void LiveAntiCheat_OnChallengesReceived(unsigned long long,
     bdReference<bdAntiCheatChallenges>);
-void LiveAntiCheat_ProcessChallenges(ControllerIndex_t);
 
-// Game reporting (reference lines 1394--1425).
-void LiveAntiCheat_ClearGameReport();
-void LiveAntiCheat_SetThresholdExceeded(int threshold);
-void LiveAntiCheat_ReportLaggedDamage();
-void LiveAntiCheat_SetGameReportTags(int *numTags, bdTag *tags, int maxTags);
-#endif // reference declarations only
+// The generated matcher labels a Store candidate AnswerChallenges (0.75).
+// Its observed interface has one 32-bit argument, no consumed return value,
+// and includes processing logic. This may be a merged/inlined body.
+// LiveAntiCheat_AnswerChallenges: separate Store signature unresolved.
+// LiveAntiCheat_ProcessChallenges: candidate void(ControllerIndex_t);
+// do not assert a separate entry for both names.
+
+// Reporting:
+// LiveAntiCheat_ClearGameReport: separate Store signature unresolved.
+// LiveAntiCheat_SetThresholdExceeded: separate Store signature unresolved.
+// LiveAntiCheat_ReportLaggedDamage: separate Store signature unresolved.
+// LiveAntiCheat_SetGameReportTags: Store candidate accepts two pointer-sized
+// arguments; the reference's third argument is not established in this build.
+// Exact source prototype and return contract remain unresolved.
+#endif // noncompiled Store MP signature inventory
