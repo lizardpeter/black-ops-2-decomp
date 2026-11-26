@@ -20,6 +20,7 @@ on:
       - 'src/cgame/cg_camera_detail_store.cpp'
       - 'src/bgame/bg_camera_bob_store.cpp'
       - 'src/cgame/cg_third_person_trace_store.cpp'
+      - 'tests/verify_store_camera_win64_objects.py'
       - 'tests/store_camera_trace_probe.cpp'
       - 'tests/verify_store_camera_trace.py'
       - 'tests/store_camera_bob_probe.cpp'
@@ -203,6 +204,10 @@ jobs:
         run: |
           set -o pipefail
           python tests/verify_store_camera_trace.py originals/t6mp_msstore.exe | tee camera-trace.log
+      - name: Compile all recovered camera bodies to Windows x64 objects
+        run: |
+          set -o pipefail
+          python tests/verify_store_camera_win64_objects.py | tee camera-win64-objects.log
       - uses: actions/upload-artifact@v4
         if: always()
         with:
@@ -236,4 +241,5 @@ jobs:
             camera-detail.log
             camera-bob.log
             camera-trace.log
+            camera-win64-objects.log
           if-no-files-found: warn

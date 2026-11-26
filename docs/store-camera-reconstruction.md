@@ -59,3 +59,7 @@ Run 45898185322 passed third-person and detail helpers (57344 comparisons). New 
 ## Third-person collision wrapper
 
 Complete candidate at 1400C69F0..1400C6D28, including ignore-entity precedence, original +/-6 bounds, trace context sentinels, inverse-square-root fallback, threshold interpolation, optional second trace with raised endpoint, and original fraction return. The trace result/context types are provisional byte layouts, not claimed full engine structure definitions. Underlying engine collision query 140190530 is still external. 32768 comparisons pending, with aliased output/start and second-query context persistence.
+
+## Windows-target object audit
+
+The camera replay builds use host C++ with explicit MS x64 call bridges. A separate Win64 COFF audit now compiles all 16 camera source translation units with build_recon.compile_unit and the production x64 flags, checking the machine identifier and every expected public decorated function symbol. The audit supplies only isolated cstdint/cstddef/cstring compatibility adapters (builtin memcpy); it does not change the normal build headers. This is compilation, not a DLL link, rebased binding audit or live replacement. Pending CI.
