@@ -2,7 +2,10 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/cgame/cg_hud_math_store.cpp":["UnpackHudColor","WorldToHud","WorldToHudAlternate","ClampHud","FadeHudNearCenter","QuaternionAxis"],
+UNITS={"src/gfx_d3d/r_init_state_store.cpp":["InitializeSourceState","InitializeCommandState","IssueRenderFrame","PrepareWorldDraw","SetupImage"],
+       "src/ui/ui_item_text_store.cpp":["CalculateTextExtents"],
+       "src/qcommon/localize_format_store.cpp":["TranslateExe","TranslateMessage"],
+       "src/cgame/cg_hud_math_store.cpp":["UnpackHudColor","WorldToHud","WorldToHudAlternate","ClampHud","FadeHudNearCenter","QuaternionAxis"],
        "src/ui/lui_text_render_store.cpp":["DrawText"],
        "src/ui/lui_inline_icon_store.cpp":["DrawInlineIcon"],
        "src/ui/ui_text_wrappers_store.cpp":["DrawTextScaled","DrawTextRotated","DrawTextNormalized","ItemFont","DecimalSeparator","DrawTextGlow","DrawHudText","DrawDistance"],
