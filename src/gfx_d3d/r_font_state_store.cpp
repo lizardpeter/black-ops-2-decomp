@@ -56,10 +56,10 @@ void SetWorldTextTransform(Byte*s){
     W(s,0x30,0.0f-R<float>(s,0x1ac0));W(s,0x34,0.0f-R<float>(s,0x1ac4));W(s,0x38,0.0f-R<float>(s,0x1ac8));
 }
 // 14073D540: update cached vertex buffer streams and only issue changed interval.
-void SetVertexBuffer(Byte*s,const void*buffer,int stride,int offset){
+void SetVertexBuffer(Byte*s,const void*buffer,int offset,int stride){
     int first=-1,last=-1;
-    if(R<const void*>(s,0x28)!=buffer||R<int>(s,0x40)!=stride||R<int>(s,0x18)!=offset){
-        W(s,0x28,buffer);W(s,0x40,stride);W(s,0x18,offset);first=last=0;
+    if(R<const void*>(s,0x28)!=buffer||R<int>(s,0x40)!=offset||R<int>(s,0x18)!=stride){
+        W(s,0x28,buffer);W(s,0x40,offset);W(s,0x18,stride);first=last=0;
     }
     for(int i=1;i<3;++i){
         if(R<const void*>(s,0x28+8*i)||R<int>(s,0x40+4*i)||R<int>(s,0x18+4*i)){
