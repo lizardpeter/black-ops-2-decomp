@@ -120,3 +120,43 @@ bool LiveAntiCheat_CompleteHash(void *handle, unsigned long long *result)
     return true;
 }
 #endif
+
+// Remaining original translation-unit functions -- declaration inventory only.
+// Prototypes below are from the named CoDMPServer_PC reference. They are kept
+// disabled until their Store x64 ABI is independently established. No bodies,
+// placeholder return values, linkage, or runtime overrides are supplied.
+// In particular, LTCG may change the emitted Store signature or inline a body.
+#if 0
+// Ban notification (reference lines 375, 385).
+void LiveAntiCheat_BanDoConnected();
+void LiveAntiCheat_DWPlayerBanned(unsigned long long userID);
+
+// Challenge request handlers (reference lines 723, 831, 852, 896, 992).
+bool LiveAntiCheat_AnswerChecksumRequest(ControllerIndex_t,
+    bdArray<bdAntiCheatChallengeParam> *, long long *, challengeTest_t);
+bool LiveAntiCheat_AnswerDvarRequest(ControllerIndex_t,
+    bdArray<bdAntiCheatChallengeParam> *, long long *);
+bool LiveAntiCheat_AnswerDvarFloatRequest(ControllerIndex_t,
+    bdArray<bdAntiCheatChallengeParam> *, long long *);
+bool LiveAntiCheat_AnswerExpressionRequest(ControllerIndex_t,
+    bdArray<bdAntiCheatChallengeParam> *, long long *);
+bool LiveAntiCheat_GetChallengeResponse(ControllerIndex_t, unsigned short,
+    bdArray<bdAntiCheatChallengeParam> *, long long *);
+
+// Challenge lifecycle (reference lines 1038--1228).
+void LiveAntiCheat_AnswerChallengesRetry(ControllerIndex_t);
+// Reference returns TaskRecord*; Store candidate return ABI not verified.
+TaskRecord *LiveAntiCheat_AnswerChallenges(ControllerIndex_t);
+bool LiveAntiCheat_AnswerChallengesSuccess(TaskRecord *);
+bool LiveAntiCheat_AnswerChallengesFailure(TaskRecord *);
+void LiveAntiCheat_ResetChallengeResponse(ControllerIndex_t);
+void LiveAntiCheat_OnChallengesReceived(unsigned long long,
+    bdReference<bdAntiCheatChallenges>);
+void LiveAntiCheat_ProcessChallenges(ControllerIndex_t);
+
+// Game reporting (reference lines 1394--1425).
+void LiveAntiCheat_ClearGameReport();
+void LiveAntiCheat_SetThresholdExceeded(int threshold);
+void LiveAntiCheat_ReportLaggedDamage();
+void LiveAntiCheat_SetGameReportTags(int *numTags, bdTag *tags, int maxTags);
+#endif // reference declarations only
