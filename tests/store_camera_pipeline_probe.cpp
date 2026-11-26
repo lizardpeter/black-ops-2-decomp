@@ -102,8 +102,8 @@ void DefaultFovRun(void*image,unsigned op,unsigned flags,unsigned config,unsigne
 void ProjectionRun(void*image,void*mapped,U32 requested,U32 aspect,unsigned config,int now,int start,U32 duration,U32 initial,void*out) {
     using namespace store_camera_projection;
     trace={};Projection_State=cg;Projection_Static=statics;
-    W(statics,0x10,F(aspect));
-    W(cg,0x4808c,now);W(cg,0x64a28,start);W(cg,0x64a2c,F(duration));W(cg,0x64a24,F(initial));
+    W(statics,0x10,::F(aspect));
+    W(cg,0x4808c,now);W(cg,0x64a28,start);W(cg,0x64a2c,::F(duration));W(cg,0x64a24,::F(initial));
     Projection_DualEnable=static_cast<const Dvar*>(Make(0,config&7,1,(config>>12)&7));
     Projection_DualActive=static_cast<const Dvar*>(Make(1,(config>>3)&7,1,0,(config&512)!=0));
     Projection_Fov=static_cast<const Dvar*>(Make(2,(config>>6)&7,65,(config>>15)&7));
@@ -118,8 +118,8 @@ void ProjectionRun(void*image,void*mapped,U32 requested,U32 aspect,unsigned conf
         W(image,0xe53a20,Projection_State);W(image,0xe53b70,Projection_Static);
         W(image,0x27e6e50,Projection_DualEnable);W(image,0x27e6d70,Projection_DualActive);
         W(image,0xe4f8e8,Projection_Fov);W(image,0x2cc0a2c,Projection_ForceFullscreen);
-        reinterpret_cast<void(MS*)(int,float)>(static_cast<Byte*>(image)+0xc2060)(0,F(requested));
-    }else CalcFov(0,F(requested));
+        reinterpret_cast<void(MS*)(int,float)>(static_cast<Byte*>(image)+0xc2060)(0,::F(requested));
+    }else CalcFov(0,::F(requested));
     const unsigned offsets[]={0x649f4,0x64950,0x64954,0x4d910,0x4d914,0x4d918,0x4d920,0x69fa8,0x64a28};
     for(unsigned i=0;i<9;++i)trace.outputs[i]=R<U32>(cg,offsets[i]);
     std::memcpy(out,&trace,sizeof(trace));
