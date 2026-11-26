@@ -2,7 +2,9 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/gfx_d3d/r_text_command_variants_store.cpp":["AddCmdEndOfList","AddCmdUI3DMarker","AddCmdDrawTextEffects","AddCmdDrawTextDecode","AddCmdDrawTextRedact","AddCmdStretchPic","AddCmdStretchPicRotate","AddCmdUIQuadArray"],
+UNITS={"src/ui/lui_text_util_store.cpp":["DecodeCharacter","ColorForCode","TransformPoint","RectVertices","FontHeight","AnimatedY","SubmitQuadChain","ReleaseQuadChain"],
+       "src/gfx_d3d/r_material_target_store.cpp":["ApplyMaterialState","SetRenderTarget","ApplyPassArgs"],
+       "src/gfx_d3d/r_text_command_variants_store.cpp":["AddCmdEndOfList","AddCmdUI3DMarker","AddCmdDrawTextEffects","AddCmdDrawTextDecode","AddCmdDrawTextRedact","AddCmdStretchPic","AddCmdStretchPicRotate","AddCmdUIQuadArray"],
        "src/gfx_d3d/rb_text_dispatch_store.cpp":["DrawText2DCmd","DrawText3DCmd"],
        "src/gfx_d3d/rb_text_loop_store.cpp":["DrawTeleType","DrawText2D"],
        "src/gfx_d3d/rb_font_flush_store.cpp":["EndTessSurface"],
