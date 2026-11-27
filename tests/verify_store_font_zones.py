@@ -21,4 +21,11 @@ def main():
                     lib.ZoneRun(base,op,seed,a);lib.ZoneRun(None,op,seed,b)
                     if a.raw!=b.raw:raise AssertionError((op,n,hex(seed),[(i,x,y) for i,(x,y) in enumerate(zip(a.raw,b.raw)) if x!=y][:40]))
                 print(f"8192 Store zone comparisons for operation {op}",flush=True)
+            for resolution in (720,1080,2160):
+                # Select integer/enum representation of the resolution value.
+                seed=1000+resolution
+                assert seed%6 in (3,4)
+                lib.ZoneRun(base,0,seed,a)
+                print("Original Store zone strings for",resolution,
+                      [a.raw[i*24:(i+1)*24].split(b"\x00",1)[0].decode("ascii") for i in range(13)],flush=True)
 if __name__=="__main__":main()
