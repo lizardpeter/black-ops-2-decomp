@@ -122,6 +122,27 @@ bool Com_IsClientConsole();
 
 // cmd.cpp
 const char *Cmd_Argv(int argIndex);
+
+// A console command: the registered list is a chain of these, each a static of the code that adds it.
+struct cmd_function_s
+{
+	cmd_function_s *next;
+	const char *name;
+	const char *autoCompleteDir;
+	const char *autoCompleteExt;
+	void (*function)();
+};
+static_assert(sizeof(cmd_function_s) == 5 * sizeof(void *), "cmd_function_s");
+
+cmd_function_s *Cmd_FindCommand(const char *cmdName);
+void Cmd_AddCommandInternal(const char *cmdName, void (*function)(), cmd_function_s *allocedCmd);
+// The original's macro: one static command record per call site, named after the function.
+#define Cmd_AddCommand(cmdName, function)                                     \
+	do                                                                        \
+	{                                                                         \
+		T6_STATIC cmd_function_s function##_VAR T6_AT(T6_CMD_SCOPE, #function "_VAR"); \
+		Cmd_AddCommandInternal(cmdName, function, &function##_VAR);           \
+	} while (0)
 struct itemDef_s;
 
 struct CmdArgs

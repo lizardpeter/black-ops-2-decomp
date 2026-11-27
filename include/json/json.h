@@ -53,6 +53,8 @@ struct jsmn_parser
 };
 static_assert(sizeof(jsmn_parser) == 0xC, "jsmn_parser");
 
+int jsmn_parse_primitive(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens);
+int jsmn_parse_string(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens);
 void jsmn_init(jsmn_parser *parser);
 jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens, int &errorPos);
 jsmnerr_t jsmn_parse(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens);

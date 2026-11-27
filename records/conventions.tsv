@@ -47,3 +47,9 @@ CoDMPServer_PC	004EE750	CL_HandleSpectatorInput	edi,stack	the caller CL_HandleSp
 CoDMPServer_PC	009034B0	Demo_GetAILockOnValues	esi	tests ESI at entry (the "(cent)" assert) and reads the entity through it; Demo_ClampViewAngleForLockedOnEntity 009072F0 calls it with the entity in ESI
 CoDMPServer_PC	00903510	Demo_GetAILockOnViewIndex	eax	moves EAX to EDI at entry and asserts it; Demo_ClampViewAngleForLockedOnEntity 009072F0 loads the entity into EAX before the call
 CoDMPServer_PC	00773810	Dvar_ValuesEqual	ecx,stack,stack,stack,stack,stack,stack,stack,stack	type in ECX (Dvar_HasLatchedValue loads it from dvar->type), val0 and val1 (DvarValue, 16 bytes each) by value on the stack: one stack entry per dword
+CoDMPServer_PC	0068C330	jsmn_parse_primitive	ecx,eax,stack,stack	jsmn_parse 0068C748: MOV ECX,ESI (the parser), MOV EAX,ECX (the text), then num_tokens and tokens pushed
+CoDMPServer_PC	0068C480	jsmn_parse_string	ecx,eax,stack,stack	jsmn_parse 0068C728: MOV ECX,ESI (the parser), MOV EAX,ECX (the text), then num_tokens and tokens pushed
+CoDMPServer_PC	0078A000	LargeLocalEndRight	esi	~LargeLocal 0078A0AE: MOV ESI,[ESI] (startPos) before the call; stored to g_largeLocalRightPos at 0078A029
+CoDMPServer_PC	0078A2C0	LargeLocal::LargeLocal	ecx,stack	__thiscall: this in ECX, sizeParam at [ESP+4]
+CoDMPServer_PC	0078A060	LargeLocal::~LargeLocal	ecx	__thiscall: this in ECX
+CoDMPServer_PC	0078A340	LargeLocal::GetBuf	ecx	__thiscall: this in ECX

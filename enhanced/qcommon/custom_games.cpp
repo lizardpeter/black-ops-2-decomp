@@ -1,6 +1,7 @@
 #ifdef T6_STORE
 #include "enhanced/custom_games.h"
 #include "enhanced/local_demonware.h"
+#include "lui/hks.h"
 #include "qcommon/qcommon.h"
 #include <windows.h>
 
@@ -10,36 +11,6 @@ extern "C" __declspec(dllimport) wchar_t **WINAPI CommandLineToArgvW(const wchar
 
 namespace
 {
-enum class LuaType : int
-{
-	Boolean = 1,
-	Number = 3,
-	Table = 5,
-	InterpretedFunction = 9,
-	CFunction = 10,
-};
-
-struct LuaValue
-{
-	LuaType type;
-	int reserved;
-	union
-	{
-		float number;
-		int boolean;
-	};
-	int padding;
-};
-
-struct LuaState
-{
-	unsigned char header[0x48];
-	LuaValue *top;
-	LuaValue *base;
-};
-
-static_assert(sizeof(LuaValue) == 16);
-
 enum class Startup
 {
 	Disabled,
@@ -55,10 +26,8 @@ extern "C" unsigned int store_sessionModeFlags;
 extern "C" const void *store_playerStatsSchema;
 extern "C" bool StoreLiveStatsAreFetched(ControllerIndex_t controller, int source);
 extern "C" void StoreLiveStatsReset(ControllerIndex_t controller, bool versionChanged, int reason);
-extern "C" LuaState *store_luiLuaState;
-extern "C" CRITICAL_SECTION store_luiLock;
-extern "C" void StoreHksGetField(LuaState *state, int index, const char *name);
-extern "C" int StoreHksProtectedCall(LuaState *state, int args, int results, int errorHandler);
+extern lua_State *LUI_luaVM;                  // ui/ui_motd.cpp
+extern CRITICAL_SECTION g_luiCriticalSection;
 extern "C" void StoreLuiTransitionToMenu(int controller, bool leaveGameLobby, const char *menu,
                                         int frontendState, const void *maxPlayers,
                                         const void *maxLocalPlayers, bool resetUi);
@@ -66,30 +35,26 @@ void Cbuf_InsertText(LocalClientNum_t, const char *);
 
 namespace
 {
-LuaType ValueType(const LuaValue &value)
-{
-	return static_cast<LuaType>(static_cast<int>(value.type) & 0xf);
-}
+unsigned ValueType(const HksObject &value) { return value.t & 0xf; }
 
-bool FindLuaFunction(LuaState *state, const char *table, const char *field)
+bool FindLuaFunction(lua_State *state, const char *table, const char *field)
 {
-	constexpr int globals = -10002;
-	StoreHksGetField(state, globals, table);
-	if (ValueType(state->top[-1]) != LuaType::Table)
+	lua_getfield(state, LUA_GLOBALSINDEX, table);
+	if (ValueType(state->top[-1]) != TTABLE)
 		return false;
-	StoreHksGetField(state, -1, field);
-	const LuaType type = ValueType(state->top[-1]);
-	return type == LuaType::InterpretedFunction || type == LuaType::CFunction;
+	lua_getfield(state, -1, field);
+	const unsigned type = ValueType(state->top[-1]);
+	return type == TIFUNCTION || type == TCFUNCTION;
 }
 
-bool CallLuaFunction(LuaState *state, const char *table, const char *field, LuaValue argument)
+bool CallLuaFunction(lua_State *state, const char *table, const char *field, HksObject argument)
 {
 	const auto depth = state->top - state->base;
 	bool success = FindLuaFunction(state, table, field);
 	if (success)
 	{
 		*state->top++ = argument;
-		success = StoreHksProtectedCall(state, 1, 0, 0) == 0;
+		success = lua_pcall(state, 1, 0, 0) == 0;
 	}
 	state->top = state->base + depth;
 	return success;
@@ -134,17 +99,17 @@ void CustomGames_ReadStartupOptions()
 
 void CustomGames_UpdateStartup()
 {
-	if (startup == Startup::Disabled || !store_luiLuaState)
+	if (startup == Startup::Disabled || !LUI_luaVM)
 		return;
 
-	EnterCriticalSection(&store_luiLock);
-	LuaState *state = store_luiLuaState;
+	EnterCriticalSection(&g_luiCriticalSection);
+	lua_State *state = LUI_luaVM;
 	if (startup == Startup::WaitingForLui)
 	{
 		const auto depth = state->top - state->base;
 		const bool ready = FindLuaFunction(state, "CoD", "SwitchToPrivateLobby");
 		state->top = state->base + depth;
-		LeaveCriticalSection(&store_luiLock);
+		LeaveCriticalSection(&g_luiCriticalSection);
 		if (ready)
 		{
 			Cbuf_InsertText(LOCAL_CLIENT_0, "setclientbeingusedandprimaryandactive");
@@ -153,13 +118,14 @@ void CustomGames_UpdateStartup()
 		return;
 	}
 
-	const LuaValue controller{LuaType::Number, 0, {.number = 0.0f}, 0};
-	const LuaValue enabled{LuaType::Boolean, 0, {.boolean = 1}, 0};
-	const LuaValue disabled{LuaType::Boolean, 0, {.boolean = 0}, 0};
+	HksObject controller{TNUMBER, {}}, enabled{TBOOLEAN, {}}, disabled{TBOOLEAN, {}};
+	controller.v.number = 0.0f;
+	enabled.v.boolean = 1;
+	disabled.v.boolean = 0;
 	const bool ready = CallLuaFunction(state, "CoD", "SwitchToPrivateLobby", controller) &&
 	                   CallLuaFunction(state, "Engine", "SessionModeSetOnlineGame", disabled) &&
 	                   CallLuaFunction(state, "Engine", "SessionModeSetOffline", enabled);
-	LeaveCriticalSection(&store_luiLock);
+	LeaveCriticalSection(&g_luiCriticalSection);
 
 	startup = Startup::Disabled;
 	if (!ready)

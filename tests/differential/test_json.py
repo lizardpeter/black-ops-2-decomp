@@ -140,3 +140,19 @@ CASES = [
     {"name": "JSMN_GetLocalizedString", "ret": "cstr", "builds": SERVER, "fakes": FAKES, "observe": OBSERVE,
      "inputs": reader_inputs(lambda c: LOCS[c % 4])},
 ]
+
+# jsmn_parse's two helpers, called from where jsmn_parse is (the parser at a character of that kind)
+def helper_inputs(first):
+    out = []
+    for js in SAMPLES + [b'"a\\u12"', b'"\\x"', b'abc', b'-1}', b'"open', b'tr\x05e', b'"' + b"z" * 50 + b'"']:
+        for pos in range(len(js)):
+            if (js[pos:pos + 1] == b'"') == first:
+                for n in (8, 1, 0):
+                    out.append({"args": [parser(pos, 0, -1), js + b"\0", tokens(8, 0), n]})
+    return out[::3]
+
+
+CASES += [
+    {"name": "jsmn_parse_primitive", "ret": "int", "builds": SERVER, "inputs": helper_inputs(False)},
+    {"name": "jsmn_parse_string", "ret": "int", "builds": SERVER, "inputs": helper_inputs(True)},
+]

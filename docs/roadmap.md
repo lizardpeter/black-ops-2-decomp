@@ -179,6 +179,15 @@ streaming budgets.
   - `xgameruntime.dll` (GDK): offline implementation, as BO3.
   - `binkw64.dll`: **true source-level reconstruction**, including proprietary Bink video/audio decoding and threaded playback, from the pinned Store DLL — no FFmpeg/third-party decoder wrapper. See [DLL reconstruction](dll-reconstruction.md).
   - XAudio2, XInput and D3D11 are Windows components.
+- **Our own message of the day (planned):** the menu's MOTD comes from Treyarch's online file
+  `motd-mp-<language>.json` (`motd-zm-...` for Zombies), unpacked with the other online files and parsed by MOTD_Parse
+  (`src/ui/ui_motd.cpp`, verified against the Store build): a header (format version 3, the message's own version,
+  show-once, expiry, image category), a `data` list of messages each shown only when its `vis` Lua function says so,
+  and Elite images. The profile remembers the last version seen (`motdVersionViewed`, `motdViewTime`), so a message
+  pops up once per new version. With the official servers cut, the enhanced build feeds MOTD_Parse a file of ours
+  (from the game folder first, our server later), in the same format so the versioning keeps working. Still to
+  reconstruct for that: the Lua side (`GetMOTD`, `ShouldShowMOTD`, `GetMOTDImageFileID`), the image descriptors
+  (`motdGetImageDescriptors`, a publisher-file listing), and the online-file unpacker that calls MOTD_Parse.
 - **Discord integration:** rich presence over Discord's local IPC pipe (`\\.\pipe\discord-ipc-0`, JSON frames),
   implemented natively, with no Discord SDK DLL.
 - **COD Elite-style class editing (open):** loadouts are player stats (DDL-defined). With our own server storing

@@ -6,7 +6,7 @@
 // that walks one parsed file's tokens in order, copying each string or primitive into one value buffer.
 //
 // The server build passes jsmn_parse_primitive's and jsmn_parse_string's parser and input in registers (link-time
-// code generation); the Store build inlines them, JSMN_BeginParseSession, JSMN_UnGetToken and JSMN_GetKey, and has no
+// code generation: records/conventions.tsv); the Store build inlines them, JSMN_BeginParseSession, JSMN_UnGetToken and JSMN_GetKey, and has no
 // asserts or warnings.
 #define T6_ASSERT_DIR "c:\\t6\\code\\src\\json\\"
 #define T6_ASSERT_FILE T6_ASSERT_DIR "json.cpp"
@@ -46,7 +46,7 @@ static void jsmn_fill_token(jsmntok_t *token, jsmntype_t type, int start, int en
 }
 
 // 0068C330 json/json.cpp:36
-static int jsmn_parse_primitive(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens)
+int jsmn_parse_primitive(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens)
 {
 	const int start = parser->pos;
 	for (; js[parser->pos]; parser->pos++)
@@ -82,7 +82,7 @@ found:
 }
 
 // 0068C480 json/json.cpp:77
-static int jsmn_parse_string(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens)
+int jsmn_parse_string(jsmn_parser *parser, const char *js, jsmntok_t *tokens, unsigned int num_tokens)
 {
 	const int start = parser->pos;
 	parser->pos++;
@@ -255,13 +255,19 @@ bool JSMN_BeginParseSession(const char *json, jsmntok_t tokens[], int maxTokens)
 	switch (r)
 	{
 	case JSMN_ERROR_PART:
+#ifndef T6_STORE
 		Com_PrintError(10, "The string is not a full JSON packet, more bytes expected.\n");
+#endif
 		return false;
 	case JSMN_ERROR_INVAL:
+#ifndef T6_STORE
 		Com_PrintError(10, "Found invalid characters while parsing and bailed out.\n");
+#endif
 		return false;
 	case JSMN_ERROR_NOMEM:
+#ifndef T6_STORE
 		Com_PrintError(10, "Too many tokens in the file. Exceeded current limit of %d\n", maxTokens);
+#endif
 		return false;
 	default:
 		return true;

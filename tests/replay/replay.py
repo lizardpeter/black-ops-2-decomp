@@ -1,7 +1,6 @@
 """Native replay: the original Store code and the reconstruction run side by side in one Linux process.
 
-The pinned original exe is mapped as an image (the Store build has no relocations and reaches its data RIP-relative,
-so it runs at any address) and called through ms_abi function pointers; the reconstruction is the same source the
+The pinned original exe is mapped as an image at its own base address (the Store build has no relocations) and called through ms_abi function pointers; the reconstruction is the same source the
 hybrid build compiles (src/), built natively for the test into a shared library together with the test's probe
 (tests/replay/<unit>_probe.cpp). The probe supplies what the function under test calls, once for each side: hooks
 patched over the original's callees, and plain definitions of the same functions for the reconstruction. Both sides
@@ -24,16 +23,53 @@ ROOT = pathlib.Path(__file__).resolve().parents[2]
 STORE_MP_SHA256 = "cf80b8058bce7e00e4c61ff3d673308c1fcd8061f18fe66710803538eab4bc01"
 
 
+class Image:
+    """The mapped exe: indexable and sliceable like bytes, a buffer for struct and ctypes, a context manager."""
+
+    def __init__(self, addr, size):
+        self.addr, self.size = addr, size
+        self.view = memoryview((ctypes.c_char * size).from_address(addr)).cast("B")
+
+    def __getitem__(self, key):
+        return self.view[key]
+
+    def __setitem__(self, key, value):
+        self.view[key] = value
+
+    def __buffer__(self, flags):
+        return self.view
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, *exc):
+        self.view.release()
+        _libc.munmap(ctypes.c_void_p(self.addr), ctypes.c_size_t(self.size))
+
+
+_libc = ctypes.CDLL(None, use_errno=True)
+_libc.mmap.restype = ctypes.c_void_p
+_libc.mmap.argtypes = [ctypes.c_void_p, ctypes.c_size_t, ctypes.c_int, ctypes.c_int, ctypes.c_int, ctypes.c_long]
+_libc.munmap.argtypes = [ctypes.c_void_p, ctypes.c_size_t]
+PROT_RWX, MAP_PRIVATE_ANON, MAP_FIXED_NOREPLACE = 7, 0x22, 0x100000
+
+
 def map_image(path, sha256=STORE_MP_SHA256):
-    """The exe's sections at their RVAs in one read/write/execute mapping."""
+    """The exe's sections at their RVAs in one read/write/execute mapping at the exe's own base address: the Store
+    build has no relocations, so the absolute pointers in its data (tables of strings and functions) are right only
+    there. The code itself reaches its data RIP-relative."""
     data = pathlib.Path(path).read_bytes()
     if hashlib.sha256(data).hexdigest() != sha256:
         raise ValueError(f"{path}: not the pinned original")
     nt, = struct.unpack_from("<I", data, 60)
     count, = struct.unpack_from("<H", data, nt + 6)
     opt, = struct.unpack_from("<H", data, nt + 20)
+    image_base, = struct.unpack_from("<Q", data, nt + 24 + 24)
     size, = struct.unpack_from("<I", data, nt + 0x50)
-    mem = mmap.mmap(-1, size, prot=mmap.PROT_READ | mmap.PROT_WRITE | mmap.PROT_EXEC)
+    addr = _libc.mmap(image_base, size, PROT_RWX, MAP_PRIVATE_ANON | MAP_FIXED_NOREPLACE, -1, 0)
+    if addr != image_base:
+        raise OSError(f"can't map the exe at its base {image_base:#x}: {ctypes.get_errno()}")
+    mem = Image(addr, size)
     for i in range(count):
         _, va, raw_size, raw = struct.unpack_from("<4I", data, nt + 24 + opt + 40 * i + 8)
         mem[va:va + raw_size] = data[raw:raw + raw_size]
@@ -41,7 +77,7 @@ def map_image(path, sha256=STORE_MP_SHA256):
 
 
 def base_of(mem):
-    return ctypes.addressof(ctypes.c_char.from_buffer(mem))
+    return mem.addr
 
 
 def hook(mem, rva, target):
@@ -51,7 +87,7 @@ def hook(mem, rva, target):
 
 def set_pointer(mem, rva, value):
     """Write a pointer into the image (an import address table slot, a global)."""
-    struct.pack_into("<Q", mem, rva, value)
+    struct.pack_into("<Q", mem.view, rva, value)
 
 
 def build(probe, out_dir, sources=(), defines=("T6_STORE",)):

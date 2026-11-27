@@ -35,7 +35,11 @@ typedef struct tagRECT
 	LONG bottom;
 } RECT, *LPRECT;
 
+#ifdef T6_REPLAY  // tests/replay builds for the host (x86-64 Linux): one calling convention
+#define WINAPI
+#else
 #define WINAPI __stdcall
+#endif
 #define WINUSERAPI extern "C" __declspec(dllimport)
 
 #define WM_LBUTTONDOWN 0x0201
@@ -197,6 +201,7 @@ typedef struct _RTL_CRITICAL_SECTION
 WINBASEAPI void WINAPI EnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
 WINBASEAPI void WINAPI LeaveCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
 WINBASEAPI BOOL WINAPI TryEnterCriticalSection(LPCRITICAL_SECTION lpCriticalSection);
+#ifndef T6_REPLAY  // the host compiler's -fms-extensions has these as builtins of its own width
 extern "C" long _InterlockedIncrement(long volatile *addend);
 extern "C" long _InterlockedDecrement(long volatile *addend);
 #define InterlockedIncrement _InterlockedIncrement
@@ -206,6 +211,12 @@ extern "C" long long _InterlockedCompareExchange64(long long volatile *destinati
 extern "C" long long _InterlockedExchange64(long long volatile *target, long long value);
 #define InterlockedCompareExchange64 _InterlockedCompareExchange64
 #define InterlockedExchange64 _InterlockedExchange64
+#else
+#define InterlockedIncrement _InterlockedIncrement
+#define InterlockedDecrement _InterlockedDecrement
+#define InterlockedCompareExchange64 _InterlockedCompareExchange64
+#define InterlockedExchange64 _InterlockedExchange64
+#endif
 WINUSERAPI BOOL WINAPI RegisterRawInputDevices(const RAWINPUTDEVICE *pRawInputDevices, UINT uiNumDevices,
                                                UINT cbSize);
 WINUSERAPI UINT WINAPI GetRawInputData(HRAWINPUT hRawInput, UINT uiCommand, void *pData, UINT *pcbSize,

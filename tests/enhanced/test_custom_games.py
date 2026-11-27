@@ -49,8 +49,8 @@ def check_custom_games_opens_native_lobby_once(ctx):
         "kernel32.dll!LeaveCriticalSection": (lambda *_: None, 1),
     })
     functions = {
-        "StoreHksGetField": get_field,
-        "StoreHksProtectedCall": protected_call,
+        "lua_getfield": get_field,
+        "lua_pcall": protected_call,
         "StoreLuiTransitionToMenu": lambda _: 0,
         "Cbuf_InsertText": lambda _: 0,
         "StoreLiveStatsAreFetched": lambda _: 0,
