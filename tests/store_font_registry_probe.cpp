@@ -10,6 +10,11 @@ static int allocCalls,stepCalls,fullCalls,resizeCalls,barrierObjectCalls,barrier
 static bool failFirst;static int lengthValue;
 extern "C"{
 Value Registry_Nil;
+extern const B Registry_CeilLog2[256]={};
+void Registry_GrowStack(B*,B*,int){std::abort();}
+void Registry_PushString(B*,const char*){std::abort();}
+void Registry_SetTable(B*,int){std::abort();}
+void Registry_AllocTable(B*,B*,Q,U,void**){std::abort();}
 int Registry_AllocationTotals[64];
 void Registry_ResizeTable(B*t,B*,U n,U){++resizeCalls;W(t,0x30,n);}
 void Registry_BarrierObject(B*,B*){++barrierObjectCalls;}
