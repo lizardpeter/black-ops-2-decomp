@@ -14,6 +14,7 @@ The references are x86 and the Store build is x64, so one function's decorated n
 therefore resolves a name the reconstruction emits through its plain name (`resolve`). The prototype itself is
 checked where it can be: against the x86 reference's MAP.
 """
+import re
 import csv
 import tomllib
 from functools import lru_cache
@@ -75,8 +76,23 @@ def resolve(build: str, sym: str):
         return t[sym]
     if has_map(build):
         return None
-    hits = {v for k, v in t.items() if scoped_name(k) == scoped_name(sym)}
+    hits = {v for k, v in t.items() if scoped_name(k) == scoped_name(sym) and same_overload(k, sym)}
     return hits.pop() if len(hits) == 1 else None
+
+
+def _arguments(decorated: str) -> str:
+    """A function's decorated signature without the 64-bit pointer marks (x64 'PEA' is x86 'PA', and so on), so a
+    name recorded from either build compares with the reconstruction's."""
+    sig = decorated.split("@@Y", 1)[1]
+    return re.sub(r"(?<=[PQAR])E(?=[ABCD])", "", sig)
+
+
+def same_overload(a: str, b: str) -> bool:
+    """Two names of one function, not two overloads: true unless both are decorated free functions (`@@Y`) whose
+    signatures differ."""
+    if not (a.startswith("?") and b.startswith("?") and "@@Y" in a and "@@Y" in b):
+        return True
+    return _arguments(a) == _arguments(b)
 
 
 # match.py methods trusted without review for linking: each rests on the function's own content (its strings,

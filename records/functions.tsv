@@ -338,3 +338,16 @@ t6mp_msstore	140576540	matches	src/live/live_anticheat.cpp	LiveAntiCheat_Continu
 CoDMPServer_PC	00776D80	compiles	src/universal/dvar.cpp	Dvar_RegisterVariant; its body is what test_dvar_register.py verifies inlined in _Dvar_RegisterFloat, this out-of-line copy (DvarValue and DvarLimits by value on the stack) has no case yet
 CoDMPServer_PC	00776FB0	matches	src/universal/dvar.cpp	_Dvar_RegisterFloat; tests/differential/test_dvar_register.py
 t6mp_msstore	14046C650	matches	src/universal/dvar.cpp	_Dvar_RegisterFloat (Dvar_RegisterVariant inlined); tests/replay/verify_dvar_register.py
+CoDMPServer_PC	0068C330	compiles	src/json/json.cpp	jsmn_parse_primitive; a static helper here (the server passes its parser and input in registers), verified through jsmn_parse
+CoDMPServer_PC	0068C480	compiles	src/json/json.cpp	jsmn_parse_string; a static helper here (the server passes its parser and input in registers), verified through jsmn_parse
+CoDMPServer_PC	0068CB20	matches	src/json/json.cpp	jsmn_parse (four arguments); tests/differential/test_json.py
+CoDMPServer_PC	0068C5D0	matches	src/json/json.cpp	jsmn_parse; tests/differential/test_json.py
+CoDMPServer_PC	0068C850	matches	src/json/json.cpp	jsmn_init; tests/differential/test_json.py
+CoDMPServer_PC	0068CB50	matches	src/json/json.cpp	JSMN_BeginParseSession; tests/differential/test_json.py
+CoDMPServer_PC	0068C870	matches	src/json/json.cpp	JSMN_GetToken; tests/differential/test_json.py
+CoDMPServer_PC	0068C9E0	matches	src/json/json.cpp	JSMN_UnGetToken; tests/differential/test_json.py
+CoDMPServer_PC	0068C9F0	matches	src/json/json.cpp	JSMN_GetKey; tests/differential/test_json.py
+CoDMPServer_PC	0068CA30	matches	src/json/json.cpp	JSMN_GetLocalizedString; tests/differential/test_json.py
+t6mp_msstore	14034C640	matches	src/json/json.cpp	jsmn_parse; tests/replay/verify_json.py
+t6mp_msstore	14034CBB0	matches	src/json/json.cpp	JSMN_GetToken; tests/replay/verify_json.py
+t6mp_msstore	14034CD10	matches	src/json/json.cpp	JSMN_GetLocalizedString; tests/replay/verify_json.py

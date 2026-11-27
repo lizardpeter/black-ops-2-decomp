@@ -195,7 +195,7 @@ def main():
             results.append([build, r["va"], r["symbol"], 0, "patched: tests/enhanced"])
             print(f"patched    {r['va']} {name}  ({r['source']}: tests/enhanced)")
             continue
-        case = cases.get(name)
+        case = cases.get(r["symbol"]) or cases.get(name)  # a decorated case name tells overloads apart
         if case and build in case.get("by_build", {}):
             # per-build overrides: what a build inlined can't be faked or observed there
             case = dict(case, **case["by_build"][build])
