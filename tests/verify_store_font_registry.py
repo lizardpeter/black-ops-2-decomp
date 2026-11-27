@@ -12,10 +12,10 @@ def main():
         a=C.create_string_buffer(lib.RegistrySize());b=C.create_string_buffer(lib.RegistrySize());rng=random.Random(0x69bb00)
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base=C.addressof(C.c_char.from_buffer(mem))
-            for i,rva in enumerate([0x680e50,0x6922c0,0x692140,0x665ca0,0x67fd00,0x67fc40,0x68f740,0x68f7d0,0x692690]):
+            for i,rva in enumerate([0x680e50,0x6922c0,0x692140,0x665ca0,0x67fd00,0x67fc40,0x68f740,0x68f7d0,0x692690,0x67f350,0x126780,0x218f80,0x692730,0x870a4e]):
                 mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",lib.RegistryMock(i))+b"\xff\xe0"
             errors=[]
-            for op in range(13):
+            for op in range(17):
                 for n in range(1024):
                     seed=rng.getrandbits(32)
                     lib.RegistryRun(base,op,seed,a);lib.RegistryRun(None,op,seed,b)

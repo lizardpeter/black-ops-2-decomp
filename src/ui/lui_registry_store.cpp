@@ -180,15 +180,15 @@ void* NewUserData(B*l,Q bytes){
 // Original 140218C80, 140218DE0, 140218EA0 and 140681180.
 extern "C"{
 void Registry_GrowStack(B*,B*,int);
-void Registry_PushString(B*,const char*);
+void Registry_PushString(B*,const char*,Q);
 void Registry_SetTable(B*,int);
 void Registry_AllocTable(B*,B*,Q,U,void**);
-extern const B Registry_CeilLog2[256];
+
 }
 void PushValue(B*l,int idx){Push(l,R<Value>(Index(l,idx,false),0));}
 void SetField(B*l,int idx,const char*key){
     if(R<B*>(l,0x58)<Top(l)+32)Registry_GrowStack(l+0x18,l,2);
-    if(key)Registry_PushString(l,key);
+    if(key){Q len=0;while(key[len])++len;Registry_PushString(l,key,len);}
     else {B*p=Top(l);W(p,0,0u);W(l,0x48,p+16);}
     B*p=Top(l);
     Value first=R<Value>(p-32,0),second=R<Value>(p-16,0);
@@ -206,7 +206,8 @@ B* NewTable(B*l,U arrayCount,int hashCount){
     if(hashCount){
         U n=U(hashCount)-1,shift=0;
         while(n>255){n>>=8;shift+=8;}
-        capacity=1u<<((Registry_CeilLog2[n]+shift)&31);
+        while(n){n>>=1;++shift;}
+        capacity=1u<<(shift&31);
     }
     void*mem[3]={nullptr,nullptr,nullptr};
     Registry_AllocTable(l,l,Q(capacity)*40,arrayCount<<4,mem);

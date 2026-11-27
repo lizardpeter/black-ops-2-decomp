@@ -10,11 +10,17 @@ static int allocCalls,stepCalls,fullCalls,resizeCalls,barrierObjectCalls,barrier
 static bool failFirst;static int lengthValue;
 extern "C"{
 Value Registry_Nil;
-extern const B Registry_CeilLog2[256]={};
-void Registry_GrowStack(B*,B*,int){std::abort();}
-void Registry_PushString(B*,const char*){std::abort();}
-void Registry_SetTable(B*,int){std::abort();}
-void Registry_AllocTable(B*,B*,Q,U,void**){std::abort();}
+static B newTable[64],newHash[40*256],newArray[16*64];
+static Q newHashSize,newArraySize,stringLength;
+static int setTableIndex,growCount;
+static Value setKey,setValue;
+void Registry_GrowStack(B*,B*l,int n){growCount+=n;W(l,0x58,stack+sizeof stack);}
+void Registry_PushString(B*l,const char*s,Q len){stringLength=len;Push(l,Value{4,0,reinterpret_cast<Q>(s)});}
+void Registry_SetTable(B*l,int idx){setTableIndex=idx;setKey=R<Value>(Top(l)-32,0);setValue=R<Value>(Top(l)-16,0);W(l,0x48,Top(l)-32);}
+void Registry_AllocTable(B*,B*,Q h,U a,void**p){
+    newHashSize=h;newArraySize=a;std::memset(newTable,0xa5,sizeof newTable);std::memset(newHash,0xa5,sizeof newHash);std::memset(newArray,0xa5,sizeof newArray);
+    p[0]=newTable;p[1]=h?newHash:nullptr;p[2]=a?newArray:nullptr;
+}
 int Registry_AllocationTotals[64];
 void Registry_ResizeTable(B*t,B*,U n,U){++resizeCalls;W(t,0x30,n);}
 void Registry_BarrierObject(B*,B*){++barrierObjectCalls;}
@@ -37,6 +43,11 @@ static void MS MInsert(B*t,B*l,const Value*k,const Value*v){Registry_InsertHash(
 static void MS MStep(B*g,B*l,int n){Registry_CollectStep(g,l,n);}
 static void MS MFull(B*g,B*l,bool b){Registry_CollectFull(g,l,b);}
 static void MS MOOM(B*l,Q n){Registry_OutOfMemory(l,n);}
+static void MS MGrow(B*p,B*l,int n){Registry_GrowStack(p,l,n);}
+static void MS MPushString(B*l,const char*s,Q n){Registry_PushString(l,s,n);}
+static void MS MSetTable(B*l,int n){Registry_SetTable(l,n);}
+static void MS MAllocTable(B*a,B*b,Q h,U s,void**p){Registry_AllocTable(a,b,h,s,p);}
+static void* MS MZero(void*p,int n,Q s){return std::memset(p,n,s);}
 static Q Bits(float f){U u;std::memcpy(&u,&f,4);return u;}
 static Value V(U t,Q p){return {t,0,p};}
 static Value P(U t,void*p){return V(t,reinterpret_cast<Q>(p));}
@@ -44,6 +55,7 @@ struct Capture{
     Q result,used,peak,head,header,environment,metatable,next;
     int count,top,totals,allocCalls,stepCalls,fullCalls,resizeCalls,barrierObjectCalls,barrierValueCalls,insertCalls;
     Value values[16],topValue;
+    Q hSize,aSize,strLen;int fieldIndex,grows;Value fieldKey,fieldValue;B tableBytes[64];U hashNonzero,arrayNonzero;
 };
 static void Reset(unsigned seed){
     std::memset(lua,0,sizeof lua);std::memset(globals,0,sizeof globals);std::memset(table,0,sizeof table);std::memset(meta,0,sizeof meta);std::memset(fn,0,sizeof fn);std::memset(userdata,0,sizeof userdata);std::memset(stack,0,sizeof stack);std::memset(array,0,sizeof array);std::memset(hash,0,sizeof hash);std::memset(allocation,0,sizeof allocation);std::memset(Registry_AllocationTotals,0,sizeof Registry_AllocationTotals);
@@ -57,11 +69,12 @@ static void Reset(unsigned seed){
     W(userdata,0,Q(128)<<10);W(userdata,8,23u);
     allocCalls=stepCalls=fullCalls=resizeCalls=barrierObjectCalls=barrierValueCalls=insertCalls=0;
     failFirst=(seed&8)!=0;lengthValue=4;
+    newHashSize=newArraySize=stringLength=0;setTableIndex=growCount=0;setKey=setValue={};
 }
 extern "C"{
 unsigned RegistrySize(){return sizeof(Capture);}
 void*RegistryMock(unsigned i){
-    void*p[]={reinterpret_cast<void*>(MResize),reinterpret_cast<void*>(MBarrierObject),reinterpret_cast<void*>(MBarrierValue),reinterpret_cast<void*>(MFormat),reinterpret_cast<void*>(MLength),reinterpret_cast<void*>(MInsert),reinterpret_cast<void*>(MStep),reinterpret_cast<void*>(MFull),reinterpret_cast<void*>(MOOM)};
+    void*p[]={reinterpret_cast<void*>(MResize),reinterpret_cast<void*>(MBarrierObject),reinterpret_cast<void*>(MBarrierValue),reinterpret_cast<void*>(MFormat),reinterpret_cast<void*>(MLength),reinterpret_cast<void*>(MInsert),reinterpret_cast<void*>(MStep),reinterpret_cast<void*>(MFull),reinterpret_cast<void*>(MOOM),reinterpret_cast<void*>(MGrow),reinterpret_cast<void*>(MPushString),reinterpret_cast<void*>(MSetTable),reinterpret_cast<void*>(MAllocTable),reinterpret_cast<void*>(MZero)};
     return p[i];
 }
 void RegistryRun(void*image,unsigned op,unsigned seed,void*out){
@@ -103,6 +116,25 @@ void RegistryRun(void*image,unsigned op,unsigned seed,void*out){
     }else if(op==11){
         Q size=seed%128;
         c.result=reinterpret_cast<Q>(b?reinterpret_cast<void*(MS*)(B*,Q)>(b+0x69ea10)(lua,size):NewUserData(lua,size));
+    }else if(op==13){
+        int valid[]={1,2,3,-1,-2,-10000,-10001,-10002,-10003};
+        int i=valid[seed%9];W(stack,2*16,value);W(stack,7*16,value);W(fn,3*16,value);
+        if(b)reinterpret_cast<void(MS*)(B*,int)>(b+0x218c80)(lua,i);else PushValue(lua,i);
+    }else if(op==14){
+        const char*keyName=(seed&1)?"UIQuadCache":nullptr;
+        W(stack,7*16,value);W(lua,0x58,Top(lua)+(seed&2?16:48));
+        if(b)reinterpret_cast<void(MS*)(B*,int,const char*)>(b+0x218de0)(lua,idx,keyName);else SetField(lua,idx,keyName);
+        c.hSize=newHashSize;c.aSize=newArraySize;c.strLen=stringLength;c.fieldIndex=setTableIndex;c.grows=growCount;c.fieldKey=setKey;c.fieldValue=setValue;
+    }else if(op==15){
+        int i=(seed&2)?1:0;
+        W(stack,2*16,P((seed&1)?5:7,(seed&1)?table:userdata));W(stack,7*16,(seed&4)?P(5,meta):V(0,0));
+        c.result=b?reinterpret_cast<int(MS*)(B*,int)>(b+0x218ea0)(lua,i):SetMetatable(lua,i);
+    }else if(op==16){
+        unsigned n=seed%64;int h=int((seed>>9)%256);
+        B*t=b?reinterpret_cast<B*(MS*)(B*,U,int)>(b+0x681180)(lua,n,h):NewTable(lua,n,h);
+        c.result=reinterpret_cast<Q>(t);c.hSize=newHashSize;c.aSize=newArraySize;std::memcpy(c.tableBytes,t,64);
+        for(Q i=0;i<newHashSize;++i)c.hashNonzero+=newHash[i]!=0;
+        for(Q i=0;i<newArraySize;++i)c.arrayNonzero+=newArray[i]!=0;
     }else{
         Value obj=type==7?P(7,userdata):type==4?P(4,userdata):type==5?P(5,table):type==3?V(3,Bits(float(int(seed%1000)-500)*0.25f)):V(type,0);
         c.result=b?reinterpret_cast<Q(MS*)(B*,const Value*)>(b+0x67f290)(lua,&obj):ValueLength(lua,&obj);
