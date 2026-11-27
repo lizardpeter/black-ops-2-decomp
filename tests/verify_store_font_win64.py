@@ -2,7 +2,9 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/database/db_font_zones_store.cpp":["BuildZoneNames","WaitForZoneLoad","LoadUIZones"],
+UNITS={"src/database/db_asset_lookup_store.cpp":["FindAssetEntry","CloneDefaultAsset","FindStringTableRow","GetStringTable"],
+       "src/database/db_zone_complete_store.cpp":["CompleteZoneLoad"],
+       "src/database/db_font_zones_store.cpp":["BuildZoneNames","WaitForZoneLoad","LoadUIZones"],
        "src/gfx_d3d/r_renderer_start_store.cpp":["InitializeMeshResources","InitializeDeviceResources","InitializeRenderer"],
        "src/ui/lui_gc_store.cpp":["BarrierValue","BarrierObject","CollectStep","CollectFull"],
        "src/ui/lui_metatable_store.cpp":["IndexNonTable","ResolveIndex","GetTable"],
