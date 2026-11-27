@@ -31,7 +31,9 @@ def compare(ctx, name, inputs, ret, fakes=v.BACKEND_FAKES, observe=v.BACKEND_SEE
         touched = sorted(a for a in got[2] if a in MIXER_STATE)
         assert not touched, f"input {i}: changed the mixer model at {[hex(a) for a in touched[:4]]}"
         assert got[0] == want[0], f"input {i}: returned {got[0]!r}, original {want[0]!r}"
-        assert got[3] == want[3], f"input {i}: calls differ\n  original {want[3]}\n  enhanced {got[3]}"
+        # (a call into the enhanced build's own copy of an original function counts as a call to that function)
+        calls = [(ctx.canon.code(c[0]),) + tuple(c[1:]) for c in got[3]]
+        assert calls == want[3], f"input {i}: calls differ\n  original {want[3]}\n  enhanced {calls}"
         # B0011: with more than eight wave-in mixers the original's line table overflows into the globals after it;
         # the enhanced build saves no line, so those writes are the original's alone
         saved = sum(1 for e in inp["model"][2] if e["has_line"] and not e["caps_fail"] and not e["open_fail"]) \
