@@ -22,6 +22,8 @@ G = {"winvoice_mic_mute": 0x07ACD71C, "winvoice_mic_reclevel": 0x07ACD614, "winv
      "s_clientSamples": 0x07ACD728, "s_clientTalkTime": 0x07ACD778, "s_waveInLineInfo": 0x07ACD7C0,
      "wavein_current_reclevel": 0x07ACD60C, "recording": 0x07ACD878, "playing": 0x07ACD879,
      "currentRecordingSample": 0x07ACD87C}
+# t6mp_msstore: the saved line table (Mixer_InitWaveInLineInfo 14049F270 clears 0xA0 bytes there)
+STORE_G = {"s_waveInLineInfo": 0x144211720}
 DVARS = {"winvoice_mic_mute": 0x7001, "winvoice_mic_reclevel": 0x7002, "winvoice_save_voice": 0x7003,
          "winvoice_mic_scaler": 0x7004, "winvoice_loopback": 0x7005, "winvoice_voice_level": 0x7006}
 
@@ -40,7 +42,15 @@ def u32(mu, va):
 
 
 def arg(mu, i):
+    """Argument i at the import's entry: stdcall on x86, Win64 registers (the first four: all the mixer API takes)."""
+    if STATE.get("x64"):
+        return mu.reg_read((x86.UC_X86_REG_RCX, x86.UC_X86_REG_RDX, x86.UC_X86_REG_R8, x86.UC_X86_REG_R9)[i])
     return u32(mu, mu.reg_read(x86.UC_X86_REG_ESP) + 4 + 4 * i)
+
+
+def ptr(mu, va):
+    """A pointer field: 4 bytes on x86, 8 on x64."""
+    return struct.unpack("<Q", bytes(mu.mem_read(va, 8)))[0] if STATE.get("x64") else u32(mu, va)
 
 
 def field(mixer, name):
@@ -48,7 +58,7 @@ def field(mixer, name):
 
 
 def result(mu, value):
-    mu.reg_write(x86.UC_X86_REG_EAX, value)
+    mu.reg_write(x86.UC_X86_REG_RAX if STATE.get("x64") else x86.UC_X86_REG_EAX, value)
 
 
 def mixer_of(mu, handle):
@@ -71,7 +81,7 @@ def mixerOpen(m, mu):
     mixer = arg(mu, 1)
     if mixer >= u32(mu, MODEL) or u32(mu, field(mixer, "open_fail")):
         return result(mu, 2)  # MMSYSERR_BADDEVICEID
-    mu.mem_write(arg(mu, 0), struct.pack("<I", HANDLE + mixer))
+    mu.mem_write(arg(mu, 0), struct.pack("<Q" if STATE.get("x64") else "<I", HANDLE + mixer))
     result(mu, 0)
 
 
@@ -94,7 +104,9 @@ def mixerGetLineControlsA(m, mu):
     if u32(mu, field(mixer, "controls_fail")):
         return result(mu, 1026)  # MIXERR_INVALCONTROL
     control = u32(mu, mxlc + 8)
-    mu.mem_write(u32(mu, mxlc + 20) + 4, struct.pack("<I", (mixer << 8) | (1 if control == VOLUME else 2)))
+    # MIXERLINECONTROLSA.pamxctrl: offset 20 on x86, 24 on x64 (aligned)
+    mu.mem_write(ptr(mu, mxlc + (24 if STATE.get("x64") else 20)) + 4,
+                 struct.pack("<I", (mixer << 8) | (1 if control == VOLUME else 2)))
     result(mu, 0)
 
 
@@ -103,15 +115,20 @@ def control_field(mu, mxcd):
     return field(cid >> 8, "volume" if cid & 0xFF == 1 else "mute")
 
 
+def details(mu, mxcd):
+    """MIXERCONTROLDETAILS.paDetails: offset 20 on x86, 32 on x64 (after the pointer-sized union)."""
+    return ptr(mu, mxcd + (32 if STATE.get("x64") else 20))
+
+
 def mixerGetControlDetailsA(m, mu):
     mxcd = arg(mu, 1)
-    mu.mem_write(u32(mu, mxcd + 20), struct.pack("<I", u32(mu, control_field(mu, mxcd))))
+    mu.mem_write(details(mu, mxcd), struct.pack("<I", u32(mu, control_field(mu, mxcd))))
     result(mu, 0)
 
 
 def mixerSetControlDetails(m, mu):
     mxcd = arg(mu, 1)
-    m.program_write(control_field(mu, mxcd), bytes(mu.mem_read(u32(mu, mxcd + 20), 4)))
+    m.program_write(control_field(mu, mxcd), bytes(mu.mem_read(details(mu, mxcd), 4)))
     result(mu, 0)
 
 
@@ -144,10 +161,20 @@ def write_mixers(w, model):
         w.write(MIXERS + 0x20 * i, struct.pack("<7I", *(e[k] for k in FIELDS)))
 
 
-def write_lines(w, lines):
+def write_lines(w, lines, table=None):
     """s_waveInLineInfo: up to 8 (isValid, mixerID, dstWaveInLineID, oldRecLevel, oldMuteState)."""
     data = b"".join(struct.pack("<5I", *e) for e in lines)
-    w.write(G["s_waveInLineInfo"], data.ljust(0xA0, b"\0"))
+    w.write(table or G["s_waveInLineInfo"], data.ljust(0xA0, b"\0"))
+
+
+def store_mixer_setup(model, lines):
+    """The Store build: only the mixer model and the line table (its other voice globals aren't identified)."""
+    def run(w):
+        STATE.clear()
+        STATE["x64"] = True
+        write_mixers(w, model)
+        write_lines(w, lines, STORE_G["s_waveInLineInfo"])
+    return run
 
 
 def lines_for(model):
@@ -230,7 +257,7 @@ def init_inputs():
     out = []
     for _ in range(40):
         model = mixers(rng.randrange(0, 11), rng.choice([0, 1, 2]))
-        out.append({"args": [], "setup": setup(model=model, record=rng.randrange(2), sound=rng.randrange(2),
+        out.append({"args": [], "model": model, "setup": setup(model=model, record=rng.randrange(2), sound=rng.randrange(2),
                                                dvars={"winvoice_mic_reclevel": rng.choice([0, 0x8000, 0xFFFF]),
                                                       "winvoice_mic_mute": rng.randrange(2),
                                                       "winvoice_voice_level": rng.randrange(256)})})
@@ -358,7 +385,11 @@ CASES = [
                  "Com_ControllerIndex_GetLocalClientNum": "i", "IN_IsTalkKeyHeld": "", "Sys_Milliseconds": ""}},
     {"name": "Voice_IsClientTalking", "ret": "bool", "builds": SERVER, "inputs": talking_inputs(),
      "fakes": BACKEND_FAKES, "observe": {"Assert_MyHandler": "siiss", "Sys_Milliseconds": ""}},
-    {"name": "Mixer_InitWaveInLineInfo", "ret": "void", "builds": SERVER, "imports": IMPORTS,
+    {"name": "Mixer_InitWaveInLineInfo", "ret": "void", "imports": IMPORTS,
+     "builds": SERVER + ["t6mp_msstore"],
+     "by_build": {"t6mp_msstore": {"inputs": [
+         {"args": [], "setup": store_mixer_setup(mixers(rng.randrange(0, 9), rng.choice([0, 1, 3])), [(1, 9, 9, 9, 9)] * 3)}
+         for _ in range(60)]}},
      "inputs": [{"args": [], "setup": setup(model=mixers(rng.randrange(0, 9), rng.choice([0, 1, 3])),
                                             lines=[(1, 9, 9, 9, 9)] * 3)} for _ in range(40)]},
     {"name": "Mixer_SetWaveInRecordLevels", "ret": "void", "builds": SERVER, "imports": IMPORTS,

@@ -7,9 +7,30 @@
 // - winvoice_mic_reclevel no longer reaches the device; the game's capture gain is winvoice_mic_scaler. Mapping the
 //   level onto that gain waits for the capture path (groupvoice/record.cpp) to be reconstructed.
 // Everything else is the faithful code.
-// Server build only for now: the Store build doesn't identify the voice globals and dvars yet, so in the game these
-// would reach traps (tools/runtime_link.py). It comes to the Store once win_voice.cpp is verified there.
-#ifndef T6_STORE
+// The Store build inlines the mixer calls into Voice_Init, Voice_Shutdown and the level re-apply (1401C2950), all of
+// which only touch the lines Mixer_InitWaveInLineInfo saved; there the patch is that function finding no line, so no
+// device is ever changed (below). The servers' version replaces the callers instead (it was written first).
+#ifdef T6_STORE
+#define T6_ASSERT_DIR "c:\\t6\\code\\src\\win32\\"
+#define T6_ASSERT_FILE T6_ASSERT_DIR "win_voice.cpp"
+#define T6_SOURCE "win32/win_voice.cpp"
+
+#include "win32/win_voice.h"
+
+#include <string.h>
+
+#include "t6_static.h"
+
+T6_STATIC WaveInLineInfo s_waveInLineInfo[8] T6_AT("", "s_waveInLineInfo");
+
+// 14049F270: the original also finds every mixer's wave-in line and saves its level and mute, so that Voice_Init can
+// set them (winvoice_mic_reclevel, 100% by default; winvoice_mic_mute) and Voice_Shutdown restore them. Here the
+// table stays empty: the set and restore loops have nothing to do, whatever the dvars say.
+void Mixer_InitWaveInLineInfo()
+{
+	memset(s_waveInLineInfo, 0, sizeof(s_waveInLineInfo));
+}
+#else
 #define T6_ASSERT_DIR "c:\\t6\\code\\src\\win32\\"
 #define T6_ASSERT_FILE T6_ASSERT_DIR "win_voice.cpp"
 #define T6_SOURCE "win32/win_voice.cpp"

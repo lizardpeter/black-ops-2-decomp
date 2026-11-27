@@ -32,7 +32,12 @@ def compare(ctx, name, inputs, ret, fakes=v.BACKEND_FAKES, observe=v.BACKEND_SEE
         assert not touched, f"input {i}: changed the mixer model at {[hex(a) for a in touched[:4]]}"
         assert got[0] == want[0], f"input {i}: returned {got[0]!r}, original {want[0]!r}"
         assert got[3] == want[3], f"input {i}: calls differ\n  original {want[3]}\n  enhanced {got[3]}"
-        rest = lambda w: {a: b for a, b in w.items() if a not in MIXER_STATE and a not in MIXER_ONLY}
+        # B0011: with more than eight wave-in mixers the original's line table overflows into the globals after it;
+        # the enhanced build saves no line, so those writes are the original's alone
+        saved = sum(1 for e in inp["model"][2] if e["has_line"] and not e["caps_fail"] and not e["open_fail"]) \
+            if "model" in inp and inp["model"][0] and inp["model"][1] else 0
+        overflow = qwords(v.G["s_waveInLineInfo"] + 0xA0, v.G["s_waveInLineInfo"] + 20 * saved) if saved > 8 else set()
+        rest = lambda w: {a: b for a, b in w.items() if a not in MIXER_STATE and a not in MIXER_ONLY and a not in overflow}
         diff = sorted(a for a in set(rest(got[2])) | set(rest(want[2])) if got[2].get(a) != want[2].get(a))
         assert not diff, f"input {i}: other globals differ at {[hex(a) for a in diff[:4]]}"
 

@@ -319,3 +319,4 @@ CoDMPServer_PC	00A28200	matches	src/gfx_d3d/r_font.cpp	R_GetCharacterGlyph; test
 CoDMPServer_PC	00A28470	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont_FastFile; tests/differential/test_r_font.py
 CoDMPServer_PC	00A28490	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont; tests/differential/test_r_font.py
 CoDMPServer_PC	00A285F0	matches	src/gfx_d3d/r_font.cpp	R_TextWidth (GetButtonProperties inlined into its test); tests/differential/test_r_font.py
+t6mp_msstore	14049F270	matches	src/win32/win_voice.cpp	Mixer_InitWaveInLineInfo (Mixer_GetRecordLevel and Mixer_GetMuteState inlined); tests/differential/test_win_voice.py

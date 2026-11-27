@@ -104,6 +104,16 @@ Limits:
   not movement, and are ignored.
 - If Windows refuses raw input (it practically never does), the mouse doesn't turn the view. The log says so.
 
+## Voice chat leaves your microphone alone (P0001)
+
+The original sets every Windows recording device's level to `winvoice_mic_reclevel` (100% by default) and its mute
+to `winvoice_mic_mute` when voice starts, re-applies the level when the dvar changes, and puts the old settings back
+only on a clean shutdown: after a crash the microphone stays at 100%. The enhanced build never touches the devices.
+In the Store build the device code is inlined into its callers, which only act on the lines
+`Mixer_InitWaveInLineInfo` (`14049F270`) saved, so the patch is that function saving none. Consequence:
+`winvoice_mic_mute` mutes nothing there for now; the mute moves into the game's own voice capture once that is
+reconstructed (`records/bugs.tsv` B0029).
+
 ## Installing
 
 1. Build: `python3 tools/build_runtime.py` (needs the pinned `t6mp_msstore` exe, like the tests). It writes
