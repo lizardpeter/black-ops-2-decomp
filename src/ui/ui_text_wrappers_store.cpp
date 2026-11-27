@@ -5,7 +5,7 @@
 #include <cstring>
 #include <xmmintrin.h>
 namespace store_font{void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int);}
-namespace store_font_core{void*DefaultFont(float);void*FontHandle(const unsigned char*,int,float);}
+#include "ui/ui.h"
 namespace store_text_cmd{
 unsigned char* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,unsigned char,float);
 void AddCmdDrawTextEffects(const char*,int,const void*,float,float,float,float,float,float,const float*,int,const float*,const void*,const void*,int,int,int,int);
@@ -78,8 +78,8 @@ void DrawTextNormalized(const B*p,const char*t,int /*unused*/,const B*f,float x,
 // 140426EB0
 void* ItemFont(int client,const B*item){
     const B*p=Wrap_Placements+static_cast<long long>(client)*0x7c;
-    if(const B*font=R<const B*>(item,0xe8))return store_font_core::FontHandle(p,R<int>(font,0x1c),R<float>(font,0x30));
-    return store_font_core::DefaultFont(((Wrap_Capture?Wrap_CaptureY:1.0f)*((Wrap_HudScale*0.55f)*Wrap_HudScale))*R<float>(p,4));
+    if(const B*font=R<const B*>(item,0xe8))return UI_GetFontHandle(reinterpret_cast<const ScreenPlacement*>(p),R<int>(font,0x1c),R<float>(font,0x30));
+    return UI_GetFontHandleDefault(((Wrap_Capture?Wrap_CaptureY:1.0f)*((Wrap_HudScale*0.55f)*Wrap_HudScale))*R<float>(p,4));
 }
 // 1403A5D90. Only AL is defined by this original ABI.
 B DecimalSeparator(){

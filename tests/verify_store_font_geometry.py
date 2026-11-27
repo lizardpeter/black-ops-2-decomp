@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"geometry.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_geometry_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_geometry_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.GeometryMock.restype=C.c_void_p;lib.GeometrySize.restype=C.c_uint
         lib.GeometryRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.GeometryRun.restype=None
         a=C.create_string_buffer(lib.GeometrySize());b=C.create_string_buffer(lib.GeometrySize());rng=random.Random(0x72bfe0)

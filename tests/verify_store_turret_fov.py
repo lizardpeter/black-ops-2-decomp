@@ -14,7 +14,7 @@ def bits(v):return struct.unpack("<I",struct.pack("<f",v))[0]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"turret.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",
                         str(ROOT/"tests/store_turret_fov_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so))
         lib.TurretMock.argtypes=[C.c_uint];lib.TurretMock.restype=C.c_void_p

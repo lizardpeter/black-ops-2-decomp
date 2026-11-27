@@ -12,7 +12,7 @@ def bits(f):return struct.unpack("<I",struct.pack("<f",f))[0]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"angles.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_angles_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_angles_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.AngleMock.argtypes=[C.c_uint];lib.AngleMock.restype=C.c_void_p
         lib.AngleSize.restype=C.c_uint;lib.AngleRun.argtypes=[C.c_void_p,*([C.c_uint]*5),C.c_void_p]
         a=C.create_string_buffer(lib.AngleSize());b=C.create_string_buffer(lib.AngleSize())

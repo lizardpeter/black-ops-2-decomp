@@ -3,7 +3,7 @@
 #if defined(T6_STORE) && defined(T6_STORE_FONT_REPLAY)
 #include <cstdint>
 #include <cstring>
-namespace store_font_core { const unsigned char* CharacterGlyph(const unsigned char*,std::uint32_t); }
+#include "gfx_d3d/r_font.h"
 namespace store_font { void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int); }
 namespace store_font_aux {
 using Byte=unsigned char;using U32=std::uint32_t;
@@ -37,7 +37,7 @@ const char* WrapPosition(const char*text,int maxBytes,int maxWidth,const Byte*fo
             p+=int(static_cast<signed char>(p[3]))+4;
             if(start!=begin)space=start;
         }else{
-            if(font)width+=store_font_core::CharacterGlyph(font,ch)[4];
+            if(font)width+=R_GetCharacterGlyph(reinterpret_cast<Font_s*>(const_cast<Byte*>(font)),ch)->dx;
             if(start!=begin&&ch<256&&Aux_IsSpace(int(ch)))space=p;
         }
         if(space&&float(width)*scale>float(maxWidth))return reinterpret_cast<const char*>(space);
@@ -58,7 +58,7 @@ int RingTextWidth(const Byte*buf,int size,int start,int length,const Byte*font){
             width+=IconWidth(font,buf[(start+1)&mask]);
             // Original payload length read is contiguous; the caller provides the guard.
             start=(start+4+int(static_cast<signed char>(buf[start+3])))&mask;
-        }else width+=store_font_core::CharacterGlyph(font,ch)[4];
+        }else width+=R_GetCharacterGlyph(reinterpret_cast<Font_s*>(const_cast<Byte*>(font)),ch)->dx;
     }
     return width;
 }

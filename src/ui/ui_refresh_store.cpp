@@ -2,6 +2,8 @@
 #define T6_SOURCE "ui/ui_main.cpp"
 #ifdef T6_STORE
 #include "ui/ui_refresh_store.h"
+#include "gfx_d3d/r_font.h"
+#include "ui/ui.h"
 #include <string.h>
 struct dvar_t;
 struct _RTL_CRITICAL_SECTION;
@@ -26,9 +28,7 @@ void Store_UI_UpdateContext(int, void *);
 void Store_UI_MainThreadContext(int, void *);
 void Store_UI_RefreshDelayed(int, void *);
 void Store_UI_PaintMenu(int, void *, int, void *, int);
-void *Store_UI_FontForScale(float);
 const char *Store_UI_FormatVersion(const char *, const char *, const char *, int, int, int);
-int Store_UI_TextWidth(int, const char *, int, const void *);
 void Store_UI_DrawTextPadding(int, const void *, const char *, int, const void *, float, float, int, int, float, const float *, int, float);
 #define DECLARE(name) extern unsigned char store_uiRefresh_##name[];
 STORE_UI_REFRESH_GLOBALS(DECLARE)
@@ -51,11 +51,11 @@ void DrawBuildNumber(const StoreUiRefreshGlobals &g,int index){
     const auto *placement=g.placements+static_cast<__PTRDIFF_TYPE__>(index)*0x7c;
     const float hud=Read<float>(g.hudScale);
     const float fontScale=((Read<int>(g.hiresActive)?Read<float>(g.hiresY):1.0f)*((hud*0.2f)*hud))*Read<float>(placement,4);
-    const auto *font=Store_UI_FontForScale(fontScale);
+    Font_s *font=UI_GetFontHandleDefault(fontScale);
     const char *text=Store_UI_FormatVersion("%s%s%d.%d.%d","","",43,Read<int>(g.versionMinor),Read<int>(g.versionPatch));
     const float norm=9.6f/static_cast<float>(Read<int>(font,8));
     // TextWidth's first register argument is dead in the two Store bodies.
-    const int width=FloorToInt(static_cast<float>(Store_UI_TextWidth(0,text,64,font))*norm+0.5f);
+    const int width=FloorToInt(static_cast<float>(R_TextWidth(LOCAL_CLIENT_0,text,64,font))*norm+0.5f);
     const float xScale=((Read<int>(g.hiresActive)?Read<float>(g.hiresX):1.0f)*Read<float>(g.hudScale))*Read<float>(placement);
     if(xScale>0.0f)Store_UI_DrawTextPadding(0,placement,text,64,font,-40.0f-static_cast<float>(width),20.0f,3,1,0.2f,reinterpret_cast<const float *>(g.white),0,0.0f);
 }

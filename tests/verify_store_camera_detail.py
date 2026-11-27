@@ -13,7 +13,7 @@ def bits(v):return struct.unpack("<I",struct.pack("<f",v))[0]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"detail.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_detail_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_detail_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.DetailMock.argtypes=[C.c_uint];lib.DetailMock.restype=C.c_void_p
         lib.DetailSize.restype=C.c_uint;lib.DetailRun.argtypes=[C.c_void_p,C.c_void_p,*([C.c_uint]*5),C.c_int,C.c_int,C.c_void_p]
         a=C.create_string_buffer(lib.DetailSize());b=C.create_string_buffer(lib.DetailSize())

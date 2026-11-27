@@ -6,11 +6,8 @@
 #include <cctype>
 #include <cstdlib>
 #define MS __attribute__((ms_abi))
-namespace store_font_core{
-const unsigned char*CharacterGlyph(const unsigned char*f,std::uint32_t ch){
-    const unsigned char*g;std::memcpy(&g,f+0x28,8);
-    return g+24*((ch-32u)<=95?ch-32u:14);
-}
+const Glyph*R_GetCharacterGlyph(Font_s*f,unsigned int ch){
+    return f->glyphs+((ch-32u)<=95?ch-32u:14);
 }
 namespace store_font {void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int){}}
 namespace store_font_aux{

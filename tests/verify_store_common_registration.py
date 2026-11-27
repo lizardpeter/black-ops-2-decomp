@@ -14,7 +14,7 @@ GLOBALS=[0x1f04878,0x1f04908,0x1f03820,0x1f04910,0x1f04998,0x1f04850,0x1f049d8,0
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"common.so"
-        subprocess.run(["g++","-std=c++17","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
                         str(ROOT/"tests/store_common_registration_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so))
         lib.CommonMock.argtypes=[C.c_uint]

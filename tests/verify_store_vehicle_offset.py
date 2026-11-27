@@ -12,7 +12,7 @@ def bits(f):return struct.unpack("<I",struct.pack("<f",f))[0]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"vehicle-offset.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_vehicle_offset_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_vehicle_offset_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.VehicleOffsetMock.argtypes=[C.c_uint];lib.VehicleOffsetMock.restype=C.c_void_p
         lib.VehicleOffsetSize.restype=C.c_uint;lib.VehicleOffsetRun.argtypes=[C.c_void_p,C.c_void_p,*([C.c_uint]*3),C.c_int,C.c_int,C.c_void_p]
         a=C.create_string_buffer(lib.VehicleOffsetSize());b=C.create_string_buffer(lib.VehicleOffsetSize());rng=random.Random(0xc66d0)

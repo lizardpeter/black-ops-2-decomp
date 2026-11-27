@@ -18,7 +18,7 @@ VIS=[0x27e6bd0, 0x27e6bc8, 0x27e6b58, 0x27e7140, 0x27e6f58, 0x27e6fc8, 0x27e6fd8
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"renderer-integrated.so"
-        subprocess.run(["g++","-std=c++17","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
                         str(ROOT/"tests/store_renderer_prefix_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so))
         lib.RendererPrefixMock.argtypes=[C.c_uint]

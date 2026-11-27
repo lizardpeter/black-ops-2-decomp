@@ -26,7 +26,7 @@ void Clients_Edit(int c,B*,int x,int y){cap->client=c;cap->editX=x;cap->editY=y;
 }
 }
 namespace store_loc_format{const char* TranslateExe(const char*s){cap->translateHash=Hash(s);return s;}}
-namespace store_font_core{void*DefaultFont(float f){cap->scale=f;return font;}}
+Font_s*UI_GetFontHandleDefault(float f){cap->scale=f;return reinterpret_cast<Font_s*>(font);}
 namespace store_font{void ApplyRect(const B*,float*x,float*y,float*sx,float*sy,int ha,int va){cap->ha=ha;cap->va=va;cap->rect[0]=*x;cap->rect[1]=*y;cap->rect[2]=*sx;cap->rect[3]=*sy;*x+=3;*y-=5;*sx*=2;*sy*=4;}}
 namespace store_text_cmd{B*AddBaseDrawTextCmd(const char*s,int n,const void*,float x,float y,float z,float sx,float sy,float angle,const float*c,int style,int cursor,B,float pad){cap->cmdMax=n;cap->style=style;cap->cursor=cursor;cap->draw[0]=x;cap->draw[1]=y;cap->draw[2]=z;cap->draw[3]=sx;cap->draw[4]=sy;cap->draw[5]=angle;cap->draw[6]=pad;cap->draw[7]=float(Hash(s));std::memcpy(cap->color,c,16);return nullptr;}}
 namespace store_static_tables{extern "C"{B*Static_BufferBase;B*Static_Pointers=tables;B*Static_Sizes=sizes;B Static_Ready;}}
@@ -34,7 +34,7 @@ static int MS MAtoi(const char*s){return store_hud_clients::Clients_Atoi(s);}
 static void MS MColor(const char*s,U*c){store_hud_clients::Clients_ParseColor(s,c);}
 static const char*MS MTranslate(const char*s){return store_loc_format::TranslateExe(s);}
 static const char*MS MFormat(const char*f,const char*s){return store_hud_clients::Clients_Format(f,s);}
-static void*MS MFont(float f){return store_font_core::DefaultFont(f);}
+static void*MS MFont(float f){return UI_GetFontHandleDefault(f);}
 static void MS MRect(const B*p,float*x,float*y,float*sx,float*sy,int ha,int va){store_font::ApplyRect(p,x,y,sx,sy,ha,va);}
 static B*MS MDraw(const char*s,int n,const void*f,float x,float y,float z,float sx,float sy,float a,const float*c,int style,int cursor,B v,float p){return store_text_cmd::AddBaseDrawTextCmd(s,n,f,x,y,z,sx,sy,a,c,style,cursor,v,p);}
 static int MS MWidth(int c,const char*s,int n,const void*f){return store_hud_clients::Clients_Width(c,s,n,f);}

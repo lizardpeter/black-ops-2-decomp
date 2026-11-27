@@ -11,7 +11,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"remote.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_remote_fallback_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_remote_fallback_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.RemoteMock.argtypes=[C.c_uint];lib.RemoteMock.restype=C.c_void_p
         lib.RemoteSize.restype=C.c_uint;lib.RemoteRun.argtypes=[C.c_void_p,C.c_void_p,C.c_uint,C.c_int,C.c_void_p]
         a=C.create_string_buffer(lib.RemoteSize());b=C.create_string_buffer(lib.RemoteSize());rng=random.Random(0xc3650)

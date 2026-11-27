@@ -880,10 +880,9 @@ X87_MATH void CL_KeyMove(LocalClientNum_t localClientNum, usercmd_s *cmd)
 }
 
 #ifdef T6_STORE
-// Store only, no name in any symbol file (records/names.tsv): a flag that drops mouse movement where the server checks
-// the dev GUI, and that aim assist and the extra-camera draw also read; and the handler that gets the movement while
-// key catcher 0x10 is set (LUI, by its strings).
-extern int store_1427F1B60;
+// Store only: while a high-resolution screenshot is taken (s_hiResShot, client/screen_placement.cpp) mouse movement is
+// dropped where the server checks the dev GUI; and the handler that gets the movement while key catcher 0x10 is set
+// (LUI, by its strings).
 void Store_LUIMouseEvent(LocalClientNum_t localClientNum, int x, int y);
 #endif
 
@@ -893,10 +892,10 @@ void Store_LUIMouseEvent(LocalClientNum_t localClientNum, int x, int y);
 int CL_MouseEvent(LocalClientNum_t localClientNum, int x, int y, int dx, int dy)
 {
 #ifdef T6_STORE
-	// The Store revision: an unnamed flag takes the dev GUI's place (no dev GUI mouse; the movement is dropped), the
+	// The Store revision: the hi-res screenshot flag takes the dev GUI's place (no dev GUI mouse; the movement is dropped), the
 	// 3D-window check is gone, and a key catcher 0x10 sends the movement to a LUI handler. IN_MouseMove 140499A10
 	// inlines this.
-	if (store_1427F1B60)
+	if (s_hiResShot.active)
 		return 1;
 	clientUIActive_t *clientUIActive = CL_GetLocalClientUIGlobals(localClientNum);
 	UI_UpdateMouseScreenPosition(localClientNum, x, y);

@@ -3,7 +3,7 @@
 #if defined(T6_STORE) && defined(T6_STORE_FONT_REPLAY)
 #include <cstdint>
 #include <cstring>
-namespace store_font_core{const unsigned char* CharacterGlyph(const unsigned char*,std::uint32_t);}
+#include "gfx_d3d/r_font.h"
 namespace store_font_geom{
 void GlyphQuad3D(const unsigned char*,const float*,const float*,const float*,const unsigned char*,std::uint32_t);
 extern "C" {extern int Geom_IndexCount;void Geom_Flush();}
@@ -21,7 +21,7 @@ void DrawTextInSpace(const Byte*text,const Byte*font,const float*origin,const fl
         U32 ch=*text++;
         if((ch&0xe0)==0xc0)ch=((ch&31)<<6)|(*text++&63);
         else if((ch&0xf0)==0xe0){ch=((ch&15)<<12)|((text[0]&63)<<6)|(text[1]&63);text+=2;}
-        const Byte*g=store_font_core::CharacterGlyph(font,ch);
+        const Byte*g=reinterpret_cast<const Byte*>(R_GetCharacterGlyph(reinterpret_cast<Font_s*>(const_cast<Byte*>(font)),ch));
         U32 c=color;
         if(ch-1<6||ch-14<12||ch-28<4||ch-0xbc<2)c=(color&0xff000000u)|0xffffffu;
         float x0=float(static_cast<signed char>(g[2])),y0=float(static_cast<signed char>(g[3]));

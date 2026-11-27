@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"gc.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_gc_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_gc_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.GCMock.argtypes=[C.c_uint];lib.GCMock.restype=C.c_void_p;lib.GCSize.restype=C.c_uint
         lib.GCRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.GCRun.restype=None
         a=C.create_string_buffer(lib.GCSize());b=C.create_string_buffer(lib.GCSize());rng=random.Random(0x692140)

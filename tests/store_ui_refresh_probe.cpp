@@ -1,4 +1,6 @@
 #include "ui/ui_refresh_store.h"
+#include "gfx_d3d/r_font.h"
+#include "ui/ui.h"
 #include <cstring>
 #include <cstdlib>
 #include <cstdint>
@@ -44,9 +46,9 @@ extern "C" void Store_UI_UpdateContext(int n,void *p){context(13,n,p);}
 extern "C" void Store_UI_MainThreadContext(int n,void *p){context(14,n,p);}
 extern "C" void Store_UI_RefreshDelayed(int n,void *p){context(15,n,p);}
 extern "C" void Store_UI_PaintMenu(int n,void *p,int a,void *m,int b){auto &e=ev(16);e.args[0]=static_cast<unsigned>(n);e.args[1]=ptr(p);e.args[2]=a;e.args[3]=ptr(m);e.args[4]=static_cast<unsigned>(b);e.args[5]=rd<unsigned>(m,0x5c);if(seed&0x80)wr(m,0x5c,rd<unsigned>(m,0x5c)&~0x42000u);}
-extern "C" void *Store_UI_FontForScale(float f){ev(17).args[0]=bits(f);return font;}
+Font_s *UI_GetFontHandleDefault(float f){ev(17).args[0]=bits(f);return reinterpret_cast<Font_s *>(font);}
 extern "C" const char *Store_UI_FormatVersion(const char *fmt,const char *a,const char *b,int major,int minor,int patch){auto &e=ev(18);if(strcmp(fmt,"%s%s%d.%d.%d")||*a||*b)++cap.bad;e.args[0]=major;e.args[1]=minor;e.args[2]=patch;return text;}
-extern "C" int Store_UI_TextWidth(int,const char *t,int len,const void *f){auto &e=ev(19);if(t!=text||f!=font)++cap.bad;e.args[0]=len;return static_cast<int>((seed>>8)%2048)-64;}
+int R_TextWidth(LocalClientNum_t,const char *t,int len,Font_s *f){auto &e=ev(19);if(t!=text||static_cast<const void *>(f)!=static_cast<const void *>(font))++cap.bad;e.args[0]=len;return static_cast<int>((seed>>8)%2048)-64;}
 extern "C" void Store_UI_DrawTextPadding(int lc,const void *placement,const char *t,int max,const void *f,float x,float y,int ha,int va,float scale,const float *white,int style,float pad){auto &e=ev(20);if(t!=text||f!=font)++cap.bad;e.args[0]=lc;e.args[1]=ptr(placement);e.args[2]=max;e.args[3]=bits(x);e.args[4]=bits(y);e.args[5]=ha;e.args[6]=va;e.args[7]=bits(scale);e.args[8]=ptr(white);e.args[9]=style;e.args[10]=bits(pad);}
 static int MS tryLock(_RTL_CRITICAL_SECTION *p){return TryEnterCriticalSection(p);}
 static void MS leaveLock(_RTL_CRITICAL_SECTION *p){LeaveCriticalSection(p);}
@@ -55,8 +57,8 @@ static void MS init(bool b){Store_UI_LuiInit(b);}static void MS luiA(int n){Stor
 static void MS notify(const void *p,unsigned char *b){Store_UI_NotifyFlag(p,b);}static void MS primary(){Store_UI_RefreshPrimary();}
 static void MS ctx(int n,void *p){Store_UI_UpdateContext(n,p);}static void MS mainCtx(int n,void *p){Store_UI_MainThreadContext(n,p);}static void MS delayed(int n,void *p){Store_UI_RefreshDelayed(n,p);}
 static void MS paint(int n,void *p,int a,void *m,int b){Store_UI_PaintMenu(n,p,a,m,b);}
-static void *MS selectFont(float f){return Store_UI_FontForScale(f);}static const char *MS format(const char *f,const char *a,const char *b,int major,int minor,int patch){return Store_UI_FormatVersion(f,a,b,major,minor,patch);}
-static int MS width(int lc,const char *t,int len,const void *f){return Store_UI_TextWidth(lc,t,len,f);}
+static void *MS selectFont(float f){return UI_GetFontHandleDefault(f);}static const char *MS format(const char *f,const char *a,const char *b,int major,int minor,int patch){return Store_UI_FormatVersion(f,a,b,major,minor,patch);}
+static int MS width(int lc,const char *t,int len,const void *f){return R_TextWidth(static_cast<LocalClientNum_t>(lc),t,len,reinterpret_cast<Font_s *>(const_cast<void *>(f)));}
 static void MS draw(int lc,const void *p,const char *t,int max,const void *f,float x,float y,int ha,int va,float scale,const float *white,int style,float pad){Store_UI_DrawTextPadding(lc,p,t,max,f,x,y,ha,va,scale,white,style,pad);}
 extern "C" void *RefreshMock(unsigned i){void *v[]={(void*)getThread,(void*)clockNow,(void*)parse,(void*)tryLock,(void*)leaveLock,(void*)begin,(void*)controller,(void*)init,(void*)luiA,(void*)luiB,(void*)notify,(void*)primary,(void*)ctx,(void*)mainCtx,(void*)delayed,(void*)paint,(void*)selectFont,(void*)format,(void*)width,(void*)draw};return v[i];}
 static const dvar_t *Dvar(unsigned slot,unsigned mode){auto *v=vars[slot];memset(v,0,128);if(!mode)return nullptr;wr(v,0x18,mode<3?1u:8u);if(mode<3)wr<unsigned char>(v,0x20,mode==2);else wr(v,0x20,mode==3?"0":"-1");return reinterpret_cast<const dvar_t *>(v);}

@@ -308,3 +308,14 @@ t6zm_msstore	1407ED2E0	matches	src/demonware/bd_rich_presence.cpp	BdRichPresence
 t6zm_msstore	1407ED480	matches	src/demonware/bd_rich_presence.cpp	BdRichPresenceSetInfo; tests/differential/test_demonware_presence.py
 t6zm_msstore	1407FFE30	matches	src/demonware/bd_http_auth.cpp	BdHandleGdkAuthTask; tests/differential/test_demonware_auth.py
 t6zm_msstore	14078741C	matches	src/win32/win_gdk.cpp	GdkUserCheckPrivilege; tests/differential/test_demonware_auth.py
+t6mp_msstore	14071A6E0	matches	src/gfx_d3d/r_font.cpp	R_GetCharacterGlyph; tests/replay/verify_r_font.py
+t6mp_msstore	14071A780	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont; tests/replay/verify_r_font.py
+t6mp_msstore	14071A7A0	matches	src/gfx_d3d/r_font.cpp	R_TextWidth (SEH_ReadCharFromString, GetButtonProperties inlined); tests/replay/verify_r_font.py
+t6mp_msstore	1403FCD20	matches	src/ui/ui_main.cpp	UI_GetFontHandleDefault (Dvar_GetFloat inlined); tests/replay/verify_ui_fonts.py
+t6mp_msstore	1403FCE40	matches	src/ui/ui_main.cpp	UI_GetFontHandle (ScrPlace_RealFromVirtual_Height inlined); tests/replay/verify_ui_fonts.py
+CoDMPServer_PC	00703FA0	matches	src/stringed/stringed_hooks.cpp	SEH_DecodeLetter; tests/differential/test_r_font.py
+CoDMPServer_PC	00704020	matches	src/stringed/stringed_hooks.cpp	SEH_ReadCharFromString; tests/differential/test_r_font.py
+CoDMPServer_PC	00A28200	matches	src/gfx_d3d/r_font.cpp	R_GetCharacterGlyph; tests/differential/test_r_font.py
+CoDMPServer_PC	00A28470	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont_FastFile; tests/differential/test_r_font.py
+CoDMPServer_PC	00A28490	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont; tests/differential/test_r_font.py
+CoDMPServer_PC	00A285F0	matches	src/gfx_d3d/r_font.cpp	R_TextWidth (GetButtonProperties inlined into its test); tests/differential/test_r_font.py

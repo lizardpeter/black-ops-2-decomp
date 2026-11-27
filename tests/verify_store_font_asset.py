@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"asset.so"
-        subprocess.run(["g++","-std=c++17","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_asset_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_asset_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.AssetMock.argtypes=[C.c_uint];lib.AssetMock.restype=C.c_void_p;lib.AssetSizeCapture.restype=C.c_uint
         lib.AssetRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.AssetRun.restype=None
         a=C.create_string_buffer(lib.AssetSizeCapture());b=C.create_string_buffer(lib.AssetSizeCapture());rng=random.Random(0x211b80)

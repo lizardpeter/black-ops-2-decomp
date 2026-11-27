@@ -3,7 +3,7 @@
 #if defined(T6_STORE) && defined(T6_STORE_FONT_REPLAY)
 #include <cstring>
 #include <cstdint>
-namespace store_font_core{void*DefaultFont(float);}
+#include "ui/ui.h"
 namespace store_font{void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int);}
 namespace store_text_cmd{unsigned char* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,unsigned char,float);}
 namespace store_font_ui_support {
@@ -69,7 +69,7 @@ void DrawTextField(int client,Byte*field,int x,int y){
     }else{
         scale=R<float>(field,0x10);
         float choose=((Support_Capture?Support_CaptureY:1.0f)*(((scale*(1.0f/48.0f))*Support_HudScale)*Support_HudScale))*R<float>(Support_FieldPlacement,4);
-        font=static_cast<const Byte*>(store_font_core::DefaultFont(choose));scale/=float(R<int>(font,8));style=3;
+        font=reinterpret_cast<const Byte*>(UI_GetFontHandleDefault(choose));scale/=float(R<int>(font,8));style=3;
     }
     float px=float(x),py=float(R<int>(font,8))*scale+float(y),sx=scale,sy=scale;
     store_font::ApplyRect(Support_FieldPlacement,&px,&py,&sx,&sy,1,1);

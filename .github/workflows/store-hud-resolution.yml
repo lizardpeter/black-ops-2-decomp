@@ -8,7 +8,6 @@ on:
       - 'src/ui/ui_font_assets_store.cpp'
       - 'src/client/screen_placement_store.cpp'
       - 'tests/store_font*probe.cpp'
-      - 'src/gfx_d3d/r_font_store.cpp'
       - 'src/gfx_d3d/r_text_commands_store.cpp'
       - 'src/ui/lui_text_util_store.cpp'
       - 'src/ui/lui_inline_icon_store.cpp'
@@ -68,8 +67,6 @@ jobs:
       - run: python tools/fetch_originals.py t6mp_msstore originals --only exe
       - run: python tools/inventory/store_hud_resolution.py originals/t6mp_msstore.exe hud-evidence
       - run: python tests/verify_store_font.py originals/t6mp_msstore.exe
-      - run: python tests/verify_store_font_core.py originals/t6mp_msstore.exe
-        if: always()
       - run: python tests/verify_store_font_command.py originals/t6mp_msstore.exe
         if: always()
       - run: python tests/verify_store_font_backend.py originals/t6mp_msstore.exe

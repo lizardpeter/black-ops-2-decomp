@@ -11,7 +11,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"transition.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_transition_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_transition_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.TransitionMock.argtypes=[C.c_uint];lib.TransitionMock.restype=C.c_void_p
         lib.TransitionSize.restype=C.c_uint;lib.TransitionRun.argtypes=[C.c_void_p,*([C.c_uint]*3),C.c_void_p]
         a=C.create_string_buffer(lib.TransitionSize());b=C.create_string_buffer(lib.TransitionSize());rng=random.Random(0xbfcc0)

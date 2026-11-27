@@ -25,7 +25,7 @@ calls. An input on which the original itself faults is skipped; a case with no u
 ones enhanced/ overrides, which tests/enhanced/ checks against their patches (records/patches.tsv).
 
 --check-records fails if records/functions.tsv claims `matches` (or `integrated`) for a function of this build that
-did not pass. Results go to build/<build>/test-results.tsv.
+did not pass here or in the native replay tests (build/<build>/replay-results.tsv, tests/replay/run.py). Results go to build/<build>/test-results.tsv.
 """
 import importlib.util
 import math
@@ -255,9 +255,13 @@ def main():
     (out / "test-results.tsv").write_text("build\tva\tsymbol\tcases\tresult\n" +
                                           "".join("\t".join(map(str, x)) + "\n" for x in results))
     passed = {x[1] for x in results if x[4] == "pass"}
+    # the native replay tests (tests/replay/run.py, run first) cover functions this harness can't reach yet
+    replay = ROOT / "build" / build / "replay-results.tsv"
+    if not enhanced and replay.exists():
+        passed |= {r["va"] for r in symbols.read_tsv(replay) if r["result"] == "pass"}
     if "--check-records" in sys.argv:
         for rec in symbols.read_tsv(ROOT / "records" / "functions.tsv"):
-            ran = {x[1] for x in results}  # with -k, only the functions that ran
+            ran = {x[1] for x in results} | passed  # with -k, only the functions that ran
             if rec["build"] == build and rec["status"] in MATCHED and rec["va"] not in passed and \
                     (not only or rec["va"] in ran):
                 print(f"FAIL records claim {rec['status']} for {build}:{rec['va']} without a passing test")

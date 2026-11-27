@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <xmmintrin.h>
-namespace store_font_core {const unsigned char* CharacterGlyph(const unsigned char*,std::uint32_t);}
+#include "gfx_d3d/r_font.h"
 namespace store_font_backend {
 using Byte=unsigned char;using U32=std::uint32_t;
 template<class T>static T R(const void*p,unsigned n){T v;std::memcpy(&v,static_cast<const Byte*>(p)+n,sizeof(v));return v;}
@@ -19,7 +19,7 @@ void Backend_Quad(void*,float,float,float,float,float,float,float,float,float,fl
 void DrawCursor(void*material,Byte letter,float x,float y,float sinAngle,float cosAngle,
                 const Byte*font,float sx,float sy,U32 color){
     if((Backend_TextTime/256)&1)return;
-    const Byte*g=store_font_core::CharacterGlyph(font,letter);
+    const Byte*g=reinterpret_cast<const Byte*>(R_GetCharacterGlyph(reinterpret_cast<Font_s*>(const_cast<Byte*>(font)),letter));
     if(Byte(letter-1)<=5||Byte(letter-14)<=11||Byte(letter-28)<=3||Byte(letter+0x44)<=1)
         color=(color&0xff000000u)|0xffffffu;
     Backend_Quad(material,x,y+float(static_cast<signed char>(g[3]))*sy,1.0f,

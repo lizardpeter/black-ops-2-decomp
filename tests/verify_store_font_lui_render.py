@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"lui_render.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_lui_render_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_lui_render_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.LuiRenderMock.argtypes=[C.c_uint];lib.LuiRenderMock.restype=C.c_void_p;lib.LuiRenderSize.restype=C.c_uint
         lib.LuiRenderRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.LuiRenderRun.restype=None
         lib.LuiRenderDiagnostics();a=C.create_string_buffer(lib.LuiRenderSize());b=C.create_string_buffer(lib.LuiRenderSize());rng=random.Random(0x6af8f0)

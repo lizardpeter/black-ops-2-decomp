@@ -12,7 +12,7 @@ from verify_store_cgame_registration import ROOT, map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"fov.so"
-        subprocess.run(["g++","-std=c++17","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
                         str(ROOT/"tests/store_cg_fov_mode_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so))
         lib.FovModeMock.argtypes=[C.c_uint]

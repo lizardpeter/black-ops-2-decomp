@@ -20,6 +20,7 @@
 #include "gfx_d3d/r_dx.h"
 #include "gfx_d3d/r_rendercmds.h"
 #include "qcommon/threads.h"
+#include "ui/ui.h"
 #include "t6_static.h"
 #include "universal/dvar.h"
 #include "universal/win_common.h"
@@ -45,7 +46,6 @@ void store_1407362F0();
 void store_140487390();
 extern bool store_1421E2467;
 extern bool store_14421181E;
-extern int store_1427F1B60;
 extern ID3D11View *store_142C3F7D8;
 extern ID3D11Resource *store_143063C70;
 extern ID3D11Resource *store_143063C78;
@@ -93,7 +93,7 @@ void RB_SwapBuffers()
 	store_1404B15B0();
 	if (store_1421E2467 && store_14421181E)
 		store_1407362F0();
-	if (store_1427F1B60)
+	if (s_hiResShot.active)
 	{
 		Sys_EnterCriticalSection(CRITSECT_DXCONTEXT);
 		ID3D11Resource *backBuffer;

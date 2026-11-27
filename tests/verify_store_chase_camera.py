@@ -12,7 +12,7 @@ def bits(f):return struct.unpack("<I",struct.pack("<f",f))[0]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"chase.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_chase_camera_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_chase_camera_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.ChaseMock.argtypes=[C.c_uint];lib.ChaseMock.restype=C.c_void_p
         lib.ChaseSize.restype=C.c_uint;lib.ChaseRun.argtypes=[C.c_void_p,*([C.c_uint]*5),C.c_void_p]
         a=C.create_string_buffer(lib.ChaseSize());b=C.create_string_buffer(lib.ChaseSize());rng=random.Random(0x16a5d0)

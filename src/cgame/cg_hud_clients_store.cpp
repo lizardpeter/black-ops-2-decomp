@@ -6,7 +6,7 @@
 #include <xmmintrin.h>
 namespace store_loc_format{const char*TranslateExe(const char*);}
 namespace store_font{void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int);}
-namespace store_font_core{void*DefaultFont(float);}
+#include "ui/ui.h"
 namespace store_text_cmd{unsigned char* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,unsigned char,float);}
 namespace store_hud_clients{
 using B=unsigned char;using U=std::uint32_t;
@@ -67,7 +67,7 @@ void DrawChatPrompt(int client){
     label=Clients_Format("%s: ",label);
     float size=R<float>(chat,0x10);
     float scale=(Clients_Capture?Clients_CaptureY:1.0f)*(((size*0.020833334f)*Clients_HudScale)*Clients_HudScale)*R<float>(Clients_Placement,4);
-    const void*font=store_font_core::DefaultFont(scale);
+    const void*font=UI_GetFontHandleDefault(scale);
     float height=float(R<int>(font,8));scale=size/height;
     float x=5,y=float(_mm_cvttss_si32(_mm_set_ss(height*scale))+254),sx=scale,sy=scale;
     store_font::ApplyRect(Clients_Placement,&x,&y,&sx,&sy,1,1);

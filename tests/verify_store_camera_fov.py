@@ -12,7 +12,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"camera.so"
-        subprocess.run(["g++","-std=c++17","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",
                         str(ROOT/"tests/store_camera_fov_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so))
         lib.CameraMock.argtypes=[C.c_uint];lib.CameraMock.restype=C.c_void_p

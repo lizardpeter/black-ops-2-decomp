@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"textdep.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_text_dependencies_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_text_dependencies_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.TextDependencyMock.argtypes=[C.c_uint];lib.TextDependencyMock.restype=C.c_void_p;lib.TextDependencySize.restype=C.c_uint
         lib.TextDependencyRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.TextDependencyRun.restype=None
         a=C.create_string_buffer(lib.TextDependencySize());b=C.create_string_buffer(lib.TextDependencySize());rng=random.Random(0x106c50)

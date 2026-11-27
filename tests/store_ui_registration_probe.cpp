@@ -5,11 +5,9 @@
 union alignas(16) StoreUiDvarValue { unsigned words[4]; const char *string; };
 struct alignas(16) StoreUiDvarDomain { unsigned words[4]; };
 using Value=StoreUiDvarValue;using Domain=StoreUiDvarDomain;
-extern "C" {
-#define DEF(name) const dvar_t *store_uiDvar_##name;
+#define DEF(name) const dvar_t *name;
 STORE_UI_DVAR_GLOBALS(DEF)
 #undef DEF
-}
 struct Event {unsigned kind,type,flags,words[6],token;char name[64],str[32];};
 struct Capture {unsigned n,bad;Event events[160];};
 static Capture cap;static unsigned seed,ix;static constexpr unsigned TOKEN=0x12340000;
@@ -38,12 +36,12 @@ static void MS tail(){Store_UI_RegisterTailDvars();}
 extern "C" void *UiRegistrationMock(unsigned i){void *v[]={(void*)lookup,(void*)fresh,(void*)again,(void*)flt,(void*)str,(void*)color,(void*)boolean,(void*)other,(void*)tail};return v[i];}
 extern "C" unsigned UiRegistrationCaptureSize(){return sizeof(Capture);}
 extern "C" void UiRegistrationRun(void *entry,unsigned s,bool draw,Capture *out){cap={};seed=s;ix=0;
-#define CLEAR(name) store_uiDvar_##name=nullptr;
+#define CLEAR(name) name=nullptr;
 STORE_UI_DVAR_GLOBALS(CLEAR)
 #undef CLEAR
 if(entry)reinterpret_cast<void(MS*)()>(entry)();else if(draw)UI_RegisterDvars();else UI_RegisterDvarsWithBuildNumberDefault(false);*out=cap;}
 extern "C" unsigned UiRegistrationGlobals(unsigned *out){unsigned i=0;
-#define GET(name) out[i++]=val(store_uiDvar_##name);
+#define GET(name) out[i++]=val(name);
 STORE_UI_DVAR_GLOBALS(GET)
 #undef GET
 return i;}

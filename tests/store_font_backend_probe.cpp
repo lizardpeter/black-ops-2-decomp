@@ -3,11 +3,8 @@
 #include "../src/gfx_d3d/rb_font_store.cpp"
 #include <cassert>
 #define MS __attribute__((ms_abi))
-namespace store_font_core {
-const unsigned char* CharacterGlyph(const unsigned char*font,std::uint32_t letter){
-    const unsigned char*g;std::memcpy(&g,font+0x28,sizeof(g));
-    return g+24*((letter-32u)<=95u?letter-32u:14u);
-}
+const Glyph* R_GetCharacterGlyph(Font_s*font,unsigned int letter){
+    return font->glyphs+((letter-32u)<=95u?letter-32u:14u);
 }
 namespace store_font_backend {
 using U=std::uint64_t;

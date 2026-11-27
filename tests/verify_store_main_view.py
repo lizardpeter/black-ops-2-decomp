@@ -12,7 +12,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"main-view.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",
                         str(ROOT/"tests/store_main_view_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.MainViewMock.argtypes=[C.c_uint];lib.MainViewMock.restype=C.c_void_p
         lib.MainViewSize.restype=C.c_uint;lib.MainViewRun.argtypes=[C.c_void_p,*([C.c_uint]*3),C.c_void_p]

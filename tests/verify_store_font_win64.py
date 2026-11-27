@@ -46,7 +46,6 @@ UNITS={"src/client/cl_text_bindings_store.cpp":["FindBindingKeys","CopyBindingTe
        "src/gfx_d3d/r_text_commands_store.cpp":["AddBaseDrawTextCmd","AddCmdDrawQuad"],
        "src/ui/ui_font_draw_store.cpp":["BlinkText","DrawTextPadding"],
        "src/gfx_d3d/r_fonticon_store.cpp":["GetFontIconEntryInfo"],
-       "src/gfx_d3d/r_font_store.cpp":["DefaultFont","FontHandle","CharacterGlyph","RegisterFont","TextWidth"],
        "src/ui/ui_font_assets_store.cpp":["AssetCache","ResolutionScale"],
        "src/client/screen_placement_store.cpp":["HudViewX","HudViewY","VirtualFromRealWidth","VirtualFromRealHeight","ApplyRect"]}
 def main():

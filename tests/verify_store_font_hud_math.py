@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"hudmath.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_hud_math_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_hud_math_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.HudMock.argtypes=[C.c_uint];lib.HudMock.restype=C.c_void_p;lib.HudSize.restype=C.c_uint
         lib.HudRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.HudRun.restype=None
         a=C.create_string_buffer(lib.HudSize());b=C.create_string_buffer(lib.HudSize());rng=random.Random(0xf4c00)

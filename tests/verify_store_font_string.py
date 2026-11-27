@@ -6,7 +6,7 @@ from verify_store_cgame_registration import ROOT,map_image
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"string.so"
-        subprocess.run(["g++","-std=c++17","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_string_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_font_string_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.StringMock.argtypes=[C.c_uint];lib.StringMock.restype=C.c_void_p;lib.StringSize.restype=C.c_uint
         lib.StringRun.argtypes=[C.c_void_p,C.c_uint,C.c_uint,C.c_void_p];lib.StringRun.restype=None
         a=C.create_string_buffer(lib.StringSize());b=C.create_string_buffer(lib.StringSize());rng=random.Random(0x50a9b0)

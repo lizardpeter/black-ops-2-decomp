@@ -58,9 +58,7 @@ void UI_RegisterDvarsWithBuildNumberDefault(bool drawBuildNumber);
     X(tu_allowDLCWeaponsByOwnership) \
     X(ui_friendsListOpen) \
     X(ui_playerListOpen)
-extern "C" {
-#define STORE_UI_DVAR_DECLARE(name) extern const dvar_t *store_uiDvar_##name;
+#define STORE_UI_DVAR_DECLARE(name) extern const dvar_t *name;
 STORE_UI_DVAR_GLOBALS(STORE_UI_DVAR_DECLARE)
 #undef STORE_UI_DVAR_DECLARE
-}
 #endif

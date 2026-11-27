@@ -13,7 +13,7 @@ def bits(f):return struct.unpack("<I",struct.pack("<f",f))[0]
 def main():
     with tempfile.TemporaryDirectory() as tmp:
         so=pathlib.Path(tmp)/"bob.so"
-        subprocess.run(["g++","-std=c++17","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_bob_probe.cpp"),"-o",str(so)],check=True)
+        subprocess.run(["g++","-std=c++17","-I"+str(ROOT/"include"),"-fms-extensions","-O2","-ffp-contract=off","-Wall","-Wextra","-Werror","-shared","-fPIC",str(ROOT/"tests/store_camera_bob_probe.cpp"),"-o",str(so)],check=True)
         lib=C.CDLL(str(so));lib.BobMock.argtypes=[C.c_uint];lib.BobMock.restype=C.c_void_p
         lib.BobSize.restype=C.c_uint;lib.BobRun.argtypes=[C.c_void_p,*([C.c_uint]*5),C.c_void_p]
         a=C.create_string_buffer(lib.BobSize());b=C.create_string_buffer(lib.BobSize())

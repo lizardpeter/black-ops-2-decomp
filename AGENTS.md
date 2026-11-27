@@ -23,6 +23,7 @@ If a generated file is wrong, fix the script that wrote it and re-run. Don't pat
 | `runtime/` | What puts the enhanced build into the game: the loader (`runtime/loader`, `XINPUT1_4.dll`); built with `tools/build_runtime.py` (docs/enhanced-build.md) |
 | `records/` | `functions.tsv` (status), `names.tsv` (identifications in builds without symbols), `bugs.tsv`, `patches.tsv` |
 | `tests/differential/` | Reconstructions against the original code under Unicorn, x86 or x64 (`harness.py`, `run.py`, cases in `test_*.py`) |
+| `tests/replay/` | Store reconstructions against the original natively: the mapped exe and the `src/` files built for the host, side by side (`replay.py`, `run.py`, `verify_*.py` with their `*_probe.cpp`) |
 | `tools/` | Fetching, inventory, PDB extraction, Ghidra scripts, matching, the hybrid-link build (`build_recon.py`, `symbols.py`, `recon/`), status and graph generation |
 | `reconstructed_dlls/`, `tools/dlls/` | Authored, evidence-based source reconstructions of the original XCurl/Bink code, with hash-pinned fetch/inventory utilities; no vendor binary blobs or unverified drop-in replacements (see `docs/dll-reconstruction.md`) |
 
@@ -47,7 +48,9 @@ x64 builds at 0x140000000 read `1407B51D0`. Every tool uses that form. Server ad
 - `named`: original name known (PDB/MAP, or a recorded identification in `records/names.tsv`)
 - `typed`: original prototype known
 - `decompiled` / `compiles`: authored source exists / builds in CI
-- `matches`: passes `tests/differential/run.py --build <build>` against that build's original code. Optimised builds
+- `matches`: passes `tests/differential/run.py --build <build>` against that build's original code, or, for the Store
+  build, the native replay tests (`tests/replay/run.py`, see `tests/replay/replay.py`), which run the same `src/` file
+  beside the original in one process. Optimised builds
   won't byte-match; the test compares behaviour. CI fails if `records/functions.tsv` claims `matches` for a function
   that doesn't pass.
 - `integrated`: linked into the runnable reconstruction

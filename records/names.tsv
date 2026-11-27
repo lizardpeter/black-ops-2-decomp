@@ -66,7 +66,7 @@ t6mp_msstore	1427E7230	data	r_fullscreen	?r_fullscreen@@3PBUdvar_t@@B	gfx_d3d/r_
 t6mp_msstore	140A53D88	data	primaryLocalClient	?primaryLocalClient@@3W4LocalClientNum_t@@A	qcommon/com_clients.cpp	structure	IN_MouseMove 140499A10's inlined Com_LocalClients_GetPrimary: passed to Com_LocalClient_LastInput_Set	high
 t6mp_msstore	1421214C0	data	uiInfoArray	?uiInfoArray@@3PAUuiInfo_s@@A	ui/ui_main.cpp	structure	IN_MouseMove 140499A10's inlined UI_UpdateMouseScreenPosition and UI_MouseEvent: cursor at +0x10, isCursorVisible +0x18, menuCount +0x27B8, currentMenuType +0x414C (the x64 layouts tools/pdb/layout64.py predicts)	high
 t6mp_msstore	140E63300	data	scrPlaceFull	?scrPlaceFull@@3UScreenPlacement@@A	client/screen_placement.cpp	structure	IN_MouseMove 140499A10's inlined UI_UpdateMouseScreenPosition divides the cursor by scaleVirtualToFull (+8, 140E63308 and 140E6330C)	high
-t6mp_msstore	1427F1B60	data	store_1427F1B60	?store_1427F1B60@@3HA	client/cl_input.cpp	structure	name made up (Store only): an int IN_MouseMove 140499A10 tests where the server's CL_MouseEvent tests DevGui_IsActive (when set, the movement is dropped); aim assist (1400A9AB0) and the extra-camera draw (1401BC300) also read it, with floats at +4 and +8	high
+t6mp_msstore	1427F1B60	data	s_hiResShot	s_hiResShot	client/screen_placement.cpp	structure	name made up (Store only, no symbol): {int active; float scale[2]} read together by every Store ScrPlace function (ApplyRect 1401F65E0, the font scale in UI_GetFontHandle 1403FCE40) as ScrPlace_HiResGetScale; set while CL_TakeHiResShot runs; IN_MouseMove 140499A10 drops mouse movement while it's set	high
 t6mp_msstore	14018E200	function	CG_GetAirburstMarkDistance	?CG_GetAirburstMarkDistance@@YAHW4LocalClientNum_t@@PAUplayerState_s@@AAV?$bitarray@$0EA@@@PAIH@Z	cgame/cg_weapons.cpp	structure	the only call of CL_UpdateAirburstMarkDistance 140192B70: (rcx left at 1, ps, &cmd->button_bits, &markDistance, the inlined laze check's result); a nonzero result stores markDistance in cmd->airburstMarkDistance and sets BUTTON_AIRBURST_MARK, as on the server	high
 t6mp_msstore	140E4F870	data	cg_airburstStrafeRestriction	?cg_airburstStrafeRestriction@@3PBUdvar_t@@B	cgame_mp/cg_main_mp.cpp	structure	the first float dvar CL_UpdateAirburstMarkDistance 140192B70's inlined CG_AirburstLazeCancelledByMovement reads, compared with the length of the scaled walk and strafe moves	high
 t6mp_msstore	140E4F860	data	cg_airburstCameraRestriction	?cg_airburstCameraRestriction@@3PBUdvar_t@@B	cgame_mp/cg_main_mp.cpp	structure	the second float dvar CL_UpdateAirburstMarkDistance 140192B70's inlined CG_AirburstLazeCancelledByMovement reads, compared with the length of the scaled pitch and yaw moves	high
@@ -817,59 +817,59 @@ t6mp_msstore	14046CA30	function	Store_UI_RegisterString	Store_UI_RegisterString	
 t6mp_msstore	14046CBD0	function	Store_UI_RegisterColor	Store_UI_RegisterColor	universal/dvar.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
 t6mp_msstore	140404A20	function	Store_UI_RegisterRelatedDvars	Store_UI_RegisterRelatedDvars	ui/ui_main.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
 t6mp_msstore	140408BC0	function	Store_UI_RegisterTailDvars	Store_UI_RegisterTailDvars	ui/ui_main.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
-t6mp_msstore	142121490	data	ui_animSpeedScale	store_uiDvar_ui_animSpeedScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142126538	data	ui_playlistPopulationRefreshTime	store_uiDvar_ui_playlistPopulationRefreshTime	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155CF8	data	ui_netSource	store_uiDvar_ui_netSource	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121410	data	ui_lastServerRefresh_0	store_uiDvar_ui_lastServerRefresh_0	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121418	data	ui_lastServerRefresh_1	store_uiDvar_ui_lastServerRefresh_1	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121420	data	ui_lastServerRefresh_2	store_uiDvar_ui_lastServerRefresh_2	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121428	data	ui_lastServerRefresh_3	store_uiDvar_ui_lastServerRefresh_3	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121430	data	ui_lastServerRefresh_4	store_uiDvar_ui_lastServerRefresh_4	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121448	data	ui_smallFont	store_uiDvar_ui_smallFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121368	data	ui_bigFont	store_uiDvar_ui_bigFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421213A8	data	ui_language	store_uiDvar_ui_language	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121398	data	ui_languagechanged	store_uiDvar_ui_languagechanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155D30	data	ui_currentMap	store_uiDvar_ui_currentMap	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121338	data	ui_preview	store_uiDvar_ui_preview	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121328	data	ui_mapPackChanged	store_uiDvar_ui_mapPackChanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121350	data	ui_prevTextEntryBox	store_uiDvar_ui_prevTextEntryBox	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421214A8	data	ui_ignoreMousePos	store_uiDvar_ui_ignoreMousePos	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121320	data	ui_drawBuildNumber	store_uiDvar_ui_drawBuildNumber	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155D20	data	ui_demoname	store_uiDvar_ui_demoname	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121318	data	ui_menuLvlNotify	store_uiDvar_ui_menuLvlNotify	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155D08	data	selectedFriendName	store_uiDvar_selectedFriendName	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155D10	data	selectedFriendIndex	store_uiDvar_selectedFriendIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155D18	data	selectedPlayerXuid	store_uiDvar_selectedPlayerXuid	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155D28	data	selectedMenuItemIndex	store_uiDvar_selectedMenuItemIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121330	data	ui_showDLCMaps	store_uiDvar_ui_showDLCMaps	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142126530	data	ui_scrollTextYOffset	store_uiDvar_ui_scrollTextYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121360	data	ui_scrollTextScrollRate	store_uiDvar_ui_scrollTextScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121438	data	ui_scrollTextYOffsetResetDelay	store_uiDvar_ui_scrollTextYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121380	data	ui_scrollTextDelay	store_uiDvar_ui_scrollTextDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421214B0	data	ui_scrollMOTDYOffset	store_uiDvar_ui_scrollMOTDYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142126548	data	ui_MOTDScrollRate	store_uiDvar_ui_MOTDScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121408	data	ui_scrollMOTDDelay	store_uiDvar_ui_scrollMOTDDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421214A0	data	ui_scrollMOTDYOffsetResetDelay	store_uiDvar_ui_scrollMOTDYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121370	data	ui_borderLowLightScale	store_uiDvar_ui_borderLowLightScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121388	data	ui_lobbypopup	store_uiDvar_ui_lobbypopup	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142126540	data	ui_listboxIndex	store_uiDvar_ui_listboxIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121358	data	ls_status	store_uiDvar_ls_status	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121340	data	ui_keyboardtitle	store_uiDvar_ui_keyboardtitle	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121348	data	ui_keyboard_dvar_edit	store_uiDvar_ui_keyboard_dvar_edit	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121498	data	ls_demoauthor	store_uiDvar_ls_demoauthor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142126550	data	scr_hardcore	store_uiDvar_scr_hardcore	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421213B0	data	ui_choice_noaction	store_uiDvar_ui_choice_noaction	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155CC8	data	ui_hud_showobjicons	store_uiDvar_ui_hud_showobjicons	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155CC0	data	ui_hud_obituaries	store_uiDvar_ui_hud_obituaries	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142155CB8	data	tu7_ui_multiteam_compass_fix	store_uiDvar_tu7_ui_multiteam_compass_fix	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421213A0	data	ui_fxFontColor	store_uiDvar_ui_fxFontColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121440	data	ui_fxFontGlowColor	store_uiDvar_ui_fxFontGlowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121378	data	ui_fxFontShadowColor	store_uiDvar_ui_fxFontShadowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121400	data	ui_fxFontOutlineColor	store_uiDvar_ui_fxFontOutlineColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	142121390	data	ui_drawOldUI	store_uiDvar_ui_drawOldUI	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421214B8	data	tu_allowDLCWeaponsByOwnership	store_uiDvar_tu_allowDLCWeaponsByOwnership	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421212F0	data	ui_friendsListOpen	store_uiDvar_ui_friendsListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6mp_msstore	1421212F8	data	ui_playerListOpen	store_uiDvar_ui_playerListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121490	data	ui_animSpeedScale	ui_animSpeedScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142126538	data	ui_playlistPopulationRefreshTime	ui_playlistPopulationRefreshTime	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155CF8	data	ui_netSource	ui_netSource	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121410	data	ui_lastServerRefresh_0	ui_lastServerRefresh_0	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121418	data	ui_lastServerRefresh_1	ui_lastServerRefresh_1	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121420	data	ui_lastServerRefresh_2	ui_lastServerRefresh_2	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121428	data	ui_lastServerRefresh_3	ui_lastServerRefresh_3	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121430	data	ui_lastServerRefresh_4	ui_lastServerRefresh_4	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121448	data	ui_smallFont	ui_smallFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121368	data	ui_bigFont	ui_bigFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421213A8	data	ui_language	ui_language	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121398	data	ui_languagechanged	ui_languagechanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155D30	data	ui_currentMap	ui_currentMap	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121338	data	ui_preview	ui_preview	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121328	data	ui_mapPackChanged	ui_mapPackChanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121350	data	ui_prevTextEntryBox	ui_prevTextEntryBox	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421214A8	data	ui_ignoreMousePos	ui_ignoreMousePos	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121320	data	ui_drawBuildNumber	ui_drawBuildNumber	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155D20	data	ui_demoname	ui_demoname	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121318	data	ui_menuLvlNotify	ui_menuLvlNotify	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155D08	data	selectedFriendName	selectedFriendName	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155D10	data	selectedFriendIndex	selectedFriendIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155D18	data	selectedPlayerXuid	selectedPlayerXuid	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155D28	data	selectedMenuItemIndex	selectedMenuItemIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121330	data	ui_showDLCMaps	ui_showDLCMaps	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142126530	data	ui_scrollTextYOffset	ui_scrollTextYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121360	data	ui_scrollTextScrollRate	ui_scrollTextScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121438	data	ui_scrollTextYOffsetResetDelay	ui_scrollTextYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121380	data	ui_scrollTextDelay	ui_scrollTextDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421214B0	data	ui_scrollMOTDYOffset	ui_scrollMOTDYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142126548	data	ui_MOTDScrollRate	ui_MOTDScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121408	data	ui_scrollMOTDDelay	ui_scrollMOTDDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421214A0	data	ui_scrollMOTDYOffsetResetDelay	ui_scrollMOTDYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121370	data	ui_borderLowLightScale	ui_borderLowLightScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121388	data	ui_lobbypopup	ui_lobbypopup	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142126540	data	ui_listboxIndex	ui_listboxIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121358	data	ls_status	ls_status	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121340	data	ui_keyboardtitle	ui_keyboardtitle	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121348	data	ui_keyboard_dvar_edit	ui_keyboard_dvar_edit	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121498	data	ls_demoauthor	ls_demoauthor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142126550	data	scr_hardcore	scr_hardcore	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421213B0	data	ui_choice_noaction	ui_choice_noaction	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155CC8	data	ui_hud_showobjicons	ui_hud_showobjicons	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155CC0	data	ui_hud_obituaries	ui_hud_obituaries	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142155CB8	data	tu7_ui_multiteam_compass_fix	tu7_ui_multiteam_compass_fix	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421213A0	data	ui_fxFontColor	ui_fxFontColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121440	data	ui_fxFontGlowColor	ui_fxFontGlowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121378	data	ui_fxFontShadowColor	ui_fxFontShadowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121400	data	ui_fxFontOutlineColor	ui_fxFontOutlineColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	142121390	data	ui_drawOldUI	ui_drawOldUI	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421214B8	data	tu_allowDLCWeaponsByOwnership	tu_allowDLCWeaponsByOwnership	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421212F0	data	ui_friendsListOpen	ui_friendsListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6mp_msstore	1421212F8	data	ui_playerListOpen	ui_playerListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
 t6zm_msstore	1403FA4F0	function	UI_RegisterDvars	?UI_RegisterDvars@@YAXXZ	ui/ui_main.cpp	semantic+differential	8143-byte Store routine; 83 registrations, 53 global assignments, both defaults and mixed lookup paths; tests/verify_store_ui_registration.py	high
 t6zm_msstore	14046C5A0	function	Store_UI_FindDvar	Store_UI_FindDvar	universal/dvar.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
 t6zm_msstore	14046CE90	function	Store_UI_RegisterNew	Store_UI_RegisterNew	universal/dvar.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
@@ -878,59 +878,59 @@ t6zm_msstore	14046D720	function	Store_UI_RegisterString	Store_UI_RegisterString	
 t6zm_msstore	14046D8C0	function	Store_UI_RegisterColor	Store_UI_RegisterColor	universal/dvar.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
 t6zm_msstore	140405550	function	Store_UI_RegisterRelatedDvars	Store_UI_RegisterRelatedDvars	ui/ui_main.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
 t6zm_msstore	140409E20	function	Store_UI_RegisterTailDvars	Store_UI_RegisterTailDvars	ui/ui_main.cpp	caller	provisional ABI label; original callee boundary mocked in UI_RegisterDvars replay; implementation not recovered	medium
-t6zm_msstore	14211F510	data	ui_animSpeedScale	store_uiDvar_ui_animSpeedScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	1421245B8	data	ui_playlistPopulationRefreshTime	store_uiDvar_ui_playlistPopulationRefreshTime	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D78	data	ui_netSource	store_uiDvar_ui_netSource	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F490	data	ui_lastServerRefresh_0	store_uiDvar_ui_lastServerRefresh_0	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F498	data	ui_lastServerRefresh_1	store_uiDvar_ui_lastServerRefresh_1	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F4A0	data	ui_lastServerRefresh_2	store_uiDvar_ui_lastServerRefresh_2	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F4A8	data	ui_lastServerRefresh_3	store_uiDvar_ui_lastServerRefresh_3	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F4B0	data	ui_lastServerRefresh_4	store_uiDvar_ui_lastServerRefresh_4	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F4C8	data	ui_smallFont	store_uiDvar_ui_smallFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3E8	data	ui_bigFont	store_uiDvar_ui_bigFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F428	data	ui_language	store_uiDvar_ui_language	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F418	data	ui_languagechanged	store_uiDvar_ui_languagechanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153DB0	data	ui_currentMap	store_uiDvar_ui_currentMap	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3B8	data	ui_preview	store_uiDvar_ui_preview	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3A8	data	ui_mapPackChanged	store_uiDvar_ui_mapPackChanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3D0	data	ui_prevTextEntryBox	store_uiDvar_ui_prevTextEntryBox	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F528	data	ui_ignoreMousePos	store_uiDvar_ui_ignoreMousePos	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3A0	data	ui_drawBuildNumber	store_uiDvar_ui_drawBuildNumber	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153DA0	data	ui_demoname	store_uiDvar_ui_demoname	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F398	data	ui_menuLvlNotify	store_uiDvar_ui_menuLvlNotify	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D88	data	selectedFriendName	store_uiDvar_selectedFriendName	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D90	data	selectedFriendIndex	store_uiDvar_selectedFriendIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D98	data	selectedPlayerXuid	store_uiDvar_selectedPlayerXuid	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153DA8	data	selectedMenuItemIndex	store_uiDvar_selectedMenuItemIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3B0	data	ui_showDLCMaps	store_uiDvar_ui_showDLCMaps	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	1421245B0	data	ui_scrollTextYOffset	store_uiDvar_ui_scrollTextYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3E0	data	ui_scrollTextScrollRate	store_uiDvar_ui_scrollTextScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F4B8	data	ui_scrollTextYOffsetResetDelay	store_uiDvar_ui_scrollTextYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F400	data	ui_scrollTextDelay	store_uiDvar_ui_scrollTextDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F530	data	ui_scrollMOTDYOffset	store_uiDvar_ui_scrollMOTDYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	1421245C8	data	ui_MOTDScrollRate	store_uiDvar_ui_MOTDScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F488	data	ui_scrollMOTDDelay	store_uiDvar_ui_scrollMOTDDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F520	data	ui_scrollMOTDYOffsetResetDelay	store_uiDvar_ui_scrollMOTDYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3F0	data	ui_borderLowLightScale	store_uiDvar_ui_borderLowLightScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F408	data	ui_lobbypopup	store_uiDvar_ui_lobbypopup	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	1421245C0	data	ui_listboxIndex	store_uiDvar_ui_listboxIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3D8	data	ls_status	store_uiDvar_ls_status	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3C0	data	ui_keyboardtitle	store_uiDvar_ui_keyboardtitle	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3C8	data	ui_keyboard_dvar_edit	store_uiDvar_ui_keyboard_dvar_edit	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F518	data	ls_demoauthor	store_uiDvar_ls_demoauthor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	1421245D0	data	scr_hardcore	store_uiDvar_scr_hardcore	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F430	data	ui_choice_noaction	store_uiDvar_ui_choice_noaction	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D48	data	ui_hud_showobjicons	store_uiDvar_ui_hud_showobjicons	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D40	data	ui_hud_obituaries	store_uiDvar_ui_hud_obituaries	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	142153D38	data	tu7_ui_multiteam_compass_fix	store_uiDvar_tu7_ui_multiteam_compass_fix	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F420	data	ui_fxFontColor	store_uiDvar_ui_fxFontColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F4C0	data	ui_fxFontGlowColor	store_uiDvar_ui_fxFontGlowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F3F8	data	ui_fxFontShadowColor	store_uiDvar_ui_fxFontShadowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F480	data	ui_fxFontOutlineColor	store_uiDvar_ui_fxFontOutlineColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F410	data	ui_drawOldUI	store_uiDvar_ui_drawOldUI	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F538	data	tu_allowDLCWeaponsByOwnership	store_uiDvar_tu_allowDLCWeaponsByOwnership	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F370	data	ui_friendsListOpen	store_uiDvar_ui_friendsListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
-t6zm_msstore	14211F378	data	ui_playerListOpen	store_uiDvar_ui_playerListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F510	data	ui_animSpeedScale	ui_animSpeedScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	1421245B8	data	ui_playlistPopulationRefreshTime	ui_playlistPopulationRefreshTime	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D78	data	ui_netSource	ui_netSource	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F490	data	ui_lastServerRefresh_0	ui_lastServerRefresh_0	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F498	data	ui_lastServerRefresh_1	ui_lastServerRefresh_1	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F4A0	data	ui_lastServerRefresh_2	ui_lastServerRefresh_2	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F4A8	data	ui_lastServerRefresh_3	ui_lastServerRefresh_3	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F4B0	data	ui_lastServerRefresh_4	ui_lastServerRefresh_4	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F4C8	data	ui_smallFont	ui_smallFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3E8	data	ui_bigFont	ui_bigFont	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F428	data	ui_language	ui_language	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F418	data	ui_languagechanged	ui_languagechanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153DB0	data	ui_currentMap	ui_currentMap	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3B8	data	ui_preview	ui_preview	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3A8	data	ui_mapPackChanged	ui_mapPackChanged	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3D0	data	ui_prevTextEntryBox	ui_prevTextEntryBox	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F528	data	ui_ignoreMousePos	ui_ignoreMousePos	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3A0	data	ui_drawBuildNumber	ui_drawBuildNumber	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153DA0	data	ui_demoname	ui_demoname	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F398	data	ui_menuLvlNotify	ui_menuLvlNotify	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D88	data	selectedFriendName	selectedFriendName	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D90	data	selectedFriendIndex	selectedFriendIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D98	data	selectedPlayerXuid	selectedPlayerXuid	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153DA8	data	selectedMenuItemIndex	selectedMenuItemIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3B0	data	ui_showDLCMaps	ui_showDLCMaps	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	1421245B0	data	ui_scrollTextYOffset	ui_scrollTextYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3E0	data	ui_scrollTextScrollRate	ui_scrollTextScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F4B8	data	ui_scrollTextYOffsetResetDelay	ui_scrollTextYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F400	data	ui_scrollTextDelay	ui_scrollTextDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F530	data	ui_scrollMOTDYOffset	ui_scrollMOTDYOffset	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	1421245C8	data	ui_MOTDScrollRate	ui_MOTDScrollRate	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F488	data	ui_scrollMOTDDelay	ui_scrollMOTDDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F520	data	ui_scrollMOTDYOffsetResetDelay	ui_scrollMOTDYOffsetResetDelay	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3F0	data	ui_borderLowLightScale	ui_borderLowLightScale	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F408	data	ui_lobbypopup	ui_lobbypopup	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	1421245C0	data	ui_listboxIndex	ui_listboxIndex	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3D8	data	ls_status	ls_status	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3C0	data	ui_keyboardtitle	ui_keyboardtitle	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3C8	data	ui_keyboard_dvar_edit	ui_keyboard_dvar_edit	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F518	data	ls_demoauthor	ls_demoauthor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	1421245D0	data	scr_hardcore	scr_hardcore	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F430	data	ui_choice_noaction	ui_choice_noaction	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D48	data	ui_hud_showobjicons	ui_hud_showobjicons	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D40	data	ui_hud_obituaries	ui_hud_obituaries	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	142153D38	data	tu7_ui_multiteam_compass_fix	tu7_ui_multiteam_compass_fix	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F420	data	ui_fxFontColor	ui_fxFontColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F4C0	data	ui_fxFontGlowColor	ui_fxFontGlowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F3F8	data	ui_fxFontShadowColor	ui_fxFontShadowColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F480	data	ui_fxFontOutlineColor	ui_fxFontOutlineColor	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F410	data	ui_drawOldUI	ui_drawOldUI	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F538	data	tu_allowDLCWeaponsByOwnership	tu_allowDLCWeaponsByOwnership	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F370	data	ui_friendsListOpen	ui_friendsListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
+t6zm_msstore	14211F378	data	ui_playerListOpen	ui_playerListOpen	ui/ui_main.cpp	structure	global dvar pointer assigned by complete original UI_RegisterDvars, verified by replay	high
 t6mp_msstore	1403FD090	function	UI_Refresh	?UI_Refresh@@YAXH@Z	ui/ui_main.cpp	semantic+differential	Store MP complete 1694-byte body; includes inlined build number drawing, validated 4096 seeded executions and ordered external calls	high
 t6mp_msstore	140E61790	data	store_uiRefresh_clients	store_uiRefresh_clients	ui/ui_main.cpp	semantic+differential	UI_Refresh observed global binding: clients; matched replay	high
 t6mp_msstore	140A53D88	data	store_uiRefresh_primaryClient	store_uiRefresh_primaryClient	ui/ui_main.cpp	semantic+differential	UI_Refresh observed global binding: primaryClient; matched replay	high
@@ -973,9 +973,7 @@ t6mp_msstore	14042F990	function	Store_UI_UpdateContext	Store_UI_UpdateContext	ui
 t6mp_msstore	140415FC0	function	Store_UI_MainThreadContext	Store_UI_MainThreadContext	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6mp_msstore	1403FD940	function	Store_UI_RefreshDelayed	Store_UI_RefreshDelayed	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6mp_msstore	14042F2F0	function	Store_UI_PaintMenu	Store_UI_PaintMenu	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
-t6mp_msstore	1403FCD20	function	Store_UI_FontForScale	Store_UI_FontForScale	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6mp_msstore	140472000	function	Store_UI_FormatVersion	Store_UI_FormatVersion	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
-t6mp_msstore	14071A7A0	function	Store_UI_TextWidth	Store_UI_TextWidth	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6mp_msstore	1403FC6D0	function	Store_UI_DrawTextPadding	Store_UI_DrawTextPadding	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6zm_msstore	1403FDA60	function	UI_Refresh	?UI_Refresh@@YAXH@Z	ui/ui_main.cpp	semantic+differential	Store ZM complete 1763-byte body; includes inlined build number drawing, validated 4096 seeded executions and ordered external calls	high
 t6zm_msstore	140E5F810	data	store_uiRefresh_clients	store_uiRefresh_clients	ui/ui_main.cpp	semantic+differential	UI_Refresh observed global binding: clients; matched replay	high
@@ -1021,10 +1019,19 @@ t6zm_msstore	140430CB0	function	Store_UI_UpdateContext	Store_UI_UpdateContext	ui
 t6zm_msstore	140417320	function	Store_UI_MainThreadContext	Store_UI_MainThreadContext	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6zm_msstore	1403FE4E0	function	Store_UI_RefreshDelayed	Store_UI_RefreshDelayed	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6zm_msstore	140430610	function	Store_UI_PaintMenu	Store_UI_PaintMenu	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
-t6zm_msstore	1403FD6F0	function	Store_UI_FontForScale	Store_UI_FontForScale	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
+t6zm_msstore	1403FD6F0	function	UI_GetFontHandleDefault	UI_GetFontHandleDefault	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6zm_msstore	140472CF0	function	Store_UI_FormatVersion	Store_UI_FormatVersion	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
-t6zm_msstore	140718350	function	Store_UI_TextWidth	Store_UI_TextWidth	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
+t6zm_msstore	140718350	function	R_TextWidth	R_TextWidth	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6zm_msstore	1403FD0A0	function	Store_UI_DrawTextPadding	Store_UI_DrawTextPadding	ui/ui_main.cpp	semantic+differential	Provisional UI_Refresh external callee boundary; observed arguments, mocked in replay; body not reconstructed	medium
 t6zm_msstore	14406DC70	data	threadId	t6s@qcommon/threads.cpp@@threadId	qcommon/threads.cpp	semantic+differential	UI_Refresh inlined Sys_IsMainThread compares TLS thread id with this main thread id	high
 t6zm_msstore	14449CA04	data	initialized	t6s@win32/win_shared.cpp@Sys_Milliseconds@initialized	win32/win_shared.cpp	semantic+differential	UI_Refresh inlined Sys_Milliseconds initialization flag	high
 t6zm_msstore	1421E250C	data	sys_timeBase	?sys_timeBase@@3HA	win32/win_shared.cpp	semantic+differential	UI_Refresh inlined Sys_Milliseconds base	high
+t6mp_msstore	14071A6E0	function	R_GetCharacterGlyph	R_GetCharacterGlyph	gfx_d3d/r_font.cpp	semantic+differential	the server's R_GetCharacterGlyph (ASCII table, then a binary search from index 96, else glyph 14); tests/replay/verify_r_font.py	high
+t6mp_msstore	14071A780	function	R_RegisterFont	R_RegisterFont	gfx_d3d/r_font.cpp	semantic+differential	DB_FindXAssetHeader(ASSET_TYPE_FONT, name, true, -1): R_RegisterFont_FastFile inlined, no LoadObj path; tests/replay/verify_r_font.py	high
+t6mp_msstore	14071A7A0	function	R_TextWidth	R_TextWidth	gfx_d3d/r_font.cpp	semantic+differential	the server's R_TextWidth with SEH_ReadCharFromString and GetButtonProperties inlined; tests/replay/verify_r_font.py	high
+t6mp_msstore	140723450	function	R_GetFontIconEntryInfo	R_GetFontIconEntryInfo	gfx_d3d/r_fonticon.cpp	caller	what R_TextWidth's inlined GetButtonProperties calls with the ^B icon name and the font's pixelHeight	high
+t6mp_msstore	1403FCD20	function	UI_GetFontHandleDefault	UI_GetFontHandleDefault	ui/ui_main.cpp	semantic+differential	the server's UI_GetFontHandleDefault (ui_smallFont, ui_extraBigFont, ui_bigFont, then textFont); tests/replay/verify_ui_fonts.py	high
+t6mp_msstore	1403FCE40	function	UI_GetFontHandle	UI_GetFontHandle	ui/ui_main.cpp	semantic+differential	the server's UI_GetFontHandle with ScrPlace_RealFromVirtual_Height inlined; tests/replay/verify_ui_fonts.py	high
+t6mp_msstore	142126570	data	sharedUiInfo	sharedUiInfo	ui/ui_main.cpp	structure	its assets: UI_AssetCache 1403FBAF0 registers the menu materials and fonts into it in the server's CachedAssets_t order, without the vertical scroll bar arrows	high
+t6mp_msstore	1421213B8	data	ui_extraBigFont	ui_extraBigFont	ui/ui_main.cpp	semantic+differential	the dvar UI_GetFontHandleDefault compares with before extraBigFont; tests/replay/verify_ui_fonts.py	high
+t6mp_msstore	140E6287C	data	cg_hudSplitscreenScale	cg_hudSplitscreenScale	client/screen_placement.cpp	semantic+differential	UI_GetFontHandle multiplies the scale by it twice (once for ScrPlace_RealFromVirtual_Height) as the server does; tests/replay/verify_ui_fonts.py	high
