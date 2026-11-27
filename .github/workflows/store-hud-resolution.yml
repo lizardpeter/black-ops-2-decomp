@@ -17,6 +17,8 @@ on:
       - 'src/cgame/cg_hud_clients_store.cpp'
       - 'src/gfx_d3d/r_static_tables_store.cpp'
       - 'src/ui/lui_registry_store.cpp'
+      - 'src/ui/lui_string_store.cpp'
+      - 'src/qcommon/dvar_display_store.cpp'
       - 'src/database/db_font_zones_store.cpp'
       - 'src/database/db_asset_lookup_store.cpp'
       - 'src/database/db_zone_complete_store.cpp'
