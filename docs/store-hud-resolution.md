@@ -73,3 +73,24 @@ Another 61 distinct original Store addresses now have source candidates (150 tot
 - Seven HKS collection and metatable functions (140692140, 1406922C0, 14068F740, 14068F7D0, 14067EFC0, 1406939D0, 140693C10). The 147-function compilation audit passed at 03b0610. The subsequent GC replay passed its first operation, then faulted at the unbound original copy-thunk boundary; the fixture now binds 140870AA2 explicitly. Await the new run before marking the suite passed.
 
 Last fully green expanded replay checkpoint: 45907434497, 140 compiled candidates, 475,136 cumulative comparisons (401,408 prior plus 49,152 HUD math, 6,144 LUI, 13,312 registry, 5,120 HUD client/table). The seven additional GC and metatable candidates compiled independently in 45907514213. The latest 150-candidate manifest and GC replay correction await CI confirmation. None of these audit counts imply live replacement, full linking, other executable variants, or an enhanced renderer. All changes are confined to the faithful Store replay paths.
+
+
+## Font asset database, string and renderer-target closure
+
+Run 45907766728 verified all 150 prior Win64 bodies, including seven GC replay operations (7,168 cases).
+
+This pass adds 28 distinct original addresses, producing a 178-function audit manifest:
+
+- Zone names and loading: 140215300, 1403C2D80, 140217160. All three operations passed 24,576 original-PE comparisons.
+- HKS stack and table APIs: 140218C80, 140218DE0, 140218EA0, 140681180. Four additional operations passed 4,096 comparisons.
+- Asset registry and string tables: 140211B80, 140211D80, 140466470, 1404669C0. All four operations passed 16,384 comparisons after correcting overlapping CRT thunk writes and the fixture's 60-entry dispatch table bounds.
+- Zone completion: 140213410. Compile-only, preserves 32-bit state and 0x4c-byte zone record stride; synchronization and asset finalization remain external.
+- HKS string insertion and interning wrapper: 140126780, 140697A70. Original hash/stack insertion exercised through the intern callback.
+- Dvar display and formatting: 14046A6A0, 1403C2E30, 140472000, 140471EC0. Compile-only; the latter two expose explicit va_list adapters rather than a verified native variadic link.
+- Interned-string lookup and two rank/name lookups: 14050A9B0, 1401A7800, 1401BBFE0. The string lookup and HKS string insertion passed 16,384 combined comparisons, including chain mutation and lengths 0–127. The rank functions are compile-only.
+- Render-target initialization: 140752AA0. Compile-only at 45916656119; preserves swap-chain/depth-view creation, aliased views and references, shadow sizes, render-target slice order and the separate fixed 720-height postprocess pyramid. The relative-target helper is an explicit external adapter, not a validated linked implementation.
+- Binding text and cached tag helpers: 1401A51F0, 1401BF5A0, 1401BF600, 1401BF710, 140106C50, 1400E96B0. Source candidates; additional replay fixture submitted at bb2935259a2f6b1b46eec4b1bd217b6a3b796eeb.
+
+Original executed zone-name examples from run 45916570677: `code_post_gfx_720_mp`, `code_post_gfx_1080_mp`, and (synthetic input) `code_post_gfx_2160_mp`. Only the resolution-dependent slot changes. The original startup explicitly sets the font resolution to 720. Constructing a filename does not establish that an asset with that name exists on disk. The font asset selection and the render-target pyramid are independent.
+
+Verified green checkpoint: 45916656119, 172 Win64 source bodies and 543,744 cumulative differential comparisons. These counts include earlier suites and controlled external mocks; the 178-candidate manifest and latest text-dependency test are tracked separately until their CI results are inspected. No enhanced changes or runtime redirects. Remaining issues include live linkage, external database/COM dependencies, larger loader and shader paths, and independent verification of actual shipped atlas sizes.

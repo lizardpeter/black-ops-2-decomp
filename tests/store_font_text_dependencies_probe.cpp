@@ -80,7 +80,8 @@ void TextDependencyRun(void*image,unsigned op,U seed,void*out){
         using namespace store_cached_tag;
         std::memset(object,0,sizeof object);object[0xe]=B(next()%32);int part=next()%96;int generation=100;
         Put(clientState,0x2cb0,generation);Put(object,0x54,seed&2?generation:99);Put(object,0x58,seed&4?static_cast<B*>(allocation):nullptr);
-        if(seed&8)Put(object,0x40+unsigned(part/32)*4,0x80000000u>>(part&31));CachedTag_LastFailureGeneration=17;
+        if(seed&8){Put(object,0x40+unsigned(part/32)*4,0x80000000u>>(part&31));}
+        CachedTag_LastFailureGeneration=17;
         if(b){Put(b,0x27e6a48,0);Put(b,0xe61bf8,static_cast<B*>(clientState));Put(b,0x44a07b8,17);reinterpret_cast<void(MS*)(void*,B*,int)>(b+0xe96b0)(nullptr,object,part);c.failed=Get<int>(b,0x44a07b8);}
         else{EnsureTagGeneration(nullptr,object,part);c.failed=CachedTag_LastFailureGeneration;}
         std::memcpy(c.object,object,sizeof object);
