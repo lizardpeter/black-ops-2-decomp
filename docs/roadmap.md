@@ -203,6 +203,18 @@ Feasible after a full source-level decomp; not by merging the shipped binaries.
   and verify). It's natural in the Rust rewrite, where the module boundary can be designed in.
 - **Order:** finish MP, then ZM (closest to MP), then campaign.
 
+## Developer console (planned, not started)
+
+The Store build has the console compiled out: the `~` key still checks `sv_disableClientConsole` (CL_KeyEvent,
+1401A70B0), but without Shift it does nothing and with Shift it flips a flag nothing reads, and when the console would
+have the keyboard the handler returns. Gone: Con_ToggleConsole, Console_Key, the text field (Field_*), the input box,
+output window and scrollbar (Con_DrawInput, Con_DrawOuputWindow), autocomplete, and their dvars (`con_inputBoxColor`,
+`con_outputWindowColor`, `con_minicon`, ...). Still there: the command system, chat and message windows, printing.
+
+Bring it back in `enhanced/` from the server's `client/cl_console.cpp` and `cl_keys.cpp` (about 95 functions in
+cl_console.cpp, part of them chat code the Store keeps), hooked into the `~` branch of CL_KeyEvent, with a setting to
+keep it off.
+
 ## Rust rewrite
 
 Last, from the verified C++ reconstruction: one subsystem at a time behind the same interfaces, each tested
