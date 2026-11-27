@@ -177,5 +177,54 @@ void* NewUserData(B*l,Q bytes){
     if(phase==4||(phase==3&&R<Q>(Globals(l),0x1b0)!=0))W(p,0,R<Q>(p,0)&~Q(1));
     return p+0x20;
 }
+// Original 140218C80, 140218DE0, 140218EA0 and 140681180.
+extern "C"{
+void Registry_GrowStack(B*,B*,int);
+void Registry_PushString(B*,const char*);
+void Registry_SetTable(B*,int);
+void Registry_AllocTable(B*,B*,Q,U,void**);
+extern const B Registry_CeilLog2[256];
+}
+void PushValue(B*l,int idx){Push(l,R<Value>(Index(l,idx,false),0));}
+void SetField(B*l,int idx,const char*key){
+    if(R<B*>(l,0x58)<Top(l)+32)Registry_GrowStack(l+0x18,l,2);
+    if(key)Registry_PushString(l,key);
+    else {B*p=Top(l);W(p,0,0u);W(l,0x48,p+16);}
+    B*p=Top(l);
+    Value first=R<Value>(p-32,0),second=R<Value>(p-16,0);
+    W(p-32,0,second);W(p-16,0,first);
+    Registry_SetTable(l,idx-int(U(idx+9999)<9999));
+}
+int SetMetatable(B*l,int idx){
+    B*p=Index(l,idx,true);
+    if(!p)return 1;
+    SetMetaValue(l,reinterpret_cast<Value*>(p),reinterpret_cast<Value*>(Top(l)-16));
+    W(l,0x48,Top(l)-16);return 1;
+}
+B* NewTable(B*l,U arrayCount,int hashCount){
+    U capacity=0;
+    if(hashCount){
+        U n=U(hashCount)-1,shift=0;
+        while(n>255){n>>=8;shift+=8;}
+        capacity=1u<<((Registry_CeilLog2[n]+shift)&31);
+    }
+    void*mem[3]={nullptr,nullptr,nullptr};
+    Registry_AllocTable(l,l,Q(capacity)*40,arrayCount<<4,mem);
+    B*t=static_cast<B*>(mem[0]);
+    W(t,0x10,Q(0));W(t,0x18,Q(0));W(t,0x20,Q(0));W(t,0x34,Q(0));W(t,0x3c,0u);
+    W(t,0x18,capacity-1);
+    B*nodes=nullptr,*end=nullptr;
+    if(mem[1]){
+        B*p=static_cast<B*>(mem[1]);
+        for(Q i=0;i<Q(capacity)*40;++i)p[i]=0;
+        nodes=p+Q(capacity)*8;end=nodes+Q(capacity)*32;
+    }
+    W(t,0x20,nodes);W(t,0x38,end);W(t,0x28,mem[2]);
+    if(mem[2]&&(arrayCount&0xfffffff)){
+        B*p=static_cast<B*>(mem[2]);for(U i=0;i<(arrayCount<<4);++i)p[i]=0;
+    }
+    W(t,0x30,arrayCount);return t;
+}
+
 }
 #endif
