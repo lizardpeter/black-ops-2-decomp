@@ -12,13 +12,13 @@ extern const B* Complete_LoadRecords;
 extern int Complete_LoadCount;
 extern B* Complete_ZoneRecords;
 extern U Complete_PendingCount,Complete_Nesting,Complete_MainThread,Complete_LevelCount;
-extern U Complete_PendingIds[];
+extern void* Complete_PendingIds[];
 extern volatile U Complete_SyncDepth;
 extern U Complete_GumpFlag,Complete_GumpStatus;
-extern B Complete_Loading;
+extern U Complete_Loading;
 unsigned Complete_Wait(void*,unsigned);
 void Complete_Signal(void*);
-void Complete_FinishFiles(const char*,const char*);
+void Complete_FinishFiles(const char*,const char*,void*,void*);
 void Complete_FinishLevel(U);
 void Complete_Log(const char*);
 void Complete_GumpLoaded();
@@ -30,7 +30,7 @@ void Complete_PrepareMain();
 void Complete_Prepare();
 void Complete_Lock();
 void Complete_Unlock();
-void Complete_FinalizeAsset(U,int);
+void Complete_FinalizeAsset(void*,int);
 void Complete_Finish();
 }
 static bool IsMain(){
@@ -48,15 +48,15 @@ static void SignalComplete(){
 }
 void CompleteZoneLoad(){
     if(Complete_Wait(Complete_Event,0)==0)return;
-    Complete_FinishFiles("","");
+    B scratch[256];Complete_FinishFiles("","",nullptr,scratch);
     for(int i=0;i<Complete_LoadCount;++i){
         H index=R<H>(Complete_LoadRecords+i*0x88,0);
-        B*p=Complete_ZoneRecords+unsigned(index)*0x98;
-        if(*p==2)*p=3;
+        B*p=Complete_ZoneRecords+unsigned(index)*0x4c;
+        if(R<U>(p,0)==2){U value=3;std::memcpy(p,&value,4);}
     }
     if(!Complete_PendingCount){
         U end=Complete_LevelCount+1;
-        if(Complete_LevelCount!=0xffffffffu&&end!=1)
+        if(end>1)
             for(U i=1;i<end;i=(i&~255u)|((i+1)&255u))Complete_FinishLevel(i);
         SignalComplete();return;
     }
