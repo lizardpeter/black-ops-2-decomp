@@ -23,7 +23,11 @@ T6_STATIC int window_center_y T6_AT("", "window_center_y");
 
 void IN_MouseMove()
 {
-	const bool rawActive = IN_StartRawInput();
+	// The enhanced build turns the view only by raw counts; there is no quiet fallback to the cursor.
+	if (!IN_StartRawInput())
+		Com_Error(ERR_FATAL, "\x15" "Raw mouse input could not be registered (Windows error %u). The enhanced build "
+		                     "needs it: remove XINPUT1_4.dll and t6_enhanced.dll to play without it.",
+		          IN_RawInputError());
 	IN_TimeWindowMessages();
 	int rawDx, rawDy;
 	IN_TakeRawMouse(&rawDx, &rawDy);  // always: counts never wait for a later frame
@@ -36,13 +40,6 @@ void IN_MouseMove()
 		IN_ClampMouseMove(&curPos);
 	int dx = curPos.x - s_wmv.oldPos.x;
 	int dy = curPos.y - s_wmv.oldPos.y;
-	// If registration failed, the cursor deltas are the input, as in the original, for everything below
-	// (including whether the mouse counts as moved).
-	if (!rawActive)
-	{
-		rawDx = dx;
-		rawDy = dy;
-	}
 	if (dx || dy || rawDx || rawDy)
 		Com_LocalClient_LastInput_Set(Com_LocalClients_GetPrimary(), LAST_INPUT_MOUSEMOVE);
 	s_wmv.oldPos.x = curPos.x;

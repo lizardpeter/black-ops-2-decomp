@@ -15,9 +15,12 @@
 
 #include "win32/win_local.h"
 
+WINBASEAPI DWORD WINAPI GetLastError();
+
 static long long s_rawDx;
 static long long s_rawDy;
 static bool s_rawInputActive;
+static unsigned int s_rawInputError;  // GetLastError() when registration failed
 static bool s_rawInputTried;
 static HANDLE s_rawInputReady;
 
@@ -72,6 +75,8 @@ static DWORD WINAPI IN_RawInputThread(void *)
 	device.dwFlags = RIDEV_INPUTSINK;
 	device.hwndTarget = hWnd;
 	s_rawInputActive = hWnd && RegisterRawInputDevices(&device, 1, sizeof(device));
+	if (!s_rawInputActive)
+		s_rawInputError = GetLastError();
 	// the keyboard too, for its changes' times (P0004); without it keys keep the messages' times, on the game's clock
 	device.usUsage = HID_USAGE_GENERIC_KEYBOARD;
 	if (s_rawInputActive)
@@ -98,10 +103,14 @@ bool IN_StartRawInput()
 	SetProcessInformation(GetCurrentProcess(), ProcessPowerThrottling, &throttling, sizeof(throttling));
 	s_rawInputReady = CreateEventA(nullptr, TRUE, FALSE, nullptr);
 	if (!s_rawInputReady)
+	{
+		s_rawInputError = GetLastError();
 		return false;
+	}
 	HANDLE thread = CreateThread(nullptr, 0, IN_RawInputThread, nullptr, 0, nullptr);
 	if (!thread)
 	{
+		s_rawInputError = GetLastError();
 		CloseHandle(s_rawInputReady);
 		s_rawInputReady = nullptr;
 		return false;
@@ -112,5 +121,12 @@ bool IN_StartRawInput()
 	CloseHandle(thread);
 	CloseHandle(s_rawInputReady);
 	return s_rawInputActive;
+}
+#endif
+
+#ifdef T6_STORE
+unsigned int IN_RawInputError()
+{
+	return s_rawInputError;
 }
 #endif

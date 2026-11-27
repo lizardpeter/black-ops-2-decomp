@@ -102,7 +102,8 @@ are the original's.
 Limits:
 - Absolute-position devices (pen tablets, and mice inside remote desktop or some virtual machines) send positions,
   not movement, and are ignored.
-- If Windows refuses raw input (it practically never does), the mouse doesn't turn the view. The log says so.
+- If Windows refuses raw input (it practically never does), the game stops at its first mouse read with an error that
+  names the Windows error code. There is no fallback to the cursor: remove the two DLLs to play without raw input.
 
 ## Voice chat leaves your microphone alone (P0001)
 

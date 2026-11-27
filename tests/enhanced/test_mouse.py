@@ -431,18 +431,26 @@ def check_loader_redirects_reach_the_replacements(ctx):
             ctx.m.mu.ctl_remove_cache(va, va + 14)
 
 
-def check_raw_registration_failure_falls_back(ctx):
+def check_raw_registration_failure_is_fatal(ctx):
+    """No quiet fallback to the cursor: when raw input can't be registered, IN_MouseMove stops the game (Com_Error,
+    ERR_FATAL) with a message naming the Windows error."""
     ctx.imports(IMPORTS)
-    ob = ctx.hooks(tw.STORE_SEEN)
-    for i, inp in enumerate(tw.store_mouse_inputs(200)):
-        fk = raw_fakes(ctx, (12345, -6789), active=0)
-        want = ctx.m.call(ctx.original("IN_MouseMove"), [], "void", inp["setup"], fk, ob)
-        got = ctx.m.call(ctx.enhanced("IN_MouseMove"), [], "void", inp["setup"], fk, ob)
+    seen = []
+
+    def com_error(mu):
+        seen.append((tw.arg(mu, 0), bytes(mu.mem_read(tw.arg(mu, 1), 120)).split(b"\0")[0]))
+
+    for i, inp in enumerate(tw.store_mouse_inputs(20)):
+        seen.clear()
+        fk = ctx.hooks(dict(tw.STORE_FAKES, IN_StartRawInput=lambda mu: 0, IN_RawInputError=lambda mu: 5,
+                            IN_TakeRawMouse=lambda mu: None, Com_Error=com_error))
+        got = ctx.m.call(ctx.enhanced("IN_MouseMove"), [], "void", inp["setup"], fk)
         assert not isinstance(got[0], str), (i, got[0])
-        assert want[:3] == got[:3] and canon(ctx, want[3], tw.STORE_SEEN) == canon(ctx, got[3], tw.STORE_SEEN), (i, "registration-failure fallback differs from Store")
+        assert seen and seen[0][0] == 0 and b"Raw mouse input" in seen[0][1], (i, seen)
+
 
 CHECKS = [check_mouse_move_is_the_original_at_equivalent_settings, check_turn_is_mw2019_units,
           check_split_frames_turn_the_same, check_sens_is_registered_on_first_use, check_accel_and_filter_do_nothing,
           check_zero_ms_frame_keeps_the_movement, check_in_mouse_move_turns_by_raw_counts,
           check_raw_counters, check_window_procedure, check_loader_redirects_reach_the_replacements,
-          check_raw_registration_failure_falls_back]
+          check_raw_registration_failure_is_fatal]

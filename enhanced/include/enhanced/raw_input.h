@@ -5,8 +5,11 @@
 #include <windows.h>
 
 // Starts the raw input thread once; later calls return its state. False if the mouse couldn't be registered for raw
-// input: the mouse then doesn't turn the view (raw input is the only mode).
+// input: IN_MouseMove then stops the game with an error (raw input is the only mode; no fallback to the cursor).
 bool IN_StartRawInput();
+
+// The Windows error code of the failed raw input registration (or thread start).
+unsigned int IN_RawInputError();
 
 // Adds one raw mouse report to the counters: relative movement only. Absolute reports (tablets, remote desktop,
 // some virtual machines) carry positions, not movement, and are ignored.
