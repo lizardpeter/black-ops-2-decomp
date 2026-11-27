@@ -1,0 +1,5 @@
+// <cstdlib> for the freestanding reconstruction build: the C header's declarations, also in namespace std.
+// Build environment, not game source (see string.h).
+#pragma once
+#include <stdlib.h>
+namespace std { using ::size_t; }

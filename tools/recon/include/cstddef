@@ -1,0 +1,5 @@
+// <cstddef> for the freestanding reconstruction build: the C header's declarations, also in namespace std.
+// Build environment, not game source (see string.h).
+#pragma once
+#include <stddef.h>
+namespace std { using ::size_t; using ::ptrdiff_t; using nullptr_t = decltype(nullptr); }

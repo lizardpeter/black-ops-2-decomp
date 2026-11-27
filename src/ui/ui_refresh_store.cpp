@@ -115,14 +115,16 @@ void Store_UI_RefreshBound(int localClient,const StoreUiRefreshGlobals &g,bool z
     }
 }
 void UI_Refresh(int localClient){
-#define BIND(name) store_uiRefresh_##name,
-    const StoreUiRefreshGlobals g={STORE_UI_REFRESH_GLOBALS(BIND)
+    // Filled field by field: a constant initializer would become a table of exe addresses in .rdata, which the
+    // x64 hybrid link can't relocate (tools/build_recon.py exe_relative_asm).
+    StoreUiRefreshGlobals g;
+#define BIND(name) g.name=store_uiRefresh_##name;
+    STORE_UI_REFRESH_GLOBALS(BIND)
 #ifdef T6_STORE_ZM
-        store_uiRefresh_controllerTable
+    g.controllerTable=store_uiRefresh_controllerTable;
 #else
-        nullptr
+    g.controllerTable=nullptr;
 #endif
-    };
 #undef BIND
 #ifdef T6_STORE_ZM
     Store_UI_RefreshBound(localClient,g,true);

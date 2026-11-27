@@ -21,6 +21,10 @@ import struct
 import test_cl_input as tc
 import test_win_input as tw
 
+# The enhanced IN_MouseMove subclasses the window procedure once (win_keytime.cpp); a model here keeps these checks
+# independent of whether test_keytime.py ran first.
+IMPORTS = dict(tw.IMPORTS, **{"user32.dll!SetWindowLongPtrA": (lambda m, mu: tw.result(mu, 0), 0)})
+
 PATCH = "P0002"  # and P0003 (records/patches.tsv)
 BUILDS = ["t6mp_msstore"]
 
@@ -272,7 +276,7 @@ def raw_fakes(ctx, counts, active=1):
 
 
 def check_in_mouse_move_turns_by_raw_counts(ctx):
-    ctx.imports(tw.IMPORTS)
+    ctx.imports(IMPORTS)
     ob = ctx.hooks(tw.STORE_SEEN)
     rng = random.Random(11)
     inputs = tw.store_mouse_inputs(200)
@@ -428,7 +432,7 @@ def check_loader_redirects_reach_the_replacements(ctx):
 
 
 def check_raw_registration_failure_falls_back(ctx):
-    ctx.imports(tw.IMPORTS)
+    ctx.imports(IMPORTS)
     ob = ctx.hooks(tw.STORE_SEEN)
     for i, inp in enumerate(tw.store_mouse_inputs(200)):
         fk = raw_fakes(ctx, (12345, -6789), active=0)

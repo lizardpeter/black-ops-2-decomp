@@ -17,7 +17,7 @@ from unicorn import x86_const as x86
 import test_r_init as ri
 import test_rb_backend as rb
 from com import ComModel
-from test_mouse import _map, read
+from test_mouse import _map, canon, read
 
 BUILDS = ["t6mp_msstore"]
 PATCH = "P0005"
@@ -270,8 +270,9 @@ def check_resize_uses_swap_chain_flags(ctx):
             assert not isinstance(got[0], str), got[0]
             flags = ALLOW_MODE_SWITCH | (ALLOW_TEARING if tearing else 0) | WAITABLE
             resize = lambda c: c[:3] == ("com", "IDXGISwapChain", 13 * 8)
-            orig = [c[:8] + (flags,) if resize(c) else c for c in want[3]]
-            assert got[3] == orig, f"input {k}: calls differ"
+            orig = [c[:8] + (flags,) if resize(c) else c for c in canon(ctx, want[3], rb.RT_SEEN)]
+            # by name: a reconstructed callee (r_image_release.cpp) is observed at its DLL copy in the enhanced build
+            assert canon(ctx, got[3], rb.RT_SEEN) == orig, f"input {k}: calls differ"
             ran += any(resize(c) for c in got[3])
     assert ran > 10, ran
 

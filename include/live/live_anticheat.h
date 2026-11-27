@@ -2,8 +2,8 @@
 #include <cstdint>
 #include <cstddef>
 
-void LiveAntiCheat_GenerateCRC32Checksum(unsigned char *data, int length, unsigned int *key);
-unsigned long long LiveAntiCheat_GenerateCRC32ChecksumSplit(unsigned char *data, int length, unsigned long long key);
+void LiveAntiCheat_GenerateCRC32Checksum(const unsigned char *data, int length, unsigned int *key);
+unsigned long long LiveAntiCheat_GenerateCRC32ChecksumSplit(const unsigned char *data, int length, unsigned long long key);
 
 // The Store compiler preserves a 32-bit address field in this x64 record.
 enum challengeTest_t : int {

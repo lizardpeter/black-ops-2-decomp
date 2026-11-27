@@ -25,7 +25,7 @@ unsigned int Step(unsigned int crc, unsigned char byte) {
 }
 }
 
-void LiveAntiCheat_GenerateCRC32Checksum(unsigned char *data, int length, unsigned int *key) {
+void LiveAntiCheat_GenerateCRC32Checksum(const unsigned char *data, int length, unsigned int *key) {
     unsigned int crc = *key;
     // Original caller contract: length is nonnegative.
     while (length != 0) {
@@ -35,7 +35,7 @@ void LiveAntiCheat_GenerateCRC32Checksum(unsigned char *data, int length, unsign
     *key = crc;
 }
 
-unsigned long long LiveAntiCheat_GenerateCRC32ChecksumSplit(unsigned char *data, int length, unsigned long long key) {
+unsigned long long LiveAntiCheat_GenerateCRC32ChecksumSplit(const unsigned char *data, int length, unsigned long long key) {
     unsigned int low = static_cast<unsigned int>(key);
     unsigned int high = static_cast<unsigned int>(key >> 32);
     while (length != 0) {

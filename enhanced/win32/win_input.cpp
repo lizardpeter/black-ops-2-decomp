@@ -36,17 +36,18 @@ void IN_MouseMove()
 		IN_ClampMouseMove(&curPos);
 	int dx = curPos.x - s_wmv.oldPos.x;
 	int dy = curPos.y - s_wmv.oldPos.y;
-	if (dx || dy || rawDx || rawDy)
-		Com_LocalClient_LastInput_Set(Com_LocalClients_GetPrimary(), LAST_INPUT_MOUSEMOVE);
-	s_wmv.oldPos.x = curPos.x;
-	s_wmv.oldPos.y = curPos.y;
-	ScreenToClient(g_wv.hWnd, &curPos);
-	// If registration failed, preserve the original cursor-delta input rather than disabling mouse movement.
+	// If registration failed, the cursor deltas are the input, as in the original, for everything below
+	// (including whether the mouse counts as moved).
 	if (!rawActive)
 	{
 		rawDx = dx;
 		rawDy = dy;
 	}
+	if (dx || dy || rawDx || rawDy)
+		Com_LocalClient_LastInput_Set(Com_LocalClients_GetPrimary(), LAST_INPUT_MOUSEMOVE);
+	s_wmv.oldPos.x = curPos.x;
+	s_wmv.oldPos.y = curPos.y;
+	ScreenToClient(g_wv.hWnd, &curPos);
 	// menus use the cursor's position (and only whether the mouse moved); the game adds the counts to mouseIn
 	g_wv.recenterMouse = CL_MouseEvent(LOCAL_CLIENT_0, curPos.x, curPos.y, rawDx, rawDy);
 	if (g_wv.recenterMouse && (dx || dy))

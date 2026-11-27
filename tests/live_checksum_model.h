@@ -65,10 +65,10 @@ inline bool BufferHashPool::Continue(StoreHashRecord *record, const unsigned cha
     auto data = buffer + static_cast<std::size_t>(record->start) + record->position;
     if (record->kind == Kind::Crc32) {
         auto state = static_cast<unsigned int>(record->state);
-        LiveAntiCheat_GenerateCRC32Checksum(const_cast<unsigned char *>(data), static_cast<int>(count), &state);
+        LiveAntiCheat_GenerateCRC32Checksum(data, static_cast<int>(count), &state);
         record->state = state;
     } else {
-        record->state = LiveAntiCheat_GenerateCRC32ChecksumSplit(const_cast<unsigned char *>(data), static_cast<int>(count), record->state);
+        record->state = LiveAntiCheat_GenerateCRC32ChecksumSplit(data, static_cast<int>(count), record->state);
     }
     record->position += count;
     finished = record->position == record->length;
