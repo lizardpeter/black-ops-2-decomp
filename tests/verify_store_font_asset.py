@@ -12,8 +12,13 @@ def main():
         a=C.create_string_buffer(lib.AssetSizeCapture());b=C.create_string_buffer(lib.AssetSizeCapture());rng=random.Random(0x211b80)
         with map_image(pathlib.Path(sys.argv[1])) as mem:
             base=C.addressof(C.c_char.from_buffer(mem));struct.pack_into("<Q",mem,0x8a8298,lib.AssetMock(0))
-            for i,rva in [(1,0x471c80),(5,0x211c60),(6,0x2116e0),(7,0x50abe0),(8,0x212150),(9,0x466400),(10,0x870aa2),(11,0x870aa8)]:
+            for i,rva in [(1,0x471c80),(5,0x211c60),(6,0x2116e0),(7,0x50abe0),(8,0x212150),(9,0x466400)]:
                 mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",lib.AssetMock(i))+b"\xff\xe0"
+            # Adjacent six-byte import thunks cannot hold a twelve-byte jump.
+            for i,rva in [(10,0x870aa2),(11,0x870aa8)]:
+                assert mem[rva:rva+2]==b'\xff\x25'
+                slot=rva+6+struct.unpack_from('<i',mem,rva+2)[0]
+                struct.pack_into('<Q',mem,slot,lib.AssetMock(i))
             errors=[]
             for op in range(4):
                 for n in range(4096):
