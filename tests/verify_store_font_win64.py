@@ -2,7 +2,9 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/ui/lui_string_store.cpp":["InternString","PushString"],
+UNITS={"src/qcommon/string_lookup_store.cpp":["FindExistingString"],
+       "src/ui/ui_rank_lookup_store.cpp":["FindNameIndex","CacheMaxPrestige"],
+       "src/ui/lui_string_store.cpp":["InternString","PushString"],
        "src/qcommon/dvar_display_store.cpp":["ValueToString","TLSValue","FormatThreadLocal","FormatBounded"],
        "src/database/db_asset_lookup_store.cpp":["FindAssetEntry","CloneDefaultAsset","FindStringTableRow","GetStringTable"],
        "src/database/db_zone_complete_store.cpp":["CompleteZoneLoad"],
