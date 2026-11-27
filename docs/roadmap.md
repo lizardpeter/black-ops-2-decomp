@@ -212,6 +212,24 @@ Feasible after a full source-level decomp; not by merging the shipped binaries.
   and verify). It's natural in the Rust rewrite, where the module boundary can be designed in.
 - **Order:** finish MP, then ZM (closest to MP), then campaign.
 
+## Player profile (in progress)
+
+Level, prestige, calling card, emblem, clan tag and name, reconstructed bottom up, since each layer reads the one
+below (server reference sizes):
+
+1. **DDL** (`ddl/`, about 100 functions): the schema-described binary format every profile field lives in; all reads
+   and writes go through DDL_Lookup_MoveTo and the ddl_api getters and setters.
+2. **Stats storage** (`live/live_storage.cpp`, 171 functions): the per-controller stats buffers, their download,
+   checksums and versions; then the profile fields in **`live/live_stats.cpp`** (227): rank XP, prestige, the
+   MOTD's viewed version and time, clan tag and the rest.
+3. **Rank** (`client_mp/cl_rank.cpp`, 15): mp/rankTable.csv, XP to level, prestige limits, rank icons.
+4. **Emblem and calling card** (`bgame/bg_emblems.cpp`, 44; `ui/ui_emblem.cpp`, 82): the emblem's layers and its
+   backing (BO2's calling card), as stored and as drawn.
+5. **Name**: the gamertag from the Store's Xbox user (GDK), as the menus and the scoreboard get it.
+
+With the official servers cut, the enhanced build keeps the profile locally (or on our server later) in the same DDL
+format, so everything above works unchanged.
+
 ## Developer console (planned, not started)
 
 The Store build has the console compiled out: the `~` key still checks `sv_disableClientConsole` (CL_KeyEvent,
