@@ -1,5 +1,18 @@
-// <cmath> for the freestanding reconstruction build: the C header's declarations, also in namespace std.
-// Build environment, not game source (see string.h).
+// <cmath> for the freestanding reconstruction build: the C header's declarations, also in namespace std, with the
+// float overloads C++ adds. Build environment, not game source (see string.h).
 #pragma once
 #include <math.h>
-
+namespace std {
+using ::acos; using ::asin; using ::atan; using ::atan2; using ::cos; using ::sin; using ::tan; using ::exp;
+using ::log; using ::pow; using ::sqrt; using ::floor; using ::ceil; using ::fabs; using ::fmod;
+inline float sqrt(float x) { return sqrtf(x); }
+inline float fabs(float x) { return fabsf(x); }
+inline float abs(float x) { return fabsf(x); }
+inline double abs(double x) { return fabs(x); }
+inline float floor(float x) { return floorf(x); }
+inline float ceil(float x) { return ceilf(x); }
+inline float sin(float x) { return sinf(x); }
+inline float cos(float x) { return cosf(x); }
+inline float atan2(float y, float x) { return atan2f(y, x); }
+inline float fmod(float x, float y) { return fmodf(x, y); }
+}

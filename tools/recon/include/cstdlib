@@ -2,4 +2,4 @@
 // Build environment, not game source (see string.h).
 #pragma once
 #include <stdlib.h>
-namespace std { using ::size_t; }
+namespace std { using ::size_t; using ::atoi; }
