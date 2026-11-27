@@ -1,6 +1,7 @@
 #define T6_STORE
 #define T6_STORE_FONT_REPLAY
 #include "../src/ui/lui_string_store.cpp"
+#undef T6_SOURCE
 #include "../src/qcommon/string_lookup_store.cpp"
 #include <cstdlib>
 #define MS __attribute__((ms_abi))

@@ -59,7 +59,7 @@ static int MS MCompare(const char*a,const char*b){return Asset_Compare(a,b);}
 static const void*MS MDefault(int t){return Asset_Default(t);}
 static B* MS MAllocate(int t,int n){return Asset_Allocate(t,n);}
 static U MS MIntern(const char*s,int a,int n){return Asset_Intern(s,a,n);}
-static void*MS MFind(int t,const char*s,int a,int n){return Asset_Find(t,s,a,n);}
+static void*MS MFind(int t,const char*s,bool a,int n){return Asset_Find(t,s,a,n);}
 static int MS MLowerBound(const B*t,int h){return Table_HashLowerBound(t,h);}
 static void*MS MCopy(void*d,const void*s,Q n){return std::memcpy(d,s,n);}
 static void*MS MMove(void*d,const void*s,Q n){return std::memmove(d,s,n);}
@@ -88,7 +88,7 @@ void AssetRun(void*image,unsigned op,unsigned seed,void*out){
     activeEntries=b?b+0x3c6e220:entries;
     if(b){
         std::memcpy(activeEntries,entries,sizeof entries);std::memcpy(b+0x3dd0580,Asset_Buckets,sizeof Asset_Buckets);
-        for(unsigned i=0;i<64;++i){W(b,0x8e7840+i*8,reinterpret_cast<void*>(MGetter));W(b,0x8e7a20+i*8,reinterpret_cast<void*>(MSize));W(b,0x8e7c00+i*8,reinterpret_cast<void*>(MSetter));}
+        for(unsigned i=0;i<60;++i){W(b,0x8e7840+i*8,reinterpret_cast<void*>(MGetter));W(b,0x8e7a20+i*8,reinterpret_cast<void*>(MSize));W(b,0x8e7c00+i*8,reinterpret_cast<void*>(MSetter));}
         W(b,0x3d50578,Asset_DefaultCount);W(b,0x2275610,Asset_StringPool);
         std::memcpy(b+0x412ecf0,cache,sizeof cache);std::memcpy(b+0x412fdf0,Table_CacheOrder,sizeof Table_CacheOrder);
     }
