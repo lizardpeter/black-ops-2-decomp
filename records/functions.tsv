@@ -328,3 +328,10 @@ t6mp_msstore	1400A9B20	matches	src/aim_assist/aim_assist.cpp	AimAssist_VirtualTo
 CoDMPServer_PC	00533F10	matches	src/client/screen_placement.cpp	ScrPlace_GetView; tests/differential/test_screen_placement.py
 CoDMPServer_PC	00534FD0	matches	src/client/screen_placement.cpp	ScrPlace_ApplyRect (ApplySplitscreenScaling inlined into its test); tests/differential/test_screen_placement.py
 CoDMPServer_PC	0043A230	matches	src/client/screen_placement.cpp	ScrPlace_VirtualFromReal_Height; tests/differential/test_screen_placement.py
+CoDMPServer_PC	008CA570	matches	src/live/live_anticheat.cpp	LiveAntiCheat_GenerateCRC32Checksum; tests/differential/test_live_anticheat.py
+CoDMPServer_PC	008CA5B0	matches	src/live/live_anticheat.cpp	LiveAntiCheat_GenerateCRC32ChecksumSplit; tests/differential/test_live_anticheat.py
+CoDMPServer_PC	008CA610	matches	src/live/live_anticheat.cpp	LiveAntiCheat_StartHash; tests/differential/test_live_anticheat.py
+CoDMPServer_PC	008CA700	matches	src/live/live_anticheat.cpp	LiveAntiCheat_ContinueHash; tests/differential/test_live_anticheat.py
+CoDMPServer_PC	008CA860	matches	src/live/live_anticheat.cpp	LiveAntiCheat_CompleteHash; tests/differential/test_live_anticheat.py
+t6mp_msstore	140576490	matches	src/live/live_anticheat.cpp	LiveAntiCheat_StartHash; tests/replay/verify_live_anticheat.py
+t6mp_msstore	140576540	matches	src/live/live_anticheat.cpp	LiveAntiCheat_ContinueHash (both CRC generators inlined); tests/replay/verify_live_anticheat.py
