@@ -76,28 +76,7 @@ static_assert(sizeof(void *) != 8 || sizeof(GfxWindowTarget) == 0x20, "GfxWindow
 extern DxGlobals dx;
 #define DX(name) (dx.name.value)
 
-// The video settings the renderer works to (0x40 bytes, no pointers: the same on x64). Right after dx in both builds.
-struct vidConfig_t
-{
-	unsigned int sceneWidth;
-	unsigned int sceneHeight;
-	unsigned int displayWidth;
-	unsigned int displayHeight;
-	unsigned short outputDisplayWidth;
-	unsigned short outputDisplayHeight;
-	unsigned int displayFrequency;
-	bool isToolMode;
-	int isWideScreen;
-	int isHiDef;
-	int isFullscreen;
-	float aspectRatioWindow;
-	float aspectRatioScenePixel;
-	float aspectRatioDisplayPixel;
-	unsigned int maxTextureSize;
-	unsigned int maxTextureMaps;
-	bool deviceSupportsGamma;
-};
-static_assert(sizeof(vidConfig_t) == 0x40, "vidConfig_t");
+#include "gfx_d3d/r_vidconfig.h"
 extern vidConfig_t vidConfig;
 
 // The renderer's thread state (0x28 bytes, the same on x64; the Store's r_glob is at 1427E7330)

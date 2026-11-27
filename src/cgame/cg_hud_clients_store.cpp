@@ -5,7 +5,6 @@
 #include <cstring>
 #include <xmmintrin.h>
 namespace store_loc_format{const char*TranslateExe(const char*);}
-namespace store_font{void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int);}
 #include "ui/ui.h"
 namespace store_text_cmd{unsigned char* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,unsigned char,float);}
 namespace store_hud_clients{
@@ -70,7 +69,7 @@ void DrawChatPrompt(int client){
     const void*font=UI_GetFontHandleDefault(scale);
     float height=float(R<int>(font,8));scale=size/height;
     float x=5,y=float(_mm_cvttss_si32(_mm_set_ss(height*scale))+254),sx=scale,sy=scale;
-    store_font::ApplyRect(Clients_Placement,&x,&y,&sx,&sy,1,1);
+    ScrPlace_ApplyRect(reinterpret_cast<const ScreenPlacement*>(Clients_Placement),&x,&y,&sx,&sy,1,1);
     const float white[]={1,1,1,1};
     store_text_cmd::AddBaseDrawTextCmd(label,0x7fffffff,font,x,y,1,sx,sy,0,white,3,-1,0,0);
     Clients_Edit(client,chat,_mm_cvttss_si32(_mm_set_ss(float(Clients_Width(0,label,0,font))*scale))+5,254);

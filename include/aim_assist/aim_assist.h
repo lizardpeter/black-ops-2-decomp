@@ -49,17 +49,25 @@ struct AimAssistGlobals
 	AimAssistPlayerState ps;
 	LocalClientNum_t localClientNum;
 	bool initialized;
-	unsigned char unknown6D[0x12B0 - 0x6D];
+	unsigned char unknown6D[0xE0 - 0x6D];
+	float screenWidth;   // the view's real size (AimAssist_Setup: realViewportSize)
+	float screenHeight;
+	unsigned char unknownE8[0x12B0 - 0xE8];
 	bitarray<64> prev_button_bits;
 	unsigned char unknown12B8[0x12D0 - 0x12B8];
 };
 static_assert(__builtin_offsetof(AimAssistGlobals, initialized) == 0x6C, "AimAssistGlobals.initialized");
+static_assert(__builtin_offsetof(AimAssistGlobals, screenWidth) == 0xE0, "AimAssistGlobals.screenWidth");
 static_assert(__builtin_offsetof(AimAssistGlobals, prev_button_bits) == 0x12B0, "AimAssistGlobals.prev_button_bits");
 static_assert(sizeof(AimAssistGlobals) == 0x12D0, "AimAssistGlobals");
 
 extern AimAssistGlobals aaGlobArray[MAX_LOCAL_CLIENTS];
 
 void AimAssist_UpdateTweakables(const AimInput *input, LocalClientNum_t localClientNum);
+#ifdef T6_STORE
+float AimAssist_VirtualToScreenX(LocalClientNum_t localClientNum, float x);
+float AimAssist_VirtualToScreenY(LocalClientNum_t localClientNum, float y);
+#endif
 void AimAssist_UpdateAdsLerp(const AimInput *input);
 void AimAssist_ApplyAutoMelee(const AimInput *input, AimOutput *output);
 void AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output);

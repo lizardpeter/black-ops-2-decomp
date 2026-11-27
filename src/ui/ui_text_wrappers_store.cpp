@@ -4,7 +4,6 @@
 #include <cstdint>
 #include <cstring>
 #include <xmmintrin.h>
-namespace store_font{void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int);}
 #include "ui/ui.h"
 namespace store_text_cmd{
 unsigned char* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,unsigned char,float);
@@ -25,7 +24,7 @@ int Wrap_TextWidth(int,const char*,int,const B*);
 void Wrap_FormatInt(char*,unsigned,const char*,int);
 void Wrap_FormatDouble(char*,unsigned,const char*,double);
 }
-using store_font::ApplyRect;
+static void ApplyRect(const unsigned char*p,float*x,float*y,float*w,float*h,int ha,int va){ScrPlace_ApplyRect(reinterpret_cast<const ScreenPlacement*>(p),x,y,w,h,ha,va);}
 using store_text_cmd::AddBaseDrawTextCmd;
 static int DvarInt(const B*d){
     if(!d)return 0;

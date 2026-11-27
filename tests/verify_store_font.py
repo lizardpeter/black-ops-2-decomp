@@ -16,7 +16,7 @@ def main():
                 ptr=lib.FontMock(i)
                 if i==0:struct.pack_into("<Q",mem,rva,ptr)
                 else:mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",ptr)+b"\xff\xe0"
-            for op in range(6):
+            for op in range(2):  # ops 2-5 (aim assist fractions, ScrPlace_VirtualFromReal_*): tests/replay/verify_screen_placement.py
                 for n in range(8192):
                     seed=rng.randrange(1<<27)
                     lib.FontRun(base,op,seed,a);lib.FontRun(None,op,seed,b)

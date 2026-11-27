@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include <xmmintrin.h>
+#include "ui/ui.h"
 namespace store_font_draw {
 using Byte=unsigned char;using U32=std::uint32_t;
 template<class T>static T Read(const void*p,unsigned o){T v;std::memcpy(&v,static_cast<const Byte*>(p)+o,sizeof(v));return v;}
@@ -14,7 +15,6 @@ extern U32 Draw_TimeOrigin; // 1421E448C
 U32 Draw_Tick(); // IAT 1408A7BA0
 int Draw_Atoi(const char*);
 bool Draw_Replace(int,int*,int*,char*); // 1400F2A90
-void Draw_ApplyRect(const Byte*,float*,float*,float*,float*,int,int); // 1401F65E0
 void *Draw_Command(const char*,int,const Byte*,float,float,float,float,float,float,const float*,int,int,bool,float); // 14071C880
 }
 static int Language(const Byte*d){
@@ -52,7 +52,7 @@ void DrawTextPadding(int client,const Byte*placement,const char*text,int max,con
     while(Draw_Replace(client,&index,&length,buffer)){}
     BlinkText(buffer,1024);
     float sx=(scale*48.0f)/float(Read<int>(font,8)),sy=sx;
-    Draw_ApplyRect(placement,&x,&y,&sx,&sy,ha,va);
+    ScrPlace_ApplyRect(reinterpret_cast<const ScreenPlacement*>(placement),&x,&y,&sx,&sy,ha,va);
     Draw_Command(buffer,max,font,RoundPixel(x),RoundPixel(y),1.0f,sx,sy,0.0f,color,style,-1,false,padding);
 }
 }

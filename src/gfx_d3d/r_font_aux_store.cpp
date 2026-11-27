@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <cstring>
 #include "gfx_d3d/r_font.h"
-namespace store_font { void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int); }
+#include "ui/ui.h"
 namespace store_font_aux {
 using Byte=unsigned char;using U32=std::uint32_t;
 template<class T> static T R(const void*p,unsigned n){T v;std::memcpy(&v,static_cast<const Byte*>(p)+n,sizeof(v));return v;}
@@ -85,9 +85,9 @@ bool ReplaceText(int client,int*index,int*length,char*text){
 // 1403FC430: beveled border with two colors, original two placement calls.
 void DrawBorder(const Byte*placement,float x,float y,float w,float h,int ha,int va,
                 float thickness,const float*light,const float*dark){
-    store_font::ApplyRect(placement,&x,&y,&w,&h,ha,va);
+    ScrPlace_ApplyRect(reinterpret_cast<const ScreenPlacement*>(placement),&x,&y,&w,&h,ha,va);
     float zeroX=0,zeroY=0,tX=thickness,tY=thickness;
-    store_font::ApplyRect(placement,&zeroX,&zeroY,&tX,&tY,ha,va);
+    ScrPlace_ApplyRect(reinterpret_cast<const ScreenPlacement*>(placement),&zeroX,&zeroY,&tX,&tY,ha,va);
     const float right=x+w,bottom=y+h,innerRight=right-tX,innerLeft=x+tX,innerTop=y+tY,innerBottom=bottom-tY;
     float a[8]={x,y,right,y,innerRight,innerTop,innerLeft,innerTop};Aux_Quad(a,1,light,Aux_White);
     float b[8]={x,y,innerLeft,innerTop,innerLeft,innerBottom,x,bottom};Aux_Quad(b,1,light,Aux_White);

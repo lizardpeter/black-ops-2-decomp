@@ -5,20 +5,9 @@
 #define T6_STORE_CMD_VARIANTS_IN_BASE
 #include "../src/gfx_d3d/r_text_command_variants_store.cpp"
 #undef T6_STORE_CMD_VARIANTS_IN_BASE
-#undef T6_SOURCE
-#include "../src/client/screen_placement_store.cpp"
 #include <cstdlib>
 #include <cstdio>
 #define MS __attribute__((ms_abi))
-namespace store_font {
-extern "C" {
-int Font_Capture;
-float Font_CaptureX,Font_CaptureY,Font_HudScale;
-unsigned Font_CaptureWidth,Font_CaptureHeight;
-float Font_CaptureOffsetX,Font_CaptureOffsetY;
-const Byte *Font_ClientTable,*Font_Placements,*Font_ViewSizes;
-}
-}
 namespace store_text_cmd {
 extern "C" {
 CommandList*Text_CommandList;
@@ -35,7 +24,7 @@ static int MS MAtoi(const char*s){return Text_Atoi(s);}
 static void MS MColor(const float*c,Byte*out){Text_Color(c,out);}
 static void* MS MCopy(void*d,const void*s,std::size_t n){return std::memcpy(d,s,n);}
 struct Capture{int used,last,result;unsigned char command[768],stats[6*0xa4];float rect[4];};
-static Byte storage[768],dvar[48],place[0x7c];
+static Byte storage[768],dvar[48];
 static char text[320];
 static CommandList list;
 static int offset(const Byte*p){return p?int(p-storage):-1;}
@@ -94,21 +83,8 @@ void CmdRun(void*image,unsigned op,unsigned seed,void*output){
         }
         cap.used=list.usedTotal;cap.last=offset(list.lastCmd);cap.result=offset(result);
         std::memcpy(cap.command,storage,sizeof(storage));std::memcpy(cap.stats,Text_UI3DStats,sizeof(Text_UI3DStats));
-    }else{
-        using namespace store_font;
-        for(unsigned i=0;i<0x7c;i+=4)W(place,i,f());
-        Font_Capture=seed&1;Font_CaptureX=f();Font_CaptureY=f();Font_CaptureOffsetX=f();Font_CaptureOffsetY=f();
-        Font_CaptureWidth=next();Font_CaptureHeight=next();
-        for(auto&v:cap.rect)v=f();
-        int ha=int(next()%15)-2,va=int(next()%15)-2;
-        if(b){
-            W(b,0x27f1b60,Font_Capture);W(b,0x27f1b64,Font_CaptureX);W(b,0x27f1b68,Font_CaptureY);
-            W(b,0x27f1b6c,Font_CaptureOffsetX);W(b,0x27f1b70,Font_CaptureOffsetY);
-            W(b,0x2cc0658,Font_CaptureWidth);W(b,0x2cc065c,Font_CaptureHeight);
-            using Fn=void(MS*)(const Byte*,float*,float*,float*,float*,int,int);
-            reinterpret_cast<Fn>(b+0x1f65e0)(place,cap.rect,cap.rect+1,cap.rect+2,cap.rect+3,ha,va);
-        }else ApplyRect(place,cap.rect,cap.rect+1,cap.rect+2,cap.rect+3,ha,va);
     }
+    // op 1 was ScrPlace_ApplyRect: tests/replay/verify_screen_placement.py
     std::memcpy(output,&cap,sizeof(cap));
 }
 }

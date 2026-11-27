@@ -4,7 +4,6 @@
 #include <cstring>
 #include <cstdint>
 #include "ui/ui.h"
-namespace store_font{void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int);}
 namespace store_text_cmd{unsigned char* AddBaseDrawTextCmd(const char*,int,const void*,float,float,float,float,float,float,const float*,int,int,unsigned char,float);}
 namespace store_font_ui_support {
 using Byte=unsigned char;
@@ -72,7 +71,7 @@ void DrawTextField(int client,Byte*field,int x,int y){
         font=reinterpret_cast<const Byte*>(UI_GetFontHandleDefault(choose));scale/=float(R<int>(font,8));style=3;
     }
     float px=float(x),py=float(R<int>(font,8))*scale+float(y),sx=scale,sy=scale;
-    store_font::ApplyRect(Support_FieldPlacement,&px,&py,&sx,&sy,1,1);
+    ScrPlace_ApplyRect(reinterpret_cast<const ScreenPlacement*>(Support_FieldPlacement),&px,&py,&sx,&sy,1,1);
     store_text_cmd::AddBaseDrawTextCmd(visible,max,font,px,py,1,sx,sy,0,Support_White,style,cursor,letter,0);
 }
 }

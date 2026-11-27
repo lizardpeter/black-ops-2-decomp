@@ -8,6 +8,7 @@
 #include "aim_assist/aim_assist.h"
 
 #include "t6_assert.h"
+#include "ui/ui.h"
 #include "t6_static.h"
 
 enum
@@ -36,3 +37,18 @@ void AimAssist_UpdateMouseInput(const AimInput *input, AimOutput *output)
 		AimAssist_ApplyAutoMelee(input, output);
 	aaGlob->prev_button_bits = input->button_bits;
 }
+
+#ifdef T6_STORE
+// Store MP 1400A9AB0 and 1400A9B20 (tests/replay/verify_screen_placement.py); names made up. A virtual (640x480)
+// length on the local client's view as a fraction of its real size: the expression the server's
+// AimAssist_UpdateTweakables repeats inline for its region sizes, a function of its own in the Store build.
+float AimAssist_VirtualToScreenX(LocalClientNum_t localClientNum, float x)
+{
+	return ScrPlace_RealFromVirtual_Width(ScrPlace_GetView(localClientNum), x) / aaGlobArray[localClientNum].screenWidth;
+}
+
+float AimAssist_VirtualToScreenY(LocalClientNum_t localClientNum, float y)
+{
+	return ScrPlace_RealFromVirtual_Height(ScrPlace_GetView(localClientNum), y) / aaGlobArray[localClientNum].screenHeight;
+}
+#endif

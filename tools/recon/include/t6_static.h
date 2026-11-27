@@ -21,7 +21,13 @@
 #pragma once
 
 #define T6_STATIC extern
+#ifdef T6_REPLAY
+// tests/replay builds for the host (ELF), where '@' in a symbol is a version: the statics keep their C++ names there
+// (the test defines the ones the function under test reaches)
+#define T6_AT(scope, name)
+#else
 #define T6_AT(scope, name) __asm__("t6s@" T6_SOURCE "@" scope "@" name)
+#endif
 #define T6_INIT(...)
 
 // A global (public) variable the reconstructed file defines in the original. While the build is hybrid-linked its

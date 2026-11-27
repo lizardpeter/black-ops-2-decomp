@@ -6,7 +6,6 @@ on:
       - 'tools/inventory/store_hud_resolution.py'
       - '.github/workflows/store-hud-resolution.yml'
       - 'src/ui/ui_font_assets_store.cpp'
-      - 'src/client/screen_placement_store.cpp'
       - 'tests/store_font*probe.cpp'
       - 'src/gfx_d3d/r_text_commands_store.cpp'
       - 'src/ui/lui_text_util_store.cpp'

@@ -17,6 +17,7 @@ def main():
                 if i==0:struct.pack_into("<Q",mem,rva,ptr)
                 else:mem[rva:rva+12]=b"\x48\xb8"+struct.pack("<Q",ptr)+b"\xff\xe0"
             for op in range(9):
+                if op==1:continue  # ScrPlace_ApplyRect: tests/replay/verify_screen_placement.py
                 for n in range(8192):
                     seed=rng.getrandbits(32)
                     lib.CmdRun(base,op,seed,a);lib.CmdRun(None,op,seed,b)

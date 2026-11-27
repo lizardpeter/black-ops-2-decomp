@@ -320,3 +320,11 @@ CoDMPServer_PC	00A28470	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont_FastFile; 
 CoDMPServer_PC	00A28490	matches	src/gfx_d3d/r_font.cpp	R_RegisterFont; tests/differential/test_r_font.py
 CoDMPServer_PC	00A285F0	matches	src/gfx_d3d/r_font.cpp	R_TextWidth (GetButtonProperties inlined into its test); tests/differential/test_r_font.py
 t6mp_msstore	14049F270	matches	src/win32/win_voice.cpp	Mixer_InitWaveInLineInfo (Mixer_GetRecordLevel and Mixer_GetMuteState inlined); tests/differential/test_win_voice.py
+t6mp_msstore	1401F65E0	matches	src/client/screen_placement.cpp	ScrPlace_ApplyRect (ApplySplitscreenScaling, ScrPlace_HiResApplyRect inlined); tests/replay/verify_screen_placement.py
+t6mp_msstore	1400DDB40	matches	src/client/screen_placement.cpp	ScrPlace_VirtualFromReal_Width; tests/replay/verify_screen_placement.py
+t6mp_msstore	1400D7110	matches	src/client/screen_placement.cpp	ScrPlace_VirtualFromReal_Height; tests/replay/verify_screen_placement.py
+t6mp_msstore	1400A9AB0	matches	src/aim_assist/aim_assist.cpp	AimAssist_VirtualToScreenX (name made up; ScrPlace_GetView inlined); tests/replay/verify_screen_placement.py
+t6mp_msstore	1400A9B20	matches	src/aim_assist/aim_assist.cpp	AimAssist_VirtualToScreenY (name made up); tests/replay/verify_screen_placement.py
+CoDMPServer_PC	00533F10	matches	src/client/screen_placement.cpp	ScrPlace_GetView; tests/differential/test_screen_placement.py
+CoDMPServer_PC	00534FD0	matches	src/client/screen_placement.cpp	ScrPlace_ApplyRect (ApplySplitscreenScaling inlined into its test); tests/differential/test_screen_placement.py
+CoDMPServer_PC	0043A230	matches	src/client/screen_placement.cpp	ScrPlace_VirtualFromReal_Height; tests/differential/test_screen_placement.py

@@ -9,7 +9,7 @@
 const Glyph*R_GetCharacterGlyph(Font_s*f,unsigned int ch){
     return f->glyphs+((ch-32u)<=95?ch-32u:14);
 }
-namespace store_font {void ApplyRect(const unsigned char*,float*,float*,float*,float*,int,int){}}
+void ScrPlace_ApplyRect(const ScreenPlacement*,float*,float*,float*,float*,int,int){}
 namespace store_font_aux{
 extern "C"{
 void*Aux_White;

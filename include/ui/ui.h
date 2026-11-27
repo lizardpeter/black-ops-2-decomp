@@ -30,7 +30,16 @@ struct ScreenPlacement
 };
 static_assert(sizeof(ScreenPlacement) == 0x7C, "ScreenPlacement");
 
-extern ScreenPlacement scrPlaceFull;  // client/screen_placement.cpp
+extern ScreenPlacement scrPlaceFull;                  // client/screen_placement.cpp
+extern ScreenPlacement scrPlaceView[MAX_UI_CONTEXTS];  // client/screen_placement.cpp
+
+const ScreenPlacement *ScrPlace_GetView(LocalClientNum_t localClientNum);
+float ScrPlace_RealFromVirtual_Width(const ScreenPlacement *scrPlace, float width);
+float ScrPlace_VirtualFromReal_Width(const ScreenPlacement *scrPlace, float width);
+float ScrPlace_VirtualFromReal_Height(const ScreenPlacement *scrPlace, float height);
+void ScrPlace_HiResApplyRect(float *x, float *y, float *w, float *h);
+void ScrPlace_ApplyRect(const ScreenPlacement *scrPlace, float *x, float *y, float *w, float *h, int horzAlign,
+                        int vertAlign);
 extern float cg_hudSplitscreenScale;  // client/screen_placement.cpp
 
 float ScrPlace_HiResGetScaleX();
@@ -40,11 +49,12 @@ float ScrPlace_RealFromVirtual_Height(const ScreenPlacement *scrPlace, float hei
 #ifdef T6_STORE
 // The Store build's high-resolution screenshot state (CL_TakeHiResShot): while a shot is taken the screen is drawn
 // scaled by scale[]. Unnamed in every build with symbols (the servers return 1 from ScrPlace_HiResGetScale*); the
-// fields are what the Store's ScrPlace functions read.
+// fields are what the Store's ScrPlace functions read (ScrPlace_ApplyRect 1401F65E0).
 struct HiResShot
 {
 	int active;
 	float scale[2];
+	float offset[2];  // the tile being drawn, in screens (ScrPlace_HiResApplyRect)
 };
 extern HiResShot s_hiResShot;  // client/screen_placement.cpp
 #endif

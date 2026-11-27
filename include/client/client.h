@@ -1,6 +1,8 @@
 // client/: the client's input, connection and per-client state.
 #pragma once
 
+#include "gfx_d3d/r_vidconfig.h"
+
 #include "bgame/bg_public.h"
 #include "qcommon/qcommon.h"
 #include "t6_assert.h"
@@ -231,15 +233,23 @@ struct clientStatic_t
 	int realtime;
 	int realFrametime;
 	bool inputUpdatedPrevFrame;
+#ifdef T6_STORE
+	unsigned char unknown161[0x89D0 - 0x161];
+#else
+	unsigned char unknown165[0x89B4 - 0x165];
+#endif
+	vidConfig_t vidConfig;  // the Store's ScrPlace_HiResApplyRect (in ScrPlace_ApplyRect 1401F65E0) reads +8 and +0xC
 #ifndef T6_STORE
-	unsigned char unknown165[0x5EF88 - 0x165];
+	unsigned char unknown89F4[0x5EF88 - 0x89F4];
 #endif
 };
 #ifdef T6_STORE
 static_assert(__builtin_offsetof(clientStatic_t, inputUpdatedPrevFrame) == 0x160, "clientStatic_t (Store)");
+static_assert(__builtin_offsetof(clientStatic_t, vidConfig) == 0x89D0, "clientStatic_t (Store)");
 #else
 static_assert(sizeof(clientStatic_t) == 0x5EF88, "clientStatic_t");
 static_assert(__builtin_offsetof(clientStatic_t, inputUpdatedPrevFrame) == 0x164, "clientStatic_t");
+static_assert(__builtin_offsetof(clientStatic_t, vidConfig) == 0x89B4, "clientStatic_t");
 #endif
 
 extern clientStatic_t cls;  // cl_main.cpp
