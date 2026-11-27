@@ -20,6 +20,8 @@ on:
       - 'src/ui/lui_string_store.cpp'
       - 'src/qcommon/string_lookup_store.cpp'
       - 'src/ui/ui_rank_lookup_store.cpp'
+      - 'src/client/cl_text_bindings_store.cpp'
+      - 'src/cgame/cg_cached_tag_store.cpp'
       - 'src/qcommon/dvar_display_store.cpp'
       - 'src/database/db_font_zones_store.cpp'
       - 'src/database/db_asset_lookup_store.cpp'

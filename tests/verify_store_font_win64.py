@@ -2,7 +2,9 @@
 """Compile recovered Store HUD/font functions to Win64 COFF, not a live link."""
 import pathlib, shutil, subprocess, tempfile
 from verify_store_camera_win64_objects import ROOT,build_recon,HEADERS
-UNITS={"src/gfx_d3d/r_target_init_store.cpp":["InitializeRenderTargets"],
+UNITS={"src/client/cl_text_bindings_store.cpp":["FindBindingKeys","CopyBindingText","FindDisplayText","FindDisplayTextAlternate"],
+       "src/cgame/cg_cached_tag_store.cpp":["GetCachedTagPosition","EnsureTagGeneration"],
+       "src/gfx_d3d/r_target_init_store.cpp":["InitializeRenderTargets"],
        "src/qcommon/string_lookup_store.cpp":["FindExistingString"],
        "src/ui/ui_rank_lookup_store.cpp":["FindNameIndex","CacheMaxPrestige"],
        "src/ui/lui_string_store.cpp":["InternString","PushString"],
