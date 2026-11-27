@@ -86,6 +86,7 @@ static_assert(sizeof(dvar_t) == 0x60 && __builtin_offsetof(dvar_t, current) == 0
 
 enum
 {
+	DVAR_CHEAT = 1 << 7,      // changes only while sv_cheats is on, and goes back to its default when it's off
 	DVAR_EXTERNAL = 1 << 14,  // a string dvar a mod or the UI set, read through the typed getters (descriptive name)
 };
 
@@ -109,6 +110,17 @@ void Dvar_MakeLatchedValueCurrent(const dvar_t *dvar);
 bool Dvar_StringToBool(const char *string);
 int Dvar_StringToInt(const char *string);
 float Dvar_StringToFloat(const char *string);
+
+// Registration: an existing dvar (from the config or the command line) is re-registered with the code's type,
+// flags, default and domain; otherwise a new one is made.
+dvar_t *Dvar_FindMalleableVar(const char *dvarName);
+const dvar_t *Dvar_RegisterNew(const char *dvarName, dvarType_t type, unsigned int flags, DvarValue value,
+                               DvarLimits domain, const char *description);
+void Dvar_Reregister(dvar_t *dvar, const char *dvarName, dvarType_t type, unsigned int flags, DvarValue resetValue,
+                     DvarLimits domain, const char *description);
+const dvar_t *Dvar_RegisterVariant(const char *dvarName, dvarType_t type, unsigned int flags, DvarValue value,
+                                   DvarLimits domain, const char *description);
+int CanKeepStringPointer(const char *string);  // universal/q_shared.cpp
 
 // The Dvar_Register* macros call these (the leading underscore is in the original names).
 const dvar_t *_Dvar_RegisterBool(const char *dvarName, bool value, unsigned int flags, const char *description);

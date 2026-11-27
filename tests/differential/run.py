@@ -124,7 +124,9 @@ def resolve_hooks(spec, build, m, recon, missing=None):
         elif missing is not None:
             missing.append(key)
         for e, va in recon.exports.items():
-            if symbols.scoped_name(e) == symbols.scoped_name(key):  # a decorated key hooks the reconstruction too
+            # a decorated key hooks the reconstruction too; a plain key is matched as written as well, since
+            # scoped_name reads a leading underscore as C decoration (_Dvar_RegisterFloat is the C++ name itself)
+            if symbols.scoped_name(e) in (symbols.scoped_name(key), key):
                 out[va] = x
     return out
 

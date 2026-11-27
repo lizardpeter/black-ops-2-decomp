@@ -2,39 +2,29 @@
 #define T6_SOURCE "ui/ui_main.cpp"
 #ifdef T6_STORE
 #include "ui/ui_register_dvars.h"
-// Exact observed Store call boundaries; names prefixed Store_UI are provisional.
-extern const dvar_t *_Dvar_RegisterFloat(const char *, float, float, float, unsigned, const char *);
-extern const dvar_t *_Dvar_RegisterBool(const char *, bool, unsigned, const char *);
-union alignas(16) StoreUiDvarValue { unsigned words[4]; const char *string; };
-struct alignas(16) StoreUiDvarDomain { unsigned words[4]; };
-using Value = StoreUiDvarValue;
-using Domain = StoreUiDvarDomain;
+#include "universal/dvar.h"
+// Store-only boundaries not identified by name yet (provisional names).
 extern "C" {
-const dvar_t *Store_UI_FindDvar(const char *name);
-const dvar_t *Store_UI_RegisterNew(const char *name, unsigned type, unsigned flags, const Value *value, const Domain *domain, const char *description);
-void Store_UI_Reregister(const dvar_t *dvar, const char *name, unsigned type, unsigned flags, const Value *value, const Domain *domain, const char *description);
 const dvar_t *Store_UI_RegisterString(const char *name, const char *value, unsigned flags);
 const dvar_t *Store_UI_RegisterColor(const char *name, float r, float g, float b, float a, unsigned flags);
 void Store_UI_RegisterRelatedDvars();
 void Store_UI_RegisterTailDvars();
 }
 namespace {
-const dvar_t *Register(const char *name, unsigned type, unsigned flags, const Value &value, const Domain &domain) {
-    if (const auto *dvar = Store_UI_FindDvar(name)) {
-        Store_UI_Reregister(dvar, name, type, flags, &value, &domain, "");
-        return dvar;
-    }
-    return Store_UI_RegisterNew(name, type, flags, &value, &domain, "");
-}
+// _Dvar_RegisterBool / _Dvar_RegisterInt / _Dvar_RegisterString as the Store compiler inlined them here: each is
+// Dvar_RegisterVariant with an empty description and the rest of the value and domain zeroed.
 const dvar_t *RegisterBool(const char *name, bool value, unsigned flags) {
-    return Register(name, 1, flags, Value{{value ? 1u : 0u}}, Domain{});
+    DvarValue v{}; v.enabled = value;
+    return Dvar_RegisterVariant(name, DVAR_TYPE_BOOL, flags, v, DvarLimits{}, "");
 }
 const dvar_t *RegisterInt(const char *name, unsigned value, unsigned min, unsigned max, unsigned flags) {
-    return Register(name, 6, flags, Value{{value}}, Domain{{min, max}});
+    DvarValue v{}; v.unsignedInt = value;
+    DvarLimits d{}; d.integer.min = (int)min; d.integer.max = (int)max;
+    return Dvar_RegisterVariant(name, DVAR_TYPE_INT, flags, v, d, "");
 }
 const dvar_t *RegisterString(const char *name, const char *value, unsigned flags) {
-    Value v{}; v.string = value;
-    return Register(name, 8, flags, v, Domain{});
+    DvarValue v{}; v.string = value;
+    return Dvar_RegisterVariant(name, DVAR_TYPE_STRING, flags, v, DvarLimits{}, "");
 }
 }
 void UI_RegisterDvarsWithBuildNumberDefault(bool drawBuildNumber) {

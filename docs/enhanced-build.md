@@ -9,6 +9,12 @@ The enhanced loader changes the inlined `ui_drawBuildNumber` registration defaul
 
 ## Multiplayer enhancements
 
+**P0018, settings without the cheat flag.** `cg_fovScale` is registered without `DVAR_CHEAT` (0x80), so it can be
+set from the console or a config file without `sv_cheats` and is no longer put back to its default when cheats are
+off. The override is `_Dvar_RegisterFloat` (`enhanced/universal/dvar.cpp`), the faithful registration
+(`src/universal/dvar.cpp`, verified against both the server and the Store) with the flag cleared only for names on its
+unlock list; every other dvar registers as in the original. More settings can be added to that list.
+
 **P0002, mouse input** (`records/patches.tsv`):
 - **Raw input.** The view turns by the mouse's own counts, read on a thread of their own from Windows' raw input.
   The original turned by how far the Windows cursor moved, so Windows' pointer speed and "Enhance pointer

@@ -335,3 +335,6 @@ CoDMPServer_PC	008CA700	matches	src/live/live_anticheat.cpp	LiveAntiCheat_Contin
 CoDMPServer_PC	008CA860	matches	src/live/live_anticheat.cpp	LiveAntiCheat_CompleteHash; tests/differential/test_live_anticheat.py
 t6mp_msstore	140576490	matches	src/live/live_anticheat.cpp	LiveAntiCheat_StartHash; tests/replay/verify_live_anticheat.py
 t6mp_msstore	140576540	matches	src/live/live_anticheat.cpp	LiveAntiCheat_ContinueHash (both CRC generators inlined); tests/replay/verify_live_anticheat.py
+CoDMPServer_PC	00776D80	compiles	src/universal/dvar.cpp	Dvar_RegisterVariant; its body is what test_dvar_register.py verifies inlined in _Dvar_RegisterFloat, this out-of-line copy (DvarValue and DvarLimits by value on the stack) has no case yet
+CoDMPServer_PC	00776FB0	matches	src/universal/dvar.cpp	_Dvar_RegisterFloat; tests/differential/test_dvar_register.py
+t6mp_msstore	14046C650	matches	src/universal/dvar.cpp	_Dvar_RegisterFloat (Dvar_RegisterVariant inlined); tests/replay/verify_dvar_register.py

@@ -139,3 +139,29 @@ void Dvar_SetInt(const dvar_t *dvar, int value)
 {
 	Dvar_SetIntFromSource(dvar, value, DVAR_SOURCE_INTERNAL);
 }
+
+// 00776D80  universal/dvar.cpp:2787 (inlined in the Store build)
+const dvar_t *Dvar_RegisterVariant(const char *dvarName, dvarType_t type, unsigned int flags, DvarValue value,
+                                   DvarLimits domain, const char *description)
+{
+	assertf_at(2790, (flags & DVAR_EXTERNAL) || CanKeepStringPointer(dvarName), "(dvarName) = %s", dvarName);
+	dvar_t *dvar = Dvar_FindMalleableVar(dvarName);
+	if (!dvar)
+		return Dvar_RegisterNew(dvarName, type, flags, value, domain, description);
+	Dvar_Reregister(dvar, dvarName, type, flags, value, domain, description);
+	return dvar;
+}
+
+// 00776FB0  universal/dvar.cpp:2840
+// Store MP 14046C650 (tests/replay/verify_dvar_register.py). The value's and the domain's other lanes are left as
+// the stack had them, as in the original.
+const dvar_t *_Dvar_RegisterFloat(const char *dvarName, float value, float min, float max, unsigned int flags,
+                                  const char *description)
+{
+	DvarValue dvarValue;
+	dvarValue.value = value;
+	DvarLimits domain;
+	domain.value.min = min;
+	domain.value.max = max;
+	return Dvar_RegisterVariant(dvarName, DVAR_TYPE_FLOAT, flags, dvarValue, domain, description);
+}
