@@ -94,3 +94,23 @@ This pass adds 28 distinct original addresses, producing a 178-function audit ma
 Original executed zone-name examples from run 45916570677: `code_post_gfx_720_mp`, `code_post_gfx_1080_mp`, and (synthetic input) `code_post_gfx_2160_mp`. Only the resolution-dependent slot changes. The original startup explicitly sets the font resolution to 720. Constructing a filename does not establish that an asset with that name exists on disk. The font asset selection and the render-target pyramid are independent.
 
 Verified green checkpoint: 45916656119, 172 Win64 source bodies and 543,744 cumulative differential comparisons. These counts include earlier suites and controlled external mocks; the 178-candidate manifest and latest text-dependency test are tracked separately until their CI results are inspected. No enhanced changes or runtime redirects. Remaining issues include live linkage, external database/COM dependencies, larger loader and shader paths, and independent verification of actual shipped atlas sizes.
+
+## Which font assets the Store build ships
+
+Read from the Store copy's fast files (`zone/`; Store fast files are `TAffu100`, version 0x93, unencrypted: after a
+0x24-byte header, blocks of a u32 length and raw deflate data):
+
+- The renderer forces `r_fontResolution` to 720 at 140720501 (`MOV EDX,0x2D0` into the integer setter 14046CDF0),
+  just before DB_Init's names (140215300) are built, while `r_resolution` gets the value at [RSI+0x24].
+- The game's fonts are in the localized `zone/<language>/<lang>_code_post_gfx_mp.ff` (and `..._code_post_gfx.ff`):
+  only `fonts/720/*` (normalFont, boldFont, smallFont, bigFont, extraSmallFont, extraBigFont, italicFont,
+  smallItalicFont, consoleFont) with one atlas, `gamefonts_pc_720` (and its glow). No 1080 set exists.
+- The fonts' pixel heights at that tier: normalFont 30, smallFont 25, bigFont 48, consoleFont 16. They are drawn
+  scaled to the screen, so at 2160p a normalFont glyph is enlarged about three times: the soft text at 4K.
+- `code_post_gfx_720_zm.ff` and `code_post_gfx_1080_zm.ff` exist but are 2752-byte stubs with no assets;
+  there is no `code_post_gfx_<res>_mp.ff` at all.
+
+So lifting the 720 doesn't help by itself: sharper text needs fonts rendered at the screen's size, either new
+higher-resolution atlases at a tier the code already supports (and beyond 1080, a wider `r_fontResolution` domain),
+or an enhanced text path that rasterizes glyphs at the output resolution. Other UI art (menu images, icons) hasn't
+been checked yet.
