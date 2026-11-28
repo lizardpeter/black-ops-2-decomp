@@ -9,7 +9,6 @@ PATCH = "P0014"
 def check_connected_local_profile_has_multiplayer_privilege(ctx):
     machine = ctx.m
     ctx.imports({"kernel32.dll!OutputDebugStringA": (lambda *_: None, 1)})
-    _, _, enable_writes, _ = machine.call(ctx.enhanced("LocalDemonware_Enable"), [], "void")
     query = ctx.original("GdkQueryApi")
     failed = 0x80004002
     check = ctx.enhanced("GdkUserCheckPrivilege")
@@ -22,18 +21,14 @@ def check_connected_local_profile_has_multiplayer_privilege(ctx):
         fakes[register] = lambda _: 1
         observe[register] = "sii"
 
-    for local, connection_state, user, options, privilege, grant in (
-        (False, 6, 0, 0, 254, False),
-        (True, 4, 0, 0, 254, False),
-        (True, 6, 123, 0, 254, False),
-        (True, 6, 0, 2, 254, False),
-        (True, 6, 0, 0, 252, False),
-        (True, 6, 0, 0, 254, True),
+    for connection_state, user, options, privilege, grant in (
+        (4, 0, 0, 254, False),
+        (6, 123, 0, 254, False),
+        (6, 0, 2, 254, False),
+        (6, 0, 0, 252, False),
+        (6, 0, 0, 254, True),
     ):
         def setup(writer):
-            if local:
-                for address, data in enable_writes.items():
-                    writer.write(address, data)
             writer.u32(state, connection_state)
 
         result, buffers, _, calls = machine.call(

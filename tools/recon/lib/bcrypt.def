@@ -1,0 +1,10 @@
+; CNG imports the enhanced build makes that the Store exe doesn't (the local Demonware's Triple DES and HMAC). x64 only.
+LIBRARY bcrypt.dll
+EXPORTS
+BCryptSetProperty
+BCryptGenerateSymmetricKey
+BCryptDecrypt
+BCryptDestroyKey
+BCryptHashData
+BCryptFinishHash
+BCryptDestroyHash

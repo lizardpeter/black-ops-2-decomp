@@ -8,26 +8,13 @@ WINBASEAPI DWORD WINAPI GetEnvironmentVariableW(const wchar_t *, wchar_t *, DWOR
 
 namespace
 {
-bool localDemonwareEnabled;
 wchar_t identityAuditPath[260];
 bool identityAuditEnabled;
 }
 
-void LocalDemonware_Enable()
-{
-	localDemonwareEnabled = true;
-	LocalDemonware_Trace("T6 Demonware: loopback lobby transport enabled\n");
-}
-
-bool LocalDemonware_IsEnabled()
-{
-	return localDemonwareEnabled;
-}
-
 void LocalDemonware_Trace(const char *event)
 {
-	if (localDemonwareEnabled)
-		OutputDebugStringA(event);
+	OutputDebugStringA(event);
 }
 
 void IdentityAudit_Enable()

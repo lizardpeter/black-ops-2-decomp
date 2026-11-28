@@ -262,6 +262,8 @@ jobs:
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tools/build_recon.py --build $b; done
       - name: Native replay tests (Store reconstruction against the original, tests/replay)
         run: python tests/replay/run.py --build t6mp_msstore originals
+      - name: Local Demonware service against the standalone one (tests/demonware)
+        run: python tests/demonware/test_local_service.py originals/t6mp_msstore.exe
       - name: Differential tests
         run: |
           for b in CoDMPServer_PC t6mp t6mp_msstore; do python tests/differential/run.py --build $b --check-records; done

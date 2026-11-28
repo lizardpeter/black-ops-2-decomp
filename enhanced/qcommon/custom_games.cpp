@@ -89,8 +89,6 @@ void CustomGames_ReadStartupOptions()
 		};
 		if (matches(L"--custom-games"))
 			startup = Startup::WaitingForLui;
-		else if (matches(L"--local-demonware"))
-			LocalDemonware_Enable();
 		else if (matches(L"--audit-identity"))
 			IdentityAudit_Enable();
 	}

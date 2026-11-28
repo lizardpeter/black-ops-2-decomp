@@ -24,7 +24,7 @@ long GdkUserCheckPrivilege(void *user, unsigned options, unsigned privilege, boo
 	IdentityAudit_Trace("XUserCheckPrivilege entered\n");
 	constexpr unsigned multiplayer = 0xfe;
 	constexpr unsigned lobbyConnected = 6;
-	if (!LocalDemonware_IsEnabled() || user || options || privilege != multiplayer ||
+	if (user || options || privilege != multiplayer ||
 	    store_primaryDemonwareState != lobbyConnected)
 		return GdkUserCheckPrivilegeImpl(user, options, privilege, hasPrivilege, reason);
 

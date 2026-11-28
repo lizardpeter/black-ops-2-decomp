@@ -1,0 +1,6 @@
+; Winsock imports the enhanced build makes that the Store exe doesn't (the local Demonware's lobby listener). x64 only.
+LIBRARY ws2_32.dll
+EXPORTS
+listen
+accept
+getsockname

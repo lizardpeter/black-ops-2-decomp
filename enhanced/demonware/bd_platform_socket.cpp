@@ -5,12 +5,13 @@
 
 extern "C" unsigned BdGetHostByName(const char *name, BdSocketAddress *addresses, unsigned capacity)
 {
-	if (!LocalDemonware_IsEnabled() || !capacity)
+	if (!capacity)
 		return 0;
 	const bool auth = !strcmp(name, "auth3.prod.demonware.net") || !strcmp(name, "auth3.dev.demonware.net");
 	const bool lobby = !strcmp(name, "lsg.2410.prod.demonware.net") || !strcmp(name, "lsg.2405.dev.demonware.net");
 	if (!auth && !lobby)
 		return 0;
+	LocalDemonware_Start();
 	// The native resolver writes the address bytes into the caller's initialized record.
 	memcpy(addresses[0].address, &demonwareLoopback, sizeof(demonwareLoopback));
 	LocalDemonware_Trace(auth ? "T6 Demonware: auth DNS returned loopback\n"

@@ -1,3 +1,4 @@
 pefile==2024.8.26
 unicorn==2.1.4  # the harness hooks rdtsc through unicorn_py3 internals
 capstone
+cryptography  # tests/demonware: Triple DES and HMAC for the local Demonware service's host build

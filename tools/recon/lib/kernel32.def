@@ -15,3 +15,6 @@ WideCharToMultiByte
 GetFileAttributesW
 GetCommandLineW
 LocalFree
+GetTickCount64
+MoveFileExW
+GetFileSizeEx

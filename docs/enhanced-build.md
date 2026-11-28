@@ -137,7 +137,7 @@ To remove it, delete `XINPUT1_4.dll` and `t6_enhanced.dll` (and the log).
 ## Opening Custom Games locally
 
 The `--custom-games` shortcut applies to multiplayer. Zombies uses the native menu with the local
-Demonware service described below.
+Demonware service described below (both always use it).
 
 With the two DLLs in a complete Store multiplayer installation, launch from the game folder:
 
@@ -229,46 +229,40 @@ pinned executable using modeled system calls and interface objects.
 These functions are tracked as faithful reconstructions in `records/functions.tsv`. The standalone
 service uses the Store client's native auth response parser and lobby connection.
 
-## Standalone local Demonware service
+## Local Demonware service
 
-Build the service with Go 1.24 or later from the repository root:
+The enhanced build runs Demonware itself, inside `t6_enhanced.dll` (`t6_enhanced_zm.dll` for Zombies): there is no
+launch option and no separate program. The first lookup of a Demonware host starts it.
 
-```powershell
-Push-Location services/demonware
-go build -o ../../build/t6mp_msstore/services/t6_demonware.exe .
-Pop-Location
-```
+- **Auth** is answered in process. The native auth pump gets a WinHTTP response object as before, filled with the
+  service's Store auth reply: a client ticket the original parser reads (title, the local user ID, `Local Player`,
+  a fresh session key) and a server ticket the lobby accepts once, within a minute, for that title.
+- **The lobby** listens on a loopback TCP port the system picks (so nothing else using 3074, such as Xbox
+  networking, can get in the way); the game still connects to 3074 and `BdConnectStream` sends it to the service. One
+  thread per connection: the protocol's hello and
+  ticket frame, then Triple DES CBC task frames (CNG, with the client's own Tiger-based IV,
+  `bdCryptoUtils::calculateInitialVector`) checked with a truncated HMAC-SHA1, one reply per task, in order. The
+  connection stays open through map loads; an empty frame is a keepalive.
+- **Tasks:** local time, synthetic region data, rich presence for the one local profile, empty league teams and
+  members, the startup console report (acknowledged and discarded), `BD_SERVICE_NOT_AVAILABLE` for the bandwidth test
+  and anything else, `BD_NO_FILE` for missing files.
+- **The profile's files** (user storage upload and get) are saved in the game's save folder under `demonware\`, one
+  file each, written whole through a temporary file, so the profile survives a restart. Up to 128 files a session.
+- **Publisher files:** generated English bundles for multiplayer and Zombies (`online_tu17_mp_english.wad`,
+  `online_tu17_zm_english.wad`: local playlist versions and synthetic league data). A folder named `publisher` beside
+  the exe replaces them: its files are served by name (plain file names only, each fitting one lobby frame). The
+  English Store client asked for `ffotd_tu17_mp_147.ff.00`, `online_tu17_mp_english.wad` and `largeheatmap.raw`
+  during startup.
 
-Run `t6_demonware.exe`, then run the Store game with the two enhanced DLLs installed:
+If the lobby can't listen, the debugger output says so and the game's lobby connection fails as it would offline.
 
-```powershell
-.\t6mp.exe --local-demonware
-```
+The game's own multiplayer networking uses a loopback public address (the native address override) with UPnP off.
 
-For Zombies, build with `python3 tools/build_runtime.py --build t6zm_msstore` and copy
-`XINPUT1_4.dll` and `t6_enhanced_zm.dll` from `build/t6zm_msstore/runtime/` next to `t6zm.exe`.
-Run `t6zm.exe --local-demonware` against the same service. In a directory containing both games,
-install the shared loader alongside both enhanced DLLs.
-
-The service listens on IPv4 loopback for Store auth on TCP 3080 and for the lobby on TCP 3074.
-The auth request uses a synthetic local profile, and the game parses the returned tickets with its
-original auth parser. The lobby listener validates the one-use server ticket and sends the
-original protocol's connection-ID reply. It handles encrypted task replies, local time,
-synthetic region data, and rich presence for one local profile. Its user-storage read and upload
-tasks share an in-memory file store for that profile, which is cleared when the service exits.
-The lobby replies to the client's keepalives and keeps authenticated connections open during map loads.
-League team and member queries return empty results. Missing files return `BD_NO_FILE`. The service
-acknowledges the startup console report and discards it. It returns `BD_SERVICE_NOT_AVAILABLE`
-for the bandwidth test, whose untyped request header shares the reply queue with typed tasks.
-The enhanced DLL configures the game's own multiplayer networking to use a loopback public
-address in local Demonware mode. This uses the native address override and disables UPnP.
-
-By default the service generates English publisher bundles for multiplayer and Zombies with
-local playlist versions and synthetic league data. To supply a publisher bundle and files from disk, start the
-service with `-publisher-dir <directory>`. Put the publisher
-files directly in that directory under their requested names. The English Store client requested
-`ffotd_tu17_mp_147.ff.00`, `online_tu17_mp_english.wad`, and `largeheatmap.raw` during startup.
-Each file must fit in a single negotiated lobby frame.
+`tests/demonware/test_local_service.py` builds the service's protocol core (`enhanced/demonware/local_service.cpp`)
+for the host and replays `tests/demonware/parity_vectors.json`, what the standalone Go service in
+`services/demonware` (the service this replaced, kept as the base for a future online server) does on the same 181
+lobby frames and 11 auth frames, byte for byte; plus that service's own checks of tickets and the publisher folder.
+After changing the Go service, regenerate the vectors (`services/demonware/parity_test.go` says how).
 
 In a loopback-only Wine run, the multiplayer client authenticated the lobby, accepted the server-time
 and region replies, and requested and uploaded local profile files. The generated publisher
