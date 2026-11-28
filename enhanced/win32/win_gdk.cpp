@@ -11,7 +11,6 @@
 
 WINBASEAPI BOOL WINAPI GetModuleHandleExA(DWORD, const char *, HINSTANCE *);
 WINBASEAPI DWORD WINAPI GetLastError();
-WINBASEAPI DWORD WINAPI GetEnvironmentVariableW(const wchar_t *, wchar_t *, DWORD);
 WINBASEAPI DWORD WINAPI GetFileAttributesW(const wchar_t *);
 WINBASEAPI BOOL WINAPI CreateDirectoryW(const wchar_t *, void *);
 WINBASEAPI int WINAPI WideCharToMultiByte(UINT, DWORD, const wchar_t *, int, char *, int, const char *, BOOL *);
@@ -103,13 +102,19 @@ extern "C" long GdkSavePath(void *, __SIZE_TYPE__ capacity, char *path)
 	if (!path || !capacity || capacity > 0x7FFFFFFFu)
 		return static_cast<long>(0x80070057u); // E_INVALIDARG
 	path[0] = '\0';
+	// Everything the game writes stays in its own folder: <game folder>\save (the game's user data, and the local
+	// Demonware's profile files under it)
 	wchar_t local[260];
-	constexpr wchar_t suffix[] = L"\\T6Enhanced";
-	DWORD length = GetEnvironmentVariableW(L"LOCALAPPDATA", local, sizeof(local) / sizeof(*local));
-	if (!length || length + sizeof(suffix) / sizeof(*suffix) > sizeof(local) / sizeof(*local))
+	constexpr wchar_t folder[] = L"save";
+	DWORD length = GetModuleFileNameW(nullptr, local, sizeof(local) / sizeof(*local));
+	if (!length || length >= sizeof(local) / sizeof(*local))
 		return failure;
-	for (unsigned i = 0; i < sizeof(suffix) / sizeof(*suffix); ++i)
-		local[length + i] = suffix[i];
+	while (length && local[length - 1] != '\\')
+		--length;
+	if (!length || length + sizeof(folder) / sizeof(*folder) > sizeof(local) / sizeof(*local))
+		return failure;
+	for (unsigned i = 0; i < sizeof(folder) / sizeof(*folder); ++i)
+		local[length + i] = folder[i];
 	if (!CreateDirectoryW(local, nullptr))
 	{
 		if (GetLastError() != 183) // ERROR_ALREADY_EXISTS

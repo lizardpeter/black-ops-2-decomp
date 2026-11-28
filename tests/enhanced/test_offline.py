@@ -81,14 +81,16 @@ def model_enhanced_module(machine, mu):
 
 def check_gdk_initializes_local_save(ctx):
     save_path, save_ready = 0x143ED0420, 0x143E33FF1
-    appdata = r"C:\LocalData"
-    directory = appdata + r"\T6Enhanced"
+    # the save folder is in the game's folder: <folder of the exe>\save
+    exe = r"C:\Games\Black Ops II\t6mp.exe"
+    directory = r"C:\Games\Black Ops II\save"
     filesystem = []
 
-    def environment(_, mu):
+    def module_name(_, mu):
+        assert mu.reg_read(x86.UC_X86_REG_RCX) == 0  # the exe's own path
         destination = mu.reg_read(x86.UC_X86_REG_RDX)
-        mu.mem_write(destination, (appdata + "\0").encode("utf-16le"))
-        mu.reg_write(x86.UC_X86_REG_RAX, len(appdata))
+        mu.mem_write(destination, (exe + "\0").encode("utf-16le"))
+        mu.reg_write(x86.UC_X86_REG_RAX, len(exe))
 
     def create(_, mu):
         pointer = mu.reg_read(x86.UC_X86_REG_RCX)
@@ -103,7 +105,7 @@ def check_gdk_initializes_local_save(ctx):
         mu.reg_write(x86.UC_X86_REG_RAX, len(path))
 
     ctx.imports({
-        "kernel32.dll!GetEnvironmentVariableW": (environment, 0),
+        "kernel32.dll!GetModuleFileNameW": (module_name, 0),
         "kernel32.dll!CreateDirectoryW": (create, 0),
         "kernel32.dll!WideCharToMultiByte": (encode, 0),
     })
@@ -114,7 +116,7 @@ def check_gdk_initializes_local_save(ctx):
     assert read(writes, save_ready, 1) == b"\x01"
     assert read(writes, save_path, len(directory) + 1) == (directory + "\0").encode("utf-8")
 
-    ctx.imports({"kernel32.dll!GetEnvironmentVariableW":
+    ctx.imports({"kernel32.dll!GetModuleFileNameW":
                  (lambda _, mu: mu.reg_write(x86.UC_X86_REG_RAX, 0), 0)})
     status, _, writes, _ = ctx.m.call(init, [0, 0, 0], "uint")
     assert status == 0x80004005 and save_ready not in writes

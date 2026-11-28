@@ -3,7 +3,7 @@
 // the client's own Tiger-based IV, the loopback TCP listener on the lobby port with one thread per connection, and
 // the profile's files.
 //
-// The profile's files are kept in the game's save folder (GdkSavePath), under demonware\, one file each, written
+// The profile's files are kept in <game folder>\save\demonware\ (GdkSavePath's folder), one file each, written
 // whole through a temporary file. A folder named publisher beside the exe, when there is one, serves the publisher
 // files by name in place of the generated bundles.
 #ifdef T6_STORE

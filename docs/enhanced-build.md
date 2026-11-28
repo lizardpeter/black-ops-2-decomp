@@ -190,12 +190,12 @@ The matching overrides in `enhanced/` run when the two DLLs are installed.
 | Store address | Function | Enhanced behavior |
 |---|---|---|
 | `140787868` | `GdkLoadRuntime` | Resolves the GDK loader entry points from `t6_enhanced.dll`. The local exports return unavailable for Xbox service interfaces and discard GDK error reports. |
-| `140788004` | `GdkSavePath` | Uses `%LOCALAPPDATA%\T6Enhanced`. Local GDK initialization creates the directory and publishes it before the filesystem starts. |
-| `1407D0990` | `BdGetHostByName` | Returns zero addresses by default. Local Demonware development can resolve the auth and lobby hosts to loopback. |
+| `140788004` | `GdkSavePath` | Uses `save` in the game's folder (beside the exe), so nothing is written outside it. Local GDK initialization creates the directory and publishes it before the filesystem starts. |
+| `1407D0990` | `BdGetHostByName` | Resolves only the Demonware auth and lobby hosts, to loopback, starting the local Demonware service; every other name gets no address. |
 | `1407D0DA0` | `BdSendTo` | Returns the original wrapper's network-failure result for Demonware datagrams. Ordinary engine UDP calls still go to Winsock. |
 | `14049BD40` | `Sys_ReportUnhandledException` | Keeps the local fatal error and omits the call to Windows `ReportFault`. |
 | `1404740C0` | `Sys_ProbeTimeServer` | Returns an unsuccessful time probe before opening a socket. |
-| `140871040` | `BdConnectStream` | Returns the Demonware stream socket's network-failure result by default. Local Demonware development can open the loopback lobby stream. |
+| `140871040` | `BdConnectStream` | Opens only the loopback lobby stream (to the local service's own port); anything else gets the network-failure result. |
 | `140491220` | `WinInetOpenConnection` | Returns no connection without reserving a request slot. |
 | `140874870` | `BdBeginWinHttpRequest` | Completes the Demonware HTTP request with the standard connection-failure result. |
 | `14088A0D0` | `XCurlAddRequest` | Maps the curl error and releases the incoming request. |
@@ -246,8 +246,8 @@ launch option and no separate program. The first lookup of a Demonware host star
 - **Tasks:** local time, synthetic region data, rich presence for the one local profile, empty league teams and
   members, the startup console report (acknowledged and discarded), `BD_SERVICE_NOT_AVAILABLE` for the bandwidth test
   and anything else, `BD_NO_FILE` for missing files.
-- **The profile's files** (user storage upload and get) are saved in the game's save folder under `demonware\`, one
-  file each, written whole through a temporary file, so the profile survives a restart. Up to 128 files a session.
+- **The profile's files** (user storage upload and get) are saved in the game's folder, under `save\demonware\`,
+  one file each, written whole through a temporary file, so the profile survives a restart. Up to 128 files a session.
 - **Publisher files:** generated English bundles for multiplayer and Zombies (`online_tu17_mp_english.wad`,
   `online_tu17_zm_english.wad`: local playlist versions and synthetic league data). A folder named `publisher` beside
   the exe replaces them: its files are served by name (plain file names only, each fitting one lobby frame). The
